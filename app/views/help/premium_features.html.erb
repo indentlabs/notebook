@@ -50,12 +50,13 @@
         
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           <% Rails.application.config.content_types[:premium].each do |content_type| %>
-            <div class="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors duration-200">
+            <%= link_to "/worldbuilding/#{content_type.name.downcase.pluralize.gsub(' ', '_')}", 
+                class: "bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition-colors duration-200 block no-underline" do %>
               <div class="w-10 h-10 <%= content_type.color %> rounded-lg flex items-center justify-center mx-auto mb-2">
                 <i class="material-icons text-white text-lg"><%= content_type.icon %></i>
               </div>
               <div class="text-sm font-medium text-gray-900"><%= content_type.name.pluralize %></div>
-            </div>
+            <% end %>
           <% end %>
         </div>
       </div>

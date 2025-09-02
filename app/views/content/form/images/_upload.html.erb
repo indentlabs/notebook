@@ -1,25 +1,132 @@
-<div class="nested-fields">
+<div class="nested-fields mb-4">
   <%= f.fields_for :image_uploads do |upload_form| %>
-    <div class="row">
-      <div class="col s11">
-        <%= upload_form.label 'Select a file to upload' %>
-        <div class="file-field input-field">
-          <div class="btn white black-text">
-            <span>Browse</span>
-            <%= upload_form.file_field :src, name: "image_uploads[]" %>
+    <div class="bg-white border border-gray-200 rounded-lg p-4 hover:border-gray-300 transition-colors">
+      <div class="flex items-start gap-4">
+        <!-- File upload area -->
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Select an image to upload
+          </label>
+          
+          <div class="relative">
+            <!-- Hidden file input -->
+            <%= upload_form.file_field :src, 
+                name: "image_uploads[]", 
+                class: "absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10",
+                accept: "image/*",
+                onchange: "updateFileName(this)" %>
+            
+            <!-- Visible upload button and file name display -->
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <div class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer flex items-center">
+                  <i class="material-icons text-sm mr-2">folder_open</i>
+                  <span>Choose File</span>
+                </div>
+              </div>
+              
+              <!-- File name display -->
+              <div class="flex-1">
+                <input type="text" 
+                       class="file-name-display w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed" 
+                       placeholder="No file selected" 
+                       readonly
+                       disabled>
+              </div>
+            </div>
           </div>
-          <div class="file-path-wrapper">
-             <input class="file-path validate" type="text" placeholder="Upload file">
+          
+          <!-- File preview area (hidden by default) -->
+          <div class="file-preview mt-3 hidden">
+            <div class="relative inline-block">
+              <img class="preview-image h-24 w-auto rounded-lg shadow-sm border border-gray-200" />
+              <div class="preview-info mt-2 text-xs text-gray-500">
+                <span class="file-size"></span>
+              </div>
+            </div>
           </div>
+          
+          <!-- Help text -->
+          <p class="mt-2 text-xs text-gray-500">
+            Supported formats: JPG, PNG, GIF, WebP. Max file size varies based on your plan.
+          </p>
         </div>
-      </div>
-      <div class="col s1">
-        <br />
-        <br />
-        <%= link_to_remove_association f do %>
-          <i class="material-icons red-text" style="position: relative; top: 10px; left: -15px;">close</i>
-        <% end %>
+        
+        <!-- Remove button -->
+        <div class="flex-shrink-0">
+          <%= link_to_remove_association f, 
+              class: "p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors",
+              title: "Remove this upload" do %>
+            <i class="material-icons">delete</i>
+          <% end %>
+        </div>
       </div>
     </div>
   <% end %>
 </div>
+
+<script>
+// Update file name display when a file is selected
+function updateFileName(input) {
+  const container = input.closest('.nested-fields');
+  const fileNameDisplay = container.querySelector('.file-name-display');
+  const previewArea = container.querySelector('.file-preview');
+  const previewImage = container.querySelector('.preview-image');
+  const fileSizeSpan = container.querySelector('.file-size');
+  
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    
+    // Update file name
+    fileNameDisplay.value = file.name;
+    fileNameDisplay.classList.remove('text-gray-600');
+    fileNameDisplay.classList.add('text-gray-900');
+    
+    // Show file size
+    const fileSize = (file.size / 1024).toFixed(2);
+    fileSizeSpan.textContent = fileSize + ' KB';
+    
+    // Show image preview if it's an image
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        previewArea.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  } else {
+    fileNameDisplay.value = '';
+    fileNameDisplay.placeholder = 'No file selected';
+    fileNameDisplay.classList.add('text-gray-600');
+    fileNameDisplay.classList.remove('text-gray-900');
+    previewArea.classList.add('hidden');
+  }
+}
+
+// Initialize any existing file inputs on page load
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('input[type="file"][name="image_uploads[]"]').forEach(function(input) {
+    if (input.files && input.files[0]) {
+      updateFileName(input);
+    }
+  });
+});
+</script>
+
+<style>
+/* Custom styling for file upload hover effect */
+.nested-fields:hover .file-field-wrapper {
+  border-color: #2563eb;
+}
+
+/* Make the whole upload area feel interactive */
+input[type="file"]:hover ~ div .bg-blue-600 {
+  background-color: #1d4ed8;
+}
+
+/* Ensure remove button appears more prominently on hover */
+.nested-fields:hover .material-icons.delete {
+  color: #dc2626;
+}
+</style>

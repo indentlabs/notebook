@@ -101,8 +101,8 @@
 function editPageController() {
   return {
     currentView: 'details',
-    currentCategory: '<%= @serialized_content.data[:categories].find { |cat| cat[:label] != "Gallery" }&.dig(:label) %>',
-    expandAllCategories: false,
+    currentCategory: null,
+    expandAllCategories: true,
     showRightSidebar: false,
     hasUnsavedChanges: false,
     
@@ -159,6 +159,142 @@ function editPageController() {
         if (window.innerWidth >= 1024) { // lg breakpoint
           this.showRightSidebar = false;
         }
+      });
+      
+      // Listen for universe field changes and update Privacy tab
+      this.watchUniverseChanges();
+    },
+    
+    watchUniverseChanges() {
+      const self = this;
+      
+      // Watch for changes on universe select field
+      document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('universe-select-field')) {
+          const universeId = e.target.value;
+          const contentId = e.target.dataset.contentId;
+          const contentType = e.target.dataset.contentType;
+          
+          // Update the Privacy tab's Universe section
+          self.updatePrivacyUniverseSection(universeId);
+        }
+      });
+    },
+    
+    updatePrivacyUniverseSection(universeId) {
+      const privacyUniverseSection = document.querySelector('[data-privacy-universe-section]');
+      if (!privacyUniverseSection) return;
+      
+      if (!universeId || universeId === '') {
+        // Show "No Universe Assigned" state
+        this.showNoUniverseState(privacyUniverseSection);
+      } else {
+        // Fetch universe data and update the section
+        this.fetchAndShowUniverseState(privacyUniverseSection, universeId);
+      }
+    },
+    
+    showNoUniverseState(section) {
+      // Find and update the content area
+      const contentArea = section.querySelector('[data-universe-content]');
+      if (contentArea) {
+        contentArea.innerHTML = `
+          <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
+                  <i class="material-icons text-gray-500 text-sm">language</i>
+                </div>
+              </div>
+              <div class="ml-3 flex-1">
+                <div class="font-semibold text-gray-900 mb-1">No Universe Assigned</div>
+                <div class="text-sm text-gray-600 mb-3">
+                  This page isn't part of a universe yet.
+                </div>
+                <div class="bg-white border border-gray-200 rounded p-3 mb-3">
+                  <div class="text-xs font-medium text-gray-700 mb-1">Benefits of using universes:</div>
+                  <ul class="text-xs text-gray-600 space-y-1">
+                    <li class="flex items-start">
+                      <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                      <span>Control privacy for all pages at once</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                      <span>Organize related content together</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                      <span>Share entire worlds with collaborators</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    
+    fetchAndShowUniverseState(section, universeId) {
+      // Make AJAX call to get universe data
+      fetch(`/universes/${universeId}.json`, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(universe => {
+        const contentArea = section.querySelector('[data-universe-content]');
+        if (contentArea) {
+          const isPublic = universe.privacy === 'public';
+          contentArea.innerHTML = `
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
+                    <i class="material-icons text-white text-sm">language</i>
+                  </div>
+                </div>
+                <div class="ml-3 flex-1">
+                  <div class="font-semibold text-gray-900 mb-1">${universe.name}</div>
+                  <div class="flex items-center mb-2">
+                    <span class="text-sm text-gray-600 mr-2">Universe is:</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                      <i class="material-icons text-xs mr-1">${isPublic ? 'public' : 'lock'}</i>
+                      ${isPublic ? 'Public' : 'Private'}
+                    </span>
+                  </div>
+                  ${isPublic ? `
+                    <div class="bg-blue-100 border border-blue-200 rounded p-2">
+                      <div class="flex items-start">
+                        <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
+                        <div>
+                          <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
+                          <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
+                        </div>
+                      </div>
+                    </div>
+                  ` : `
+                    <div class="text-xs text-gray-600">
+                      Individual page privacy settings apply
+                    </div>
+                  `}
+                </div>
+                <div class="ml-3 flex-shrink-0">
+                  <a href="/universes/${universeId}/edit" 
+                     class="inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 rounded text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors">
+                    <i class="material-icons text-xs mr-1">settings</i>
+                    Manage
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching universe data:', error);
       });
     },
     

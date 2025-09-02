@@ -1,0 +1,179 @@
+<!-- Secondary Sidebar - Edit Tools and Quick Actions -->
+<div class="h-full overflow-y-auto">
+  <div class="p-6 space-y-6">
+    
+    <!-- Page Image Card -->
+    <% 
+      # Get the same preview image logic
+      regular_images = raw_content.image_uploads.ordered.to_a rescue []
+      unless user_signed_in? && raw_content.user_id == current_user.id
+        regular_images = regular_images.select { |img| img.privacy == 'public' } rescue []
+      end
+      basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered.to_a rescue []
+      preview_image = get_preview_image(regular_images, basil_images) rescue nil
+    %>
+    
+    <div class="pb-4 border-b border-gray-200">
+      <button @click="switchView('gallery')" 
+              class="block group w-full text-left" 
+              title="Manage gallery">
+        <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100">
+          <% if preview_image.present? %>
+            <% image_type = preview_image[:type] %>
+            <% image_data = preview_image[:data] %>
+            
+            <% if image_type == 'image_upload' %>
+              <%= image_tag image_data.src.url, 
+                            class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                            alt: "#{content.name} preview" %>
+            <% elsif image_type == 'basil_commission' %>
+              <% if image_data.image.attached? %>
+                <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
+                              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                              alt: "#{content.name} preview" %>
+              <% else %>
+                <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
+                              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                              alt: "#{content.name} preview" %>
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
+                          class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                          alt: "#{content.name} preview" %>
+          <% end %>
+          
+          <!-- Overlay on hover -->
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full p-3">
+              <i class="material-icons text-gray-700 text-xl">edit</i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-3 text-center">
+          <p class="text-sm font-medium text-gray-900">Manage Gallery</p>
+          <p class="text-xs text-gray-500">
+            <% 
+              image_count = raw_content.image_uploads.count rescue 0
+              basil_count = raw_content.basil_commissions.where.not(saved_at: nil).count rescue 0
+              total_images = image_count + basil_count
+            %>
+            <%= pluralize(total_images, 'image') %>
+          </p>
+        </div>
+      </button>
+    </div>
+    
+    <!-- Save Status Panel -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-medium text-gray-900">Edit Status</h3>
+        <div class="text-xs text-gray-500" id="last-saved">
+          Auto-saving...
+        </div>
+      </div>
+      
+      <!-- Overall completion -->
+      <% 
+        total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum
+        completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum
+        completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0
+      %>
+      
+      <div class="mb-3">
+        <div class="flex justify-between text-sm text-gray-600 mb-1">
+          <span>Overall Progress</span>
+          <span><%= completed_fields %>/<%= total_fields %> fields</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="<%= content.class_color %> h-2 rounded-full transition-all duration-300" 
+               style="width: <%= completion_percent %>%"></div>
+        </div>
+      </div>
+      
+      <!-- Quick stats -->
+      <div class="text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-500">Completion:</span>
+          <span class="text-gray-900 font-medium"><%= completion_percent %>%</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">flash_on</i>
+        Quick Actions
+      </h2>
+      
+      <div class="space-y-2">
+        <button @click="showAllCategories()" 
+                class="w-full flex items-center justify-center px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors bg-white">
+          <i class="material-icons text-sm mr-2">unfold_more</i>
+          Show All Fields
+        </button>
+        
+        <button onclick="focusNextEmptyField()" 
+                class="w-full flex items-center justify-center px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors bg-white">
+          <i class="material-icons text-sm mr-2">navigate_next</i>
+          Next Empty Field
+        </button>
+      </div>
+    </div>
+    
+    <!-- Keyboard Shortcuts Help -->
+    <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-600">
+      <h4 class="font-medium text-gray-700 mb-2">Keyboard Shortcuts</h4>
+      <div class="space-y-1">
+        <div class="flex justify-between">
+          <span>Save current field</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 rounded keyboard-shortcut-save">⌘S</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span>Exit editing</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 rounded">Esc</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span>Navigate fields</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 rounded">Tab</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Detect OS and update keyboard shortcuts
+document.addEventListener('DOMContentLoaded', function() {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
+                navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+  
+  // Update all save shortcut displays
+  document.querySelectorAll('.keyboard-shortcut-save').forEach(function(element) {
+    element.textContent = isMac ? '⌘S' : 'Ctrl+S';
+  });
+});
+
+// Update last saved time
+document.addEventListener('autosave:success', function() {
+  const lastSavedEl = document.getElementById('last-saved');
+  if (lastSavedEl) {
+    lastSavedEl.textContent = 'Saved ' + new Date().toLocaleTimeString();
+  }
+});
+
+// Focus next empty field
+function focusNextEmptyField() {
+  const emptyFields = document.querySelectorAll('.field-form input[value=""], .field-form textarea:empty');
+  
+  if (emptyFields.length > 0) {
+    emptyFields[0].focus();
+    emptyFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    // Show success message - all fields have content
+    alert('All fields have content! 🎉');
+  }
+}
+</script>

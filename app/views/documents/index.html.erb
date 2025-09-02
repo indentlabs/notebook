@@ -98,13 +98,13 @@ class="min-h-screen bg-gray-50">
           Recently Edited
         </h3>
         <% if @recent_documents.any? %>
-          <div class="space-y-2">
+          <div class="space-y-1">
             <% @recent_documents.first(7).each do |document| %>
               <%= link_to edit_document_path(document), class: "block group" do %>
-                <div class="p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-all duration-200 border border-transparent hover:border-gray-200">
                   <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0">
-                      <h4 class="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
+                      <h4 class="text-sm font-medium text-gray-900 truncate group-hover:<%= Document.text_color %>">
                         <%= document.title %>
                       </h4>
                       <div class="flex items-center mt-1 text-xs text-gray-500">
@@ -131,6 +131,59 @@ class="min-h-screen bg-gray-50">
         <% else %>
           <p class="text-sm text-gray-500 italic">No recent documents</p>
         <% end %>
+      </div>
+      
+      <!-- Document Writing Streak -->
+      <div class="p-4 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <i class="material-icons text-orange-500 text-sm mr-1">whatshot</i>
+          Writing Streak
+        </h3>
+        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            <% 
+              # Calculate words written for each of the last 7 days
+              (6.downto(0)).each do |days_ago|
+                date = Date.current - days_ago
+                words_for_day = WordCountUpdate
+                  .where(user: current_user, for_date: date)
+                  .sum(:word_count)
+                
+                # Determine opacity based on word count
+                opacity_class = if words_for_day >= 1000
+                  "bg-green-600"
+                elsif words_for_day >= 500
+                  "bg-green-400"
+                elsif words_for_day >= 100
+                  "bg-green-300"
+                elsif words_for_day > 0
+                  "bg-green-200"
+                else
+                  "bg-gray-200"
+                end
+                
+                is_today = days_ago == 0
+            %>
+              <div class="relative group">
+                <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400' : '' %> transition-colors hover:opacity-80" 
+                     title="<%= date.strftime('%b %d') %>: <%= number_with_delimiter(words_for_day) %> words"></div>
+                <div class="text-center mt-0.5">
+                  <span class="text-xs text-gray-400"><%= date.strftime('%a')[0] %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="pt-2 border-t border-gray-200">
+            <div class="flex justify-between items-baseline">
+              <div class="text-xs text-gray-600">
+                Today: <span class="font-medium <%= @words_written_today > 0 ? 'text-green-600' : 'text-gray-400' %>"><%= number_with_delimiter(@words_written_today) %></span>
+              </div>
+              <div class="text-xs text-gray-600">
+                Week: <span class="font-medium text-gray-700"><%= number_with_delimiter(@words_written_this_week) %></span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       
       <!-- Frequent Folders -->

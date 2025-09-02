@@ -104,111 +104,368 @@
       <p class="text-gray-600">Control who can see and edit this <%= content.class_name.downcase %></p>
     </div>
     
-    <div class="max-w-2xl">
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Visibility Settings</h3>
+    <div x-data="{ 
+      selectedPrivacy: '<%= raw_content.privacy || 'private' %>',
+      publicType: 'standard',
+      password: '',
+      isLoading: false,
+      showToast: false,
+      toastMessage: ''
+    }" 
+    x-init="
+      // Watch for privacy changes and auto-save
+      $watch('selectedPrivacy', (value) => {
+        savePrivacySettings();
+      });
+      
+      // Auto-save function
+      function savePrivacySettings() {
+        this.isLoading = true;
         
-        <%= form_for raw_content, remote: true, html: { class: "space-y-4" } do |f| %>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Who can see this page?</label>
-            <div class="space-y-2">
-              <label class="flex items-start">
-                <%= f.radio_button :privacy, 'public', class: 'mt-1 mr-3' %>
-                <div>
-                  <div class="font-medium">Public</div>
-                  <div class="text-sm text-gray-500">Anyone on the internet can view this page</div>
-                </div>
-              </label>
-              
-              <label class="flex items-start">
-                <%= f.radio_button :privacy, 'private', class: 'mt-1 mr-3' %>
-                <div>
-                  <div class="font-medium">Private</div>
-                  <div class="text-sm text-gray-500">Only you can view this page</div>
-                </div>
-              </label>
-            </div>
-          </div>
+        // Submit form via Rails UJS
+        const form = document.getElementById('privacy-settings-form');
+        if (form) {
+          // Update radio button selection
+          const radioButton = form.querySelector(`input[value='${this.selectedPrivacy}']`);
+          if (radioButton) {
+            radioButton.checked = true;
+            // Trigger Rails remote form submission
+            Rails.fire(form, 'submit');
+          }
+        }
+        
+        // Visual feedback
+        setTimeout(() => {
+          this.isLoading = false;
+          this.showToast = true;
+          this.toastMessage = 'Privacy settings updated';
           
-          <div class="pt-4">
-            <%= f.submit "Update Privacy Settings", class: "px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-          </div>
-        <% end %>
+          setTimeout(() => {
+            this.showToast = false;
+          }, 3000);
+        }, 500);
+      }
+    "
+    class="max-w-4xl mx-auto space-y-6">
+      
+      <!-- Toast Notification -->
+      <div x-show="showToast"
+           x-transition:enter="transition ease-out duration-300"
+           x-transition:enter-start="opacity-0 transform translate-y-2"
+           x-transition:enter-end="opacity-100 transform translate-y-0"
+           x-transition:leave="transition ease-in duration-200"
+           x-transition:leave-start="opacity-100 transform translate-y-0"
+           x-transition:leave-end="opacity-0 transform translate-y-2"
+           class="fixed top-20 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+        <i class="material-icons text-sm mr-2">check_circle</i>
+        <span x-text="toastMessage"></span>
       </div>
       
-      <% if raw_content.respond_to?(:contributors) %>
-        <div class="bg-white rounded-lg shadow border border-gray-200 p-6 mt-6">
-          <h3 class="text-lg font-medium text-gray-900 mb-4">Collaborators</h3>
-          <p class="text-sm text-gray-600 mb-4">Users who can edit this page with you</p>
+      <!-- Current Status Overview -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div :class="selectedPrivacy === 'public' ? 'bg-green-100' : 'bg-gray-100'"
+                 class="w-12 h-12 rounded-lg flex items-center justify-center mr-4 transition-colors duration-200">
+              <i :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+                 class="material-icons text-xl transition-colors duration-200"
+                 x-text="selectedPrivacy === 'public' ? 'public' : 'lock'">
+              </i>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                Current Status
+                <div x-show="isLoading" class="ml-2">
+                  <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              </h3>
+              <p class="text-sm text-gray-600">
+                This <%= content.class_name.downcase %> is currently 
+                <span :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+                      class="font-medium transition-colors duration-200"
+                      x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)">
+                </span>
+              </p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-sm text-gray-500">Effective visibility</div>
+            <% if raw_content.respond_to?(:universe) && raw_content.universe.present? && raw_content.universe.privacy == 'public' %>
+              <div class="font-medium text-green-600 flex items-center justify-end mt-1">
+                <span>Public</span>
+                <i class="material-icons text-sm ml-1 text-blue-500" title="Set by universe '<%= raw_content.universe.name %>'">info</i>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">via Universe</div>
+            <% else %>
+              <div :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+                   class="font-medium transition-colors duration-200 mt-1"
+                   x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)">
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Privacy Level Selection -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Privacy Settings</h3>
+          <p class="text-gray-600 text-sm">Choose who can see and access this <%= content.class_name.downcase %></p>
+        </div>
+        
+        <%= form_for raw_content, remote: true, html: { id: "privacy-settings-form", class: "space-y-4" } do |f| %>
+          <!-- Private Option -->
+          <label class="group relative cursor-pointer block">
+            <%= f.radio_button :privacy, 'private', 
+                class: 'sr-only',
+                'x-model': 'selectedPrivacy' %>
+            <div :class="selectedPrivacy === 'private' ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+                 class="border-2 rounded-lg p-4 transition-all duration-200">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <div :class="selectedPrivacy === 'private' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'"
+                       class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200">
+                    <i class="material-icons text-lg">lock</i>
+                  </div>
+                </div>
+                <div class="ml-4 flex-1">
+                  <div class="text-base font-semibold text-gray-900">Private</div>
+                  <div class="text-sm text-gray-600">Only you and collaborators can see this page</div>
+                </div>
+                <div class="flex-shrink-0 ml-4">
+                  <div :class="selectedPrivacy === 'private' ? 'text-blue-500' : 'text-gray-300'"
+                       class="transition-colors duration-200">
+                    <i class="material-icons text-xl">check_circle</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </label>
           
-          <!-- Add collaborator form would go here -->
-          <div class="text-gray-500 text-sm">
-            Collaborator management coming soon...
+          <!-- Public Option -->
+          <label class="group relative cursor-pointer block">
+            <%= f.radio_button :privacy, 'public', 
+                class: 'sr-only',
+                'x-model': 'selectedPrivacy' %>
+            <div :class="selectedPrivacy === 'public' ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+                 class="border-2 rounded-lg p-4 transition-all duration-200">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <div :class="selectedPrivacy === 'public' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'"
+                       class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200">
+                    <i class="material-icons text-lg">public</i>
+                  </div>
+                </div>
+                <div class="ml-4 flex-1">
+                  <div class="text-base font-semibold text-gray-900">Public</div>
+                  <div class="text-sm text-gray-600">Anyone with the link can view this page</div>
+                </div>
+                <div class="flex-shrink-0 ml-4">
+                  <div :class="selectedPrivacy === 'public' ? 'text-blue-500' : 'text-gray-300'"
+                       class="transition-colors duration-200">
+                    <i class="material-icons text-xl">check_circle</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </label>
+        <% end %>
+        
+        <!-- Additional Options (Coming Soon) -->
+        <div x-show="selectedPrivacy === 'public'" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 class="text-sm font-medium text-gray-900 mb-3 flex items-center">
+            <i class="material-icons text-gray-600 text-sm mr-2">tune</i>
+            Additional Options
+          </h4>
+          
+          <div class="space-y-3">
+            <!-- Password Protected -->
+            <div class="flex items-start p-3 bg-white rounded-lg border border-gray-200 opacity-60">
+              <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-sm text-orange-600">key</i>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-900 text-sm">Password Protected</div>
+                <div class="text-xs text-gray-600">Require a password to view this public page</div>
+              </div>
+              <span class="text-xs text-orange-600 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</span>
+            </div>
+            
+            <!-- Discoverable -->
+            <div class="flex items-start p-3 bg-white rounded-lg border border-gray-200 opacity-60">
+              <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-sm text-green-600">search</i>
+              </div>
+              <div class="flex-1">
+                <div class="font-medium text-gray-900 text-sm">Discoverable</div>
+                <div class="text-xs text-gray-600">Appears in public searches and content indexes</div>
+              </div>
+              <span class="text-xs text-orange-600 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Universe Privacy Section -->
+      <% if raw_content.respond_to?(:universe) %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-privacy-universe-section>
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+              <i class="material-icons text-lg <%= Universe.text_color %> mr-2"><%= Universe.icon %></i>
+              Universe Privacy
+            </h3>
+            <% if raw_content.universe.present? %>
+              <p class="text-sm text-gray-600">This page belongs to a universe with its own privacy settings</p>
+            <% else %>
+              <p class="text-sm text-gray-600">Organize your pages in a universe to manage privacy settings collectively</p>
+            <% end %>
+          </div>
+          
+          <div data-universe-content>
+            <% if raw_content.universe.present? %>
+              <!-- Current universe settings -->
+              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-lg <%= Universe.color %> flex items-center justify-center">
+                    <i class="material-icons text-white text-sm"><%= Universe.icon %></i>
+                  </div>
+                </div>
+                <div class="ml-3 flex-1">
+                  <div class="font-semibold text-gray-900 mb-1"><%= raw_content.universe.name %></div>
+                  <div class="flex items-center mb-2">
+                    <span class="text-sm text-gray-600 mr-2">Universe is:</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (raw_content.universe.privacy || 'private') == 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                      <i class="material-icons text-xs mr-1"><%= (raw_content.universe.privacy || 'private') == 'public' ? 'public' : 'lock' %></i>
+                      <%= (raw_content.universe.privacy || 'private').capitalize %>
+                    </span>
+                  </div>
+                  
+                  <% if (raw_content.universe.privacy || 'private') == 'public' %>
+                    <div class="bg-blue-100 border border-blue-200 rounded p-2">
+                      <div class="flex items-start">
+                        <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
+                        <div>
+                          <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
+                          <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
+                        </div>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="text-xs text-gray-600">
+                      Individual page privacy settings apply
+                    </div>
+                  <% end %>
+                </div>
+                <div class="ml-3 flex-shrink-0">
+                  <%= link_to edit_polymorphic_path(raw_content.universe), 
+                              class: "inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 rounded text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors" do %>
+                    <i class="material-icons text-xs mr-1">settings</i>
+                    Manage
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <!-- No universe - show feature promotion -->
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+              <div class="flex items-start">
+                <div class="flex-shrink-0">
+                  <div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
+                    <i class="material-icons text-gray-500 text-sm"><%= Universe.icon %></i>
+                  </div>
+                </div>
+                <div class="ml-3 flex-1">
+                  <div class="font-semibold text-gray-900 mb-1">No Universe Assigned</div>
+                  <div class="text-sm text-gray-600 mb-3">
+                    This <%= content.class_name.downcase %> isn't part of a universe yet.
+                  </div>
+                  <div class="bg-white border border-gray-200 rounded p-3 mb-3">
+                    <div class="text-xs font-medium text-gray-700 mb-1">Benefits of using universes:</div>
+                    <ul class="text-xs text-gray-600 space-y-1">
+                      <li class="flex items-start">
+                        <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                        <span>Control privacy for all pages at once</span>
+                      </li>
+                      <li class="flex items-start">
+                        <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                        <span>Organize related content together</span>
+                      </li>
+                      <li class="flex items-start">
+                        <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                        <span>Share entire worlds with collaborators</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="ml-3 flex-shrink-0">
+                  <button @click="switchView('details'); currentCategory = null; expandAllCategories = false; currentCategory = '<%= content.data[:categories].first[:label] rescue '' %>'" 
+                          class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white border border-blue-600 rounded text-xs font-medium hover:bg-blue-700 transition-colors">
+                    <i class="material-icons text-xs mr-1">add</i>
+                    Assign Universe
+                  </button>
+                </div>
+              </div>
+            </div>
+            <% end %>
           </div>
         </div>
       <% end %>
-    </div>
-  </div>
-
-  <!-- Universe View -->
-  <% if raw_content.respond_to?(:universe_id) %>
-    <div x-show="currentView === 'universe'" class="p-8">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Universe Assignment</h2>
-        <p class="text-gray-600">Assign this <%= content.class_name.downcase %> to a universe</p>
-      </div>
       
-      <div class="max-w-2xl">
-        <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-          <%= form_for raw_content, remote: true, html: { class: "space-y-4" } do |f| %>
-            <div>
-              <label for="universe_id" class="block text-sm font-medium text-gray-700 mb-2">
-                Select Universe
-              </label>
-              <%= f.select :universe_id, 
-                          options_for_select(
-                            [['No universe', nil]] + current_user.universes.pluck(:name, :id),
-                            raw_content.universe_id
-                          ),
-                          {},
-                          { 
-                            class: "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500",
-                            onchange: "this.form.submit();"
-                          } %>
-              <p class="mt-2 text-sm text-gray-500">
-                Assigning to a universe helps organize your content and enables cross-references.
-              </p>
-            </div>
-          <% end %>
+      <!-- Collaborators Section -->
+      <% if raw_content.respond_to?(:contributors) %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Collaborators</h3>
+          <p class="text-sm text-gray-600 mb-4">Users who can edit this page with you</p>
           
-          <% if raw_content.universe.present? %>
-            <div class="mt-6 pt-6 border-t border-gray-200">
-              <h4 class="text-sm font-medium text-gray-900 mb-3">Current Universe</h4>
-              <%= link_to raw_content.universe, class: "block group" do %>
-                <div class="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div class="flex-shrink-0">
-                    <div class="w-12 h-12 <%= Universe.color %> rounded-lg flex items-center justify-center">
-                      <i class="material-icons text-white"><%= Universe.icon %></i>
+          <% if raw_content.contributors && raw_content.contributors.any? %>
+            <div class="space-y-3 mb-4">
+              <% raw_content.contributors.each do |contributor| %>
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                      <i class="material-icons text-white text-sm">person</i>
+                    </div>
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-900"><%= contributor.name || contributor.email %></div>
+                      <div class="text-xs text-gray-500">Can edit</div>
                     </div>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">
-                      <%= raw_content.universe.name %>
-                    </p>
-                    <p class="text-sm text-gray-500">
-                      <%= pluralize raw_content.universe.characters.count, 'character' %>,
-                      <%= pluralize raw_content.universe.locations.count, 'location' %>
-                    </p>
-                  </div>
-                  <i class="material-icons text-gray-400 group-hover:text-gray-600">chevron_right</i>
+                  <button class="text-red-500 hover:bg-red-50 p-2 rounded transition-colors">
+                    <i class="material-icons text-sm">remove_circle</i>
+                  </button>
                 </div>
               <% end %>
             </div>
           <% end %>
+          
+          <div class="border-t border-gray-200 pt-4">
+            <button class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-sm mr-2">person_add</i>
+              Add Collaborator
+            </button>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Auto-save indicator -->
+      <div class="flex justify-center pt-4">
+        <div class="text-sm text-gray-500 flex items-center">
+          <i class="material-icons text-sm mr-2">info</i>
+          Changes are saved automatically
         </div>
       </div>
+      
     </div>
-  <% end %>
+  </div>
+
 
   <!-- Settings View -->
   <div x-show="currentView === 'settings'" class="p-8">
