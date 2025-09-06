@@ -1,6 +1,7 @@
 class DocumentEntity < ApplicationRecord
   belongs_to :entity, polymorphic: true, optional: true
   belongs_to :document_analysis, optional: true
+  has_one :document, through: :document_analysis
 
   after_create :match_notebook_page!, if: Proc.new { |de| de.entity_id.nil? }
 

@@ -195,7 +195,40 @@ class DocumentsController < ApplicationController
       # # Finally, we need to kick off another analysis job to fetch information about this entity
       document_entity.analyze! if current_user.on_premium_plan?
 
-      return redirect_back(fallback_location: analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
+      # Return JSON for AJAX requests, redirect for regular requests
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!") }
+        format.json do
+          # Load the entity with its attributes for display
+          entity = document_entity.entity
+          entity_class = entity.class
+          
+          render json: {
+            success: true,
+            document_entity: {
+              id: document_entity.id,
+              entity_type: document_entity.entity_type,
+              entity_id: document_entity.entity_id,
+              entity: {
+                id: entity.id,
+                name: entity.name,
+                description: entity.try(:description),
+                role: entity.try(:role),
+                type_of: entity.try(:type_of),
+                item_type: entity.try(:item_type),
+                summary: entity.try(:summary),
+                class_color: entity_class.color,
+                class_text_color: entity_class.text_color,
+                class_icon: entity_class.icon,
+                class_name: entity_class.name,
+                view_path: polymorphic_path(entity_class.name.downcase, id: entity.id)
+              }
+            }
+          }
+        end
+      end
+      
+      return
 
     else
       # If we pass in an actual ID for the document entity, we're modifying an existing one
@@ -208,7 +241,38 @@ class DocumentsController < ApplicationController
           entity_id:   linked_entity_params[:entity_id].to_i
         )
 
-        return redirect_to(analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
+        respond_to do |format|
+          format.html { redirect_to(analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!") }
+          format.json do
+            entity = document_entity.entity
+            entity_class = entity.class
+            
+            render json: {
+              success: true,
+              document_entity: {
+                id: document_entity.id,
+                entity_type: document_entity.entity_type,
+                entity_id: document_entity.entity_id,
+                entity: {
+                  id: entity.id,
+                  name: entity.name,
+                  description: entity.try(:description),
+                  role: entity.try(:role),
+                  type_of: entity.try(:type_of),
+                  item_type: entity.try(:item_type),
+                  summary: entity.try(:summary),
+                  class_color: entity_class.color,
+                  class_text_color: entity_class.text_color,
+                  class_icon: entity_class.icon,
+                  class_name: entity_class.name,
+                  view_path: polymorphic_path(entity_class.name.downcase, id: entity.id)
+                }
+              }
+            }
+          end
+        end
+        
+        return
       end
     end
   end
@@ -224,9 +288,13 @@ class DocumentsController < ApplicationController
   def edit
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
 
+    # Fetch all document entities (linked and unlinked) with their associations
     @linked_entities = @document.document_entities
+      .includes(:entity)
       .where.not(entity_id: nil)
-      .group_by(&:entity_type)
+    
+    # Group by entity type for easier rendering
+    @linked_entities_by_type = @linked_entities.group_by(&:entity_type)
   end
 
   def create

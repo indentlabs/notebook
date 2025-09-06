@@ -65,11 +65,20 @@
                 </h4>
                 <div class="relative mb-6">
                   <!-- Chart Container -->
-                  <div id="dashboard-activity-chart" class="flex items-end justify-between h-10 space-x-0.5 relative">
+                  <div id="dashboard-activity-chart" class="flex items-end justify-between h-10 space-x-0.5 relative overflow-hidden">
                     <% if @dashboard_daily_activity %>
+                      <% 
+                        # Extract counts from array of [date, count] pairs and find max
+                        max_count = @dashboard_daily_activity.map { |_, count| count }.max || 1
+                        max_height = 40 # h-10 = 40px
+                      %>
                       <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
+                        <% 
+                          # Scale bar height proportionally to fit within container
+                          bar_height = count > 0 ? [(count.to_f / max_count * max_height).round, 2].max : 1
+                        %>
                         <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer" 
-                             style="height: <%= count > 0 ? [count * 12, 3].max : 1 %>px;"
+                             style="height: <%= bar_height %>px;"
                              data-date="<%= date %>"
                              data-count="<%= count %>"
                              data-index="<%= index %>">
@@ -428,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<%= render partial: 'javascripts/content_linking' %>
+<%= render partial: 'javascripts/content_linking_alpine' %>
 
 <!-- Dashboard Analytics Styles -->
 <style>

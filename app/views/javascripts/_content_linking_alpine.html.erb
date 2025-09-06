@@ -7,7 +7,7 @@
         <% linkable_class = content_class_from_name(class_name) %>
         <% collection.each do |page_name, page_id| %>
           {
-            name: "<%= j(page_name.to_s.strip) %>",
+            name: <%= page_name.to_s.strip.to_json.html_safe %>,
             value: '[[<%= class_name %>-<%= page_id %>]]',
             type: '<%= class_name %>',
             color: '<%= linkable_class.color %>',
@@ -28,7 +28,10 @@
         triggerPosition: null,
         textElement: null,
         filteredResults: [],
-        maxResults: 8,
+        groupedResults: [],
+        maxResults: 50,
+        maxResultsPerSection: 6,
+        expandedSections: [],
         dropdownPosition: { top: 0, left: 0 },
 
         init() {
@@ -64,6 +67,7 @@
                 this.calculateDropdownPosition();
                 this.showDropdown = true;
                 this.selectedIndex = 0;
+                this.$dispatch('dropdown-open');
               } else {
                 this.hideDropdown();
               }
@@ -125,9 +129,12 @@
         },
 
         updateFilteredResults() {
-          if (!this.searchTerm) {
-            this.filteredResults = window.notebookLinkables.slice(0, this.maxResults);
-          } else {
+          // Group all linkables by content type
+          const grouped = {};
+          
+          // Apply filtering if there's a search term
+          let itemsToGroup = window.notebookLinkables;
+          if (this.searchTerm) {
             // Score-based search for better results
             const scored = window.notebookLinkables.map(item => {
               const nameMatch = item.name.toLowerCase();
@@ -143,11 +150,38 @@
               return { ...item, score };
             });
 
-            this.filteredResults = scored
+            itemsToGroup = scored
               .filter(item => item.score > 0)
-              .sort((a, b) => b.score - a.score)
-              .slice(0, this.maxResults);
+              .sort((a, b) => b.score - a.score);
           }
+          
+          // Group items by content type
+          itemsToGroup.forEach(item => {
+            if (!grouped[item.type]) {
+              grouped[item.type] = [];
+            }
+            grouped[item.type].push(item);
+          });
+          
+          // Convert to array format for template rendering
+          this.groupedResults = Object.keys(grouped).map(contentType => {
+            const isExpanded = this.expandedSections.includes(contentType);
+            const itemsToShow = isExpanded ? grouped[contentType].length : this.maxResultsPerSection;
+            return {
+              type: contentType,
+              items: grouped[contentType].slice(0, itemsToShow),
+              allItems: grouped[contentType], // Keep all items for expansion
+              totalCount: grouped[contentType].length,
+              hasMore: grouped[contentType].length > this.maxResultsPerSection,
+              isExpanded: isExpanded
+            };
+          });
+          
+          // Also maintain flat filteredResults for keyboard navigation compatibility
+          this.filteredResults = [];
+          this.groupedResults.forEach(group => {
+            this.filteredResults.push(...group.items);
+          });
         },
 
         selectItem(item) {
@@ -167,8 +201,52 @@
             this.textElement.focus();
             this.textElement.setSelectionRange(newCursorPos, newCursorPos);
           } else {
-            this.textElement.innerText = newText;
-            this.textElement.focus();
+            // For contenteditable (including Medium Editor)
+            // Check if this is a Medium Editor instance
+            const isMediumEditor = this.textElement.classList.contains('medium-editor-element') || 
+                                  this.textElement.id === 'editor';
+            
+            if (isMediumEditor && typeof MediumEditor !== 'undefined') {
+              // For Medium Editor, we need to use execCommand to maintain undo/redo history
+              this.textElement.focus();
+              
+              // Get current selection and replace the text
+              const selection = window.getSelection();
+              const range = selection.getRangeAt(0);
+              
+              // Create a text node with the content before the trigger
+              const beforeNode = document.createTextNode(beforeTrigger);
+              // Create a text node with the token and space
+              const tokenNode = document.createTextNode(item.value + ' ');
+              // Create a text node with content after cursor
+              const afterNode = document.createTextNode(afterCursor);
+              
+              // Clear the current content and insert new nodes
+              range.selectNodeContents(this.textElement);
+              range.deleteContents();
+              
+              // Build the new content
+              const fragment = document.createDocumentFragment();
+              fragment.appendChild(beforeNode);
+              fragment.appendChild(tokenNode);
+              fragment.appendChild(afterNode);
+              range.insertNode(fragment);
+              
+              // Position cursor after the inserted token
+              range.setStartAfter(tokenNode);
+              range.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(range);
+              
+              // Trigger Medium Editor's input event to update its internal state
+              if (window.editor && window.editor.trigger) {
+                window.editor.trigger('editableInput', {}, this.textElement);
+              }
+            } else {
+              // Fallback for regular contenteditable
+              this.textElement.innerText = newText;
+              this.textElement.focus();
+            }
           }
 
           // Trigger input event for any listeners
@@ -187,6 +265,17 @@
           this.searchTerm = '';
           this.selectedIndex = 0;
           this.triggerPosition = null;
+          this.expandedSections = []; // Reset expanded sections
+          this.$dispatch('dropdown-close');
+        },
+        
+        toggleSection(contentType) {
+          if (this.expandedSections.includes(contentType)) {
+            this.expandedSections = this.expandedSections.filter(t => t !== contentType);
+          } else {
+            this.expandedSections.push(contentType);
+          }
+          this.updateFilteredResults(); // Re-render with expanded items
         },
 
         getCursorPosition() {
@@ -208,7 +297,8 @@
         scrollToSelected() {
           this.$nextTick(() => {
             const dropdown = this.$el.querySelector('.linkables-dropdown');
-            const selected = dropdown?.children[this.selectedIndex];
+            // Find the selected item by looking for the element with bg-blue-50 class
+            const selected = dropdown?.querySelector('.bg-blue-50');
             if (selected) {
               selected.scrollIntoView({ block: 'nearest' });
             }
@@ -237,7 +327,7 @@
         
         calculateDropdownPosition() {
           // Get the text before the @ symbol to calculate position
-          const text = this.textElement.value;
+          const text = this.textElement.value || this.textElement.innerText || '';
           const textBeforeTrigger = text.substring(0, this.triggerPosition);
           
           // Get computed styles
@@ -306,8 +396,17 @@
         },
         
         triggerAutosave() {
+          // Check if this is a document editor with Medium Editor
+          if (this.textElement.id === 'editor' && typeof queueAutosave === 'function') {
+            // For documents with Medium Editor, use the document's autosave system
+            queueAutosave();
+            // Also trigger Medium Editor's input event
+            if (window.editor && window.editor.trigger) {
+              window.editor.trigger('editableInput', {}, this.textElement);
+            }
+          }
           // The existing autosave system listens for 'change' events on elements with 'autosave-closest-form-on-change' class
-          if (this.textElement.classList.contains('autosave-closest-form-on-change')) {
+          else if (this.textElement.classList.contains('autosave-closest-form-on-change')) {
             // Dispatch a change event to trigger the existing autosave system
             const changeEvent = new Event('change', { 
               bubbles: true, 

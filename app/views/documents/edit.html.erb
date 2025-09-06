@@ -150,10 +150,23 @@
 
         <!-- Editor with integrated toolbar -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[500px] overflow-hidden">
-
-<!-- Editor content area -->
-<div id="editor" class="editable js-can-mention-pages prose prose-lg max-w-none p-6 min-h-[500px] focus:outline-none border-0" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
-</div>
+          <!-- Wrap editor in Alpine component for @mentions -->
+          <div x-data="contentLinking()" class="relative">
+            <!-- Editor content area -->
+            <div id="editor" 
+                 class="editable js-can-mention-pages prose prose-lg max-w-none p-6 min-h-[500px] focus:outline-none border-0" 
+                 data-save-url="<%= document_url(@document) %>"
+                 x-ref="editor"><%= @document.body.try(:html_safe) %></div>
+            
+            <!-- Include shared dropdown template for @mentions -->
+            <%= render partial: 'javascripts/content_linking_dropdown' %>
+            
+            <!-- Mention Helper Tooltip -->
+            <div class="absolute bottom-4 right-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full pointer-events-none">
+              Press @ to link other pages
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     
@@ -161,7 +174,7 @@
     <div class="lg:col-span-2 relative">
       <!-- Entities sidebar container - positioned in the right column -->
       <div class="lg:sticky lg:top-14 lg:h-screen">
-        <%= render partial: 'javascripts/content_linking' %>
+        <%= render partial: 'javascripts/content_linking_alpine' %>
         
         <!-- Privacy modal with tabs -->
         <div
@@ -587,7 +600,7 @@
         
         <!-- Document entities sidebar using Alpine.js -->
         <div
-          x-data="{ activeTab: 'all', selectedEntity: null }"
+          x-data="documentEntitiesSidebar()"
           x-init="$watch('entitiesSidebarOpen', value => {
             if (value) {
               document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
@@ -633,19 +646,50 @@
                     placeholder="Search pages to link..."
                     class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     autocomplete="off"
+                    x-model="searchQuery"
+                    @input="filterSearchResults"
+                    @focus="showSearchDropdown = searchQuery.length > 0"
+                    @blur="setTimeout(() => showSearchDropdown = false, 200)"
                   >
                   <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                     <i class="material-icons text-gray-400">search</i>
                   </div>
-                  <!-- Dropdown for autocomplete results will appear here -->
+                  
+                  <!-- Search results dropdown -->
+                  <div x-show="showSearchDropdown && filteredSearchResults.length > 0"
+                       x-transition:enter="transition ease-out duration-200"
+                       x-transition:enter-start="opacity-0 scale-95"
+                       x-transition:enter-end="opacity-100 scale-100"
+                       x-transition:leave="transition ease-in duration-150"
+                       x-transition:leave-start="opacity-100 scale-100"
+                       x-transition:leave-end="opacity-0 scale-95"
+                       class="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                    <template x-for="result in filteredSearchResults" :key="`${result.type}-${result.id}`">
+                      <button @click="linkEntity(result)"
+                              type="button"
+                              class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0">
+                        <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                             :class="getEntityColorClass(result.type)">
+                          <i class="material-icons text-xs" 
+                             :class="getEntityTextColorClass(result.type)"
+                             x-text="getEntityIcon(result.type)"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-medium text-gray-900 truncate" x-text="result.name"></p>
+                          <p class="text-xs text-gray-500" x-text="result.type"></p>
+                        </div>
+                      </button>
+                    </template>
+                  </div>
                 </div>
               </div>
               
-              <!-- Filter tabs with Material Icons -->
+              <!-- Filter tabs - only show types that are actually linked -->
               <div class="px-4 py-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
-                <div class="flex space-x-2">
+                <div class="flex space-x-2" id="entity-filter-buttons">
+                  <!-- All filter (always visible) -->
                   <button
-                    @click="activeTab = 'all'"
+                    @click="filterByType('all')"
                     :class="activeTab === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
                     class="p-2 rounded-md text-xs font-medium transition-colors"
                     title="All pages"
@@ -653,166 +697,154 @@
                     <i class="material-icons text-sm">apps</i>
                   </button>
                   
-                  <!-- Character filter -->
-                  <button
-                    @click="activeTab = 'Character'"
-                    :class="activeTab === 'Character' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
-                    class="p-2 rounded-md text-xs font-medium transition-colors"
-                    title="Characters"
-                  >
-                    <i class="material-icons text-sm">person</i>
-                  </button>
+                  <% # Get unique entity types that are actually linked %>
+                  <% linked_types = @linked_entities.map(&:entity_type).uniq.sort %>
                   
-                  <!-- Location filter -->
-                  <button
-                    @click="activeTab = 'Location'"
-                    :class="activeTab === 'Location' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
-                    class="p-2 rounded-md text-xs font-medium transition-colors"
-                    title="Locations"
-                  >
-                    <i class="material-icons text-sm">place</i>
-                  </button>
-                  
-                  <!-- Item filter -->
-                  <button
-                    @click="activeTab = 'Item'"
-                    :class="activeTab === 'Item' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
-                    class="p-2 rounded-md text-xs font-medium transition-colors"
-                    title="Items"
-                  >
-                    <i class="material-icons text-sm">diamond</i>
-                  </button>
-                  
-                  <!-- Document filter -->
-                  <button
-                    @click="activeTab = 'Document'"
-                    :class="activeTab === 'Document' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
-                    class="p-2 rounded-md text-xs font-medium transition-colors"
-                    title="Documents"
-                  >
-                    <i class="material-icons text-sm">description</i>
-                  </button>
-                  
-                  <!-- Universe filter -->
-                  <button
-                    @click="activeTab = 'Universe'"
-                    :class="activeTab === 'Universe' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
-                    class="p-2 rounded-md text-xs font-medium transition-colors"
-                    title="Universes"
-                  >
-                    <i class="material-icons text-sm">public</i>
-                  </button>
+                  <% linked_types.each do |entity_type| %>
+                    <% entity_class = content_class_from_name(entity_type) %>
+                    <% next unless entity_class %>
+                    
+                    <button
+                      @click="filterByType('<%= entity_type %>')"
+                      :class="activeTab === '<%= entity_type %>' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                      class="p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1"
+                      title="<%= entity_type.pluralize %>"
+                      data-filter-type="<%= entity_type %>"
+                    >
+                      <i class="material-icons text-sm"><%= entity_class.icon %></i>
+                      <span class="text-xs filter-count">
+                        (<%= @linked_entities.select { |e| e.entity_type == entity_type }.count %>)
+                      </span>
+                    </button>
+                  <% end %>
                 </div>
               </div>
             
               <!-- Vertical entity list with expandable previews -->
               <div class="flex-1 overflow-y-auto p-4 h-full" style="flex-grow: 1;">
-                <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages</h4>
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages <span id="linked-entities-count">(<%= @linked_entities.count %>)</span></h4>
                 
                 <!-- Entity list with collapsible previews -->
-                <div class="space-y-2">
-                  <!--
-                  This section should be populated with actual document entities using:
-                  <% @document.document_entities.each do |entity| %>
-                    <!-- Entity type, name, and other details from entity.linkable -->
-                  <% end %>
-                  
-                  See document.rb and document_analysis.rb for the relationship between
-                  documents and their linked entities via document_analysis.
-                -->
-                  
-                  <!-- Example entity with collapsible preview -->
-                  <div x-data="{ expanded: false }" class="border rounded-md overflow-hidden">
-                    <!-- Entity header (always visible) -->
-                    <div
-                      @click="expanded = !expanded; selectedEntity = expanded ? 'character-1' : null"
-                      :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
-                      class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                    >
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                          <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center mr-2">
-                            <i class="material-icons text-red-600 text-xs">person</i>
-                          </div>
-                          <div>
-                            <span class="text-sm font-medium">Aragorn</span>
-                            <p class="text-xs text-gray-500">Character</p>
-                          </div>
-                        </div>
-                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
-                      </div>
-                    </div>
-                    
-                    <!-- Expandable preview section -->
-                    <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
-                      <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
-                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View full page</a>
-                      </div>
+                <div class="space-y-2" id="linked-entities-list">
+                  <% if @linked_entities.any? %>
+                    <% @linked_entities.each do |document_entity| %>
+                      <% entity = document_entity.entity %>
+                      <% next unless entity.present? %>
+                      <% entity_class = content_class_from_name(document_entity.entity_type) %>
                       
-                      <div class="space-y-2">
-                        <div>
-                          <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
-                          <p class="text-sm">Ranger of the North, Heir to the throne of Gondor</p>
-                        </div>
-                        <div>
-                          <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
-                          <p class="text-sm">A tall, dark-haired man with gray eyes and a stern face that would light up when he smiled.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Example entity 2 -->
-                  <div x-data="{ expanded: false }" class="border rounded-md overflow-hidden">
-                    <div
-                      @click="expanded = !expanded; selectedEntity = expanded ? 'location-1' : null"
-                      :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
-                      class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                    >
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                          <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                            <i class="material-icons text-green-600 text-xs">place</i>
+                      <div x-data="{ expanded: false }" 
+                           class="border rounded-md overflow-hidden linked-entity"
+                           data-entity-type="<%= document_entity.entity_type %>"
+                           data-entity-id="<%= document_entity.id %>">
+                        <!-- Entity header (always visible) -->
+                        <div
+                          @click="expanded = !expanded"
+                          :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                          class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                        >
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                              <div class="w-6 h-6 rounded-full <%= entity_class.color.gsub('bg-', 'bg-').gsub('-500', '-100') %> flex items-center justify-center mr-2">
+                                <i class="material-icons <%= entity_class.text_color %> text-xs"><%= entity_class.icon %></i>
+                              </div>
+                              <div>
+                                <span class="text-sm font-medium"><%= entity.name %></span>
+                                <p class="text-xs text-gray-500"><%= entity_class.name %></p>
+                              </div>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                              <!-- Unlink button -->
+                              <button @click.stop="unlinkEntity(<%= document_entity.id %>)"
+                                      class="p-1 hover:bg-red-50 rounded transition-colors"
+                                      title="Remove from document">
+                                <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+                              </button>
+                              <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                            </div>
                           </div>
-                          <div>
-                            <span class="text-sm font-medium">Rivendell</span>
-                            <p class="text-xs text-gray-500">Location</p>
+                        </div>
+                        
+                        <!-- Expandable preview section -->
+                        <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                          <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                            <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.id), 
+                                        class: "text-xs text-blue-600 hover:text-blue-800",
+                                        target: "_blank" do %>
+                              View full page
+                            <% end %>
+                          </div>
+                          
+                          <div class="space-y-2">
+                            <% # Display key attributes based on entity type %>
+                            <% case document_entity.entity_type %>
+                            <% when 'Character' %>
+                              <% if entity.respond_to?(:role) && entity.role.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                                  <p class="text-sm"><%= entity.role %></p>
+                                </div>
+                              <% end %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% when 'Location' %>
+                              <% if entity.respond_to?(:type_of) && entity.type_of.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                                  <p class="text-sm"><%= entity.type_of %></p>
+                                </div>
+                              <% end %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% when 'Item' %>
+                              <% if entity.respond_to?(:item_type) && entity.item_type.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                                  <p class="text-sm"><%= entity.item_type %></p>
+                                </div>
+                              <% end %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% else %>
+                              <% # Generic fallback for other content types %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% elsif entity.respond_to?(:summary) && entity.summary.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
+                                  <p class="text-sm"><%= truncate(entity.summary, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% end %>
                           </div>
                         </div>
-                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
                       </div>
-                    </div>
-                    
-                    <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
-                      <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
-                        <a href="#" class="text-xs text-blue-600 hover:text-blue-800">View full page</a>
-                      </div>
-                      
-                      <div class="space-y-2">
-                        <div>
-                          <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
-                          <p class="text-sm">Elven settlement</p>
-                        </div>
-                        <div>
-                          <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
-                          <p class="text-sm">A hidden valley with elegant elven architecture, surrounded by forests and waterfalls.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <!-- Empty state when no entities are linked -->
-                  <template x-if="false">
+                    <% end %>
+                  <% else %>
+                    <!-- Empty state when no entities are linked -->
                     <div class="flex flex-col items-center justify-center py-8 text-center">
                       <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                         <i class="material-icons text-gray-400 text-xl">link_off</i>
                       </div>
                       <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
-                      <p class="text-xs text-gray-500">Search above to link pages to this document</p>
+                      <p class="text-xs text-gray-500">Type @ in the editor or search above to link pages</p>
                     </div>
-                  </template>
+                  <% end %>
                 </div>
               </div>
             </div>
@@ -1692,3 +1724,505 @@
           }
         }
       </style>
+      
+      <!-- Alpine.js component for Document Entities Sidebar -->
+      <script>
+        function documentEntitiesSidebar() {
+          return {
+            activeTab: 'all',
+            selectedEntity: null,
+            searchQuery: '',
+            showSearchDropdown: false,
+            filteredSearchResults: [],
+            allLinkables: [],
+            
+            init() {
+              // Load linkables data if available
+              if (window.notebookLinkables) {
+                this.allLinkables = window.notebookLinkables.map(item => ({
+                  id: item.value.match(/\[\[[^\-]+\-([^\]]+)\]\]/)?.[1],
+                  name: item.name,
+                  type: item.type,
+                  value: item.value,
+                  color: item.color,
+                  icon: item.icon,
+                  textColor: item.textColor
+                }));
+              }
+            },
+            
+            filterSearchResults() {
+              if (this.searchQuery.length === 0) {
+                this.filteredSearchResults = [];
+                this.showSearchDropdown = false;
+                return;
+              }
+              
+              const query = this.searchQuery.toLowerCase();
+              this.filteredSearchResults = this.allLinkables
+                .filter(item => item.name.toLowerCase().includes(query))
+                .slice(0, 10); // Limit to 10 results
+              
+              this.showSearchDropdown = this.filteredSearchResults.length > 0;
+            },
+            
+            linkEntity(entity) {
+              // Check if entity is already linked
+              const existingEntity = document.querySelector(`[data-entity-type="${entity.type}"][data-entity-id]`);
+              if (existingEntity) {
+                const existingIds = Array.from(document.querySelectorAll(`[data-entity-type="${entity.type}"]`))
+                  .map(el => el.querySelector('[data-linked-entity-id]')?.dataset.linkedEntityId)
+                  .filter(Boolean);
+                
+                if (existingIds.includes(entity.id)) {
+                  alert('This page is already linked to the document.');
+                  return;
+                }
+              }
+              
+              // Create form data for linking
+              const formData = new FormData();
+              formData.append('document_id', '<%= @document.id %>');
+              formData.append('document_analysis_id', '-1'); // Create placeholder if needed
+              formData.append('entity_type', entity.type);
+              formData.append('entity_id', entity.id);
+              formData.append('document_entity_id', '-1'); // New entity
+              
+              // Get CSRF token
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              
+              // Send AJAX request to link entity
+              fetch('/documents/link_entity', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Accept': 'application/json'
+                },
+                body: formData
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Create and insert the new entity element
+                  const newEntityElement = this.createEntityElement(data.document_entity);
+                  
+                  // Remove empty state if it exists
+                  const emptyState = document.querySelector('#linked-entities-list .flex.flex-col.items-center.justify-center');
+                  if (emptyState) {
+                    emptyState.remove();
+                  }
+                  
+                  // Add the new entity to the list
+                  const entitiesList = document.getElementById('linked-entities-list');
+                  entitiesList.insertAdjacentHTML('afterbegin', newEntityElement);
+                  
+                  // Initialize Alpine for the new element
+                  const newElement = entitiesList.firstElementChild;
+                  if (window.Alpine && newElement) {
+                    window.Alpine.initTree(newElement);
+                  }
+                  
+                  // Update count
+                  this.updateEntityCount();
+                  
+                  // Update filter buttons if this is a new entity type
+                  this.updateFilterButtons(data.document_entity.entity_type, data.document_entity.entity);
+                  
+                  // Apply current filter
+                  if (this.activeTab !== 'all') {
+                    this.filterByType(this.activeTab);
+                  }
+                  
+                  // Show success feedback
+                  this.showSuccessFeedback('Page linked successfully!');
+                } else {
+                  console.error('Failed to link entity');
+                  alert('Failed to link page. Please try again.');
+                }
+              })
+              .catch(error => {
+                console.error('Error linking entity:', error);
+                alert('An error occurred while linking the page.');
+              });
+              
+              // Clear search
+              this.searchQuery = '';
+              this.showSearchDropdown = false;
+              this.filteredSearchResults = [];
+            },
+            
+            unlinkEntity(documentEntityId) {
+              if (!confirm('Remove this page from the document?')) {
+                return;
+              }
+              
+              // Get CSRF token
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              
+              // Send request to remove entity
+              fetch('/documents/<%= @document.id %>/destroy_entity/' + documentEntityId, {
+                method: 'GET',
+                headers: {
+                  'X-CSRF-Token': csrfToken
+                }
+              })
+              .then(response => {
+                if (response.ok) {
+                  // Remove from UI
+                  const entityElement = document.querySelector(`[data-entity-id="${documentEntityId}"]`);
+                  if (entityElement) {
+                    entityElement.remove();
+                    
+                    // Update counts and filter buttons
+                    this.updateEntityCount();
+                    this.updateAllFilterCounts();
+                    
+                    // Check if we need to show empty state
+                    const remainingEntities = document.querySelectorAll('.linked-entity');
+                    if (remainingEntities.length === 0) {
+                      const entitiesList = document.getElementById('linked-entities-list');
+                      entitiesList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-8 text-center">
+                          <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                            <i class="material-icons text-gray-400 text-xl">link_off</i>
+                          </div>
+                          <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
+                          <p class="text-xs text-gray-500">Type @ in the editor or search above to link pages</p>
+                        </div>
+                      `;
+                    }
+                  }
+                } else {
+                  console.error('Failed to unlink entity');
+                }
+              })
+              .catch(error => {
+                console.error('Error unlinking entity:', error);
+              });
+            },
+            
+            getEntityColorClass(type) {
+              // Map content types to Tailwind color classes
+              const colorMap = {
+                'Character': 'bg-red-100',
+                'Location': 'bg-green-100',
+                'Item': 'bg-yellow-100',
+                'Creature': 'bg-purple-100',
+                'Flora': 'bg-green-100',
+                'Building': 'bg-gray-100',
+                'Landmark': 'bg-blue-100',
+                'Town': 'bg-orange-100',
+                'Country': 'bg-pink-100',
+                'Planet': 'bg-indigo-100',
+                'Universe': 'bg-blue-100',
+                'Document': 'bg-teal-100'
+              };
+              return colorMap[type] || 'bg-gray-100';
+            },
+            
+            getEntityTextColorClass(type) {
+              // Map content types to text color classes
+              const colorMap = {
+                'Character': 'text-red-600',
+                'Location': 'text-green-600',
+                'Item': 'text-yellow-600',
+                'Creature': 'text-purple-600',
+                'Flora': 'text-green-600',
+                'Building': 'text-gray-600',
+                'Landmark': 'text-blue-600',
+                'Town': 'text-orange-600',
+                'Country': 'text-pink-600',
+                'Planet': 'text-indigo-600',
+                'Universe': 'text-blue-600',
+                'Document': 'text-teal-600'
+              };
+              return colorMap[type] || 'text-gray-600';
+            },
+            
+            getEntityIcon(type) {
+              // Map content types to Material Icons
+              const iconMap = {
+                'Character': 'person',
+                'Location': 'place',
+                'Item': 'category',
+                'Creature': 'pets',
+                'Flora': 'local_florist',
+                'Building': 'home',
+                'Landmark': 'terrain',
+                'Town': 'location_city',
+                'Country': 'flag',
+                'Planet': 'public',
+                'Universe': 'public',
+                'Document': 'description'
+              };
+              return iconMap[type] || 'category';
+            },
+            
+            filterByType(type) {
+              this.activeTab = type;
+              
+              // Get all entity elements
+              const entities = document.querySelectorAll('.linked-entity');
+              
+              entities.forEach(entity => {
+                const entityType = entity.dataset.entityType;
+                
+                if (type === 'all') {
+                  // Show all entities
+                  entity.style.display = 'block';
+                } else {
+                  // Show only matching type
+                  entity.style.display = entityType === type ? 'block' : 'none';
+                }
+              });
+              
+              // Update count in header
+              const visibleCount = type === 'all' 
+                ? entities.length 
+                : document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+              
+              // Update the header count if it exists
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${visibleCount})`;
+              }
+              
+              // Update all filter button counts
+              this.updateAllFilterCounts();
+            },
+            
+            updateAllFilterCounts() {
+              // Update counts for all filter buttons
+              const filterButtons = document.querySelectorAll('[data-filter-type]');
+              filterButtons.forEach(button => {
+                const type = button.dataset.filterType;
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+                const countSpan = button.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+                
+                // Hide filter button if count is 0 (entity was removed)
+                if (count === 0) {
+                  button.style.display = 'none';
+                } else {
+                  button.style.display = '';
+                }
+              });
+            },
+            
+            createEntityElement(documentEntity) {
+              const entity = documentEntity.entity;
+              const colorClass = entity.class_color.replace('bg-', 'bg-').replace('-500', '-100');
+              
+              // Build attributes HTML based on entity type
+              let attributesHtml = '';
+              if (documentEntity.entity_type === 'Character') {
+                if (entity.role) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.role)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Location') {
+                if (entity.type_of) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.type_of)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Item') {
+                if (entity.item_type) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.item_type)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else {
+                // Generic fallback
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                } else if (entity.summary) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.summary, 150))}</p>
+                    </div>`;
+                }
+              }
+              
+              return `
+                <div x-data="{ expanded: false }" 
+                     class="border rounded-md overflow-hidden linked-entity"
+                     data-entity-type="${documentEntity.entity_type}"
+                     data-entity-id="${documentEntity.id}"
+                     data-linked-entity-id="${entity.id}">
+                  <!-- Entity header (always visible) -->
+                  <div
+                    @click="expanded = !expanded"
+                    :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                    class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full ${colorClass} flex items-center justify-center mr-2">
+                          <i class="material-icons ${entity.class_text_color} text-xs">${entity.class_icon}</i>
+                        </div>
+                        <div>
+                          <span class="text-sm font-medium">${this.escapeHtml(entity.name)}</span>
+                          <p class="text-xs text-gray-500">${entity.class_name}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <!-- Unlink button -->
+                        <button @click.stop="unlinkEntity(${documentEntity.id})"
+                                class="p-1 hover:bg-red-50 rounded transition-colors"
+                                title="Remove from document">
+                          <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+                        </button>
+                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Expandable preview section -->
+                  <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                    <div class="flex items-center justify-between mb-2">
+                      <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                      <a href="${entity.view_path}" 
+                         class="text-xs text-blue-600 hover:text-blue-800"
+                         target="_blank">
+                        View full page
+                      </a>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      ${attributesHtml}
+                    </div>
+                  </div>
+                </div>
+              `;
+            },
+            
+            updateEntityCount() {
+              const entities = document.querySelectorAll('.linked-entity');
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${entities.length})`;
+              }
+            },
+            
+            updateFilterButtons(entityType, entityData) {
+              const filterContainer = document.getElementById('entity-filter-buttons');
+              if (!filterContainer) return;
+              
+              // Check if a filter button for this type already exists
+              let filterButton = filterContainer.querySelector(`[data-filter-type="${entityType}"]`);
+              
+              if (filterButton) {
+                // Update the count for existing filter
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${entityType}"]`).length;
+                const countSpan = filterButton.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+              } else {
+                // Create a new filter button for this entity type
+                const newButton = document.createElement('button');
+                // Don't use Alpine directives - use regular JavaScript instead
+                newButton.className = 'p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 bg-gray-100 text-gray-700';
+                newButton.setAttribute('title', entityType + 's');
+                newButton.setAttribute('data-filter-type', entityType);
+                
+                // Use the icon from entity data
+                newButton.innerHTML = `
+                  <i class="material-icons text-sm">${entityData.class_icon}</i>
+                  <span class="text-xs filter-count">(1)</span>
+                `;
+                
+                // Add click handler
+                newButton.addEventListener('click', () => {
+                  this.filterByType(entityType);
+                  
+                  // Update button styles to show active state
+                  document.querySelectorAll('#entity-filter-buttons button').forEach(btn => {
+                    if (btn.getAttribute('data-filter-type') === entityType || 
+                        (btn.querySelector('.material-icons')?.textContent === 'apps' && entityType === 'all')) {
+                      btn.className = btn.className.replace('bg-gray-100 text-gray-700', 'bg-blue-100 text-blue-700');
+                    } else if (!btn.hasAttribute('@click')) {
+                      // Only update non-Alpine buttons
+                      btn.className = btn.className.replace('bg-blue-100 text-blue-700', 'bg-gray-100 text-gray-700');
+                    }
+                  });
+                });
+                
+                // Insert the button (keep alphabetical order)
+                const allButtons = Array.from(filterContainer.querySelectorAll('[data-filter-type]'));
+                const insertIndex = allButtons.findIndex(btn => btn.dataset.filterType > entityType);
+                
+                if (insertIndex === -1) {
+                  // Add at the end
+                  filterContainer.appendChild(newButton);
+                } else {
+                  // Insert before the found button
+                  filterContainer.insertBefore(newButton, allButtons[insertIndex]);
+                }
+              }
+            },
+            
+            showSuccessFeedback(message) {
+              // Create a temporary success message
+              const feedback = document.createElement('div');
+              feedback.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+              feedback.textContent = message;
+              document.body.appendChild(feedback);
+              
+              setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => feedback.remove(), 300);
+              }, 2000);
+            },
+            
+            escapeHtml(text) {
+              if (!text) return '';
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div.innerHTML;
+            },
+            
+            truncate(text, length) {
+              if (!text) return '';
+              if (text.length <= length) return text;
+              return text.substring(0, length) + '...';
+            }
+          }
+        }
+      </script>

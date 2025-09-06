@@ -145,39 +145,8 @@
                             style: "min-height: 400px; overflow-y: hidden;"
             %>
             
-            <!-- Dropdown for content suggestions -->
-            <div x-show="showDropdown"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition ease-in duration-150"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95"
-                 class="linkables-dropdown-container absolute w-96 bg-white rounded-lg shadow-lg border border-gray-200"
-                 :style="`top: ${dropdownPosition.top}px; left: ${dropdownPosition.left}px; z-index: 9999;`">
-              <div class="linkables-dropdown max-h-80 overflow-y-auto">
-                <template x-for="(item, index) in filteredResults" :key="item.value">
-                  <div @click="selectItem(item)"
-                       @mousedown.prevent
-                       :class="{ 'bg-blue-50': index === selectedIndex }"
-                       class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors">
-                    <div class="flex items-center space-x-3">
-                      <div :class="[getIconColorClass(item.color), getBackgroundColor(item.color)]" 
-                           class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center">
-                        <i class="material-icons text-sm" x-text="item.icon"></i>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <div class="font-medium text-gray-900 truncate" x-text="item.name"></div>
-                        <div class="text-xs text-gray-500" x-text="item.type"></div>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-                <div x-show="filteredResults.length === 0" class="px-4 py-3 text-gray-500 text-sm">
-                  No matching content found
-                </div>
-              </div>
-            </div>
+            <!-- Include shared dropdown template -->
+            <%= render partial: 'javascripts/content_linking_dropdown' %>
             
             <!-- Mention Helper Tooltip -->
             <div class="absolute bottom-4 right-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
@@ -201,14 +170,9 @@
             
             <div class="flex items-center space-x-3">
               <button type="button" @click="handleSaveAndNext" 
-                      class="px-5 py-2.5 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg transition-colors flex items-center space-x-2 shadow-sm">
+                      class="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center space-x-2 shadow-sm">
                 <span>Save & Next</span>
                 <i class="material-icons text-base">arrow_forward</i>
-              </button>
-              <button type="submit" 
-                      class="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center space-x-2 shadow-sm">
-                <i class="material-icons text-base">save</i>
-                <span>Save Answer</span>
               </button>
             </div>
           </div>

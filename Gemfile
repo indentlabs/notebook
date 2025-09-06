@@ -55,7 +55,7 @@ gem 'react-rails'
 # Form enhancements
 gem 'redcarpet' #markdown formatting
 gem 'acts_as_list' #sortables
-gem 'tribute' # @mentions
+# gem 'tribute' # @mentions - Replaced with Alpine.js implementation
 
 # SEO
 gem 'meta-tags'

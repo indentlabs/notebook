@@ -23,50 +23,58 @@
   
   <!-- Page References Section -->
   <% if references.any? %>
-    <div class="mb-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-        <i class="material-icons text-xl <%= content.class_text_color %> mr-2">link</i>
-        Referenced by Other Pages
-        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">
+    <div class="mb-12">
+      <div class="flex items-center justify-between mb-8 pb-3 border-b border-gray-100">
+        <h3 class="text-lg font-light text-gray-700 tracking-wide uppercase text-sm">
+          Referenced By
+        </h3>
+        <span class="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
           <%= references.count %>
         </span>
-      </h3>
+      </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <% references.each do |reference| %>
           <% referencing_page = reference.referencing_page %>
           <% next unless referencing_page %>
           
-          <div class="association-item">
-            <%= link_to referencing_page, class: "flex items-center space-x-4 w-full" do %>
-              <!-- Page Icon -->
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 <%= referencing_page.class.color %> rounded-lg flex items-center justify-center">
-                  <i class="material-icons text-white text-lg"><%= referencing_page.class.icon %></i>
+          <%= link_to referencing_page, class: "group block" do %>
+            <div class="bg-white border-2 border-gray-100 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:shadow-xl hover:border-<%= referencing_page.class.color.split('-').last %> hover:-translate-y-1 relative overflow-hidden">
+              <!-- Subtle gradient background -->
+              <div class="absolute inset-0 bg-gradient-to-br from-<%= referencing_page.class.color.split('-').last %> via-transparent to-transparent opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
+              
+              <!-- Main content -->
+              <div class="relative z-10 flex items-start space-x-4">
+                <!-- Large icon -->
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 <%= referencing_page.class.color %> rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                    <i class="material-icons text-white text-xl sm:text-2xl"><%= referencing_page.class.icon %></i>
+                  </div>
+                </div>
+                
+                <!-- Text content -->
+                <div class="flex-1 min-w-0">
+                  <!-- Page title (prominent) -->
+                  <h4 class="text-lg font-medium text-gray-900 mb-1 group-hover:<%= referencing_page.class.text_color %> transition-colors line-clamp-2">
+                    <%= referencing_page.name %>
+                  </h4>
+                  
+                  <!-- Relation context if available -->
+                  <% if reference.respond_to?(:cached_relation_title) && reference.cached_relation_title.present? %>
+                    <p class="text-sm text-gray-500 italic">
+                      <%= reference.cached_relation_title %>
+                    </p>
+                  <% end %>
+                  
+                  <!-- Visual indicator for navigation -->
+                  <div class="mt-3 flex items-center text-xs <%= referencing_page.class.text_color %> opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>View <%= referencing_page.class.name.downcase %></span>
+                    <i class="material-icons text-sm ml-1">arrow_forward</i>
+                  </div>
                 </div>
               </div>
-              
-              <!-- Page Info -->
-              <div class="flex-1 min-w-0">
-                <h4 class="text-sm font-medium text-gray-900 truncate">
-                  <%= referencing_page.name %>
-                </h4>
-                <p class="text-xs <%= referencing_page.class.text_color %>">
-                  <%= referencing_page.class.name %>
-                </p>
-                <% if reference.respond_to?(:cached_relation_title) && reference.cached_relation_title.present? %>
-                  <p class="text-xs text-gray-500">
-                    via <%= reference.cached_relation_title %>
-                  </p>
-                <% end %>
-              </div>
-              
-              <!-- Arrow -->
-              <div class="flex-shrink-0">
-                <i class="material-icons text-gray-400">chevron_right</i>
-              </div>
-            <% end %>
-          </div>
+            </div>
+          <% end %>
         <% end %>
       </div>
     </div>
@@ -74,92 +82,126 @@
   
   <!-- Document Mentions Section -->
   <% if mentioned_in_documents.any? %>
-    <div class="mb-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-        <i class="material-icons text-xl <%= content.class_text_color %> mr-2">description</i>
-        Mentioned in Documents
-        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">
+    <div class="mb-12">
+      <div class="flex items-center justify-between mb-8 pb-3 border-b border-gray-100">
+        <h3 class="text-lg font-light text-gray-700 tracking-wide uppercase text-sm">
+          Mentioned In
+        </h3>
+        <span class="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
           <%= mentioned_in_documents.count %>
         </span>
-      </h3>
+      </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <% mentioned_in_documents.each do |document| %>
-          <div class="association-item">
-            <%= link_to document, class: "flex items-center space-x-4 w-full" do %>
-              <!-- Document Icon -->
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <i class="material-icons text-white text-lg">description</i>
+          <%= link_to document, class: "group block" do %>
+            <div class="bg-white border-2 border-gray-100 rounded-xl p-4 sm:p-6 transition-all duration-300 hover:shadow-xl hover:border-teal-400 hover:-translate-y-1 relative overflow-hidden">
+              <!-- Document paper texture -->
+              <div class="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div class="absolute inset-x-6 top-6 h-full">
+                  <% 12.times do |i| %>
+                    <div class="h-px bg-teal-100 mb-6"></div>
+                  <% end %>
                 </div>
               </div>
               
-              <!-- Document Info -->
-              <div class="flex-1 min-w-0">
-                <h4 class="text-sm font-medium text-gray-900 truncate">
-                  <%= document.name %>
-                </h4>
-                <p class="text-xs text-blue-600">Document</p>
-                <p class="text-xs text-gray-500">
-                  by <%= document.user.display_name %>
-                </p>
+              <!-- Three-hole punch decoration -->
+              <div class="absolute left-2 top-0 bottom-0 flex flex-col justify-center space-y-8 opacity-0 group-hover:opacity-20 transition-opacity">
+                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div class="w-2 h-2 bg-gray-400 rounded-full"></div>
               </div>
               
-              <!-- Arrow -->
-              <div class="flex-shrink-0">
-                <i class="material-icons text-gray-400">chevron_right</i>
+              <!-- Main content -->
+              <div class="relative z-10 flex items-start space-x-4">
+                <!-- Large document icon -->
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 sm:w-14 sm:h-14 <%= Document.color %> rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                    <i class="material-icons text-white text-xl sm:text-2xl"><%= Document.icon %></i>
+                  </div>
+                </div>
+                
+                <!-- Text content -->
+                <div class="flex-1 min-w-0">
+                  <!-- Document title (prominent) -->
+                  <h4 class="text-lg font-medium text-gray-900 mb-2 group-hover:<%= Document.text_color %> transition-colors line-clamp-2">
+                    <%= document.name %>
+                  </h4>
+                  
+                  <!-- Author info -->
+                  <div class="flex items-center text-sm text-gray-500">
+                    <i class="material-icons text-xs mr-1.5 text-gray-400">edit</i>
+                    <span><%= document.user.display_name %></span>
+                  </div>
+                  
+                  <!-- Visual indicator for navigation -->
+                  <div class="mt-3 flex items-center text-xs <%= Document.text_color %> opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>Read document</span>
+                    <i class="material-icons text-sm ml-1">arrow_forward</i>
+                  </div>
+                </div>
               </div>
-            <% end %>
-          </div>
+            </div>
+          <% end %>
         <% end %>
       </div>
     </div>
   <% end %>
   
   <!-- View More Links -->
-  <div class="text-center">
+  <div class="mt-16 text-center">
     <%= link_to send("references_#{raw_content.class.name.downcase}_path", raw_content), 
-                class: "inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-      <i class="material-icons text-lg mr-2">link</i>
-      View All References
-      <i class="material-icons text-sm ml-2">open_in_new</i>
+                class: "group inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-sm text-gray-600 hover:border-gray-300 hover:shadow-lg transition-all duration-200" do %>
+      <span>Explore all connections</span>
+      <i class="material-icons text-sm ml-2 text-gray-400 group-hover:translate-x-1 transition-transform">arrow_forward</i>
     <% end %>
   </div>
 
 <% else %>
   <!-- Empty associations state -->
-  <div class="text-center py-12">
-    <div class="mx-auto h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-      <i class="material-icons text-2xl text-gray-400">link</i>
-    </div>
-    <h3 class="text-lg font-medium text-gray-900 mb-2">No associations yet</h3>
-    <p class="text-gray-500 mb-6 max-w-md mx-auto">
-      This <%= content.class_name.downcase %> isn't referenced by any other pages or documents yet. 
-      As you build your world and link content together, connections will appear here.
-    </p>
-    
-    <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <!-- Create related content suggestions -->
-      <% if content.class_name != 'Universe' %>
-        <%= link_to new_polymorphic_path(Character), 
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-          <i class="material-icons text-lg mr-2">person_add</i>
-          Create Related Character
-        <% end %>
-        
-        <%= link_to new_polymorphic_path(Location), 
-                    class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
-          <i class="material-icons text-lg mr-2">place</i>
-          Create Related Location
-        <% end %>
-      <% end %>
-    </div>
-    
-    <div class="mt-6">
-      <p class="text-xs text-gray-400 max-w-lg mx-auto">
-        Tip: Use the "link" field type when editing content to create connections between your pages. 
-        These connections will automatically appear here.
+  <div class="max-w-xl mx-auto">
+    <div class="text-center py-16">
+      <!-- Large icon with subtle animation -->
+      <div class="relative inline-block mb-8">
+        <div class="w-24 h-24 rounded-2xl bg-gray-50 flex items-center justify-center">
+          <i class="material-icons text-4xl text-gray-300">link_off</i>
+        </div>
+        <!-- Decorative dots -->
+        <div class="absolute -right-2 -top-2 w-3 h-3 <%= content.class_color %> rounded-full opacity-40"></div>
+        <div class="absolute -left-2 -bottom-2 w-2 h-2 <%= content.class_color %> rounded-full opacity-30"></div>
+      </div>
+      
+      <h3 class="text-2xl font-light text-gray-800 mb-3">No connections yet</h3>
+      <p class="text-base text-gray-500 mb-10 max-w-sm mx-auto">
+        Start building your world by linking this <%= content.class_name.downcase %> to other pages
       </p>
+      
+      <!-- Quick action buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <% if content.class_name != 'Universe' %>
+          <%= link_to new_polymorphic_path(Character), 
+                      class: "group flex items-center justify-center px-6 py-3 bg-white border-2 border-gray-100 rounded-xl hover:border-red-200 hover:shadow-lg transition-all duration-200" do %>
+            <div class="w-8 h-8 <%= Character.color %> rounded-lg flex items-center justify-center mr-3">
+              <i class="material-icons text-white text-sm"><%= Character.icon %></i>
+            </div>
+            <span class="text-gray-700 group-hover:text-gray-900">New Character</span>
+          <% end %>
+          
+          <%= link_to new_polymorphic_path(Location), 
+                      class: "group flex items-center justify-center px-6 py-3 bg-white border-2 border-gray-100 rounded-xl hover:border-green-200 hover:shadow-lg transition-all duration-200" do %>
+            <div class="w-8 h-8 <%= Location.color %> rounded-lg flex items-center justify-center mr-3">
+              <i class="material-icons text-white text-sm"><%= Location.icon %></i>
+            </div>
+            <span class="text-gray-700 group-hover:text-gray-900">New Location</span>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <!-- Tip -->
+      <div class="mt-12 inline-flex items-center text-xs text-gray-400 bg-gray-50 px-4 py-2 rounded-full">
+        <i class="material-icons text-xs mr-1.5">lightbulb_outline</i>
+        <span>Link pages together using the relationship fields when editing</span>
+      </div>
     </div>
   </div>
 <% end %>

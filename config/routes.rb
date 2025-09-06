@@ -241,6 +241,7 @@ Rails.application.routes.draw do
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
+  post 'universes/:universe_id/contributors', to: 'contributors#create', as: :universe_contributors
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
   get '/paper', to: redirect('https://www.notebook-paper.com')

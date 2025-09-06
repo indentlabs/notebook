@@ -301,8 +301,8 @@
           </label>
         <% end %>
         
-        <!-- Additional Options (Coming Soon) -->
-        <div x-show="selectedPrivacy === 'public'" 
+        <!-- Additional Options for Private (Coming Soon) -->
+        <div x-show="selectedPrivacy === 'private'" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform -translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -320,11 +320,25 @@
               </div>
               <div class="flex-1">
                 <div class="font-medium text-gray-900 text-sm">Password Protected</div>
-                <div class="text-xs text-gray-600">Require a password to view this public page</div>
+                <div class="text-xs text-gray-600">Require a password to view this private page when shared</div>
               </div>
               <span class="text-xs text-orange-600 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</span>
             </div>
-            
+          </div>
+        </div>
+        
+        <!-- Additional Options for Public (Coming Soon) -->
+        <div x-show="selectedPrivacy === 'public'" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 transform -translate-y-4"
+             x-transition:enter-end="opacity-100 transform translate-y-0"
+             class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 class="text-sm font-medium text-gray-900 mb-3 flex items-center">
+            <i class="material-icons text-gray-600 text-sm mr-2">tune</i>
+            Additional Options
+          </h4>
+          
+          <div class="space-y-3">
             <!-- Discoverable -->
             <div class="flex items-start p-3 bg-white rounded-lg border border-gray-200 opacity-60">
               <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
@@ -447,38 +461,41 @@
       <% end %>
       
       <!-- Collaborators Section -->
-      <% if raw_content.respond_to?(:contributors) %>
+      <% if raw_content.class.name == 'Universe' && raw_content.respond_to?(:contributors) %>
+        <!-- For Universes, show a link to the Contributors tab instead -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Universe Contributors</h3>
+          <p class="text-sm text-gray-600 mb-4">
+            Manage who can collaborate on this universe and all its content
+          </p>
+          
+          <% contributor_count = raw_content.contributors.count rescue 0 %>
+          <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center mb-2">
+                  <i class="material-icons text-purple-600 mr-2">group</i>
+                  <span class="font-medium text-purple-900">
+                    <%= contributor_count %> <%= 'contributor'.pluralize(contributor_count) %>
+                  </span>
+                </div>
+                <p class="text-sm text-purple-800">
+                  Contributors can edit all content within this universe
+                </p>
+              </div>
+              <button @click="switchView('contributors')" 
+                      class="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white border border-purple-600 rounded text-xs font-medium hover:bg-purple-700 transition-colors">
+                <i class="material-icons text-xs mr-1">settings</i>
+                Manage Contributors
+              </button>
+            </div>
+          </div>
+        </div>
+      <% elsif raw_content.respond_to?(:contributors) %>
+        <!-- For other content types that might have contributors in the future -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Collaborators</h3>
-          <p class="text-sm text-gray-600 mb-4">Users who can edit this page with you</p>
-          
-          <% if raw_content.contributors && raw_content.contributors.any? %>
-            <div class="space-y-3 mb-4">
-              <% raw_content.contributors.each do |contributor| %>
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                      <i class="material-icons text-white text-sm">person</i>
-                    </div>
-                    <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900"><%= contributor.name || contributor.email %></div>
-                      <div class="text-xs text-gray-500">Can edit</div>
-                    </div>
-                  </div>
-                  <button class="text-red-500 hover:bg-red-50 p-2 rounded transition-colors">
-                    <i class="material-icons text-sm">remove_circle</i>
-                  </button>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-          
-          <div class="border-t border-gray-200 pt-4">
-            <button class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <i class="material-icons text-sm mr-2">person_add</i>
-              Add Collaborator
-            </button>
-          </div>
+          <p class="text-sm text-gray-600 mb-4">Collaboration features coming soon</p>
         </div>
       <% end %>
       
@@ -493,6 +510,21 @@
     </div>
   </div>
 
+
+  <!-- Contributors View (Universe only) -->
+  <% if raw_content.class.name == 'Universe' %>
+    <div x-show="currentView === 'contributors'" class="p-8">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Universe Contributors</h2>
+        <p class="text-gray-600">Manage who can collaborate on this universe and all its content</p>
+      </div>
+      
+      <%= render partial: 'content/shared/contributors_panel', locals: { 
+        content: content, 
+        raw_content: raw_content 
+      } %>
+    </div>
+  <% end %>
 
   <!-- Settings View -->
   <div x-show="currentView === 'settings'" class="p-8">
