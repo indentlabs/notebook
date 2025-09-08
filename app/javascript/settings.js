@@ -182,6 +182,16 @@ function initializePasswordStrength() {
   const passwordField = document.getElementById('user_password');
   if (!passwordField) return;
   
+  // Only show password strength on sign-up and password change pages
+  // Check if we're on a sign-in page by looking for specific elements
+  const isSignInPage = document.querySelector('form[action*="/users/sign_in"]') || 
+                       document.querySelector('input[value="Sign In"]');
+  
+  if (isSignInPage) {
+    // Don't show password strength on sign-in page
+    return;
+  }
+  
   // Create strength meter
   const strengthMeter = document.createElement('div');
   strengthMeter.className = 'password-strength mt-2 hidden';
@@ -195,7 +205,26 @@ function initializePasswordStrength() {
     <p class="text-xs mt-1 text-gray-500 strength-text">Password strength</p>
   `;
   
-  passwordField.parentNode.appendChild(strengthMeter);
+  // Check if we're on sign-up page with two-column layout
+  const passwordParent = passwordField.parentNode;
+  const isSignUpPage = document.querySelector('form[action*="/users"]') && 
+                       document.querySelector('input[name="user[password_confirmation]"]');
+  
+  if (isSignUpPage && passwordParent.classList.contains('flex-1')) {
+    // On sign-up page, append the strength meter after the flex container
+    const flexContainer = passwordParent.parentNode;
+    if (flexContainer && flexContainer.classList.contains('flex')) {
+      // Insert the strength meter after the flex container
+      flexContainer.insertAdjacentElement('afterend', strengthMeter);
+      // Make it span full width
+      strengthMeter.classList.add('w-full', 'px-4');
+    } else {
+      passwordParent.appendChild(strengthMeter);
+    }
+  } else {
+    // On other pages (like password change), append to the password field's parent
+    passwordParent.appendChild(strengthMeter);
+  }
   
   passwordField.addEventListener('input', function() {
     const password = this.value;
