@@ -106,6 +106,9 @@ gem 'redis', '~> 5.1.0'
 # Exports
 gem 'csv'
 
+# Diff generation for document revisions
+gem 'diffy'
+
 # Admin
 gem 'rails_admin'
 

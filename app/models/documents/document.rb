@@ -90,7 +90,12 @@ class Document < ApplicationRecord
 
   def save_document_revision!
     if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
-      SaveDocumentRevisionJob.perform_later(self.id)
+      begin
+        SaveDocumentRevisionJob.perform_later(self.id)
+      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+        # Log the error but don't fail the save - document revisions are not critical
+        Rails.logger.warn "Could not save document revision due to Redis connection error: #{e.message}"
+      end
     end
   end
 

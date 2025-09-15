@@ -75,26 +75,35 @@
                 <% end %>
                 
                 <!-- Revision log -->
-                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <%= link_to document_document_revisions_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do %>
                   <i class="material-icons text-gray-600 mr-3 text-sm">history</i>
                   <span>Revision log</span>
-                </a>
+                <% end %>
                 
                 <!-- Plaintext view -->
-                <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <%= link_to plaintext_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50", target: "_blank" do %>
                   <i class="material-icons text-gray-600 mr-3 text-sm">text_format</i>
                   <span>Plaintext view</span>
-                </a>
+                <% end %>
                 
                 <hr class="my-1 border-gray-100">
                 
                 <hr class="my-1 border-gray-100">
                 
                 <!-- Delete Document -->
-                <a href="#" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                <%= button_to document_path(@document), 
+                    method: :delete, 
+                    form: { 
+                      class: "w-full",
+                      data: { 
+                        turbo_confirm: 'Are you sure you want to delete this document? This action cannot be undone.' 
+                      },
+                      onsubmit: "return confirm('Are you sure you want to delete this document? This action cannot be undone.');"
+                    },
+                    class: "flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left" do %>
                   <i class="material-icons text-red-500 mr-3 text-sm">delete</i>
                   <span>Delete document</span>
-                </a>
+                <% end %>
               </div>
             </div>
           </div>
@@ -1181,6 +1190,26 @@
         
         // Manual save on click - immediate save, not queued
         $('.js-autosave-status').on('click', performSave);
+        
+        // Set up beforeunload handler to warn about unsaved changes
+        window.addEventListener('beforeunload', function(e) {
+          // Only show warning if we have unsaved changes
+          if (has_unsaved_changes) {
+            // Modern browsers
+            e.preventDefault();
+            e.returnValue = ''; // Chrome requires this
+            
+            // Legacy browsers (return value is ignored in modern browsers)
+            return 'You have unsaved changes. Are you sure you want to leave?';
+          }
+        });
+        
+        // Alternative legacy approach for older browsers
+        window.onbeforeunload = function() {
+          if (has_unsaved_changes) {
+            return 'You have unsaved changes. Are you sure you want to leave?';
+          }
+        };
         
         // Allow entering `tab` into the editor
         $(document).delegate('#editor', 'keydown', function(e) {

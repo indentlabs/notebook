@@ -145,7 +145,12 @@ Rails.application.routes.draw do
     get  '/plaintext',           to: 'documents#plaintext',               on: :member
     get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
-    resources :document_revisions, path: 'revisions', on: :member
+    resources :document_revisions, path: 'revisions', on: :member do
+      member do
+        get 'diff'
+        post 'restore'
+      end
+    end
 
     get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
 

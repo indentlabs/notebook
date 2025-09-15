@@ -78,15 +78,15 @@ class="min-h-screen bg-gray-50">
       
       <!-- Quick Actions -->
       <div class="p-4 space-y-2 border-b border-gray-200">
-        <%= link_to new_document_path, class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+        <%= link_to new_document_path, class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" do %>
           <i class="material-icons mr-2 text-sm">add</i>
           New Document
         <% end %>
         <button
           @click="showNewFolderModal = true"
-          class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          <i class="material-icons mr-2 text-sm <%= Folder.text_color %>">create_new_folder</i>
+          <i class="material-icons mr-2 text-sm text-white">create_new_folder</i>
           New Folder
         </button>
       </div>
@@ -232,7 +232,7 @@ class="min-h-screen bg-gray-50">
                 <i class="material-icons" x-text="leftSidebarOpen ? 'menu_open' : 'menu'"></i>
               </button>
               <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
-                Documents Trunk
+                Documents
                 <% if params[:q].present? %>
                   <span class="text-sm font-normal text-gray-500 ml-2">
                     - Searching for "<%= params[:q] %>"
@@ -309,11 +309,11 @@ class="min-h-screen bg-gray-50">
           <!-- Quick Stats -->
           <div class="flex items-center gap-4 sm:gap-6 text-sm">
             <div class="flex items-center text-gray-500">
-              <i class="material-icons text-blue-500 mr-1 text-sm">description</i>
+              <i class="material-icons text-teal-600 mr-1 text-sm">description</i>
               <span><%= @total_documents %> documents</span>
             </div>
             <div class="flex items-center text-gray-500">
-              <i class="material-icons <%= Folder.text_color %> mr-1 text-sm">folder</i>
+              <i class="material-icons text-blue-600 mr-1 text-sm">folder</i>
               <span><%= @folders.count %> folders</span>
             </div>
           </div>
@@ -445,7 +445,7 @@ class="min-h-screen bg-gray-50">
                           <div class="flex items-center space-x-3 text-gray-600">
                             <% if document.folder %>
                               <span class="flex items-center">
-                                <i class="material-icons text-xs mr-1 <%= Document.text_color %>">folder</i>
+                                <i class="material-icons text-xs mr-1 <%= Folder.text_color %>">folder</i>
                                 <span class="truncate max-w-[120px]"><%= document.folder.title %></span>
                               </span>
                             <% end %>
@@ -627,14 +627,14 @@ class="min-h-screen bg-gray-50">
               <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-6 shadow-sm">
                 <i class="material-icons text-4xl text-gray-400">folder_open</i>
               </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-3">Welcome to your Library</h3>
+              <h3 class="text-xl font-semibold text-gray-900 mb-3">Welcome to Documents</h3>
               <p class="text-gray-600 mb-8">Start organizing your work by creating folders and documents.</p>
               <div class="flex justify-center space-x-3">
-                <button @click="showNewFolderModal = true" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white <%= Folder.color %> hover:opacity-90">
+                <button @click="showNewFolderModal = true" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                   <i class="material-icons mr-2 text-sm">create_new_folder</i>
                   Create Folder
                 </button>
-                <%= link_to new_document_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+                <%= link_to new_document_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700" do %>
                   <i class="material-icons mr-2 text-sm">add</i>
                   Create Document
                 <% end %>
@@ -717,7 +717,7 @@ class="min-h-screen bg-gray-50">
   </div>
   
   <!-- New Folder Modal -->
-  <div x-show="showNewFolderModal" class="fixed z-10 inset-0 overflow-y-auto" style="display: none;">
+  <div x-show="showNewFolderModal" class="fixed z-50 inset-0 overflow-y-auto" style="display: none;">
     <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: Document, parent_folder: nil } %>
   </div>
 </div>

@@ -316,12 +316,20 @@ class DocumentsController < ApplicationController
       d_params[:universe_id] = nil
     end
 
-    # Only queue document mentions for analysis if the document body has changed
-    DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
-
-    update_page_tags(document) if document_tag_params
-
+    # Save the document first - this is critical and must succeed
     if document.update(d_params)
+      # Update tags after successful save
+      update_page_tags(document) if document_tag_params
+      
+      # Queue background jobs only after successful save, and fail gracefully if Redis is down
+      begin
+        # Only queue document mentions for analysis if the document body has changed
+        DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
+      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+        # Log the error but don't fail the save - the document is already saved
+        Rails.logger.warn "Could not queue DocumentMentionJob due to Redis connection error: #{e.message}"
+      end
+      
       head 200, content_type: "text/html"
     else
       head 501, content_type: "text/html"
