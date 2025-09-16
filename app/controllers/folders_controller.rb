@@ -16,15 +16,30 @@ class FoldersController < ApplicationController
   end
 
   def destroy
-    # Relocate all documents in this folder to the root "folder"
-    # TODO - I think we can handle this at the model association level with dependent: nullify, but I've never used it
-    Document.with_deleted.where(folder_id: @folder.id).update_all(folder_id: nil)
+    # Store parent folder reference before deletion for redirect logic
+    parent_folder_id = @folder.parent_folder_id
+    redirect_destination = if parent_folder_id
+                            folder_path(parent_folder_id)
+                          else
+                            documents_path
+                          end
+    
+    # Relocate all documents to parent folder (or root if no parent)
+    Document.with_deleted.where(folder_id: @folder.id).update_all(folder_id: parent_folder_id)
 
-    # Relocate all child folders in this folder to the root "folder"
-    Folder.where(parent_folder_id: @folder.id).update_all(parent_folder_id: nil)
+    # Relocate all child folders to parent folder (or root if no parent)
+    Folder.where(parent_folder_id: @folder.id).update_all(parent_folder_id: parent_folder_id)
 
+    folder_name = @folder.title
     @folder.destroy!
-    redirect_to(documents_path, notice: "Folder #{@folder.title} deleted!")
+    
+    notice_message = if parent_folder_id
+                      "Folder #{folder_name} deleted! All content moved to parent folder."
+                    else
+                      "Folder #{folder_name} deleted! All content moved to root."
+                    end
+    
+    redirect_to(redirect_destination, notice: notice_message)
   end
 
   def show

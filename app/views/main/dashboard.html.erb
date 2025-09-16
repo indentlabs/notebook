@@ -39,12 +39,232 @@
     </div>
   </div>
 
-  <div>
-    <%= render partial: 'main/components/create_new_page_list', locals: { } %>
-  </div>
+  <% unless @user_has_content %>
+    <!-- Hide quick-create ribbon for null state users -->
+  <% else %>
+    <div>
+      <%= render partial: 'main/components/create_new_page_list', locals: { } %>
+    </div>
+  <% end %>
 
-  <!-- Two-Column Hero Section: Expand Your Worlds -->
-  <% if @content %>
+  <!-- Null State Dashboard for New Users -->
+  <% unless @user_has_content %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Two-Column Layout: 2/3 | 1/3 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Welcome Content & Activity (2/3) -->
+        <div class="lg:col-span-2">
+          
+          <!-- Section header to align with right column -->
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">&nbsp;</h3>
+          
+          <!-- Welcome Hero Card -->
+          <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="bg-notebook-blue p-8 flex items-center">
+              <h2 class="text-3xl font-bold text-white">Welcome to Notebook.ai!</h2>
+            </div>
+            <div class="p-8">
+              <p class="text-gray-700 leading-relaxed mb-6">
+                Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
+              </p>
+              <p class="text-gray-700 leading-relaxed">
+                Start your worldbuilding journey by creating a universe with the button below (or jump straight to the good stuff!). All of the worldbuildings pages you create can be assigned to a universe, which contains your world. Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
+              </p>
+            </div>
+          </div>
+          
+          <!-- Free Tier Information -->
+          <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-8 border border-green-200 mt-8">
+            <p class="text-gray-700 leading-relaxed mb-4">
+              The free tier of Notebook.ai was intentionally designed to be enough for most beginner worldbuilders. Your noun trifecta (people, places, and things) can be created with Character, Location, and Item pages.
+            </p>
+            <p class="text-gray-700 leading-relaxed">
+              For more advanced worlds, the site is supported by an optional Premium subscription that unlocks 25 other page types for you to use!
+            </p>
+            <div class="mt-6">
+              <%= link_to customization_content_types_path, class: "inline-flex items-center px-4 py-2 border border-green-600 text-green-700 font-medium rounded-lg hover:bg-green-100 transition-colors duration-200" do %>
+                <i class="material-icons mr-2">explore</i>
+                Browse All Page Types
+              <% end %>
+            </div>
+          </div>
+          
+          <!-- Activity Charts (Empty state) -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            
+            <!-- 30-Day Activity Chart -->
+            <div class="bg-gradient-to-br from-purple-50 via-white to-purple-25 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                <i class="material-icons mr-1 text-purple-600 text-base">show_chart</i>
+                30-Day Activity
+              </h4>
+              <div class="relative mb-6">
+                <div class="flex items-end justify-between h-10 space-x-0.5">
+                  <% 30.times do %>
+                    <div class="flex-1 bg-gray-200 rounded-t" style="height: 1px;"></div>
+                  <% end %>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-gray-500">
+                <span>30 days ago</span>
+                <span>Today</span>
+              </div>
+            </div>
+
+            <!-- Editing Streak -->
+            <div class="bg-gradient-to-br from-orange-50 via-white to-orange-25 rounded-lg shadow-sm border border-gray-200 p-4">
+              <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+                <i class="material-icons mr-1 text-orange-600 text-base">local_fire_department</i>
+                Editing Streak
+              </h4>
+              <div class="flex flex-row items-center space-x-4">
+                <div class="flex items-center justify-center space-x-1 flex-1">
+                  <% 7.times do |i| %>
+                    <div class="flex flex-col items-center">
+                      <div class="w-4 h-4 rounded-full bg-gray-100 border border-gray-300"></div>
+                      <div class="text-xs text-gray-500 mt-0.5"><%= Date::ABBR_DAYNAMES[(Date.current - (6-i).days).wday][0] %></div>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="text-center flex-1">
+                  <div class="text-2xl font-bold text-orange-600 mb-0.5">0</div>
+                  <div class="text-xs text-gray-600">days in a row</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Right Column: Quick Start Actions (1/3) -->
+        <div class="lg:col-span-1 space-y-4">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Create Something New</h3>
+          
+          <!-- Create Universe Button (Most Prominent) -->
+          <%= link_to new_universe_path, class: "block" do %>
+            <div class="<%= Universe.color %> text-white rounded-lg p-5 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-3xl"><%= Universe.icon %></i>
+                  <div>
+                    <h4 class="text-lg font-bold">Create Universe</h4>
+                    <p class="text-sm opacity-90">Start your world here</p>
+                  </div>
+                </div>
+                <i class="material-icons text-2xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Character Button -->
+          <%= link_to new_character_path, class: "block" do %>
+            <div class="<%= Character.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Character.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Character</h4>
+                    <p class="text-xs opacity-90">People in your world</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Location Button -->
+          <%= link_to new_location_path, class: "block" do %>
+            <div class="<%= Location.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Location.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Location</h4>
+                    <p class="text-xs opacity-90">Places in your world</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Item Button -->
+          <%= link_to new_item_path, class: "block" do %>
+            <div class="<%= Item.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Item.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Item</h4>
+                    <p class="text-xs opacity-90">Things in your world</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Document Button -->
+          <%= link_to new_document_path, class: "block" do %>
+            <div class="<%= Document.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Document.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Document</h4>
+                    <p class="text-xs opacity-90">Write your stories</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+      </div>
+      
+      <!-- Community Discussions Section -->
+      <% if @most_recent_threads && @most_recent_threads.any? %>
+        <div class="mt-12">
+          <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+              <i class="material-icons mr-2 text-gray-600">forum</i>
+              Recent Community Discussions
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <% @most_recent_threads.each do |thread| %>
+                <%= link_to thredded.topic_path(thread), class: "block" do %>
+                  <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-200">
+                    <h4 class="font-medium text-gray-900 mb-2 line-clamp-2"><%= thread.title %></h4>
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">folder</i>
+                        <%= thread.messageboard.name %>
+                      </span>
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">chat_bubble</i>
+                        <%= thread.posts.count %> <%= 'post'.pluralize(thread.posts.count) %>
+                      </span>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="mt-4 text-center">
+              <%= link_to thredded.messageboards_path, class: "text-blue-600 hover:text-blue-700 font-medium text-sm" do %>
+                Join the conversation →
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+    </div>
+  <% end %>
+
+  <!-- Two-Column Hero Section: Expand Your Worlds (for users with content) -->
+  <% if @content && @user_has_content %>
     <div class="bg-white shadow-sm border-b border-gray-200 mb-12">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         

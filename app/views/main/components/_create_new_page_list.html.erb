@@ -1,6 +1,10 @@
 <!-- Full Grid of Content Types -->
 <div class="grid grid-cols-12 gap-2 p-2 max-w-7xl mx-auto">
-  <% (@activated_content_types + ["Timeline", "Document"]).each do |content_type| %>
+  <% 
+    content_types_to_show = @activated_content_types + ["Document"]
+    content_types_to_show << "Timeline" if current_user.can_create?(Timeline)
+  %>
+  <% content_types_to_show.each do |content_type| %>
     <% klass = content_class_from_name(content_type) %>
     <%= link_to send("new_#{content_type.downcase}_path"), class: "block" do %>
       <div class="<%= klass.color %> text-white rounded-lg p-4 hover:opacity-90 hover:shadow-md transition-all duration-200 text-center group">

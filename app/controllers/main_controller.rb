@@ -41,6 +41,10 @@ class MainController < ApplicationController
                                           .where(moderation_state: "approved")
                                           .includes(:posts, :messageboard)
     
+    # Check if user has any content for null state detection
+    cache_current_user_content
+    @user_has_content = @current_user_content.values.flatten.any?
+    
     set_questionable_content # for questions
     generate_dashboard_analytics # for activity chart and streak
 
