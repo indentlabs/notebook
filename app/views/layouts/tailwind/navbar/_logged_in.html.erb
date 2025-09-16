@@ -35,12 +35,16 @@
         
         <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
                type="search" 
+               name="search"
                x-model="query"
                @input="handleInput()"
                @keydown="handleKeydown($event)"
                @focus="handleFocus()"
                placeholder="Search your notebook"
-               autocomplete="off">
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false">
         
         <!-- Autocomplete Dropdown -->
         <div x-show="showDropdown" 
@@ -115,6 +119,11 @@
                class="flex items-center px-4 py-3 text-sm text-blue-600 hover:text-blue-800 hover:bg-gray-100 font-medium">
               <i class="material-icons text-sm mr-2">search</i>
               Search my notebook for "<span x-text="query"></span>"
+            </a>
+            <a :href="`/forum/?q=${encodeURIComponent(query)}`" 
+               class="flex items-center px-4 py-3 text-sm text-blue-600 hover:text-blue-800 hover:bg-gray-100 font-medium border-t border-gray-200">
+              <i class="material-icons text-sm mr-2">forum</i>
+              Search the forums for "<span x-text="query"></span>"
             </a>
           </div>
         </div>
@@ -263,6 +272,15 @@
             <span class="bg-notebook-blue text-white rounded px-1 text-xs group-hover:bg-orange-500">
               PREMIUM
             </span>
+          <% end %>
+          <%= link_to thredded.private_topics_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons text-purple-600 shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">inbox</i>
+            <span class="flex-grow text-sm">Inbox</span>
+            <% if unread_inbox_count > 0 %>
+              <span class="bg-red-500 text-white rounded-full px-1.5 py-0.5 text-xs font-bold group-hover:bg-red-600">
+                <%= unread_inbox_count %>
+              </span>
+            <% end %>
           <% end %>
           <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white border-b border-gray-300' do %>
             <i class="material-icons text-black shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1">settings</i>

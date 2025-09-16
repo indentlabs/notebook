@@ -129,4 +129,17 @@ module ApplicationHelper
     # Return the first sorted image, or nil if none available
     combined.first
   end
+
+  def unread_inbox_count
+    return 0 unless user_signed_in?
+    
+    @unread_inbox_count ||= begin
+      Thredded::PrivateTopic
+        .for_user(current_user)
+        .unread(current_user)
+        .count
+    rescue
+      0
+    end
+  end
 end

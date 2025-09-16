@@ -4,68 +4,136 @@
 %>
 
 <% unless blocked_post %>
-  <%
-    common_post_classes  = 'p-4 text-sm'
-    unmuted_post_classes = 'bg-white rounded shadow' + ' ' + common_post_classes
-    muted_post_classes   = '' + ' ' + common_post_classes
-
-    # Mute the post if it's one line that starts with ( and ends with )
-    muted_post = post.present? && post.to_model.content.split("\n").reject(&:empty?).all? { |paragraph| paragraph.strip.start_with?('(') && paragraph.strip.end_with?(')') }
-  %>
-
   <%= render 'thredded/posts_common/before_first_unread_post', post: post if post.first_unread_in_page? %>
-  <%= content_tag :article, id: dom_id(post), class: "thredded--post thredded--#{post.read_state}--post" do %>
-    <div class="flex space-x-4">
-      <div>
-        <span class="inline-block relative">
-          <% if post.user %>
-            <%= image_tag post.user.image_url(120), class: 'h-16 w-16 rounded-full border border-gray-200' %>
+  
+  <%= content_tag :article, 
+                  id: dom_id(post), 
+                  class: ["thredded--post", "thredded--#{post.read_state}--post", "mb-6"] do %>
+    
+    <!-- Two-column layout: Avatar column + Content column -->
+    <div class="flex gap-4">
+      <!-- Left Column: User Avatar & Info -->
+      <div class="flex-shrink-0 w-12 sm:w-16">
+        <% if post.user %>
+          <div class="relative">
+            <!-- User Avatar -->
+            <%= image_tag post.user.image_url(120), 
+                class: 'h-12 w-12 sm:h-16 sm:w-16 rounded-full border-2 border-gray-200 dark:border-gray-600 shadow-sm' %>
+            
+            <!-- Favorite Page Type Badge -->
             <% if post.user.favorite_page_type? %>
               <%= link_to main_app.send("#{post.user.favorite_page_type.downcase.pluralize}_user_path", { id: post.user.id }) do %>
-                <span class="absolute bottom-2 right-2 transform translate-y-1/2 translate-x-1/2 block border-2 border-white rounded-full">
-                  <span class="block h-6 w-6 rounded-full text-center <%= content_class_from_name(post.user.favorite_page_type).color %>">
-                    <i class="material-icons text-sm text-white"><%= content_class_from_name(post.user.favorite_page_type).icon %></i>
+                <span class="absolute -bottom-1 -right-1 block">
+                  <span class="block h-5 w-5 rounded-full text-center <%= content_class_from_name(post.user.favorite_page_type).color %> border-2 border-white dark:border-gray-800 shadow-sm">
+                    <i class="material-icons text-xs text-white"><%= content_class_from_name(post.user.favorite_page_type).icon %></i>
                   </span>
                 </span>
               <% end %>
             <% end %>
+          </div>
+          
+          <!-- Role Badges under avatar -->
+          <% if post.user&.forum_moderator? %>
+            <div class="mt-2 flex justify-center">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                <i class="material-icons text-xs mr-1">verified_user</i>
+                Mod
+              </span>
+            </div>
           <% end %>
-        </span>
-      </div>
-      <div class="bg-white flex-1 border border-gray-200 rounded divide-y">
-        <div class="px-2 py-1 bg-gray-50 rounded-t flex">
-          <div class="flex-1">
-            <h2 class="thredded--post--user text-sm">
-              <%= user_link post.user %>
-            </h2>
-
-            <% if post.user&.forum_moderator? %>
-              <i class="material-icons float-left text-notebook-blue mr-1">
-                health_and_safety
-              </i>
-            <% end %>
-          </div>
-          <div class="h-6">
-            <span class="relative -top-0.5">
-              <a href="<%= post.permalink_path %>" rel="nofollow" class="thredded--link thredded--post--created-at text-xs">
-                <%= time_ago post.created_at %>
-              </a>
-            </span>
-            <span class="relative top-0.5">
-              <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
-            </span>
-          </div>
-        </div>
-        <div class="p-4">
-          <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>
-        </div>
-        <% if post.pending_moderation? && !Thredded.content_visible_while_pending_moderation %>
-          <p class="thredded--alert thredded--alert-warning"><%= t 'thredded.posts.pending_moderation_notice' %></p>
-        <% elsif post.blocked? && post.can_moderate? %>
-          <p class="thredded--alert thredded--alert-danger">
-            <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
-          </p>
+          
         <% end %>
+      </div>
+      
+      <!-- Right Column: Message Content (Speech Bubble) -->
+      <div class="flex-1 min-w-0">
+        <!-- Speech Bubble Container -->
+        <div class="relative">
+          <!-- Speech Bubble Arrow -->
+          <div class="absolute left-0 top-4 transform -translate-x-2">
+            <div class="w-0 h-0 border-t-8 border-b-8 border-r-8 border-t-transparent border-b-transparent border-r-white dark:border-r-gray-800"></div>
+          </div>
+          
+          <!-- Message Card -->
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 ml-2">
+            <!-- Message Content -->
+            <div class="px-4 py-3">
+              <!-- User Name and Badge at top of message -->
+              <div class="flex items-center gap-2 mb-2">
+                <span class="font-medium <%= User.text_color %>">
+                  <%= user_link post.user %>
+                </span>
+                <% if post.user.forums_badge_text.present? %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <%= post.user.forums_badge_text %>
+                  </span>
+                <% end %>
+              </div>
+              
+              <div class="prose prose-sm max-w-none text-gray-900 dark:text-gray-100">
+                <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>
+              </div>
+              
+              <!-- Moderation Notices -->
+              <% if post.pending_moderation? && !Thredded.content_visible_while_pending_moderation %>
+                <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-3">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <i class="material-icons text-yellow-400 text-base">pending</i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                        <%= t 'thredded.posts.pending_moderation_notice' %>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              <% elsif post.blocked? && post.can_moderate? %>
+                <div class="mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg p-3">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <i class="material-icons text-red-400 text-base">block</i>
+                    </div>
+                    <div class="ml-3">
+                      <p class="text-sm text-red-800 dark:text-red-200">
+                        <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- Message Footer -->
+            <div class="px-4 py-2 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 rounded-b-lg">
+              <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center gap-3">
+                  <!-- Timestamp -->
+                  <a href="<%= post.permalink_path %>" rel="nofollow" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                    <%= time_ago post.created_at %>
+                  </a>
+                  
+                  <!-- First Post Stats -->
+                  <% if defined?(post_counter) && post_counter == 0 %>
+                    <span class="flex items-center">
+                      <i class="material-icons text-xs mr-1">visibility</i>
+                      <%= number_with_delimiter(post.topic.views_count) %> views
+                    </span>
+                    <span class="flex items-center">
+                      <i class="material-icons text-xs mr-1">forum</i>
+                      <%= post.topic.posts_count - 1 %> <%= 'reply'.pluralize(post.topic.posts_count - 1) %>
+                    </span>
+                  <% end %>
+                </div>
+                
+                <!-- Post Actions -->
+                <div class="flex items-center">
+                  <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   <% end %>

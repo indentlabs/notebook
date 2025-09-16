@@ -1,0 +1,154 @@
+<% content_for :thredded_page_title,
+               safe_join([t('thredded.nav.moderation'), t('thredded.nav.moderation_history')], ': ') %>
+<% content_for :thredded_page_id, 'thredded--moderation-history' %>
+<%= render 'nav' %>
+
+<%= thredded_page do %>
+  <div class="thredded--main-section">
+    <!-- History Header with Filters -->
+    <div class="moderation-history-header">
+      <div class="history-title">
+        <i class="material-icons">history</i>
+        <h2>Moderation History</h2>
+      </div>
+      
+      <div class="history-filters">
+        <div class="filter-group">
+          <label>Status:</label>
+          <select class="filter-select">
+            <option value="all">All Actions</option>
+            <option value="approved">Approved</option>
+            <option value="blocked">Blocked</option>
+            <option value="deleted">Deleted</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Period:</label>
+          <select class="filter-select">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Moderator:</label>
+          <select class="filter-select">
+            <option value="all">All Moderators</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <% if @post_moderation_records.present? %>
+      <!-- Timeline Container -->
+      <div class="moderation-timeline">
+        <% @post_moderation_records.each_with_index do |record, index| %>
+          <% 
+            post = record.post
+            post_view = Thredded::PostView.new(post, policy(post)) if post
+          %>
+          
+          <div class="timeline-item <%= record.moderation_state %>">
+            <!-- Timeline Marker -->
+            <div class="timeline-marker">
+              <% if record.approved? %>
+                <i class="material-icons">check_circle</i>
+              <% elsif record.blocked? %>
+                <i class="material-icons">block</i>
+              <% else %>
+                <i class="material-icons">radio_button_unchecked</i>
+              <% end %>
+            </div>
+            
+            <!-- Timeline Content -->
+            <div class="timeline-content">
+              <!-- Action Header -->
+              <div class="action-header">
+                <div class="action-info">
+                  <span class="action-type <%= record.moderation_state %>">
+                    <%= record.moderation_state.capitalize %>
+                  </span>
+                  <span class="action-meta">
+                    by <%= user_link(record.moderator) %>
+                    <span class="separator">•</span>
+                    <%= time_ago(record.created_at) %>
+                  </span>
+                </div>
+                
+                <% if post %>
+                  <div class="action-links">
+                    <a href="<%= post_permalink_path(post) %>" class="view-post-link" target="_blank">
+                      <i class="material-icons">open_in_new</i>
+                      View Post
+                    </a>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Post Preview -->
+              <div class="post-preview">
+                <div class="post-author">
+                  <% if record.post_user %>
+                    <%= image_tag record.post_user.try(:image_url, 40) || 'user-placeholder.png', 
+                                  class: 'author-avatar' %>
+                    <div class="author-info">
+                      <div class="author-name">
+                        <%= link_to record.post_user.thredded_display_name, 
+                                    user_moderation_path(record.post_user.id) %>
+                      </div>
+                      <div class="post-location">
+                        <% if post %>
+                          in <%= link_to post.postable.title, post.postable.path %>
+                        <% else %>
+                          <em>Post deleted</em>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="author-info">
+                      <div class="author-name">
+                        <%= record.post_user_name || content_tag(:em, t('thredded.null_user_name')) %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <div class="post-content-preview">
+                  <% if post && post.content != record.post_content %>
+                    <div class="content-changed-notice">
+                      <i class="material-icons">info</i>
+                      Content has been modified since moderation
+                    </div>
+                  <% end %>
+                  
+                  <div class="content-text">
+                    <%= truncate(strip_tags(record.post_content_html), length: 200) %>
+                  </div>
+                </div>
+                
+                <% if post %>
+                  <div class="post-actions">
+                    <%= render 'post_moderation_actions', post: post %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <%= paginate @post_moderation_records %>
+    <% else %>
+      <div class="thredded--empty">
+        <div class="empty-icon">
+          <i class="material-icons">history</i>
+        </div>
+        <h3 class="thredded--empty--title">No moderation history</h3>
+        <p>There are no moderation actions to display.</p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

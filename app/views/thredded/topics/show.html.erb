@@ -1,52 +1,151 @@
 <% topic = @posts.topic %>
 <% content_for :thredded_page_title, topic.title %>
 <% content_for :thredded_page_id, 'thredded--topic-show' %>
+<% content_for :thredded_breadcrumbs, render('thredded/shared/breadcrumbs') %>
 
-<div class="flex-1 relative z-0 flex">
-  <aside class="bg-gray-50 hidden relative xl:flex xl:flex-col flex-shrink-0 w-96 border-r border-gray-200 overflow-y-auto">
-    <!-- side panel (hidden on small screens; todo: probably just stack it) -->
-    <div class="py-6 px-4 sm:px-6 lg:px-8">
-      <%= content_tag :section,
-                      class: ['thredded--main-section', 'thredded--topic', *topic_css_classes(topic)] do %>
-        <%= render 'thredded/topics/header', topic: topic %>
-      <% end %>
-    </div>
-  </aside>
-  <main class="flex-1 relative z-0 mt-10 focus:outline-none">
-    <!-- main panel-->
-    <%= thredded_page do %>
-      <%= content_tag :section,
-                      id: dom_id(topic),
-                      class: ['thredded--main-section', 'thredded--topic', *topic_css_classes(topic)] do %>
-        <%= render_posts @posts,
-                        partial: 'thredded/posts/post',
-                        content_partial: 'thredded/posts/content',
-                        locals: { actions: { quote: true } } %>
-
-        <%= view_hooks.posts_common.pagination_bottom.render(self, posts: @posts) do %>
-          <footer class="thredded--pagination-bottom"><%= paginate @posts %></footer>
+<%= thredded_page do %>
+  <!-- Full-width Topic Header -->
+  <div class="topic-header-section">
+    <div class="topic-header-container">
+      <!-- Topic Title -->
+      <h1 class="topic-title">
+        <% if topic.sticky? %>
+          <i class="material-icons" title="Pinned topic">push_pin</i>
         <% end %>
         <% if topic.locked? %>
-          <p class="thredded--topic--locked-notice"><%= t 'thredded.topics.locked.message'%></p>
+          <i class="material-icons" title="Locked topic">lock</i>
         <% end %>
-        <% if policy(@new_post.post).create? %>
-          <div class="thredded--post-form--wrapper">
-            <h3 class="thredded--post-form--title"><%= t('thredded.posts.form.title_label') %></h3>
-            <%= render 'thredded/posts/form',
-                      post:        @new_post,
-                      button_text: t('thredded.posts.form.create_btn'),
-                      button_submitting_text: t('thredded.posts.form.create_btn_submitting') %>
+        <%= topic.title %>
+      </h1>
+      
+      <!-- Topic Metadata -->
+      <div class="topic-meta">
+        <div class="meta-item">
+          <i class="material-icons">person_outline</i>
+          <span>Started by <%= user_link topic.user %></span>
+        </div>
+        
+        <div class="meta-item">
+          <i class="material-icons">schedule</i>
+          <span><%= time_ago topic.created_at %></span>
+        </div>
+        
+        <div class="meta-item">
+          <i class="material-icons">forum</i>
+          <span><%= topic.posts_count %> <%= 'post'.pluralize(topic.posts_count) %></span>
+        </div>
+        
+        <% if topic.last_user %>
+          <div class="meta-item">
+            <i class="material-icons">update</i>
+            <span>Last reply by <%= user_link topic.last_user %> <%= time_ago topic.last_post_at %></span>
           </div>
         <% end %>
+      </div>
+      
+      <!-- Categories -->
+      <% if topic.categories.any? %>
+        <div class="topic-categories">
+          <% topic.categories.each do |category| %>
+            <span class="category-badge"><%= category.name %></span>
+          <% end %>
+        </div>
+      <% end %>
+      
+      <!-- Topic Actions -->
+      <div class="topic-actions">
+        <% if thredded_current_user %>
+          <% if topic.followed? %>
+            <%= button_to topic.unfollow_path, 
+                          method: :post,
+                          class: 'following',
+                          title: topic_follow_reason_text(topic.follow_reason) do %>
+              <i class="material-icons">notifications_active</i>
+              Following
+            <% end %>
+          <% else %>
+            <%= button_to topic.follow_path, 
+                          method: :post,
+                          title: "Follow this topic to get notifications" do %>
+              <i class="material-icons">notifications_none</i>
+              Follow
+            <% end %>
+          <% end %>
+        <% end %>
+        
+        <% if topic.can_update? %>
+          <%= link_to topic.edit_path, rel: 'nofollow' do %>
+            <i class="material-icons">edit</i>
+            Edit Topic
+          <% end %>
+        <% end %>
+        
         <% if topic.can_destroy? %>
-          <div class="thredded--topic-delete--wrapper">
-            <%= button_to t('thredded.topics.delete_topic'), topic.destroy_path, method: :delete,
-                          form_class: 'thredded--topic-delete-form',
-                          class: 'thredded--button bg-red-500',
-                          'data-confirm' => t('thredded.topics.delete_confirm') %>
-          </div>
+          <%= button_to topic.destroy_path, 
+                        method: :delete,
+                        data: { confirm: t('thredded.topics.delete_confirm') },
+                        class: 'text-red-600 hover:bg-red-50' do %>
+            <i class="material-icons">delete</i>
+            Delete Topic
+          <% end %>
         <% end %>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Narrower Content Area -->
+  <div class="topic-content-area">
+    <%= content_tag :section,
+                    id: dom_id(topic),
+                    class: ['thredded--topic', *topic_css_classes(topic)] do %>
+      
+      <!-- Top Pagination -->
+      <% if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
+        <div class="topic-pagination">
+          <%= paginate @posts %>
+        </div>
+      <% end %>
+      
+      <!-- Posts Container -->
+      <div class="posts-container">
+        <%= render_posts @posts,
+                         partial: 'thredded/posts/post',
+                         content_partial: 'thredded/posts/content',
+                         locals: { actions: { quote: true } } %>
+      </div>
+      
+      <!-- Bottom Pagination -->
+      <% if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
+        <div class="topic-pagination">
+          <%= paginate @posts %>
+        </div>
+      <% end %>
+      
+      <!-- Locked Topic Notice -->
+      <% if topic.locked? %>
+        <div class="locked-notice">
+          <i class="material-icons">lock</i>
+          <p><%= t 'thredded.topics.locked.message' %></p>
+        </div>
+      <% end %>
+      
+      <!-- Reply Form -->
+      <% if policy(@new_post.post).create? %>
+        <div class="reply-form-section">
+          <div class="reply-form-header">
+            <h3>
+              <i class="material-icons">reply</i>
+              <%= t('thredded.posts.form.title_label') %>
+            </h3>
+          </div>
+          <div class="reply-form-body">
+            <%= render 'thredded/posts/form',
+                       post: @new_post,
+                       button_text: t('thredded.posts.form.create_btn'),
+                       button_submitting_text: t('thredded.posts.form.create_btn_submitting') %>
+          </div>
+        </div>
       <% end %>
     <% end %>
-  </main>
-</div>
+  </div>
+<% end %>

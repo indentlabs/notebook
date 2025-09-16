@@ -1,10 +1,17 @@
 <% if thredded_moderator? %>
   <% current = current_page_moderation? %>
-  <li class="px-4 text-center m-0 thredded--user-navigation--item thredded--user-navigation--moderation<%= ' thredded--is-current' if current %>">
-    <%= link_to current ? nav_back_path : pending_moderation_path, rel: 'nofollow' do %>
-      <span class="thredded--nav-text"><%= t 'thredded.nav.moderation' %></span>
+  <li class="thredded--user-navigation--item thredded--user-navigation--moderation<%= ' thredded--is-current' if current %>" style="display: flex; align-items: center; height: 100%; margin: 0;">
+    <%= link_to current ? nav_back_path : pending_moderation_path, 
+                rel: 'nofollow',
+                style: 'display: flex; align-items: center; height: 100%; padding: 0.75rem 1rem; text-decoration: none; color: #374151; transition: background-color 0.15s;',
+                onmouseover: "this.style.backgroundColor='#f9fafb'",
+                onmouseout: "this.style.backgroundColor='transparent'",
+                title: t('thredded.nav.moderation') do %>
+      <span style="font-size: 14px;"><%= t 'thredded.nav.moderation' %></span>
       <% if posts_pending_moderation_count > 0 %>
-        <span class="thredded--user-navigation--moderation--pending-count"><%= posts_pending_moderation_count %></span>
+        <span style="margin-left: 0.25rem; display: inline-flex; align-items: center; padding: 0.125rem 0.375rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; background-color: #fee2e2; color: #991b1b;">
+          <%= posts_pending_moderation_count %>
+        </span>
       <% end %>
     <% end %>
   </li>

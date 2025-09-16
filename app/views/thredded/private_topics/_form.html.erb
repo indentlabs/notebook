@@ -1,0 +1,78 @@
+<%= form_for private_topic,
+             url: private_topic.submit_path,
+             html: {
+                 class: "thredded--form thredded--new-private-topic-form #{local_assigns[:css_class]}",
+                 'data-thredded-topic-form' => true,
+                 'data-autocomplete-url' => autocomplete_users_path,
+                 'data-autocomplete-min-length' => Thredded.autocomplete_min_length,
+                 'data-thredded-submit-hotkey' => true,
+             } do |form| %>
+
+  <ul class="thredded--form-list on-top">
+    <li class="title">
+      <%= form.label :title, t('thredded.private_topics.form.title_label') %>
+      <%= form.text_field :title, placeholder: placeholder, required: true, autocomplete: 'off' %>
+      <%= render 'thredded/shared/field_errors', messages: form.object.errors[:title] %>
+    </li>
+    
+    <li>
+      <%= form.label :user_names, t('thredded.private_topics.form.users_label') %>
+      <%= form.text_area :user_names,
+                         required: true,
+                         placeholder: t('thredded.private_topics.form.users_placeholder'),
+                         'data-thredded-users-select' => true,
+                         'data-autocomplete-url' => autocomplete_users_path,
+                         'data-autocomplete-min-length' => Thredded.autocomplete_min_length,
+                         rows: 1 %>
+      <div class="recipients-helper">
+        <i class="material-icons">info</i>
+        Start typing to search for users
+      </div>
+      <%= render 'thredded/shared/field_errors', messages: form.object.errors[:user_names] %>
+    </li>
+
+    <%= render 'thredded/posts_common/form/content',
+               form: form,
+               content_label: t('thredded.private_topics.form.content_label'),
+               preview_url: private_topic.preview_path %>
+
+    <li>
+      <div class="compose-actions">
+        <div class="left-actions">
+          <a href="<%= private_topics_path %>" class="btn-cancel">
+            <i class="material-icons">arrow_back</i>
+            Cancel
+          </a>
+        </div>
+        
+        <div class="right-actions">
+          <button type="button" class="btn-preview" data-thredded-preview-toggle>
+            <i class="material-icons">visibility</i>
+            Preview
+          </button>
+          
+          <button type="submit" class="thredded--form--submit"
+                  data-disable-with="<%= t 'thredded.private_topics.form.create_btn_submitting' %>">
+            <i class="material-icons">send</i>
+            <%= t('thredded.private_topics.form.create_btn') %>
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+<% end %>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle preview toggle
+  const previewBtn = document.querySelector('[data-thredded-preview-toggle]');
+  const previewArea = document.querySelector('.thredded--preview-area');
+  
+  if (previewBtn && previewArea) {
+    previewBtn.addEventListener('click', function() {
+      previewArea.style.display = previewArea.style.display === 'none' ? 'block' : 'none';
+      previewBtn.classList.toggle('active');
+    });
+  }
+});
+</script>

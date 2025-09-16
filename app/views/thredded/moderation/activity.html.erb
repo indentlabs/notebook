@@ -1,0 +1,125 @@
+<% content_for :thredded_page_title, t('thredded.nav.moderation') %>
+<% content_for :thredded_page_id, 'thredded--moderation-activity' %>
+<%= render 'nav' %>
+
+<%= thredded_page do %>
+  <div class="thredded--main-section">
+    <!-- Activity Header -->
+    <div class="activity-header">
+      <div class="activity-title">
+        <i class="material-icons">timeline</i>
+        <h2><%= t 'thredded.recent_activity' %></h2>
+      </div>
+    </div>
+    
+    <!-- Last Moderated Notice -->
+    <% if @last_moderated_record %>
+      <div class="thredded--moderated-notice">
+        <i class="material-icons">check_circle</i>
+        <div class="notice-content">
+          <div class="notice-title">Recently moderated</div>
+          <div class="notice-text">
+            <%= render_post_moderation_records([@last_moderated_record]) %>
+          </div>
+        </div>
+        <button class="notice-dismiss" onclick="this.parentElement.style.display='none'">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+    <% end %>
+    
+    <!-- Activity Feed -->
+    <% if @posts.present? %>
+      <div class="activity-feed">
+        <div class="feed-header">
+          <h3>
+            <i class="material-icons">forum</i>
+            Recent Forum Activity
+          </h3>
+        </div>
+        
+        <div class="feed-items">
+          <% @posts.each do |post| %>
+            <div class="feed-item">
+              <div class="feed-item-indicator">
+                <% if post.to_model.first_post_in_topic? %>
+                  <i class="material-icons new-topic">add_comment</i>
+                <% else %>
+                  <i class="material-icons reply">reply</i>
+                <% end %>
+              </div>
+              
+              <div class="feed-item-content">
+                <div class="feed-meta">
+                  <% if post.user %>
+                    <%= image_tag post.avatar_url, class: 'feed-avatar' %>
+                    <span class="feed-user"><%= user_link post.user %></span>
+                  <% else %>
+                    <span class="feed-user">Anonymous</span>
+                  <% end %>
+                  <span class="feed-action">
+                    <% if post.to_model.first_post_in_topic? %>
+                      started a new topic
+                    <% else %>
+                      replied
+                    <% end %>
+                  </span>
+                  <span class="feed-location">
+                    <% topic = post.to_model.postable %>
+                    in <%= link_to topic.title, topic_path(topic), class: 'feed-topic-link' %>
+                  </span>
+                  <span class="feed-time">
+                    <%= time_ago post.created_at %>
+                  </span>
+                </div>
+                
+                <div class="feed-preview">
+                  <%= truncate(strip_tags(post.filtered_content(self)), length: 150) %>
+                </div>
+                
+                <div class="feed-actions">
+                  <a href="<%= post.permalink_path %>" class="feed-action-btn">
+                    <i class="material-icons">visibility</i>
+                    View
+                  </a>
+                  
+                  <% if post.can_update? %>
+                    <%= link_to post.edit_path, class: 'feed-action-btn' do %>
+                      <i class="material-icons">edit</i>
+                      Edit
+                    <% end %>
+                  <% end %>
+                  
+                  <% if post.can_moderate? %>
+                    <button class="feed-action-btn moderate">
+                      <i class="material-icons">gavel</i>
+                      Moderate
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+              
+              <div class="feed-item-status">
+                <% if post.pending_moderation? %>
+                  <span class="status-badge pending">Pending</span>
+                <% elsif post.blocked? %>
+                  <span class="status-badge blocked">Blocked</span>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <%= paginate @posts %>
+      </div>
+    <% else %>
+      <div class="thredded--empty">
+        <div class="empty-icon">
+          <i class="material-icons">timeline</i>
+        </div>
+        <h3 class="thredded--empty--title">No recent activity</h3>
+        <p>There's no forum activity to display at the moment.</p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

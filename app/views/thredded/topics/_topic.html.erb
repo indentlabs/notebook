@@ -1,56 +1,112 @@
 <%= content_tag :article,
-                id:    dom_id(topic),
-                class: ['thredded--topics--topic', topic_css_classes(topic)],
+                id: dom_id(topic),
+                class: ['group hover:bg-gray-50 transition-colors duration-150', 
+                        topic.sticky? ? 'bg-yellow-50 hover:bg-yellow-100' : '',
+                        topic.locked? ? 'opacity-75' : ''],
                 data: {topic: topic.id, messageboard: topic.messageboard_id} do %>
-  <div class="thredded--topics--posts-count"><%= topic.posts_count %></div>
-
-  <div class="thredded--topics--follow-info" title="<%= topic_follow_reason_text topic.follow_reason %>">
-    <svg class="thredded--topics--follow-icon" viewBox="0 0 116 121" role="img">
-      <% if topic.followed? %>
-        <use xlink:href="#thredded-follow-icon"></use>
-      <% else %>
-        <use xlink:href="#thredded-unfollow-icon"></use>
-      <% end %>
-    </svg>
-  </div>
-
-  <h1 class="thredded--topics--title">
-    <% if user_signed_in? %>
-      <%
-        @current_user_unread_and_followed_topics ||= Thredded::Topic.unread_followed_by(current_user).pluck(:id)
-        if @current_user_unread_and_followed_topics.include?(topic.id)
-      %>
-        <i class="material-icons amber-text tooltipped" style="font-size: 0.9em"
-          data-tooltip="You are following this thread and there are unread replies."
-          data-position="right">
-          notifications_active
-        </i>
-      <% end %>
+  
+  <div class="px-6 py-4">
+    <div class="flex items-center">
+      <!-- Topic Title and Meta -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start">
+          <div class="flex-1">
+            <h3 class="text-base font-medium text-gray-900 group-hover:text-purple-600 transition-colors flex items-center">
+              <!-- Status Icons -->
+              <% if topic.sticky? %>
+                <i class="material-icons text-yellow-600 mr-2 text-base" title="Pinned topic">push_pin</i>
+              <% end %>
+              <% if topic.locked? %>
+                <i class="material-icons text-gray-500 mr-2 text-base" title="Locked topic">lock</i>
+              <% end %>
+              
+              <!-- Follow/Unread Notification -->
+              <% if user_signed_in? && topic.followed? %>
+                <%
+                  @current_user_unread_and_followed_topics ||= Thredded::Topic.unread_followed_by(current_user).pluck(:id)
+                  has_unread = @current_user_unread_and_followed_topics.include?(topic.id)
+                %>
+                <% if has_unread %>
+                  <i class="material-icons text-amber-500 mr-2 text-base animate-pulse" 
+                     title="Following • New replies">
+                    notifications_active
+                  </i>
+                <% else %>
+                  <i class="material-icons text-gray-400 mr-2 text-base" 
+                     title="Following • All caught up">
+                    notifications
+                  </i>
+                <% end %>
+              <% end %>
+              
+              <!-- Topic Title -->
+              <%= link_to topic.title, topic.path, class: 'hover:underline' %>
+              
+              <!-- Unread Badge -->
+              <% if !topic.read? %>
+                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                  NEW
+                </span>
+              <% end %>
+            </h3>
+            
+            <!-- Categories -->
+            <% if topic.categories.any? %>
+              <div class="mt-1 flex flex-wrap gap-1">
+                <% topic.categories.each do |category| %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                    <%= category.name %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+            
+            <!-- Topic Meta Info -->
+            <div class="mt-1 flex items-center text-sm text-gray-500">
+              <span>Started by <%= user_link topic.user %></span>
+              <span class="mx-2">•</span>
+              <span><%= time_ago topic.created_at %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Posts Count -->
+      <div class="hidden sm:flex w-32 justify-center">
+        <div class="text-center">
+          <div class="text-2xl font-semibold text-gray-900"><%= topic.posts_count - 1 %></div>
+          <div class="text-xs text-gray-500"><%= 'reply'.pluralize(topic.posts_count - 1) %></div>
+        </div>
+      </div>
+      
+      <!-- Last Activity -->
+      <div class="hidden md:flex w-48 justify-end">
+        <div class="text-right text-sm">
+          <div class="text-gray-900 font-medium"><%= user_link topic.last_user %></div>
+          <div class="text-gray-500"><%= time_ago topic.last_post_at %></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Moderation State -->
+    <% if topic.blocked? && topic.can_moderate? %>
+      <div class="mt-3">
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-red-100 text-red-800">
+          <i class="material-icons text-base mr-1">block</i>
+          <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: topic.last_moderation_record %>
+        </span>
+      </div>
     <% end %>
-    <%= link_to topic.title, topic.path %>
-  </h1>
-
-  <% if topic.categories.any? %>
-    <ul class="thredded--topics--categories">
-      <%= render topic.categories %>
-    </ul>
-  <% end %>
-
-  <cite class="thredded--topics--updated-by">
-    last post
-    <%= time_ago topic.last_post_at %>
-    by
-    <%= user_link topic.last_user %>
-  </cite>
-
-  <% if topic.blocked? && topic.can_moderate? %>
-    <span class="thredded--topics--moderation-state thredded--alert thredded--alert-danger">
-      <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: topic.last_moderation_record %>
-    </span>
-  <% end %>
+  </div>
 <% end %>
 
 <% if local_assigns[:sticky_topics_divider] &&
     !topic_iteration.last? && topic.sticky? && !topics[topic_counter + 1].sticky? %>
-  <%= render 'thredded/topics/sticky_topics_divider' %>
+  <div class="px-6 py-2 bg-gray-100 border-y border-gray-200">
+    <div class="flex items-center justify-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <div class="flex-1 h-px bg-gray-300"></div>
+      <span class="px-3">Regular Topics</span>
+      <div class="flex-1 h-px bg-gray-300"></div>
+    </div>
+  </div>
 <% end %>

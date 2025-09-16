@@ -1,0 +1,101 @@
+<% content_for :thredded_page_title, messageboard.name %>
+<% content_for :thredded_page_id, 'thredded--topics-index' %>
+<% content_for :thredded_breadcrumbs, render('thredded/shared/breadcrumbs') %>
+
+<%= thredded_page do %>
+  <%= define_svg_icons('thredded/follow.svg', 'thredded/unfollow.svg') %>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <i class="material-icons text-blue-600 mr-3 text-3xl">forum</i>
+            <%= messageboard.name %>
+          </h1>
+          <% if messageboard.description.present? %>
+            <p class="text-gray-600 mt-2"><%= messageboard.description %></p>
+          <% end %>
+        </div>
+        
+        <% if messageboard.topics_count > 0 %>
+          <div class="flex items-center gap-4 text-sm text-gray-500">
+            <div class="flex items-center">
+              <i class="material-icons text-base mr-1">chat_bubble_outline</i>
+              <span><%= number_with_delimiter(messageboard.topics_count) %> <%= 'topic'.pluralize(messageboard.topics_count) %></span>
+            </div>
+            <div class="flex items-center">
+              <i class="material-icons text-base mr-1">forum</i>
+              <span><%= number_with_delimiter(messageboard.posts_count) %> <%= 'post'.pluralize(messageboard.posts_count) %></span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- New Topic Form -->
+    <% if @new_topic %>
+      <div class="mb-6">
+        <%= render 'thredded/topics/form',
+                   topic: @new_topic,
+                   css_class: 'bg-white rounded-lg shadow-sm border border-gray-200 p-6',
+                   placeholder: t('thredded.topics.form.title_placeholder_start') %>
+      </div>
+    <% end %>
+    
+    <!-- Topics List -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+         data-thredded-topics="true"
+         data-thredded-topic-posts-per-page="<%= Thredded.posts_per_page %>">
+      
+      <% if @topics.to_a.any? %>
+        <!-- Topics Header -->
+        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+          <div class="flex items-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <div class="flex-1">Topic</div>
+            <div class="hidden sm:block w-32 text-center">Replies</div>
+            <div class="hidden md:block w-48 text-right">Last Activity</div>
+          </div>
+        </div>
+        
+        <!-- Topics -->
+        <div class="divide-y divide-gray-200">
+          <%= render partial: 'thredded/topics/topic',
+                     collection: @topics,
+                     locals: {
+                         sticky_topics_divider: true,
+                         topics: @topics.to_a
+                     } %>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <i class="material-icons text-6xl text-gray-300 mb-4">forum</i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2">No topics yet</h3>
+          <p class="text-gray-500 mb-6">Be the first to start a discussion!</p>
+          <% if @new_topic %>
+            <button type="button" 
+                    onclick="document.querySelector('#new_topic input[name=\"topic[title]\"]').focus();"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+              <i class="material-icons mr-2 text-lg">add</i>
+              Start a New Topic
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Pagination -->
+    <% if @topics.respond_to?(:total_pages) && @topics.total_pages > 1 %>
+      <div class="mt-6">
+        <%= paginate @topics, theme: 'tailwind' %>
+      </div>
+    <% end %>
+    
+    <!-- Messageboard Actions -->
+    <div class="mt-8">
+      <%= render 'thredded/messageboards/messageboard_actions', messageboard: messageboard %>
+    </div>
+  </div>
+<% end %>

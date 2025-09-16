@@ -1,0 +1,160 @@
+<div x-data="{
+  expanded: false,
+  hasContent: false,
+  showPreview: false,
+  titleValue: '',
+  contentValue: '',
+  previewInitialized: false,
+  toggleExpand() {
+    if (!this.expanded) {
+      this.expanded = true;
+      this.$nextTick(() => {
+        this.$refs.titleInput.focus();
+      });
+    }
+  },
+  collapse() {
+    if (!this.hasContent) {
+      this.expanded = false;
+      this.showPreview = false;
+    }
+  },
+  checkContent() {
+    this.hasContent = (this.titleValue.trim() !== '' || this.contentValue.trim() !== '');
+  },
+  togglePreview() {
+    this.showPreview = !this.showPreview;
+    if (this.showPreview && !this.previewInitialized) {
+      this.$nextTick(() => {
+        const form = this.$refs.topicForm;
+        const textarea = form.querySelector('textarea#topic_content');
+        if (window.ThreddedPreviewArea && textarea) {
+          new window.ThreddedPreviewArea(form, textarea);
+          this.previewInitialized = true;
+          textarea.dispatchEvent(new Event('input'));
+        }
+      });
+    } else if (this.showPreview && this.previewInitialized) {
+      this.$nextTick(() => {
+        const textarea = this.$refs.topicForm.querySelector('textarea#topic_content');
+        if (textarea) {
+          textarea.dispatchEvent(new Event('input'));
+        }
+      });
+    }
+  }
+}" 
+x-on:click.away="collapse()"
+x-on:keydown.escape.window="collapse()"
+class="thredded--new-topic-form-wrapper">
+
+  <!-- Collapsed State -->
+  <div x-show="!expanded" 
+       x-transition:enter="form-expand-enter form-expand-enter-active"
+       x-transition:leave="form-expand-leave form-expand-leave-active"
+       class="new-topic-collapsed">
+    <div @click="toggleExpand()" class="collapsed-input" tabindex="0">
+      <span class="collapsed-placeholder">Start a new discussion...</span>
+    </div>
+  </div>
+
+  <!-- Expanded State -->
+  <div x-show="expanded" 
+       x-cloak
+       x-transition:enter="form-expand-enter form-expand-enter-active"
+       x-transition:leave="form-expand-leave form-expand-leave-active"
+       class="new-topic-expanded">
+    
+    <div class="form-header">
+      <div class="form-title">
+        <i class="material-icons">edit</i>
+        New Discussion
+      </div>
+    </div>
+
+    <%= form_for topic,
+                 url: topic.submit_path,
+                 html: {
+                     class: "thredded--form",
+                     'x-ref' => 'topicForm',
+                     'data-thredded-topic-form' => true,
+                     'data-autocomplete-url' => autocomplete_users_path,
+                     'data-autocomplete-min-length' => Thredded.autocomplete_min_length,
+                     'data-thredded-submit-hotkey' => true,
+                 } do |form| %>
+      <%= hidden_field_tag("next_page", params[:next_page]) %>
+
+      <div class="form-content">
+        <ul class="thredded--form-list">
+          <li class="title">
+            <%= form.label :title, t('thredded.topics.form.title_label') %>
+            <%= form.text_field :title, 
+                placeholder: placeholder, 
+                required: true, 
+                autocomplete: 'off',
+                'x-ref': 'titleInput',
+                'x-model': 'titleValue',
+                '@input': 'checkContent()' %>
+            <%= render 'thredded/shared/field_errors', messages: form.object.errors[:title] %>
+          </li>
+
+          <li>
+            <%= form.label :content, t('thredded.topics.form.content_label') %>
+            <%= form.text_area :content, 
+                rows: 5, 
+                required: true,
+                placeholder: "Share your thoughts...",
+                'x-model': 'contentValue',
+                '@input': 'checkContent()' %>
+            <%= render 'thredded/shared/field_errors', messages: form.object.errors[:content] %>
+          </li>
+
+          <% if form.object.category_options.any? %>
+            <li class="category">
+              <%= form.label :category_ids, "Categories (optional)" %>
+              <%= form.select :category_ids,
+                              form.object.category_options,
+                              {},
+                              { multiple: true, 'data-placeholder' => t('thredded.topics.form.categories_placeholder') } %>
+            </li>
+          <% end %>
+
+          <!-- Preview Area -->
+          <li x-show="showPreview" x-cloak>
+            <div class="thredded--preview-area" 
+                 data-thredded-preview-area 
+                 data-thredded-preview-url="<%= topic.preview_path %>">
+              <div class="thredded--preview-area--post thredded--post--content" 
+                   data-thredded-preview-area-post></div>
+            </div>
+          </li>
+
+          <%= render 'thredded/topics/topic_form_admin_options', form: form if defined?(topic_form_admin_options) %>
+        </ul>
+      </div>
+
+      <div class="form-actions">
+        <div class="left-actions">
+          <button type="button" 
+                  @click="togglePreview()"
+                  :class="{ 'active': showPreview }"
+                  class="btn-preview">
+            <i class="material-icons">visibility</i>
+            <span x-text="showPreview ? 'Hide Preview' : 'Preview'"></span>
+          </button>
+        </div>
+        
+        <div class="right-actions">
+          <button type="button" 
+                  @click="expanded = false; titleValue = ''; contentValue = ''; hasContent = false; showPreview = false; previewInitialized = false"
+                  class="btn-cancel">
+            Cancel
+          </button>
+          <%= form.submit t('thredded.topics.form.create_btn'), 
+              class: 'thredded--form--submit',
+              ':disabled': '!hasContent' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

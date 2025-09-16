@@ -1,0 +1,75 @@
+<% content_for :thredded_page_title, t('thredded.nav.private_topics') %>
+<% content_for :thredded_page_id, 'thredded--private-topics-index' %>
+<% content_for :thredded_breadcrumbs, render('thredded/private_topics/breadcrumbs') %>
+
+<%= thredded_page do %>
+  <div class="thredded--private-topics">
+    <!-- Page Header -->
+    <div class="private-messages-header">
+      <div class="header-content">
+        <h1>
+          <i class="material-icons">mail</i>
+          Private Messages
+        </h1>
+        
+        <div class="header-actions">
+          <a href="<%= new_private_topic_path %>" class="btn-compose">
+            <i class="material-icons">edit</i>
+            Compose
+          </a>
+        </div>
+      </div>
+      
+      <% if @private_topics.to_a.any? %>
+        <div class="inbox-stats">
+          <div class="stat">
+            <i class="material-icons">inbox</i>
+            <span><strong><%= @private_topics.to_a.count %></strong> conversations</span>
+          </div>
+          <% unread_count = unread_private_topics_count %>
+          <% if unread_count > 0 %>
+            <div class="stat">
+              <i class="material-icons">mark_email_unread</i>
+              <span><strong><%= unread_count %></strong> unread</span>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Messages List or Empty State -->
+    <% if @private_topics.to_a.empty? %>
+      <%= render 'thredded/private_topics/no_private_topics' %>
+    <% else %>
+      <div class="messages-list">
+        <%= content_tag :section,
+                        'data-thredded-topics' => 'private',
+                        'data-thredded-topic-posts-per-page' => Thredded.posts_per_page do %>
+          
+          <% if @new_private_topic %>
+            <%= render 'thredded/private_topics/form',
+                       private_topic: @new_private_topic,
+                       css_class: 'thredded--is-compact',
+                       placeholder: t('thredded.private_topics.form.title_placeholder_start') %>
+          <% end %>
+          
+          <%= render @private_topics %>
+        <% end %>
+      </div>
+      
+      <% unless unread_private_topics_count.zero? %>
+        <%= link_to mark_all_private_topics_read_path,
+                    class: 'thredded--button-wide',
+                    method: :put do %>
+          <i class="material-icons mr-2">done_all</i>
+          <%= t('thredded.nav.mark_all_read') %>
+        <% end %>
+      <% end %>
+    <% end %>
+    
+    <!-- Pagination -->
+    <footer class="thredded--pagination-bottom">
+      <%= paginate @private_topics %>
+    </footer>
+  </div>
+<% end %>

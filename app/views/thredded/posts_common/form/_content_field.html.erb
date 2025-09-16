@@ -1,13 +1,22 @@
-<li>
-  <%= form.label :content, content_label %>
+<div>
+  <%= form.label :content, content_label, class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" %>
   <%= view_hooks.post_form.content_text_area.render self, form: form, content_label: content_label do %>
-      <%= render 'thredded/posts_common/form/before_content', form: form %>
-      <%= form.text_area :content, {rows: 5, required: true, autofocus: !!params[:autofocus_new_post_content], class: 'js-can-mention-pages'} %>
-      <%= render 'thredded/posts_common/form/after_content', form: form %>
+    <%= render 'thredded/posts_common/form/before_content', form: form %>
+    <%= form.text_area :content, {
+      rows: 5, 
+      required: true, 
+      autofocus: !!params[:autofocus_new_post_content],
+      class: "js-can-mention-pages shadow-sm focus:ring-blue-500 focus:border-blue-500 mt-1 block w-full sm:text-sm border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md p-3 resize-vertical",
+      placeholder: "Write your message here..."
+    } %>
+    <%= render 'thredded/posts_common/form/after_content', form: form %>
   <% end %>
-  <div>
-    <%= link_to 'https://www.markdownguide.org/basic-syntax/', target: '_blank' do %>
-      <span class="hoverable badge new blue white-text" data-badge-caption="formatting help"></span>
+  <div class="mt-2">
+    <%= link_to 'https://www.markdownguide.org/basic-syntax/', 
+                target: '_blank',
+                class: 'inline-flex items-center text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' do %>
+      <i class="material-icons text-sm mr-1">help_outline</i>
+      Markdown formatting help
     <% end %>
   </div>
-</li>
+</div>
