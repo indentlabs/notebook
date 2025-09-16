@@ -303,7 +303,7 @@
   <% end %>
 
   <!-- forum navigation & breadcrumbs -->
-  <nav class="thredded-nav bg-white border-b border-gray-200 flex" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %>>
+  <nav class="thredded-nav bg-white border-b border-gray-200 flex <%= user_signed_in? ? 'lg:ml-56' : '' %>" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64': showSidebar, 'ml-0': !showSidebar }"<% end %>>
     <ol role="list" class="max-w-screen-xl w-full mx-auto flex space-x-4 px-4 py-2">
       <%= render('thredded/redesigned/breadcrumbs') %>
     </ol>
@@ -316,11 +316,11 @@
   </nav>
 
   <!-- main content -->
-  <main <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
+  <main class="<%= user_signed_in? ? 'lg:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64': showSidebar, 'ml-0': !showSidebar }"<% end %>>
     <%= yield %>
   </main>
 
-  <footer <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64 lg:ml-56': showSidebar }"<% end %> class="transition-all duration-300">
+  <footer class="<%= user_signed_in? ? 'lg:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-64': showSidebar, 'ml-0': !showSidebar }"<% end %>>
     <div class="max-w-7xl mx-auto pt-24 px-4 sm:px-6 md:flex md:items-center md:justify-between lg:px-8">
       <div class="flex justify-center space-x-6 md:order-2">
         <%= link_to 'https://www.facebook.com/notebookai/', class: 'text-gray-400 hover:text-gray-500' do %>
