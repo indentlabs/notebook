@@ -545,6 +545,50 @@
     </div>
   <% end %>
   
+  <!-- Trending Conversations -->
+  <% if @most_recent_threads && @most_recent_threads.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="material-icons mr-3 text-gray-600 text-3xl">forum</i>
+          Trending Conversations
+        </h2>
+        <%= link_to thredded.messageboards_path, class: "text-xs text-blue-600 hover:text-blue-700 font-medium" do %>
+          View all →
+        <% end %>
+      </div>
+      
+      <!-- Ultra Compact Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <% @most_recent_threads.first(8).each do |thread| %>
+          <%= link_to thredded.messageboard_topic_path(thread.messageboard, thread), 
+              class: "group relative overflow-hidden bg-white hover:bg-gray-50 rounded-lg p-3 transition-all duration-200 hover:shadow-md border border-gray-200 hover:border-gray-300",
+              data: { turbo: false } do %>
+            
+            <!-- Title -->
+            <h4 class="text-sm font-medium text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+              <%= thread.title %>
+            </h4>
+            
+            <!-- Stats -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2 text-xs text-gray-500">
+                <span class="flex items-center">
+                  <i class="material-icons text-xs mr-0.5">chat_bubble_outline</i>
+                  <span class="font-medium"><%= thread.posts.count %></span>
+                </span>
+                <span class="text-gray-400">•</span>
+                <span>
+                  <%= time_ago_in_words(thread.updated_at).gsub('about ', '').gsub('less than a ', '1').gsub(' ago', '') %>
+                </span>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+  
 </div>
 
 <style>
@@ -609,6 +653,29 @@
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Forum Cards - Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trending-card {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Glass morphism enhancements */
+.backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 </style>
 
@@ -1001,6 +1068,39 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(() => {
         ripple.remove();
       }, 600);
+    });
+  }
+  
+  // Forum Ticker Enhancement
+  const ticker = document.getElementById('forum-ticker');
+  if (ticker) {
+    // Calculate the actual width of content for seamless looping
+    const tickerItems = ticker.querySelectorAll('.ticker-item');
+    let totalWidth = 0;
+    tickerItems.forEach(item => {
+      totalWidth += item.offsetWidth + 24; // 24px is the space-x-6 gap
+    });
+    
+    // Adjust animation duration based on content width
+    // Slower for more content, faster for less
+    const baseSpeed = 30; // pixels per second
+    const duration = totalWidth / baseSpeed;
+    ticker.style.animationDuration = `${duration}s`;
+    
+    // Pause animation on hover for better UX
+    ticker.addEventListener('mouseenter', () => {
+      ticker.style.animationPlayState = 'paused';
+    });
+    
+    ticker.addEventListener('mouseleave', () => {
+      ticker.style.animationPlayState = 'running';
+    });
+    
+    // Add smooth restart when animation ends
+    ticker.addEventListener('animationend', () => {
+      ticker.style.animation = 'none';
+      ticker.offsetHeight; // Trigger reflow
+      ticker.style.animation = null;
     });
   }
 });

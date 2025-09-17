@@ -36,7 +36,7 @@ class MainController < ApplicationController
                                       .order('id DESC')
                                       .limit(300)
                                       .shuffle
-                                      .first(3)
+                                      .first(8)  # Increased from 3 to 8 for the ticker
     @most_recent_threads = Thredded::Topic.where(id: most_recent_posts.pluck(:postable_id))
                                           .where(moderation_state: "approved")
                                           .includes(:posts, :messageboard)
