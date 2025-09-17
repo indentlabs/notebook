@@ -481,9 +481,9 @@
   <% if @most_edited_pages && @most_edited_pages.any? %>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-8">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-            <i class="material-icons mr-3 text-gray-600 text-3xl">library_books</i>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+            <i class="material-icons mr-2 text-gray-500 text-lg">library_books</i>
             Most-Edited Pages
           </h2>
         </div>
@@ -547,10 +547,10 @@
   
   <!-- Trending Conversations -->
   <% if @most_recent_threads && @most_recent_threads.any? %>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-8">
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-          <i class="material-icons mr-3 text-gray-600 text-3xl">forum</i>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800 flex items-center">
+          <i class="material-icons mr-2 text-gray-500 text-lg">forum</i>
           Trending Conversations
         </h2>
         <%= link_to thredded.messageboards_path, class: "text-xs text-blue-600 hover:text-blue-700 font-medium" do %>
@@ -558,30 +558,21 @@
         <% end %>
       </div>
       
-      <!-- Ultra Compact Grid -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <% @most_recent_threads.first(8).each do |thread| %>
+      <!-- Single Row Grid -->
+      <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <% @most_recent_threads.first(6).each do |thread| %>
           <%= link_to thredded.messageboard_topic_path(thread.messageboard, thread), 
-              class: "group relative overflow-hidden bg-white hover:bg-gray-50 rounded-lg p-3 transition-all duration-200 hover:shadow-md border border-gray-200 hover:border-gray-300",
+              class: "group bg-white hover:bg-gray-50 rounded-md border border-gray-200 hover:border-gray-400 p-2.5 transition-all duration-150",
               data: { turbo: false } do %>
             
             <!-- Title -->
-            <h4 class="text-sm font-medium text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+            <h4 class="text-sm text-gray-700 group-hover:text-blue-600 line-clamp-2 mb-1.5 leading-tight">
               <%= thread.title %>
             </h4>
             
-            <!-- Stats -->
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2 text-xs text-gray-500">
-                <span class="flex items-center">
-                  <i class="material-icons text-xs mr-0.5">chat_bubble_outline</i>
-                  <span class="font-medium"><%= thread.posts.count %></span>
-                </span>
-                <span class="text-gray-400">•</span>
-                <span>
-                  <%= time_ago_in_words(thread.updated_at).gsub('about ', '').gsub('less than a ', '1').gsub(' ago', '') %>
-                </span>
-              </div>
+            <!-- Just reply count -->
+            <div class="text-xs text-gray-500">
+              <%= thread.posts.count %> <%= thread.posts.count == 1 ? 'reply' : 'replies' %>
             </div>
           <% end %>
         <% end %>
