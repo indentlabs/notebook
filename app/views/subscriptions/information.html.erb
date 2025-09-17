@@ -1,7 +1,44 @@
+<!-- Page Header -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 mb-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+      <div class="mb-4 lg:mb-0">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Payment Information</h1>
+        <p class="text-gray-600">
+          <% if @selected_plan.nil? %>
+            Add or update your payment method for future subscriptions.
+          <% else %>
+            Complete your subscription to <%= @selected_plan.name %> by adding payment information.
+          <% end %>
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= link_to subscription_path, class: 'inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' do %>
+          <i class="material-icons text-sm mr-2">arrow_back</i>
+          Back to Subscription
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
 <% if @selected_plan.nil? %>
   <% cents_due_now = 0 %>
-  <div class="card light-blue white-text" style="padding: 20px;">
-    Saving a payment method allows you to freely switch between Notebook.ai subscription plans with ease. Your information is stored securely in our payment processing provider, Stripe, and will not be shared with any other parties.
+  <!-- Information Card for General Payment Method -->
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-8 mb-8 shadow-sm">
+    <div class="flex items-start">
+      <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+        <i class="material-icons text-blue-700">info</i>
+      </div>
+      <div>
+        <h3 class="text-lg font-bold text-blue-900 mb-3">Secure Payment Processing</h3>
+        <p class="text-sm text-blue-800 leading-relaxed">
+          Adding a payment method allows you to seamlessly upgrade or change subscription plans. Your payment information is securely processed and tokenized by Stripe, our trusted payment partner, and is never shared with third parties.
+        </p>
+      </div>
+    </div>
   </div>
 <% else %>
   <%
@@ -20,75 +57,168 @@
       bill_frequency = 'year'
     end
   %>
-
-  <div class="card light-blue lighten-3">
-    <div class="card-content">
-      <p class="black-text">
-        You are signing up for Notebook.ai's <strong><%= @selected_plan.name %></strong> plan.
-
-        You will be charged <%= number_to_currency(cents_due_now / 100.0) %> USD now
-        for <%= service_length %> of membership, renewing every <%= bill_frequency %>.
-      </p>
-      <p class="black-text">
-        In order to get started, we need to collect your payment information below.
-      </p>
+  
+  <!-- Subscription Summary Card -->
+  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-8 mb-8 shadow-lg">
+    <div class="flex items-start">
+      <div class="w-16 h-16 bg-gradient-to-br from-blue-200 to-blue-300 rounded-2xl flex items-center justify-center mr-6 flex-shrink-0 shadow-sm">
+        <i class="material-icons text-blue-700 text-xl">grade</i>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-2xl font-bold text-gray-900 mb-4">Upgrading to <%= @selected_plan.name %> Premium</h3>
+        <div class="bg-white rounded-xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center justify-between py-2">
+            <span class="text-sm font-medium text-gray-600">Plan Selected:</span>
+            <span class="text-sm font-bold text-gray-900"><%= @selected_plan.name %> Premium</span>
+          </div>
+          <div class="flex items-center justify-between py-2 border-t border-gray-100">
+            <span class="text-sm font-medium text-gray-600">Billing Cycle:</span>
+            <span class="text-sm font-bold text-gray-900">Every <%= bill_frequency %></span>
+          </div>
+          <div class="flex items-center justify-between py-3 border-t border-gray-200">
+            <span class="text-base font-medium text-gray-900">Amount Due Today:</span>
+            <span class="text-2xl font-bold text-blue-600"><%= number_to_currency(cents_due_now / 100.0) %></span>
+          </div>
+        </div>
+        <div class="mt-6 p-4 bg-blue-100 rounded-lg">
+          <p class="text-sm text-blue-800 leading-relaxed">
+            <i class="material-icons text-blue-600 text-sm mr-2">info</i>
+            Your subscription will automatically renew every <%= bill_frequency %> unless cancelled. You can cancel anytime from your subscription settings with no cancellation fees.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 <% end %>
 
-<script type="text/javascript">
-  Stripe.setPublishableKey('<%= Rails.application.config.stripe_publishable_key %>');
-</script>
-
-<div class="card" style="padding: 20px 10px;">
-  <div class="card-content">
-    <form action="<%# Same URL, same GET params %>" method="POST" id="payment-form">
+<!-- Payment Form -->
+<div class="bg-white shadow-lg rounded-2xl overflow-hidden border-2 border-gray-100">
+  <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-8 py-6 border-b border-gray-200">
+    <div class="flex items-center">
+      <div class="w-12 h-12 bg-gradient-to-br from-blue-200 to-blue-300 rounded-xl flex items-center justify-center mr-4 shadow-sm">
+        <i class="material-icons text-blue-700">credit_card</i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-gray-900">Payment Details</h2>
+        <p class="text-sm text-gray-600">Enter your payment information securely</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="p-8">
+    <!-- Security Notice -->
+    <div class="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 mb-8">
+      <div class="flex items-start">
+        <div class="w-10 h-10 bg-gradient-to-br from-green-100 to-green-200 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+          <i class="material-icons text-green-700">security</i>
+        </div>
+        <div>
+          <div class="flex items-center mb-2">
+            <h3 class="text-sm font-bold text-green-900 mr-3">Secure Checkout Powered by Stripe</h3>
+            <div class="flex items-center space-x-2">
+              <div class="px-2 py-1 bg-green-600 text-white text-xs font-bold rounded">SSL</div>
+              <div class="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded">256-BIT</div>
+            </div>
+          </div>
+          <p class="text-sm text-green-800 leading-relaxed">
+            Your payment information is encrypted and tokenized by Stripe. We never see or store your full card details on our servers.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    
+    <form action="<%# Same URL, same GET params %>" method="POST" id="payment-form" class="space-y-8">
       <%= hidden_field_tag 'authenticity_token', form_authenticity_token %>
-      <div class="row">
-        <div class="col s12">
-          <label>
-            <span>Card Number</span>
-            <input type="text" size="20" data-stripe="number">
+      
+      <!-- Card Number -->
+      <div class="space-y-2">
+        <label class="block text-sm font-bold text-gray-800 mb-3">
+          <i class="material-icons text-blue-600 text-sm mr-2">credit_card</i>
+          Card Number
+        </label>
+        <input type="text" 
+               data-stripe="number" 
+               placeholder="1234 5678 9012 3456"
+               class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono bg-gray-50 hover:bg-white transition-colors duration-200" 
+               autocomplete="cc-number">
+      </div>
+
+      <!-- Expiration and CVC -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="block text-sm font-bold text-gray-800 mb-3">
+            <i class="material-icons text-blue-600 text-sm mr-2">date_range</i>
+            Expiration Date
           </label>
+          <input type="text" 
+                 data-stripe="exp" 
+                 placeholder="MM/YY"
+                 maxlength="5"
+                 class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono bg-gray-50 hover:bg-white transition-colors duration-200" 
+                 autocomplete="cc-exp">
+        </div>
+        <div class="space-y-2">
+          <label class="block text-sm font-bold text-gray-800 mb-3">
+            <i class="material-icons text-blue-600 text-sm mr-2">security</i>
+            CVC
+            <span class="text-xs text-gray-500 font-normal ml-1">(3-4 digits on back)</span>
+          </label>
+          <input type="text" 
+                 data-stripe="cvc" 
+                 placeholder="123"
+                 maxlength="4"
+                 class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono bg-gray-50 hover:bg-white transition-colors duration-200" 
+                 autocomplete="cc-csc">
         </div>
       </div>
 
-      <div class="row">
-        <div class="col s4">
-          <label>
-            <span>Expiration month (MM)</span>
-            <input type="text" size="2" data-stripe="exp_month">
-          </label>
-        </div>
-        <div class="col s4">
-          <label>
-            <span>Expiration year (YY)</span>
-            <input type="text" size="2" data-stripe="exp_year">
-          </label>
-        </div>
-        <div class="col s4">
-          <label>
-            <span>CVC<%#<span>(?)</span>%></span>
-            <input type="text" size="4" data-stripe="cvc">
-          </label>
+      <!-- Billing Postal Code -->
+      <div class="space-y-2">
+        <label class="block text-sm font-bold text-gray-800 mb-3">
+          <i class="material-icons text-blue-600 text-sm mr-2">location_on</i>
+          Billing Postal Code
+        </label>
+        <div class="max-w-md">
+          <input type="text" 
+                 data-stripe="address_zip" 
+                 placeholder="12345"
+                 class="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg bg-gray-50 hover:bg-white transition-colors duration-200" 
+                 autocomplete="postal-code">
         </div>
       </div>
 
-      <div class="row">
-        <div class="col s12">
-          <label>
-            <span>Billing Postal Code</span>
-            <input type="text" size="6" data-stripe="address_zip">
-          </label>
+      <!-- Error Display -->
+      <div class="payment-errors hidden bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-200 rounded-xl p-6">
+        <div class="flex items-start">
+          <div class="w-8 h-8 bg-gradient-to-br from-red-100 to-red-200 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+            <i class="material-icons text-red-700 text-sm">error</i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-red-900 mb-1">Payment Error</h4>
+            <p class="text-sm text-red-800" id="error-message"></p>
+          </div>
         </div>
       </div>
 
-      <div class="payment-errors red white-text center" style="margin-bottom: 10px;"></div>
-
-      <div class="center">
+      <div class="pt-8 border-t-2 border-gray-100">
         <% if @selected_plan.nil? %>
-          <input type="submit" class="btn btn-primary blue" value="Save payment info">
-
+          <!-- Save Payment Method Button -->
+          <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+              <div class="text-sm text-gray-600">
+                <div class="flex items-center mb-2">
+                  <i class="material-icons text-blue-600 text-sm mr-2">shield</i>
+                  <span class="font-medium">Secure Storage</span>
+                </div>
+                <p>Your payment method will be securely tokenized and saved for seamless future upgrades.</p>
+              </div>
+              <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 border border-transparent rounded-xl text-lg font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-xl hover:shadow-2xl transition-all duration-200 transform hover:scale-105" id="submit-button">
+                <i class="material-icons text-lg mr-3">save</i>
+                <span id="button-text">Save Payment Method</span>
+              </button>
+            </div>
+          </div>
         <% else %>
           <%
             # Get subscriptions with safe navigation and use modern price.id instead of plan.id
@@ -97,45 +227,244 @@
               sub.items&.data&.any? { |item| item.price&.id == @selected_plan.stripe_plan_id }
             }.first
           %>
-          <% if active_plan_on_stripe %>
-            <p class="center">
-              Since you've already paid for a <strong><%= @selected_plan.name %></strong> plan
-              until <%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d') %>, you will not be charged again
-              for this plan until it renews on that date.
-            </p>
-          <% elsif @selected_plan.stripe_plan_id == 'premium' %>
-            <p class="center">
-              You will be charged <%= number_to_currency(@selected_plan.monthly_cents / 100) %> USD immediately, renewing
-              monthly.
-            </p>
-            <p class="center">
-              Of course, you can cancel at any time.
-            </p>
-          <% elsif @selected_plan.stripe_plan_id == 'premium-trio' %>
-            <p class="center">
-              You will be charged <%= number_to_currency(@selected_plan.monthly_cents * 3 / 100) %> USD immediately, renewing every three months.
-            </p>
-            <p class="center">
-              Of course, you can cancel at any time.
-            </p>
-          <% elsif @selected_plan.stripe_plan_id == 'premium-annual' %>
-            <p class="center">
-              You will be charged <%= number_to_currency(@selected_plan.monthly_cents * 12 / 100) %> USD immediately, renewing
-              annually.
-            </p>
-            <p class="center">
-              Of course, you can cancel at any time.
-            </p>
-          <% end %>
-          <br />
-
-          <input type="submit" class="btn btn-primary blue" value="Submit payment">
+          
+          <!-- Subscription Confirmation -->
+          <div class="space-y-4">
+            <% if active_plan_on_stripe %>
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-blue-600">info</i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-blue-800">
+                      Since you've already paid for a <strong><%= @selected_plan.name %></strong> plan until 
+                      <strong><%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d, %Y') %></strong>, 
+                      you will not be charged again until your next renewal date.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Billing Details</h4>
+                <div class="space-y-1 text-sm text-gray-600">
+                  <% if @selected_plan.stripe_plan_id == 'premium' %>
+                    <p>• You will be charged <strong><%= number_to_currency(@selected_plan.monthly_cents / 100) %> USD</strong> immediately</p>
+                    <p>• Your subscription will renew <strong>monthly</strong></p>
+                  <% elsif @selected_plan.stripe_plan_id == 'premium-trio' %>
+                    <p>• You will be charged <strong><%= number_to_currency(@selected_plan.monthly_cents * 3 / 100) %> USD</strong> immediately</p>
+                    <p>• Your subscription will renew every <strong>three months</strong></p>
+                  <% elsif @selected_plan.stripe_plan_id == 'premium-annual' %>
+                    <p>• You will be charged <strong><%= number_to_currency(@selected_plan.monthly_cents * 12 / 100) %> USD</strong> immediately</p>
+                    <p>• Your subscription will renew <strong>annually</strong></p>
+                  <% end %>
+                  <p>• You can cancel anytime from your subscription settings</p>
+                </div>
+              </div>
+            <% end %>
+            
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+              <div class="flex flex-col sm:flex-row justify-between items-center gap-6">
+                <div class="text-sm text-gray-600">
+                  <div class="flex items-center mb-2">
+                    <i class="material-icons text-blue-600 text-sm mr-2">gavel</i>
+                    <span class="font-medium">Terms Agreement</span>
+                  </div>
+                  <p>By completing your subscription, you agree to our terms of service and cancellation policy.</p>
+                </div>
+                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-10 py-5 border border-transparent rounded-xl text-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-2xl hover:shadow-3xl transition-all duration-200 transform hover:scale-105" id="submit-button">
+                  <i class="material-icons text-xl mr-3">payment</i>
+                  <span id="button-text">Complete Subscription</span>
+                </button>
+              </div>
+            </div>
+          </div>
         <% end %>
       </div>
     </form>
   </div>
 </div>
 
-<div class="center help-text">
-  All prices are in US Dollars. Making payments using another currency will automatically exchange into US Dollars at the current exchange rates.
+<!-- Footer Information -->
+<div class="text-center text-sm text-gray-500 mt-12 space-y-3 pb-8">
+  <div class="max-w-2xl mx-auto space-y-3">
+    <p class="flex items-center justify-center">
+      <i class="material-icons text-gray-400 text-sm mr-2">public</i>
+      All prices are in US Dollars. International payments are automatically converted at current exchange rates.
+    </p>
+    <p class="flex items-center justify-center">
+      <i class="material-icons text-gray-400 text-sm mr-2">help</i>
+      Questions about billing? Visit our <%= link_to 'FAQ', billing_faq_path, class: 'text-blue-600 hover:text-blue-800 underline font-medium' %> or contact support.
+    </p>
+  </div>
 </div>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Stripe with publishable key
+    const publishableKey = '<%= Rails.application.config.stripe_publishable_key %>';
+    
+    if (typeof Stripe === 'undefined') {
+      console.error('Stripe library not loaded. Make sure the Stripe script is included.');
+      showError('Payment system not available. Please refresh the page and try again.');
+      return;
+    }
+    
+    if (!publishableKey || publishableKey.trim() === '') {
+      console.error('Stripe publishable key not configured');
+      showError('Payment system not configured. Please contact support.');
+      return;
+    }
+    
+    try {
+      Stripe.setPublishableKey(publishableKey);
+    } catch (e) {
+      console.error('Error setting Stripe publishable key:', e);
+      showError('Payment system initialization failed. Please refresh and try again.');
+      return;
+    }
+    
+    const form = document.getElementById('payment-form');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const errorContainer = document.querySelector('.payment-errors');
+    const errorMessage = document.getElementById('error-message');
+    
+    function showError(message) {
+      if (errorMessage && errorContainer) {
+        errorMessage.textContent = message;
+        errorContainer.classList.remove('hidden');
+      } else {
+        alert(message);
+      }
+    }
+    
+    function hideError() {
+      if (errorContainer) {
+        errorContainer.classList.add('hidden');
+      }
+    }
+    
+    // Format card number input
+    const cardInput = form.querySelector('[data-stripe="number"]');
+    if (cardInput) {
+      cardInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/[^0-9]/gi, '');
+        let formattedInputValue = value.match(/.{1,4}/g)?.join(' ') || value;
+        if (value.length <= 16) {
+          e.target.value = formattedInputValue;
+        }
+      });
+    }
+    
+    // Format expiration date input
+    const expInput = form.querySelector('[data-stripe="exp"]');
+    if (expInput) {
+      expInput.addEventListener('input', function(e) {
+        let value = e.target.value;
+        
+        // Only allow digits and slash, remove other characters
+        let cleaned = value.replace(/[^\d\/]/g, '');
+        
+        // Find slash position
+        let slashIndex = cleaned.indexOf('/');
+        
+        if (slashIndex === -1) {
+          // No slash yet - just digits
+          let digits = cleaned.replace(/\D/g, '');
+          if (digits.length <= 2) {
+            e.target.value = digits;
+          } else {
+            // Auto-add slash after 2 digits: 123 becomes 12/3
+            e.target.value = digits.substring(0, 2) + '/' + digits.substring(2, 4);
+          }
+        } else {
+          // Slash exists - split around it
+          let beforeSlash = cleaned.substring(0, slashIndex).replace(/\D/g, '');
+          let afterSlash = cleaned.substring(slashIndex + 1).replace(/\D/g, '');
+          
+          // Limit parts: MM/YY format (max 2 digits each)
+          beforeSlash = beforeSlash.substring(0, 2);
+          afterSlash = afterSlash.substring(0, 2);
+          
+          // Rebuild the formatted value
+          if (beforeSlash === '') {
+            e.target.value = '';
+          } else {
+            e.target.value = beforeSlash + '/' + afterSlash;
+          }
+        }
+      });
+    }
+    
+    // Format CVC input
+    const cvcInput = form.querySelector('[data-stripe="cvc"]');
+    if (cvcInput) {
+      cvcInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      });
+    }
+    
+    function setLoading(loading) {
+      if (loading) {
+        submitButton.disabled = true;
+        submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+        buttonText.textContent = 'Processing...';
+      } else {
+        submitButton.disabled = false;
+        submitButton.classList.remove('opacity-75', 'cursor-not-allowed');
+        buttonText.textContent = '<%= @selected_plan.nil? ? "Save Payment Method" : "Complete Subscription" %>';
+      }
+    }
+    
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      hideError();
+      setLoading(true);
+      
+      // Handle MM/YY format for expiration
+      const expInput = form.querySelector('[data-stripe="exp"]');
+      if (expInput && expInput.value) {
+        const expParts = expInput.value.split('/');
+        if (expParts.length === 2) {
+          // Create temporary inputs for Stripe
+          const monthInput = document.createElement('input');
+          monthInput.setAttribute('data-stripe', 'exp_month');
+          monthInput.value = expParts[0];
+          monthInput.style.display = 'none';
+          form.appendChild(monthInput);
+          
+          const yearInput = document.createElement('input');
+          yearInput.setAttribute('data-stripe', 'exp_year');
+          yearInput.value = expParts[1];
+          yearInput.style.display = 'none';
+          form.appendChild(yearInput);
+          
+          // Remove the combined field temporarily
+          expInput.removeAttribute('data-stripe');
+        }
+      }
+
+      Stripe.card.createToken(form, function(status, response) {
+        console.log('Stripe response:', response);
+        if (response.error) {
+          console.error('Stripe error:', response.error);
+          showError(response.error.message);
+          setLoading(false);
+        } else {
+          console.log('Stripe token created successfully:', response.id);
+          const token = response.id;
+          const hiddenInput = document.createElement('input');
+          hiddenInput.setAttribute('type', 'hidden');
+          hiddenInput.setAttribute('name', 'stripeToken');
+          hiddenInput.setAttribute('value', token);
+          form.appendChild(hiddenInput);
+          form.submit();
+        }
+      });
+    });
+  });
+</script>

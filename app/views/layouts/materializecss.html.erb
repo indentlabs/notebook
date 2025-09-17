@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%= render 'layouts/common_head' %>
+</head>
+<body data-in-app="true"
+      class="<%= controller_name %> <%= action_name %> <%= 'has-fixed-sidenav' if user_signed_in? %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+>
+  <%= render 'layouts/sidenav' if user_signed_in? %>
+  <%= render 'layouts/recent_edits_sidenav' if user_signed_in? %>
+  <%= render 'layouts/navbar' %>
+
+  <main>
+    <%= yield :full_width_page_header %>
+    <%= yield :full_width_page_content %>
+    <div class="container<% if (user_signed_in? && current_user.fluid_preference) || request.env.fetch('REQUEST_PATH', '').start_with?('/forum/') || @full_width_page_override %>-fluid<% end %>">
+      <%= render 'cards/ui/alert' %>
+      <%= render 'cards/ui/notice' %>
+      <div class="row">
+        <div class="col s12">
+          <%= yield %>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
+  <%= render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
+
+  <script type="text/javascript">
+    <% if user_signed_in? %>
+      DISABLE_KEYBOARD_SHORTCUTS = <%= !current_user.keyboard_shortcuts_preference %>;
+    <% end %>
+
+    $(document).ready(function() {
+      <%= yield :javascript %>
+    });
+  </script>
+
+  <%= render partial: 'content/keyboard_controls_help_modal' %>
+  <%= render 'layouts/ganalytics' %>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!-- Secondary Sidebar - Tools and Navigation -->
+<div class="h-full overflow-y-auto">
+  <div class="p-6 space-y-6">
+    
+    <!-- Page Image Card -->
+    <% 
+      # Get the same preview image as the header
+      regular_images = raw_content.image_uploads.ordered.to_a
+      unless user_signed_in? && raw_content.user_id == current_user.id
+        regular_images = regular_images.select { |img| img.privacy == 'public' }
+      end
+      basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered.to_a
+      preview_image = get_preview_image(regular_images, basil_images)
+    %>
+    
+    <div class="pb-4 border-b border-gray-200">
+      <button @click="switchView('gallery')" 
+              class="block group w-full text-left" 
+              title="View full gallery">
+        <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100">
+          <% if preview_image.present? %>
+            <% image_type = preview_image[:type] %>
+            <% image_data = preview_image[:data] %>
+            
+            <% if image_type == 'image_upload' %>
+              <%= image_tag image_data.src.url, 
+                            class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                            alt: "#{content.name} preview" %>
+            <% elsif image_type == 'basil_commission' %>
+              <% if image_data.image.attached? %>
+                <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
+                              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                              alt: "#{content.name} preview" %>
+              <% else %>
+                <%= image_tag asset_path("content/card-headers/#{raw_content.class.name.downcase.pluralize}.jpg"), 
+                              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                              alt: "#{content.name} preview" %>
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
+                          class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200",
+                          alt: "#{content.name} preview" %>
+          <% end %>
+          
+          <!-- Overlay on hover -->
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full p-3">
+              <i class="material-icons text-gray-700 text-xl">photo_library</i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-3 text-center">
+          <p class="text-sm font-medium text-gray-900">View Gallery</p>
+          <p class="text-xs text-gray-500">Click to see all images</p>
+        </div>
+      </button>
+    </div>
+    
+    <!-- Tools -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
+        Tools
+      </h2>
+      
+      <div class="grid grid-cols-2 gap-2">
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">lightbulb</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Brainstorm</span>
+        <% end %>
+        
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">find_in_page</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Research</span>
+        <% end %>
+
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">visibility</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Visualize</span>
+        <% end %>
+        
+        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
+          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">analytics</i>
+          <span class="font-medium text-gray-700 group-hover:text-purple-700">Analyze</span>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Community -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
+        Community
+      </h2>
+      
+      <div class="space-y-2">
+        <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
+        <% if forum_url %>
+          <%= link_to forum_url, target: "_blank", class: "group flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors" do %>
+            <i class="material-icons text-base text-gray-400 group-hover:text-blue-500 mr-3">forum</i>
+            <div class="flex-1">
+              <div class="text-sm font-medium text-gray-900 group-hover:text-blue-700"><%= content.class_name.pluralize %> Forum</div>
+              <div class="text-xs text-gray-500">Discuss <%= content.class_name.pluralize.downcase %> with others</div>
+            </div>
+            <i class="material-icons text-xs text-gray-400 group-hover:text-blue-500">open_in_new</i>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Resources -->
+    <div class="pb-4 border-b border-gray-200">
+      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">school</i>
+        Resources
+      </h2>
+      
+      <div class="space-y-1">
+        <%= link_to "#", class: "text-sm text-gray-700 hover:text-blue-600 block hover:underline" do %>
+          Writing Guides
+        <% end %>
+        <%= link_to "#", class: "text-sm text-gray-700 hover:text-blue-600 block hover:underline" do %>
+          Research Guides
+        <% end %>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Custom styling for the secondary sidebar -->
+<style>
+.secondary-sidebar-item {
+  @apply flex items-center p-2 text-sm text-gray-600 rounded-md hover:bg-gray-100 transition-colors cursor-pointer;
+}
+
+.secondary-sidebar-item:hover {
+  @apply text-gray-900;
+}
+
+.secondary-sidebar-section {
+  @apply space-y-3;
+}
+
+.secondary-sidebar-header {
+  @apply text-sm font-semibold text-gray-900 flex items-center;
+}
+</style>

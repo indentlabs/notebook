@@ -3,7 +3,7 @@
 # TODO: we should probably spin off an Api::ContentController for #api_sort and anything else 
 #       api-wise we need
 class ContentController < ApplicationController
-  before_action :authenticate_user!, except: [:show, :changelog, :api_sort, :gallery] \
+  before_action :authenticate_user!, except: [:show, :changelog, :api_sort] \
     + Rails.application.config.content_types[:all_non_universe].map { |type| type.name.downcase.pluralize.to_sym }
 
   skip_before_action :cache_most_used_page_information, only: [
@@ -12,9 +12,9 @@ class ContentController < ApplicationController
 
   before_action :migrate_old_style_field_values, only: [:show, :edit]
 
-  before_action :cache_linkable_content_for_each_content_type, only: [:new, :edit, :index]
+  before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
-  before_action :set_attributes_content_type, only: [:attributes]
+  before_action :set_attributes_content_type, only: [:attributes, :export_template, :reset_template]
 
   before_action :set_navbar_color, except: [:api_sort]
   before_action :set_navbar_actions, except: [:deleted, :api_sort]
@@ -22,6 +22,7 @@ class ContentController < ApplicationController
 
   def index
     @content_type_class = content_type_from_controller(self.class)
+    @content_type_name  = @content_type_class.name
     pluralized_content_name = @content_type_class.name.downcase.pluralize
 
     @page_title = "My #{pluralized_content_name}"
@@ -35,13 +36,16 @@ class ContentController < ApplicationController
 
     @show_scope_notice = @universe_scope.present? && @content_type_class != Universe
 
-    # Filters
+    # For tags, we need all content IDs (not just paginated) to show all available tags
+    all_content_ids = @content.map(&:id)
+    
     @page_tags = PageTag.where(
       page_type: @content_type_class.name,
-      page_id:   @content.pluck(:id)
+      page_id:   all_content_ids
     ).order(:tag)
+    @filtered_page_tags = []
     if params.key?(:slug)
-      @filtered_page_tags = @page_tags.where(slug: params[:slug])
+      @filtered_page_tags = @page_tags.where(slug: params[:slug]).uniq(&:slug)
       @content.select! { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
     end
     @page_tags = @page_tags.uniq(&:tag)
@@ -50,35 +54,67 @@ class ContentController < ApplicationController
       @content.select!(&:favorite?)
     end
 
-    @content = @content.sort_by {|x| [x.favorite? ? 0 : 1, x.name] }
-
-    @questioned_content = @content.sample
-    @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
-
-    # Query for both regular and pinned images
-    image_uploads = ImageUpload.where(
-      content_type: @content_type_class.name,
-      content_id:   @content.pluck(:id)
-    )
+    # Sort content with favorites always first, then by selected sort option
+    sort_option = params[:sort] || 'updated_at'
+    sorted_content = case sort_option
+                     when 'alphabetical'
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.name.downcase] }
+                     when 'created_at'
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.created_at] }.reverse
+                     else # 'updated_at' or default
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.updated_at] }.reverse
+                     end
     
-    # Group by content but prioritize pinned images
-    @random_image_including_private_pool_cache = {}
-    image_uploads.group_by { |image| [image.content_type, image.content_id] }.each do |key, images|
-      # Check for pinned images first that have a valid src
-      pinned_image = images.find { |img| img.pinned }
-      if pinned_image && pinned_image.src_file_name.present?
-        @random_image_including_private_pool_cache[key] = [pinned_image]
-      else
-        # Use all valid images if no valid pinned image
-        @random_image_including_private_pool_cache[key] = images.select { |img| img.src_file_name.present? }
-      end
-    end
+    # Implement pagination manually since @content is an array
+    @total_content_count = sorted_content.size
+    page = params[:page] || 1
+    per_page = 50
+    @current_page = page.to_i
+    @total_pages = (@total_content_count.to_f / per_page).ceil
+    
+    # Calculate pagination slice
+    start_index = ((@current_page - 1) * per_page)
+    end_index = start_index + per_page - 1
+    @content = sorted_content[start_index..end_index] || []
+    @folders = current_user
+      .folders
+      .where(context: @content_type_name, parent_folder_id: nil)
+      .order('title ASC')
 
-    @saved_basil_commissions = BasilCommission.where(
-      entity_type: @content_type_class.name,
-      entity_id:   @content.pluck(:id)
-    ).where.not(saved_at: nil)
-    .group_by { |commission| [commission.entity_type, commission.entity_id] }
+    # Only load expensive features if we have content to show
+    if @content.any?
+      @questioned_content = @content.sample
+      @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
+
+      # Query for both regular and pinned images - only for current page content
+      current_page_content_ids = @content.map(&:id)
+      image_uploads = ImageUpload.where(
+        content_type: @content_type_class.name,
+        content_id:   current_page_content_ids
+      )
+      
+      # Group by content but prioritize pinned images
+      @random_image_including_private_pool_cache = {}
+      image_uploads.group_by { |image| [image.content_type, image.content_id] }.each do |key, images|
+        # Check for pinned images first that have a valid src
+        pinned_image = images.find { |img| img.pinned }
+        if pinned_image && pinned_image.src_file_name.present?
+          @random_image_including_private_pool_cache[key] = [pinned_image]
+        else
+          # Use all valid images if no valid pinned image
+          @random_image_including_private_pool_cache[key] = images.select { |img| img.src_file_name.present? }
+        end
+      end
+
+      @saved_basil_commissions = BasilCommission.where(
+        entity_type: @content_type_class.name,
+        entity_id:   current_page_content_ids
+      ).where.not(saved_at: nil)
+      .group_by { |commission| [commission.entity_type, commission.entity_id] }
+    else
+      @random_image_including_private_pool_cache = {}
+      @saved_basil_commissions = {}
+    end
 
     # Uh, do we ever actually make JSON requests to logged-in user pages?
     respond_to do |format|
@@ -103,6 +139,13 @@ class ContentController < ApplicationController
     @basil_images = BasilCommission.where(entity: @content)
                                    .where.not(saved_at: nil)
 
+    if @content.updatable_by?(current_user)
+      @suggested_page_tags = (
+        current_user.page_tags.where(page_type: content_type.name).pluck(:tag) +
+          PageTagService.suggested_tags_for(content_type.name)
+        ).uniq
+    end
+
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
@@ -111,6 +154,29 @@ class ContentController < ApplicationController
     else
       return redirect_to root_path, notice: "You don't have permission to view that content."
     end
+  end
+
+
+  def references
+    content_type = content_type_from_controller(self.class)
+    return redirect_to(root_path, notice: "That page doesn't exist!") unless valid_content_types.include?(content_type.name)
+
+    @content = content_type.find_by(id: params[:id])
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+
+    @serialized_content = ContentSerializer.new(@content)
+
+    analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
+    document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
+    @documents = Document.where(id: document_ids)
+    @references = @content.incoming_page_references.preload(:referencing_page)
+    @mentioning_attributes = Attribute.where(
+      attribute_field_id: @references.pluck(:attribute_field_id),
+      entity_id: @references.pluck(:referencing_page_id)
+    )
   end
 
   def new
@@ -335,6 +401,26 @@ class ContentController < ApplicationController
     @serialized_content = ContentSerializer.new(@content)
     return redirect_to(root_path, notice: "You don't have permission to view that content.") unless @content.updatable_by?(current_user || User.new)
 
+    # Generate changelog statistics and data
+    @stats = ChangelogStatsService.new(@content)
+    @change_intensity = @stats.change_intensity_by_week
+    
+    # Get paginated change events first, then group them
+    page = params[:page] || 1
+    per_page = 20 # 20 change events per page
+    
+    # Get the base query for change events (without the .last() limit)
+    change_events_query = ContentChangeEvent.where(
+      content_id: Attribute.where(
+        entity_type: @content.class.name,
+        entity_id: @content.id
+      ),
+      content_type: "Attribute"
+    ).includes(:user).order('created_at DESC')
+    
+    @paginated_events = change_events_query.paginate(page: page, per_page: per_page)
+    @grouped_changes = group_events_by_date(@paginated_events)
+
     if user_signed_in?
       @navbar_actions << {
         label: @serialized_content.name,
@@ -414,50 +500,57 @@ class ContentController < ApplicationController
 
     @dummy_model = @content_type_class.new
   end
-
-  def gallery
-    content_type = content_type_from_controller(self.class)
-    @content = content_type.find_by(id: params[:id])
-    return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
+  
+  def export_template
+    service = TemplateExportService.new(current_user, @content_type)
     
-    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
-    return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
-    
-    if (current_user || User.new).can_read?(@content)
-      # Serialize content for overview section
-      @serialized_content = ContentSerializer.new(@content)
-
-      # Get all images for this content with proper ordering
-      # Only show private images to the owner or contributors
-      is_owner_or_contributor = false
-      # Check if the user is the owner or a contributor
-      if current_user.present? && (@content.user == current_user || 
-         (@content.respond_to?(:universe_id) && 
-          @content.universe_id.present? && 
-          current_user.try(:contributable_universe_ids).to_a.include?(@content.universe_id)))
-        is_owner_or_contributor = true
-        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id).ordered
-      else
-        @images = ImageUpload.where(content_type: @content.class.name, content_id: @content.id, privacy: 'public').ordered
-      end
-      
-      # Get additional context information
-      if @content.is_a?(Universe)
-        # Universe objects don't have a universe_id field
-        @universe = nil
-        @other_content = []
-      else
-        @universe = @content.universe_id.present? ? Universe.find_by(id: @content.universe_id) : nil
-        @other_content = @content.universe_id.present? ? 
-          content_type.where(universe_id: @content.universe_id).where.not(id: @content.id).limit(5) : []
-      end
-      
-      # Include basil images too with proper ordering
-      @basil_images = BasilCommission.where(entity: @content).where.not(saved_at: nil).ordered
-      
-      render 'content/gallery'
+    case params[:format]
+    when 'yml', 'yaml'
+      send_data service.export_as_yaml, 
+                filename: "#{@content_type}_template.yml", 
+                type: 'text/plain'
+    when 'md', 'markdown'
+      send_data service.export_as_markdown,
+                filename: "#{@content_type}_template.md", 
+                type: 'text/plain'
+    when 'json'
+      send_data service.export_as_json,
+                filename: "#{@content_type}_template.json", 
+                type: 'application/json'
+    when 'csv'
+      send_data service.export_as_csv,
+                filename: "#{@content_type}_template.csv", 
+                type: 'text/csv'
     else
-      return redirect_to root_path, notice: "You don't have permission to view that content."
+      redirect_back fallback_location: root_path, alert: 'Invalid export format'
+    end
+  end
+  
+  def reset_template
+    service = TemplateResetService.new(current_user, @content_type)
+    
+    if params[:confirm] == 'true'
+      result = service.reset_template!
+      
+      respond_to do |format|
+        format.json do
+          if result[:success]
+            render json: {
+              success: true,
+              message: result[:message]
+            }, status: :ok
+          else
+            render json: {
+              success: false,
+              error: result[:error]
+            }, status: :unprocessable_entity
+          end
+        end
+      end
+    else
+      # Return analysis for confirmation
+      analysis = service.analyze_reset_impact
+      render json: analysis, status: :ok
     end
   end
 
@@ -641,7 +734,10 @@ class ContentController < ApplicationController
     @content = @entity
     update_page_tags
 
-    render json: attribute_value.to_json, status: 200
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.json { render json: attribute_value.to_json, status: 200 }
+    end
   end
 
   def universe_field_update
@@ -666,6 +762,20 @@ class ContentController < ApplicationController
   end
 
   private
+
+  def group_events_by_date(events)
+    # Group events by date for timeline display
+    grouped = events.group_by { |event| event.created_at.to_date }
+    
+    grouped.map do |date, date_events|
+      {
+        date: date,
+        events: date_events,
+        total_field_changes: date_events.sum { |event| event.changed_fields.keys.length },
+        users: date_events.map(&:user).compact.uniq
+      }
+    end.sort_by { |group| group[:date] }.reverse
+  end
 
   def update_page_tags
     tag_list = field_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)
@@ -813,42 +923,6 @@ class ContentController < ApplicationController
     @entity = entity_page_type.constantize.find_by(id: entity_page_id)    
   end
 
-  # For index, new, edit
-  # def set_general_navbar_actions
-  #   content_type = @content_type_class || content_type_from_controller(self.class)
-  #   return if [AttributeCategory, AttributeField, Attribute].include?(content_type)
-    
-  #   @navbar_actions = []
-
-  #   if @current_user_content
-  #     @navbar_actions << {
-  #       label: "Your #{view_context.pluralize @current_user_content.fetch(content_type.name, []).count, content_type.name.downcase}",
-  #       href: main_app.polymorphic_path(content_type)
-  #     }
-  #   end
-
-  #   @navbar_actions << {
-  #     label: "New #{content_type.name.downcase}",
-  #     href: main_app.new_polymorphic_path(content_type),
-  #     class: 'right'
-  #   } if user_signed_in? && current_user.can_create?(content_type) \
-  #   || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
-
-  #   discussions_link = ForumsLinkbuilderService.worldbuilding_url(content_type)
-  #   if discussions_link.present?
-  #     @navbar_actions << {
-  #       label: 'Discussions',
-  #       href: discussions_link
-  #     }
-  #   end
-
-  #   # @navbar_actions << {
-  #   #   label: 'Customize template',
-  #   #   class: 'right',
-  #   #   href: main_app.attribute_customization_path(content_type.name.downcase)
-  #   # }
-  # end
-
   # For showing a specific piece of content
   def set_navbar_actions
     content_type = @content_type_class || content_type_from_controller(self.class)
@@ -856,20 +930,6 @@ class ContentController < ApplicationController
 
     return if [AttributeCategory, AttributeField].include?(content_type)
     
-    # Set up navbar actions for gallery specifically
-    if action_name == 'gallery' && @content.present?
-      # Add a link to view the content page
-      @navbar_actions << {
-        label: @content.name,
-        href: polymorphic_path(@content)
-      }
-      
-      # Add a gallery title indicator
-      @navbar_actions << {
-        label: 'Gallery',
-        href: send("gallery_#{@content.class.name.downcase}_path", @content)
-      }
-    end
   end
 
   def set_sidenav_expansion

@@ -1,185 +1,774 @@
-<h4 class="white-text">
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons blue-text text-lighten-3">arrow_back</i>
-  <% end %>
-  Your paper footprint
-</h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700">Your Environmental Impact</h1>
+  </div>
 
-<%
-  total_pages_equivalent = 0
-%>
+  <%
+    total_pages_equivalent = 0
+    total_trees_saved = 0
+    
+    # Calculate personal totals
+    @current_user_content.each do |content_type, content_list|
+      content_list_count = content_list.count
 
-<div class="row">
-  <div class="col s12">
-    <div class="card-panel">
-      All of the added functionality of Notebook.ai over a traditional paper notebook isn't the only benefit of going digital. Backing your ideas up in the cloud
-      instead of on paper also saves trees!
+      physical_page_equivalent = case content_type
+      when 'Timeline'
+        GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
+      when 'Document'
+        [
+          content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
+          content_list_count
+        ].max
+      else
+        GreenService.physical_pages_equivalent_for(content_type) * content_list_count
+      end
+
+      total_pages_equivalent += physical_page_equivalent
+    end
+    
+    total_trees_saved = total_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
+    
+    # Calculate community totals
+    community_pages_equivalent = 0
+    (Rails.application.config.content_type_names[:all] + ["Timeline", "Document"]).each do |content_type|
+      content_list_count = content_class_from_name(content_type).last.try(:id) || 0
+
+      physical_page_equivalent = case content_type
+      when 'Timeline'
+        GreenService.total_timeline_pages_equivalent
+      when 'Document'
+        GreenService.total_document_pages_equivalent
+      else
+        GreenService.physical_pages_equivalent_for(content_type) * content_list_count
+      end
+
+      community_pages_equivalent += physical_page_equivalent
+    end
+    
+    community_trees_saved = community_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
+    
+    # Calculate user's contribution percentage
+    user_contribution_percentage = (total_trees_saved / community_trees_saved * 100).round(2)
+    user_contribution_percentage = [user_contribution_percentage, 100].min
+  %>
+
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-lg overflow-hidden mb-8">
+    <div class="p-8 md:p-12 flex flex-col md:flex-row items-center">
+      <div class="w-full md:w-1/2 mb-6 md:mb-0 flex justify-center">
+        <div class="bg-green-700 rounded-lg p-8 shadow-inner text-center">
+          <% if total_trees_saved >= 1 %>
+            <div class="text-5xl md:text-6xl font-bold text-white mb-2">
+              <%= number_with_delimiter total_trees_saved.round(2) %>
+            </div>
+            <div class="text-xl md:text-2xl font-medium text-green-100">
+              Trees Saved
+            </div>
+          <% else %>
+            <div class="text-5xl md:text-6xl font-bold text-white mb-2">
+              <%= number_with_delimiter (total_trees_saved * 100).round(1) %>%
+            </div>
+            <div class="text-xl md:text-2xl font-medium text-green-100">
+              of a Tree Saved
+            </div>
+            <div class="mt-2 text-green-200">
+              Every bit counts!
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="w-full md:w-1/2 text-white">
+        <h2 class="text-3xl font-bold mb-4">You're Making a Difference!</h2>
+        <p class="text-xl mb-6">
+          By using Notebook.ai instead of physical paper, you've personally saved 
+          <strong><%= number_with_delimiter total_trees_saved.round(2) %> trees</strong> 
+          and <strong><%= number_with_delimiter total_pages_equivalent.round %> sheets of paper</strong>.
+        </p>
+        <div class="bg-white/20 rounded-lg p-4">
+          <p class="text-green-100">
+            That's equivalent to approximately:
+          </p>
+          <ul class="mt-2 space-y-2 text-white">
+            <li class="flex items-center">
+              <i class="material-icons mr-2">book</i>
+              <%= number_with_delimiter((total_pages_equivalent / 500).round) %> notebooks
+            </li>
+            <li class="flex items-center">
+              <i class="material-icons mr-2">description</i>
+              <%= number_with_delimiter((total_pages_equivalent / 300).round) %> textbooks
+            </li>
+            <li class="flex items-center">
+              <i class="material-icons mr-2">co2</i>
+              <%= number_with_delimiter((total_trees_saved * 21).round) %> kg of CO₂ absorbed annually
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="bg-green-700 px-8 py-4">
+      <div class="flex justify-between items-center">
+        <div class="text-green-100">
+          <span class="font-medium">Your contribution:</span> 
+          <%= user_contribution_percentage %>% of community impact
+        </div>
+        <div>
+          <div class="inline-flex rounded-md shadow">
+            <a href="#details" class="inline-flex items-center justify-center px-5 py-2 border border-transparent text-base font-medium rounded-md text-green-700 bg-white hover:bg-green-50">
+              See Details
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Your personal paper footprint</div>
-        <table>
-          <thead>
-            <tr>
-              <th>Digital content</th>
-              <th>Equivalent physical pages</th>
-              <th>Equivalent trees</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <% @current_user_content.each do |content_type, content_list| %>
+  <!-- Impact Visualization -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">Your Environmental Impact</h2>
+      <p class="text-gray-600 mt-1">
+        Watch your positive impact grow as you build your fictional worlds
+      </p>
+    </div>
+    
+    <div class="p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-gray-50 rounded-lg p-6">
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Paper Saved</h3>
+          <div class="flex items-end mb-6">
+            <div class="text-4xl font-bold text-gray-800 mr-2">
+              <%= number_with_delimiter total_pages_equivalent.round %>
+            </div>
+            <div class="text-gray-600 pb-1">sheets</div>
+          </div>
+          
+          <div class="space-y-4">
+            <%
+              top_content_types = @current_user_content.sort_by do |content_type, content_list|
+                case content_type
+                when 'Timeline'
+                  GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
+                when 'Document'
+                  [
+                    content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
+                    content_list.count
+                  ].max
+                else
+                  GreenService.physical_pages_equivalent_for(content_type) * content_list.count
+                end
+              end.reverse.first(5)
+            %>
+            
+            <% top_content_types.each do |content_type, content_list| %>
               <%
-                content_list_count = content_list.count
-
                 physical_page_equivalent = case content_type
                 when 'Timeline'
                   GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
                 when 'Document'
                   [
-                    content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f, 
-                    content_list_count
+                    content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
+                    content_list.count
                   ].max
                 else
-                  GreenService.physical_pages_equivalent_for(content_type) * content_list_count
+                  GreenService.physical_pages_equivalent_for(content_type) * content_list.count
                 end
-
-                tree_equivalent = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
-
-                total_pages_equivalent += physical_page_equivalent
+                
+                percentage = total_pages_equivalent > 0 ? (physical_page_equivalent / total_pages_equivalent * 100).round : 0
               %>
-              <tr>
-                <td>
-                  <i class="material-icons left <%= content_class_from_name(content_type).color %>-text">
-                    <%= content_class_from_name(content_type).icon %>
-                  </i>
-                  <%= pluralize content_list_count, content_type.pluralize %>
-                </td>
-                <td>
-                  <i class="material-icons left grey-text">copy_all</i>
-                  <%= number_with_delimiter physical_page_equivalent %>
-                  <%= 'page'.pluralize physical_page_equivalent %>
-                </td>
-                <td>
-                  <i class="material-icons left green-text">park</i>
-                  <%= pluralize tree_equivalent.round(5), 'tree' %>
-                </td>
-              </tr>
+              
+              <div>
+                <div class="flex justify-between items-center mb-1">
+                  <div class="flex items-center">
+                    <i class="material-icons text-<%= content_class_from_name(content_type).text_color %> mr-2">
+                      <%= content_class_from_name(content_type).icon %>
+                    </i>
+                    <span class="text-gray-700"><%= content_type.pluralize %></span>
+                  </div>
+                  <span class="text-gray-600"><%= number_with_delimiter physical_page_equivalent.round %> pages</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                  <div class="bg-<%= content_class_from_name(content_type).text_color %> h-2.5 rounded-full" style="width: <%= percentage %>%"></div>
+                </div>
+              </div>
             <% end %>
-            <tr>
-              <td>Totals</td>
-              <td>
-                <strong>
-                  <i class="material-icons left grey-text">copy_all</i>
-                  <%= number_with_delimiter total_pages_equivalent.round %>
-                  <%= 'page'.pluralize total_pages_equivalent %>
-                </strong>
-              </td>
-              <td>
-                <strong>
-                  <i class="material-icons left green-text">park</i>
-                  <% trees_saved = total_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE %>
-                  <%= number_with_delimiter trees_saved.round(5) %>
-                  <%= 'tree'.pluralize trees_saved %>
-                  saved
-                </strong>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 rounded-lg p-6">
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Trees Saved</h3>
+          <div class="flex items-end mb-6">
+            <% if total_trees_saved >= 1 %>
+              <div class="text-4xl font-bold text-gray-800 mr-2">
+                <%= number_with_delimiter total_trees_saved.round(2) %>
+              </div>
+              <div class="text-gray-600 pb-1">trees</div>
+            <% else %>
+              <div class="text-4xl font-bold text-gray-800 mr-2">
+                <%= number_with_delimiter (total_trees_saved * 100).round(1) %>%
+              </div>
+              <div class="text-gray-600 pb-1">of a tree</div>
+            <% end %>
+          </div>
+          
+          <div class="grid grid-cols-5 gap-2">
+            <% (1..10).each do |i| %>
+              <div class="flex justify-center">
+                <% if i <= total_trees_saved.floor %>
+                  <i class="material-icons text-green-600" style="font-size: 36px;">park</i>
+                <% elsif i == total_trees_saved.floor + 1 && total_trees_saved % 1 > 0 %>
+                  <div class="relative">
+                    <i class="material-icons text-gray-300" style="font-size: 36px;">park</i>
+                    <div class="absolute bottom-0 overflow-hidden" style="height: <%= (total_trees_saved % 1 * 100).round %>%">
+                      <i class="material-icons text-green-600" style="font-size: 36px;">park</i>
+                    </div>
+                  </div>
+                <% else %>
+                  <i class="material-icons text-gray-300" style="font-size: 36px;">park</i>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="mt-6">
+            <div class="text-sm text-gray-600 mb-1">Your progress toward saving 10 trees</div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+              <div class="bg-green-600 h-2.5 rounded-full" style="width: <%= [(total_trees_saved / 10 * 100), 100].min %>%"></div>
+            </div>
+            <div class="flex justify-between mt-1 text-xs text-gray-500">
+              <div>0</div>
+              <div>10 trees</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Community Impact -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">Community Impact</h2>
+      <p class="text-gray-600 mt-1">
+        Together, Notebook.ai users have made a significant environmental difference
+      </p>
+    </div>
+    
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-green-50 rounded-lg p-6 border border-green-100">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="text-sm text-gray-500 uppercase font-medium">Total Trees Saved</div>
+              <div class="text-4xl font-bold text-gray-800 mt-1">
+                <%= number_with_delimiter community_trees_saved.round(1) %>
+              </div>
+            </div>
+            <div class="bg-green-100 rounded-full p-2">
+              <i class="material-icons text-green-600">park</i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-600">
+            That's enough trees to cover <%= (community_trees_saved / 100).round(1) %> acres of forest
+          </div>
+        </div>
+        
+        <div class="bg-blue-50 rounded-lg p-6 border border-blue-100">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="text-sm text-gray-500 uppercase font-medium">Paper Saved</div>
+              <div class="text-4xl font-bold text-gray-800 mt-1">
+                <%= number_with_delimiter community_pages_equivalent.round %>
+              </div>
+            </div>
+            <div class="bg-blue-100 rounded-full p-2">
+              <i class="material-icons text-blue-600">description</i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-600">
+            Stacked, these pages would reach <%= (community_pages_equivalent * 0.1 / 1000).round(1) %> kilometers high
+          </div>
+        </div>
+        
+        <div class="bg-amber-50 rounded-lg p-6 border border-amber-100">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="text-sm text-gray-500 uppercase font-medium">Your Contribution</div>
+              <div class="text-4xl font-bold text-gray-800 mt-1">
+                <%= user_contribution_percentage %>%
+              </div>
+            </div>
+            <div class="bg-amber-100 rounded-full p-2">
+              <i class="material-icons text-amber-600">emoji_events</i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-600">
+            You're part of a global community making a difference
+          </div>
+        </div>
+      </div>
+      
+      <div class="bg-gray-50 rounded-lg p-6">
+        <h3 class="text-lg font-medium text-gray-800 mb-4">Environmental Impact</h3>
+        <div class="space-y-6">
+          <div>
+            <div class="flex items-center mb-2">
+              <i class="material-icons text-blue-600 mr-2">water_drop</i>
+              <span class="text-gray-800 font-medium">Water Saved</span>
+            </div>
+            <p class="text-gray-600">
+              The community has saved approximately <%= number_with_delimiter((community_pages_equivalent * 10 / 1000).round) %> gallons of water
+              that would have been used in paper production.
+            </p>
+          </div>
+          
+          <div>
+            <div class="flex items-center mb-2">
+              <i class="material-icons text-amber-600 mr-2">bolt</i>
+              <span class="text-gray-800 font-medium">Energy Saved</span>
+            </div>
+            <p class="text-gray-600">
+              Paper production is energy-intensive. Together, we've saved roughly
+              <%= number_with_delimiter((community_pages_equivalent * 0.05 / 1000).round) %> kilowatt-hours of electricity.
+            </p>
+          </div>
+          
+          <div>
+            <div class="flex items-center mb-2">
+              <i class="material-icons text-green-600 mr-2">co2</i>
+              <span class="text-gray-800 font-medium">Carbon Impact</span>
+            </div>
+            <p class="text-gray-600">
+              The trees saved can absorb approximately <%= number_with_delimiter((community_trees_saved * 21).round) %> kg of CO₂ annually,
+              helping combat climate change.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <!-- Detailed Breakdown -->
+  <div id="details" class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">Detailed Breakdown</h2>
+      <p class="text-gray-600 mt-1">
+        See exactly how your worldbuilding translates to environmental savings
+      </p>
+    </div>
+    
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Worldbuilding content</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equivalent physical pages</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equivalent trees</th>
+          </tr>
+        </thead>
 
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @current_user_content.sort_by { |content_type, content_list| -content_list.count }.each do |content_type, content_list| %>
+            <%
+              content_list_count = content_list.count
+              
+              # Skip if count is 0
+              next if content_list_count == 0
 
-<%
-  total_pages_equivalent = 0
-%>
+              physical_page_equivalent = case content_type
+              when 'Timeline'
+                GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
+              when 'Document'
+                [
+                  content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
+                  content_list_count
+                ].max
+              else
+                GreenService.physical_pages_equivalent_for(content_type) * content_list_count
+              end
 
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Our community paper footprint</div>
-        <p>Across all Notebook.ai pages...</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Digital content</th>
-              <th>Equivalent physical pages</th>
-              <th>Equivalent trees</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <% (Rails.application.config.content_type_names[:all] + ["Timeline", "Document"]).each do |content_type| %>
-              <%
-                content_list_count = content_class_from_name(content_type).last.try(:id) || 0
-
-                physical_page_equivalent = case content_type
-                when 'Timeline'
-                  GreenService.total_timeline_pages_equivalent
-                when 'Document'
-                  GreenService.total_document_pages_equivalent
-                else
-                  GreenService.physical_pages_equivalent_for(content_type) * content_list_count
-                end
-
-                tree_equivalent = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
-
-                total_pages_equivalent += physical_page_equivalent
-              %>
-              <tr>
-                <td>
-                  <i class="material-icons left <%= content_class_from_name(content_type).color %>-text">
+              tree_equivalent = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
+            %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <i class="material-icons text-<%= content_class_from_name(content_type).text_color %> mr-2">
                     <%= content_class_from_name(content_type).icon %>
                   </i>
-                  <%= number_with_delimiter content_list_count %>
-                  <%= content_type.pluralize content_list_count %>
-                </td>
-                <td>
-                  <i class="material-icons left grey-text">copy_all</i>
-                  <%= number_with_delimiter physical_page_equivalent %>
-                  <%= 'page'.pluralize physical_page_equivalent %>
-                </td>
-                <td>
-                  <i class="material-icons left green-text">park</i>
-                  <%= number_with_delimiter tree_equivalent.round(5) %>
-                  <%= 'tree'.pluralize tree_equivalent %>
-                </td>
-              </tr>
-            <% end %>
-            <tr>
-              <td>Totals</td>
-              <td>
-                <strong>
-                  <i class="material-icons left grey-text">copy_all</i>
-                  <%= number_with_delimiter total_pages_equivalent %>
-                  <%= 'page'.pluralize total_pages_equivalent %>
-                </strong>
+                  <span class="text-gray-700 font-medium"><%= content_type.pluralize %></span>
+                </div>
               </td>
-              <td>
-                <strong>
-                  <i class="material-icons left green-text">park</i>
-                  <% trees_saved = total_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE %>
-                  <%= number_with_delimiter trees_saved.round(5) %>
-                  <%= 'tree'.pluralize trees_saved %>
-                  saved
-                </strong>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                <%= number_with_delimiter content_list_count %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <i class="material-icons text-gray-500 mr-2">copy_all</i>
+                  <span class="text-gray-700">
+                    <%= number_with_delimiter physical_page_equivalent.round %>
+                    <%= 'page'.pluralize physical_page_equivalent.round %>
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <i class="material-icons text-green-600 mr-2">park</i>
+                  <span class="text-gray-700"><%= tree_equivalent.round(3) %> <%= 'tree'.pluralize tree_equivalent.round(3) %></span>
+                </div>
               </td>
             </tr>
-          </tbody>
-        </table>
+          <% end %>
+          <tr class="bg-green-50">
+            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-800">Totals</td>
+            <td class="px-6 py-4 whitespace-nowrap text-gray-700 font-medium">
+              <%= number_with_delimiter @current_user_content.sum { |_, content_list| content_list.count } %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center font-medium">
+                <i class="material-icons text-gray-500 mr-2">copy_all</i>
+                <span class="text-gray-800">
+                  <%= number_with_delimiter total_pages_equivalent.round %>
+                  <%= 'page'.pluralize total_pages_equivalent.round %>
+                </span>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center font-medium">
+                <i class="material-icons text-green-600 mr-2">park</i>
+                <span class="text-gray-800">
+                  <%= number_with_delimiter total_trees_saved.round(3) %>
+                  <%= 'tree'.pluralize total_trees_saved.round(3) %>
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="mb-8"></div>
+  
+  <!-- Personal Goals -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8 mt-12">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">Personal Goals</h2>
+      <p class="text-gray-600 mt-1">
+        Track your environmental milestones
+      </p>
+    </div>
+    
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <i class="material-icons text-green-600 mr-2">park</i>
+            <span class="text-gray-800 font-medium">Save Your First Tree</span>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            Approximately <%= GreenService::SHEETS_OF_PAPER_PER_TREE %> sheets of paper
+          </p>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-green-600 h-2.5 rounded-full" style="width: <%= [(total_trees_saved * 100), 100].min %>%"></div>
+          </div>
+          <div class="flex justify-between mt-1 text-xs text-gray-500">
+            <div>0%</div>
+            <div><%= [(total_trees_saved * 100), 100].min.round %>% complete</div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <i class="material-icons text-blue-600 mr-2">forest</i>
+            <span class="text-gray-800 font-medium">Save a Grove (10 Trees)</span>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            A significant environmental contribution
+          </p>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-blue-600 h-2.5 rounded-full" style="width: <%= [(total_trees_saved / 10 * 100), 100].min %>%"></div>
+          </div>
+          <div class="flex justify-between mt-1 text-xs text-gray-500">
+            <div>0%</div>
+            <div><%= [(total_trees_saved / 10 * 100), 100].min.round %>% complete</div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <div class="flex items-center mb-2">
+            <i class="material-icons text-amber-600 mr-2">emoji_events</i>
+            <span class="text-gray-800 font-medium">Join the 1% Club</span>
+          </div>
+          <p class="text-gray-600 text-sm mb-3">
+            1% of community's total impact
+          </p>
+          <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-amber-600 h-2.5 rounded-full" style="width: <%= [(user_contribution_percentage / 1 * 100), 100].min %>%"></div>
+          </div>
+          <div class="flex justify-between mt-1 text-xs text-gray-500">
+            <div>0%</div>
+            <div><%= [(user_contribution_percentage / 1 * 100), 100].min.round %>% complete</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- Calculation Methodology -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800">How We Calculate Your Impact</h2>
+      <p class="text-gray-600 mt-1">
+        Understanding the methodology behind our environmental calculations
+      </p>
+    </div>
+    
+    <div class="p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Paper Equivalents</h3>
+          <div class="space-y-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="font-medium text-gray-800 mb-1">Content Type Equivalents</div>
+              <p class="text-gray-600 text-sm">
+                Different content types are equivalent to different amounts of paper:
+              </p>
+              <ul class="mt-2 space-y-1 text-sm text-gray-600">
+                <li>• Characters: <%= GreenService.physical_pages_equivalent_for("Character") %> pages</li>
+                <li>• Locations: <%= GreenService.physical_pages_equivalent_for("Location") %> pages</li>
+                <li>• Items: <%= GreenService.physical_pages_equivalent_for("Item") %> pages</li>
+                <li>• Documents: Based on word count (<%= GreenService::AVERAGE_WORDS_PER_PAGE %> words per page)</li>
+                <li>• Timelines: <%= GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE %> events per page</li>
+              </ul>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="font-medium text-gray-800 mb-1">Tree Calculation</div>
+              <p class="text-gray-600 text-sm">
+                We use the industry standard of <%= GreenService::SHEETS_OF_PAPER_PER_TREE %> sheets of paper per tree.
+                This accounts for the average yield of a tree used for paper production.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-medium text-gray-800 mb-4">Environmental Impact</h3>
+          <div class="space-y-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="font-medium text-gray-800 mb-1">Water Usage</div>
+              <p class="text-gray-600 text-sm">
+                Paper production requires approximately 10 gallons of water per 1,000 sheets.
+                This includes water used in pulping, processing, and cleaning.
+              </p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="font-medium text-gray-800 mb-1">Energy Consumption</div>
+              <p class="text-gray-600 text-sm">
+                We estimate 0.05 kilowatt-hours of electricity saved per 1,000 sheets of paper,
+                based on average energy requirements for paper manufacturing.
+              </p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="font-medium text-gray-800 mb-1">Carbon Impact</div>
+              <p class="text-gray-600 text-sm">
+                A mature tree absorbs approximately 21 kilograms of CO₂ per year.
+                By saving trees, you're helping maintain this important carbon capture capacity.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-6 bg-blue-50 p-4 rounded-lg">
+        <div class="flex items-center mb-2">
+          <i class="material-icons text-blue-600 mr-2">info</i>
+          <span class="text-gray-800 font-medium">Note on Calculations</span>
+        </div>
+        <p class="text-gray-600 text-sm">
+          These calculations are estimates based on industry averages and research. The actual environmental impact may vary
+          based on numerous factors including paper type, manufacturing processes, and tree species. Our goal is to provide
+          a meaningful representation of the positive environmental effect of going digital with Notebook.ai.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Share Your Impact -->
+  <div class="mt-8 bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-md p-6 text-white">
+    <div class="flex flex-col md:flex-row items-center justify-between">
+      <div class="mb-4 md:mb-0">
+        <h3 class="text-xl font-bold mb-2">Share Your Environmental Impact</h3>
+        <p>Let others know how worldbuilding helps the environment!</p>
+      </div>
+      <div class="flex space-x-4">
+        <a href="<%= green_paper_path %>" class="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-green-700 bg-white hover:bg-green-50">
+          <i class="material-icons mr-1">article</i>
+          Learn More
+        </a>
+        <button id="shareButton" class="inline-flex items-center px-4 py-2 border border-white text-base font-medium rounded-md text-white hover:bg-green-700">
+          <i class="material-icons mr-1">share</i>
+          Share Impact
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Share Modal -->
+  <div id="shareModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xl font-semibold text-gray-800">Share Your Environmental Impact</h3>
+          <button id="closeShareModal" class="text-gray-400 hover:text-gray-500">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <p class="text-gray-600 mb-6">Share your positive environmental impact with your network!</p>
+        
+        <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+          <p class="text-gray-700 text-sm" id="shareMessagePreview"></p>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <a href="#" id="shareFacebook" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700">
+            <i class="material-icons mr-2">facebook</i>
+            Facebook
+          </a>
+          <a href="#" id="shareTwitter" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-base font-medium text-white bg-sky-500 hover:bg-sky-600">
+            <i class="material-icons mr-2">flutter_dash</i>
+            X / Twitter
+          </a>
+          <a href="#" id="shareLinkedIn" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-base font-medium text-white bg-blue-700 hover:bg-blue-800">
+            <i class="material-icons mr-2">work</i>
+            LinkedIn
+          </a>
+          <button id="copyShareText" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50">
+            <i class="material-icons mr-2">content_copy</i>
+            Copy Text
+          </button>
+        </div>
+        
+        <div class="flex justify-center">
+          <button id="genericShareButton" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+            <i class="material-icons mr-2">share</i>
+            Share via Device
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const shareButton = document.getElementById('shareButton');
+      const shareModal = document.getElementById('shareModal');
+      const closeShareModal = document.getElementById('closeShareModal');
+      const shareMessagePreview = document.getElementById('shareMessagePreview');
+      const shareFacebook = document.getElementById('shareFacebook');
+      const shareTwitter = document.getElementById('shareTwitter');
+      const shareLinkedIn = document.getElementById('shareLinkedIn');
+      const copyShareText = document.getElementById('copyShareText');
+      const genericShareButton = document.getElementById('genericShareButton');
+      
+      // Generate share text
+      const treesCount = <%= total_trees_saved.round(2) %>;
+      const pagesCount = <%= total_pages_equivalent.round %>;
+      
+      let shareText;
+      if (treesCount >= 1) {
+        shareText = `I've saved ${treesCount} trees and ${pagesCount} sheets of paper through worldbuilding on Notebook.ai! #GoGreen #Worldbuilding`;
+      } else {
+        shareText = `I've saved ${(treesCount * 100).toFixed(1)}% of a tree and ${pagesCount} sheets of paper through worldbuilding on Notebook.ai! Every bit counts! #GoGreen #Worldbuilding`;
+      }
+      
+      const shareUrl = window.location.href;
+      const shareTitle = 'My Environmental Impact on Notebook.ai';
+      
+      // Update preview
+      shareMessagePreview.textContent = shareText;
+      
+      // Open modal
+      shareButton.addEventListener('click', function() {
+        shareModal.classList.remove('hidden');
+      });
+      
+      // Close modal
+      closeShareModal.addEventListener('click', function() {
+        shareModal.classList.add('hidden');
+      });
+      
+      // Close modal when clicking outside
+      window.addEventListener('click', function(event) {
+        if (event.target === shareModal) {
+          shareModal.classList.add('hidden');
+        }
+      });
+      
+      // Social media share links
+      shareFacebook.addEventListener('click', function(e) {
+        e.preventDefault();
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+        window.open(facebookUrl, '_blank');
+      });
+      
+      shareTwitter.addEventListener('click', function(e) {
+        e.preventDefault();
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+        window.open(twitterUrl, '_blank');
+      });
+      
+      shareLinkedIn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+        window.open(linkedInUrl, '_blank');
+      });
+      
+      // Copy text button
+      copyShareText.addEventListener('click', function() {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareText;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        
+        // Show feedback
+        const originalText = copyShareText.innerHTML;
+        copyShareText.innerHTML = '<i class="material-icons mr-2">check</i>Copied!';
+        copyShareText.classList.add('bg-green-50', 'text-green-700');
+        
+        setTimeout(function() {
+          copyShareText.innerHTML = originalText;
+          copyShareText.classList.remove('bg-green-50', 'text-green-700');
+        }, 2000);
+      });
+      
+      // Web Share API
+      genericShareButton.addEventListener('click', function() {
+        if (navigator.share) {
+          navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: shareUrl,
+          })
+          .then(() => console.log('Successful share'))
+          .catch((error) => console.log('Error sharing:', error));
+        } else {
+          // Fallback for browsers that don't support the Web Share API
+          copyShareText.click();
+        }
+      });
+    });
+  </script>
       </div>
     </div>
   </div>

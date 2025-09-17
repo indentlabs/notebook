@@ -1,4 +1,6 @@
 class NotificationsController < ApplicationController
+  before_action :authenticate_user!
+
   def index
     @notifications = current_user.notifications.order('happened_at DESC').limit(100)
   end

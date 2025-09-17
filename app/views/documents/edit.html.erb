@@ -8,40 +8,2250 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
+<div x-data="{
+  entitiesSidebarOpen: false
+}" class="min-h-screen bg-gray-50 flex flex-col">
 
-  <div class="container" style="max-width: 50em;">
+  <!-- Document editor navbar - sticky beneath site navbar, provides tools and stats -->
+  <header class="bg-white border-b border-gray-200 sticky top-14 z-20 shadow-sm">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <!-- Full navbar -->
+      <div class="flex flex-row items-center justify-between">
+        <!-- Left side: Document action buttons -->
+        <div class="flex items-center space-x-2">
+          <!-- Entities button - styled like AI analysis FAB -->
+          <button
+            @click="entitiesSidebarOpen = !entitiesSidebarOpen"
+            class="flex items-center px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-colors shadow-sm"
+          >
+            <i class="material-icons text-white mr-1 text-sm align-middle">people_alt</i>
+            <span class="font-medium">Entities</span>
+          </button>
+          
+          
+          <!-- Metadata button -->
+          <button
+            @click="$dispatch('open-modal', 'document-metadata-modal')"
+            class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+          >
+            <i class="material-icons mr-1 text-sm align-middle">description</i>
+            <span class="font-medium">Metadata</span>
+          </button>
+          
+          <!-- Preview as Reader -->
+          <%= link_to document_path(@document), class: "flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm" do %>
+            <i class="material-icons mr-1 text-sm align-middle">visibility</i>
+            <span class="font-medium">Preview as Reader</span>
+          <% end %>
+          
+          <!-- Privacy settings button removed from here and moved to the right side -->
+          
+          <!-- Overflow menu -->
+          <div class="relative" x-data="{ open: false }">
+            <button
+              @click="open = !open"
+              class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+            >
+              <i class="material-icons text-sm align-middle">more_horiz</i>
+            </button>
+            
+            <div
+              x-show="open"
+              @click.away="open = false"
+              x-transition:enter="transition ease-out duration-100"
+              x-transition:enter-start="transform opacity-0 scale-95"
+              x-transition:enter-end="transform opacity-100 scale-100"
+              x-transition:leave="transition ease-in duration-75"
+              x-transition:leave-start="transform opacity-100 scale-100"
+              x-transition:leave-end="transform opacity-0 scale-95"
+              class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+              x-cloak
+            >
+              <div class="py-1">
+                <!-- Analyze document -->
+                <%= link_to queue_analysis_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do %>
+                  <i class="material-icons text-blue-500 mr-3 text-sm">analytics</i>
+                  <span>Analyze this document</span>
+                <% end %>
+                
+                <!-- Revision log -->
+                <%= link_to document_document_revisions_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do %>
+                  <i class="material-icons text-gray-600 mr-3 text-sm">history</i>
+                  <span>Revision log</span>
+                <% end %>
+                
+                <!-- Plaintext view -->
+                <%= link_to plaintext_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50", target: "_blank" do %>
+                  <i class="material-icons text-gray-600 mr-3 text-sm">text_format</i>
+                  <span>Plaintext view</span>
+                <% end %>
+                
+                <hr class="my-1 border-gray-100">
+                
+                <hr class="my-1 border-gray-100">
+                
+                <!-- Delete Document -->
+                <%= button_to document_path(@document), 
+                    method: :delete, 
+                    form: { 
+                      class: "w-full",
+                      data: { 
+                        turbo_confirm: 'Are you sure you want to delete this document? This action cannot be undone.' 
+                      },
+                      onsubmit: "return confirm('Are you sure you want to delete this document? This action cannot be undone.');"
+                    },
+                    class: "flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left" do %>
+                  <i class="material-icons text-red-500 mr-3 text-sm">delete</i>
+                  <span>Delete document</span>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Right side: Document stats -->
+        <div class="flex items-center space-x-4 text-sm">
+          <!-- Word count -->
+          <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-md shadow-sm border border-gray-100">
+            <i class="material-icons mr-1 text-sm text-gray-500">text_fields</i>
+            <span><span id="word-count" class="font-medium">0</span> words</span>
+          </div>
+          
+          <!-- Privacy status - now a clickable button -->
+          <button
+            type="button"
+            @click="$dispatch('open-modal', 'document-privacy-modal')"
+            class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm border border-gray-200 hover:border-gray-300"
+          >
+            <i class="material-icons mr-1 text-sm <%= @document.privacy == 'private' ? 'text-gray-500' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+            <span class="capitalize font-medium"><%= @document.privacy || 'private' %></span>
+            <i class="material-icons ml-1 text-xs text-gray-400">edit</i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main content area - Three column grid layout -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12">
+    <!-- Left column (empty space/margin) -->
+    <div class="hidden lg:block lg:col-span-2"></div>
+    
+    <!-- Center column (editor) - always centered -->
+    <div class="lg:col-span-8 px-4 sm:px-6 lg:px-8 py-6">
+      <!-- Editor container with max width -->
+      <div class="max-w-3xl mx-auto">
+        <!-- Document title input -->
+        <div class="mb-4">
     <%= form_for @document do |f| %>
-      <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
+      <div class="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-3 py-2 border-r border-gray-200">
+          <i class="material-icons <%= Document.text_color %>"><%= Document.icon %></i>
+        </div>
+        <%= f.text_field :title,
+          id: "document_title",
+          class: "flex-1 px-4 py-3 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+          placeholder: "Document title"
+        %>
+      </div>
     <% end %>
-  </div>
+        </div>
 
-  <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
-<% end %>
-
-<div style="clear: both"></div>
-<%= render partial: 'javascripts/content_linking' %>
-
-<div id="document-notes-modal" class="modal modal-fixed-footer">
-  <%= form_for(@document, remote: true, html: { id: 'document-notes-form' }) do |f| %>
-    <div class="modal-content">
-      <h4>
-        <i class="material-icons medium <%= Document.text_color %> left">
-          <%= Document.icon %>
-        </i>
-        Document notes
-      </h4>
-      <p class="grey-text">This field will automatically expand as you write.</p>
-      <%= f.text_area :notes_text, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 400px; border: 1px solid #ccc; padding: 10px;' %>
-      <p class="grey-text">
-        <strong>To save your notes, please click "Save Changes" below.</strong>
-        Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
-      </p>
+        <!-- Editor with integrated toolbar -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[500px] overflow-hidden">
+          <!-- Wrap editor in Alpine component for @mentions -->
+          <div x-data="contentLinking()" class="relative">
+            <!-- Editor content area -->
+            <div id="editor" 
+                 class="editable js-can-mention-pages prose prose-lg max-w-none p-6 min-h-[500px] focus:outline-none border-0" 
+                 data-save-url="<%= document_url(@document) %>"
+                 x-ref="editor"><%= @document.body.try(:html_safe) %></div>
+            
+            <!-- Include shared dropdown template for @mentions -->
+            <%= render partial: 'javascripts/content_linking_dropdown' %>
+            
+            <!-- Mention Helper Tooltip -->
+            <div class="absolute bottom-4 right-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full pointer-events-none">
+              Press @ to link other pages
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ignore changes</a>
-      <%= link_to 'Save changes', "#", onclick: '$("form#document-notes-form").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
+    
+    <!-- Right column (sidebar) -->
+    <div class="lg:col-span-2 relative">
+      <!-- Entities sidebar container - positioned in the right column -->
+      <div class="lg:sticky lg:top-14 lg:h-screen">
+        <%= render partial: 'javascripts/content_linking_alpine' %>
+        
+        <!-- Privacy modal with tabs -->
+        <div
+          id="document-privacy-modal"
+          x-data="{ open: false, activeTab: 'document' }"
+          x-show="open"
+          @open-modal.window="if ($event.detail === 'document-privacy-modal') open = true"
+          @close-modal.window="open = false"
+          @keydown.escape.window="open = false"
+          class="fixed inset-0 z-50 overflow-y-auto"
+          x-cloak
+        >
+          <!-- Modal backdrop -->
+          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+          
+          <!-- Modal content -->
+          <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div
+              class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
+              x-show="open"
+              x-transition:enter="ease-out duration-300"
+              x-transition:enter-start="opacity-0 translate-y-4"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              x-transition:leave="ease-in duration-200"
+              x-transition:leave-start="opacity-100 translate-y-0"
+              x-transition:leave-end="opacity-0 translate-y-4"
+              @click.away="open = false"
+            >
+              <!-- Modal header -->
+              <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-teal-600">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                      <i class="material-icons text-teal-500"><%= Document.icon %></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-white">Privacy Settings</h3>
+                  </div>
+                  <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+                    <i class="material-icons">close</i>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Tab navigation -->
+              <div class="border-b border-gray-200 bg-gray-50">
+                <nav class="flex px-6" aria-label="Tabs">
+                  <button
+                    type="button"
+                    @click="activeTab = 'document'"
+                    :class="activeTab === 'document' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                  >
+                    <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'document' ? 'text-teal-500' : 'text-gray-400'"><%= Document.icon %></i>
+                    Document Privacy
+                  </button>
+                  
+                  <% if @document.universe.present? %>
+                    <button
+                      type="button"
+                      @click="activeTab = 'universe'"
+                      :class="activeTab === 'universe' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-blue-500' : 'text-gray-400'">public</i>
+                      Universe Privacy
+                      <% if @document.universe.privacy == 'public' %>
+                        <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          Public
+                        </span>
+                      <% end %>
+                    </button>
+                  <% end %>
+                </nav>
+              </div>
+              
+              <!-- Tab content -->
+              <div class="p-6">
+                <!-- Document privacy tab -->
+                <div x-show="activeTab === 'document'" x-cloak>
+                  <table class="mb-4 w-full">
+                    <tr>
+                      <td class="align-top pr-3" style="width: 24px;">
+                        <i class="material-icons text-teal-500">info</i>
+                      </td>
+                      <td class="align-top">
+                        <span class="text-sm text-gray-600">
+                          Control who can view this document. More privacy options will be available in the future.
+                        </span>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <% if @document.universe.present? %>
+                    <div class="mb-4 p-3 rounded-md border <%= @document.universe.privacy == 'public' ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200' %>">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0 mr-3">
+                          <div class="w-8 h-8 rounded-full <%= @document.universe.privacy == 'public' ? 'bg-yellow-100' : 'bg-gray-100' %> flex items-center justify-center">
+                            <i class="material-icons text-sm <%= @document.universe.privacy == 'public' ? 'text-yellow-600' : 'text-gray-500' %>"><%= @document.universe.privacy == 'public' ? 'warning' : 'info' %></i>
+                          </div>
+                        </div>
+                        <div>
+                          <p class="text-sm font-medium <%= @document.universe.privacy == 'public' ? 'text-yellow-800' : 'text-gray-700' %>">
+                            This document is in the universe "<%= @document.universe.name %>"
+                          </p>
+                          <p class="text-xs <%= @document.universe.privacy == 'public' ? 'text-yellow-600' : 'text-gray-500' %>">
+                            <% if @document.universe.privacy == 'public' %>
+                              <strong>Note:</strong> This universe is <strong>public</strong>, so this document will be visible to anyone who can view the universe, regardless of its own privacy setting.
+                            <% else %>
+                              This universe is <strong>private</strong>, so this document's privacy setting will be respected.
+                            <% end %>
+                            <a @click="activeTab = 'universe'" class="underline cursor-pointer <%= @document.universe.privacy == 'public' ? 'text-yellow-700' : 'text-gray-600' %> hover:opacity-80">Manage universe privacy</a>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                  
+                  <%= form_for(@document, remote: true, html: { id: 'document-privacy-form' }) do |f| %>
+                    <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                      <%= f.hidden_field :privacy, value: @document.privacy, id: 'document_privacy_field' %>
+                      
+                      <div class="space-y-3">
+                        <!-- Radio button for Private -->
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.privacy == 'private' ? 'bg-white border border-teal-500' : '' %>">
+                          <input type="radio" id="document-privacy-private" name="document-privacy-option" value="private" class="h-4 w-4 text-teal-600 focus:ring-teal-500" <%= @document.privacy == 'private' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                          <label for="document-privacy-private" class="ml-3 flex items-center cursor-pointer">
+                            <i class="material-icons text-gray-500 mr-2">lock</i>
+                            <div>
+                              <span class="block text-sm font-medium text-gray-900">Private</span>
+                              <span class="block text-xs text-gray-500">Only visible to you</span>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        <!-- Radio button for Public -->
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.privacy == 'public' ? 'bg-white border border-teal-500' : '' %>">
+                          <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500" <%= @document.privacy == 'public' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                          <label for="document-privacy-public" class="ml-3 flex items-center cursor-pointer">
+                            <i class="material-icons text-green-500 mr-2">public</i>
+                            <div>
+                              <span class="block text-sm font-medium text-gray-900">Public</span>
+                              <span class="block text-xs text-gray-500">Anyone with the link can view</span>
+                            </div>
+                          </label>
+                        </div>
+                        
+                        <!-- Placeholder for future options (commented out for now) -->
+                        <!--
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 opacity-50 cursor-not-allowed">
+                          <input type="radio" id="document-privacy-friends" name="document-privacy-option" value="friends" class="h-4 w-4 text-teal-600 focus:ring-teal-500" disabled>
+                          <label for="document-privacy-friends" class="ml-3 flex items-center">
+                            <i class="material-icons text-blue-500 mr-2">people</i>
+                            <div>
+                              <span class="block text-sm font-medium text-gray-900">Friends Only</span>
+                              <span class="block text-xs text-gray-500">Only visible to you and your friends</span>
+                              <span class="block text-xs text-gray-400 italic">Coming soon</span>
+                            </div>
+                          </label>
+                        </div>
+                        -->
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <!-- Universe privacy tab -->
+                <% if @document.universe.present? %>
+                  <div x-show="activeTab === 'universe'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-blue-500">info</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            Documents in a public universe are visible to anyone who can view that universe, regardless of the document's privacy setting.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <% if @document.universe.user == current_user %>
+                      <%= form_for(@document.universe, remote: true, html: { id: 'universe-privacy-form' }) do |f| %>
+                        <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                          <div class="flex items-center mb-4">
+                            <div class="mr-3">
+                              <i class="material-icons text-blue-500">public</i>
+                            </div>
+                            <div>
+                              <span class="font-medium text-gray-900"><%= @document.universe.name %></span>
+                            </div>
+                          </div>
+                          
+                          <%= f.hidden_field :privacy, value: @document.universe.privacy, id: 'universe_privacy_field' %>
+                          
+                          <div class="space-y-3">
+                            <!-- Radio button for Private -->
+                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.universe.privacy == 'private' ? 'bg-white border border-blue-500' : '' %>">
+                              <input type="radio" id="universe-privacy-private" name="universe-privacy-option" value="private" class="h-4 w-4 text-blue-600 focus:ring-blue-500" <%= @document.universe.privacy == 'private' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
+                              <label for="universe-privacy-private" class="ml-3 flex items-center cursor-pointer">
+                                <i class="material-icons text-gray-500 mr-2">lock</i>
+                                <div>
+                                  <span class="block text-sm font-medium text-gray-900">Private</span>
+                                  <span class="block text-xs text-gray-500">Only visible to you</span>
+                                </div>
+                              </label>
+                            </div>
+                            
+                            <!-- Radio button for Public -->
+                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.universe.privacy == 'public' ? 'bg-white border border-blue-500' : '' %>">
+                              <input type="radio" id="universe-privacy-public" name="universe-privacy-option" value="public" class="h-4 w-4 text-blue-600 focus:ring-blue-500" <%= @document.universe.privacy == 'public' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
+                              <label for="universe-privacy-public" class="ml-3 flex items-center cursor-pointer">
+                                <i class="material-icons text-green-500 mr-2">public</i>
+                                <div>
+                                  <span class="block text-sm font-medium text-gray-900">Public</span>
+                                  <span class="block text-xs text-gray-500">Anyone with the link can view</span>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% else %>
+                      <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center">
+                          <div class="mr-3">
+                            <i class="material-icons text-blue-500">public</i>
+                          </div>
+                          <div>
+                            <span class="font-medium text-gray-900"><%= @document.universe.name %></span>
+                            <p class="text-sm text-gray-500">Currently: <span class="font-medium capitalize"><%= @document.universe.privacy || 'private' %></span></p>
+                            <p class="text-xs text-gray-500 mt-1">You don't own this universe, so you can't change its privacy settings.</p>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Modal footer -->
+              <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Document metadata modal using Alpine.js -->
+        <div
+          id="document-metadata-modal"
+          x-data="{ open: false, activeTab: 'notes' }"
+          x-show="open"
+          @open-modal.window="if ($event.detail === 'document-metadata-modal') open = true"
+          @close-modal.window="open = false"
+          @keydown.escape.window="open = false"
+          class="fixed inset-0 z-50 overflow-y-auto"
+          x-cloak
+        >
+          <!-- Modal backdrop -->
+          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+          
+          <!-- Modal content -->
+          <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div
+              class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-3xl transform transition-all"
+              x-show="open"
+              x-transition:enter="ease-out duration-300"
+              x-transition:enter-start="opacity-0 translate-y-4"
+              x-transition:enter-end="opacity-100 translate-y-0"
+              x-transition:leave="ease-in duration-200"
+              x-transition:leave-start="opacity-100 translate-y-0"
+              x-transition:leave-end="opacity-0 translate-y-4"
+              @click.away="open = false"
+            >
+              <%= form_for(@document, remote: true, html: { id: 'document-metadata-form' }) do |f| %>
+                <!-- Modal header -->
+                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-teal-600">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                        <i class="material-icons text-teal-500"><%= Document.icon %></i>
+                      </div>
+                      <h3 class="text-lg font-medium text-white">Document Metadata</h3>
+                    </div>
+                    <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+                      <i class="material-icons">close</i>
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Tab navigation -->
+                <div class="border-b border-gray-200 bg-gray-50">
+                  <nav class="flex px-6" aria-label="Tabs">
+                    <button
+                      type="button"
+                      @click="activeTab = 'notes'"
+                      :class="activeTab === 'notes' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm mr-8 transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'notes' ? 'text-teal-500' : 'text-gray-400'">notes</i>
+                      Notes
+                    </button>
+                    <button
+                      type="button"
+                      @click="activeTab = 'synopsis'"
+                      :class="activeTab === 'synopsis' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'synopsis' ? 'text-teal-500' : 'text-gray-400'">short_text</i>
+                      Synopsis
+                    </button>
+                    <button
+                      type="button"
+                      @click="activeTab = 'universe'"
+                      :class="activeTab === 'universe' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
+                    >
+                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-teal-500' : 'text-gray-400'">public</i>
+                      Universe
+                    </button>
+                  </nav>
+                </div>
+                
+                <!-- Tab content -->
+                <div class="p-6">
+                  <!-- Notes tab -->
+                  <div x-show="activeTab === 'notes'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-teal-500">info</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            Document notes are for your reference only and won't be visible to readers. Use this space for research notes, planning, or any other information you want to keep with your document.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <%= f.text_area :notes_text,
+                      class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30',
+                      placeholder: "Write as little or as much as you'd like!",
+                      style: 'min-height: 300px; padding: 12px;'
+                    %>
+                  </div>
+                  
+                  <!-- Synopsis tab -->
+                  <div x-show="activeTab === 'synopsis'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-teal-500">visibility</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            A brief summary of your document's content. This will be displayed in document listings and previews to give readers an idea of what your document is about.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <%= f.text_area :synopsis,
+                      class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30',
+                      placeholder: "Summarize your document in a few sentences...",
+                      style: 'min-height: 300px; padding: 12px;'
+                    %>
+                  </div>
+                  
+                  <!-- Universe tab -->
+                  <div x-show="activeTab === 'universe'" x-cloak>
+                    <table class="mb-4 w-full">
+                      <tr>
+                        <td class="align-top pr-3" style="width: 24px;">
+                          <i class="material-icons text-teal-500">public</i>
+                        </td>
+                        <td class="align-top">
+                          <span class="text-sm text-gray-600">
+                            Select a universe for this document. Documents in a universe can be organized together and share common worldbuilding elements.
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                    
+                    <div class="mt-4">
+                      <label for="document_universe_id" class="block text-sm font-medium text-gray-700 mb-1">Universe</label>
+                      <%= f.collection_select :universe_id,
+                          current_user.universes.order(:name),
+                          :id,
+                          :name,
+                          { include_blank: "No universe" },
+                          { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md" }
+                      %>
+                      <p class="mt-2 text-sm text-gray-500">
+                        Selecting a universe will make this document part of that universe's worldbuilding.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Modal footer -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                  <div class="text-sm text-gray-500">
+                    <i class="material-icons text-sm align-middle mr-1">save</i>
+                    All changes will be saved
+                  </div>
+                  <div class="flex space-x-3">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+                      Cancel
+                    </button>
+                    <button type="button" id="save-metadata-button" @click="open = false" class="px-4 py-2 text-sm font-medium text-white bg-teal-500 border border-transparent rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                      Save & Close
+                    </button>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Document entities sidebar using Alpine.js -->
+        <div
+          x-data="documentEntitiesSidebar()"
+          x-init="$watch('entitiesSidebarOpen', value => {
+            if (value) {
+              document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+              // Focus the search input when sidebar is shown
+              setTimeout(() => {
+                document.getElementById('entity-search-input').focus();
+              }, 300);
+            } else {
+              document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+            }
+          })"
+          @keydown.escape.window="entitiesSidebarOpen = false"
+        >
+          <!-- Entities sidebar - in right column on large screens -->
+          <div
+            class="bg-white border-l border-gray-200 transition-all duration-300 ease-in-out overflow-hidden h-full sticky top-14 z-50"
+            :class="entitiesSidebarOpen ? 'block' : 'hidden'"
+            style="height: calc(100vh - 112px);"
+            x-cloak
+          >
+            <!-- Sidebar header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
+                  <i class="material-icons text-white text-sm">people_alt</i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900">Document Entities</h3>
+              </div>
+              <button @click="entitiesSidebarOpen = false" class="text-gray-500 hover:text-gray-700 lg:hidden">
+                <i class="material-icons">close</i>
+              </button>
+            </div>
+            
+            <!-- Sidebar content -->
+            <div class="flex flex-col h-full overflow-hidden" style="height: calc(100vh - 168px);">
+              <!-- Link new entity section -->
+              <div class="p-4 border-b border-gray-200">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Link a page to this document</h4>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="entity-search-input"
+                    placeholder="Search pages to link..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    autocomplete="off"
+                    x-model="searchQuery"
+                    @input="filterSearchResults"
+                    @focus="showSearchDropdown = searchQuery.length > 0"
+                    @blur="setTimeout(() => showSearchDropdown = false, 200)"
+                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <i class="material-icons text-gray-400">search</i>
+                  </div>
+                  
+                  <!-- Search results dropdown -->
+                  <div x-show="showSearchDropdown && filteredSearchResults.length > 0"
+                       x-transition:enter="transition ease-out duration-200"
+                       x-transition:enter-start="opacity-0 scale-95"
+                       x-transition:enter-end="opacity-100 scale-100"
+                       x-transition:leave="transition ease-in duration-150"
+                       x-transition:leave-start="opacity-100 scale-100"
+                       x-transition:leave-end="opacity-0 scale-95"
+                       class="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                    <template x-for="result in filteredSearchResults" :key="`${result.type}-${result.id}`">
+                      <button @click="linkEntity(result)"
+                              type="button"
+                              class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0">
+                        <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                             :class="getEntityColorClass(result.type)">
+                          <i class="material-icons text-xs" 
+                             :class="getEntityTextColorClass(result.type)"
+                             x-text="getEntityIcon(result.type)"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-medium text-gray-900 truncate" x-text="result.name"></p>
+                          <p class="text-xs text-gray-500" x-text="result.type"></p>
+                        </div>
+                      </button>
+                    </template>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Filter tabs - only show types that are actually linked -->
+              <div class="px-4 py-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
+                <div class="flex space-x-2" id="entity-filter-buttons">
+                  <!-- All filter (always visible) -->
+                  <button
+                    @click="filterByType('all')"
+                    :class="activeTab === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    class="p-2 rounded-md text-xs font-medium transition-colors"
+                    title="All pages"
+                  >
+                    <i class="material-icons text-sm">apps</i>
+                  </button>
+                  
+                  <% # Get unique entity types that are actually linked %>
+                  <% linked_types = @linked_entities.map(&:entity_type).uniq.sort %>
+                  
+                  <% linked_types.each do |entity_type| %>
+                    <% entity_class = content_class_from_name(entity_type) %>
+                    <% next unless entity_class %>
+                    
+                    <button
+                      @click="filterByType('<%= entity_type %>')"
+                      :class="activeTab === '<%= entity_type %>' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                      class="p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1"
+                      title="<%= entity_type.pluralize %>"
+                      data-filter-type="<%= entity_type %>"
+                    >
+                      <i class="material-icons text-sm"><%= entity_class.icon %></i>
+                      <span class="text-xs filter-count">
+                        (<%= @linked_entities.select { |e| e.entity_type == entity_type }.count %>)
+                      </span>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            
+              <!-- Vertical entity list with expandable previews -->
+              <div class="flex-1 overflow-y-auto p-4 h-full" style="flex-grow: 1;">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages <span id="linked-entities-count">(<%= @linked_entities.count %>)</span></h4>
+                
+                <!-- Entity list with collapsible previews -->
+                <div class="space-y-2" id="linked-entities-list">
+                  <% if @linked_entities.any? %>
+                    <% @linked_entities.each do |document_entity| %>
+                      <% entity = document_entity.entity %>
+                      <% next unless entity.present? %>
+                      <% entity_class = content_class_from_name(document_entity.entity_type) %>
+                      
+                      <div x-data="{ expanded: false }" 
+                           class="border rounded-md overflow-hidden linked-entity"
+                           data-entity-type="<%= document_entity.entity_type %>"
+                           data-entity-id="<%= document_entity.id %>">
+                        <!-- Entity header (always visible) -->
+                        <div
+                          @click="expanded = !expanded"
+                          :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                          class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                        >
+                          <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                              <div class="w-6 h-6 rounded-full <%= entity_class.color.gsub('bg-', 'bg-').gsub('-500', '-100') %> flex items-center justify-center mr-2">
+                                <i class="material-icons <%= entity_class.text_color %> text-xs"><%= entity_class.icon %></i>
+                              </div>
+                              <div>
+                                <span class="text-sm font-medium"><%= entity.name %></span>
+                                <p class="text-xs text-gray-500"><%= entity_class.name %></p>
+                              </div>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                              <!-- Unlink button -->
+                              <button @click.stop="unlinkEntity(<%= document_entity.id %>)"
+                                      class="p-1 hover:bg-red-50 rounded transition-colors"
+                                      title="Remove from document">
+                                <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+                              </button>
+                              <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Expandable preview section -->
+                        <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                          <div class="flex items-center justify-between mb-2">
+                            <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                            <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.id), 
+                                        class: "text-xs text-blue-600 hover:text-blue-800",
+                                        target: "_blank" do %>
+                              View full page
+                            <% end %>
+                          </div>
+                          
+                          <div class="space-y-2">
+                            <% # Display key attributes based on entity type %>
+                            <% case document_entity.entity_type %>
+                            <% when 'Character' %>
+                              <% if entity.respond_to?(:role) && entity.role.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                                  <p class="text-sm"><%= entity.role %></p>
+                                </div>
+                              <% end %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% when 'Location' %>
+                              <% if entity.respond_to?(:type_of) && entity.type_of.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                                  <p class="text-sm"><%= entity.type_of %></p>
+                                </div>
+                              <% end %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% when 'Item' %>
+                              <% if entity.respond_to?(:item_type) && entity.item_type.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                                  <p class="text-sm"><%= entity.item_type %></p>
+                                </div>
+                              <% end %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% else %>
+                              <% # Generic fallback for other content types %>
+                              <% if entity.respond_to?(:description) && entity.description.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
+                                </div>
+                              <% elsif entity.respond_to?(:summary) && entity.summary.present? %>
+                                <div>
+                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
+                                  <p class="text-sm"><%= truncate(entity.summary, length: 150) %></p>
+                                </div>
+                              <% end %>
+                            <% end %>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  <% else %>
+                    <!-- Empty state when no entities are linked -->
+                    <div class="flex flex-col items-center justify-center py-8 text-center">
+                      <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                        <i class="material-icons text-gray-400 text-xl">link_off</i>
+                      </div>
+                      <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
+                      <p class="text-xs text-gray-500">Type @ in the editor or search above to link pages</p>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Mobile entities sidebar (overlays content on small screens) -->
+      <div
+        x-show="entitiesSidebarOpen"
+        class="fixed inset-y-0 right-0 z-50 w-80 bg-white border-l border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden"
+        x-cloak
+      >
+        <!-- Sidebar header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
+              <i class="material-icons text-white text-sm">people_alt</i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900">Document Entities</h3>
+          </div>
+          <button @click="entitiesSidebarOpen = false" class="text-gray-500 hover:text-gray-700">
+            <i class="material-icons">close</i>
+          </button>
+        </div>
+        
+        <!-- Sidebar content (same as desktop) -->
+        <div class="flex flex-col h-full overflow-hidden">
+          <!-- Link new entity section -->
+          <div class="p-4 border-b border-gray-200">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Link a page to this document</h4>
+            <div class="relative">
+              <input
+                type="text"
+                id="entity-search-input-mobile"
+                placeholder="Search pages to link..."
+                class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                autocomplete="off"
+              >
+              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                <i class="material-icons text-gray-400">search</i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Entity list (same as desktop) -->
+          <div class="flex-1 overflow-y-auto p-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages</h4>
+            <div class="space-y-2">
+              <!-- Same entity list as desktop -->
+              <!-- Example entity with collapsible preview -->
+              <div class="border rounded-md overflow-hidden">
+                <div class="p-3 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center mr-2">
+                        <i class="material-icons text-red-600 text-xs">person</i>
+                      </div>
+                      <div>
+                        <span class="text-sm font-medium">Aragorn</span>
+                        <p class="text-xs text-gray-500">Character</p>
+                      </div>
+                    </div>
+                    <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Example entity 2 -->
+              <div class="border rounded-md overflow-hidden">
+                <div class="p-3 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                      <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
+                        <i class="material-icons text-green-600 text-xs">place</i>
+                      </div>
+                      <div>
+                        <span class="text-sm font-medium">Rivendell</span>
+                        <p class="text-xs text-gray-500">Location</p>
+                      </div>
+                    </div>
+                    <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Backdrop for mobile -->
+      <div
+        x-show="entitiesSidebarOpen"
+        @click="entitiesSidebarOpen = false"
+        class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+        x-cloak
+      ></div>
     </div>
-  <% end %>
-</div>
+  </main>
+      
+      <!-- Always-visible save status indicator centered at the bottom -->
+      <div id="save-indicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-white rounded-full shadow-md px-3 py-1.5 border border-gray-200 transition-colors duration-300">
+        <i class="material-icons js-autosave-icon text-gray-900 mr-2 text-sm">save</i>
+        <span class="js-autosave-status text-sm text-gray-600">Saved</span>
+      </div>
+      
+      <!-- Floating action buttons with tooltip -->
+      <div class="fixed bottom-8 right-8 flex flex-col space-y-4">
+        <!-- Document analysis button -->
+        <div class="group relative">
+          <%= link_to queue_analysis_document_path(@document), class: "flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-110 focus:outline-none" do %>
+            <i class="material-icons">analytics</i>
+          <% end %>
+          
+          <!-- Enhanced tooltip with CTA - positioned to stay on screen -->
+          <div class="absolute bottom-full mb-3 right-0 w-64 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity">
+            <div class="p-3">
+              <h4 class="font-medium text-gray-900 mb-1">Analyze Your Document</h4>
+              <p class="text-xs text-gray-600">Get AI-powered insights about readability, style, and sentiment.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Initialize Medium Editor with enhanced toolbar -->
+      <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        window.editor = new MediumEditor('#editor', {
+          targetBlank: true,
+          autoLink: false,
+          buttonLabels: 'fontawesome',
+          placeholder: {
+            text: 'Write as little or as much as you want!',
+            hideOnClick: true
+          },
+          toolbar: {
+            buttons: [
+              'bold',
+              'italic',
+              'underline',
+              'strikethrough',
+              {
+                name: 'h1',
+                action: 'append-h2',
+                aria: 'header type 1',
+                tagNames: ['h2'],
+                contentDefault: '<b>H1</b>',
+                classList: ['custom-class-h1'],
+                attrs: {'data-custom-attr': 'attr-value-h1'}
+              },
+              {
+                name: 'h2',
+                action: 'append-h3',
+                aria: 'header type 2',
+                tagNames: ['h3'],
+                contentDefault: '<b>H2</b>',
+                classList: ['custom-class-h2'],
+                attrs: {'data-custom-attr': 'attr-value-h2'}
+              },
+              {
+                name: 'h3',
+                action: 'append-h4',
+                aria: 'header type 3',
+                tagNames: ['h4'],
+                contentDefault: '<b>H3</b>',
+                classList: ['custom-class-h3'],
+                attrs: {'data-custom-attr': 'attr-value-h3'}
+              },
+              'justifyLeft',
+              'justifyCenter',
+              'justifyRight',
+              'justifyFull',
+              'orderedlist',
+              'unorderedlist',
+              'quote',
+              'anchor',
+              'removeFormat'
+            ]
+          },
+          anchorPreview: {
+            hideDelay: 0
+          },
+          paste: {
+            forcePlainText: false
+          }
+        });
+        
+        // Set up CSRF token for AJAX requests
+        $.ajaxSetup({
+          headers: {
+            'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+          }
+        });
+        
+        // Autosave variables
+        let short_timer = null;           // Timer that resets on each change (2 seconds)
+        let long_timer = null;            // Timer that forces save after 30 seconds
+        let last_autosave = null;         // Last AJAX request
+        let first_change_time = null;     // When the first unsaved change was made
+        let has_unsaved_changes = false;  // Whether we have unsaved changes
+        let autosave_hide_timeout = null; // Timeout for hiding success indicator
+        
+        // Function to perform the actual save
+        const performSave = function() {
+          console.log('Performing save');
+          
+          // Update save indicator to saving state
+          $('.js-autosave-status').text('Saving...');
+          $('.js-autosave-icon').addClass('text-gray-400').removeClass('text-gray-900 text-red-500');
+          $('#save-indicator').removeClass('bg-red-500').addClass('bg-white pulse-animation');
+          $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
+          
+          // Update mini save indicator
+          $('#mini-save-indicator i').addClass('pulse-animation');
+          
+          // Clear both timers
+          clearTimeout(short_timer);
+          clearTimeout(long_timer);
+          short_timer = null;
+          long_timer = null;
+          
+          // Reset change tracking
+          first_change_time = null;
+          has_unsaved_changes = false;
+          
+          // Do the autosave
+          last_autosave = $.ajax({
+            type: 'PATCH',
+            url: $('#editor').data('save-url'),
+            data: {
+              document: {
+                title: $('#document_title').val(),
+                body: $('#editor').html()
+              }
+            }
+          });
+          
+          last_autosave.fail(function(jqXHR, textStatus) {
+            // Update indicator to error state with red background and white text
+            $('.js-autosave-status').text('Error saving!');
+            $('.js-autosave-icon').addClass('text-white').removeClass('text-gray-400 text-gray-900 text-red-500');
+            $('#save-indicator').removeClass('bg-white bg-green-50').addClass('bg-red-500');
+            $('.js-autosave-status').removeClass('text-gray-600').addClass('text-white');
+            
+            // Mark that we still have unsaved changes
+            has_unsaved_changes = true;
+          });
+          
+          last_autosave.done(function() {
+            // Update indicator to saved state
+            $('.js-autosave-status').text('Saved');
+            $('.js-autosave-icon').addClass('text-gray-900').removeClass('text-gray-400 text-red-500 text-white');
+            $('#save-indicator').removeClass('bg-red-500 pulse-animation').addClass('bg-white');
+            $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
+            
+            // Update mini save indicator
+            $('#mini-save-indicator i').removeClass('pulse-animation');
+            
+            // Make the indicator more visible for a moment
+            $('#save-indicator').addClass('bg-green-50');
+            clearTimeout(autosave_hide_timeout);
+            autosave_hide_timeout = setTimeout(function() {
+              $('#save-indicator').removeClass('bg-green-50');
+            }, 1000);
+          });
+        };
+        
+        // Function to queue an autosave after a change
+        const queueAutosave = function() {
+          // If this is the first unsaved change, record the time
+          if (!has_unsaved_changes) {
+            first_change_time = new Date();
+            has_unsaved_changes = true;
+            
+            // Set long timer for 30 seconds (won't be reset by further changes)
+            if (!long_timer) {
+              long_timer = setTimeout(function() {
+                console.log('Long timer triggered - 30 seconds since first change');
+                performSave();
+              }, 30000); // 30 seconds
+            }
+          }
+          
+          // Update indicator to show pending changes
+          $('.js-autosave-status').text('Editing...');
+          
+          // Clear and reset the short timer (2 seconds)
+          clearTimeout(short_timer);
+          short_timer = setTimeout(function() {
+            console.log('Short timer triggered - 2 seconds since last change');
+            performSave();
+          }, 2000); // 2 seconds
+        };
+        
+        // Function to count words in text
+        const countWords = function(text) {
+          // Remove HTML tags
+          const strippedText = text.replace(/<[^>]*>/g, ' ');
+          // Replace multiple spaces, tabs, newlines with a single space
+          const cleanText = strippedText.replace(/\s+/g, ' ').trim();
+          // Return 0 if empty, otherwise count words
+          return cleanText === '' ? 0 : cleanText.split(' ').length;
+        };
+        
+        // Update word count display
+        const updateWordCount = function() {
+          const content = $('#editor').html();
+          const wordCount = countWords(content);
+          $('#word-count').text(wordCount);
+          $('#mini-word-count').text(wordCount); // Update mini word count too
+        };
+        
+        // Initial word count
+        updateWordCount();
+        
+        // Trigger autosave and update word count on content changes
+        editor.subscribe('editableInput', function() {
+          // Queue an autosave
+          queueAutosave();
+          // Update word count
+          updateWordCount();
+        });
+        
+        // Trigger autosave on title changes
+        $('#document_title').on('change', function() {
+          queueAutosave();
+        });
+        
+        $('#document_title').on('keyup', function() {
+          if ($(this).val().length > 0) {
+            queueAutosave();
+          }
+        });
+        
+        // Manual save on click - immediate save, not queued
+        $('.js-autosave-status').on('click', performSave);
+        
+        // Set up beforeunload handler to warn about unsaved changes
+        window.addEventListener('beforeunload', function(e) {
+          // Only show warning if we have unsaved changes
+          if (has_unsaved_changes) {
+            // Modern browsers
+            e.preventDefault();
+            e.returnValue = ''; // Chrome requires this
+            
+            // Legacy browsers (return value is ignored in modern browsers)
+            return 'You have unsaved changes. Are you sure you want to leave?';
+          }
+        });
+        
+        // Alternative legacy approach for older browsers
+        window.onbeforeunload = function() {
+          if (has_unsaved_changes) {
+            return 'You have unsaved changes. Are you sure you want to leave?';
+          }
+        };
+        
+        // Allow entering `tab` into the editor
+        $(document).delegate('#editor', 'keydown', function(e) {
+          const keyCode = e.keyCode || e.which;
+          if (keyCode === 9) {
+            e.preventDefault();
+          }
+        });
+        
+        // Keyboard shortcuts
+        $(document).on('keydown', function(e) {
+          // Save (Ctrl+S)
+          if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            performSave();
+          }
+        });
+      });
+      </script>
+      
+      <!-- Document metadata modal AJAX functionality -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Handle Save & Close button click
+          $('#save-metadata-button').on('click', function() {
+            // Get the form
+            const form = $('#document-metadata-form');
+            
+            // Show saving state
+            const button = $(this);
+            const originalText = button.text();
+            button.html('<i class="material-icons text-sm align-middle mr-1">hourglass_top</i> Saving...');
+            button.prop('disabled', true);
+            
+            // Submit the form via AJAX
+            $.ajax({
+              type: 'PATCH',
+              url: form.attr('action'),
+              data: form.serialize(),
+              success: function() {
+                // Show success state
+                button.html('<i class="material-icons text-sm align-middle mr-1">check</i> Saved!');
+                
+                // Close the modal after a short delay
+                setTimeout(function() {
+                  // Reset button
+                  button.html(originalText);
+                  button.prop('disabled', false);
+                  
+                  // The modal should already be closed by the @click="open = false" on the button
+                }, 1000);
+              },
+              error: function() {
+                // Show error state
+                button.html('<i class="material-icons text-sm align-middle mr-1">error</i> Error!');
+                
+                // Reset button after delay
+                setTimeout(function() {
+                  button.html(originalText);
+                  button.prop('disabled', false);
+                }, 2000);
+              }
+            });
+          });
+        });
+      </script>
+      
+      <!-- Privacy toggle functionality -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          // Document privacy toggle
+          $('#document-privacy-toggle').on('change', function() {
+            const isPublic = $(this).is(':checked');
+            const privacyValue = isPublic ? 'public' : 'private';
+            
+            // Update hidden field
+            $('#document_privacy_field').val(privacyValue);
+            
+            // Update icon in navbar
+            const privacyIcon = isPublic ? 'visibility' : 'visibility_off';
+            $('button[type="button"][@click*="document-privacy-modal"] i').text(privacyIcon);
+            
+            // Also update the privacy status indicator in the navbar
+            // Update the privacy button in the top right
+            const privacyButton = $('button[type="button"][@click*="document-privacy-modal"]');
+            privacyButton.find('i.material-icons').first().text(isPublic ? 'public' : 'lock');
+            privacyButton.find('i.material-icons').first().removeClass('text-gray-500 text-green-500').addClass(isPublic ? 'text-green-500' : 'text-gray-500');
+            privacyButton.find('span.capitalize.font-medium').text(isPublic ? 'public' : 'private');
+            
+            // Submit form
+            $('#document-privacy-form').submit();
+            
+            // Show saving indicator
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving privacy...');
+            
+            // Reset indicator after delay
+            setTimeout(function() {
+              saveIndicator.removeClass('pulse-animation');
+              $('.js-autosave-status').text('Saved');
+            }, 1500);
+          });
+          
+          // Universe privacy toggle (if present)
+          $('#universe-privacy-toggle').on('change', function() {
+            const isPublic = $(this).is(':checked');
+            const privacyValue = isPublic ? 'public' : 'private';
+            
+            // Update hidden field
+            $('#universe_privacy_field').val(privacyValue);
+            
+            // Submit form
+            $('#universe-privacy-form').submit();
+            
+            // Show saving indicator
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving universe privacy...');
+            
+            // Reset indicator after delay
+            setTimeout(function() {
+              saveIndicator.removeClass('pulse-animation');
+              $('.js-autosave-status').text('Saved');
+            }, 1500);
+          });
+          
+          // Helper functions for privacy radio buttons
+          window.updateDocumentPrivacy = function(radio) {
+            // Disable all radio buttons during submission to prevent multiple clicks
+            document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+              option.disabled = true;
+              option.parentElement.classList.add('opacity-50');
+            });
+            
+            const value = radio.value;
+            document.getElementById('document_privacy_field').value = value;
+            
+            // Update selected state visually
+            document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+              const container = option.closest('div');
+              if (option.value === value) {
+                container.classList.add('bg-white', 'border', 'border-teal-500');
+              } else {
+                container.classList.remove('bg-white', 'border', 'border-teal-500');
+              }
+            });
+            
+            // Update UI immediately
+            const statusIcon = value === 'public' ? 'public' : 'lock';
+            
+            // Update the privacy button in the top right
+            const privacyButton = $('button[type="button"][\\@click*="document-privacy-modal"]');
+            privacyButton.find('i.material-icons').first().text(statusIcon);
+            privacyButton.find('i.material-icons').first().removeClass('text-gray-500 text-green-500').addClass(value === 'public' ? 'text-green-500' : 'text-gray-500');
+            privacyButton.find('span.capitalize.font-medium').text(value);
+            
+            // Show saving indicator
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving privacy...');
+            
+            // Submit the form
+            $('#document-privacy-form').submit();
+          };
+          
+          // Flag to track if a submission is in progress
+          let universePrivacySubmissionInProgress = false;
+          
+          // Direct AJAX update function for universe privacy
+          window.updateUniversePrivacy = function(radio) {
+            console.log('updateUniversePrivacy called with value:', radio.value);
+            
+            // Prevent multiple submissions
+            if (universePrivacySubmissionInProgress) {
+              console.log('Universe privacy update already in progress, ignoring this request');
+              return;
+            }
+            
+            // Set flag to prevent multiple submissions
+            universePrivacySubmissionInProgress = true;
+            
+            // Disable all radio buttons immediately to prevent multiple clicks
+            document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+              option.disabled = true;
+              option.parentElement.classList.add('opacity-50');
+            });
+            
+            // Update selected state visually immediately
+            const value = radio.value;
+            document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+              const container = option.closest('div');
+              if (option.value === value) {
+                container.classList.add('bg-white', 'border', 'border-blue-500');
+              } else {
+                container.classList.remove('bg-white', 'border', 'border-blue-500');
+              }
+            });
+            
+            // Show saving indicator immediately
+            const saveIndicator = $('#save-indicator');
+            saveIndicator.addClass('pulse-animation');
+            $('.js-autosave-status').text('Saving universe privacy...');
+            
+            // Get universe ID from form action
+            const universeId = $('#universe-privacy-form').attr('action').split('/').pop();
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+            
+            console.log('Making AJAX request to update universe privacy to:', value);
+            
+            // Make direct AJAX call instead of form submission
+            $.ajax({
+              type: 'PATCH',
+              url: '/plan/universes/' + universeId,
+              headers: {
+                'X-CSRF-Token': csrfToken
+              },
+              data: {
+                universe: {
+                  privacy: value
+                }
+              },
+              success: function(data, textStatus, xhr) {
+                console.log('Universe privacy update successful');
+                handleUniversePrivacySuccess(value === 'public');
+              },
+              error: function(xhr, status, error) {
+                console.log('Universe privacy update response:', xhr.status, status);
+                
+                // The server is redirecting, which jQuery treats as an error
+                // But we know the update was successful if we get a 302 Found
+                if (xhr.status === 200 || xhr.status === 302) {
+                  console.log('Treating redirect as success');
+                  handleUniversePrivacySuccess(value === 'public');
+                } else {
+                  // Only show error for actual errors
+                  console.error("Universe privacy update error:", status, error);
+                  const saveIndicator = $('#save-indicator');
+                  saveIndicator.removeClass('bg-white pulse-animation').addClass('bg-red-500');
+                  $('.js-autosave-status').text('Error saving universe privacy!').addClass('text-white');
+                  
+                  // Reset indicator after delay
+                  setTimeout(function() {
+                    saveIndicator.removeClass('bg-red-500').addClass('bg-white');
+                    $('.js-autosave-status').text('Saved').removeClass('text-white');
+                  }, 2000);
+                }
+              },
+              complete: function() {
+                console.log('Universe privacy update request completed');
+                // Re-enable radio buttons
+                document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+                  option.disabled = false;
+                  option.parentElement.classList.remove('opacity-50');
+                });
+                
+                // Reset submission flag
+                universePrivacySubmissionInProgress = false;
+                
+                // Always remove the pulse animation when the request completes
+                $('#save-indicator').removeClass('pulse-animation');
+              }
+            });
+            
+            // Helper function to handle successful universe privacy updates
+            function handleUniversePrivacySuccess(isPublic) {
+              // Update UI elements based on the new privacy setting
+              window.updateUniversePrivacyUI(isPublic);
+              
+              // Show success in save indicator
+              const saveIndicator = $('#save-indicator');
+              saveIndicator.removeClass('pulse-animation bg-red-500').addClass('bg-green-50');
+              $('.js-autosave-status').text('Universe privacy saved').removeClass('text-white');
+              
+              // Reset indicator after delay
+              setTimeout(function() {
+                saveIndicator.removeClass('bg-green-50');
+                $('.js-autosave-status').text('Saved');
+              }, 2000);
+            }
+          };
+
+          // Function to update UI elements based on universe privacy
+          window.updateUniversePrivacyUI = function(isPublic) {
+            // Update the badge on the Universe tab
+            const universeTab = document.querySelector('button[type="button"][\\@click*="activeTab = \'universe\'"]');
+            if (universeTab) {
+              let badge = universeTab.querySelector('span.ml-2');
+              
+              if (isPublic) {
+                // Add badge if it doesn't exist
+                if (!badge) {
+                  badge = document.createElement('span');
+                  badge.className = 'ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800';
+                  badge.textContent = 'Public';
+                  universeTab.appendChild(badge);
+                }
+              } else {
+                // Remove badge if it exists
+                if (badge) {
+                  badge.remove();
+                }
+              }
+            }
+            
+            // Update the notice in the document privacy tab
+            const universeNotice = document.querySelector('.mb-4.p-3.rounded-md.border');
+            if (universeNotice) {
+              if (isPublic) {
+                universeNotice.classList.remove('bg-gray-50', 'border-gray-200');
+                universeNotice.classList.add('bg-yellow-50', 'border-yellow-200');
+                
+                // Update icon container
+                const iconContainer = universeNotice.querySelector('.w-8.h-8.rounded-full');
+                iconContainer.classList.remove('bg-gray-100');
+                iconContainer.classList.add('bg-yellow-100');
+                
+                // Update icon
+                const icon = iconContainer.querySelector('.material-icons');
+                icon.classList.remove('text-gray-500');
+                icon.classList.add('text-yellow-600');
+                icon.textContent = 'warning';
+                
+                // Update text
+                const title = universeNotice.querySelector('.text-sm.font-medium');
+                title.classList.remove('text-gray-700');
+                title.classList.add('text-yellow-800');
+                
+                const description = universeNotice.querySelector('.text-xs');
+                description.classList.remove('text-gray-500');
+                description.classList.add('text-yellow-600');
+                description.innerHTML = '<strong>Note:</strong> This universe is <strong>public</strong>, so this document will be visible to anyone who can view the universe, regardless of its own privacy setting. <a @click="activeTab = \'universe\'" class="underline cursor-pointer text-yellow-700 hover:opacity-80">Manage universe privacy</a>';
+              } else {
+                universeNotice.classList.remove('bg-yellow-50', 'border-yellow-200');
+                universeNotice.classList.add('bg-gray-50', 'border-gray-200');
+                
+                // Update icon container
+                const iconContainer = universeNotice.querySelector('.w-8.h-8.rounded-full');
+                iconContainer.classList.remove('bg-yellow-100');
+                iconContainer.classList.add('bg-gray-100');
+                
+                // Update icon
+                const icon = iconContainer.querySelector('.material-icons');
+                icon.classList.remove('text-yellow-600');
+                icon.classList.add('text-gray-500');
+                icon.textContent = 'info';
+                
+                // Update text
+                const title = universeNotice.querySelector('.text-sm.font-medium');
+                title.classList.remove('text-yellow-800');
+                title.classList.add('text-gray-700');
+                
+                const description = universeNotice.querySelector('.text-xs');
+                description.classList.remove('text-yellow-600');
+                description.classList.add('text-gray-500');
+                description.innerHTML = 'This universe is <strong>private</strong>, so this document\'s privacy setting will be respected. <a @click="activeTab = \'universe\'" class="underline cursor-pointer text-gray-600 hover:opacity-80">Manage universe privacy</a>';
+              }
+            }
+          };
+          
+          // Handle form submission for document-privacy-form
+          $('#document-privacy-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            
+            $.ajax({
+              type: 'PATCH',
+              url: form.attr('action'),
+              data: form.serialize(),
+              success: function() {
+                // Show success in save indicator
+                const saveIndicator = $('#save-indicator');
+                saveIndicator.removeClass('pulse-animation bg-red-500').addClass('bg-green-50');
+                $('.js-autosave-status').text('Privacy saved').removeClass('text-white');
+                
+                // Reset indicator after delay
+                setTimeout(function() {
+                  saveIndicator.removeClass('bg-green-50');
+                  $('.js-autosave-status').text('Saved');
+                }, 1500);
+              },
+              error: function() {
+                // Show error in save indicator
+                const saveIndicator = $('#save-indicator');
+                saveIndicator.removeClass('bg-white pulse-animation').addClass('bg-red-500');
+                $('.js-autosave-status').text('Error saving privacy!').addClass('text-white');
+                
+                // Reset indicator after delay
+                setTimeout(function() {
+                  saveIndicator.removeClass('bg-red-500').addClass('bg-white');
+                  $('.js-autosave-status').text('Saved').removeClass('text-white');
+                }, 2000);
+              },
+              complete: function() {
+                // Re-enable radio buttons
+                document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+                  option.disabled = false;
+                  option.parentElement.classList.remove('opacity-50');
+                });
+              }
+            });
+          });
+          
+          // Prevent the default form submission entirely
+          $('#universe-privacy-form').on('submit', function(e) {
+            console.log('Preventing default form submission for universe privacy');
+            e.preventDefault();
+            return false;
+          });
+          
+          // Make sure the radio buttons trigger the updateUniversePrivacy function
+          document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(radio) {
+            // Re-attach the onchange handler to ensure it works
+            radio.onchange = function() {
+              updateUniversePrivacy(this);
+            };
+          });
+          
+          // Initialize UI based on current universe privacy
+          $(document).ready(function() {
+            <% if @document.universe.present? %>
+              window.updateUniversePrivacyUI(<%= @document.universe.privacy == 'public' ? 'true' : 'false' %>);
+            <% end %>
+          });
+          
+          // Add event listener for Alpine.js tab changes to ensure badge visibility
+          document.addEventListener('alpine:initialized', function() {
+            // When the universe tab becomes active, ensure the badge is properly displayed
+            document.addEventListener('x-on:click', function(event) {
+              if (event.target.getAttribute('@click') &&
+                  event.target.getAttribute('@click').includes("activeTab = 'universe'")) {
+                <% if @document.universe.present? %>
+                  window.updateUniversePrivacyUI(<%= @document.universe.privacy == 'public' ? 'true' : 'false' %>);
+                <% end %>
+              }
+            });
+          });
+        });
+      </script>
+      
+      <!-- Custom styles for Medium Editor to match Tailwind design -->
+      <style>
+        /* Enhanced Medium Editor toolbar styling */
+        .medium-editor-toolbar {
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          border: none;
+          background-color: white;
+          transition: all 0.2s ease;
+          transform-origin: center bottom;
+          animation: toolbar-appear 0.2s ease;
+        }
+        
+        @keyframes toolbar-appear {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .medium-editor-toolbar-active {
+          visibility: visible;
+        }
+        
+        .medium-editor-toolbar-actions {
+          display: flex;
+          padding: 4px;
+          gap: 2px;
+        }
+        
+        .medium-editor-action {
+          width: 36px;
+          height: 36px;
+          border-radius: 0.375rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.15s ease;
+          background-color: white;
+          color: rgba(55, 65, 81, 1);
+        }
+        
+        .medium-editor-action:hover {
+          background-color: rgba(243, 244, 246, 1);
+          color: rgba(17, 24, 39, 1);
+        }
+        
+        .medium-editor-button-active {
+          background-color: rgba(239, 246, 255, 1);
+          color: rgba(37, 99, 235, 1);
+        }
+        
+        .medium-editor-placeholder {
+          color: rgba(156, 163, 175, 1);
+        }
+        
+        /* Improve the prose styling for the editor */
+        .prose {
+          max-width: none;
+        }
+        
+        .prose h2 {
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        .prose h3 {
+          margin-top: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        .prose p {
+          margin-top: 1em;
+          margin-bottom: 1em;
+        }
+        
+        .prose ul, .prose ol {
+          margin-top: 1em;
+          margin-bottom: 1em;
+        }
+        
+        /* Autosave indicator animation */
+        @keyframes pulse {
+          0% { opacity: 1; }
+          50% { opacity: 0.6; }
+          100% { opacity: 1; }
+        }
+        
+        .pulse-animation {
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 640px) {
+          .medium-editor-action {
+            width: 32px;
+            height: 32px;
+          }
+          
+          #editor {
+            padding: 1rem;
+          }
+        }
+      </style>
+      
+      <!-- Alpine.js component for Document Entities Sidebar -->
+      <script>
+        function documentEntitiesSidebar() {
+          return {
+            activeTab: 'all',
+            selectedEntity: null,
+            searchQuery: '',
+            showSearchDropdown: false,
+            filteredSearchResults: [],
+            allLinkables: [],
+            
+            init() {
+              // Load linkables data if available
+              if (window.notebookLinkables) {
+                this.allLinkables = window.notebookLinkables.map(item => ({
+                  id: item.value.match(/\[\[[^\-]+\-([^\]]+)\]\]/)?.[1],
+                  name: item.name,
+                  type: item.type,
+                  value: item.value,
+                  color: item.color,
+                  icon: item.icon,
+                  textColor: item.textColor
+                }));
+              }
+            },
+            
+            filterSearchResults() {
+              if (this.searchQuery.length === 0) {
+                this.filteredSearchResults = [];
+                this.showSearchDropdown = false;
+                return;
+              }
+              
+              const query = this.searchQuery.toLowerCase();
+              this.filteredSearchResults = this.allLinkables
+                .filter(item => item.name.toLowerCase().includes(query))
+                .slice(0, 10); // Limit to 10 results
+              
+              this.showSearchDropdown = this.filteredSearchResults.length > 0;
+            },
+            
+            linkEntity(entity) {
+              // Check if entity is already linked
+              const existingEntity = document.querySelector(`[data-entity-type="${entity.type}"][data-entity-id]`);
+              if (existingEntity) {
+                const existingIds = Array.from(document.querySelectorAll(`[data-entity-type="${entity.type}"]`))
+                  .map(el => el.querySelector('[data-linked-entity-id]')?.dataset.linkedEntityId)
+                  .filter(Boolean);
+                
+                if (existingIds.includes(entity.id)) {
+                  alert('This page is already linked to the document.');
+                  return;
+                }
+              }
+              
+              // Create form data for linking
+              const formData = new FormData();
+              formData.append('document_id', '<%= @document.id %>');
+              formData.append('document_analysis_id', '-1'); // Create placeholder if needed
+              formData.append('entity_type', entity.type);
+              formData.append('entity_id', entity.id);
+              formData.append('document_entity_id', '-1'); // New entity
+              
+              // Get CSRF token
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              
+              // Send AJAX request to link entity
+              fetch('/documents/link_entity', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Accept': 'application/json'
+                },
+                body: formData
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Create and insert the new entity element
+                  const newEntityElement = this.createEntityElement(data.document_entity);
+                  
+                  // Remove empty state if it exists
+                  const emptyState = document.querySelector('#linked-entities-list .flex.flex-col.items-center.justify-center');
+                  if (emptyState) {
+                    emptyState.remove();
+                  }
+                  
+                  // Add the new entity to the list
+                  const entitiesList = document.getElementById('linked-entities-list');
+                  entitiesList.insertAdjacentHTML('afterbegin', newEntityElement);
+                  
+                  // Initialize Alpine for the new element
+                  const newElement = entitiesList.firstElementChild;
+                  if (window.Alpine && newElement) {
+                    window.Alpine.initTree(newElement);
+                  }
+                  
+                  // Update count
+                  this.updateEntityCount();
+                  
+                  // Update filter buttons if this is a new entity type
+                  this.updateFilterButtons(data.document_entity.entity_type, data.document_entity.entity);
+                  
+                  // Apply current filter
+                  if (this.activeTab !== 'all') {
+                    this.filterByType(this.activeTab);
+                  }
+                  
+                  // Show success feedback
+                  this.showSuccessFeedback('Page linked successfully!');
+                } else {
+                  console.error('Failed to link entity');
+                  alert('Failed to link page. Please try again.');
+                }
+              })
+              .catch(error => {
+                console.error('Error linking entity:', error);
+                alert('An error occurred while linking the page.');
+              });
+              
+              // Clear search
+              this.searchQuery = '';
+              this.showSearchDropdown = false;
+              this.filteredSearchResults = [];
+            },
+            
+            unlinkEntity(documentEntityId) {
+              if (!confirm('Remove this page from the document?')) {
+                return;
+              }
+              
+              // Get CSRF token
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              
+              // Send request to remove entity
+              fetch('/documents/<%= @document.id %>/destroy_entity/' + documentEntityId, {
+                method: 'GET',
+                headers: {
+                  'X-CSRF-Token': csrfToken
+                }
+              })
+              .then(response => {
+                if (response.ok) {
+                  // Remove from UI
+                  const entityElement = document.querySelector(`[data-entity-id="${documentEntityId}"]`);
+                  if (entityElement) {
+                    entityElement.remove();
+                    
+                    // Update counts and filter buttons
+                    this.updateEntityCount();
+                    this.updateAllFilterCounts();
+                    
+                    // Check if we need to show empty state
+                    const remainingEntities = document.querySelectorAll('.linked-entity');
+                    if (remainingEntities.length === 0) {
+                      const entitiesList = document.getElementById('linked-entities-list');
+                      entitiesList.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-8 text-center">
+                          <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                            <i class="material-icons text-gray-400 text-xl">link_off</i>
+                          </div>
+                          <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
+                          <p class="text-xs text-gray-500">Type @ in the editor or search above to link pages</p>
+                        </div>
+                      `;
+                    }
+                  }
+                } else {
+                  console.error('Failed to unlink entity');
+                }
+              })
+              .catch(error => {
+                console.error('Error unlinking entity:', error);
+              });
+            },
+            
+            getEntityColorClass(type) {
+              // Map content types to Tailwind color classes
+              const colorMap = {
+                'Character': 'bg-red-100',
+                'Location': 'bg-green-100',
+                'Item': 'bg-yellow-100',
+                'Creature': 'bg-purple-100',
+                'Flora': 'bg-green-100',
+                'Building': 'bg-gray-100',
+                'Landmark': 'bg-blue-100',
+                'Town': 'bg-orange-100',
+                'Country': 'bg-pink-100',
+                'Planet': 'bg-indigo-100',
+                'Universe': 'bg-blue-100',
+                'Document': 'bg-teal-100'
+              };
+              return colorMap[type] || 'bg-gray-100';
+            },
+            
+            getEntityTextColorClass(type) {
+              // Map content types to text color classes
+              const colorMap = {
+                'Character': 'text-red-600',
+                'Location': 'text-green-600',
+                'Item': 'text-yellow-600',
+                'Creature': 'text-purple-600',
+                'Flora': 'text-green-600',
+                'Building': 'text-gray-600',
+                'Landmark': 'text-blue-600',
+                'Town': 'text-orange-600',
+                'Country': 'text-pink-600',
+                'Planet': 'text-indigo-600',
+                'Universe': 'text-blue-600',
+                'Document': 'text-teal-600'
+              };
+              return colorMap[type] || 'text-gray-600';
+            },
+            
+            getEntityIcon(type) {
+              // Map content types to Material Icons
+              const iconMap = {
+                'Character': 'person',
+                'Location': 'place',
+                'Item': 'category',
+                'Creature': 'pets',
+                'Flora': 'local_florist',
+                'Building': 'home',
+                'Landmark': 'terrain',
+                'Town': 'location_city',
+                'Country': 'flag',
+                'Planet': 'public',
+                'Universe': 'public',
+                'Document': 'description'
+              };
+              return iconMap[type] || 'category';
+            },
+            
+            filterByType(type) {
+              this.activeTab = type;
+              
+              // Get all entity elements
+              const entities = document.querySelectorAll('.linked-entity');
+              
+              entities.forEach(entity => {
+                const entityType = entity.dataset.entityType;
+                
+                if (type === 'all') {
+                  // Show all entities
+                  entity.style.display = 'block';
+                } else {
+                  // Show only matching type
+                  entity.style.display = entityType === type ? 'block' : 'none';
+                }
+              });
+              
+              // Update count in header
+              const visibleCount = type === 'all' 
+                ? entities.length 
+                : document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+              
+              // Update the header count if it exists
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${visibleCount})`;
+              }
+              
+              // Update all filter button counts
+              this.updateAllFilterCounts();
+            },
+            
+            updateAllFilterCounts() {
+              // Update counts for all filter buttons
+              const filterButtons = document.querySelectorAll('[data-filter-type]');
+              filterButtons.forEach(button => {
+                const type = button.dataset.filterType;
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+                const countSpan = button.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+                
+                // Hide filter button if count is 0 (entity was removed)
+                if (count === 0) {
+                  button.style.display = 'none';
+                } else {
+                  button.style.display = '';
+                }
+              });
+            },
+            
+            createEntityElement(documentEntity) {
+              const entity = documentEntity.entity;
+              const colorClass = entity.class_color.replace('bg-', 'bg-').replace('-500', '-100');
+              
+              // Build attributes HTML based on entity type
+              let attributesHtml = '';
+              if (documentEntity.entity_type === 'Character') {
+                if (entity.role) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.role)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Location') {
+                if (entity.type_of) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.type_of)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Item') {
+                if (entity.item_type) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.item_type)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else {
+                // Generic fallback
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                } else if (entity.summary) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.summary, 150))}</p>
+                    </div>`;
+                }
+              }
+              
+              return `
+                <div x-data="{ expanded: false }" 
+                     class="border rounded-md overflow-hidden linked-entity"
+                     data-entity-type="${documentEntity.entity_type}"
+                     data-entity-id="${documentEntity.id}"
+                     data-linked-entity-id="${entity.id}">
+                  <!-- Entity header (always visible) -->
+                  <div
+                    @click="expanded = !expanded"
+                    :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                    class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full ${colorClass} flex items-center justify-center mr-2">
+                          <i class="material-icons ${entity.class_text_color} text-xs">${entity.class_icon}</i>
+                        </div>
+                        <div>
+                          <span class="text-sm font-medium">${this.escapeHtml(entity.name)}</span>
+                          <p class="text-xs text-gray-500">${entity.class_name}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <!-- Unlink button -->
+                        <button @click.stop="unlinkEntity(${documentEntity.id})"
+                                class="p-1 hover:bg-red-50 rounded transition-colors"
+                                title="Remove from document">
+                          <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+                        </button>
+                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Expandable preview section -->
+                  <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                    <div class="flex items-center justify-between mb-2">
+                      <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                      <a href="${entity.view_path}" 
+                         class="text-xs text-blue-600 hover:text-blue-800"
+                         target="_blank">
+                        View full page
+                      </a>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      ${attributesHtml}
+                    </div>
+                  </div>
+                </div>
+              `;
+            },
+            
+            updateEntityCount() {
+              const entities = document.querySelectorAll('.linked-entity');
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${entities.length})`;
+              }
+            },
+            
+            updateFilterButtons(entityType, entityData) {
+              const filterContainer = document.getElementById('entity-filter-buttons');
+              if (!filterContainer) return;
+              
+              // Check if a filter button for this type already exists
+              let filterButton = filterContainer.querySelector(`[data-filter-type="${entityType}"]`);
+              
+              if (filterButton) {
+                // Update the count for existing filter
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${entityType}"]`).length;
+                const countSpan = filterButton.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+              } else {
+                // Create a new filter button for this entity type
+                const newButton = document.createElement('button');
+                // Don't use Alpine directives - use regular JavaScript instead
+                newButton.className = 'p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 bg-gray-100 text-gray-700';
+                newButton.setAttribute('title', entityType + 's');
+                newButton.setAttribute('data-filter-type', entityType);
+                
+                // Use the icon from entity data
+                newButton.innerHTML = `
+                  <i class="material-icons text-sm">${entityData.class_icon}</i>
+                  <span class="text-xs filter-count">(1)</span>
+                `;
+                
+                // Add click handler
+                newButton.addEventListener('click', () => {
+                  this.filterByType(entityType);
+                  
+                  // Update button styles to show active state
+                  document.querySelectorAll('#entity-filter-buttons button').forEach(btn => {
+                    if (btn.getAttribute('data-filter-type') === entityType || 
+                        (btn.querySelector('.material-icons')?.textContent === 'apps' && entityType === 'all')) {
+                      btn.className = btn.className.replace('bg-gray-100 text-gray-700', 'bg-blue-100 text-blue-700');
+                    } else if (!btn.hasAttribute('@click')) {
+                      // Only update non-Alpine buttons
+                      btn.className = btn.className.replace('bg-blue-100 text-blue-700', 'bg-gray-100 text-gray-700');
+                    }
+                  });
+                });
+                
+                // Insert the button (keep alphabetical order)
+                const allButtons = Array.from(filterContainer.querySelectorAll('[data-filter-type]'));
+                const insertIndex = allButtons.findIndex(btn => btn.dataset.filterType > entityType);
+                
+                if (insertIndex === -1) {
+                  // Add at the end
+                  filterContainer.appendChild(newButton);
+                } else {
+                  // Insert before the found button
+                  filterContainer.insertBefore(newButton, allButtons[insertIndex]);
+                }
+              }
+            },
+            
+            showSuccessFeedback(message) {
+              // Create a temporary success message
+              const feedback = document.createElement('div');
+              feedback.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+              feedback.textContent = message;
+              document.body.appendChild(feedback);
+              
+              setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => feedback.remove(), 300);
+              }, 2000);
+            },
+            
+            escapeHtml(text) {
+              if (!text) return '';
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div.innerHTML;
+            },
+            
+            truncate(text, length) {
+              if (!text) return '';
+              if (text.length <= length) return text;
+              return text.substring(0, length) + '...';
+            }
+          }
+        }
+      </script>

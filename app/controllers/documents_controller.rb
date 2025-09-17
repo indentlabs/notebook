@@ -1,4 +1,6 @@
 class DocumentsController < ApplicationController
+  layout :determine_layout
+
   before_action :authenticate_user!, except: [:show, :analysis]
 
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
@@ -18,23 +20,68 @@ class DocumentsController < ApplicationController
 
   before_action :cache_linkable_content_for_each_content_type, only: [:edit]
 
-  layout 'editor',    only: [:edit]
-
   def index
     @page_title = "My documents"
     @recent_documents = current_user
       .linkable_documents.order('updated_at DESC')
       .includes([:user, :page_tags, :universe])
+      .limit(10) # Limit for sidebar display
 
+    # Apply sorting based on params
     @documents = current_user
       .linkable_documents
-      .order('favorite DESC, title ASC, updated_at DESC')
       .includes([:user, :page_tags, :universe])
+    
+    case params[:sort]
+    when 'alphabetical'
+      @documents = @documents.order(favorite: :desc, title: :asc)
+    when 'word_count'
+      @documents = @documents.order(favorite: :desc).order(Arel.sql('cached_word_count DESC NULLS LAST'))
+    when 'created'
+      @documents = @documents.order(favorite: :desc, created_at: :desc)
+    else # default to 'updated' or no param
+      @documents = @documents.order(favorite: :desc, updated_at: :desc)
+    end
 
     @folders = current_user
       .folders
       .where(context: 'Document', parent_folder_id: nil)
       .order('title ASC')
+    
+    # Apply global search if query param is present
+    if params[:q].present?
+      search_query = "%#{params[:q]}%"
+      @documents = @documents.where("title ILIKE ? OR body ILIKE ?", search_query, search_query)
+      @folders = @folders.where("title ILIKE ?", search_query)
+    end
+
+    # Calculate frequent folders (top 5 by document count)
+    @frequent_folders = current_user
+      .folders
+      .where(context: 'Document')
+      .joins(:documents)
+      .group('folders.id')
+      .order('COUNT(documents.id) DESC')
+      .limit(5)
+
+    # Writing statistics
+    @total_documents = current_user.linkable_documents.count
+    @total_word_count = current_user.linkable_documents.sum(:cached_word_count) || 0
+    @average_words_per_doc = @total_documents > 0 ? (@total_word_count.to_f / @total_documents).round : 0
+
+    # This month's stats
+    @documents_this_month = current_user.linkable_documents
+      .where('created_at >= ?', Date.current.beginning_of_month)
+      .count
+
+    # Calculate writing streak using WordCountUpdate
+    calculate_writing_streak_data
+
+    # Recent activity for feed
+    @recent_activity = current_user.linkable_documents
+      .order('updated_at DESC')
+      .limit(10)
+      .select(:id, :title, :updated_at, :cached_word_count, :user_id)
 
     # TODO: can we reuse this content to skip a few queries in this controller action?
     cache_linkable_content_for_each_content_type
@@ -56,6 +103,7 @@ class DocumentsController < ApplicationController
       page_id:   @documents.map(&:id)
     ).order(:tag)
 
+    @filtered_page_tags = []
     if params.key?(:tag)
       @filtered_page_tags = @page_tags.where(slug: params[:tag])
       @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
@@ -147,7 +195,40 @@ class DocumentsController < ApplicationController
       # # Finally, we need to kick off another analysis job to fetch information about this entity
       document_entity.analyze! if current_user.on_premium_plan?
 
-      return redirect_back(fallback_location: analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
+      # Return JSON for AJAX requests, redirect for regular requests
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!") }
+        format.json do
+          # Load the entity with its attributes for display
+          entity = document_entity.entity
+          entity_class = entity.class
+          
+          render json: {
+            success: true,
+            document_entity: {
+              id: document_entity.id,
+              entity_type: document_entity.entity_type,
+              entity_id: document_entity.entity_id,
+              entity: {
+                id: entity.id,
+                name: entity.name,
+                description: entity.try(:description),
+                role: entity.try(:role),
+                type_of: entity.try(:type_of),
+                item_type: entity.try(:item_type),
+                summary: entity.try(:summary),
+                class_color: entity_class.color,
+                class_text_color: entity_class.text_color,
+                class_icon: entity_class.icon,
+                class_name: entity_class.name,
+                view_path: polymorphic_path(entity_class.name.downcase, id: entity.id)
+              }
+            }
+          }
+        end
+      end
+      
+      return
 
     else
       # If we pass in an actual ID for the document entity, we're modifying an existing one
@@ -160,7 +241,38 @@ class DocumentsController < ApplicationController
           entity_id:   linked_entity_params[:entity_id].to_i
         )
 
-        return redirect_to(analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!")
+        respond_to do |format|
+          format.html { redirect_to(analysis_document_path(document_entity.document_analysis.document), notice: "Page linked!") }
+          format.json do
+            entity = document_entity.entity
+            entity_class = entity.class
+            
+            render json: {
+              success: true,
+              document_entity: {
+                id: document_entity.id,
+                entity_type: document_entity.entity_type,
+                entity_id: document_entity.entity_id,
+                entity: {
+                  id: entity.id,
+                  name: entity.name,
+                  description: entity.try(:description),
+                  role: entity.try(:role),
+                  type_of: entity.try(:type_of),
+                  item_type: entity.try(:item_type),
+                  summary: entity.try(:summary),
+                  class_color: entity_class.color,
+                  class_text_color: entity_class.text_color,
+                  class_icon: entity_class.icon,
+                  class_name: entity_class.name,
+                  view_path: polymorphic_path(entity_class.name.downcase, id: entity.id)
+                }
+              }
+            }
+          end
+        end
+        
+        return
       end
     end
   end
@@ -176,9 +288,13 @@ class DocumentsController < ApplicationController
   def edit
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
 
+    # Fetch all document entities (linked and unlinked) with their associations
     @linked_entities = @document.document_entities
+      .includes(:entity)
       .where.not(entity_id: nil)
-      .group_by(&:entity_type)
+    
+    # Group by entity type for easier rendering
+    @linked_entities_by_type = @linked_entities.group_by(&:entity_type)
   end
 
   def create
@@ -200,12 +316,20 @@ class DocumentsController < ApplicationController
       d_params[:universe_id] = nil
     end
 
-    # Only queue document mentions for analysis if the document body has changed
-    DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
-
-    update_page_tags(document) if document_tag_params
-
+    # Save the document first - this is critical and must succeed
     if document.update(d_params)
+      # Update tags after successful save
+      update_page_tags(document) if document_tag_params
+      
+      # Queue background jobs only after successful save, and fail gracefully if Redis is down
+      begin
+        # Only queue document mentions for analysis if the document body has changed
+        DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
+      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+        # Log the error but don't fail the save - the document is already saved
+        Rails.logger.warn "Could not queue DocumentMentionJob due to Redis connection error: #{e.message}"
+      end
+      
       head 200, content_type: "text/html"
     else
       head 501, content_type: "text/html"
@@ -217,18 +341,22 @@ class DocumentsController < ApplicationController
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
-    render layout: 'plaintext'
+    render
   end
 
   def toggle_favorite
     document = Document.with_deleted.find_or_initialize_by(id: params[:id])
 
     unless document.updatable_by?(current_user)
-      flash[:notice] = "You don't have permission to edit that!"
-      return redirect_back fallback_location: document
+      render json: { error: "You don't have permission to edit that!" }, status: :forbidden
+      return
     end
 
-    document.update!(favorite: !document.favorite)
+    if document.update(favorite: !document.favorite)
+      render json: { success: true, favorite: document.favorite }
+    else
+      render json: { error: "Failed to update favorite status" }, status: :unprocessable_entity
+    end
   end
 
   def destroy
@@ -293,7 +421,30 @@ class DocumentsController < ApplicationController
     @show_footer = false
   end
 
+  # Determines which layout to use based on the current action
+  def determine_layout
+    if action_name == 'edit'
+      'editor'
+    elsif action_name == 'plaintext'
+      'plaintext'
+    else
+      'application' # Default layout for other actions
+    end
+  end
+
   private
+
+  def calculate_writing_streak_data
+    # Today's word count
+    @words_written_today = WordCountUpdate
+      .where(user: current_user, for_date: Date.current)
+      .sum(:word_count)
+
+    # This week's word count
+    @words_written_this_week = WordCountUpdate
+      .where(user: current_user, for_date: Date.current.beginning_of_week..Date.current)
+      .sum(:word_count)
+  end
 
   def update_page_tags(document)
     tag_list = document_tag_params.fetch('value', '').split(PageTag::SUBMISSION_DELIMITER)

@@ -1,112 +1,241 @@
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Your payment method</div>
-        <div class="row">
-          <div class="col s12 m6">
-            <p>
-              <strong>For your security, we don't store your payment information on file.</strong><br /><br />
+<!-- Page Header -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 mb-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+      <div class="mb-4 lg:mb-0">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Billing History</h1>
+        <p class="text-gray-600">View your payment history and manage your payment methods.</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= link_to subscription_path, class: 'inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' do %>
+          <i class="material-icons text-sm mr-2">arrow_back</i>
+          Back to Subscription
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+  <!-- Payment Methods Section -->
+  <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-8">
+    <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg flex items-center justify-center mr-4 shadow-sm">
+          <i class="material-icons text-blue-700">credit_card</i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900">Payment Methods</h2>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center mr-3">
+                <i class="material-icons text-blue-700 text-sm">security</i>
+              </div>
+              <span class="text-sm font-bold text-blue-900">Secure Payment Processing</span>
+            </div>
+            <p class="text-sm text-blue-800 leading-relaxed">
+              We use Stripe, an industry-leading payment processor, to securely handle all payment information. 
+              Your full card details are tokenized and stored securely by Stripe, not on our servers.
             </p>
-            <p>
-              Instead, we rely on industry-leading payment processor Stripe to safely and securely process payments and handle your
-              subscription info.
-            </p>
-          </div>
-          <div class="col s12 m6">
-            <% if @stripe_payment_methods.data.length == 0 %>
-              <p>
-                We don't currently have a payment method on file for you. You'll be asked to add one whenever you
-                upgrade, but you can add one at any time here.
-                <br /><br />
-              </p>
-              <p class="center">
-                <%= link_to "Add payment method", payment_info_path, class: 'btn white blue-text' %>
-              </p>
-            <% else %>
-              <p>
-                We have a payment method on file for you through Stripe
-                (<%= @stripe_payment_methods.data[0].try(:card).try(:brand) || 'a card' %> ending in <%= @stripe_payment_methods.data[0].try(:card).try(:last4) %>),
-                but since we don't store it, you cannot edit it. You can choose to add a new one (replacing the old),
-                or delete the existing one.
-              </p>
-            <% end %>
           </div>
         </div>
+        <div>
+          <% if @stripe_payment_methods.data.length == 0 %>
+            <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-gray-400 transition-colors duration-200">
+              <div class="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i class="material-icons text-gray-400 text-xl">credit_card_off</i>
+              </div>
+              <h3 class="text-sm font-bold text-gray-900 mb-2">No payment method on file</h3>
+              <p class="text-sm text-gray-500 mb-4">
+                You'll be prompted to add one when upgrading to Premium.
+              </p>
+              <%= link_to payment_info_path, class: 'inline-flex items-center justify-center px-4 py-2.5 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200' do %>
+                <i class="material-icons text-sm mr-2">add</i>
+                Add Payment Method
+              <% end %>
+            </div>
+          <% else %>
+            <div class="bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200 rounded-xl p-6 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center mr-3">
+                    <i class="material-icons text-gray-700">credit_card</i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-900">
+                      <%= (@stripe_payment_methods.data[0].try(:card).try(:brand) || 'Card').titleize %> ending in <%= @stripe_payment_methods.data[0].try(:card).try(:last4) %>
+                    </p>
+                    <p class="text-xs text-gray-500">Primary payment method</p>
+                  </div>
+                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ring-1 ring-green-600/20">
+                  Active
+                </span>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <%= link_to payment_info_path, class: 'inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200' do %>
+                  <i class="material-icons text-sm mr-2">edit</i>
+                  Update
+                <% end %>
+                <%= link_to delete_payment_method_path, class: 'inline-flex items-center justify-center px-4 py-2.5 border border-red-300 rounded-lg text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200', data: { confirm: 'Are you sure you want to delete this payment method?' } do %>
+                  <i class="material-icons text-sm mr-2">delete</i>
+                  Remove
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
       </div>
-      <% if @stripe_payment_methods.data.length > 0 %>
-      <div class="card-action">
-        <%= link_to "Add new payment method", payment_info_path %>
-        <%= link_to "Delete existing payment method", delete_payment_method_path %>
-      </div>
-      <% end %>
     </div>
   </div>
 
+  <!-- Notice for PayPal Users -->
   <% if current_user.paypal_invoices.any? %>
-    <div class="col s12">
-      <div class="card-panel yellow darken-3">
-        Please note that this list only reflects recurring subscription payments and doesn't include any standalone Premium Code purchases yet.
+    <div class="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 mb-8 shadow-sm">
+      <div class="flex items-start">
+        <div class="w-8 h-8 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+          <i class="material-icons text-amber-700 text-sm">info</i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-amber-900 mb-2">Note about PayPal purchases</h3>
+          <p class="text-sm text-amber-800 leading-relaxed">
+            This billing history shows recurring subscription payments only. Premium Code purchases made through PayPal are tracked separately in your 
+            <%= link_to 'prepaid codes section', prepay_path, class: 'font-medium underline hover:no-underline text-amber-900' %>.
+          </p>
+        </div>
       </div>
     </div>
   <% end %>
 
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          <div class="right">
-            <% account_balance = @stripe_customer.balance %>
-            <%= 'Outstanding balance:' if account_balance > 0 %> <%= number_to_currency(account_balance.abs / 100.0) if account_balance != 0 %> <%= 'credit' if account_balance < 0 %>
+  <!-- Billing History Section -->
+  <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+    <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg flex items-center justify-center mr-4 shadow-sm">
+            <i class="material-icons text-blue-700">receipt</i>
           </div>
-          Billing history
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">Transaction History</h2>
+            <p class="text-sm text-gray-500">Your recent billing transactions</p>
+          </div>
         </div>
-        <table class="bordered">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Description</th>
-              <th>Amount Billed</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @stripe_invoices.first(10).each do |invoice| %>
-              <tr>
-                <td>
-                  <%= Time.at(invoice.created).strftime("%B %d, %Y") %><br />
-                  at <%= Time.at(invoice.created).strftime("%I:%M %p") %><br />
-                  <%= '(Pending)' if Time.at(invoice.created) > Time.now %>
-                </td>
-                <td>
-                  <ul>
-                    <% invoice.lines.data.reverse.each do |line_item| %>
-                      <li>
-                        <%
-                          action = line_item.amount < 0 ? 'prorated' : 'charged'
-                          if line_item.description.nil?
-                            description = [
-                              "a #{line_item.plan.name} subscription ",
-                              "from #{Time.at(line_item.period.start).strftime('%B %d, %Y')} ",
-                              "to #{Time.at(line_item.period.end).strftime('%B %d, %Y')}"
-                            ].join
-                          else
-                            description = line_item.description
-                          end
-                        %>
-
-                        You were <%= action %> <%= number_to_currency(line_item.amount / 100) %> for <%= description %>.
-                      </li>
-                    <% end %>
-                  </ul>
-                </td>
-                <td>
-                  <%= number_to_currency(invoice.amount_due / 100) %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
+      <% account_balance = @stripe_customer.balance %>
+      <% if account_balance != 0 %>
+        <div class="text-right">
+          <p class="text-sm text-gray-500">
+            <%= account_balance > 0 ? 'Outstanding balance:' : 'Account credit:' %>
+          </p>
+          <p class="text-lg font-semibold <%= account_balance > 0 ? 'text-red-600' : 'text-green-600' %>">
+            <%= number_to_currency(account_balance.abs / 100.0) %>
+          </p>
+        </div>
+      <% end %>
     </div>
   </div>
+  
+  <% if @stripe_invoices.data.any? %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gradient-to-r from-gray-50 to-blue-50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+              Date
+            </th>
+            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+              Description
+            </th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
+              Amount
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @stripe_invoices.first(10).each_with_index do |invoice, index| %>
+            <tr class="<%= 'bg-gray-50' if index.even? %>">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">
+                  <%= Time.at(invoice.created).strftime("%B %d, %Y") %>
+                </div>
+                <div class="text-xs text-gray-500">
+                  <%= Time.at(invoice.created).strftime("%I:%M %p") %>
+                  <% if Time.at(invoice.created) > Time.now %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                      Pending
+                    </span>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <div class="space-y-1">
+                  <% invoice.lines.data.reverse.each do |line_item| %>
+                    <div class="text-sm text-gray-900">
+                      <%
+                        action = line_item.amount < 0 ? 'Credit' : 'Charge'
+                        action_color = line_item.amount < 0 ? 'text-green-600' : 'text-gray-900'
+                        
+                        if line_item.description.nil?
+                          plan_name = line_item.plan&.nickname || line_item.plan&.id || 'subscription'
+                          description = "#{plan_name.titleize} (#{Time.at(line_item.period.start).strftime('%b %d')} - #{Time.at(line_item.period.end).strftime('%b %d, %Y')})"
+                        else
+                          description = line_item.description
+                        end
+                      %>
+                      <span class="<%= action_color %> font-medium"><%= action %>:</span>
+                      <span class="text-gray-700"><%= description %></span>
+                      <span class="text-gray-500 text-xs ml-2">(<%= number_to_currency(line_item.amount.abs / 100) %>)</span>
+                    </div>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right">
+                <div class="text-sm font-medium text-gray-900">
+                  <%= number_to_currency(invoice.amount_due / 100) %>
+                </div>
+                <% if invoice.paid %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Paid
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Unpaid
+                  </span>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+    <% if @stripe_invoices.data.length > 10 %>
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 text-center">
+        <p class="text-sm text-gray-600">
+          Showing the 10 most recent transactions. 
+          <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">View all transactions</a>
+        </p>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="px-6 py-12 text-center">
+      <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <i class="material-icons text-gray-500 text-2xl">receipt_long</i>
+      </div>
+      <h3 class="text-xl font-bold text-gray-900 mb-3">No billing history yet</h3>
+      <p class="text-sm text-gray-500 mb-8 max-w-md mx-auto">
+        Your transaction history will appear here once you make your first payment.
+      </p>
+      <%= link_to subscription_path, class: 'inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200' do %>
+        <i class="material-icons text-sm mr-2">upgrade</i>
+        Upgrade to Premium
+      <% end %>
+    </div>
+  <% end %>
+  </div>
+
 </div>

@@ -1,0 +1,347 @@
+<!-- Content Tab - Browse All Public Pages -->
+<div class="space-y-6">
+  
+  <!-- Header with Controls -->
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Public Content</h2>
+      <p class="text-gray-600 mt-1">
+        Browse <%= @user.name || @user.display_name %>'s public pages by content type
+      </p>
+    </div>
+    
+    <!-- Controls -->
+    <div class="flex items-center space-x-3">
+      <!-- Search -->
+      <div class="relative">
+        <input type="text" 
+               placeholder="Search content..." 
+               class="w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               id="content-search">
+        <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
+      </div>
+      
+      <!-- View Toggle -->
+      <div class="flex items-center bg-gray-100 rounded-lg p-1">
+        <button id="grid-view-btn" class="px-3 py-1 rounded-md text-sm font-medium bg-white text-blue-600 shadow-sm">
+          <i class="material-icons text-sm">grid_view</i>
+        </button>
+        <button id="list-view-btn" class="px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">
+          <i class="material-icons text-sm">view_list</i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Content Type Filter -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-sm font-medium text-gray-700 mr-2">Filter by type:</span>
+      
+      <button class="content-type-filter active px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200" data-type="all">
+        All Types
+        <span class="ml-1 px-2 py-0.5 bg-blue-200 text-blue-900 rounded-full text-xs">
+          <%= @total_public_pages %>
+        </span>
+      </button>
+      
+      <% @content.each do |content_type, content_list| %>
+        <% content_type_klass = User.new.send(content_type).klass %>
+        <button class="content-type-filter px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200" 
+                data-type="<%= content_type %>">
+          <i class="material-icons text-xs mr-1"><%= content_type_klass.icon %></i>
+          <%= content_type.to_s.humanize.pluralize %>
+          <span class="ml-1 px-2 py-0.5 bg-gray-200 text-gray-800 rounded-full text-xs">
+            <%= content_list.length %>
+          </span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+  
+  <!-- Content Display -->
+  <% if @content.any? %>
+    
+    <!-- Grid View -->
+    <div id="content-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <% @content.each do |content_type, content_list| %>
+        <% content_type_klass = User.new.send(content_type).klass %>
+        <% content_list.each do |content_page| %>
+          <div class="content-item" 
+               data-type="<%= content_type %>"
+               data-name="<%= content_page.name.downcase %>"
+               data-updated="<%= content_page.updated_at.to_i %>">
+            
+            <%= link_to content_page, class: "group block" do %>
+              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                
+                <!-- Content Image -->
+                <div class="relative h-48 overflow-hidden">
+                  <% if content_page.respond_to?(:random_image_including_private) && content_page.random_image_including_private.present? %>
+                    <%= image_tag content_page.random_image_including_private, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+                  <% else %>
+                    <div class="w-full h-full <%= content_type_klass.color %> bg-opacity-20 flex items-center justify-center">
+                      <i class="material-icons text-6xl <%= content_type_klass.text_color %> opacity-80"><%= content_type_klass.icon %></i>
+                    </div>
+                  <% end %>
+                  
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                  
+                  <!-- Content Type Badge -->
+                  <div class="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white <%= content_type_klass.color %>">
+                    <i class="material-icons text-xs mr-1"><%= content_type_klass.icon %></i>
+                    <%= content_type_klass.name %>
+                  </div>
+                  
+                  <!-- Content Title -->
+                  <div class="absolute bottom-3 left-3 right-3">
+                    <h3 class="text-white font-semibold text-lg line-clamp-2">
+                      <%= content_page.name %>
+                    </h3>
+                  </div>
+                </div>
+                
+                <!-- Content Details -->
+                <div class="p-4">
+                  <div class="flex items-center justify-between text-xs text-gray-500">
+                    <span class="flex items-center">
+                      <i class="material-icons text-xs mr-1">schedule</i>
+                      <%= time_ago_in_words(content_page.updated_at) %> ago
+                    </span>
+                    
+                    <% if content_page.respond_to?(:cached_word_count) && content_page.cached_word_count && content_page.cached_word_count > 0 %>
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">description</i>
+                        <%= number_with_delimiter content_page.cached_word_count %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+    
+    <!-- List View -->
+    <div id="content-list" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div class="divide-y divide-gray-200">
+        <% @content.each do |content_type, content_list| %>
+          <% content_type_klass = User.new.send(content_type).klass %>
+          <% content_list.each do |content_page| %>
+            <div class="content-item" 
+                 data-type="<%= content_type %>"
+                 data-name="<%= content_page.name.downcase %>"
+                 data-updated="<%= content_page.updated_at.to_i %>">
+              
+              <%= link_to content_page, class: "block hover:bg-gray-50 transition-colors duration-200" do %>
+                <div class="px-6 py-4 flex items-center space-x-4">
+                  
+                  <!-- Content Image/Icon -->
+                  <div class="flex-shrink-0">
+                    <% if content_page.respond_to?(:random_image_including_private) && content_page.random_image_including_private.present? %>
+                      <%= image_tag content_page.random_image_including_private, class: "w-12 h-12 rounded-lg object-cover" %>
+                    <% else %>
+                      <div class="w-12 h-12 <%= content_type_klass.color %> bg-opacity-20 rounded-lg flex items-center justify-center">
+                        <i class="material-icons text-lg <%= content_type_klass.text_color %>"><%= content_type_klass.icon %></i>
+                      </div>
+                    <% end %>
+                  </div>
+                  
+                  <!-- Content Info -->
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2 mb-1">
+                      <h3 class="text-lg font-semibold text-gray-900 truncate"><%= content_page.name %></h3>
+                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= content_type_klass.color %> text-white">
+                        <%= content_type_klass.name %>
+                      </span>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">schedule</i>
+                        <%= time_ago_in_words(content_page.updated_at) %> ago
+                      </span>
+                      
+                      <% if content_page.respond_to?(:cached_word_count) && content_page.cached_word_count && content_page.cached_word_count > 0 %>
+                        <span class="flex items-center">
+                          <i class="material-icons text-xs mr-1">description</i>
+                          <%= number_with_delimiter content_page.cached_word_count %> words
+                        </span>
+                      <% end %>
+                      
+                      <% if content_page.respond_to?(:universe) && content_page.universe %>
+                        <span class="flex items-center">
+                          <i class="material-icons text-xs mr-1">public</i>
+                          <%= content_page.universe.name %>
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                  
+                  <!-- Arrow -->
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-gray-400">chevron_right</i>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- No Results -->
+    <div id="no-content-results" class="hidden text-center py-12">
+      <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No content found</h3>
+      <p class="text-gray-500">Try adjusting your search terms or content type filter.</p>
+    </div>
+    
+  <% else %>
+    
+    <!-- Empty State -->
+    <div class="text-center py-16">
+      <div class="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+        <i class="material-icons text-blue-600 text-4xl">library_books</i>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+        <% if user_signed_in? && @user == current_user %>
+          No public content yet
+        <% else %>
+          <%= @user.name || @user.display_name %> hasn't shared any content publicly
+        <% end %>
+      </h3>
+      
+      <p class="text-gray-600 max-w-md mx-auto mb-6">
+        <% if user_signed_in? && @user == current_user %>
+          Create characters, locations, items, and more to build your fictional worlds. Make them public to share with the community.
+        <% else %>
+          Content includes characters, locations, items, and other worldbuilding elements. Check back later!
+        <% end %>
+      </p>
+      
+      <% if user_signed_in? && @user == current_user %>
+        <%= link_to new_character_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+          <i class="material-icons mr-2 text-sm">add</i>
+          Create Your First Character
+        <% end %>
+      <% end %>
+    </div>
+    
+  <% end %>
+</div>
+
+<!-- JavaScript for Content Filtering and View Switching -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('content-search');
+  const contentGrid = document.getElementById('content-grid');
+  const contentList = document.getElementById('content-list');
+  const noResults = document.getElementById('no-content-results');
+  const gridViewBtn = document.getElementById('grid-view-btn');
+  const listViewBtn = document.getElementById('list-view-btn');
+  const typeFilters = document.querySelectorAll('.content-type-filter');
+  
+  let currentView = 'grid';
+  let currentFilter = 'all';
+  let currentSearch = '';
+  
+  // Get all content items
+  const allContentItems = Array.from(document.querySelectorAll('.content-item'));
+  
+  function updateDisplay() {
+    let filteredItems = allContentItems;
+    
+    // Apply type filter
+    if (currentFilter !== 'all') {
+      filteredItems = filteredItems.filter(item => item.dataset.type === currentFilter);
+    }
+    
+    // Apply search filter
+    if (currentSearch) {
+      filteredItems = filteredItems.filter(item => 
+        item.dataset.name.includes(currentSearch.toLowerCase())
+      );
+    }
+    
+    // Hide all items first
+    allContentItems.forEach(item => {
+      item.style.display = 'none';
+    });
+    
+    // Show filtered items
+    if (filteredItems.length > 0) {
+      filteredItems.forEach(item => {
+        item.style.display = 'block';
+      });
+      
+      if (currentView === 'grid') {
+        contentGrid.style.display = 'grid';
+        contentList.style.display = 'none';
+      } else {
+        contentGrid.style.display = 'none';
+        contentList.style.display = 'block';
+      }
+      
+      noResults.classList.add('hidden');
+    } else {
+      contentGrid.style.display = 'none';
+      contentList.style.display = 'none';
+      noResults.classList.remove('hidden');
+    }
+  }
+  
+  // Search functionality
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      currentSearch = this.value;
+      updateDisplay();
+    });
+  }
+  
+  // View toggle functionality
+  if (gridViewBtn && listViewBtn) {
+    gridViewBtn.addEventListener('click', function() {
+      currentView = 'grid';
+      this.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+      this.classList.remove('text-gray-600');
+      listViewBtn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+      listViewBtn.classList.add('text-gray-600');
+      updateDisplay();
+    });
+    
+    listViewBtn.addEventListener('click', function() {
+      currentView = 'list';
+      this.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+      this.classList.remove('text-gray-600');
+      gridViewBtn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+      gridViewBtn.classList.add('text-gray-600');
+      updateDisplay();
+    });
+  }
+  
+  // Type filter functionality
+  typeFilters.forEach(filter => {
+    filter.addEventListener('click', function() {
+      currentFilter = this.dataset.type;
+      
+      // Update active state
+      typeFilters.forEach(f => {
+        f.classList.remove('active', 'bg-blue-100', 'text-blue-800', 'border-blue-200');
+        f.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
+      });
+      
+      this.classList.add('active', 'bg-blue-100', 'text-blue-800', 'border-blue-200');
+      this.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+      
+      updateDisplay();
+    });
+  });
+  
+  // Initialize display
+  updateDisplay();
+});
+</script>

@@ -1,240 +1,641 @@
-<div class="row">
-  <div class="col s12">
-    <div class="hoverable card">
-      <div class="card-content">
-        <div class="card-title">Prepaid Premium Codes</div>
-        <div class="row">
-          <div class="col s12 m8 l9">
-            <p>
-              Making a purchase below will generate a single-use code that can be redeemed at any time for a Premium subscription on Notebook.ai.
-              You can purchase these codes for yourself if you'd like to prepay for a certain amount of months without a recurring monthly subscription,
-              or for others if you'd like to gift a Notebook.ai Premium membership to someone else!
-            </p>
-            <br />
-            <p>
-              You can purchase as many codes as you'd like and redeem them whenever you'd like.
-            </p>
-            <br />
-            <p>
-              While your Premium is active, you'll have access to <%= Rails.application.config.content_types[:premium].count %> additional worldbuilding
-              pages: you'll be able to create unlimited 
-              <%=
-                Rails.application.config.content_types[:premium].map { |page|
-                  "&nbsp;<strong class='#{page.text_color}'><i class='material-icons tiny'>#{page.icon}</i> #{page.name.pluralize}</strong>"
-                }.to_sentence.html_safe
-              %>!
-            </p>
-          </div>
-          <div class="col hide-on-small-only m4 l3">
-            <%= image_tag 'tristan/small.webp',
-              class: 'tooltipped tristan',
-              data: {
-                position: 'left',
-                enterDelay: '500',
-                tooltip: "Hey, I'm Tristan! I'm here to help you around the site!"
-              } %>
-          </div>
-        </div>
+<!-- Page Header -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 mb-8">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+      <div class="mb-4 lg:mb-0">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Premium Codes</h1>
+        <p class="text-gray-600">Purchase prepaid Premium codes for yourself or as gifts</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <%= link_to subscription_path, class: 'inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' do %>
+          <i class="material-icons text-sm mr-2">arrow_back</i>
+          Back to Subscription
+        <% end %>
       </div>
     </div>
   </div>
 </div>
 
-<h5 class="center grey-text">Choose a Premium Code to purchase</h5>
-<div class="row">
-  <div class="col s12 m6">
-    <%= link_to prepay_paypal_gateway_path(months: 1), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="min-height: 170px;">
-        <div class="card-content">
-          <div class="card-title black-text">
-            <i class="material-icons left">star</i>
-            1 month of Premium
-          </div>
-          <p class="black-text">
-            All Premium features
-            for <strong>$9.00</strong>
-          </p>
-        </div>
-      </div>
-    <% end %>
-  </div>
-  <div class="col s12 m6">
-    <%= link_to prepay_paypal_gateway_path(months: 3), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="min-height: 170px;">
-        <div class="card-content">
-          <div class="card-title black-text">
-            <i class="material-icons left">star</i>
-            3 months of Premium
-          </div>
-          <p class="black-text">
-            All Premium features
-            for <strong>$24.00</strong>
-            (save $3.00 compared to monthly)
-          </p>
-        </div>
-      </div>
-    <% end %>
-  </div>
-  <div class="col s12 m6">
-    <%= link_to prepay_paypal_gateway_path(months: 6), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="min-height: 170px">
-        <div class="card-content">
-          <div class="card-title black-text">
-            <i class="material-icons left">star</i>
-            6 months of Premium
-          </div>
-          <p class="black-text">
-            All Premium features
-            for <strong>$48.00</strong>
-            (save $6.00 compared to monthly)
-          </p>
-        </div>
-      </div>
-    <% end %>
-  </div>
-  <div class="col s12 m6">
-    <%= link_to prepay_paypal_gateway_path(months: 12), class: 'black-text' do %>
-      <div class="hoverable card blue lighten-4" style="min-height: 170px;">
-        <div class="card-content">
-          <div class="card-title black-text">
-            <i class="material-icons left">star</i>
-            12 months of Premium
-          </div>
-          <p class="black-text">
-            All Premium features
-            for <strong>$84.00</strong>
-            (save $24.00 compared to monthly)
-          </p>
-        </div>
-      </div>
-    <% end %>
-  </div>
-</div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-<div class="row">
-  <div class="col s12 m10 offset-m1">
-    Selecting a package will take you to PayPal to complete your purchase, where you can pay from a PayPal balance or with a credit/debit card. 
-    Afterwards, you will be redirected here where you will find the code you've purchased listed below.
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12">
-    <h5 class="center grey-text">Your purchased Premium codes</h5>
-    <p class="center grey-text">
-      Please note that codes may take up to 5 minutes to appear here after purchase.
-    </p>
-
-    <% if current_user.on_premium_plan? && @invoices.any? %>
-      <div class="card-panel green white-text center">
-        Since you already have Premium features active, you won't be able to activate any codes on this account yet.<br />
-        Activation links will appear again whenever you don't have Premium active.
+  <!-- Value Proposition Section -->
+  <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-8">
+    <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg flex items-center justify-center mr-4 shadow-sm">
+          <i class="material-icons text-blue-700">card_giftcard</i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900">How Premium Codes Work</h2>
       </div>
-    <% end %>
-  </div>
-  <% @invoices.each do |invoice| %>
-    <div class="col s12 m12 l6">
-      <div class="hoverable card medium <%= 'blue lighten-5' if invoice.activateable? %>">
-        <div class="card-content">
-          <div class="card-title">
-            <% if invoice.page_unlock_promo_code&.uses_remaining&.zero? %>
-              <span class="badge orange black-text">used</span>
-            <% end %>
-            <%= pluralize invoice.months, 'month' %> of Premium
-          </div>
-          <p>
-            <% if invoice.page_unlock_promo_code.present? %>
-              <p>
-                Description: <%= invoice.page_unlock_promo_code.description %>
-              </p>
-              <% if invoice.activateable? %>
-                <p>
-                  Promo code: <strong><%= invoice.page_unlock_promo_code.code %></strong>
-                </p>
-              <% end %>
-            <% else %>
-              <% if invoice.status == 'APPROVED' %>
-                <em>Processing payment...</em>
-              <% else %>
-                <%= link_to 'Awaiting payment', invoice.approval_url %>
-              <% end %>
-            <% end %>
-          </p>
-          <p class="grey-text">
-            <% unless invoice.page_unlock_promo_code&.uses_remaining&.zero? %>
-              <% if invoice.status == 'CREATED' %>
-                Ready for payment
-              <% else %>
-                Purchased
-              <% end %>
-              <%= time_ago_in_words invoice.created_at %> ago
-            <% end %>
-          </p>
-          <% if invoice.page_unlock_promo_code %>
-            <hr style="margin: 20px 0" />
-            <p>
-              <div>
-                Unlocks these <%= pluralize invoice.page_unlock_promo_code.page_types.count, 'page type' %>
-                for <%= invoice.months * 30 %> days:
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div>
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                <i class="material-icons text-blue-600 text-sm">shopping_cart</i>
               </div>
-              <% invoice.page_unlock_promo_code.page_types.each do |page_type| %>
-                <% page_type_class = content_class_from_name(page_type) %>
-                <%= link_to polymorphic_path(page_type_class) do %>
-                  <i class="material-icons <%= page_type_class.text_color %> tooltipped" data-tooltip="<%= page_type.pluralize %>">
-                    <%= page_type_class.icon %>
-                  </i>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Purchase Flexibility</h3>
+                <p class="text-sm text-gray-600">Buy codes for immediate use or save them for later activation. No recurring subscriptions required.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                <i class="material-icons text-green-600 text-sm">card_giftcard</i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Perfect for Gifting</h3>
+                <p class="text-sm text-gray-600">Share Premium access with friends, family, or fellow writers with a simple code.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                <i class="material-icons text-purple-600 text-sm">security</i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Secure & Simple</h3>
+                <p class="text-sm text-gray-600">Powered by PayPal's secure payment processing. Codes appear instantly after purchase.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-blue-900 mb-4">Premium Features Included</h3>
+            <div class="space-y-3">
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-sm text-blue-800"><strong>Unlimited universes</strong> and <strong>10GB storage</strong></span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-sm text-blue-800">All <strong><%= Rails.application.config.content_types[:all].count %></strong> page types</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <i class="material-icons text-green-600 text-sm">check</i>
+                </div>
+                <span class="text-sm text-blue-800"><strong>Document analysis</strong> and advanced features</span>
+              </div>
+            </div>
+            <div class="mt-6 pt-4 border-t border-blue-200">
+              <div class="flex flex-wrap gap-2">
+                <% Rails.application.config.content_types[:premium].first(8).each do |page| %>
+                  <div class="inline-flex items-center px-2 py-1 rounded-md bg-white border border-blue-200 text-xs">
+                    <i class="material-icons <%= page.text_color %> text-xs mr-1"><%= page.icon %></i>
+                    <span class="text-gray-700"><%= page.name.pluralize %></span>
+                  </div>
                 <% end %>
-              <% end %>
+                <% if Rails.application.config.content_types[:premium].count > 8 %>
+                  <div class="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs text-gray-500">
+                    +<%= Rails.application.config.content_types[:premium].count - 8 %> more
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Code Purchase Options -->
+  <div class="mb-12">
+    <div class="text-center mb-10">
+      <h3 class="text-3xl font-bold text-gray-900 mb-4">Choose Your Premium Duration</h3>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">Select the perfect duration for your needs. Longer plans offer better value.</p>
+    </div>
+    
+    <!-- Pricing Cards Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- 1 Month Plan -->
+      <div class="plan-card relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-gray-200">
+        <div class="p-8">
+          <!-- Plan Header -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <i class="material-icons text-gray-600 text-2xl">star</i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">1 Month</h4>
+            <div class="text-4xl font-bold text-gray-900 mb-1">$9</div>
+            <div class="text-gray-500">per month</div>
+          </div>
+          
+          <!-- Features List -->
+          <div class="space-y-4 mb-8">
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Perfect for <strong>trying Premium</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Great as a <strong>gift</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">No commitment</span>
+            </div>
+          </div>
+          
+          <!-- Action Button -->
+          <div class="mt-auto">
+            <%= link_to prepay_paypal_gateway_path(months: 1), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-gray-700 bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 text-center block" do %>
+              Purchase 1 Month
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 3 Month Plan -->
+      <div class="plan-card relative bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-blue-300">
+        <div class="absolute -top-2 -right-2 z-10">
+          <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">Save $3</span>
+        </div>
+        
+        <div class="p-8">
+          <!-- Plan Header -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-blue-200 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <i class="material-icons text-blue-700 text-2xl">star</i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">3 Months</h4>
+            <div class="text-4xl font-bold text-gray-900 mb-1">$24</div>
+            <div class="text-gray-500 mb-1">total ($8/mo)</div>
+            <div class="text-xs text-green-600 font-semibold">Save $3 vs monthly</div>
+          </div>
+          
+          <!-- Features List -->
+          <div class="space-y-4 mb-8">
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Great for <strong>projects</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Perfect <strong>gift size</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Good value</span>
+            </div>
+          </div>
+          
+          <!-- Action Button -->
+          <div class="mt-auto">
+            <%= link_to prepay_paypal_gateway_path(months: 3), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200 text-center block" do %>
+              Purchase 3 Months
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 6 Month Plan -->
+      <div class="plan-card relative bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-purple-300">
+        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+          <span class="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold shadow-lg whitespace-nowrap">Popular</span>
+        </div>
+        <div class="absolute -top-2 -right-2 z-10">
+          <span class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">Save $6</span>
+        </div>
+        
+        <div class="p-8">
+          <!-- Plan Header -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-purple-200 to-pink-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <i class="material-icons text-purple-700 text-2xl">star</i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">6 Months</h4>
+            <div class="text-4xl font-bold text-gray-900 mb-1">$48</div>
+            <div class="text-gray-500 mb-1">total ($8/mo)</div>
+            <div class="text-xs text-green-600 font-semibold">Save $6 vs monthly</div>
+          </div>
+          
+          <!-- Features List -->
+          <div class="space-y-4 mb-8">
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Perfect for <strong>writers</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Great <strong>value</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Most popular choice</span>
+            </div>
+          </div>
+          
+          <!-- Action Button -->
+          <div class="mt-auto">
+            <%= link_to prepay_paypal_gateway_path(months: 6), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 shadow-lg hover:shadow-xl transition-all duration-200 text-center block" do %>
+              Purchase 6 Months
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 12 Month Plan -->
+      <div class="plan-card relative bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 border border-amber-300">
+        <div class="absolute -top-2 -right-2 z-10">
+          <span class="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">Save $24</span>
+        </div>
+        
+        <div class="p-8">
+          <!-- Plan Header -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-gradient-to-br from-amber-200 to-orange-200 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <i class="material-icons text-amber-700 text-2xl">star</i>
+            </div>
+            <h4 class="text-xl font-bold text-gray-900 mb-2">12 Months</h4>
+            <div class="text-4xl font-bold text-gray-900 mb-1">$84</div>
+            <div class="text-gray-600 mb-1">total ($7/mo)</div>
+            <div class="text-xs text-green-600 font-semibold">Save $24 vs monthly</div>
+          </div>
+          
+          <!-- Features List -->
+          <div class="space-y-4 mb-8">
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700"><strong>Best value</strong> option</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">For <strong>serious writers</strong></span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-green-600 text-sm">check</i>
+              </div>
+              <span class="text-gray-700">Maximum savings</span>
+            </div>
+          </div>
+          
+          <!-- Action Button -->
+          <div class="mt-auto">
+            <%= link_to prepay_paypal_gateway_path(months: 12), class: "w-full py-3 px-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 shadow-xl hover:shadow-2xl transition-all duration-200 text-center block" do %>
+              Purchase 12 Months
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Information -->
+  <div class="bg-white shadow-lg rounded-xl overflow-hidden mb-8">
+    <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg flex items-center justify-center mr-4 shadow-sm">
+          <i class="fab fa-paypal text-blue-700"></i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900">Secure Payment with PayPal</h2>
+      </div>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                <i class="material-icons text-blue-600 text-sm">security</i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Secure Processing</h3>
+                <p class="text-sm text-gray-600">All payments are processed securely through PayPal. You can pay with PayPal balance or any credit/debit card.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                <i class="material-icons text-green-600 text-sm">flash_on</i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-gray-900 mb-1">Instant Delivery</h3>
+                <p class="text-sm text-gray-600">Your Premium code will appear below immediately after successful payment completion.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+            <h3 class="text-sm font-bold text-blue-900 mb-3">What happens next?</h3>
+            <div class="space-y-2 text-sm text-blue-800">
+              <div class="flex items-center">
+                <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 mr-3">1</span>
+                <span>Click a plan above to go to PayPal</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 mr-3">2</span>
+                <span>Complete your payment securely</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 mr-3">3</span>
+                <span>Return here to find your code ready</span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-600 mr-3">4</span>
+                <span>Activate immediately or share as gift</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Management Section -->
+  <div class="bg-white shadow-lg rounded-xl overflow-hidden">
+    <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg flex items-center justify-center mr-4 shadow-sm">
+            <i class="material-icons text-blue-700">inventory</i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">Your Premium Codes</h2>
+            <p class="text-sm text-gray-500">Manage your purchased codes and track usage</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <% if current_user.on_premium_plan? && @invoices.any? %>
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 border-b border-amber-200 px-6 py-4">
+        <div class="flex items-start">
+          <div class="w-8 h-8 bg-gradient-to-br from-amber-100 to-amber-200 rounded-lg flex items-center justify-center mr-4 flex-shrink-0">
+            <i class="material-icons text-amber-700 text-sm">info</i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-amber-900 mb-2">Premium Currently Active</h3>
+            <p class="text-sm text-amber-800 leading-relaxed">
+              Since you already have Premium features active, activation options will appear when your current subscription ends.
             </p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+    <div class="p-6">
+      <% if @invoices.any? %>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <% @invoices.each do |invoice| %>
+            <div class="bg-gradient-to-br <%= invoice.activateable? ? 'from-blue-50 to-indigo-50 border-blue-200' : 'from-gray-50 to-gray-100 border-gray-200' %> border rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <!-- Code Header -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-gradient-to-br <%= invoice.activateable? ? 'from-blue-200 to-blue-300' : 'from-gray-200 to-gray-300' %> rounded-xl flex items-center justify-center mr-3 shadow-sm">
+                    <i class="material-icons <%= invoice.activateable? ? 'text-blue-700' : 'text-gray-600' %> text-lg">star</i>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-gray-900"><%= pluralize invoice.months, 'Month' %> Premium</h3>
+                    <p class="text-sm text-gray-500">
+                      <% if invoice.page_unlock_promo_code&.uses_remaining&.zero? %>
+                        Used · Activated <%= time_ago_in_words invoice.page_unlock_promo_code.promotions.last.created_at %> ago
+                      <% elsif invoice.activateable? %>
+                        Ready to activate or share
+                      <% elsif invoice.status == 'APPROVED' %>
+                        Processing payment...
+                      <% else %>
+                        Awaiting payment
+                      <% end %>
+                    </p>
+                  </div>
+                </div>
+                <% if invoice.page_unlock_promo_code&.uses_remaining&.zero? %>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    Used
+                  </span>
+                <% elsif invoice.activateable? %>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    Available
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
+                    Pending
+                  </span>
+                <% end %>
+              </div>
+
+              <!-- Code Details -->
+              <% if invoice.page_unlock_promo_code.present? %>
+                <div class="bg-white rounded-lg p-4 mb-4 border">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-600">Premium Code:</span>
+                    <% if invoice.activateable? %>
+                      <code class="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-900"><%= invoice.page_unlock_promo_code.code %></code>
+                    <% else %>
+                      <span class="text-sm text-gray-400">Hidden until ready</span>
+                    <% end %>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-600">Duration:</span>
+                    <span class="text-sm text-gray-900"><%= invoice.months * 30 %> days of Premium access</span>
+                  </div>
+                </div>
+
+                <!-- Premium Features Preview -->
+                <div class="mb-4">
+                  <h4 class="text-sm font-medium text-gray-700 mb-2">Unlocks these page types:</h4>
+                  <div class="flex flex-wrap gap-1">
+                    <% invoice.page_unlock_promo_code.page_types.first(6).each do |page_type| %>
+                      <% page_type_class = content_class_from_name(page_type) %>
+                      <div class="inline-flex items-center px-2 py-1 rounded-md bg-white border text-xs">
+                        <i class="material-icons <%= page_type_class.text_color %> text-xs mr-1"><%= page_type_class.icon %></i>
+                        <span class="text-gray-700"><%= page_type_class.name.pluralize %></span>
+                      </div>
+                    <% end %>
+                    <% if invoice.page_unlock_promo_code.page_types.count > 6 %>
+                      <div class="inline-flex items-center px-2 py-1 rounded-md bg-gray-100 text-xs text-gray-500">
+                        +<%= invoice.page_unlock_promo_code.page_types.count - 6 %> more
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% else %>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                  <div class="flex items-center">
+                    <i class="material-icons text-yellow-600 text-sm mr-2">schedule</i>
+                    <span class="text-sm text-yellow-800">
+                      <% if invoice.status == 'APPROVED' %>
+                        Processing payment...
+                      <% else %>
+                        <%= link_to 'Complete payment', invoice.approval_url, class: 'text-yellow-900 font-medium underline hover:no-underline' %>
+                      <% end %>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Action Buttons -->
+              <% if invoice.activateable? %>
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <% unless current_user.on_premium_plan? %>
+                    <%= form_for :promotional_code, url: redeem_path, class: 'flex-1' do |form| %>
+                      <%= form.hidden_field :promo_code, value: invoice.page_unlock_promo_code.code %>
+                      <%= form.submit 'Activate on My Account', 
+                          class: 'w-full inline-flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-lg hover:shadow-xl transition-all duration-200',
+                          data: { confirm: "Are you sure you wish to activate this Premium code? It can only be used once." } %>
+                    <% end  %>
+                  <% end %>
+                  <button type="button" 
+                          class="inline-flex items-center justify-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 gift-button"
+                          data-code="<%= invoice.page_unlock_promo_code.code %>"
+                          data-months="<%= invoice.months %>"
+                          data-referral="<%= current_user.referral_code.code %>">
+                    <i class="material-icons text-sm mr-2">share</i>
+                    Share as Gift
+                  </button>
+                </div>
+              <% end %>
+            </div>
           <% end %>
         </div>
-        <% if invoice.activateable? %>
-          <div class="card-action">
-            <%= link_to '#', class: 'btn hoverable black-text white right activator', onclick: 'return false' do %>
-              <i class="material-icons left">share</i>
-              Gift
-            <% end %>
-            <% unless current_user.on_premium_plan? %>
-              <%= form_for :promotional_code, url: redeem_path do |form| %>
-                <%= form.hidden_field :promo_code, value: invoice.page_unlock_promo_code.code %>
-                <%= form.submit 'Activate', class: 'hoverable btn blue white-text', data: { confirm: "Are you sure you wish to activate this promo code? It can only be used once." } %>
-              <% end  %>
-            <% end %>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <i class="material-icons text-gray-500 text-2xl">inventory</i>
           </div>
-        <% else %>
-          <div class="card-action">
-            <% if invoice.page_unlock_promo_code && invoice.page_unlock_promo_code.uses_remaining.zero? && invoice.page_unlock_promo_code.promotions.any? %>
-              Activated <%= time_ago_in_words invoice.page_unlock_promo_code.promotions.last.created_at %> ago
-            <% else %>
-              <% if invoice.status == 'CREATED' %>
-                Ready for payment
-              <% else %>
-                Purchased
-              <% end %>
-              <%= time_ago_in_words invoice.created_at %> ago
-            <% end %>
+          <h3 class="text-xl font-bold text-gray-900 mb-3">No Premium Codes Yet</h3>
+          <p class="text-sm text-gray-500 mb-8 max-w-md mx-auto">
+            Your purchased Premium codes will appear here. Choose a plan above to get started!
+          </p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+</div>
+
+<!-- Gift Sharing Modal -->
+<div id="gift-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+    
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    
+    <div class="relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+            <i class="material-icons text-blue-600">card_giftcard</i>
           </div>
-        <% end %>
-        <% if invoice.page_unlock_promo_code.present? %>
-          <div class="card-reveal">
-            <span class="card-title">
-              Share this code
-              <i class="material-icons right">close</i>
-            </span>
-            <p>
-              Anyone you send this code to can redeem it for their own account, activating the
-              <%= pluralize invoice.months, 'month' %> of Premium immediately. To share it, send
-              the following link with them:
-            </p>
-            <p>
-              <input type="text" value="<%= gift_code_url(code: invoice.page_unlock_promo_code.code, referral: current_user.referral_code.code) %>" onClick="this.select();">
-            </p>
-            <p>
-              If they don't already have a Notebook.ai account, you'll also be credited with their referral.
-            </p>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+              Share Premium Code as Gift
+            </h3>
+            <div class="mt-4">
+              <p class="text-sm text-gray-500 mb-4">
+                Share this <span id="gift-duration"></span> Premium code with someone special. They can redeem it instantly for Premium access.
+              </p>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Gift Link:</label>
+                <div class="flex">
+                  <input type="text" id="gift-link" readonly 
+                         class="flex-1 block w-full rounded-l-md border-gray-300 bg-white text-sm font-mono px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                  <button type="button" id="copy-link"
+                          class="inline-flex items-center px-4 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="material-icons text-sm">content_copy</i>
+                  </button>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">
+                If they don't have a Notebook.ai account, you'll also be credited with their referral.
+              </p>
+            </div>
           </div>
-        <% end %>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button type="button" id="close-modal"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+          Done
+        </button>
       </div>
     </div>
-  <% end %>
+  </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('gift-modal');
+  const giftButtons = document.querySelectorAll('.gift-button');
+  const closeModal = document.getElementById('close-modal');
+  const copyButton = document.getElementById('copy-link');
+  const giftLink = document.getElementById('gift-link');
+  const giftDuration = document.getElementById('gift-duration');
+
+  // Open modal
+  giftButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const code = this.dataset.code;
+      const months = this.dataset.months;
+      const referral = this.dataset.referral;
+      
+      const url = `${window.location.origin}/redeem/${code}?referral=${referral}`;
+      giftLink.value = url;
+      giftDuration.textContent = `${months} month${months > 1 ? 's' : ''}`;
+      
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    });
+  });
+
+  // Close modal
+  function closeGiftModal() {
+    modal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  closeModal.addEventListener('click', closeGiftModal);
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      closeGiftModal();
+    }
+  });
+
+  // Copy link
+  copyButton.addEventListener('click', function() {
+    giftLink.select();
+    document.execCommand('copy');
+    
+    // Show feedback
+    const originalText = this.innerHTML;
+    this.innerHTML = '<i class="material-icons text-sm">check</i>';
+    this.classList.add('bg-green-100', 'text-green-700');
+    
+    setTimeout(() => {
+      this.innerHTML = originalText;
+      this.classList.remove('bg-green-100', 'text-green-700');
+    }, 2000);
+  });
+});
+</script>

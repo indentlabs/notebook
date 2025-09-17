@@ -1,10 +1,60 @@
 <%= view_hooks.messageboards_index.messageboard.render self, messageboard: messageboard do %>
   <%= link_to messageboard.path,
-              class: ['thredded--messageboard hoverable',
-                      *('thredded--messageboard--has-unread-topics' if messageboard.unread_topics?),
-                      *('thredded--messageboard--has-unread-followed-topics' if messageboard.unread_followed_topics?)] do %>
-    <%= render 'thredded/messageboards/messageboard/header', messageboard: messageboard %>
-    <%= render 'thredded/messageboards/messageboard/description', messageboard: messageboard %>
-    <%= render 'thredded/messageboards/messageboard/last_updated', messageboard: messageboard %>
+              class: "messageboard-card messageboard-compact block" do %>
+    
+    <!-- Card Header -->
+    <div class="messageboard-header">
+      <div class="flex items-start justify-between">
+        <h3 class="text-sm font-semibold text-gray-900 flex items-center group-hover:text-purple-600 transition-colors">
+          <% if messageboard.locked? %>
+            <i class="material-icons text-gray-500 mr-1 text-xs" title="<%= t('thredded.messageboard.form.locked_notice') %>">lock</i>
+          <% end %>
+          <%= messageboard.name %>
+        </h3>
+        
+        <% if messageboard.unread_followed_topics? %>
+          <span class="messageboard-unread-badge followed inline-flex items-center">
+            <%= messageboard.unread_followed_topics_count %>
+          </span>
+        <% elsif messageboard.unread_topics? %>
+          <span class="messageboard-unread-badge new inline-flex items-center">
+            <%= messageboard.unread_topics_count %>
+          </span>
+        <% end %>
+      </div>
+      
+      <!-- Description (single line) -->
+      <% if messageboard.description.present? %>
+        <p class="messageboard-description">
+          <%= messageboard.description %>
+        </p>
+      <% end %>
+      
+      <!-- Stats -->
+      <div class="messageboard-stats flex items-center gap-3">
+        <span class="flex items-center">
+          <i class="material-icons mr-0.5">chat_bubble_outline</i>
+          <%= number_with_delimiter(messageboard.topics_count) %>
+        </span>
+        <span class="flex items-center">
+          <i class="material-icons mr-0.5">forum</i>
+          <%= number_with_delimiter(messageboard.posts_count) %>
+        </span>
+      </div>
+    </div>
+    
+    <!-- Last Activity Footer -->
+    <% if messageboard.last_topic %>
+      <div class="messageboard-footer">
+        <p class="text-gray-600 truncate">
+          <%= time_ago(messageboard.last_topic.last_post_at) %> • 
+          <span class="font-medium text-gray-700"><%= messageboard.last_user.thredded_display_name %></span>
+        </p>
+      </div>
+    <% else %>
+      <div class="messageboard-footer">
+        <p class="text-gray-500 italic">No topics yet</p>
+      </div>
+    <% end %>
   <% end %>
 <% end %>

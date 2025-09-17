@@ -1,5 +1,6 @@
 class BasilController < ApplicationController
   before_action :authenticate_user!, except: [:complete_commission, :about, :stats, :jam, :queue_jam_job, :commission_info]
+  before_action :cache_basil_user_content, if: :user_signed_in?
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -23,7 +24,14 @@ class BasilController < ApplicationController
   def content
     # Fetch the content page from our already-queried cache of current user content
     @content_type = params[:content_type].humanize
-    @content      = @current_user_content[@content_type].detect do |page|
+    
+    # Debug: Let's see what's actually in the cache
+    Rails.logger.debug "=== BASIL DEBUG ==="
+    Rails.logger.debug "Looking for #{@content_type} with ID #{params[:id]}"
+    Rails.logger.debug "Available content types: #{@current_user_content&.keys}"
+    Rails.logger.debug "#{@content_type} content: #{@current_user_content[@content_type]&.map { |p| "#{p.class.name}##{p.id}:#{p.name}" }}"
+    
+    @content      = @current_user_content[@content_type]&.detect do |page|
       page.id == params[:id].to_i
     end
     raise "No content found for #{params[:content_type]} with ID #{params[:id]} for user #{current_user.id}" if @content.nil?
@@ -656,6 +664,23 @@ class BasilController < ApplicationController
   end
 
   private
+
+  # Cache user content for Basil without universe filtering
+  # since Basil should be able to generate images for any user content
+  def cache_basil_user_content
+    return if @current_user_content
+    @current_user_content = {}
+    return unless user_signed_in?
+    
+    # Get all enabled content types for Basil
+    enabled_types = BasilService::ENABLED_PAGE_TYPES
+    
+    # Cache content without universe filtering
+    @current_user_content = current_user.content(
+      content_types: enabled_types,
+      universe_id: nil  # No universe filtering for Basil
+    )
+  end
 
   def commission_params
     params.require(:basil_commission).permit(:style, :entity_type, :entity_id, field: {})

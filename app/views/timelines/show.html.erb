@@ -1,127 +1,553 @@
-<%= form_for @timeline, html: { class: 'autosave-form' }, remote: true do |f| %>
-  <div class="row">
-    <div class="col s12">
-      <h1 style="font-size: 3em;">
-        <% if @timeline.universe %>
-          <%= link_to @timeline.universe do %>
-            <i class="material-icons right medium <%= Universe.text_color %> tooltipped" data-tooltip="A timeline in the <%= @timeline.universe.name %> universe."><%= Universe.icon %></i>
+<div class="min-h-screen bg-gray-50">
+  <!-- Timeline Header - Clean Application Style -->
+  <header class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="px-6 py-4">
+      <!-- Header Content -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4 flex-1 min-w-0">
+          <!-- Back Button -->
+          <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0 p-2 rounded-lg hover:bg-gray-100", title: "Back to all Timelines" do %>
+            <i class="material-icons text-lg">arrow_back</i>
           <% end %>
-        <% end %>
-        <% if user_signed_in? && current_user == @timeline.user %>
-          <%= link_to edit_timeline_path(@timeline) do %>
-            <i class="material-icons right medium <%= Timeline.text_color %> tooltipped" data-tooltip="Edit this timeline">edit</i>
-          <% end %>
-        <% end %>
-        <%= @timeline.name %><br />
-        <small class="grey-text"><%= @timeline.subtitle %></small>
-      </h1>
-      <%= simple_format @timeline.description %>
-    </div>
-    <div class="col s12">
-      <% if @timeline.notes.present? || (@timeline.private_notes.present? && user_signed_in? && current_user == @timeline.user) %>
-        <ul class="hoverable collapsible">
-          <li>
-            <div class=" collapsible-header">
-              <i class="material-icons <%= Timeline.text_color %>"><%= Timeline.icon %></i>
-              Timeline notes
-            </div>
-            <div class="collapsible-body">
-              <% if @timeline.notes.present? %>
-                <div class='grey-text uppercase'>Notes</div>
-                <%= simple_format @timeline.notes %>
+          
+          <!-- Timeline Title and Subtitle -->
+          <div class="flex-1 min-w-0">
+            <h1 class="text-xl font-semibold text-gray-900 truncate">
+              <%= @timeline.name.present? ? @timeline.name : 'Untitled Timeline' %>
+            </h1>
+            
+            <div class="flex items-center mt-1 space-x-2">
+              <% if @timeline.subtitle.present? %>
+                <span class="text-sm text-gray-600 truncate">
+                  <%= @timeline.subtitle %>
+                </span>
+                <span class="text-gray-400">•</span>
               <% end %>
-
-              <% if @timeline.private_notes.present? && user_signed_in? && current_user == @timeline.user %>
-                <div class="grey-text uppercase">Private notes (only visible to you)</div>
-                <%= simple_format @timeline.private_notes %>
-              <% end %>
-              <div class="clearfix"></div>
-            </div>
-          </li>
-        </ul>
-      <% end %>          
-    </div>
-  </div>
-<% end %>
-
-<div class="timeline-viewer" data-timeline-id="<%= @timeline.id %>">
-  <!--
-  <div class="filter-bar">
-    (filter events by character, location, etc)
-  </div>
-  -->
-
-  <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
-    <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
-      <div class="timeline-event-container" data-event-id="<%= event.id %>"  data-timeline-id="<%= @timeline.id %>">
-        <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
-          <%= f.hidden_field :timeline_id %>
-          <div class="row">
-            <div class="col l2">
-              <% if event.time_label.present? %>
-                <div class="grey-text uppercase">Time label</div>
-                <%= simple_format event.time_label %>
-              <% end %>
-            </div>
-            <div class="col l1" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
-              <%= image_tag 'graphics/timeline-line.webp' %>
-            </div>
-            <div class="col l6">
-              <div class="hoverable clearfix card" style="border-top: 5px solid <%= Timeline.hex_color %>">
-                <div class="card-content">
-                  <span class="card-title">
-                    <%= simple_format(event.title.presence || 'Untitled event') %>
-                  </span>
-                  <% if event.description.present? %>
-                    <div class="grey-text uppercase">Description</div>
-                    <%= simple_format(event.description) %>
-                  <% end %>
-
-                  <br />
-
-                  <% if event.notes.present? %>
-                    <div class="grey-text uppercase">Notes</div>
-                    <%= simple_format(event.notes) %>
-                  <% end %>
-                </div>
+              
+              <!-- Creator Attribution in Header -->
+              <div class="flex items-center space-x-1">
+                <span class="text-xs text-gray-500">by</span>
+                <%= link_to @timeline.user.name, @timeline.user, 
+                    class: "text-xs font-medium text-green-600 hover:text-green-500 transition-colors truncate" %>
               </div>
             </div>
-            <div class="col l3">
-              <%
-                event_entities = event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type)
-              %>
-              <% unless event_entities == {} %>
-                <div class="grey-text uppercase">
-                  In this event
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3 ml-4">
+          <!-- Action Buttons -->
+          <% if current_user && @timeline.user == current_user %>
+            <%= link_to edit_timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors" do %>
+              <i class="material-icons text-lg mr-2">edit</i>
+              <span class="hidden sm:inline">Edit</span>
+            <% end %>
+          <% end %>
+          
+          <!-- Share Button -->
+          <button onclick="openShareModal()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+            <i class="material-icons text-lg mr-2">share</i>
+            <span class="hidden sm:inline">Share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Timeline Content -->
+  <main class="max-w-4xl mx-auto py-8 px-6">
+    <!-- Timeline Container -->
+    <div class="timeline-viewer-container relative">
+      <!-- Timeline Rail -->
+      <div class="absolute top-0 bottom-0 left-6 w-0.5 bg-gray-300 timeline-spine rounded-full"></div>
+      
+      <!-- Timeline Header -->
+      <% if @timeline.description.present? || @timeline.notes.present? || @timeline.universe.present? || @timeline.page_tags.any? %>
+        <div class="timeline-header-container relative mb-8">
+          <!-- Header Dot -->
+          <div class="absolute left-6 top-6 w-6 h-6 bg-blue-600 rounded-full z-10 timeline-header-dot shadow-sm flex items-center justify-center"
+               title="Timeline Overview">
+            <i class="material-icons text-white text-xs">description</i>
+          </div>
+          
+          <!-- Header Card -->
+          <div class="ml-16 timeline-header-card bg-white rounded-xl shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-100">
+              <h3 class="text-lg font-semibold text-gray-900">Timeline Overview</h3>
+            </div>
+            
+            <div class="px-6 py-4 space-y-4">
+              <!-- Description -->
+              <% if @timeline.description.present? %>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                  <div class="prose prose-sm text-gray-700 max-w-none">
+                    <%= simple_format(@timeline.description) %>
+                  </div>
                 </div>
-                <ul class="collapsible">
-                  <% event_entities.each do |entity_type, entity_list| %>
-                    <% entity_list.reject! { |te_entity| te_entity.entity.nil? } %>
-                    <li>
-                      <% klass = content_class_from_name(entity_type) %>
-                      <div class="collapsible-header">
-                        <i class="material-icons <%= klass.text_color %>"><%= klass.icon %></i>
-                        <%= entity_type.pluralize %>
-                        <span class="badge"><%= entity_list.count %></span>
-                      </div>
-                      <div class="collapsible-body">
-                        <% entity_list.each do |te_entity| %>
-                          <div class="chip">
-                            <%= link_to(te_entity.entity.name.presence || "Untitled #{te_entity.entity_type}", te_entity.entity) %>
+              <% end %>
+
+              <!-- Notes -->
+              <% if @timeline.notes.present? %>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-700 mb-2">Notes</h4>
+                  <div class="prose prose-sm text-gray-700 max-w-none">
+                    <%= simple_format(@timeline.notes) %>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Tags -->
+              <% if @timeline.page_tags.any? %>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-700 mb-2">Tags</h4>
+                  <div class="flex flex-wrap gap-2">
+                    <% @timeline.page_tags.each do |tag| %>
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800 border border-blue-200">
+                        <%= tag.tag %>
+                      </span>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Universe -->
+              <% if @timeline.universe.present? %>
+                <div>
+                  <h4 class="text-sm font-medium text-gray-700 mb-2">Universe</h4>
+                  <div class="inline-flex items-center">
+                    <i class="material-icons text-sm mr-2 text-purple-600">public</i>
+                    <%= link_to @timeline.universe.name, @timeline.universe, 
+                        class: "text-purple-600 hover:text-purple-800 font-medium transition-colors" %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Timeline Events -->
+      <% if @timeline.timeline_events.any? %>
+        <% @timeline.timeline_events.includes(:timeline_event_entities, :page_tags).each_with_index do |event, index| %>
+          <div class="timeline-event-container relative mb-8 last:mb-0">
+            <!-- Timeline Connection -->
+            <div class="absolute left-6 top-6 w-6 h-6 <%= Timeline.color %> rounded-full z-10 timeline-dot shadow-sm flex items-center justify-center" 
+                 title="<%= event.event_type_name %>">
+              <i class="material-icons text-white text-xs"><%= event.event_type_icon %></i>
+            </div>
+            
+            <!-- Event Card -->
+            <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card">
+              <!-- Card Header -->
+              <div class="px-6 py-4 border-b border-gray-100">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1 min-w-0">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                      <%= event.title.present? ? event.title : "Untitled Event" %>
+                    </h2>
+                    
+                    <!-- Time Information -->
+                    <% if event.time_label.present? || event.end_time_label.present? %>
+                      <div class="flex items-center space-x-4 text-sm text-gray-600">
+                        <% if event.time_label.present? %>
+                          <div class="flex items-center">
+                            <i class="material-icons text-sm mr-1 text-green-600">schedule</i>
+                            <span><%= event.time_label %></span>
+                          </div>
+                        <% end %>
+                        
+                        <% if event.end_time_label.present? %>
+                          <div class="flex items-center">
+                            <i class="material-icons text-sm mr-1 text-red-600">schedule</i>
+                            <span>to <%= event.end_time_label %></span>
                           </div>
                         <% end %>
                       </div>
-                    </li>
-                  <% end %>
-                </ul>
-              <% end %>
-
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Card Body -->
+              <div class="px-6 py-4 space-y-4">
+                <!-- Description -->
+                <% if event.description.present? %>
+                  <div class="prose prose-sm text-gray-700 max-w-none">
+                    <%= simple_format(event.description) %>
+                  </div>
+                <% end %>
+                
+                <!-- Tags Display -->
+                <% if event.page_tags.any? %>
+                  <div class="flex flex-wrap gap-2">
+                    <% event.page_tags.each do |tag| %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                        <%= tag.tag %>
+                      </span>
+                    <% end %>
+                  </div>
+                <% end %>
+                
+                <!-- Linked Content -->
+                <%= render 'shared/timeline_event_linked_content', timeline_event: event %>
+              </div>
             </div>
           </div>
         <% end %>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-16">
+          <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
+            <i class="material-icons text-4xl text-green-600">timeline</i>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">This timeline is empty</h3>
+          <p class="text-gray-600 mb-8 max-w-md mx-auto">
+            No events have been added to this timeline yet.
+          </p>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Enhanced Author Attribution -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+      <div class="max-w-md mx-auto">
+        <!-- Creator Spotlight Card -->
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-100 shadow-sm">
+          <div class="text-center">
+            <div class="flex items-center justify-center mb-3">
+              <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                <i class="material-icons text-green-600">person</i>
+              </div>
+            </div>
+            
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">
+              <%= link_to @timeline.user.name, @timeline.user, 
+                  class: "hover:text-green-600 transition-colors" %>
+            </h3>
+            
+            <p class="text-sm text-gray-600 mb-4">
+              Created this timeline
+              <% if @timeline.created_at %>
+                on <%= @timeline.created_at.strftime("%B %d, %Y") %>
+              <% end %>
+            </p>
+            
+            <!-- Timeline Stats -->
+            <div class="flex justify-center space-x-6 text-sm text-gray-500 mb-4">
+              <div class="text-center">
+                <div class="font-medium text-gray-900">
+                  <%= @timeline.timeline_events.count %>
+                </div>
+                <div class="text-xs">
+                  <%= @timeline.timeline_events.count == 1 ? 'Event' : 'Events' %>
+                </div>
+              </div>
+              
+              <% if @timeline.cached_word_count && @timeline.cached_word_count > 0 %>
+                <div class="text-center">
+                  <div class="font-medium text-gray-900">
+                    <%= number_with_delimiter(@timeline.cached_word_count) %>
+                  </div>
+                  <div class="text-xs">Words</div>
+                </div>
+              <% end %>
+              
+              <% if @timeline.timeline_events.joins(:timeline_event_entities).count > 0 %>
+                <div class="text-center">
+                  <div class="font-medium text-gray-900">
+                    <%= @timeline.timeline_events.joins(:timeline_event_entities).count %>
+                  </div>
+                  <div class="text-xs">Links</div>
+                </div>
+              <% end %>
+            </div>
+            
+            <!-- Call-to-action -->
+            <div class="border-t border-green-100 pt-4">
+              <%= link_to @timeline.user, 
+                  class: "inline-flex items-center px-4 py-2 bg-white border border-green-200 rounded-lg text-sm font-medium text-green-600 hover:bg-green-50 transition-colors shadow-sm" do %>
+                <i class="material-icons text-sm mr-2">visibility</i>
+                View more from <%= @timeline.user.name.split(' ').first %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Powered by -->
+        <div class="text-center mt-4">
+          <p class="text-xs text-gray-400">
+            Powered by <%= link_to "Notebook.ai", "https://www.notebook.ai", 
+                         class: "text-green-600 hover:text-green-500 transition-colors font-medium" %>
+          </p>
+        </div>
       </div>
-    <% end %>
-  </div>
-
+    </div>
+  </main>
 </div>
 
+<!-- Share Modal -->
+<div id="shareModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeShareModal()"></div>
+    
+    <!-- Modal -->
+    <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+      <div class="sm:flex sm:items-start">
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+          <i class="material-icons text-green-600">share</i>
+        </div>
+        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Share Timeline</h3>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Shareable URL</label>
+              <div class="flex rounded-lg shadow-sm">
+                <input type="text" 
+                       readonly
+                       value="<%= timeline_url(@timeline) %>"
+                       id="shareUrlInput"
+                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-lg border border-gray-300 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50"
+                       onclick="this.focus(); this.select();">
+                <button type="button" 
+                        onclick="copyShareURL()"
+                        id="copyButton"
+                        class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-lg bg-gray-50 text-gray-500 text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                  Copy
+                </button>
+              </div>
+            </div>
+            
+            <% if current_user && @timeline.user == current_user %>
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-blue-400">info</i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-800">Sharing Settings</h3>
+                    <p class="mt-1 text-sm text-blue-700">
+                      To be shared, content must either be public <strong>or</strong> in a public Universe.
+                      <a href="https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2" 
+                         class="font-medium underline hover:text-blue-600" target="_blank">Learn more about privacy</a>
+                    </p>
+                    <p class="mt-1 text-xs text-blue-600">
+                      Changes are saved automatically and can be changed at any time.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Privacy Toggle Controls -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <% if @timeline.universe.present? %>
+                  <!-- Universe Privacy Toggle -->
+                  <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="mb-3">
+                      <h4 class="text-sm font-medium text-purple-900 flex items-center">
+                        <i class="material-icons text-purple-600 text-sm mr-2">public</i>
+                        Universe-wide sharing
+                      </h4>
+                      <p class="text-xs text-purple-700 mt-1">
+                        Controls visibility for the entire "<%= @timeline.universe.name %>" universe
+                      </p>
+                    </div>
+                    <%= 
+                      react_component("PrivacyToggle", {
+                        content:       @timeline.universe.attributes.slice('id', 'name', 'page_type', 'privacy'),
+                        content_icon:  Universe.icon,
+                        content_color: Universe.color,
+                        submit_path:   polymorphic_path(@timeline.universe),
+                        csrf_token:    form_authenticity_token
+                      })
+                    %>
+                  </div>
+                <% end %>
+
+                <!-- Timeline Privacy Toggle -->
+                <div class="<%= @timeline.universe.present? ? '' : 'md:col-span-2' %> bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div class="mb-3">
+                    <h4 class="text-sm font-medium text-green-900 flex items-center">
+                      <i class="material-icons text-green-600 text-sm mr-2">timeline</i>
+                      Timeline-specific sharing
+                    </h4>
+                    <p class="text-xs text-green-700 mt-1">
+                      Controls visibility for this specific timeline
+                    </p>
+                  </div>
+                  <%= 
+                    react_component("PrivacyToggle", {
+                      content:       @timeline.attributes.slice('id', 'name', 'page_type', 'privacy'),
+                      content_icon:  Timeline.icon,
+                      content_color: Timeline.color,
+                      submit_path:   polymorphic_path(@timeline),
+                      csrf_token:    form_authenticity_token
+                    })
+                  %>
+                </div>
+              </div>
+
+              <% if @timeline.universe.present? %>
+                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <p class="text-xs text-gray-600">
+                    <i class="material-icons text-gray-400 text-sm mr-1">info_outline</i>
+                    This timeline belongs to the "<%= @timeline.universe.name %>" universe. 
+                    Making the universe public will also make this timeline viewable to others.
+                  </p>
+                </div>
+              <% end %>
+
+              <!-- Social Sharing Buttons -->
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="<%= [
+                  'http://twitter.com/share?',
+                  'url=' + CGI.escape(timeline_url(@timeline)),
+                  '&text=' + CGI.escape("Check out my timeline '#{@timeline.name}' on Notebook.ai:")
+                ].join %>" 
+                   target="_blank"
+                   class="inline-flex items-center justify-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+                   style="background: #1DA1F2;">
+                  <i class="fa fa-twitter mr-2"></i>
+                  Share on Twitter
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= CGI.escape(timeline_url(@timeline)) %>" 
+                   target="_blank"
+                   onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')"
+                   class="inline-flex items-center justify-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+                   style="background: #4267B2;">
+                  <i class="fa fa-facebook mr-2"></i>
+                  Share on Facebook
+                </a>
+              </div>
+            <% else %>
+              <!-- Non-owner view -->
+              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <p class="text-sm text-gray-700">
+                  This timeline is being shared by <%= link_to @timeline.user.name, @timeline.user, class: "font-medium text-green-600 hover:text-green-500" %>.
+                </p>
+              </div>
+              
+              <!-- Social Sharing Buttons for Non-owners -->
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <a href="<%= [
+                  'http://twitter.com/share?',
+                  'url=' + CGI.escape(timeline_url(@timeline)),
+                  '&text=' + CGI.escape("Check out this timeline '#{@timeline.name}' by #{@timeline.user.name} on Notebook.ai:")
+                ].join %>" 
+                   target="_blank"
+                   class="inline-flex items-center justify-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+                   style="background: #1DA1F2;">
+                  <i class="fa fa-twitter mr-2"></i>
+                  Share on Twitter
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= CGI.escape(timeline_url(@timeline)) %>" 
+                   target="_blank"
+                   onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')"
+                   class="inline-flex items-center justify-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+                   style="background: #4267B2;">
+                  <i class="fa fa-facebook mr-2"></i>
+                  Share on Facebook
+                </a>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+        <button type="button" 
+                onclick="closeShareModal()"
+                class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Share Functionality -->
+<script>
+let shareModalOpen = false;
+
+function openShareModal() {
+  const modal = document.getElementById('shareModal');
+  modal.classList.remove('hidden');
+  shareModalOpen = true;
+  
+  // Focus the URL input for easy copying
+  setTimeout(() => {
+    const urlInput = document.getElementById('shareUrlInput');
+    if (urlInput) {
+      urlInput.focus();
+      urlInput.select();
+    }
+  }, 100);
+}
+
+function closeShareModal() {
+  const modal = document.getElementById('shareModal');
+  modal.classList.add('hidden');
+  shareModalOpen = false;
+}
+
+function copyShareURL() {
+  const urlInput = document.getElementById('shareUrlInput');
+  const copyButton = document.getElementById('copyButton');
+  const url = urlInput.value;
+  
+  // Try to use the modern clipboard API
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(url).then(() => {
+      showCopySuccess(copyButton);
+    }).catch(() => {
+      fallbackCopyTextToClipboard(url, copyButton);
+    });
+  } else {
+    fallbackCopyTextToClipboard(url, copyButton);
+  }
+}
+
+function fallbackCopyTextToClipboard(text, button) {
+  const urlInput = document.getElementById('shareUrlInput');
+  urlInput.focus();
+  urlInput.select();
+  
+  try {
+    document.execCommand('copy');
+    showCopySuccess(button);
+  } catch (err) {
+    console.error('Failed to copy URL:', err);
+    showCopyError(button);
+  }
+}
+
+function showCopySuccess(button) {
+  const originalText = button.textContent;
+  button.textContent = 'Copied!';
+  button.classList.add('bg-green-100', 'text-green-800', 'border-green-200');
+  
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.classList.remove('bg-green-100', 'text-green-800', 'border-green-200');
+  }, 2000);
+}
+
+function showCopyError(button) {
+  const originalText = button.textContent;
+  button.textContent = 'Failed';
+  button.classList.add('bg-red-100', 'text-red-800', 'border-red-200');
+  
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.classList.remove('bg-red-100', 'text-red-800', 'border-red-200');
+  }, 2000);
+}
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && shareModalOpen) {
+    closeShareModal();
+  }
+});
+</script>

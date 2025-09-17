@@ -28,11 +28,11 @@ class Landmark < ApplicationRecord
   end
 
   def self.color
-    'text-lighten-1 lighten-1 orange'
+    'text-lighten-1 lighten-1 orange bg-orange-600'
   end
 
   def self.text_color
-    'text-lighten-1 orange-text'
+    'text-lighten-1 orange-text text-orange-600'
   end
 
   def self.hex_color

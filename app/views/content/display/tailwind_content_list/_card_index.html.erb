@@ -1,0 +1,20 @@
+<div class="flex flex-wrap mb-32 px-2 container mx-auto">
+  <% content.each do |content| %>
+    <div class="xl:w-1/4 md:w-1/2 p-2 group">
+      <%= link_to content.is_a?(ContentPage) ? content.view_path : content do %>
+        <div class="bg-white hover:shadow-lg rounded-lg transition">
+          <%= image_tag content.random_image_including_private(format: :small), class: 'h-64 rounded-t w-full object-cover object-center mb-6' %>
+          <div class="pl-4 pb-1">
+            <i class="material-icons float-right text-2xl mr-3">star_outline</i>
+            <h3 class="tracking-widest <%= content.text_color %> text-xs uppercase font-medium title-font">
+              <%= content.page_type %>
+            </h3>
+            <h2 class="text-lg text-gray-900 font-medium title-font mb-4">
+              <%= content.name %>
+            </h2>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

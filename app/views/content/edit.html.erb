@@ -1,54 +1,555 @@
-<% set_meta_tags title: "Editing " + @content.name, description: @content.description %>
+<%
+  page_description = "Editing #{@content.name} — a fictional #{@content.class.name.downcase} on Notebook.ai"
+  set_meta_tags title:       "Edit #{@content.name}",
+                description: page_description.truncate(160)
+%>
 
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/display/image_card_header' %>
-<% end %>
+<div class="min-h-screen bg-gray-50" 
+     x-data="editPageController()" 
+     x-init="init()">
+  
+  <!-- Include content linking functionality -->
+  <%= render partial: 'javascripts/content_linking_alpine' %>
+  
+  <!-- Header with breadcrumbs -->
+  <%= render partial: 'content/shared/breadcrumb_nav', locals: { 
+    content: @serialized_content, 
+    show_edit_controls: true,
+    current_page: :edit 
+  } %>
 
-<div class="row flex">
-  <div class="col s12 m3">
-    <div class="sticky-below-navbar">
-      <%=
-        render partial: 'content/display/sidelinks',
-          locals: {
-            editing: true,
-            content: @serialized_content
-          }
-      %>
-    </div>
-  </div>
-
-  <div class="col s12 m6">
-    <%= render partial: 'content/form', locals: { content: @serialized_content } %>
-  </div>
-
-  <div class="col s12 m3">
-    <div class="sticky-below-navbar">
-      <%=
-        render partial: 'content/display/sideactions',
-          locals: {
-            editing: true,
-            content: @serialized_content
-          }
-      %>
+  <!-- Main responsive layout -->
+  <div class="max-w-full mx-auto">
+    <div class="flex min-h-screen relative">
+      
+      <!-- Left Column - Navigation -->
+      <div class="w-72 bg-white border-r border-gray-200 shadow-sm flex-shrink-0">
+        <%= render partial: 'content/edit/navigation_sidebar', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+      <!-- Center Column - Dynamic Content -->
+      <div class="flex-1 bg-white">
+        <%= render partial: 'content/edit/dynamic_content', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+      <!-- Right Column - Desktop Only -->
+      <div class="hidden lg:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0">
+        <%= render partial: 'content/edit/secondary_sidebar', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
+      <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
+      <div class="lg:hidden fixed right-0 top-1/2 transform -translate-y-1/2 z-40">
+        <button @click="toggleRightSidebar()" 
+                class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-l-lg shadow-lg transition-colors"
+                title="Edit Tools">
+          <i class="material-icons text-lg" x-show="!showRightSidebar">chevron_left</i>
+          <i class="material-icons text-lg" x-show="showRightSidebar">chevron_right</i>
+        </button>
+      </div>
+      
+      <!-- Mobile/Tablet Right Sidebar Overlay -->
+      <div x-show="showRightSidebar" 
+           x-transition:enter="transition-opacity ease-linear duration-200"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100"
+           x-transition:leave="transition-opacity ease-linear duration-200"
+           x-transition:leave-start="opacity-100"
+           x-transition:leave-end="opacity-0"
+           @click="showRightSidebar = false"
+           class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+      </div>
+      
+      <!-- Mobile/Tablet Right Sidebar -->
+      <div x-show="showRightSidebar"
+           x-transition:enter="transform transition ease-in-out duration-200"
+           x-transition:enter-start="translate-x-full"
+           x-transition:enter-end="translate-x-0"
+           x-transition:leave="transform transition ease-in-out duration-200"
+           x-transition:leave-start="translate-x-0"
+           x-transition:leave-end="translate-x-full"
+           class="lg:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto">
+        
+        <!-- Close button -->
+        <div class="p-4 border-b border-gray-200 bg-white">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900">Edit Tools</h2>
+            <button @click="showRightSidebar = false" 
+                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <i class="material-icons text-gray-500">close</i>
+            </button>
+          </div>
+        </div>
+        
+        <%= render partial: 'content/edit/secondary_sidebar', locals: { 
+          content: @serialized_content, 
+          raw_content: @content 
+        } %>
+      </div>
+      
     </div>
   </div>
 </div>
 
-<%# todo: surely we can strip this out (to a general slider.js?), no? %>
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('.slider').slider({
-      height: 200,
-      indicators: false
-    });
+<!-- Alpine.js Controller for dynamic content switching -->
+<script>
+function editPageController() {
+  return {
+    currentView: 'details',
+    currentCategory: null,
+    expandAllCategories: true,
+    showRightSidebar: false,
+    hasUnsavedChanges: false,
+    
+    // Privacy state
+    selectedPrivacy: '<%= @content.privacy || 'private' %>',
+    universePrivacy: '<%= @content.respond_to?(:universe) && @content.universe.present? ? (@content.universe.privacy || 'private') : 'private' %>',
+    
+    // Computed property for effective visibility
+    get isEffectivelyPublic() {
+      return this.selectedPrivacy === 'public' || this.universePrivacy === 'public';
+    },
+    
+    get showUniverseIndicator() {
+      return this.selectedPrivacy !== 'public' && this.universePrivacy === 'public';
+    },
+    
+    init() {
+      // Set initial view from URL hash if present
+      const hash = window.location.hash.substring(1);
+      if (['details', 'gallery', 'privacy', 'contributors', 'universe', 'settings'].includes(hash)) {
+        this.currentView = hash;
+      }
+      
+      // Track unsaved changes
+      document.addEventListener('input', (e) => {
+        if (e.target.closest('form')) {
+          this.hasUnsavedChanges = true;
+        }
+      });
+      
+      // Clear unsaved changes flag when autosave succeeds and update last saved time
+      document.addEventListener('autosave:success', () => {
+        this.hasUnsavedChanges = false;
+        this.updateLastSavedTime();
+      });
+      
+      // Warn user about unsaved changes when leaving page
+      window.addEventListener('beforeunload', (e) => {
+        if (this.hasUnsavedChanges) {
+          e.preventDefault();
+          e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+          return 'You have unsaved changes. Are you sure you want to leave?';
+        }
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        // Ctrl/Cmd + S to save
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          const activeElement = document.activeElement;
+          if (activeElement && activeElement.classList.contains('autosave-closest-form-on-change')) {
+            activeElement.blur(); // Trigger autosave
+          }
+        }
+        
+        // Escape to go back to view mode
+        if (e.key === 'Escape' && !e.target.closest('.dropdown-menu')) {
+          e.preventDefault();
+          if (confirm('Are you sure you want to stop editing? Any unsaved changes will be lost.')) {
+            window.location.href = '<%= polymorphic_path(@content) %>';
+          }
+        }
+      });
+      
+      // Close right sidebar on window resize to desktop
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024) { // lg breakpoint
+          this.showRightSidebar = false;
+        }
+      });
+      
+      // Listen for universe field changes and update Privacy tab
+      this.watchUniverseChanges();
+      
+      // Listen for privacy updates from the privacy form
+      window.addEventListener('privacy-updated', (e) => {
+        this.selectedPrivacy = e.detail.privacy;
+      });
+    },
+    
+    watchUniverseChanges() {
+      const self = this;
+      
+      // Watch for changes on universe select field
+      document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('universe-select-field') || e.target.dataset.universeSelect) {
+          const universeId = e.target.value;
+          const selectedOption = e.target.options[e.target.selectedIndex];
+          const universeName = selectedOption ? selectedOption.text : '';
+          const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
+          
+          console.log('Universe changed to:', universeId, universeName, 'Privacy:', universePrivacy);
+          
+          // Update the Alpine.js reactive state
+          self.universePrivacy = universePrivacy;
+          
+          // Update both the Privacy tab and sidebar Universe sections
+          self.updatePrivacyUniverseSection(universeId, universeName, universePrivacy);
+          self.updateSidebarUniverseSection(universeId, universeName);
+        }
+      });
+      
+      // Also watch for successful autosave to ensure we catch the update
+      document.addEventListener('ajax:success', function(e) {
+        // Update last saved time for any successful AJAX save
+        self.updateLastSavedTime();
+        
+        if (e.target && e.target.querySelector && e.target.querySelector('.universe-select-field')) {
+          const select = e.target.querySelector('.universe-select-field');
+          if (select) {
+            const universeId = select.value;
+            const selectedOption = select.options[select.selectedIndex];
+            const universeName = selectedOption ? selectedOption.text : '';
+            const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
+            
+            console.log('Universe updated via autosave:', universeId, universeName, 'Privacy:', universePrivacy);
+            
+            // Update the Alpine.js reactive state
+            self.universePrivacy = universePrivacy;
+            
+            self.updatePrivacyUniverseSection(universeId, universeName, universePrivacy);
+            self.updateSidebarUniverseSection(universeId, universeName);
+          }
+        }
+      });
+    },
+    
+    updatePrivacyUniverseSection(universeId, universeName, universePrivacy) {
+      const privacyUniverseSection = document.querySelector('[data-privacy-universe-section]');
+      if (!privacyUniverseSection) {
+        console.log('Privacy universe section not found');
+        return;
+      }
+      
+      console.log('Updating privacy universe section with ID:', universeId);
+      
+      if (!universeId || universeId === '' || universeId === 'null') {
+        // Show "No Universe Assigned" state
+        this.showNoUniverseState(privacyUniverseSection);
+      } else {
+        // Show universe state without fetching
+        this.showUniverseState(privacyUniverseSection, universeId, universeName, universePrivacy);
+      }
+    },
+    
+    showNoUniverseState(section) {
+      // Find and update the content area
+      const contentArea = section.querySelector('[data-universe-content]');
+      if (contentArea) {
+        console.log('Showing no universe state');
+        const firstCategoryLabel = '<%= @serialized_content.data[:categories].first[:label] rescue "Overview" %>';
+        contentArea.innerHTML = `
+          <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
+                  <i class="material-icons text-gray-500 text-sm">language</i>
+                </div>
+              </div>
+              <div class="ml-3 flex-1">
+                <div class="font-semibold text-gray-900 mb-1">No Universe Assigned</div>
+                <div class="text-sm text-gray-600 mb-3">
+                  This <%= @serialized_content.class_name.downcase %> isn't part of a universe yet.
+                </div>
+                <div class="bg-white border border-gray-200 rounded p-3 mb-3">
+                  <div class="text-xs font-medium text-gray-700 mb-1">Benefits of using universes:</div>
+                  <ul class="text-xs text-gray-600 space-y-1">
+                    <li class="flex items-start">
+                      <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                      <span>Control privacy for all pages at once</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                      <span>Organize related content together</span>
+                    </li>
+                    <li class="flex items-start">
+                      <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
+                      <span>Share entire worlds with collaborators</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="ml-3 flex-shrink-0">
+                <button onclick="this.closest('[x-data]').__x.$data.switchView('details'); this.closest('[x-data]').__x.$data.currentCategory = null; this.closest('[x-data]').__x.$data.expandAllCategories = false; this.closest('[x-data]').__x.$data.currentCategory = '${firstCategoryLabel}';" 
+                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white border border-blue-600 rounded text-xs font-medium hover:bg-blue-700 transition-colors">
+                  <i class="material-icons text-xs mr-1">add</i>
+                  Assign Universe
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    },
+    
+    showUniverseState(section, universeId, universeName, universePrivacy) {
+      const contentArea = section.querySelector('[data-universe-content]');
+      if (!contentArea) {
+        console.log('Content area not found');
+        return;
+      }
+      
+      const isPublic = universePrivacy === 'public';
+      const displayName = universeName || 'Selected Universe';
+      
+      contentArea.innerHTML = `
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg <%= Universe.color %> flex items-center justify-center">
+                <i class="material-icons text-white text-sm"><%= Universe.icon %></i>
+              </div>
+            </div>
+            <div class="ml-3 flex-1">
+              <div class="font-semibold text-gray-900 mb-1">${displayName}</div>
+              <div class="flex items-center mb-2">
+                <span class="text-sm text-gray-600 mr-2">Universe is:</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                  <i class="material-icons text-xs mr-1">${isPublic ? 'public' : 'lock'}</i>
+                  ${isPublic ? 'Public' : 'Private'}
+                </span>
+              </div>
+              ${isPublic ? `
+                <div class="bg-blue-100 border border-blue-200 rounded p-2">
+                  <div class="flex items-start">
+                    <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
+                    <div>
+                      <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
+                      <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
+                    </div>
+                  </div>
+                </div>
+              ` : `
+                <div class="text-xs text-gray-600">
+                  Individual page privacy settings apply
+                </div>
+              `}
+            </div>
+            <div class="ml-3 flex-shrink-0">
+              <a href="/universes/${universeId}/edit" 
+                 class="inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 rounded text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors">
+                <i class="material-icons text-xs mr-1">settings</i>
+                Manage
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    },
+    
+    updateSidebarUniverseSection(universeId, universeName) {
+      const sidebarSection = document.querySelector('[data-sidebar-universe-section]');
+      if (!sidebarSection) {
+        console.log('Sidebar universe section not found');
+        return;
+      }
+      
+      const contentArea = sidebarSection.querySelector('[data-sidebar-universe-content]');
+      if (!contentArea) {
+        console.log('Sidebar universe content area not found');
+        return;
+      }
+      
+      console.log('Updating sidebar universe section with ID:', universeId);
+      
+      if (!universeId || universeId === '' || universeId === 'null') {
+        // Show "No universe assigned" state
+        contentArea.innerHTML = `
+          <div class="text-center py-3">
+            <div class="w-10 h-10 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+              <i class="material-icons text-gray-400 text-sm"><%= Universe.icon %></i>
+            </div>
+            <p class="text-xs text-gray-500">No universe assigned</p>
+          </div>
+        `;
+      } else {
+        // Show universe card with image
+        const displayName = universeName || 'Selected Universe';
+        
+        // We'll try to load the default universe card header image
+        // The actual universe image would require a fetch, but we can use the default fallback
+        contentArea.innerHTML = `
+          <a href="/universes/${universeId}" class="block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200 <%= Universe.color %>">
+            <!-- Background image - use the card header fallback -->
+            <img src="/assets/card-headers/universes.jpg" 
+                 class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                 alt="${displayName} preview"
+                 onerror="this.style.display='none';">
+            
+            <!-- Gradient overlay for text readability -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            <!-- Content overlay -->
+            <div class="absolute inset-0 p-3 flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    ${displayName}
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">open_in_new</i>
+              </div>
+            </div>
+          </a>
+        `;
+      }
+    },
+    
+    switchView(view) {
+      this.currentView = view;
+      this.currentCategory = null;
+      this.expandAllCategories = false;
+      window.location.hash = view;
+      
+      // Scroll to top of content area
+      const contentArea = document.querySelector('.flex-1');
+      if (contentArea) contentArea.scrollTop = 0;
+    },
+    
+    showCategory(categoryName) {
+      this.currentView = 'details';
+      this.currentCategory = categoryName;
+      this.expandAllCategories = false;
+      window.location.hash = 'details';
+    },
+    
+    showAllCategories() {
+      this.currentView = 'details';
+      this.currentCategory = null;
+      this.expandAllCategories = true;
+      window.location.hash = 'details';
+    },
+    
+    isViewActive(view) {
+      return this.currentView === view;
+    },
+    
+    isCategoryActive(categoryName) {
+      return this.currentView === 'details' && this.currentCategory === categoryName && !this.expandAllCategories;
+    },
+    
+    isExpandAllActive() {
+      return this.currentView === 'details' && this.expandAllCategories;
+    },
+    
+    toggleRightSidebar() {
+      this.showRightSidebar = !this.showRightSidebar;
+    },
+    
+    updateLastSavedTime() {
+      // Update the "Last saved" time in the left sidebar
+      const lastSavedElement = document.getElementById('last-saved-time');
+      if (lastSavedElement) {
+        // Show "just now" for very recent saves, otherwise show relative time
+        lastSavedElement.textContent = 'just now';
+        
+        // After a short delay, you could update it to show "a few seconds ago"
+        setTimeout(() => {
+          if (lastSavedElement) {
+            lastSavedElement.textContent = 'a few seconds ago';
+          }
+        }, 5000);
+      }
+    }
+  }
+}
+
+// Delete confirmation function
+function confirmDelete(pageName, deletePath) {
+  // Create a more robust confirmation dialog
+  const confirmed = confirm(`⚠️ WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to permanently delete "${pageName}"?\n\nAll associated data, images, and links will be lost forever.`);
+  
+  if (confirmed) {
+    // Second confirmation for extra safety
+    const doubleConfirmed = confirm(`This is your FINAL warning!\n\nType OK to permanently delete "${pageName}".`);
+    
+    if (doubleConfirmed) {
+      // Create a form and submit it with DELETE method
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = deletePath;
+      
+      // Add CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'authenticity_token';
+      csrfInput.value = csrfToken;
+      form.appendChild(csrfInput);
+      
+      // Add method override for DELETE
+      const methodInput = document.createElement('input');
+      methodInput.type = 'hidden';
+      methodInput.name = '_method';
+      methodInput.value = 'delete';
+      form.appendChild(methodInput);
+      
+      // Append to body and submit
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+}
+
+// Update breadcrumb when name field is saved
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('autosave:success', function(event) {
+    // Check if this is a name-type field being saved
+    const field = event.detail.field;
+    const fieldContainer = field.closest('[data-field-type]');
+    const fieldType = fieldContainer?.dataset.fieldType;
+    
+    // Only proceed if this is a name-type field
+    if (fieldType === 'name') {
+      // Get the new name from the field value
+      const newName = field.value?.trim();
+      
+      if (newName && newName !== '' && !newName.startsWith('New ')) {
+        // Update the breadcrumb link text
+        const breadcrumbLink = document.querySelector('[data-breadcrumb-name]');
+        if (breadcrumbLink) {
+          breadcrumbLink.textContent = newName;
+        }
+        
+        // Also update the page title
+        const pageTitle = document.title;
+        const titleParts = pageTitle.split(' — ');
+        if (titleParts.length > 0) {
+          titleParts[0] = 'Edit ' + newName;
+          document.title = titleParts.join(' — ');
+        }
+        
+        // Update the page header if it exists
+        const pageHeader = document.querySelector('h1.page-header, .page-title');
+        if (pageHeader) {
+          pageHeader.textContent = newName;
+        }
+      }
+    }
   });
+});
 </script>
-<%= render partial: 'javascripts/content_linking' %>
-
-<script type="text/javascript">
-  DISABLE_KEYBOARD_SHORTCUTS = true;
-</script>
-
-<% if @content.persisted? %>
-  <%= render partial: 'content/share', locals: { shared_content: @content} %>
-<% end %>

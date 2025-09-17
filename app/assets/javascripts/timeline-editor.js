@@ -5,9 +5,7 @@ $(document).ready(function () {
 
   $('.js-trigger-autosave-on-change').change(function () {
     $(this).closest('.autosave-form').submit();
-    M.toast({
-      html: "Autosaving..."
-    });
+    console.log("Autosaving...");
   });
 
   $('.js-move-event-to-top').click(function () {

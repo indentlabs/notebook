@@ -1,0 +1,415 @@
+// Forum Topics - Collapsible New Discussion Form
+// Progressive disclosure pattern for starting new discussions
+
+// New topic form container
+.thredded--new-topic-form {
+  position: relative;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+
+  // Wrapper for Alpine.js states
+  &[x-data] {
+    // Initial collapsed state styles handled by Alpine
+  }
+}
+
+// Collapsed state - single input field
+.new-topic-collapsed {
+  position: relative;
+  
+  .collapsed-input {
+    width: 100%;
+    padding: 1.5rem 1rem 1.5rem 2.75rem;
+    font-size: 0.9375rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    cursor: text;
+    transition: all 0.2s ease;
+    color: #6b7280;
+    
+    &:hover {
+      border-color: #d1d5db;
+      background: #fafafa;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    &:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      color: #111827;
+    }
+    
+    // Icon
+    &::before {
+      content: '';
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.25rem;
+      height: 1.25rem;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E") no-repeat center;
+      background-size: contain;
+    }
+  }
+  
+  // Fake placeholder
+  .collapsed-placeholder {
+    position: absolute;
+    left: 2.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+}
+
+// Expanded state - full form
+.new-topic-expanded {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  
+  // Form header
+  .form-header {
+    padding: 1rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fafafa;
+    
+    .form-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      
+      .material-icons {
+        font-size: 1rem;
+        margin-right: 0.5rem;
+        opacity: 0.7;
+      }
+    }
+  }
+  
+  // Form content area
+  .form-content {
+    padding: 1.25rem;
+  }
+  
+  // Override thredded's default form list styles
+  .thredded--form-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    
+    li {
+      margin-bottom: 1rem;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    // Title field
+    li.title {
+      input[type="text"] {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        font-size: 1rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        transition: all 0.15s ease;
+        
+        &:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        &::placeholder {
+          color: #9ca3af;
+        }
+      }
+      
+      label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.375rem;
+      }
+    }
+    
+    // Content textarea
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 0.625rem 0.875rem;
+      font-size: 0.9375rem;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      resize: vertical;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      
+      &:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        min-height: 150px;
+      }
+      
+      &::placeholder {
+        color: #9ca3af;
+      }
+    }
+    
+    // Category select
+    li.category {
+      select {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        
+        &:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+      }
+    }
+  }
+  
+  // Form actions
+  .form-actions {
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+    border-top: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .left-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .right-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    // Buttons
+    .thredded--form--submit {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      background: #3b82f6;
+      color: white;
+      
+      &:hover:not(:disabled) {
+        background: #2563eb;
+      }
+      
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+    
+    .btn-cancel {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      background: white;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      
+      &:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+      }
+      
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+      }
+    }
+    
+    .btn-preview {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      
+      .material-icons {
+        font-size: 1rem;
+        margin-right: 0.25rem;
+      }
+      
+      &:hover {
+        background: #f9fafb;
+      }
+      
+      &.active {
+        background: #eff6ff;
+        border-color: #3b82f6;
+        color: #2563eb;
+      }
+    }
+  }
+}
+
+// Preview area
+.thredded--preview-area {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  min-height: 100px;
+  
+  &:empty::before {
+    content: 'Preview will appear here...';
+    color: #9ca3af;
+    font-style: italic;
+  }
+}
+
+// Transition classes for smooth animations
+.form-expand-enter {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.form-expand-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+}
+
+.form-expand-leave {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.form-expand-leave-active {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+}
+
+// Dark mode support
+.dark {
+  .new-topic-collapsed {
+    .collapsed-input {
+      background: #1f2937;
+      border-color: #374151;
+      color: #9ca3af;
+      
+      &:hover {
+        background: #111827;
+        border-color: #4b5563;
+      }
+      
+      &:focus {
+        border-color: #3b82f6;
+        color: #f3f4f6;
+      }
+    }
+    
+    .collapsed-placeholder {
+      color: #6b7280;
+    }
+  }
+  
+  .new-topic-expanded {
+    background: #1f2937;
+    border-color: #374151;
+    
+    .form-header {
+      background: #111827;
+      border-bottom-color: #374151;
+      
+      .form-title {
+        color: #d1d5db;
+      }
+    }
+    
+    .thredded--form-list {
+      input[type="text"],
+      textarea,
+      select {
+        background: #111827;
+        border-color: #374151;
+        color: #f3f4f6;
+        
+        &:focus {
+          border-color: #3b82f6;
+        }
+        
+        &::placeholder {
+          color: #6b7280;
+        }
+      }
+      
+      label {
+        color: #9ca3af;
+      }
+    }
+    
+    .form-actions {
+      background: #111827;
+      border-top-color: #374151;
+      
+      .btn-cancel,
+      .btn-preview {
+        background: #1f2937;
+        border-color: #374151;
+        color: #9ca3af;
+        
+        &:hover {
+          background: #374151;
+        }
+      }
+    }
+  }
+  
+  .thredded--preview-area {
+    background: #111827;
+    border-color: #374151;
+    color: #d1d5db;
+    
+    &:empty::before {
+      color: #6b7280;
+    }
+  }
+}
