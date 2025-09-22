@@ -15,10 +15,10 @@
     @keydown.escape="clearSearch()"
   >
     <div class="relative" @keydown.enter.prevent="addTag(textInput)">
-      <%= 
-        hidden_field_tag 'field[value]', 
-          page.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
-          class: 'hidden_page_tags_value',
+      <%=
+        hidden_field_tag 'field[value]',
+          page.page_tags.join(PageTag::SUBMISSION_DELIMITER),
+          class: 'hidden_page_tags_value autosave-closest-form-on-change',
           id: field_uuid
       %>
       <input
@@ -92,8 +92,9 @@
     // Update our selected tags
     hidden_field.val(tags.join(tag_delimiter));
 
-    // Trigger autosave manually
-    hidden_field.closest('form').submit();
+    // Trigger autosave by firing change event
+    // The field has autosave-closest-form-on-change class which handles remote submission
+    hidden_field.trigger('change');
   }
 
   function tagSelect() {

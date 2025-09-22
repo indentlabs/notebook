@@ -28,23 +28,29 @@
   <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false }">
     <% if user_signed_in? %>
       <!-- Dynamic Autocomplete Search -->
-      <div class="hidden md:inline-flex items-center relative" 
-           x-data="searchAutocomplete()" 
+      <div class="hidden md:inline-flex items-center relative"
+           x-data="searchAutocomplete()"
            x-init="init()"
            @click.away="closeDropdown()">
-        
-        <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
-               type="search" 
-               name="search"
-               x-model="query"
-               @input="handleInput()"
-               @keydown="handleKeydown($event)"
-               @focus="handleFocus()"
-               placeholder="Search your notebook"
-               autocomplete="off"
-               autocorrect="off"
-               autocapitalize="off"
-               spellcheck="false">
+
+        <!-- Wrap in form to isolate autocomplete context -->
+        <form onsubmit="return false;" autocomplete="off">
+          <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 text-notebook-blue focus:border-notebook-blue bg-white h-9 px-3 text-sm rounded focus:outline-none"
+                 type="search"
+                 id="navbar-search-input"
+                 name="navbar_search_query"
+                 x-model="query"
+                 @input="handleInput()"
+                 @keydown="handleKeydown($event)"
+                 @focus="handleFocus()"
+                 placeholder="Search your notebook"
+                 autocomplete="new-password"
+                 autocorrect="off"
+                 autocapitalize="off"
+                 spellcheck="false"
+                 aria-label="Search your notebook"
+                 role="searchbox">
+        </form>
         
         <!-- Autocomplete Dropdown -->
         <div x-show="showDropdown" 
