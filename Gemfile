@@ -114,7 +114,7 @@ gem 'binding_of_caller' # see has_changelog.rb
 
 group :test, :development do
   gem 'pry'
-  gem 'sqlite3', '~> 1.4'
+  gem 'sqlite3', '~> 2.7'
   
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
