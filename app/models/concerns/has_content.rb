@@ -157,5 +157,24 @@ module HasContent
         .first(limit)
         .map { |page_data| ContentPage.new(page_data) }
     end
+    
+    # Optimized method for getting recent public content
+    def recent_public_content_list(limit: 10)
+      @user_recent_public_content_list ||= begin
+        recent_content = []
+        
+        Rails.application.config.content_types[:all].each do |content_type|
+          relation = content_type.name.downcase.pluralize.to_sym
+          recent = send(relation)
+                   .is_public
+                   .order(updated_at: :desc)
+                   .limit(limit)
+          
+          recent_content.concat(recent.to_a)
+        end
+        
+        recent_content.sort_by(&:updated_at).reverse.first(limit)
+      end
+    end
   end
 end

@@ -51,19 +51,19 @@ class User < ApplicationRecord
   has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
   # has_many :followed_by_users,            through: :user_followings, source: :user # todo unsure how to actually write this, so we do it manually below
   def followed_by_users
-    User.where(id: UserFollowing.where(followed_user_id: self.id).pluck(:user_id)) 
+    User.joins(:user_followings).where(user_followings: { followed_user_id: self.id })
   end
   def followed_by?(user)
-    followed_by_users.pluck(:id).include?(user.id)
+    UserFollowing.exists?(user_id: user.id, followed_user_id: self.id)
   end
 
   has_many :user_blockings,               dependent: :destroy
   has_many :blocked_users,                through: :user_blockings, source: :blocked_user
   def blocked_by_users
-    @cached_blocked_by_users ||= User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))
+    @cached_blocked_by_users ||= User.joins(:user_blockings).where(user_blockings: { blocked_user_id: self.id })
   end
   def blocked_by?(user)
-    blocked_by_users.pluck(:id).include?(user.id)
+    UserBlocking.exists?(user_id: user.id, blocked_user_id: self.id)
   end
 
   has_many :content_page_shares,           dependent: :destroy

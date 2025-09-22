@@ -25,18 +25,25 @@ class UsersController < ApplicationController
       return if @user.nil?
       return if @user.private_profile?
 
-      @random_image_including_private_pool_cache = ImageUpload.where(
-        user_id: @user.id,
-      ).group_by { |image| [image.content_type, image.content_id] }
-      
+      # Optimized: Only load images for content that will be displayed
       @content_type = content_type
-      @content_list = @user.send(content_type_name).is_public.order(:name)
+      @content_list = @user.send(content_type_name)
+                           .includes(:page_tags, :image_uploads)
+                           .is_public
+                           .order(:name)
+                           .paginate(page: params[:page], per_page: 20)
+      
+      # Only load images for the content being displayed
+      content_ids = @content_list.pluck(:id)
+      @random_image_including_private_pool_cache = ImageUpload
+        .where(user_id: @user.id, content_type: content_type.name, content_id: content_ids)
+        .group_by { |image| [image.content_type, image.content_id] }
 
-      @saved_basil_commissions = BasilCommission.where(
-        entity_type: content_type_name,
-        entity_id:   @content_list.pluck(:id)
-      ).where.not(saved_at: nil)
-      .group_by { |commission| [commission.entity_type, commission.entity_id] }
+      # Optimized: Use content_ids we already have
+      @saved_basil_commissions = BasilCommission
+        .where(entity_type: content_type.name, entity_id: content_ids)
+        .where.not(saved_at: nil)
+        .group_by { |commission| [commission.entity_type, commission.entity_id] }
 
       render :content_list
     end
@@ -211,31 +218,26 @@ class UsersController < ApplicationController
   end
   
   def load_user_activity
-    # Content page shares (stream activity) - filter to only public content
-    all_shares = ContentPageShare.where(user_id: @user.id)
+    # Optimized: Use joins to filter at database level
+    @feed = ContentPageShare
+      .includes(:content_page, :share_comments)
+      .where(user_id: @user.id)
+      .where(privacy: 'public')
       .order('created_at DESC')
-      .limit(200) # Get more initially so we have enough after filtering
+      .limit(100)
     
-    # Filter shares to only include those with public content pages
-    @feed = all_shares.select do |share|
-      next false unless share.content_page
-      share.content_page.respond_to?(:privacy) && share.content_page.privacy == 'public'
-    end.first(100) # Take first 100 after filtering
-    
-    # Recent content updates - only public content
-    @stream = @user.recent_content_list(limit: 20).select do |content|
-      content.respond_to?(:privacy) && content.privacy == 'public'
-    end
+    # Optimized: Get public content directly
+    @stream = @user.recent_public_content_list(limit: 20)
     
     # Skip recent edits - we don't want to show "made an edit" activities
     @recent_edits = []
     
     # Forum activity (if Thredded is available)
     if defined?(Thredded::Post)
-      @recent_forum_posts = Thredded::Post.where(user_id: @user.id)
-        .where(moderation_state: 'approved')
-        .order(created_at: :desc)
+      @recent_forum_posts = Thredded::Post
         .includes(:postable, :messageboard)
+        .where(user_id: @user.id, moderation_state: 'approved')
+        .order(created_at: :desc)
         .limit(10)
     else
       @recent_forum_posts = []
@@ -246,15 +248,25 @@ class UsersController < ApplicationController
   end
   
   def load_user_social_data
-    # Following/follower counts and data
-    @followers_count = @user.followed_by_users.count
-    @following_count = @user.followed_users.count
-    @followers = @user.followed_by_users.limit(12) # For display
-    @following = @user.followed_users.limit(12) # For display
+    # Optimized: Use counter caches if available, fallback to count
+    @followers_count = @user.respond_to?(:followers_count) ? @user.followers_count : @user.followed_by_users.count
+    @following_count = @user.respond_to?(:following_count) ? @user.following_count : @user.followed_users.count
     
-    # Check if current user follows this user
-    @is_following = user_signed_in? ? @user.followed_by?(current_user) : false
-    @is_blocked = user_signed_in? ? @user.blocked_by?(current_user) : false
+    # Optimized: Use includes to prevent N+1
+    @followers = User.joins(:user_followings)
+                     .where(user_followings: { followed_user_id: @user.id })
+                     .includes(:avatar_attachment)
+                     .limit(12)
+    @following = @user.followed_users.includes(:avatar_attachment).limit(12)
+    
+    # Optimized: Check follows and blocks efficiently
+    if user_signed_in?
+      @is_following = UserFollowing.exists?(user_id: current_user.id, followed_user_id: @user.id)
+      @is_blocked = UserBlocking.exists?(user_id: current_user.id, blocked_user_id: @user.id)
+    else
+      @is_following = false
+      @is_blocked = false
+    end
   end
   
   def load_user_collections

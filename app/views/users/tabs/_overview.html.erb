@@ -13,7 +13,7 @@
     <!-- Welcome Message for New/Empty Profiles -->
     <% if @total_public_pages == 0 %>
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">
-        <i class="material-icons text-blue-500 text-5xl mb-4">explore</i>
+        <i class="material-icons text-blue-500 text-5xl mb-4"><%= User.icon %></i>
         <h3 class="text-xl font-semibold text-blue-900 mb-2">
           <% if user_signed_in? && @user == current_user %>
             Welcome to your profile!
@@ -30,7 +30,7 @@
         </p>
         <% if user_signed_in? && @user == current_user %>
           <div class="mt-6">
-            <%= link_to new_character_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+            <%= link_to new_character_path, class: "#{Character.color} hover:opacity-90 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
               <i class="material-icons mr-2 text-sm">add</i>
               Create Your First Character
             <% end %>
@@ -44,7 +44,7 @@
         <div>
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-              <i class="material-icons mr-3 text-purple-600 text-3xl">public</i>
+              <i class="material-icons mr-3 text-purple-600 text-3xl"><%= Universe.icon %></i>
               Featured Universes
             </h2>
             <% if @featured_universes.length < (@user.universes.is_public.count rescue 0) %>
@@ -63,7 +63,7 @@
                       <%= image_tag universe.first_public_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
                     <% else %>
                       <div class="w-full h-full bg-gradient-to-br from-purple-400 via-blue-500 to-indigo-600 flex items-center justify-center">
-                        <i class="material-icons text-white text-6xl opacity-80">public</i>
+                        <i class="material-icons text-white text-6xl opacity-80"><%= Universe.icon %></i>
                       </div>
                     <% end %>
                     
@@ -101,7 +101,7 @@
       <!-- Quick Stats Grid -->
       <div>
         <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-          <i class="material-icons mr-3 text-green-600 text-3xl">analytics</i>
+          <i class="material-icons mr-3 bg-notebook-blue text-white rounded p-1 text-3xl">analytics</i>
           At a Glance
         </h2>
         
@@ -220,7 +220,7 @@
         <div>
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-              <i class="material-icons mr-3 text-emerald-600 text-3xl">timeline</i>
+              <i class="material-icons mr-3 bg-notebook-blue text-white rounded p-1 text-3xl">timeline</i>
               Recent Activity
             </h2>
             <button class="profile-tab text-sm text-blue-600 hover:text-blue-700 font-medium" data-tab="activity">

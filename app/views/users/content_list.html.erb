@@ -331,6 +331,19 @@
         <% end %>
       </div>
       
+      <!-- Pagination Controls -->
+      <% if @content_list.respond_to?(:total_pages) && @content_list.total_pages > 1 %>
+        <div class="mt-8 flex justify-center">
+          <%= will_paginate @content_list, 
+              class: 'flex items-center space-x-2',
+              previous_label: '← Previous',
+              next_label: 'Next →',
+              inner_window: 2,
+              outer_window: 1,
+              renderer: BootstrapPagination::Rails %>
+        </div>
+      <% end %>
+      
     <% end %>
   </div>
 </div>
