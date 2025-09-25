@@ -199,65 +199,67 @@
   </div>
   
   <!-- Generate with Basil section -->
-  <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">
-      <i class="material-icons text-sm align-middle mr-2 text-purple-600">auto_awesome</i>
-      Generate with Basil
-    </h3>
-    
-    <p class="text-sm text-gray-600 mb-4">
-      Let Basil create unique images for your <%= raw_content.page_type.downcase %> based on the details you've added.
-    </p>
-    
-    <div class="bg-white rounded-lg p-4 mb-4 border border-purple-100">
-      <div class="flex items-start space-x-3">
-        <div class="flex-shrink-0">
-          <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-            <i class="material-icons text-purple-600 text-sm">tips_and_updates</i>
+  <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">
+        <i class="material-icons text-sm align-middle mr-2 text-purple-600">auto_awesome</i>
+        Generate with Basil
+      </h3>
+
+      <p class="text-sm text-gray-600 mb-4">
+        Let Basil create unique images for your <%= raw_content.page_type.downcase %> based on the details you've added.
+      </p>
+
+      <div class="bg-white rounded-lg p-4 mb-4 border border-purple-100">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <i class="material-icons text-purple-600 text-sm">tips_and_updates</i>
+            </div>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-700 mb-2">
+              Basil uses the information from your <%= raw_content.page_type.downcase %> page to generate images that match your vision.
+            </p>
+            <p class="text-xs text-gray-500">
+              The more details you've added about appearance and characteristics, the better the results will be.
+            </p>
           </div>
         </div>
-        <div class="flex-1">
-          <p class="text-sm text-gray-700 mb-2">
-            Basil uses the information from your <%= raw_content.page_type.downcase %> page to generate images that match your vision.
-          </p>
-          <p class="text-xs text-gray-500">
-            The more details you've added about appearance and characteristics, the better the results will be.
+      </div>
+
+      <% if basil_images.any? %>
+        <div class="mb-4">
+          <p class="text-xs text-gray-500 mb-2">
+            <i class="material-icons text-xs align-middle mr-1">check_circle</i>
+            You've already generated <%= pluralize(basil_images.count, 'image') %> with Basil
           </p>
         </div>
+      <% end %>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+        <%= link_to basil_content_path(raw_content.page_type.downcase, raw_content.id),
+            class: 'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all group' do %>
+          <i class="material-icons text-sm mr-2 group-hover:scale-110 transition-transform">auto_awesome</i>
+          <span>Generate New Image</span>
+          <i class="material-icons text-sm ml-2 opacity-70 group-hover:translate-x-1 transition-transform">arrow_forward</i>
+        <% end %>
+
+        <% if current_user && !current_user.on_premium_plan? %>
+          <div class="flex items-center space-x-1">
+            <% generated_count = current_user.basil_commissions.with_deleted.count %>
+            <% free_limit = BasilService::FREE_IMAGE_LIMIT %>
+            <span class="text-xs text-gray-500">
+              <%= generated_count %> / <%= free_limit %> free images generated
+            </span>
+            <% if generated_count >= free_limit %>
+              <%= link_to "Upgrade", subscription_path, class: "text-xs font-medium text-purple-600 hover:text-purple-700 underline" %>
+            <% end %>
+          </div>
+        <% end %>
       </div>
     </div>
-    
-    <% if basil_images.any? %>
-      <div class="mb-4">
-        <p class="text-xs text-gray-500 mb-2">
-          <i class="material-icons text-xs align-middle mr-1">check_circle</i>
-          You've already generated <%= pluralize(basil_images.count, 'image') %> with Basil
-        </p>
-      </div>
-    <% end %>
-    
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
-      <%= link_to basil_content_path(raw_content.page_type.downcase, raw_content.id), 
-          class: 'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all group' do %>
-        <i class="material-icons text-sm mr-2 group-hover:scale-110 transition-transform">auto_awesome</i>
-        <span>Generate New Image</span>
-        <i class="material-icons text-sm ml-2 opacity-70 group-hover:translate-x-1 transition-transform">arrow_forward</i>
-      <% end %>
-      
-      <% if current_user && !current_user.on_premium_plan? %>
-        <div class="flex items-center space-x-1">
-          <% generated_count = current_user.basil_commissions.with_deleted.count %>
-          <% free_limit = BasilService::FREE_IMAGE_LIMIT %>
-          <span class="text-xs text-gray-500">
-            <%= generated_count %> / <%= free_limit %> free images generated
-          </span>
-          <% if generated_count >= free_limit %>
-            <%= link_to "Upgrade", subscription_path, class: "text-xs font-medium text-purple-600 hover:text-purple-700 underline" %>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
-  </div>
+  <% end %>
 </div>
 
 <style>
