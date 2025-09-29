@@ -52,7 +52,7 @@
               <div class="flex items-center space-x-4">
                 <div class="relative">
                   <%= image_tag @share.user.image_url(size: 48), class: "h-12 w-12 rounded-full shadow-sm border border-green-200" %>
-                  <% if @share.content_page %>
+                  <% if @share.content_page && @share.content_page.class.respond_to?(:hex_color) %>
                     <div class="absolute -bottom-1 -right-1 h-6 w-6 rounded-full shadow-sm flex items-center justify-center" style="background-color: <%= @share.content_page.class.hex_color %>;">
                       <i class="material-icons text-white text-sm"><%= @share.content_page.class.icon %></i>
                     </div>
@@ -66,9 +66,15 @@
                     <% end %>
                     <% if @share.content_page %>
                       <span class="text-gray-500">shared a</span>
-                      <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: <%= @share.content_page.class.hex_color %>20; color: <%= @share.content_page.class.hex_color %>;">
-                        <%= @share.content_page.class.name.downcase %>
-                      </span>
+                      <% if @share.content_page.class.respond_to?(:hex_color) %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: <%= @share.content_page.class.hex_color %>20; color: <%= @share.content_page.class.hex_color %>;">
+                          <%= @share.content_page.class.name.downcase %>
+                        </span>
+                      <% else %>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                          <%= @share.content_page.class.name.downcase %>
+                        </span>
+                      <% end %>
                     <% else %>
                       <span class="text-red-500">shared a deleted page</span>
                     <% end %>
@@ -113,9 +119,19 @@
                         <%= image_tag @share.content_page.first_public_image, class: 'w-full h-full object-cover', alt: "#{@share.content_page.name} preview" %>
                       </div>
                     <% end %>
-                    <div class="flex-1 p-4" style="border-left: 3px solid <%= @share.content_page.class.hex_color %>;">
+                    <% if @share.content_page.class.respond_to?(:hex_color) %>
+                      <div class="flex-1 p-4" style="border-left: 3px solid <%= @share.content_page.class.hex_color %>;">
+                    <% else %>
+                      <div class="flex-1 p-4" style="border-left: 3px solid #9CA3AF;">
+                    <% end %>
                       <h3 class="font-semibold text-gray-900 group-hover/content:text-blue-600 transition-colors flex items-center">
-                        <i class="material-icons text-lg mr-2" style="color: <%= @share.content_page.class.hex_color %>"><%= @share.content_page.class.icon %></i>
+                        <% if @share.content_page.class.respond_to?(:hex_color) && @share.content_page.class.respond_to?(:icon) %>
+                          <i class="material-icons text-lg mr-2" style="color: <%= @share.content_page.class.hex_color %>"><%= @share.content_page.class.icon %></i>
+                        <% elsif @share.content_page.class.respond_to?(:icon) %>
+                          <i class="material-icons text-lg mr-2 text-gray-500"><%= @share.content_page.class.icon %></i>
+                        <% else %>
+                          <i class="material-icons text-lg mr-2 text-gray-500">article</i>
+                        <% end %>
                         <%= @share.content_page.name %>
                       </h3>
                       <% if @share.content_page.respond_to?(:description) && @share.content_page.description.present? %>
@@ -352,9 +368,16 @@
                       <%= link_to page_path, class: "block group" do %>
                         <div class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors">
                           <div class="flex-shrink-0">
-                            <div class="w-6 h-6 rounded-md flex items-center justify-center" style="background-color: <%= content_page_data.page_type.constantize.hex_color %>20;">
-                              <i class="material-icons text-xs" style="color: <%= content_page_data.page_type.constantize.hex_color %>;"><%= content_page_data.page_type.constantize.icon %></i>
-                            </div>
+                            <% content_class = content_page_data.page_type.constantize rescue nil %>
+                            <% if content_class && content_class.respond_to?(:hex_color) %>
+                              <div class="w-6 h-6 rounded-md flex items-center justify-center" style="background-color: <%= content_class.hex_color %>20;">
+                                <i class="material-icons text-xs" style="color: <%= content_class.hex_color %>;"><%= content_class.icon if content_class.respond_to?(:icon) %></i>
+                              </div>
+                            <% else %>
+                              <div class="w-6 h-6 rounded-md flex items-center justify-center bg-gray-100">
+                                <i class="material-icons text-xs text-gray-500">article</i>
+                              </div>
+                            <% end %>
                           </div>
                           <div class="flex-1 min-w-0">
                             <h4 class="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
