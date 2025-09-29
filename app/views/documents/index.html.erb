@@ -31,6 +31,7 @@
 
 <div x-data="{
   showNewFolderModal: false,
+  showEditFolderModal: false,
   leftSidebarOpen: window.innerWidth >= 1280,
   rightSidebarOpen: window.innerWidth >= 1536,
   mobileMenuOpen: false,
@@ -99,7 +100,7 @@ class="min-h-screen bg-gray-50">
             <i class="material-icons text-purple-500 text-sm mr-1">history</i>
             Recent Documents
           </h3>
-          <%= link_to new_document_path, class: "p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors", title: "New Document" do %>
+          <%= link_to new_document_path(folder: @current_folder&.id), class: "p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors", title: "New Document" do %>
             <i class="material-icons text-sm">add</i>
           <% end %>
         </div>
@@ -181,6 +182,25 @@ class="min-h-screen bg-gray-50">
     <main class="flex-1 min-w-0 flex flex-col">
       <!-- Header -->
       <div class="bg-white border-b border-gray-200">
+        <!-- Breadcrumb Navigation (if in folder) -->
+        <% if @current_folder %>
+          <div class="px-6 pt-3 pb-2 border-b border-gray-100">
+            <nav class="flex items-center space-x-2 text-sm">
+              <%= link_to documents_path, class: "text-gray-500 hover:text-gray-700 transition-colors" do %>
+                <i class="material-icons text-sm">folder</i>
+                <span>Documents</span>
+              <% end %>
+              <% if @current_folder.parent_folder %>
+                <span class="text-gray-400">/</span>
+                <%= link_to @current_folder.parent_folder.title, folder_path(@current_folder.parent_folder),
+                    class: "text-gray-500 hover:text-gray-700 transition-colors" %>
+              <% end %>
+              <span class="text-gray-400">/</span>
+              <span class="text-gray-900 font-medium"><%= @current_folder.title %></span>
+            </nav>
+          </div>
+        <% end %>
+
         <div class="px-6 py-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2 sm:space-x-4">
@@ -193,7 +213,7 @@ class="min-h-screen bg-gray-50">
                 <i class="material-icons" x-text="leftSidebarOpen ? 'menu_open' : 'menu'"></i>
               </button>
               <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
-                Documents
+                <%= @current_folder ? @current_folder.title : 'Documents' %>
                 <% if params[:q].present? %>
                   <span class="text-sm font-normal text-gray-500 ml-2">
                     - Searching for "<%= params[:q] %>"
@@ -201,15 +221,28 @@ class="min-h-screen bg-gray-50">
                 <% end %>
               </h1>
             </div>
-            
-            <!-- Right Sidebar Toggle -->
-            <button
-              @click="rightSidebarOpen = !rightSidebarOpen"
-              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-              :class="{ 'bg-gray-100 text-gray-600': rightSidebarOpen }"
-            >
-              <i class="material-icons">insights</i>
-            </button>
+
+            <div class="flex items-center space-x-2">
+              <!-- Edit Folder Button (when in folder context) -->
+              <% if @current_folder %>
+                <button
+                  @click="showEditFolderModal = true"
+                  class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Edit folder"
+                >
+                  <i class="material-icons">edit</i>
+                </button>
+              <% end %>
+
+              <!-- Right Sidebar Toggle -->
+              <button
+                @click="rightSidebarOpen = !rightSidebarOpen"
+                class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                :class="{ 'bg-gray-100 text-gray-600': rightSidebarOpen }"
+              >
+                <i class="material-icons">insights</i>
+              </button>
+            </div>
           </div>
         </div>
         
@@ -519,7 +552,7 @@ class="min-h-screen bg-gray-50">
               <div>
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-sm font-medium text-gray-500">Documents</h3>
-                  <%= link_to new_document_path, class: "inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors" do %>
+                  <%= link_to new_document_path(folder: @current_folder&.id), class: "inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors" do %>
                     <i class="material-icons text-xs mr-1">add</i>
                     New
                   <% end %>
@@ -628,7 +661,7 @@ class="min-h-screen bg-gray-50">
                   <i class="material-icons mr-2 text-sm">create_new_folder</i>
                   Create Folder
                 </button>
-                <%= link_to new_document_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700" do %>
+                <%= link_to new_document_path(folder: @current_folder&.id), class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700" do %>
                   <i class="material-icons mr-2 text-sm">add</i>
                   Create Document
                 <% end %>
@@ -775,8 +808,15 @@ class="min-h-screen bg-gray-50">
   
   <!-- New Folder Modal -->
   <div x-show="showNewFolderModal" class="fixed z-50 inset-0" style="display: none;">
-    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: Document, parent_folder: nil } %>
+    <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: Document, parent_folder: @current_folder } %>
   </div>
+
+  <!-- Edit Folder Modal (only when in a folder context) -->
+  <% if @current_folder %>
+    <div x-show="showEditFolderModal" class="fixed z-50 inset-0" style="display: none;">
+      <%= render partial: 'folders/tailwind_edit_modal', locals: { folder: @current_folder } %>
+    </div>
+  <% end %>
 </div>
 
 <script>
@@ -819,7 +859,7 @@ class="min-h-screen bg-gray-50">
     // CMD/Ctrl + N for new document
     if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
       e.preventDefault();
-      window.location.href = '<%= new_document_path %>';
+      window.location.href = '<%= new_document_path(folder: @current_folder&.id) %>';
     }
   });
 </script>

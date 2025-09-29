@@ -45,144 +45,113 @@ class FoldersController < ApplicationController
   def show
     @page_title = @folder.title || 'Untitled folder'
 
-    @parent_folder = @folder.parent_folder
-    @child_folders = Folder.where(parent_folder: @folder)
+    # Set up variables to match documents#index
+    @recent_documents = current_user
+      .linkable_documents.order('updated_at DESC')
+      .includes([:user, :page_tags, :universe])
+      .limit(10)
+
+    # Get documents in this folder
+    @documents = current_user
+      .linkable_documents
+      .includes([:user, :page_tags, :universe])
+      .where(folder_id: @folder.id)
+
+    # Apply sorting (same as documents#index)
+    case params[:sort]
+    when 'alphabetical'
+      @documents = @documents.order(favorite: :desc, title: :asc)
+    when 'word_count'
+      @documents = @documents.order(favorite: :desc).order(Arel.sql('cached_word_count DESC NULLS LAST'))
+    when 'created'
+      @documents = @documents.order(favorite: :desc, created_at: :desc)
+    else # default to 'updated' or no param
+      @documents = @documents.order(favorite: :desc, updated_at: :desc)
+    end
+
+    # Get subfolders
+    @folders = current_user
+      .folders
+      .where(context: 'Document', parent_folder_id: @folder.id)
       .order('title ASC')
 
-    # TODO: probably want to cache this in @current_user_content if we need it anywhere else
-    @all_folders = current_user.folders
+    # Apply global search if query param is present
+    if params[:q].present?
+      search_query = "%#{params[:q]}%"
+      @documents = @documents.where("title ILIKE ? OR body ILIKE ?", search_query, search_query)
+      @folders = @folders.where("title ILIKE ?", search_query)
+    end
+
+    # Calculate frequent folders (top 5 by document count)
+    @frequent_folders = current_user
+      .folders
       .where(context: 'Document')
-      .order('title ASC')
+      .joins(:documents)
+      .group('folders.id')
+      .order('COUNT(documents.id) DESC')
+      .limit(5)
 
-    # TODO: can we reuse this content to skip a few queries in this controller action?
+    # Calculate writing streak using WordCountUpdate (same as documents#index)
+    calculate_writing_streak_data
+
+    # Recent activity for feed
+    @recent_activity = current_user.linkable_documents
+      .order('updated_at DESC')
+      .limit(10)
+      .select(:id, :title, :updated_at, :cached_word_count, :user_id)
+
     cache_linkable_content_for_each_content_type
 
-    # Get the content type class based on the folder's context
-    content_type_class = @folder.context.constantize rescue Document
-    
-    # Add sidebar data
-    # Recent items and folders for sidebars (matching documents#index)
-    if @folder.context == 'Document'
-      @recent_documents = current_user.linkable_documents
-        .order('updated_at DESC')
-        .includes([:user, :page_tags, :universe])
-        .limit(10)
-    else
-      # For other content types, load recent items
-      @recent_documents = content_type_class
-        .where(user: current_user)
-        .order('updated_at DESC')
-        .limit(10) rescue []
-    end
-
-    @frequent_folders = current_user.folders
-      .where(context: @folder.context)
-      .joins("LEFT JOIN #{content_type_class.table_name} ON #{content_type_class.table_name}.folder_id = folders.id")
-      .group('folders.id')
-      .order("COUNT(#{content_type_class.table_name}.id) DESC")
-      .limit(5)
-    
-    # Calculate quick actions based on folder context
-    @quick_actions = []
-    if @folder.context == 'Document'
-      @quick_actions << { label: 'New Document', path: new_document_path(folder: @folder.id), icon: 'add', color: 'blue' }
-    elsif Rails.application.config.content_types[:all].map(&:name).include?(@folder.context)
-      content_klass = content_class_from_name(@folder.context)
-      @quick_actions << { 
-        label: "New #{@folder.context}", 
-        path: new_polymorphic_path(content_klass, folder: @folder.id), 
-        icon: content_klass.icon, 
-        color: content_klass.hex_color 
-      }
-    end
-    @quick_actions << { label: 'New Subfolder', action: 'showNewFolderModal = true', icon: 'create_new_folder', color: Folder.hex_color }
-    
-    # Folder statistics (for right sidebar)
-    @total_items_in_folder = 0
-    @total_words_in_folder = 0
-    
-    # Check if the content type has a folder association
-    if content_type_class.column_names.include?('folder_id')
-      # Load content of the appropriate type
-      @content = content_type_class.where(folder: @folder)
-      
-      # Add includes based on available associations
-      includes_array = [:user]
-      includes_array << :page_tags if content_type_class.reflect_on_association(:page_tags)
-      includes_array << :universe if content_type_class.reflect_on_association(:universe)
-      
-      @content = @content.includes(includes_array)
-        .order("#{content_type_class.table_name}.favorite DESC, #{content_type_class.table_name}.title ASC, #{content_type_class.table_name}.updated_at DESC")
-
-      # Only filter by universe if the content type has a universe association
-      if @universe_scope && content_type_class.reflect_on_association(:universe)
-        @content = @content.where(universe: @universe_scope)
-      end
-    else
-      # If the content type doesn't have a folder association, return an empty array
-      @content = []
-      Rails.logger.warn("Content type #{content_type_class.name} doesn't have a folder_id column")
-    end
-
+    # Filter by favorites if requested
     if params.key?(:favorite_only)
-      @content = @content.where(favorite: true)
+      @documents = @documents.where(favorite: true)
     end
 
-    # Handle page tags if content has any IDs
-    if @content.any?
-      @page_tags = PageTag.where(
-        page_type: content_type_class.name,
-        page_id:   @content.pluck(:id)
-      ).order(:tag)
-
-      if params.key?(:tag)
-        @filtered_page_tags = @page_tags.where(slug: params[:tag])
-
-        @content = @content.to_a.select { |content| @filtered_page_tags.pluck(:page_id).include?(content.id) }
-        # TODO: the above could probably be replaced with something like the below, but not sure on nesting syntax
-        # @content = @content.where(page_tags: { slug: @filtered_page_tags.pluck(:slug) })
-      end
-
-      @page_tags = @page_tags.uniq(&:tag)
-      @suggested_page_tags = (@page_tags.pluck(:slug) + PageTagService.suggested_tags_for(content_type_class.name)).uniq
-    else
-      @page_tags = []
-      @suggested_page_tags = PageTagService.suggested_tags_for(content_type_class.name)
+    # Handle universe filtering
+    if @universe_scope
+      @documents = @documents.where(universe: @universe_scope)
+      @recent_documents = @recent_documents.where(universe: @universe_scope)
+    elsif params[:universe_id].present?
+      @documents = @documents.where(universe_id: params[:universe_id])
+      @recent_documents = @recent_documents.where(universe_id: params[:universe_id])
     end
-    
-    # Make the content type class available to the view
-    @content_type_class = content_type_class
-    
-    # Calculate folder statistics after content is loaded
-    if @content.respond_to?(:count)
-      @total_items_in_folder = @content.count
-      if content_type_class.column_names.include?('cached_word_count')
-        @total_words_in_folder = @content.sum(:cached_word_count) || 0
-      end
-    end
-    
-    # Activity stats (for right sidebar)
-    @words_written_today = WordCountUpdate.where(
-      user: current_user,
-      for_date: Date.current
-    ).sum(:word_count)
 
-    @words_written_this_week = WordCountUpdate.where(
-      user: current_user,
-      for_date: Date.current.beginning_of_week..Date.current
-    ).sum(:word_count)
+    @recent_documents = @recent_documents.limit(6)
 
-    # Activity stats
-    @items_this_month = 0
-    if @content.any? && content_type_class.column_names.include?('created_at')
-      @items_this_month = @content.where('created_at >= ?', Date.current.beginning_of_month).count
+    # Handle page tags
+    @page_tags = PageTag.where(
+      page_type: Document.name,
+      page_id:   @documents.map(&:id)
+    ).order(:tag)
+
+    @filtered_page_tags = []
+    if params.key?(:tag)
+      @filtered_page_tags = @page_tags.where(slug: params[:tag])
+      @documents = @documents.to_a.select { |document| @filtered_page_tags.pluck(:page_id).include?(document.id) }
     end
-    
-    # Last activity in folder
-    @last_activity = nil
-    if @content.any? && content_type_class.column_names.include?('updated_at')
-      @last_activity = @content.maximum(:updated_at)
-    end
+
+    @page_tags = @page_tags.uniq(&:tag)
+    @suggested_page_tags = (@page_tags.pluck(:tag) + PageTagService.suggested_tags_for('Document')).uniq
+
+    # Store the current folder for use in the view
+    @current_folder = @folder
+
+    # Render the documents index view
+    render 'documents/index'
+  end
+
+  private
+
+  def calculate_writing_streak_data
+    # Today's word count
+    @words_written_today = WordCountUpdate
+      .where(user: current_user, for_date: Date.current)
+      .sum(:word_count)
+
+    # This week's word count
+    @words_written_this_week = WordCountUpdate
+      .where(user: current_user, for_date: Date.current.beginning_of_week..Date.current)
+      .sum(:word_count)
   end
 
   private
