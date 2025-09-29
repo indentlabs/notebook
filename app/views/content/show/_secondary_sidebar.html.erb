@@ -64,26 +64,28 @@
         <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
         Tools
       </h2>
-      
-      <div class="grid grid-cols-2 gap-2">
-        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
-          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">lightbulb</i>
-          <span class="font-medium text-gray-700 group-hover:text-purple-700">Brainstorm</span>
-        <% end %>
-        
-        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
-          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">find_in_page</i>
-          <span class="font-medium text-gray-700 group-hover:text-purple-700">Research</span>
-        <% end %>
 
-        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
-          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">visibility</i>
-          <span class="font-medium text-gray-700 group-hover:text-purple-700">Visualize</span>
-        <% end %>
-        
-        <%= link_to "#", class: "group flex flex-col items-center p-3 text-xs rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white text-center" do %>
-          <i class="material-icons text-lg text-gray-400 group-hover:text-purple-500 mb-1">analytics</i>
-          <span class="font-medium text-gray-700 group-hover:text-purple-700">Analyze</span>
+      <div class="w-full">
+        <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+          <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
+                      target: "_blank",
+                      class: "group flex items-center justify-between p-3 w-full rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white" do %>
+            <div class="flex items-center">
+              <i class="material-icons text-xl text-gray-400 group-hover:text-purple-500 mr-3">visibility</i>
+              <div>
+                <div class="font-medium text-gray-700 group-hover:text-purple-700 text-sm">Visualize</div>
+                <div class="text-xs text-gray-500 group-hover:text-purple-600">Generate images</div>
+              </div>
+            </div>
+            <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
+          <% end %>
+        <% else %>
+          <div class="p-3 w-full rounded-lg border border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-center">
+              <i class="material-icons text-gray-400 mr-2">construction</i>
+              <span class="text-sm text-gray-600">More tools coming soon!</span>
+            </div>
+          </div>
         <% end %>
       </div>
     </div>

@@ -160,9 +160,61 @@
           <% end %>
         </div>
         
-        <!-- Center Column: Style Selection -->
+        <!-- Center Column: Style Selection or Empty State -->
         <div class="lg:col-span-1 xl:col-span-1">
-          <% if @can_request_another && @relevant_fields.any? %>
+          <% if @relevant_fields.empty? %>
+            <!-- Empty State: No fields filled -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div class="p-6 sm:p-8 text-center">
+                <!-- Icon -->
+                <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <i class="material-icons text-gray-400 text-3xl">edit_note</i>
+                </div>
+
+                <!-- Title -->
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                  More Information Needed
+                </h3>
+
+                <!-- Description -->
+                <p class="text-sm text-gray-600 mb-6 max-w-sm mx-auto">
+                  To generate images for <%= @content.name || "this #{@content.page_type.downcase}" %>,
+                  please fill in the following fields:
+                </p>
+
+                <!-- Required Fields List -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto text-left">
+                  <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                    <i class="material-icons text-amber-500 text-sm mr-2">checklist</i>
+                    Required Fields
+                  </h4>
+                  <ul class="space-y-2">
+                    <% @missing_required_fields.each do |field_name, section| %>
+                      <li class="flex items-start text-sm">
+                        <i class="material-icons text-gray-400 text-xs mt-0.5 mr-2">radio_button_unchecked</i>
+                        <div>
+                          <span class="font-medium text-gray-700"><%= field_name %></span>
+                          <span class="text-gray-500 text-xs block"><%= section %></span>
+                        </div>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+
+                <!-- CTA Button -->
+                <%= link_to @content.edit_path,
+                    class: "inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shadow-sm" do %>
+                  <i class="material-icons text-sm mr-2">edit</i>
+                  Edit <%= @content.name || @content.page_type %>
+                <% end %>
+
+                <!-- Helper Text -->
+                <p class="text-xs text-gray-500 mt-4">
+                  Once you've added these details, you can return here to generate images
+                </p>
+              </div>
+            </div>
+          <% elsif @can_request_another && @relevant_fields.any? %>
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
               <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
                 <i class="material-icons text-purple-500 mr-2 text-lg sm:text-base">palette</i>
