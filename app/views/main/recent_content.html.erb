@@ -107,9 +107,19 @@
         <div class="relative mb-12">
           <!-- Chart Container -->
           <div id="activity-chart" class="flex items-end justify-between h-16 space-x-2 relative">
+            <%
+              # Find the maximum count for scaling (daily_activity is an array of [date, count] pairs)
+              max_count = @daily_activity.map { |_, count| count }.max.to_f
+              max_count = 1 if max_count == 0 # Avoid division by zero
+            %>
             <% @daily_activity.each_with_index do |(date, count), index| %>
-              <div class="activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer" 
-                   style="height: <%= count > 0 ? [count * 20, 4].max : 2 %>px;"
+              <%
+                # Calculate height as percentage of container (64px max)
+                height_percentage = count > 0 ? (count / max_count * 100).round : 5
+                height_percentage = [height_percentage, 10].max if count > 0 # Minimum visible height
+              %>
+              <div class="activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer"
+                   style="height: <%= height_percentage %>%;"
                    data-date="<%= date %>"
                    data-count="<%= count %>"
                    data-index="<%= index %>">
@@ -641,37 +651,117 @@ document.addEventListener('DOMContentLoaded', function() {
     const contentTypeSelect = filterForm.querySelector('select[name="content_type"]');
     const dateRangeSelect = filterForm.querySelector('select[name="date_range"]');
     const sortSelect = filterForm.querySelector('select[name="sort"]');
-    
-    // Search input with debouncing
+
+    // Client-side filtering function
+    function filterContent() {
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      const contentType = contentTypeSelect ? contentTypeSelect.value : 'all';
+
+      // Get all content cards based on view mode
+      let contentItems = [];
+      const viewMode = '<%= @view_mode %>';
+
+      if (viewMode === 'grid') {
+        contentItems = document.querySelectorAll('.content-card');
+      } else if (viewMode === 'list') {
+        contentItems = document.querySelectorAll('.divide-y > a');
+      } else if (viewMode === 'timeline') {
+        // For timeline, we need to handle both items and date headers
+        contentItems = document.querySelectorAll('.ml-20 a');
+        // We'll handle date headers separately below
+      }
+
+      let visibleCount = 0;
+
+      contentItems.forEach(item => {
+        // Get item text content for searching
+        const itemText = item.textContent.toLowerCase();
+
+        // Get content type from the badge
+        let itemType = 'all';
+        const typeBadge = item.querySelector('span[class*="rounded-full"]');
+        if (typeBadge && typeBadge.textContent) {
+          itemType = typeBadge.textContent.trim();
+        }
+
+        // Check if item matches search term
+        const matchesSearch = searchTerm === '' || itemText.includes(searchTerm);
+
+        // Check if item matches content type filter
+        const matchesType = contentType === 'all' || itemType === contentType;
+
+        // Show/hide item based on filters
+        if (matchesSearch && matchesType) {
+          item.style.display = '';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      // Update results count
+      const resultsInfo = document.querySelector('.text-sm.text-gray-600');
+      if (resultsInfo && resultsInfo.textContent.includes('Showing')) {
+        const totalCount = contentItems.length;
+        resultsInfo.textContent = `Showing ${visibleCount} of ${totalCount} items`;
+      }
+
+      // Show/hide empty state if needed
+      const hasVisibleItems = visibleCount > 0;
+      const emptyState = document.querySelector('.text-center.py-16');
+      if (emptyState) {
+        emptyState.style.display = hasVisibleItems ? 'none' : 'block';
+      }
+
+      // Special handling for timeline view - hide date headers with no visible items
+      if (viewMode === 'timeline') {
+        document.querySelectorAll('.ml-20.space-y-4').forEach(dateGroup => {
+          const visibleItemsInGroup = Array.from(dateGroup.querySelectorAll('a')).filter(
+            item => item.style.display !== 'none'
+          ).length;
+
+          const dateHeader = dateGroup.previousElementSibling;
+          if (dateHeader && dateHeader.classList.contains('relative')) {
+            dateHeader.style.display = visibleItemsInGroup > 0 ? '' : 'none';
+          }
+          dateGroup.style.display = visibleItemsInGroup > 0 ? '' : 'none';
+        });
+      }
+    }
+
+    // Search input - instant filtering, no debounce needed
     if (searchInput) {
-      let searchTimeout;
       searchInput.addEventListener('input', function() {
         console.log('Search input changed:', this.value);
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          console.log('Submitting search form');
-          filterForm.submit();
-        }, 800);
+        filterContent();
+      });
+
+      // Prevent form submission on Enter key
+      searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          filterContent();
+        }
       });
     }
-    
-    // Content type filter
+
+    // Content type filter - instant filtering
     if (contentTypeSelect) {
       contentTypeSelect.addEventListener('change', function() {
         console.log('Content type changed:', this.value);
-        filterForm.submit();
+        filterContent();
       });
     }
-    
-    // Date range filter
+
+    // Date range filter - still submit form since this requires server-side filtering
     if (dateRangeSelect) {
       dateRangeSelect.addEventListener('change', function() {
         console.log('Date range changed:', this.value);
         filterForm.submit();
       });
     }
-    
-    // Sort filter
+
+    // Sort filter - still submit form since this requires server-side sorting
     if (sortSelect) {
       sortSelect.addEventListener('change', function() {
         console.log('Sort changed:', this.value);
