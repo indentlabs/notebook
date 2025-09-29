@@ -1,9 +1,40 @@
+<style>
+  /* Subtle scrollbar styling */
+  .styled-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .styled-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .styled-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+  }
+
+  .styled-scrollbar:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.8);
+  }
+
+  /* Firefox scrollbar styling */
+  .styled-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+
+  .styled-scrollbar:hover {
+    scrollbar-color: rgba(156, 163, 175, 0.8) transparent;
+  }
+</style>
+
 <div x-data="{
   showNewFolderModal: false,
   leftSidebarOpen: window.innerWidth >= 1280,
   rightSidebarOpen: window.innerWidth >= 1536,
   mobileMenuOpen: false,
-  viewMode: 'grid',
+  viewMode: localStorage.getItem('documentsViewMode') || 'list',
   searchQuery: '',
   globalSearchQuery: '',
   isSearching: false,
@@ -29,7 +60,7 @@ x-init="
 class="min-h-screen bg-gray-50">
 
   <!-- Three Column Layout -->
-  <div class="flex h-screen"> <!-- Remove extra padding, navbar is handled by layout -->
+  <div class="flex min-h-screen"> <!-- Natural height with sticky sidebars -->
     
     <!-- Mobile Backdrop -->
     <div x-show="(leftSidebarOpen || rightSidebarOpen) && window.innerWidth < 1280" 
@@ -43,14 +74,14 @@ class="min-h-screen bg-gray-50">
          class="fixed inset-0 bg-black bg-opacity-25 z-40 lg:hidden"></div>
 
     <!-- Left Sidebar - Quick Actions & Navigation -->
-    <aside x-show="leftSidebarOpen" 
+    <aside x-show="leftSidebarOpen"
            x-transition:enter="transition ease-out duration-300"
            x-transition:enter-start="-translate-x-full"
            x-transition:enter-end="translate-x-0"
            x-transition:leave="transition ease-in duration-300"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto fixed lg:relative lg:translate-x-0 h-full z-40 top-0 pt-14 lg:pt-0 lg:top-auto"
+           class="w-80 bg-white border-r border-b border-gray-200 flex-shrink-0 fixed lg:sticky lg:top-0 lg:self-start lg:max-h-screen overflow-y-auto z-40 top-0 h-full lg:h-auto pt-14 lg:pt-0 styled-scrollbar"
            :class="{ 'translate-x-0': leftSidebarOpen, '-translate-x-full': !leftSidebarOpen }">
       
       <!-- Sidebar Header -->
@@ -60,43 +91,18 @@ class="min-h-screen bg-gray-50">
           <i class="material-icons">close</i>
         </button>
       </div>
-      
-      <!-- Global Search -->
+
+      <!-- Recent Documents -->
       <div class="p-4 border-b border-gray-200">
-        <form action="<%= documents_path %>" method="get" class="relative">
-          <input
-            name="q"
-            type="text"
-            placeholder="Search all documents..."
-            value="<%= params[:q] %>"
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            @keydown.enter="$el.form.submit()"
-          />
-          <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-lg">search</i>
-        </form>
-      </div>
-      
-      <!-- Quick Actions -->
-      <div class="p-4 space-y-2 border-b border-gray-200">
-        <%= link_to new_document_path, class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" do %>
-          <i class="material-icons mr-2 text-sm">add</i>
-          New Document
-        <% end %>
-        <button
-          @click="showNewFolderModal = true"
-          class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <i class="material-icons mr-2 text-sm text-white">create_new_folder</i>
-          New Folder
-        </button>
-      </div>
-      
-      <!-- Recently Edited -->
-      <div class="p-4 border-b border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-          <i class="material-icons text-purple-500 text-sm mr-1">history</i>
-          Recently Edited
-        </h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+            <i class="material-icons text-purple-500 text-sm mr-1">history</i>
+            Recent Documents
+          </h3>
+          <%= link_to new_document_path, class: "p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors", title: "New Document" do %>
+            <i class="material-icons text-sm">add</i>
+          <% end %>
+        </div>
         <% if @recent_documents.any? %>
           <div class="space-y-1">
             <% @recent_documents.first(7).each do |document| %>
@@ -133,65 +139,20 @@ class="min-h-screen bg-gray-50">
         <% end %>
       </div>
       
-      <!-- Document Writing Streak -->
-      <div class="p-4 border-b border-gray-200">
-        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-          <i class="material-icons text-orange-500 text-sm mr-1">whatshot</i>
-          Writing Streak
-        </h3>
-        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
-          <div class="grid grid-cols-7 gap-1 mb-2">
-            <% 
-              # Calculate words written for each of the last 7 days
-              (6.downto(0)).each do |days_ago|
-                date = Date.current - days_ago
-                words_for_day = WordCountUpdate
-                  .where(user: current_user, for_date: date)
-                  .sum(:word_count)
-                
-                # Determine opacity based on word count
-                opacity_class = if words_for_day >= 1000
-                  "bg-green-600"
-                elsif words_for_day >= 500
-                  "bg-green-400"
-                elsif words_for_day >= 100
-                  "bg-green-300"
-                elsif words_for_day > 0
-                  "bg-green-200"
-                else
-                  "bg-gray-200"
-                end
-                
-                is_today = days_ago == 0
-            %>
-              <div class="relative group">
-                <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400' : '' %> transition-colors hover:opacity-80" 
-                     title="<%= date.strftime('%b %d') %>: <%= number_with_delimiter(words_for_day) %> words"></div>
-                <div class="text-center mt-0.5">
-                  <span class="text-xs text-gray-400"><%= date.strftime('%a')[0] %></span>
-                </div>
-              </div>
-            <% end %>
-          </div>
-          <div class="pt-2 border-t border-gray-200">
-            <div class="flex justify-between items-baseline">
-              <div class="text-xs text-gray-600">
-                Today: <span class="font-medium <%= @words_written_today > 0 ? 'text-green-600' : 'text-gray-400' %>"><%= number_with_delimiter(@words_written_today) %></span>
-              </div>
-              <div class="text-xs text-gray-600">
-                Week: <span class="font-medium text-gray-700"><%= number_with_delimiter(@words_written_this_week) %></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
       <!-- Frequent Folders -->
       <div class="p-4">
-        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-          <i class="material-icons <%= Folder.text_color %> text-sm mr-1">folder_special</i>
-          Frequent Folders
-        </h3>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+            <i class="material-icons <%= Folder.text_color %> text-sm mr-1">folder_special</i>
+            Frequent Folders
+          </h3>
+          <button
+            @click="showNewFolderModal = true"
+            class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+            title="New Folder">
+            <i class="material-icons text-sm">add</i>
+          </button>
+        </div>
         <% if @frequent_folders.any? %>
           <div class="space-y-2">
             <% @frequent_folders.each do |folder| %>
@@ -217,7 +178,7 @@ class="min-h-screen bg-gray-50">
     </aside>
     
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <main class="flex-1 min-w-0 flex flex-col">
       <!-- Header -->
       <div class="bg-white border-b border-gray-200">
         <div class="px-6 py-4">
@@ -268,63 +229,232 @@ class="min-h-screen bg-gray-50">
             
             <div class="flex items-center gap-3">
               <!-- View Toggle -->
-              <div class="flex border border-gray-300 rounded-lg">
-                <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg">
-                  <i class="material-icons text-sm">grid_view</i>
-                </button>
-                <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg">
+              <div class="flex border border-gray-300 rounded-lg bg-white shadow-sm">
+                <button @click="viewMode = 'list'; localStorage.setItem('documentsViewMode', 'list')" :class="viewMode === 'list' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg" title="List View">
                   <i class="material-icons text-sm">view_list</i>
                 </button>
-              </div>
-              
-              <!-- Sort Dropdown -->
-              <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                <button @click="open = !open" class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
-                  <i class="material-icons mr-1 text-sm">sort</i>
-                  <span class="hidden sm:inline">Sort</span>
-                  <i class="material-icons ml-1 text-sm">arrow_drop_down</i>
+                <button @click="viewMode = 'timeline'; localStorage.setItem('documentsViewMode', 'timeline')" :class="viewMode === 'timeline' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg" title="Timeline View">
+                  <i class="material-icons text-sm">timeline</i>
                 </button>
-                <div x-show="open" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10">
-                  <%= link_to documents_path(sort: 'updated'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort].nil? || params[:sort] == 'updated'}" do %>
-                    <% if params[:sort].nil? || params[:sort] == 'updated' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
-                    Recently Updated
-                  <% end %>
-                  <%= link_to documents_path(sort: 'alphabetical'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort] == 'alphabetical'}" do %>
-                    <% if params[:sort] == 'alphabetical' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
-                    Alphabetical (A-Z)
-                  <% end %>
-                  <%= link_to documents_path(sort: 'word_count'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort] == 'word_count'}" do %>
-                    <% if params[:sort] == 'word_count' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
-                    Word Count
-                  <% end %>
-                  <%= link_to documents_path(sort: 'created'), class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{'font-medium bg-gray-50' if params[:sort] == 'created'}" do %>
-                    <% if params[:sort] == 'created' %><i class="material-icons text-xs mr-1 align-middle">check</i><% end %>
-                    Date Created
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter Controls with Responsive Behavior -->
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <!-- Compact Filters Dropdown (shown when very tight on space) -->
+            <div class="relative lg:hidden" x-data="{ open: false }" @click.away="open = false">
+              <button @click="open = !open"
+                      class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-sm font-medium rounded-lg bg-white hover:bg-gray-50 <%= (params[:tag].present? || params[:favorite_only].present?) ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700' %>">
+                <i class="material-icons text-sm">filter_list</i>
+                <span class="ml-1.5">Filters</span>
+                <% active_filters = 0 %>
+                <% active_filters += 1 if params[:tag].present? %>
+                <% active_filters += 1 if params[:favorite_only].present? %>
+                <% if active_filters > 0 %>
+                  <span class="ml-1.5 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full"><%= active_filters %></span>
+                <% end %>
+              </button>
+              <div x-show="open"
+                   x-transition:enter="transition ease-out duration-100"
+                   x-transition:enter-start="opacity-0 transform scale-95"
+                   x-transition:enter-end="opacity-100 transform scale-100"
+                   class="absolute left-0 mt-2 w-64 rounded-lg shadow-lg py-2 bg-white ring-1 ring-black ring-opacity-5 z-10">
+                <!-- Tag Filter in Dropdown -->
+                <div class="px-3 py-2 border-b border-gray-100">
+                  <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Tag</div>
+                  <select onchange="window.location.href = this.value" class="w-full text-sm border-gray-300 rounded-md">
+                    <option value="<%= documents_path(params.permit(:favorite_only)) %>" <%= !params[:tag].present? ? 'selected' : '' %>>
+                      All Tags
+                    </option>
+                    <% @page_tags.each do |page_tag| %>
+                      <option value="<%= documents_path(params.permit(:favorite_only).merge(tag: page_tag.slug)) %>" <%= params[:tag] == page_tag.slug ? 'selected' : '' %>>
+                        <%= page_tag.tag %>
+                      </option>
+                    <% end %>
+                  </select>
+                </div>
+                <!-- Favorites Toggle in Dropdown -->
+                <div class="px-3 py-2">
+                  <% if params[:favorite_only].present? %>
+                    <%= link_to documents_path(params.permit(:tag)),
+                                class: "block w-full text-center px-3 py-2 bg-yellow-50 text-yellow-700 rounded-md hover:bg-yellow-100 text-sm font-medium" do %>
+                      <i class="material-icons text-sm align-middle">star</i>
+                      <span class="ml-1">Showing Favorites</span>
+                    <% end %>
+                  <% else %>
+                    <%= link_to documents_path(params.permit(:tag).merge(favorite_only: true)),
+                                class: "block w-full text-center px-3 py-2 bg-gray-50 text-gray-700 rounded-md hover:bg-gray-100 text-sm font-medium" do %>
+                      <i class="material-icons text-sm align-middle">star_outline</i>
+                      <span class="ml-1">Show Favorites</span>
+                    <% end %>
                   <% end %>
                 </div>
               </div>
             </div>
-          </div>
-          
-          <!-- Quick Stats -->
-          <div class="flex items-center gap-4 sm:gap-6 text-sm">
-            <div class="flex items-center text-gray-500">
-              <i class="material-icons text-teal-600 mr-1 text-sm">description</i>
-              <span><%= @total_documents %> documents</span>
-            </div>
-            <div class="flex items-center text-gray-500">
-              <i class="material-icons text-blue-600 mr-1 text-sm">folder</i>
-              <span><%= @folders.count %> folders</span>
+
+            <!-- Individual Filter Buttons (shown on larger screens) -->
+            <div class="hidden lg:flex items-center gap-1.5">
+              <!-- Tag Filter Dropdown -->
+              <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                <button @click="open = !open"
+                        class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded-lg bg-white hover:bg-gray-50 <%= params[:tag].present? ? 'text-blue-700 border-blue-300 bg-blue-50' : 'text-gray-700' %>"
+                        title="Filter by tag">
+                  <i class="material-icons text-sm">label</i>
+                  <span class="hidden xl:inline ml-1 max-w-[120px] truncate">
+                    <% if params[:tag].present? %>
+                      <%= @page_tags.find { |t| t.slug == params[:tag] }&.tag || 'Tag' %>
+                    <% else %>
+                      All Tags
+                    <% end %>
+                  </span>
+                  <i class="material-icons text-xs ml-0.5">arrow_drop_down</i>
+                </button>
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100"
+                     class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 z-10 max-h-64 overflow-y-auto">
+                  <%= link_to documents_path(params.permit(:favorite_only)),
+                              class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{!params[:tag].present? ? 'font-medium bg-gray-50' : ''}" do %>
+                    <% if !params[:tag].present? %>
+                      <i class="material-icons text-xs mr-1 align-middle">check</i>
+                    <% end %>
+                    All Tags
+                  <% end %>
+                  <% if @page_tags.any? %>
+                    <div class="border-t border-gray-100"></div>
+                    <% @page_tags.each do |page_tag| %>
+                      <%= link_to documents_path(params.permit(:favorite_only).merge(tag: page_tag.slug)),
+                                  class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 #{params[:tag] == page_tag.slug ? 'font-medium bg-gray-50' : ''}" do %>
+                        <% if params[:tag] == page_tag.slug %>
+                          <i class="material-icons text-xs mr-1 align-middle">check</i>
+                        <% end %>
+                        <%= page_tag.tag %>
+                      <% end %>
+                    <% end %>
+                  <% else %>
+                    <div class="px-4 py-3 text-sm text-gray-500 italic">
+                      No tags available
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Favorite Toggle -->
+              <% if params[:favorite_only].present? %>
+                <%= link_to documents_path(params.permit(:tag)),
+                            class: "inline-flex items-center px-2.5 py-1.5 border border-yellow-300 text-xs font-medium rounded-lg text-yellow-700 bg-yellow-50 hover:bg-yellow-100",
+                            title: "Showing favorites only. Click to show all." do %>
+                  <i class="material-icons text-sm">star</i>
+                  <span class="hidden 2xl:inline ml-1">Favorites</span>
+                <% end %>
+              <% else %>
+                <%= link_to documents_path(params.permit(:tag).merge(favorite_only: true)),
+                            class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50",
+                            title: "Show favorites only" do %>
+                  <i class="material-icons text-sm">star_outline</i>
+                  <span class="hidden 2xl:inline ml-1">Favorites</span>
+                <% end %>
+              <% end %>
             </div>
           </div>
         </div>
       </div>
       
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+      <div class="px-4 sm:px-6 py-4 sm:py-6">
         <% if @folders.any? || @documents.any? %>
-          <!-- Grid View -->
-          <div x-show="viewMode === 'grid'" class="space-y-8">
+          <!-- Timeline View -->
+          <div x-show="viewMode === 'timeline'" style="display: none;" class="space-y-8" x-transition>
+            <% if @documents.any? %>
+              <%
+                # Group documents by date
+                documents_by_date = @documents.group_by { |d| d.updated_at.to_date }.sort_by(&:first).reverse
+              %>
+              <div class="relative">
+                <!-- Timeline line -->
+                <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+
+                <% documents_by_date.each do |date, docs| %>
+                  <div class="mb-8">
+                    <!-- Date marker -->
+                    <div class="flex items-center mb-4">
+                      <div class="bg-white border-4 border-indigo-500 rounded-full w-4 h-4 absolute left-6"></div>
+                      <div class="ml-12">
+                        <h3 class="text-lg font-semibold text-gray-800">
+                          <%= date.strftime('%B %d, %Y') %>
+                        </h3>
+                        <p class="text-sm text-gray-500">
+                          <%= docs.count %> <%= 'document'.pluralize(docs.count) %> updated
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Documents for this date -->
+                    <div class="ml-12 space-y-3">
+                      <% docs.sort_by(&:updated_at).reverse.each do |document| %>
+                        <%
+                          time_str = document.updated_at.strftime('%l:%M %p').strip
+                          preview_text = if document.body.present?
+                            ActionController::Base.helpers.strip_tags(document.body).truncate(150, separator: ' ')
+                          else
+                            "No content yet..."
+                          end
+                        %>
+                        <div x-show="searchQuery === '' || '<%= document.title.downcase %>'.includes(searchQuery.toLowerCase())">
+                          <%= link_to edit_document_path(document), class: "block group" do %>
+                            <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-5 border border-gray-200 hover:border-indigo-300">
+                              <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                  <div class="flex items-center space-x-3 mb-2">
+                                    <span class="text-xs text-gray-500 font-medium"><%= time_str %></span>
+                                    <% if document.folder %>
+                                      <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                                        <i class="material-icons text-xs mr-1" style="font-size: 10px;">folder</i>
+                                        <%= document.folder.title %>
+                                      </span>
+                                    <% end %>
+                                  </div>
+                                  <h4 class="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors mb-2">
+                                    <%= document.title %>
+                                  </h4>
+                                  <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                                    <%= preview_text %>
+                                  </p>
+                                  <div class="flex items-center space-x-4 text-xs text-gray-500">
+                                    <span class="flex items-center">
+                                      <i class="material-icons text-xs mr-1">edit</i>
+                                      <%= number_with_delimiter(document.cached_word_count || 0) %> words
+                                    </span>
+                                    <% if document.cached_word_count && document.cached_word_count > 0 %>
+                                      <span class="flex items-center">
+                                        <i class="material-icons text-xs mr-1">schedule</i>
+                                        <%= ((document.cached_word_count || 0) / 200.0).ceil %> min read
+                                      </span>
+                                    <% end %>
+                                  </div>
+                                </div>
+                                <i class="material-icons text-gray-400 group-hover:text-indigo-600 ml-4">chevron_right</i>
+                              </div>
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="text-center py-12">
+                <i class="material-icons text-gray-400 text-5xl mb-4">timeline</i>
+                <p class="text-gray-500">No documents in your timeline yet</p>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- List View -->
+          <div x-show="viewMode === 'list'" class="space-y-6">
             <!-- No results message -->
             <template x-if="searchQuery && !Array.from(document.querySelectorAll('[x-show*=searchQuery]')).some(el => el.style.display !== 'none')">
               <div class="text-center py-12">
@@ -333,155 +463,19 @@ class="min-h-screen bg-gray-50">
                 <button @click="searchQuery = ''" class="mt-4 text-sm text-blue-600 hover:text-blue-800">Clear filter</button>
               </div>
             </template>
-            <!-- Folders Section -->
-            <% if @folders.any? %>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-4">Folders</h3>
-                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                  <% @folders.each do |folder| %>
-                    <div x-show="searchQuery === '' || '<%= folder.title.downcase %>'.includes(searchQuery.toLowerCase())"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 transform scale-90"
-                         x-transition:enter-end="opacity-100 transform scale-100">
-                      <%= link_to folder_path(folder), class: "block group" do %>
-                        <div class="relative transform transition-all duration-200 hover:-translate-y-0.5 hover:scale-105">
-                        <div class="relative overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-all duration-200">
-                          <div class="h-1 <%= Folder.color %>"></div>
-                          <div class="bg-white border border-gray-200 rounded-b-lg">
-                            <div class="p-3">
-                              <div class="flex items-start space-x-3">
-                                <div class="<%= Folder.color %> rounded-lg p-2 flex-shrink-0 shadow-sm">
-                                  <i class="material-icons text-white text-base"><%= Folder.icon %></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                  <h3 class="text-gray-900 font-medium text-sm truncate"><%= folder.title %></h3>
-                                  <div class="mt-1 flex items-center text-xs <%= folder.documents.count > 0 ? 'text-gray-600' : 'text-gray-400 italic' %>">
-                                    <% if folder.documents.count > 0 %>
-                                      <i class="material-icons text-xs mr-1">description</i>
-                                      <span><%= folder.documents.count %> <%= folder.documents.count == 1 ? 'doc' : 'docs' %></span>
-                                    <% else %>
-                                      <i class="material-icons text-xs mr-1 opacity-50">folder_open</i>
-                                      <span>Empty</span>
-                                    <% end %>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    <% end %>
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-            
-            <!-- Documents Section -->
-            <% if @documents.any? %>
-              <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-4">Documents</h3>
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                  <% @documents.each do |document| %>
-                    <div x-show="searchQuery === '' || '<%= document.title.downcase %>'.includes(searchQuery.toLowerCase())"
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 transform scale-90"
-                         x-transition:enter-end="opacity-100 transform scale-100"
-                         class="group relative bg-white border border-gray-200 rounded-lg overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
-                         x-data="{
-                           isFavorite: <%= document.favorite? %>,
-                           isLoading: false,
-                           async toggleFavorite(event) {
-                             event.preventDefault();
-                             event.stopPropagation();
-                             this.isLoading = true;
-                             try {
-                               const result = await window.toggleDocumentFavorite('<%= document.id %>');
-                               if (result.success) {
-                                 this.isFavorite = !this.isFavorite;
-                               } else {
-                                 alert('Error toggling favorite. Please try again.');
-                               }
-                             } catch (error) {
-                               console.error('Error:', error);
-                               alert('An unexpected error occurred. Please check the console.');
-                             } finally {
-                               this.isLoading = false;
-                             }
-                           }
-                         }">
-                      <%= link_to edit_document_path(document), class: "block" do %>
-                        <!-- Header image area -->
-                        <div class="relative h-24 bg-gray-100 overflow-hidden">
-                          <%= image_tag "card-headers/documents.webp", class: 'object-cover object-center w-full h-full' %>
-                          
-                          <!-- Recency indicator -->
-                          <% 
-                            time_diff = Time.current - document.updated_at
-                            recency_class = case
-                              when time_diff < 1.hour then "bg-red-500 animate-pulse"
-                              when time_diff < 6.hours then "bg-orange-500"
-                              when time_diff < 24.hours then "bg-yellow-500"
-                              else "bg-gray-400"
-                            end
-                          %>
-                          <div class="absolute top-2 right-2 w-2 h-2 rounded-full <%= recency_class %>"></div>
-                          
-                          <!-- Title overlay -->
-                          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/80 to-black/20 pt-8">
-                            <div class="bg-black/80 backdrop-blur-sm">
-                              <div class="p-3 pb-2">
-                                <h3 class="text-white font-medium text-base line-clamp-2 leading-tight">
-                                  <%= document.title %>
-                                </h3>
-                              </div>
-                            </div>
 
-                          </div>
-                        </div>
-                        
-                        <!-- Metadata bar -->
-                        <div class="p-3 flex items-center justify-between text-xs">
-                          <div class="flex items-center space-x-3 text-gray-600">
-                            <% if document.folder %>
-                              <span class="flex items-center">
-                                <i class="material-icons text-xs mr-1 <%= Folder.text_color %>">folder</i>
-                                <span class="truncate max-w-[120px]"><%= document.folder.title %></span>
-                              </span>
-                            <% end %>
-                            <span class="flex items-center">
-                              <i class="material-icons text-xs mr-1 <%= Document.text_color %>">description</i>
-                              <span class="font-medium"><%= number_with_delimiter(document.cached_word_count || 0) %> words</span>
-                            </span>
-                          </div>
-                          <span class="text-gray-500 font-medium whitespace-nowrap">
-                            <%= time_ago_in_words(document.updated_at) %> ago
-                          </span>
-                        </div>
-                      <% end %>
-                      <!-- Favorite Toggle Button -->
-                      <button
-                        @click="toggleFavorite"
-                        :disabled="isLoading"
-                        class="absolute top-2 left-2 p-1 text-xl rounded-lg bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all z-10"
-                        :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
-                        title="Toggle favorite"
-                      >
-                        <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
-                      </button>
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-          </div>
-          
-          <!-- List View -->
-          <div x-show="viewMode === 'list'" style="display: none;" class="space-y-6">
             <!-- Folders Section -->
             <% if @folders.any? %>
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-4">Folders</h3>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-sm font-medium text-gray-500">Folders</h3>
+                  <button
+                    @click="showNewFolderModal = true"
+                    class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                    <i class="material-icons text-xs mr-1">add</i>
+                    New
+                  </button>
+                </div>
                 <div class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
                   <ul class="divide-y divide-gray-200">
                     <% @folders.each do |folder| %>
@@ -523,7 +517,13 @@ class="min-h-screen bg-gray-50">
             <!-- Documents Section -->
             <% if @documents.any? %>
               <div>
-                <h3 class="text-sm font-medium text-gray-500 mb-4">Documents</h3>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-sm font-medium text-gray-500">Documents</h3>
+                  <%= link_to new_document_path, class: "inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors" do %>
+                    <i class="material-icons text-xs mr-1">add</i>
+                    New
+                  <% end %>
+                </div>
                 <div class="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
                   <ul class="divide-y divide-gray-200">
                     <% @documents.each do |document| %>
@@ -579,12 +579,6 @@ class="min-h-screen bg-gray-50">
                               <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                   <h3 class="text-sm font-medium text-gray-900 truncate"><%= document.title %></h3>
-                                  <% if document.folder %>
-                                    <span class="text-xs text-gray-500 flex items-center">
-                                      <i class="material-icons text-xs mr-1 <%= Folder.text_color %>">folder</i>
-                                      <%= document.folder.title %>
-                                    </span>
-                                  <% end %>
                                 </div>
                                 <div class="flex items-center space-x-6 text-xs">
                                   <span class="text-gray-600 font-medium">
@@ -653,7 +647,7 @@ class="min-h-screen bg-gray-50">
            x-transition:leave="transition ease-in duration-300"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="w-80 bg-white border-l border-gray-200 flex-shrink-0 overflow-y-auto fixed lg:relative lg:translate-x-0 h-full z-40 right-0 top-0 pt-14 lg:pt-0 lg:top-auto"
+           class="w-80 bg-white border-l border-b border-gray-200 flex-shrink-0 fixed lg:sticky lg:top-0 lg:self-start lg:max-h-screen overflow-y-auto z-40 right-0 lg:right-auto top-0 h-full lg:h-auto pt-14 lg:pt-0 styled-scrollbar"
            :class="{ 'translate-x-0': rightSidebarOpen, 'translate-x-full': !rightSidebarOpen }">
       
       <!-- Sidebar Header -->
@@ -669,20 +663,16 @@ class="min-h-screen bg-gray-50">
         <h3 class="text-sm font-semibold text-gray-900 mb-4">Overall Statistics</h3>
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">Total Documents</span>
-            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@total_documents) %></span>
+            <span class="text-sm text-gray-600">Documents</span>
+            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@documents.count) %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Folders</span>
+            <span class="text-sm font-medium text-gray-900"><%= @folders.count %></span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">Total Words</span>
-            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@total_word_count) %></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">Average per Doc</span>
-            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@average_words_per_doc) %></span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">Docs This Month</span>
-            <span class="text-sm font-medium text-gray-900"><%= @documents_this_month %></span>
+            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@documents.map(&:cached_word_count).compact.sum) %></span>
           </div>
         </div>
       </div>
@@ -712,12 +702,65 @@ class="min-h-screen bg-gray-50">
           </div>
         </div>
       </div>
-      
+
+      <!-- Document Writing Streak -->
+      <div class="p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <i class="material-icons text-orange-500 text-sm mr-1">whatshot</i>
+          Writing Streak
+        </h3>
+        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            <%
+              # Calculate words written for each of the last 7 days
+              (6.downto(0)).each do |days_ago|
+                date = Date.current - days_ago
+                words_for_day = WordCountUpdate
+                  .where(user: current_user, for_date: date)
+                  .sum(:word_count)
+
+                # Determine opacity based on word count
+                opacity_class = if words_for_day >= 1000
+                  "bg-green-600"
+                elsif words_for_day >= 500
+                  "bg-green-400"
+                elsif words_for_day >= 100
+                  "bg-green-300"
+                elsif words_for_day > 0
+                  "bg-green-200"
+                else
+                  "bg-gray-200"
+                end
+
+                is_today = days_ago == 0
+            %>
+              <div class="relative group">
+                <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400' : '' %> transition-colors hover:opacity-80"
+                     title="<%= date.strftime('%b %d') %>: <%= number_with_delimiter(words_for_day) %> words"></div>
+                <div class="text-center mt-0.5">
+                  <span class="text-xs text-gray-400"><%= date.strftime('%a')[0] %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="pt-2 border-t border-gray-200">
+            <div class="flex justify-between items-baseline">
+              <div class="text-xs text-gray-600">
+                Today: <span class="font-medium <%= @words_written_today > 0 ? 'text-green-600' : 'text-gray-400' %>"><%= number_with_delimiter(@words_written_today) %></span>
+              </div>
+              <div class="text-xs text-gray-600">
+                Week: <span class="font-medium text-gray-700"><%= number_with_delimiter(@words_written_this_week) %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </aside>
   </div>
   
   <!-- New Folder Modal -->
-  <div x-show="showNewFolderModal" class="fixed z-50 inset-0 overflow-y-auto" style="display: none;">
+  <div x-show="showNewFolderModal" class="fixed z-50 inset-0" style="display: none;">
     <%= render partial: 'folders/tailwind_new_modal', locals: { content_type: Document, parent_folder: nil } %>
   </div>
 </div>

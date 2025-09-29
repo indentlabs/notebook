@@ -22,16 +22,19 @@ class DocumentsController < ApplicationController
 
   def index
     @page_title = "My documents"
+
     @recent_documents = current_user
       .linkable_documents.order('updated_at DESC')
       .includes([:user, :page_tags, :universe])
+      .where(folder_id: nil)  # Only show documents not in folders
       .limit(10) # Limit for sidebar display
 
     # Apply sorting based on params
     @documents = current_user
       .linkable_documents
       .includes([:user, :page_tags, :universe])
-    
+      .where(folder_id: nil)  # Only show documents not in folders at root level
+
     case params[:sort]
     when 'alphabetical'
       @documents = @documents.order(favorite: :desc, title: :asc)
@@ -64,15 +67,8 @@ class DocumentsController < ApplicationController
       .order('COUNT(documents.id) DESC')
       .limit(5)
 
-    # Writing statistics
-    @total_documents = current_user.linkable_documents.count
-    @total_word_count = current_user.linkable_documents.sum(:cached_word_count) || 0
-    @average_words_per_doc = @total_documents > 0 ? (@total_word_count.to_f / @total_documents).round : 0
-
-    # This month's stats
-    @documents_this_month = current_user.linkable_documents
-      .where('created_at >= ?', Date.current.beginning_of_month)
-      .count
+    # Note: Statistics are calculated directly in the view using @documents and @folders
+    # which are already filtered to show only root-level items (folder_id: nil)
 
     # Calculate writing streak using WordCountUpdate
     calculate_writing_streak_data
@@ -91,9 +87,13 @@ class DocumentsController < ApplicationController
       @documents = @documents.where(favorite: true)
     end
 
+    # Handle universe filtering from either @universe_scope or params[:universe_id]
     if @universe_scope
       @documents = @documents.where(universe: @universe_scope)
       @recent_documents = @recent_documents.where(universe: @universe_scope)
+    elsif params[:universe_id].present?
+      @documents = @documents.where(universe_id: params[:universe_id])
+      @recent_documents = @recent_documents.where(universe_id: params[:universe_id])
     end
 
     @recent_documents = @recent_documents.limit(6)

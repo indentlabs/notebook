@@ -61,11 +61,26 @@ class FoldersController < ApplicationController
     content_type_class = @folder.context.constantize rescue Document
     
     # Add sidebar data
-    # Recent folders in this context (for left sidebar)
-    @recent_folders = current_user.folders
+    # Recent items and folders for sidebars (matching documents#index)
+    if @folder.context == 'Document'
+      @recent_documents = current_user.linkable_documents
+        .order('updated_at DESC')
+        .includes([:user, :page_tags, :universe])
+        .limit(10)
+    else
+      # For other content types, load recent items
+      @recent_documents = content_type_class
+        .where(user: current_user)
+        .order('updated_at DESC')
+        .limit(10) rescue []
+    end
+
+    @frequent_folders = current_user.folders
       .where(context: @folder.context)
-      .order('updated_at DESC')
-      .limit(10)
+      .joins("LEFT JOIN #{content_type_class.table_name} ON #{content_type_class.table_name}.folder_id = folders.id")
+      .group('folders.id')
+      .order("COUNT(#{content_type_class.table_name}.id) DESC")
+      .limit(5)
     
     # Calculate quick actions based on folder context
     @quick_actions = []
@@ -146,6 +161,17 @@ class FoldersController < ApplicationController
       end
     end
     
+    # Activity stats (for right sidebar)
+    @words_written_today = WordCountUpdate.where(
+      user: current_user,
+      for_date: Date.current
+    ).sum(:word_count)
+
+    @words_written_this_week = WordCountUpdate.where(
+      user: current_user,
+      for_date: Date.current.beginning_of_week..Date.current
+    ).sum(:word_count)
+
     # Activity stats
     @items_this_month = 0
     if @content.any? && content_type_class.column_names.include?('created_at')
