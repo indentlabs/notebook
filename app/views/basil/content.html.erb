@@ -161,56 +161,56 @@
         </div>
         
         <!-- Center Column: Style Selection or Empty State -->
-        <div class="lg:col-span-1 xl:col-span-1">
+        <div class="<%= @relevant_fields.empty? ? 'lg:col-span-2 xl:col-span-3' : 'lg:col-span-1 xl:col-span-1' %>">
           <% if @relevant_fields.empty? %>
             <!-- Empty State: No fields filled -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div class="p-6 sm:p-8 text-center">
+              <div class="p-8 sm:p-12 text-center">
                 <!-- Icon -->
-                <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <i class="material-icons text-gray-400 text-3xl">edit_note</i>
+                <div class="mx-auto w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mb-6">
+                  <i class="material-icons text-purple-400 text-4xl">auto_awesome</i>
                 </div>
 
                 <!-- Title -->
-                <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
-                  More Information Needed
+                <h3 class="text-xl sm:text-2xl font-semibold text-gray-900 mb-3">
+                  Let's Add Some Details
                 </h3>
 
                 <!-- Description -->
-                <p class="text-sm text-gray-600 mb-6 max-w-sm mx-auto">
-                  To generate images for <%= @content.name || "this #{@content.page_type.downcase}" %>,
-                  please fill in the following fields:
+                <p class="text-base text-gray-600 mb-8 max-w-lg mx-auto">
+                  To generate images, Basil needs visual descriptions.
+                  Try adding details to <strong>at least one</strong> of these fields:
                 </p>
 
-                <!-- Required Fields List -->
-                <div class="bg-gray-50 rounded-lg p-4 mb-6 max-w-md mx-auto text-left">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                    <i class="material-icons text-amber-500 text-sm mr-2">checklist</i>
-                    Required Fields
+                <!-- Suggested Fields List -->
+                <div class="bg-purple-50 rounded-xl p-6 mb-8 max-w-2xl mx-auto text-left">
+                  <h4 class="text-base font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="material-icons text-purple-500 text-base mr-2">lightbulb</i>
+                    Suggested Fields to Get Started
                   </h4>
-                  <ul class="space-y-2">
-                    <% @missing_required_fields.each do |field_name, section| %>
-                      <li class="flex items-start text-sm">
-                        <i class="material-icons text-gray-400 text-xs mt-0.5 mr-2">radio_button_unchecked</i>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <% @suggested_fields.each do |field_name, section| %>
+                      <div class="flex items-start text-sm bg-white rounded-lg p-3 border border-purple-100">
+                        <i class="material-icons text-purple-400 text-sm mt-0.5 mr-3">edit</i>
                         <div>
-                          <span class="font-medium text-gray-700"><%= field_name %></span>
-                          <span class="text-gray-500 text-xs block"><%= section %></span>
+                          <span class="font-medium text-gray-800"><%= field_name %></span>
+                          <span class="text-gray-600 text-xs block"><%= section %></span>
                         </div>
-                      </li>
+                      </div>
                     <% end %>
-                  </ul>
+                  </div>
                 </div>
 
                 <!-- CTA Button -->
                 <%= link_to @content.edit_path,
-                    class: "inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors shadow-sm" do %>
-                  <i class="material-icons text-sm mr-2">edit</i>
+                    class: "inline-flex items-center px-8 py-3.5 text-base font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all shadow-sm hover:shadow-md transform hover:scale-105" do %>
+                  <i class="material-icons text-base mr-2">edit</i>
                   Edit <%= @content.name || @content.page_type %>
                 <% end %>
 
                 <!-- Helper Text -->
-                <p class="text-xs text-gray-500 mt-4">
-                  Once you've added these details, you can return here to generate images
+                <p class="text-sm text-gray-500 mt-6">
+                  Add details to any of these fields, then return here to generate amazing images
                 </p>
               </div>
             </div>
@@ -311,8 +311,9 @@
             </div>
           <% end %>
         </div>
-        
+
         <!-- Right Column: Generated Images -->
+        <% unless @relevant_fields.empty? %>
         <div class="lg:col-span-1 xl:col-span-2">
           <div class="space-y-4">
             <% if @commissions.any? %>
@@ -433,6 +434,7 @@
             <% end %>
           </div>
         </div>
+        <% end %>
       </div>
     </div>
   <% end %>

@@ -206,12 +206,12 @@ class BasilController < ApplicationController
     end
     @relevant_fields.compact!
 
-    # Identify which required fields are missing for helpful empty state
-    @missing_required_fields = []
+    # Identify suggested fields for helpful empty state guidance
+    @suggested_fields = []
     if @relevant_fields.empty?
       case @content_type
       when 'Character'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Role', 'Overview section'],
           ['Age', 'Overview section'],
@@ -219,14 +219,14 @@ class BasilController < ApplicationController
           ['Looks fields', 'Looks section (hair color, eye color, etc.)']
         ]
       when 'Location'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Type', 'Overview section'],
           ['Description', 'Overview section'],
           ['Area or Climate', 'Geography section']
         ]
       when 'Item'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Item Type', 'Overview section'],
           ['Description', 'Overview section'],
@@ -234,70 +234,70 @@ class BasilController < ApplicationController
           ['Magical effects', 'Abilities section (optional)']
         ]
       when 'Building'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Type of building', 'Overview section'],
           ['Description', 'Overview section'],
           ['Design details', 'Design section']
         ]
       when 'Creature'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Description', 'Overview section'],
           ['Physical details', 'Looks section']
         ]
       when 'Flora'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Description', 'Overview section'],
           ['Appearance details', 'Looks section']
         ]
       when 'Food'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Type of food', 'Overview section'],
           ['Taste', 'Overview section'],
           ['Description', 'Overview section']
         ]
       when 'Landmark'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Type of landmark', 'Overview section'],
           ['Description', 'Overview section'],
           ['Appearance details', 'Appearance section']
         ]
       when 'Planet'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Geography details', 'Geography section'],
           ['Moons', 'Astral section']
         ]
       when 'Town'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Description', 'Overview section'],
           ['Layout details', 'Layout section']
         ]
       when 'Vehicle'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Type of vehicle', 'Overview section'],
           ['Description', 'Overview section'],
           ['Appearance details', 'Looks section']
         ]
       when 'Deity'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Description', 'Overview section'],
           ['Physical form', 'Appearance section'],
           ['Symbols', 'Symbols section']
         ]
       when 'Technology'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Description', 'Overview section'],
           ['Materials', 'Production section'],
           ['Appearance details', 'Appearance section']
         ]
       when 'Tradition'
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Type of tradition', 'Overview section'],
           ['Description', 'Overview section'],
           ['Activities', 'Celebrations section'],
@@ -305,7 +305,7 @@ class BasilController < ApplicationController
         ]
       else
         # Generic fallback for other content types
-        @missing_required_fields = [
+        @suggested_fields = [
           ['Name', 'Overview section'],
           ['Description', 'Overview section'],
           ['Key details', 'Main sections of the page']
