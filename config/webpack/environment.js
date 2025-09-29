@@ -1,6 +1,49 @@
 const { environment } = require('@rails/webpacker')
 const webpack = require('webpack')
 
+// Fix postcss-loader v4 compatibility
+const getCSSModuleLoader = (environment) => {
+  const cssLoader = environment.loaders.get('moduleCss') || environment.loaders.get('css')
+  if (!cssLoader) return null
+  return cssLoader.use.find(el => el.loader === 'postcss-loader')
+}
+
+// Update postcss-loader options for v4 compatibility
+const postcssLoader = getCSSModuleLoader(environment)
+if (postcssLoader) {
+  postcssLoader.options = {
+    postcssOptions: {
+      config: postcssLoader.options?.config?.path || './postcss.config.js'
+    }
+  }
+}
+
+// Apply the same fix to all style loaders
+const updatePostcssLoaderOptions = (loader) => {
+  if (loader && loader.use) {
+    const postcssLoaderUse = loader.use.find(item =>
+      item && (item.loader === 'postcss-loader' || item.loader?.includes('postcss-loader'))
+    )
+    if (postcssLoaderUse && postcssLoaderUse.options?.config) {
+      const configPath = postcssLoaderUse.options.config.path || './postcss.config.js'
+      postcssLoaderUse.options = {
+        postcssOptions: {
+          config: configPath
+        }
+      }
+    }
+  }
+}
+
+['css', 'moduleCss', 'sass', 'moduleSass'].forEach(loaderName => {
+  try {
+    const loader = environment.loaders.get(loaderName)
+    updatePostcssLoaderOptions(loader)
+  } catch (e) {
+    // Loader not found, skip
+  }
+})
+
 environment.config.merge({
   module: {
     rules: [
