@@ -1,0 +1,50 @@
+<% content_for :thredded_page_title, t('thredded.preferences.edit.page_title') %>
+<% content_for :thredded_page_id, 'thredded--preferences' %>
+<% content_for :thredded_breadcrumbs, render('thredded/shared/breadcrumbs') %>
+
+<%= thredded_page do %>
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+        <i class="material-icons text-blue-500 mr-2 align-middle">settings</i>
+        <%= t('thredded.preferences.edit.page_title') %>
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        Manage your forum notification preferences and settings
+      </p>
+    </div>
+
+    <!-- Global Preferences Section -->
+    <section class="mb-8">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+            <i class="material-icons text-gray-500 mr-2 text-lg">public</i>
+            <%= t 'thredded.preferences.global_preferences_title' %>
+          </h2>
+        </div>
+        <div class="p-6">
+          <%= render 'thredded/preferences/form', preferences: @preferences %>
+        </div>
+      </div>
+    </section>
+
+    <% unless @preferences.messageboard %>
+      <!-- Messageboard-specific Preferences Navigation -->
+      <section>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center">
+              <i class="material-icons text-gray-500 mr-2 text-lg">dashboard</i>
+              <%= t 'thredded.preferences.messageboard_preferences_nav_title' %>
+            </h2>
+          </div>
+          <div class="p-6">
+            <%= render 'thredded/preferences/messageboards_nav', preferences: @preferences %>
+          </div>
+        </div>
+      </section>
+    <% end %>
+  </div>
+<% end %>

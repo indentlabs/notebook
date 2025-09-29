@@ -4,10 +4,7 @@
 if (!window.Notebook) { window.Notebook = {}; }
 Notebook.tailwindInit = function() {
   // Initialize non-MaterializeCSS components here
-  
-  // Initialize toggle switches
-  initializeToggleSwitches();
-  
+
   // Character counters for textareas and inputs with maxlength
   document.querySelectorAll('[maxlength]').forEach(function(element) {
     const maxLength = element.getAttribute('maxlength');
@@ -71,72 +68,6 @@ Notebook.tailwindInit = function() {
     });
   });
 };
-
-// Initialize toggle switches to replace checkboxes
-function initializeToggleSwitches() {
-  document.querySelectorAll('.toggle-switch').forEach(function(toggle) {
-    const checkbox = toggle.querySelector('input[type="checkbox"]');
-    
-    // Skip if no checkbox found
-    if (!checkbox) {
-      console.warn('Toggle switch found without checkbox:', toggle);
-      return;
-    }
-    
-    toggle.addEventListener('click', function(e) {
-      if (e.target.tagName !== 'INPUT') {
-        checkbox.checked = !checkbox.checked;
-        
-        // Trigger change event for any listeners
-        const event = new Event('change', { bubbles: true });
-        checkbox.dispatchEvent(event);
-        
-        // Update toggle appearance
-        updateToggleState(checkbox);
-      }
-    });
-    
-    // Set initial state
-    updateToggleState(checkbox);
-    
-    // Listen for changes
-    checkbox.addEventListener('change', function() {
-      updateToggleState(this);
-    });
-  });
-}
-
-// Update toggle switch appearance based on checkbox state
-function updateToggleState(checkbox) {
-  if (!checkbox) {
-    console.warn('updateToggleState called with null checkbox');
-    return;
-  }
-  
-  const toggle = checkbox.closest('.toggle-switch');
-  if (!toggle) {
-    console.warn('Checkbox not inside .toggle-switch:', checkbox);
-    return;
-  }
-  
-  const toggleButton = toggle.querySelector('.toggle-dot');
-  
-  if (checkbox.checked) {
-    toggle.classList.add('bg-notebook-blue');
-    toggle.classList.remove('bg-gray-200');
-    if (toggleButton) {
-      toggleButton.classList.add('translate-x-5');
-      toggleButton.classList.remove('translate-x-0');
-    }
-  } else {
-    toggle.classList.remove('bg-notebook-blue');
-    toggle.classList.add('bg-gray-200');
-    if (toggleButton) {
-      toggleButton.classList.remove('translate-x-5');
-      toggleButton.classList.add('translate-x-0');
-    }
-  }
-}
 
 // Initialize on DOM ready for Tailwind pages
 document.addEventListener('DOMContentLoaded', function() {

@@ -1,4 +1,5 @@
 class Document < ApplicationRecord
+  include Rails.application.routes.url_helpers
   acts_as_paranoid
 
   belongs_to :user,     optional: true
@@ -16,6 +17,7 @@ class Document < ApplicationRecord
   include HasImageUploads
   include HasPageTags
   include BelongsToUniverse
+  include HasPrivacy
 
   belongs_to :folder, optional: true
 
@@ -76,6 +78,14 @@ class Document < ApplicationRecord
 
   def universe_field_value
     # TODO: populate value from cache when documents belong to a universe
+  end
+
+  def view_path
+    document_path(self.id)
+  end
+
+  def edit_path
+    edit_document_path(self.id)
   end
 
   def analyze!

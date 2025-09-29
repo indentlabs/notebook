@@ -1,69 +1,20 @@
 // Settings page JavaScript functionality
 document.addEventListener('DOMContentLoaded', function() {
-  // Toggle switches
-  initializeToggleSwitches();
-  
   // Form validation
   initializeFormValidation();
-  
+
   // Password strength meter
   initializePasswordStrength();
-  
+
   // Toast notifications
   initializeToasts();
-  
+
   // Mobile navigation
   initializeMobileNav();
-  
+
   // Tooltips
   initializeTooltips();
 });
-
-// Initialize toggle switches to replace checkboxes
-function initializeToggleSwitches() {
-  document.querySelectorAll('.toggle-switch').forEach(function(toggle) {
-    toggle.addEventListener('click', function(e) {
-      if (e.target.tagName !== 'INPUT') {
-        const checkbox = this.querySelector('input[type="checkbox"]');
-        checkbox.checked = !checkbox.checked;
-        
-        // Trigger change event for any listeners
-        const event = new Event('change', { bubbles: true });
-        checkbox.dispatchEvent(event);
-        
-        // Update toggle appearance
-        updateToggleState(checkbox);
-      }
-    });
-    
-    // Set initial state
-    const checkbox = toggle.querySelector('input[type="checkbox"]');
-    updateToggleState(checkbox);
-    
-    // Listen for changes
-    checkbox.addEventListener('change', function() {
-      updateToggleState(this);
-    });
-  });
-}
-
-// Update toggle switch appearance based on checkbox state
-function updateToggleState(checkbox) {
-  const toggle = checkbox.closest('.toggle-switch');
-  const toggleButton = toggle.querySelector('.toggle-dot');
-  
-  if (checkbox.checked) {
-    toggle.classList.add('bg-notebook-blue');
-    toggle.classList.remove('bg-gray-200');
-    toggleButton.classList.add('translate-x-5');
-    toggleButton.classList.remove('translate-x-0');
-  } else {
-    toggle.classList.remove('bg-notebook-blue');
-    toggle.classList.add('bg-gray-200');
-    toggleButton.classList.remove('translate-x-5');
-    toggleButton.classList.add('translate-x-0');
-  }
-}
 
 // Initialize form validation
 function initializeFormValidation() {

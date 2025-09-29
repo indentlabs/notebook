@@ -323,66 +323,45 @@
         <!-- Right Sidebar -->
         <div class="hidden lg:block lg:col-span-4">
           <div class="sticky top-24 space-y-4">
-            <!-- About the Creator -->
-            <% if @share.user != current_user %>
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <!-- Share Creator Card -->
+            <%= link_to @share.user, class: "block group" do %>
+              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
                 <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
                   <h3 class="text-sm font-semibold text-gray-900 flex items-center">
-                    <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    About the Creator
+                    <i class="material-icons text-sm mr-2 text-gray-600"><%= User.icon %></i>
+                    Share Creator
                   </h3>
                 </div>
-                
+
                 <div class="p-4">
-                  <%= link_to @share.user, class: "block group" do %>
-                    <div class="flex items-start space-x-3">
-                      <%= image_tag @share.user.image_url(size: 48), class: "h-12 w-12 rounded-full shadow-sm flex-shrink-0 border border-green-200" %>
-                      <div class="flex-1 min-w-0">
-                        <h4 class="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                          <%= @share.user.display_name %>
-                        </h4>
-                        <% if @share.user.bio.present? %>
-                          <p class="text-sm text-gray-600 mt-1 line-clamp-2">
-                            <%= @share.user.bio %>
-                          </p>
-                        <% end %>
-                        <div class="flex items-center space-x-3 mt-2 text-xs text-gray-500">
-                          <span><%= pluralize(@share.user.public_content_count, 'page') %></span>
-                          <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
-                          <span>Joined <%= time_ago_in_words(@share.user.created_at) %> ago</span>
-                        </div>
-                      </div>
+                  <div class="flex items-center space-x-3">
+                    <%= image_tag @share.user.image_url(size: 48), class: "h-12 w-12 rounded-full" %>
+                    <div class="flex-1 min-w-0">
+                      <h4 class="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                        <%= @share.user.display_name %>
+                      </h4>
+                      <p class="text-sm text-gray-500">
+                        <%= pluralize(@share.user.public_content_count, 'public page') %>
+                      </p>
                     </div>
-                  <% end %>
-                  
-                  <div class="mt-3 flex space-x-2">
-                    <%= link_to @share.user, class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-xs font-medium rounded-md #{User.text_color} bg-white hover:bg-gray-50 transition-colors" do %>
-                      <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                      </svg>
-                      Profile
-                    <% end %>
-                    
-                    <% if user_signed_in? && @share.user != current_user %>
-                      <% unless @is_blocked %>
-                        <button type="button" id="follow-btn" 
-                                class="<%= @is_following ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700' %> text-white flex-1 inline-flex items-center justify-center px-3 py-2 text-xs font-medium rounded-md transition-colors duration-200"
-                                data-user-id="<%= @share.user.id %>"
-                                data-following="<%= @is_following %>">
-                          <i class="material-icons text-xs mr-1"><%= @is_following ? 'person_remove' : 'person_add' %></i>
-                          <span><%= @is_following ? 'Following' : 'Follow' %></span>
-                        </button>
-                      <% else %>
-                        <div class="flex-1 text-center px-3 py-2 text-xs text-gray-500 italic">
-                          Blocked
-                        </div>
-                      <% end %>
-                    <% end %>
+                    <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
                   </div>
                 </div>
               </div>
+            <% end %>
+
+            <% if user_signed_in? && @share.user != current_user %>
+              <% unless @is_blocked %>
+                <button type="button" id="follow-btn"
+                        class="w-full mt-2 <%= @is_following ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-blue-600 hover:bg-blue-700 text-white' %> inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+                        data-user-id="<%= @share.user.id %>"
+                        data-following="<%= @is_following %>">
+                  <i class="material-icons text-sm mr-1.5"><%= @is_following ? 'check' : 'person_add' %></i>
+                  <span><%= @is_following ? 'Following' : 'Follow User' %></span>
+                </button>
+              <% end %>
             <% end %>
             
             <!-- More from Creator -->

@@ -36,14 +36,22 @@ class SearchController < ApplicationController
 
     # 2. Also search entity names (old-style name columns) with multi-word support
     @matched_names = []
-    Rails.application.config.content_types[:all].each do |content_type|
+    (Rails.application.config.content_types[:all] + [Document]).each do |content_type|
       begin
         model_class = content_type.name.constantize
-        if model_class.column_names.include?('name')
+
+        # Determine the name column (Document uses 'title', others use 'name')
+        name_column = if model_class == Document
+          'title' if model_class.column_names.include?('title')
+        else
+          'name' if model_class.column_names.include?('name')
+        end
+
+        if name_column
           # Build multi-word search for entity names
           if search_words.length > 1
-            # Multi-word search: all words must be present in name
-            name_conditions = search_words.map { "LOWER(name) LIKE LOWER(?)" }.join(" AND ")
+            # Multi-word search: all words must be present in name/title
+            name_conditions = search_words.map { "LOWER(#{name_column}) LIKE LOWER(?)" }.join(" AND ")
             name_values = search_words.map { |word| "%#{word}%" }
             matching_entities = model_class
               .where(user_id: current_user.id)
@@ -52,11 +60,12 @@ class SearchController < ApplicationController
             # Single word search
             matching_entities = model_class
               .where(user_id: current_user.id)
-              .where("LOWER(name) LIKE LOWER(?)", "%#{@query}%")
+              .where("LOWER(#{name_column}) LIKE LOWER(?)", "%#{@query}%")
           end
-          
+
           matching_entities.each do |entity|
             # Create a virtual attribute-like object for the name match
+            # Use the name method which returns title for Documents
             @matched_names << OpenStruct.new(
               id: "name_#{entity.class.name}_#{entity.id}",
               entity_type: entity.class.name,
@@ -139,23 +148,33 @@ class SearchController < ApplicationController
     results = []
     
     # Fast name-only search across all content types
-    Rails.application.config.content_types[:all].each do |content_type|
+    (Rails.application.config.content_types[:all] + [Document]).each do |content_type|
       begin
         model_class = content_type.name.constantize
-        
-        # Only search content types that have name columns
-        if model_class.column_names.include?('name')
+
+        # Determine the name column (Document uses 'title', others use 'name')
+        name_column = if model_class == Document
+          'title' if model_class.column_names.include?('title')
+        else
+          'name' if model_class.column_names.include?('name')
+        end
+
+        if name_column
           # Fast query with limit to prevent slow searches
+          # Select the appropriate column and use .name method for display
+          select_columns = [:id, :created_at]
+          select_columns << (model_class == Document ? :title : :name)
+
           matching_entities = model_class
             .where(user_id: current_user.id)
-            .where("LOWER(name) LIKE LOWER(?)", "%#{@query}%")
+            .where("LOWER(#{name_column}) LIKE LOWER(?)", "%#{@query}%")
             .limit(5) # Limit per content type
-            .select(:id, :name, :created_at) # Only select needed columns
-          
+            .select(*select_columns)
+
           matching_entities.each do |entity|
             results << {
               id: entity.id,
-              name: entity.name,
+              name: entity.respond_to?(:name) ? entity.name : entity.title,
               type: content_type.name,
               icon: content_type.icon,
               color: content_type.hex_color,
