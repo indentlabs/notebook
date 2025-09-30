@@ -21,29 +21,57 @@
           <% end %>
         </div>
 
-        <div class="mt-6 sm:mt-5 space-y-2 pb-8">
+        <div class="mt-6 sm:mt-5 space-y-8 pb-8">
           <% category[:fields].each do |field| %>
-            <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start border-t border-gray-200 pt-4 pb-2" 
-                 data-field-id="<%= field[:id] %>" 
+            <div class="border-t border-gray-200 pt-6"
+                 data-field-id="<%= field[:id] %>"
                  data-field-type="<%= field[:type] %>">
-              
+
               <!-- Field label -->
-              <div class="px-4 sm:text-right mb-2 sm:mb-0">
-                <label for="<%= field[:name] %>" class="block pt-1 text-sm font-medium text-gray-700">
-                  <%= field[:label] %>
+              <div class="mb-3">
+                <label for="<%= field[:name] %>" class="inline-flex items-center px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
+                  <%
+                    # Map field types/names to appropriate icons
+                    icon = case field[:label]&.downcase
+                    when /name/
+                      'fingerprint'
+                    when /description/, /notes/
+                      'text_fields'
+                    when /genre/, /type/
+                      'category'
+                    when /tag/
+                      'label'
+                    when /universe/
+                      'public'
+                    when /role/
+                      'work'
+                    when /gender/
+                      'wc'
+                    when /age/
+                      'cake'
+                    when /location/, /place/
+                      'place'
+                    when /history/, /origin/
+                      'history'
+                    else
+                      'text_fields'
+                    end
+                  %>
+                  <i class="material-icons text-gray-400" style="font-size: 18px; margin-right: 8px;"><%= icon %></i>
+                  <span class="text-sm font-medium text-gray-600"><%= field[:label] %></span>
                   <% if field[:required] %>
                     <span class="text-red-500 ml-1">*</span>
                   <% end %>
                 </label>
-                
+
                 <!-- Field help text if available -->
                 <% if field[:help_text].present? %>
-                  <p class="mt-1 text-xs text-gray-500"><%= field[:help_text] %></p>
+                  <p class="mt-2 ml-3 text-xs text-gray-500"><%= field[:help_text] %></p>
                 <% end %>
               </div>
-              
+
               <!-- Field input -->
-              <div class="mt-1 sm:mt-0 col-span-3 mb-4 relative">
+              <div class="relative">
                 <%= form_for content.raw_model, url: FieldTypeService.form_path(field), remote: true, authenticity_token: true, html: { class: "field-form" } do |f| %>
                   <%= hidden_field_tag "entity[entity_id]",   content.id %>
                   <%= hidden_field_tag "entity[entity_type]", content.class_name %>
