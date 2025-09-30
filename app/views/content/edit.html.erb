@@ -128,7 +128,10 @@
 
         <!-- Desktop Header with Title and Toggle Button -->
         <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
-          <h2 class="text-sm font-semibold text-gray-900">Page Tools</h2>
+          <h2 class="text-sm font-semibold text-gray-900 flex items-center">
+            <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
+            Page Tools
+          </h2>
           <button @click="toggleRightSidebar()"
                   class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
                   title="Hide sidebar"
@@ -368,8 +371,6 @@ function editPageController() {
             const universeName = selectedOption ? selectedOption.text : '';
             const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
             
-            console.log('Universe updated via autosave:', universeId, universeName, 'Privacy:', universePrivacy);
-            
             // Update the Alpine.js reactive state
             self.universePrivacy = universePrivacy;
             
@@ -383,11 +384,9 @@ function editPageController() {
     updatePrivacyUniverseSection(universeId, universeName, universePrivacy) {
       const privacyUniverseSection = document.querySelector('[data-privacy-universe-section]');
       if (!privacyUniverseSection) {
-        console.log('Privacy universe section not found');
         return;
       }
       
-      console.log('Updating privacy universe section with ID:', universeId);
       
       if (!universeId || universeId === '' || universeId === 'null') {
         // Show "No Universe Assigned" state
@@ -402,7 +401,6 @@ function editPageController() {
       // Find and update the content area
       const contentArea = section.querySelector('[data-universe-content]');
       if (contentArea) {
-        console.log('Showing no universe state');
         const firstCategoryLabel = '<%= @serialized_content.data[:categories].first[:label] rescue "Overview" %>';
         contentArea.innerHTML = `
           <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
@@ -451,7 +449,6 @@ function editPageController() {
     showUniverseState(section, universeId, universeName, universePrivacy) {
       const contentArea = section.querySelector('[data-universe-content]');
       if (!contentArea) {
-        console.log('Content area not found');
         return;
       }
       
@@ -506,17 +503,14 @@ function editPageController() {
     updateSidebarUniverseSection(universeId, universeName) {
       const sidebarSection = document.querySelector('[data-sidebar-universe-section]');
       if (!sidebarSection) {
-        console.log('Sidebar universe section not found');
         return;
       }
       
       const contentArea = sidebarSection.querySelector('[data-sidebar-universe-content]');
       if (!contentArea) {
-        console.log('Sidebar universe content area not found');
         return;
       }
       
-      console.log('Updating sidebar universe section with ID:', universeId);
       
       if (!universeId || universeId === '' || universeId === 'null') {
         // Show "No universe assigned" state
@@ -645,27 +639,19 @@ function editPageController() {
 
     saveLeftSidebarState() {
       try {
-        console.log('Saving left sidebar state:', this.showLeftSidebar);
         localStorage.setItem('content_edit_left_sidebar_visible', this.showLeftSidebar.toString());
-        console.log('Successfully saved to localStorage');
-        console.log('Current localStorage:', localStorage);
       } catch (e) {
         // Silently fail if localStorage is not available
-        console.warn('Could not save left sidebar state to localStorage', e);
+        // Silently fail if localStorage is not available
       }
     },
 
     toggleLeftSidebar() {
-      console.log('toggleLeftSidebar called, current state:', this.showLeftSidebar);
       this.showLeftSidebar = !this.showLeftSidebar;
-      console.log('New state:', this.showLeftSidebar);
 
       // Only save preference on desktop (mobile is always session-based)
       if (this.isDesktop) {
-        console.log('Saving to localStorage...');
         this.saveLeftSidebarState();
-      } else {
-        console.log('Not saving - not on desktop');
       }
     },
 
@@ -778,43 +764,3 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-
-<style>
-/* Instant CSS Tooltips */
-.tooltip-left,
-.tooltip-right {
-  position: relative;
-}
-
-.tooltip-left::after,
-.tooltip-right::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 8px 12px;
-  background-color: rgba(0, 0, 0, 0.9);
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  border-radius: 6px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s ease-in-out;
-  z-index: 1000;
-}
-
-.tooltip-left::after {
-  right: calc(100% + 8px);
-}
-
-.tooltip-right::after {
-  left: calc(100% + 8px);
-}
-
-.tooltip-left:hover::after,
-.tooltip-right:hover::after {
-  opacity: 1;
-}
-</style>
