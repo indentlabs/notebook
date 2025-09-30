@@ -127,6 +127,7 @@ function validateUsername(field) {
 
   if (username.length === 0) {
     feedbackElement.textContent = '';
+    feedbackElement.className = 'validation-feedback h-5 text-xs mt-1';
     return;
   }
 
@@ -136,11 +137,11 @@ function validateUsername(field) {
   if (validUsernameRegex.test(username)) {
     field.classList.add('border-green-300', 'focus:border-green-300');
     feedbackElement.textContent = 'Username is valid';
-    feedbackElement.className = 'validation-feedback text-xs text-green-600 mt-1';
+    feedbackElement.className = 'validation-feedback h-5 text-xs text-green-600 mt-1';
   } else {
     field.classList.add('border-red-300', 'focus:border-red-300');
     feedbackElement.textContent = 'Username can only contain letters, numbers, and - _ $ + ! *';
-    feedbackElement.className = 'validation-feedback text-xs text-red-600 mt-1';
+    feedbackElement.className = 'validation-feedback h-5 text-xs text-red-600 mt-1';
   }
 }
 
@@ -156,6 +157,7 @@ function validateEmail(field) {
 
   if (email.length === 0) {
     feedbackElement.textContent = '';
+    feedbackElement.className = 'validation-feedback h-5 text-xs mt-1';
     return;
   }
 
@@ -165,11 +167,11 @@ function validateEmail(field) {
   if (validEmailRegex.test(email)) {
     field.classList.add('border-green-300', 'focus:border-green-300');
     feedbackElement.textContent = 'Email is valid';
-    feedbackElement.className = 'validation-feedback text-xs text-green-600 mt-1';
+    feedbackElement.className = 'validation-feedback h-5 text-xs text-green-600 mt-1';
   } else {
     field.classList.add('border-red-300', 'focus:border-red-300');
     feedbackElement.textContent = 'Please enter a valid email address';
-    feedbackElement.className = 'validation-feedback text-xs text-red-600 mt-1';
+    feedbackElement.className = 'validation-feedback h-5 text-xs text-red-600 mt-1';
   }
 }
 
@@ -204,10 +206,15 @@ function initializePasswordStrength() {
   // Try to find a pre-allocated strength meter container
   let strengthMeter = document.querySelector('.password-strength');
 
+  // Ensure pre-allocated containers start with correct visibility state
+  if (strengthMeter && !strengthMeter.classList.contains('invisible')) {
+    strengthMeter.classList.add('invisible');
+  }
+
   // If no pre-allocated container exists, create one dynamically (for backwards compatibility)
   if (!strengthMeter) {
     strengthMeter = document.createElement('div');
-    strengthMeter.className = 'password-strength mt-2 hidden';
+    strengthMeter.className = 'password-strength mt-2 h-8 invisible';
     strengthMeter.innerHTML = `
       <div class="flex space-x-1">
         <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="1"></div>
@@ -244,10 +251,12 @@ function initializePasswordStrength() {
     const password = this.value;
 
     if (password.length > 0) {
-      strengthMeter.classList.remove('hidden');
+      strengthMeter.classList.remove('invisible');
+      strengthMeter.classList.add('visible');
       updatePasswordStrength(password, strengthMeter);
     } else {
-      strengthMeter.classList.add('hidden');
+      strengthMeter.classList.remove('visible');
+      strengthMeter.classList.add('invisible');
     }
   });
 }
