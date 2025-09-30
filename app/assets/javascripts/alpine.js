@@ -5,9 +5,23 @@ function alpineMultiSelectController() {
     selected: [],
     show: false,
     sourceFieldId: '',
+    searchQuery: '',
     open() { this.show = true },
     close() { this.show = false },
     isOpen() { return this.show === true },
+    filterOptions() {
+      // Update filteredOptions for each optgroup based on search query
+      this.optgroups.forEach(optgroup => {
+        if (!this.searchQuery || this.searchQuery.trim() === '') {
+          optgroup.filteredOptions = optgroup.options;
+        } else {
+          const query = this.searchQuery.toLowerCase();
+          optgroup.filteredOptions = optgroup.options.filter(option =>
+            option.text.toLowerCase().includes(query)
+          );
+        }
+      });
+    },
     select(index, event) {
       if (!this.options[index].selected) {
         this.options[index].selected = true;
@@ -79,13 +93,16 @@ function alpineMultiSelectController() {
 
         // Finally, add it as a valid optgroup with options
         if (optionsForThisOptGroup.length > 0) {
-          this.optgroups.push({
+          const optgroupData = {
             label: optgroups[i].label,
             icon: window.ContentTypeData[optgroups[i].label].icon,
             color: window.ContentTypeData[optgroups[i].label].color,
+            iconColor: window.ContentTypeData[optgroups[i].label].text_color || 'text-gray-600',
             plural: window.ContentTypeData[optgroups[i].label].plural,
-            options: optionsForThisOptGroup
-          });
+            options: optionsForThisOptGroup,
+            filteredOptions: optionsForThisOptGroup // Initialize with all options
+          };
+          this.optgroups.push(optgroupData);
 
           // And also track all the options in a flat array so we can reference them with a single index
           for (let j = 0; j < optionsForThisOptGroup.length; j++) {
