@@ -20,18 +20,16 @@
           <% next if category[:label] == 'Gallery' %>
           <% next if category[:label] == 'Contributors' && raw_content.class.name == 'Universe' %>
           <% has_content = category[:fields].any? { |field| field[:value].present? } %>
-          
-          <button @click="showCategory('<%= category[:label] %>')" 
-                  :class="isCategoryActive('<%= category[:label] %>') ? '<%= content.class_color %> text-white' : '<%= has_content ? 'text-gray-700 hover:bg-gray-50' : 'text-gray-400' %>'"
+          <% next unless has_content %>
+
+          <button @click="showCategory('<%= category[:label] %>')"
+                  :class="isCategoryActive('<%= category[:label] %>') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
                   class="group flex items-center justify-between px-3 py-2 text-sm rounded-md w-full text-left transition-colors">
             <div class="flex items-center">
               <i class="material-icons text-lg mr-3"
-                 :class="isCategoryActive('<%= category[:label] %>') ? 'text-white' : '<%= has_content ? content.class_text_color : 'text-gray-400' %>'"><%= category[:icon] %></i>
+                 :class="isCategoryActive('<%= category[:label] %>') ? 'text-white' : '<%= content.class_text_color %>'"><%= category[:icon] %></i>
               <span><%= category[:label] %></span>
             </div>
-            <% unless has_content %>
-              <span class="text-xs text-gray-400">Empty</span>
-            <% end %>
           </button>
         <% end %>
         
