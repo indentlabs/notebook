@@ -43,7 +43,7 @@
               <% if messageboard_or_nil %>
                 Found results in <span class="font-medium"><%= messageboard.name %></span>
               <% else %>
-                Found <span class="font-medium"><%= @topics.total_count %></span> matching <%= 'topic'.pluralize(@topics.total_count) %>
+                Found <span class="font-medium"><%= @topics.size %></span> matching <%= 'topic'.pluralize(@topics.size) %>
               <% end %>
             </span>
           </div>
@@ -65,7 +65,7 @@
     <div class="space-y-3">
       <% @topics.each do |topic| %>
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-          <%= link_to topic_path(topic), class: 'block p-4 hover:bg-gray-50 transition-colors duration-150' do %>
+          <%= link_to topic.path, class: 'block p-4 hover:bg-gray-50 transition-colors duration-150' do %>
             <div class="flex items-start justify-between">
               <div class="flex-1 min-w-0">
                 <div class="flex items-center space-x-2 mb-2">
@@ -98,10 +98,10 @@
                 <div class="flex items-center space-x-4 text-sm text-gray-600">
                   <div class="flex items-center space-x-1">
                     <% if topic.user %>
-                      <img src="<%= topic.user.thredded_avatar_url %>" 
-                           alt="<%= topic.user.thredded_display_name %>" 
+                      <img src="<%= topic.user.image_url(40) %>"
+                           alt="<%= topic.user.display_name %>"
                            class="w-5 h-5 rounded-full">
-                      <span><%= topic.user.thredded_display_name %></span>
+                      <span><%= topic.user.display_name %></span>
                     <% else %>
                       <i class="material-icons text-base">person</i>
                       <span>Anonymous</span>
@@ -125,8 +125,8 @@
                   <% if topic.last_user %>
                     <div class="flex items-center justify-end space-x-1 mb-1">
                       <span>Last by</span>
-                      <img src="<%= topic.last_user.thredded_avatar_url %>" 
-                           alt="<%= topic.last_user.thredded_display_name %>" 
+                      <img src="<%= topic.last_user.image_url(32) %>"
+                           alt="<%= topic.last_user.display_name %>"
                            class="w-4 h-4 rounded-full">
                     </div>
                   <% end %>

@@ -644,8 +644,9 @@
                   }
                 }"
               >
-                <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "block" do %>
-                  <div class="bg-white hover:shadow-xl rounded-lg transition-shadow duration-200 overflow-hidden">
+                <div class="bg-white hover:shadow-xl rounded-lg transition-shadow duration-200 overflow-hidden">
+                  <!-- Image - clickable to View -->
+                  <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "block" do %>
                     <%
                       item_image = nil
                       if item.respond_to?(:random_image_including_private)
@@ -654,20 +655,36 @@
                       item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
                     %>
                     <%= image_tag item_image, class: 'h-48 w-full object-cover' %>
-                    <div class="p-4">
-                      <div class="flex items-start justify-between">
-                        <div class="flex-1 min-w-0 pr-8">
-                          <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide <%= item.text_color %> truncate">
-                            <%= item.page_type %>
-                          </h3>
-                          <h2 class="mt-1 text-lg font-semibold text-gray-900 line-clamp-2" title="<%= item.name %>">
-                            <%= item.name %>
-                          </h2>
-                        </div>
+                  <% end %>
+
+                  <!-- Content -->
+                  <div class="p-4">
+                    <div class="flex items-start justify-between mb-3">
+                      <div class="flex-1 min-w-0 pr-8">
+                        <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide <%= item.text_color %> truncate">
+                          <%= item.page_type %>
+                        </h3>
+                        <h2 class="mt-1 text-lg font-semibold text-gray-900 line-clamp-2" title="<%= item.name %>">
+                          <%= item.name %>
+                        </h2>
                       </div>
                     </div>
+
+                    <!-- Action Buttons Footer -->
+                    <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+                      <%= link_to (item.respond_to?(:view_path) ? item.view_path : item), class: "flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-white #{item.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                        <i class="material-icons text-sm mr-1.5">visibility</i>
+                        View
+                      <% end %>
+                      <%= link_to (item.respond_to?(:edit_path) ? item.edit_path : edit_polymorphic_path(item)), class: "flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                        <i class="material-icons text-sm mr-1.5">edit</i>
+                        Edit
+                      <% end %>
+                    </div>
                   </div>
-                <% end %>
+                </div>
+
+                <!-- Favorite Star -->
                 <% if item.respond_to?(:favorite?) %>
                   <button
                     @click="toggleFavorite"
@@ -743,36 +760,50 @@
                   }
                 }"
               >
-                <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "flex items-center p-4 space-x-4 pr-16" do %>
-                  <div class="flex-shrink-0">
-                    <%
-                      item_image = nil
-                      if item.respond_to?(:random_image_including_private)
-                        item_image = item.random_image_including_private(format: :small)
-                      end
-                      item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
-                    %>
-                    <%= image_tag item_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                <div class="flex items-center p-4 space-x-4">
+                  <!-- Image + Content (clickable to View) -->
+                  <%= link_to (item.respond_to?(:view_path) ? item.view_path : item), class: "flex items-center space-x-4 flex-1 min-w-0" do %>
+                    <div class="flex-shrink-0">
+                      <%
+                        item_image = nil
+                        if item.respond_to?(:random_image_including_private)
+                          item_image = item.random_image_including_private(format: :small)
+                        end
+                        item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
+                      %>
+                      <%= image_tag item_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-medium text-gray-900 truncate" title="<%= item.name %>"><%= item.name %></h3>
+                      <p class="text-sm text-gray-500 <%= item.text_color %> truncate"><%= item.page_type %></p>
+                    </div>
+                  <% end %>
+
+                  <!-- Action Buttons -->
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <%= link_to (item.respond_to?(:view_path) ? item.view_path : item), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white #{item.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                      <i class="material-icons text-sm mr-1.5">visibility</i>
+                      View
+                    <% end %>
+                    <%= link_to (item.respond_to?(:edit_path) ? item.edit_path : edit_polymorphic_path(item)), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                      <i class="material-icons text-sm mr-1.5">edit</i>
+                      Edit
+                    <% end %>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-medium text-gray-900 truncate" title="<%= item.name %>"><%= item.name %></h3>
-                    <p class="text-sm text-gray-500 <%= item.text_color %> truncate"><%= item.page_type %></p>
-                  </div>
-                  <div class="flex-shrink-0">
-                    <i class="material-icons text-gray-400">chevron_right</i>
-                  </div>
-                <% end %>
-                <% if item.respond_to?(:favorite?) %>
-                  <button
-                    @click="toggleFavorite"
-                    :disabled="isLoading"
-                    class="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
-                    title="Toggle favorite"
-                  >
-                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
-                  </button>
-                <% end %>
+
+                  <!-- Favorite Star -->
+                  <% if item.respond_to?(:favorite?) %>
+                    <button
+                      @click="toggleFavorite"
+                      :disabled="isLoading"
+                      class="flex-shrink-0 p-1 text-lg rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors"
+                      :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                      title="Toggle favorite"
+                    >
+                      <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                    </button>
+                  <% end %>
+                </div>
               </div>
             <% end %>
           </div>
