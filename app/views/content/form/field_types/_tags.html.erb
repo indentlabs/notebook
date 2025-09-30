@@ -25,8 +25,9 @@
         x-model="textInput"
         x-ref="textInput"
         @input="search($event.target.value)"
-        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        class="shadow-sm block w-full py-2 px-3 focus:ring-notebook-blue focus:border-notebook-blue sm:text-sm border-0 border-l-4 border-r-4 border-gray-200 rounded-md text-gray-700"
         placeholder="Add tags to this page"
+        id="tags_input_<%= field_uuid %>"
       />
       <div :class="[open ? 'block' : 'hidden']">
         <div class="absolute z-40 left-0 mt-0 w-full">
@@ -85,6 +86,37 @@
 </div>
 
 <script type="text/javascript">
+  // Set up observer to mirror autosave status from hidden field to visible field
+  $(document).ready(function() {
+    const hidden_field  = $('#<%= field_uuid %>');
+    const visible_field = $('#tags_input_<%= field_uuid %>');
+
+    if (hidden_field.length && visible_field.length) {
+      // Create a MutationObserver to watch for class changes on the hidden field
+      const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            // Get the current classes from hidden field
+            const hiddenClasses = hidden_field.attr('class');
+
+            // Extract border classes
+            const borderClasses = ['border-gray-200', 'border-yellow-400', 'border-green-400', 'border-red-400'];
+            const currentBorderClass = borderClasses.find(cls => hiddenClasses.includes(cls));
+
+            // Apply the same border class to visible field
+            if (currentBorderClass) {
+              visible_field.removeClass(borderClasses.join(' '));
+              visible_field.addClass(currentBorderClass);
+            }
+          }
+        });
+      });
+
+      // Start observing the hidden field for class changes
+      observer.observe(hidden_field[0], { attributes: true, attributeFilter: ['class'] });
+    }
+  });
+
   function update_hidden_page_tag_value(tags) {
     const tag_delimiter = '<%= PageTag::SUBMISSION_DELIMITER %>';
     const hidden_field  = $('#<%= field_uuid %>');
@@ -94,6 +126,7 @@
 
     // Trigger autosave by firing change event
     // The field has autosave-closest-form-on-change class which handles remote submission
+    // The MutationObserver will handle mirroring the visual feedback
     hidden_field.trigger('change');
   }
 
