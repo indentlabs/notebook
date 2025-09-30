@@ -123,18 +123,18 @@ class ContentController < ApplicationController
     end
   end
 
-  def show    
+  def show
     content_type = content_type_from_controller(self.class)
     return redirect_to(root_path, notice: "That page doesn't exist!", status: :not_found) unless valid_content_types.include?(content_type.name)
 
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.", status: :not_found) if @content.nil?
 
-    return redirect_to(root_path) if @content.user.nil? # deleted user's content    
+    return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
     @serialized_content = ContentSerializer.new(@content)
-    
+
     # For basil images, assume they're all public for now since there's no privacy column
     @basil_images = BasilCommission.where(entity: @content)
                                    .where.not(saved_at: nil)
@@ -144,6 +144,60 @@ class ContentController < ApplicationController
         current_user.page_tags.where(page_type: content_type.name).pluck(:tag) +
           PageTagService.suggested_tags_for(content_type.name)
         ).uniq
+    end
+
+    # Calculate counts for "Dive Deeper" navigation items (used in sidebar and content views)
+    # Gallery count
+    @gallery_count = 0
+    if @content.respond_to?(:image_uploads)
+      @gallery_count += (current_user && @content.updatable_by?(current_user) ?
+        @content.image_uploads.count :
+        @content.image_uploads.where(privacy: 'public').count) rescue 0
+    end
+    @gallery_count += @basil_images.count
+
+    # Associations count
+    @associations_count = 0
+    if @content.respond_to?(:incoming_page_references)
+      @associations_count += @content.incoming_page_references.count rescue 0
+    end
+    if @content.respond_to?(:document_entities)
+      @associations_count += @content.document_entities.select(:document_id).distinct.count rescue 0
+    end
+
+    # Collections count
+    @collections_count = 0
+    if @content.respond_to?(:page_collections)
+      @collections_count = @content.page_collections
+        .joins(:collection)
+        .where('collections.published = ?', true)
+        .count rescue 0
+    elsif @content.respond_to?(:collections)
+      @collections_count = @content.collections.count rescue 0
+    end
+
+    # Timelines count
+    @timelines_count = 0
+    begin
+      if defined?(Timeline) && @content.respond_to?(:incoming_page_references)
+        @timelines_count += @content.incoming_page_references
+          .where(referencing_page_type: 'Timeline')
+          .select(:referencing_page_id)
+          .distinct
+          .count
+      end
+    rescue
+      # Timeline model might not exist
+    end
+    begin
+      if defined?(TimelineEvent) && @content.respond_to?(:timeline_events)
+        @timelines_count += @content.timeline_events
+          .select(:timeline_id)
+          .distinct
+          .count
+      end
+    rescue
+      # TimelineEvent model might not exist
     end
 
     if (current_user || User.new).can_read?(@content)
