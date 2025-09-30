@@ -30,44 +30,16 @@
                data-field-type="<%= field[:type] %>">
 
             <!-- Field label -->
-            <div class="mb-3">
-              <label for="<%= field[:name] %>" class="inline-flex items-center px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
-                <%
-                  # Map field types/names to appropriate icons
-                  icon = case field[:label]&.downcase
-                  when /name/
-                    'fingerprint'
-                  when /description/, /notes/
-                    'text_fields'
-                  when /genre/, /type/
-                    'category'
-                  when /tag/
-                    'label'
-                  when /universe/
-                    'public'
-                  when /role/
-                    'work'
-                  when /gender/
-                    'wc'
-                  when /age/
-                    'cake'
-                  when /location/, /place/
-                    'place'
-                  when /history/, /origin/
-                    'history'
-                  else
-                    'text_fields'
-                  end
-                %>
-                <i class="material-icons text-gray-400" style="font-size: 18px; margin-right: 8px;"><%= icon %></i>
-                <span class="text-sm font-medium text-gray-600"><%= field[:label] %></span>
+            <div class="mb-2">
+              <label for="<%= field[:name] %>" class="block text-sm font-medium text-gray-700">
+                <%= field[:label] %>
                 <% if field[:required] %>
                   <span class="text-red-500 ml-1">*</span>
                 <% end %>
               </label>
 
               <% if field[:help_text].present? %>
-                <p class="mt-2 ml-3 text-xs text-gray-500"><%= field[:help_text] %></p>
+                <p class="mt-1 text-xs text-gray-500"><%= field[:help_text] %></p>
               <% end %>
             </div>
 

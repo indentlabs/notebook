@@ -5,11 +5,6 @@
 # hack for thread bug in PMs until I figure out the real solution
 Thredded::CollectionToStringsWithCacheRenderer.render_threads = 1
 
-# ==> Pagination Configuration
-# Temporarily set to 1 for testing pagination UI
-Thredded.topics_per_page = 1
-Thredded.posts_per_page = 1
-
 # ==> User Configuration
 # The name of the class your app uses for your users.
 # By default the engine will use 'User' but if you have another name
