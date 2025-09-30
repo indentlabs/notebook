@@ -84,8 +84,8 @@
            class="hidden lg:block fixed left-0 z-40"
            style="top: 132px;">
         <button @click="toggleLeftSidebar()"
-                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1"
-                title="Show Navigation"
+                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
+                data-tooltip="Show Navigation"
                 aria-label="Show Navigation">
           <i class="material-icons text-base">menu</i>
           <i class="material-icons text-base">chevron_right</i>
@@ -148,8 +148,8 @@
            class="hidden lg:block fixed right-0 z-40"
            style="top: 132px;">
         <button @click="toggleRightSidebar()"
-                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1"
-                title="Show Page Tools"
+                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+                data-tooltip="Show Page Tools"
                 aria-label="Show Page Tools">
           <i class="material-icons text-base">chevron_left</i>
           <i class="material-icons text-base">construction</i>
@@ -345,8 +345,6 @@ function editPageController() {
           const selectedOption = e.target.options[e.target.selectedIndex];
           const universeName = selectedOption ? selectedOption.text : '';
           const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
-          
-          console.log('Universe changed to:', universeId, universeName, 'Privacy:', universePrivacy);
           
           // Update the Alpine.js reactive state
           self.universePrivacy = universePrivacy;
@@ -780,3 +778,43 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
+
+<style>
+/* Instant CSS Tooltips */
+.tooltip-left,
+.tooltip-right {
+  position: relative;
+}
+
+.tooltip-left::after,
+.tooltip-right::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  z-index: 1000;
+}
+
+.tooltip-left::after {
+  right: calc(100% + 8px);
+}
+
+.tooltip-right::after {
+  left: calc(100% + 8px);
+}
+
+.tooltip-left:hover::after,
+.tooltip-right:hover::after {
+  opacity: 1;
+}
+</style>
