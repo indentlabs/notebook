@@ -22,15 +22,57 @@
   <div class="max-w-full mx-auto">
     <div class="flex relative">
 
-      <!-- Left Column - Navigation -->
-      <div x-show="showLeftSidebar"
+      <!-- Left Column - Navigation (Desktop) -->
+      <div x-show="showLeftSidebar && isDesktop"
            x-transition:enter="transform transition ease-in-out duration-200"
            x-transition:enter-start="-translate-x-full"
            x-transition:enter-end="translate-x-0"
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="w-72 bg-white border-r border-gray-200 shadow-sm flex-shrink-0 h-full overflow-y-auto">
+           class="hidden lg:block w-72 bg-white border-r border-gray-200 shadow-sm flex-shrink-0 h-full overflow-y-auto">
+        <%= render partial: 'content/edit/navigation_sidebar', locals: {
+          content: @serialized_content,
+          raw_content: @content
+        } %>
+      </div>
+
+      <!-- Mobile/Tablet Left Sidebar Overlay -->
+      <div x-show="showLeftSidebar && !isDesktop"
+           x-transition:enter="transition-opacity ease-linear duration-200"
+           x-transition:enter-start="opacity-0"
+           x-transition:enter-end="opacity-100"
+           x-transition:leave="transition-opacity ease-linear duration-200"
+           x-transition:leave-start="opacity-100"
+           x-transition:leave-end="opacity-0"
+           @click="showLeftSidebar = false"
+           class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+           role="presentation"
+           aria-hidden="true">
+      </div>
+
+      <!-- Mobile/Tablet Left Sidebar -->
+      <div x-show="showLeftSidebar && !isDesktop"
+           x-transition:enter="transform transition ease-in-out duration-200"
+           x-transition:enter-start="-translate-x-full"
+           x-transition:enter-end="translate-x-0"
+           x-transition:leave="transform transition ease-in-out duration-200"
+           x-transition:leave-start="translate-x-0"
+           x-transition:leave-end="-translate-x-full"
+           class="lg:hidden fixed left-0 top-0 h-full w-72 bg-white border-r border-gray-200 shadow-xl z-50 overflow-y-auto">
+
+        <!-- Mobile Close button -->
+        <div class="p-4 border-b border-gray-200 bg-white lg:hidden">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-gray-900">Navigation</h2>
+            <button @click="showLeftSidebar = false"
+                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    aria-label="Close navigation">
+              <i class="material-icons text-gray-500">close</i>
+            </button>
+          </div>
+        </div>
+
         <%= render partial: 'content/edit/navigation_sidebar', locals: {
           content: @serialized_content,
           raw_content: @content
@@ -187,7 +229,17 @@ function editPageController() {
     currentView: 'details',
     currentCategory: null,
     expandAllCategories: true,
-    showLeftSidebar: true,
+    showLeftSidebar: (() => {
+      // Initialize from localStorage if available
+      try {
+        const saved = localStorage.getItem('edit_left_sidebar_visible');
+        const isDesktop = window.innerWidth >= 1024;
+        // On desktop, use saved preference (default true), on mobile default false
+        return isDesktop ? (saved === null ? true : saved === 'true') : false;
+      } catch (e) {
+        return window.innerWidth >= 1024; // Default true on desktop, false on mobile
+      }
+    })(),
     showRightSidebar: false,
     hasUnsavedChanges: false,
     isDesktop: window.innerWidth >= 1024,
