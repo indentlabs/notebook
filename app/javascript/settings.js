@@ -119,18 +119,20 @@ function initializeFormValidation() {
 function validateUsername(field) {
   const username = field.value;
   const feedbackElement = field.parentNode.querySelector('.validation-feedback') || createFeedbackElement(field);
-  
+
   // Clear previous validation classes
   field.classList.remove('border-red-300', 'border-green-300', 'focus:border-red-300', 'focus:border-green-300');
-  
+
+  if (!feedbackElement) return; // Exit if no feedback container available
+
   if (username.length === 0) {
     feedbackElement.textContent = '';
     return;
   }
-  
+
   // Simple validation - can be expanded
   const validUsernameRegex = /^[a-zA-Z0-9_\-$+!*]{1,40}$/;
-  
+
   if (validUsernameRegex.test(username)) {
     field.classList.add('border-green-300', 'focus:border-green-300');
     feedbackElement.textContent = 'Username is valid';
@@ -146,18 +148,20 @@ function validateUsername(field) {
 function validateEmail(field) {
   const email = field.value;
   const feedbackElement = field.parentNode.querySelector('.validation-feedback') || createFeedbackElement(field);
-  
+
   // Clear previous validation classes
   field.classList.remove('border-red-300', 'border-green-300', 'focus:border-red-300', 'focus:border-green-300');
-  
+
+  if (!feedbackElement) return; // Exit if no feedback container available
+
   if (email.length === 0) {
     feedbackElement.textContent = '';
     return;
   }
-  
+
   // Simple email validation
   const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   if (validEmailRegex.test(email)) {
     field.classList.add('border-green-300', 'focus:border-green-300');
     feedbackElement.textContent = 'Email is valid';
@@ -169,66 +173,76 @@ function validateEmail(field) {
   }
 }
 
-// Create feedback element for validation
+// Create or find feedback element for validation
 function createFeedbackElement(field) {
-  const feedbackElement = document.createElement('div');
-  feedbackElement.className = 'validation-feedback text-xs mt-1';
-  field.parentNode.appendChild(feedbackElement);
-  return feedbackElement;
+  // First, try to find an existing pre-allocated feedback container
+  const existingFeedback = field.parentNode.querySelector('.validation-feedback');
+  if (existingFeedback) {
+    return existingFeedback;
+  }
+
+  // If no pre-allocated container exists, don't create one dynamically
+  // (this prevents layout shifts - containers should be pre-allocated in the HTML)
+  return null;
 }
 
 // Initialize password strength meter
 function initializePasswordStrength() {
   const passwordField = document.getElementById('user_password');
   if (!passwordField) return;
-  
+
   // Only show password strength on sign-up and password change pages
   // Check if we're on a sign-in page by looking for specific elements
-  const isSignInPage = document.querySelector('form[action*="/users/sign_in"]') || 
+  const isSignInPage = document.querySelector('form[action*="/users/sign_in"]') ||
                        document.querySelector('input[value="Sign In"]');
-  
+
   if (isSignInPage) {
     // Don't show password strength on sign-in page
     return;
   }
-  
-  // Create strength meter
-  const strengthMeter = document.createElement('div');
-  strengthMeter.className = 'password-strength mt-2 hidden';
-  strengthMeter.innerHTML = `
-    <div class="flex space-x-1">
-      <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="1"></div>
-      <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="2"></div>
-      <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="3"></div>
-      <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="4"></div>
-    </div>
-    <p class="text-xs mt-1 text-gray-500 strength-text">Password strength</p>
-  `;
-  
-  // Check if we're on sign-up page with two-column layout
-  const passwordParent = passwordField.parentNode;
-  const isSignUpPage = document.querySelector('form[action*="/users"]') && 
-                       document.querySelector('input[name="user[password_confirmation]"]');
-  
-  if (isSignUpPage && passwordParent.classList.contains('flex-1')) {
-    // On sign-up page, append the strength meter after the flex container
-    const flexContainer = passwordParent.parentNode;
-    if (flexContainer && flexContainer.classList.contains('flex')) {
-      // Insert the strength meter after the flex container
-      flexContainer.insertAdjacentElement('afterend', strengthMeter);
-      // Make it span full width
-      strengthMeter.classList.add('w-full', 'px-4');
+
+  // Try to find a pre-allocated strength meter container
+  let strengthMeter = document.querySelector('.password-strength');
+
+  // If no pre-allocated container exists, create one dynamically (for backwards compatibility)
+  if (!strengthMeter) {
+    strengthMeter = document.createElement('div');
+    strengthMeter.className = 'password-strength mt-2 hidden';
+    strengthMeter.innerHTML = `
+      <div class="flex space-x-1">
+        <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="1"></div>
+        <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="2"></div>
+        <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="3"></div>
+        <div class="h-1 w-1/4 rounded-full bg-gray-200" data-strength="4"></div>
+      </div>
+      <p class="text-xs mt-1 text-gray-500 strength-text">Password strength</p>
+    `;
+
+    // Check if we're on sign-up page with two-column layout
+    const passwordParent = passwordField.parentNode;
+    const isSignUpPage = document.querySelector('form[action*="/users"]') &&
+                         document.querySelector('input[name="user[password_confirmation]"]');
+
+    if (isSignUpPage && passwordParent.classList.contains('flex-1')) {
+      // On sign-up page, append the strength meter after the flex container
+      const flexContainer = passwordParent.parentNode;
+      if (flexContainer && flexContainer.classList.contains('flex')) {
+        // Insert the strength meter after the flex container
+        flexContainer.insertAdjacentElement('afterend', strengthMeter);
+        // Make it span full width
+        strengthMeter.classList.add('w-full', 'px-4');
+      } else {
+        passwordParent.appendChild(strengthMeter);
+      }
     } else {
+      // On other pages (like password change), append to the password field's parent
       passwordParent.appendChild(strengthMeter);
     }
-  } else {
-    // On other pages (like password change), append to the password field's parent
-    passwordParent.appendChild(strengthMeter);
   }
-  
+
   passwordField.addEventListener('input', function() {
     const password = this.value;
-    
+
     if (password.length > 0) {
       strengthMeter.classList.remove('hidden');
       updatePasswordStrength(password, strengthMeter);
