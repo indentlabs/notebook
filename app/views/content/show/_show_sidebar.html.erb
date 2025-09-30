@@ -27,14 +27,11 @@
       <% if @content.respond_to?(:privacy) %>
         <div class="flex justify-between">
           <span class="text-gray-500">Visibility:</span>
-          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= @content.privacy == 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
-            <% if @content.privacy == 'public' %>
-              <i class="material-icons text-sm mr-1">public</i>
-              Public
-            <% else %>
-              <i class="material-icons text-sm mr-1">lock</i>
-              Private
-            <% end %>
+          <span id="sidebar-visibility-badge"
+                data-privacy="<%= @content.privacy %>"
+                class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= @content.privacy == 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+            <i class="material-icons text-sm mr-1" id="sidebar-visibility-icon"><%= @content.privacy == 'public' ? 'public' : 'lock' %></i>
+            <span id="sidebar-visibility-text"><%= @content.privacy == 'public' ? 'Public' : 'Private' %></span>
           </span>
         </div>
       <% end %>

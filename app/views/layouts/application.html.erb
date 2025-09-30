@@ -19,6 +19,13 @@
   
   <!-- Simplified stylesheet and script section for debugging -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    /* Prevent transition on initial page load */
+    .no-transition {
+      transition: none !important;
+    }
+  </style>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
@@ -314,7 +321,7 @@
         </div>
       </nav>
       
-      <div @click="showSidebar = false" class="flex items-center px-4 py-3 cursor-pointer group shrink-0 relative z-10 mx-3 mt-auto mb-5">
+      <div @click="showSidebar = false" class="flex items-center px-4 py-3 cursor-pointer group shrink-0 relative z-10 mx-3 mt-auto mb-5 tooltip-right" data-tooltip="Hide Site Navigation">
         <div class="relative flex items-center justify-center w-full px-2 py-2 bg-notebook-blue text-white rounded-lg shadow-sm transition-all duration-200 transform hover:-translate-x-1 hover:shadow-md">
           <div class="w-7 h-7 flex items-center justify-center">
             <i class="material-icons text-white text-base">arrow_back</i>
@@ -328,7 +335,8 @@
     
     <!-- Floating notebook toggle button (shows when sidebar is hidden) -->
     <button x-show="!showSidebar" @click="showSidebar = true"
-            class="fixed bottom-7 -left-2 z-50"
+            class="fixed bottom-7 -left-2 z-50 tooltip-right"
+            data-tooltip="Show Site Navigation"
             x-cloak>
       <div class="relative pl-0 hover:pl-2 transition-all duration-300">
         <div class="ripple-effect bg-notebook-blue text-white rounded-r-lg shadow-lg py-3 px-5 flex flex-row items-center justify-center space-x-2">
@@ -347,7 +355,9 @@
   <% end %>
 
   <!-- main content -->
-  <main class="<%= user_signed_in? ? 'lg:ml-60' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-60 sm:ml-64 lg:ml-60': showSidebar, 'ml-0': !showSidebar }"<% end %>>
+  <main class="no-transition transition-all duration-300"
+        <% if user_signed_in? %>:class="{ 'ml-60 sm:ml-64 lg:ml-60': showSidebar, 'ml-0': !showSidebar }"<% end %>
+        x-init="setTimeout(() => { $el.classList.remove('no-transition') }, 100)">
     <%= yield %>
   </main>
 
