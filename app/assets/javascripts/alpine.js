@@ -6,7 +6,15 @@ function alpineMultiSelectController() {
     show: false,
     sourceFieldId: '',
     searchQuery: '',
-    open() { this.show = true },
+    open() {
+      this.show = true;
+      // Focus search input after dropdown opens
+      this.$nextTick(() => {
+        if (this.$refs.searchInput) {
+          this.$refs.searchInput.focus();
+        }
+      });
+    },
     close() { this.show = false },
     isOpen() { return this.show === true },
     filterOptions() {
@@ -97,6 +105,7 @@ function alpineMultiSelectController() {
             label: optgroups[i].label,
             icon: window.ContentTypeData[optgroups[i].label].icon,
             color: window.ContentTypeData[optgroups[i].label].color,
+            textColor: window.ContentTypeData[optgroups[i].label].text_color || 'text-gray-600',
             iconColor: window.ContentTypeData[optgroups[i].label].text_color || 'text-gray-600',
             plural: window.ContentTypeData[optgroups[i].label].plural,
             options: optionsForThisOptGroup,

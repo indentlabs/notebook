@@ -89,6 +89,7 @@
                      x-model="searchQuery"
                      @input="filterOptions()"
                      placeholder="Search pages..."
+                     x-ref="searchInput"
                      class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                      @click.stop>
             </div>
@@ -96,10 +97,12 @@
             <div class="overflow-y-auto max-h-80">
               <template x-for="(optgroup,groupIndex) in optgroups" :key="groupIndex">
                 <div x-show="optgroup.filteredOptions && optgroup.filteredOptions.length > 0">
-                  <%# Subtle section header %>
-                  <div class="sticky top-0 bg-gray-100 px-3 py-1.5 border-b border-gray-200 z-10">
-                    <div class="flex items-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                      <span x-text="optgroup.icon" class="material-icons text-sm mr-1.5" x-bind:class="optgroup.iconColor"></span>
+                  <%# Colorful section header %>
+                  <div class="sticky top-0 px-3 py-2 border-b border-gray-200 z-10"
+                       x-bind:class="optgroup.color + ' bg-opacity-10'">
+                    <div class="flex items-center text-xs font-semibold uppercase tracking-wider"
+                         x-bind:class="optgroup.textColor">
+                      <span x-text="optgroup.icon" class="material-icons text-sm mr-1.5"></span>
                       <span x-text="optgroup.plural"></span>
                     </div>
                   </div>
