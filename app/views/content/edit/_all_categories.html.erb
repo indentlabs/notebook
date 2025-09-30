@@ -31,7 +31,38 @@
 
             <!-- Field label -->
             <div class="mb-2">
-              <label for="<%= field[:name] %>" class="block text-sm font-medium text-gray-700">
+              <label for="<%= field[:name] %>" class="inline-flex items-center text-sm font-semibold text-gray-700">
+                <%
+                  # Map field types to appropriate icons (matching template editor)
+                  icon = case field[:type]
+                  when 'text_area', 'textarea'
+                    'text_fields'
+                  when 'link'
+                    'link'
+                  when 'name'
+                    'label'
+                  when 'universe'
+                    'language'
+                  when 'tags'
+                    'local_offer'
+                  else
+                    'subject'
+                  end
+
+                  icon_color = case field[:type]
+                  when 'link'
+                    'text-blue-600'
+                  when 'name'
+                    'text-purple-600'
+                  when 'universe'
+                    'text-indigo-600'
+                  when 'tags'
+                    'text-green-600'
+                  else
+                    'text-gray-600'
+                  end
+                %>
+                <i class="material-icons mr-1 <%= icon_color %>" style="font-size: 16px;"><%= icon %></i>
                 <%= field[:label] %>
                 <% if field[:required] %>
                   <span class="text-red-500 ml-1">*</span>
