@@ -149,13 +149,16 @@
   <% end %>
   
   <!-- View More Links -->
-  <div class="mt-16 text-center">
-    <%= link_to send("references_#{raw_content.class.name.downcase}_path", raw_content), 
-                class: "group inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-sm text-gray-600 hover:border-gray-300 hover:shadow-lg transition-all duration-200" do %>
-      <span>Explore all connections</span>
-      <i class="material-icons text-sm ml-2 text-gray-400 group-hover:translate-x-1 transition-transform">arrow_forward</i>
-    <% end %>
-  </div>
+  <% references_path_method = "references_#{raw_content.class.name.downcase}_path" %>
+  <% if respond_to?(references_path_method) %>
+    <div class="mt-16 text-center">
+      <%= link_to send(references_path_method, raw_content),
+                  class: "group inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 rounded-full text-sm text-gray-600 hover:border-gray-300 hover:shadow-lg transition-all duration-200" do %>
+        <span>Explore all connections</span>
+        <i class="material-icons text-sm ml-2 text-gray-400 group-hover:translate-x-1 transition-transform">arrow_forward</i>
+      <% end %>
+    </div>
+  <% end %>
 
 <% else %>
   <!-- Empty associations state -->

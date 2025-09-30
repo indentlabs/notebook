@@ -22,7 +22,50 @@
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 1024' : 'false' %> }"
+      x-data="{
+        showSidebar: (() => {
+          <% if user_signed_in? %>
+            try {
+              const saved = localStorage.getItem('site_navigation_sidebar_visible');
+              const isDesktop = window.innerWidth >= 1024;
+              // On desktop, use saved preference (default true), on mobile default false
+              return isDesktop ? (saved === null ? true : saved === 'true') : false;
+            } catch (e) {
+              return window.innerWidth >= 1024;
+            }
+          <% else %>
+            return false;
+          <% end %>
+        })()
+      }"
+      x-init="
+        <% if user_signed_in? %>
+          // Save sidebar state to localStorage when it changes
+          $watch('showSidebar', value => {
+            try {
+              localStorage.setItem('site_navigation_sidebar_visible', value.toString());
+            } catch (e) {
+              // Silently fail if localStorage is not available
+            }
+          });
+
+          // Handle window resize
+          window.addEventListener('resize', () => {
+            const isDesktop = window.innerWidth >= 1024;
+            if (!isDesktop) {
+              showSidebar = false;
+            } else {
+              // Restore saved state when going back to desktop
+              try {
+                const saved = localStorage.getItem('site_navigation_sidebar_visible');
+                showSidebar = saved === null ? true : saved === 'true';
+              } catch (e) {
+                showSidebar = true;
+              }
+            }
+          });
+        <% end %>
+      "
 >
   <%= render 'layouts/tailwind/navbar' %>
 
@@ -284,8 +327,8 @@
     <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 lg:hidden" x-show="showSidebar" @click="showSidebar = false" x-cloak></div>
     
     <!-- Floating notebook toggle button (shows when sidebar is hidden) -->
-    <button x-show="!showSidebar" @click="showSidebar = true" 
-            class="fixed bottom-24 -left-2 z-50"
+    <button x-show="!showSidebar" @click="showSidebar = true"
+            class="fixed bottom-7 -left-2 z-50"
             x-cloak>
       <div class="relative pl-0 hover:pl-2 transition-all duration-300">
         <div class="ripple-effect bg-notebook-blue text-white rounded-r-lg shadow-lg py-3 px-5 flex flex-row items-center justify-center space-x-2">
