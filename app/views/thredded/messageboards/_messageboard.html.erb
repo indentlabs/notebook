@@ -48,7 +48,9 @@
       <div class="messageboard-footer">
         <p class="text-gray-600 truncate">
           <%= time_ago(messageboard.last_topic.last_post_at) %> •
-          <span class="font-medium text-gray-700"><%= messageboard.last_user.display_name %></span>
+          <span class="font-medium text-gray-700">
+            <%= messageboard.last_user.respond_to?(:display_name) ? messageboard.last_user.display_name : messageboard.last_user.thredded_display_name %>
+          </span>
         </p>
       </div>
     <% else %>

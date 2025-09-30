@@ -98,10 +98,14 @@
                 <div class="flex items-center space-x-4 text-sm text-gray-600">
                   <div class="flex items-center space-x-1">
                     <% if topic.user %>
-                      <img src="<%= topic.user.image_url(40) %>"
-                           alt="<%= topic.user.display_name %>"
-                           class="w-5 h-5 rounded-full">
-                      <span><%= topic.user.display_name %></span>
+                      <% if topic.user.respond_to?(:image_url) %>
+                        <img src="<%= topic.user.image_url(40) %>"
+                             alt="<%= topic.user.respond_to?(:display_name) ? topic.user.display_name : topic.user.thredded_display_name %>"
+                             class="w-5 h-5 rounded-full">
+                      <% else %>
+                        <i class="material-icons text-base">person</i>
+                      <% end %>
+                      <span><%= topic.user.respond_to?(:display_name) ? topic.user.display_name : topic.user.thredded_display_name %></span>
                     <% else %>
                       <i class="material-icons text-base">person</i>
                       <span>Anonymous</span>
@@ -125,9 +129,13 @@
                   <% if topic.last_user %>
                     <div class="flex items-center justify-end space-x-1 mb-1">
                       <span>Last by</span>
-                      <img src="<%= topic.last_user.image_url(32) %>"
-                           alt="<%= topic.last_user.display_name %>"
-                           class="w-4 h-4 rounded-full">
+                      <% if topic.last_user.respond_to?(:image_url) %>
+                        <img src="<%= topic.last_user.image_url(32) %>"
+                             alt="<%= topic.last_user.respond_to?(:display_name) ? topic.last_user.display_name : topic.last_user.thredded_display_name %>"
+                             class="w-4 h-4 rounded-full">
+                      <% else %>
+                        <span class="text-xs"><%= topic.last_user.respond_to?(:display_name) ? topic.last_user.display_name : topic.last_user.thredded_display_name %></span>
+                      <% end %>
                     </div>
                   <% end %>
                   <div class="text-xs text-gray-400">

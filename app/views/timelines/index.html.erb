@@ -105,11 +105,12 @@
 
       <!-- Timeline Event Type Breakdown -->
       <% if @content.any? && total_events > 0 %>
-        <% 
+        <%
           event_type_counts = Hash.new(0)
           @content.each do |timeline|
             timeline.timeline_events.each do |event|
-              event_type_counts[event.event_type || 'Unspecified'] += 1
+              type = event.respond_to?(:event_type) ? (event.event_type || 'Unspecified') : 'Unspecified'
+              event_type_counts[type] += 1
             end
           end
         %>
