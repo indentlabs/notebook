@@ -59,14 +59,14 @@
     </div>
     
     <!-- Tools -->
-    <div class="pb-4 border-b border-gray-200">
-      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
-        Tools
-      </h2>
+    <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+      <div class="pb-4 border-b border-gray-200">
+        <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
+          Tools
+        </h2>
 
-      <div class="w-full">
-        <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+        <div class="w-full">
           <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
                       target: "_blank",
                       class: "group flex items-center justify-between p-3 w-full rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white" do %>
@@ -79,27 +79,20 @@
             </div>
             <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
           <% end %>
-        <% else %>
-          <div class="p-3 w-full rounded-lg border border-gray-200 bg-gray-50">
-            <div class="flex items-center justify-center">
-              <i class="material-icons text-gray-400 mr-2">construction</i>
-              <span class="text-sm text-gray-600">More tools coming soon!</span>
-            </div>
-          </div>
-        <% end %>
+        </div>
       </div>
-    </div>
+    <% end %>
     
     <!-- Community -->
-    <div class="pb-4 border-b border-gray-200">
-      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
-        Community
-      </h2>
-      
-      <div class="space-y-2">
-        <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
-        <% if forum_url %>
+    <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
+    <% if forum_url %>
+      <div class="pb-4 border-b border-gray-200">
+        <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
+          Community
+        </h2>
+        
+        <div class="space-y-2">
           <%= link_to forum_url, target: "_blank", class: "group flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors" do %>
             <i class="material-icons text-base text-gray-400 group-hover:text-blue-500 mr-3">forum</i>
             <div class="flex-1">
@@ -108,26 +101,9 @@
             </div>
             <i class="material-icons text-xs text-gray-400 group-hover:text-blue-500">open_in_new</i>
           <% end %>
-        <% end %>
+        </div>
       </div>
-    </div>
-    
-    <!-- Resources -->
-    <div class="pb-4 border-b border-gray-200">
-      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">school</i>
-        Resources
-      </h2>
-      
-      <div class="space-y-1">
-        <%= link_to "#", class: "text-sm text-gray-700 hover:text-blue-600 block hover:underline" do %>
-          Writing Guides
-        <% end %>
-        <%= link_to "#", class: "text-sm text-gray-700 hover:text-blue-600 block hover:underline" do %>
-          Research Guides
-        <% end %>
-      </div>
-    </div>
+    <% end %>
     
   </div>
 </div>
