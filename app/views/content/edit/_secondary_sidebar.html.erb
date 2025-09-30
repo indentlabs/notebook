@@ -2,8 +2,34 @@
 <div class="h-full overflow-y-auto">
   <div class="p-4 space-y-4">
     
+    <!-- Tools -->
+    <div class="pb-4 border-b border-gray-200">
+      <div class="w-full">
+        <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+          <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
+                      target: "_blank",
+                      class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 transition-all duration-200 bg-gray-50" do %>
+            <div class="flex items-center">
+              <i class="material-icons text-xl text-gray-400 group-hover:text-purple-500 mr-3">visibility</i>
+              <div>
+                <div class="font-medium text-gray-700 group-hover:text-purple-700 text-sm">Visualize</div>
+                <div class="text-xs text-gray-500 group-hover:text-purple-600">Generate images</div>
+              </div>
+            </div>
+            <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
+          <% end %>
+        <% else %>
+          <div class="p-3 w-full rounded-lg bg-gray-50">
+            <div class="flex items-center justify-center">
+              <i class="material-icons text-gray-400 mr-2">construction</i>
+              <span class="text-sm text-gray-600">More tools coming soon!</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
     <!-- Save Status -->
-    <div class="bg-white rounded-lg border border-gray-200 px-3 py-2">
+    <div class="bg-gray-50 rounded-lg px-3 py-2 mb-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center">
           <div class="w-2 h-2 bg-green-400 rounded-full mr-2" id="save-indicator"></div>
@@ -15,88 +41,56 @@
       </div>
     </div>
     
-    <!-- Tools -->
-    <div class="pb-4 border-b border-gray-200">
-      <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
-        Tools
-      </h2>
-
-      <div class="w-full">
-        <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
-          <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
-                      target: "_blank",
-                      class: "group flex items-center justify-between p-3 w-full rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white" do %>
-            <div class="flex items-center">
-              <i class="material-icons text-xl text-gray-400 group-hover:text-purple-500 mr-3">visibility</i>
-              <div>
-                <div class="font-medium text-gray-700 group-hover:text-purple-700 text-sm">Visualize</div>
-                <div class="text-xs text-gray-500 group-hover:text-purple-600">Generate images</div>
-              </div>
-            </div>
-            <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
-          <% end %>
-        <% else %>
-          <div class="p-3 w-full rounded-lg border border-gray-200 bg-gray-50">
-            <div class="flex items-center justify-center">
-              <i class="material-icons text-gray-400 mr-2">construction</i>
-              <span class="text-sm text-gray-600">More tools coming soon!</span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    </div>
-    
     <!-- Page Stats -->
-    <div class="bg-white rounded-lg p-3 border border-gray-200 mb-4">
-      <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">analytics</i>
+    <div class="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 mb-4">
+      <h4 class="font-medium text-gray-700 mb-2 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-1.5">analytics</i>
         Page Stats
-      </h3>
-      <div class="space-y-3">
-        
+      </h4>
+      <div class="space-y-1.5">
+
         <!-- Effective Visibility -->
         <% if raw_content.respond_to?(:privacy) %>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-600">Visibility</span>
-            <button @click="switchView('privacy')" 
-                    :class="isEffectivelyPublic ? 
-                      'inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-gray-100 bg-green-50 text-green-700 border border-green-200' : 
-                      'inline-flex items-center px-2 py-1 rounded text-xs font-medium transition-colors hover:bg-gray-100 bg-gray-50 text-gray-700 border border-gray-200'"
+          <div class="flex justify-between items-center">
+            <span>Visibility</span>
+            <button @click="switchView('privacy')"
+                    :class="isEffectivelyPublic ?
+                      'inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium transition-colors hover:bg-gray-200 bg-gray-200 text-gray-700' :
+                      'inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium transition-colors hover:bg-gray-200 bg-gray-200 text-gray-700'"
                     title="Click to manage privacy settings">
-              <i class="material-icons text-xs mr-1" 
+              <i class="material-icons text-xs mr-0.5"
                  x-text="isEffectivelyPublic ? 'public' : 'lock'"></i>
               <span x-text="isEffectivelyPublic ? 'Public' : 'Private'"></span>
-              <span x-show="showUniverseIndicator" 
-                    class="text-xs text-green-600 ml-1">(via universe)</span>
+              <span x-show="showUniverseIndicator"
+                    class="text-xs ml-0.5">(via universe)</span>
             </button>
           </div>
         <% end %>
-        
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Word count</span>
-          <span class="font-medium text-gray-900 px-2 py-1 bg-gray-50 rounded text-xs">
+
+        <div class="flex justify-between">
+          <span>Word count</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 rounded">
             <%= number_with_delimiter(content.cached_word_count || 0) %>
-          </span>
+          </kbd>
         </div>
-        
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Last saved</span>
-          <span class="font-medium text-gray-900 text-xs" id="last-saved-time">
+
+        <div class="flex justify-between">
+          <span>Last saved</span>
+          <span class="text-gray-700" id="last-saved-time">
             <%= distance_of_time_in_words(raw_content.updated_at, Time.current) %> ago
           </span>
         </div>
-        
-        <% 
+
+        <%
           total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum
           completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum
           completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0
         %>
-        <div class="flex justify-between text-sm">
-          <span class="text-gray-600">Completion</span>
-          <span class="font-medium text-gray-900 text-xs">
+        <div class="flex justify-between">
+          <span>Completion</span>
+          <span class="text-gray-700">
             <%= completion_percent %>%
-            <span class="text-xs text-gray-500">(<%= completed_fields %>/<%= total_fields %>)</span>
+            <span class="text-gray-500">(<%= completed_fields %>/<%= total_fields %>)</span>
           </span>
         </div>
       </div>

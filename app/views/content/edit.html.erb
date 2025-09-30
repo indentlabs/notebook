@@ -38,36 +38,77 @@
         } %>
       </div>
       
-      <!-- Right Column - Desktop Only -->
-      <div class="hidden lg:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0">
-        <%= render partial: 'content/edit/secondary_sidebar', locals: { 
-          content: @serialized_content, 
-          raw_content: @content 
+      <!-- Right Column - Desktop (Toggleable) -->
+      <div x-show="showRightSidebar"
+           x-transition:enter="transform transition ease-in-out duration-200"
+           x-transition:enter-start="translate-x-full"
+           x-transition:enter-end="translate-x-0"
+           x-transition:leave="transform transition ease-in-out duration-200"
+           x-transition:leave-start="translate-x-0"
+           x-transition:leave-end="translate-x-full"
+           class="hidden lg:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0"
+           role="complementary"
+           aria-label="Edit tools and page information">
+
+        <!-- Desktop Header with Title and Toggle Button -->
+        <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
+          <h2 class="text-sm font-semibold text-gray-900">Page Tools</h2>
+          <button @click="toggleRightSidebar()"
+                  class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                  title="Hide sidebar"
+                  aria-label="Hide sidebar">
+            <i class="material-icons text-gray-500 text-lg">chevron_right</i>
+          </button>
+        </div>
+
+        <%= render partial: 'content/edit/secondary_sidebar', locals: {
+          content: @serialized_content,
+          raw_content: @content
         } %>
       </div>
-      
+
+      <!-- Desktop Collapsed Toggle Tab -->
+      <div x-show="!showRightSidebar && isDesktop"
+           class="hidden lg:block fixed right-0 z-40"
+           style="top: 132px;">
+        <button @click="toggleRightSidebar()"
+                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1"
+                title="Show sidebar"
+                aria-label="Show sidebar">
+          <i class="material-icons text-base">chevron_left</i>
+          <i class="material-icons text-base">construction</i>
+        </button>
+      </div>
+
       <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
       <div class="lg:hidden fixed right-0 top-1/2 transform -translate-y-1/2 z-40">
-        <button @click="toggleRightSidebar()" 
-                class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-l-lg shadow-lg transition-colors"
-                title="Edit Tools">
-          <i class="material-icons text-lg" x-show="!showRightSidebar">chevron_left</i>
-          <i class="material-icons text-lg" x-show="showRightSidebar">chevron_right</i>
+        <button @click="toggleRightSidebar()"
+                @keydown.escape="showRightSidebar && toggleRightSidebar()"
+                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
+                :title="showRightSidebar ? 'Close edit tools' : 'Open edit tools'"
+                :aria-label="showRightSidebar ? 'Close edit tools' : 'Open edit tools'"
+                :aria-expanded="showRightSidebar">
+          <i class="material-icons text-base" x-show="!showRightSidebar">construction</i>
+          <i class="material-icons text-base" x-show="!showRightSidebar">chevron_left</i>
+          <i class="material-icons text-base" x-show="showRightSidebar">chevron_right</i>
         </button>
       </div>
       
       <!-- Mobile/Tablet Right Sidebar Overlay -->
-      <div x-show="showRightSidebar" 
+      <div x-show="showRightSidebar"
            x-transition:enter="transition-opacity ease-linear duration-200"
            x-transition:enter-start="opacity-0"
            x-transition:enter-end="opacity-100"
            x-transition:leave="transition-opacity ease-linear duration-200"
            x-transition:leave-start="opacity-100"
            x-transition:leave-end="opacity-0"
-           @click="showRightSidebar = false"
-           class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+           @click="closeMobileSidebar()"
+           @keydown.escape.window="closeMobileSidebar()"
+           class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+           role="presentation"
+           aria-hidden="true">
       </div>
-      
+
       <!-- Mobile/Tablet Right Sidebar -->
       <div x-show="showRightSidebar"
            x-transition:enter="transform transition ease-in-out duration-200"
@@ -76,14 +117,20 @@
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="lg:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto">
-        
+           x-trap.noscroll.inert="showRightSidebar && window.innerWidth < 1024"
+           @keydown.escape="closeMobileSidebar()"
+           class="lg:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto"
+           role="dialog"
+           aria-modal="true"
+           aria-labelledby="mobile-sidebar-title">
+
         <!-- Close button -->
         <div class="p-4 border-b border-gray-200 bg-white">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900">Edit Tools</h2>
-            <button @click="showRightSidebar = false" 
-                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <h2 id="mobile-sidebar-title" class="text-lg font-semibold text-gray-900">Edit Tools</h2>
+            <button @click="closeMobileSidebar()"
+                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    aria-label="Close edit tools">
               <i class="material-icons text-gray-500">close</i>
             </button>
           </div>
@@ -108,6 +155,7 @@ function editPageController() {
     expandAllCategories: true,
     showRightSidebar: false,
     hasUnsavedChanges: false,
+    isDesktop: window.innerWidth >= 1024,
     
     // Privacy state
     selectedPrivacy: '<%= @content.privacy || 'private' %>',
@@ -123,6 +171,9 @@ function editPageController() {
     },
     
     init() {
+      // Initialize sidebar state from localStorage
+      this.initializeSidebarState();
+
       // Set initial view from URL hash if present
       const hash = window.location.hash.substring(1);
       if (['details', 'gallery', 'privacy', 'contributors', 'universe', 'settings'].includes(hash)) {
@@ -171,9 +222,17 @@ function editPageController() {
         }
       });
       
-      // Close right sidebar on window resize to desktop
+      // Handle window resize
       window.addEventListener('resize', () => {
-        if (window.innerWidth >= 1024) { // lg breakpoint
+        const wasDesktop = this.isDesktop;
+        this.isDesktop = window.innerWidth >= 1024;
+
+        // When transitioning from mobile to desktop, close mobile sidebar
+        if (!wasDesktop && this.isDesktop) {
+          this.showRightSidebar = this.getSavedSidebarState();
+        }
+        // When transitioning from desktop to mobile, always close
+        if (wasDesktop && !this.isDesktop) {
           this.showRightSidebar = false;
         }
       });
@@ -456,10 +515,52 @@ function editPageController() {
       return this.currentView === 'details' && this.expandAllCategories;
     },
     
+    initializeSidebarState() {
+      // On desktop, restore saved preference (default: shown)
+      // On mobile, always start closed
+      if (this.isDesktop) {
+        this.showRightSidebar = this.getSavedSidebarState();
+      } else {
+        this.showRightSidebar = false;
+      }
+    },
+
+    getSavedSidebarState() {
+      try {
+        const saved = localStorage.getItem('edit_sidebar_visible');
+        // Default to true (shown) if not set
+        return saved === null ? true : saved === 'true';
+      } catch (e) {
+        // If localStorage is not available, default to shown
+        return true;
+      }
+    },
+
+    saveSidebarState() {
+      try {
+        localStorage.setItem('edit_sidebar_visible', this.showRightSidebar.toString());
+      } catch (e) {
+        // Silently fail if localStorage is not available
+        console.warn('Could not save sidebar state to localStorage', e);
+      }
+    },
+
     toggleRightSidebar() {
       this.showRightSidebar = !this.showRightSidebar;
+
+      // Only save preference on desktop (mobile is always session-based)
+      if (this.isDesktop) {
+        this.saveSidebarState();
+      }
     },
-    
+
+    closeMobileSidebar() {
+      // Only close if on mobile (< 1024px)
+      if (!this.isDesktop) {
+        this.showRightSidebar = false;
+      }
+    },
+
     updateLastSavedTime() {
       // Update the "Last saved" time in the left sidebar
       const lastSavedElement = document.getElementById('last-saved-time');
