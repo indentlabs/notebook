@@ -1,6 +1,33 @@
 <section class="min-h-[60vh] md:min-h-[78vh]">
-  <div class="h-full flex shadow-lg bg-cover bg-center border-b bg-notebook-blue border-notebook-blue bg-no-repeat py-32" style="background-image: url(<%= image_path 'landing/notebook-hero-1.png' %>);">
-    <div class="container mx-auto p-4 flex items-center py-16 md:pb-24 z-10">
+  <div class="h-full flex shadow-lg bg-cover bg-center border-b bg-notebook-blue border-notebook-blue bg-no-repeat py-32 relative"
+       id="hero-section">
+
+    <!-- Responsive hero background image -->
+    <picture class="absolute inset-0 w-full h-full">
+      <source type="image/webp"
+              media="(min-width: 1440px)"
+              srcset="<%= asset_path 'landing/notebook-hero-1-1920.webp' %>">
+      <source type="image/webp"
+              media="(min-width: 768px)"
+              srcset="<%= asset_path 'landing/notebook-hero-1-1440.webp' %>">
+      <source type="image/webp"
+              srcset="<%= asset_path 'landing/notebook-hero-1-828.webp' %>">
+      <img src="<%= asset_path 'landing/notebook-hero-1.png' %>"
+           alt="Notebook hero background"
+           class="w-full h-full object-cover">
+    </picture>
+
+    <!-- Hidden video element -->
+    <video id="hero-video"
+           class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 pointer-events-none"
+           muted
+           loop
+           playsinline
+           preload="none">
+      <source src="<%= asset_path 'landing/digital-notebook-active.mp4' %>" type="video/mp4">
+    </video>
+
+    <div class="container mx-auto p-4 flex items-center py-16 md:pb-24 z-10 relative">
       <div class="text-center w-full">
         <div class="text-white py-4 px-5 my-5">
           <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: black 0px 0px 10px;">
@@ -12,7 +39,9 @@
           </div>
         </div>
         <div class="cta clear-left px-5">
-          <%= link_to new_user_registration_path, class: 'no-underline px-4 py-4 rounded-lg block sm:inline-block global-transition text-white bg-notebook-blue hover:bg-blue-400 hover:shadow-lg' do %>
+          <%= link_to new_user_registration_path,
+              class: 'no-underline px-4 py-4 rounded-lg block sm:inline-block global-transition text-white bg-notebook-blue hover:bg-blue-400 hover:shadow-lg',
+              id: 'start-worldbuilding-btn' do %>
             <div class="flex justify-center items-center">
               <span>Start worldbuilding</span>
               <span class="fa fa-xs fa-arrow-right ml-4"></span>
@@ -23,6 +52,42 @@
     </div>
   </div>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('hero-video');
+    const button = document.getElementById('start-worldbuilding-btn');
+
+    // Detect mobile devices
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Skip video functionality entirely on mobile
+    if (isMobile) {
+      return;
+    }
+
+    // Preload video after a short delay (let page load first) - desktop only
+    setTimeout(() => {
+      video.preload = 'auto';
+      video.load();
+    }, 1000);
+
+    // Show video on button hover
+    button.addEventListener('mouseenter', function() {
+      video.style.opacity = '1';
+      video.play().catch(err => console.log('Video play failed:', err));
+    });
+
+    // Hide video on button leave
+    button.addEventListener('mouseleave', function() {
+      video.style.opacity = '0';
+      setTimeout(() => {
+        video.pause();
+        video.currentTime = 0; // Reset to start
+      }, 500); // Wait for fade out
+    });
+  });
+</script>
 
 <section class="bg-gray-50 py-16">
   <div class="container mx-auto px-5">
