@@ -270,8 +270,13 @@ function editPageController() {
         this.currentView = hash;
       }
       
-      // Track unsaved changes
+      // Track unsaved changes (but not for file inputs)
       document.addEventListener('input', (e) => {
+        // Skip file inputs - they don't need unsaved changes tracking
+        if (e.target.type === 'file') {
+          return;
+        }
+
         if (e.target.closest('form')) {
           this.hasUnsavedChanges = true;
         }

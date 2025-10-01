@@ -54,12 +54,12 @@
   <%= content_for :javascript do %>
     $(function() {
       $('.js-autocomplete-<%= field[:id].to_s %>').autocomplete({
-        limit: 5,
-        data: {
-          <% autocomplete.each do |autocomplete_option| %>
-            "<%= autocomplete_option %>": null,
+        source: [
+          <% autocomplete.each_with_index do |autocomplete_option, index| %>
+            "<%= autocomplete_option %>"<%= ',' unless index == autocomplete.length - 1 %>
           <% end %>
-        }
+        ],
+        minLength: 2
       });
     });
   <% end %>
