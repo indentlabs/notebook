@@ -18,7 +18,7 @@
       type: 'image_upload',
       data: img,
       position: img.position || 999,
-      pinned: img.pinned?
+      pinned: img.pinned == true
     }
   end
   
@@ -28,7 +28,7 @@
       type: 'basil_commission',
       data: img,
       position: img.position || 999,
-      pinned: img.pinned?
+      pinned: img.pinned == true
     }
   end
   
@@ -56,7 +56,7 @@
               image_data = image_item[:data]
               image_type = image_item[:type]
               image_id = image_item[:id]
-              is_pinned = image_data.respond_to?(:pinned?) && image_data.pinned?
+              is_pinned = image_data.pinned == true
             %>
             <div class="gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
               <div class="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow <%= is_pinned ? 'ring-2 ring-yellow-400' : '' %>">
@@ -75,7 +75,6 @@
                   <!-- Pin button -->
                   <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image_data.id),
                     class: "absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400'}",
-                    remote: true,
                     method: :post,
                     title: 'Pin this image to always use it in previews of this page',
                     data: { type: 'json' } do %>
@@ -116,7 +115,6 @@
                   <!-- Pin button -->
                   <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: image_data.id),
                     class: "absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400'}",
-                    remote: true,
                     method: :post,
                     title: 'Pin this image to always use it in previews of this page',
                     data: { type: 'json' } do %>
@@ -286,10 +284,116 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize sortable functionality
+// Function to initialize pin buttons (can be called multiple times safely)
+function initializePinButtons() {
+  // Only initialize buttons that haven't been initialized yet
+  document.querySelectorAll('.js-toggle-pin:not([data-initialized])').forEach(function(button) {
+    button.setAttribute('data-initialized', 'true');
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation(); // Stop ALL event handlers including jQuery UJS
+
+      if (this.classList.contains('processing')) return;
+      this.classList.add('processing');
+
+      var url = this.getAttribute('href');
+      var buttonElement = this;
+      var imageCard = buttonElement.closest('.gallery-sortable-item').querySelector('.relative');
+
+      // Safe CSRF token access
+      var csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (!csrfToken) {
+        console.error('CSRF token not found');
+        showNotification('Security error. Please refresh the page.', 'error');
+        buttonElement.classList.remove('processing');
+        return;
+      }
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': csrfToken.content,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (!response.ok) {
+          // Handle HTTP errors
+          if (response.status === 401) {
+            throw new Error('Please log in to pin images');
+          } else if (response.status === 403) {
+            throw new Error('You do not have permission to modify this image');
+          } else if (response.status === 404) {
+            throw new Error('Image not found');
+          } else if (response.status === 422) {
+            throw new Error('Content not found for this image');
+          } else {
+            throw new Error(`Error: ${response.status}`);
+          }
+        }
+        return response.json();
+      })
+      .then(data => {
+        buttonElement.classList.remove('processing');
+
+        // Check for error in response data
+        if (data.error) {
+          showNotification(data.error, 'error');
+          return;
+        }
+
+        if (data.pinned) {
+          buttonElement.classList.add('text-yellow-500');
+          buttonElement.classList.remove('text-gray-400');
+          imageCard.classList.add('ring-2', 'ring-yellow-400');
+
+          // Add pinned badge if not exists
+          if (!imageCard.querySelector('.bg-yellow-400')) {
+            var pinnedBadge = document.createElement('div');
+            pinnedBadge.className = 'absolute bottom-12 left-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium flex items-center';
+            pinnedBadge.innerHTML = '<i class="material-icons text-xs mr-1">push_pin</i> Pinned';
+            imageCard.appendChild(pinnedBadge);
+          }
+
+          // Remove pinned state from other images
+          document.querySelectorAll('.js-toggle-pin').forEach(function(btn) {
+            if (btn !== buttonElement) {
+              btn.classList.remove('text-yellow-500');
+              btn.classList.add('text-gray-400');
+              var otherCard = btn.closest('.gallery-sortable-item').querySelector('.relative');
+              if (otherCard) {
+                otherCard.classList.remove('ring-2', 'ring-yellow-400');
+                var badge = otherCard.querySelector('.bg-yellow-400');
+                if (badge) badge.remove();
+              }
+            }
+          });
+        } else {
+          buttonElement.classList.remove('text-yellow-500');
+          buttonElement.classList.add('text-gray-400');
+          imageCard.classList.remove('ring-2', 'ring-yellow-400');
+
+          var pinnedBadge = imageCard.querySelector('.bg-yellow-400');
+          if (pinnedBadge) pinnedBadge.remove();
+        }
+      })
+      .catch(error => {
+        console.error('Error toggling pin status:', error);
+        buttonElement.classList.remove('processing');
+        showNotification(error.message || 'Error toggling pin status', 'error');
+      });
+    });
+  });
+}
+
+// Initialize sortable functionality
+function initializeSortable() {
   var galleryItems = document.querySelector('.js-sortable-gallery-items');
-  if (galleryItems && typeof $ !== 'undefined' && $.fn.sortable) {
+  if (galleryItems && typeof $ !== 'undefined' && $.fn.sortable && !$(galleryItems).hasClass('ui-sortable')) {
     var sortableGallery = $('.js-sortable-gallery-items');
     var sortableContainer = sortableGallery.closest('.sortable-gallery');
     var contentType = sortableContainer.data('content-type');
@@ -339,76 +443,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-  
-  // Handle pin toggle buttons
-  document.querySelectorAll('.js-toggle-pin').forEach(function(button) {
-    button.addEventListener('click', function(e) {
-      e.preventDefault();
-      
-      if (this.classList.contains('processing')) return;
-      this.classList.add('processing');
-      
-      var url = this.getAttribute('href');
-      var buttonElement = this;
-      var imageCard = buttonElement.closest('.gallery-sortable-item').querySelector('.relative');
-      
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        credentials: 'same-origin'
-      })
-      .then(response => response.json())
-      .then(data => {
-        buttonElement.classList.remove('processing');
-        
-        if (data.pinned) {
-          buttonElement.classList.add('text-yellow-500');
-          buttonElement.classList.remove('text-gray-400');
-          imageCard.classList.add('ring-2', 'ring-yellow-400');
-          
-          // Add pinned badge if not exists
-          if (!imageCard.querySelector('.bg-yellow-400')) {
-            var pinnedBadge = document.createElement('div');
-            pinnedBadge.className = 'absolute bottom-12 left-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium flex items-center';
-            pinnedBadge.innerHTML = '<i class="material-icons text-xs mr-1">push_pin</i> Pinned';
-            imageCard.appendChild(pinnedBadge);
-          }
-          
-          // Remove pinned state from other images
-          document.querySelectorAll('.js-toggle-pin').forEach(function(btn) {
-            if (btn !== buttonElement) {
-              btn.classList.remove('text-yellow-500');
-              btn.classList.add('text-gray-400');
-              var otherCard = btn.closest('.gallery-sortable-item').querySelector('.relative');
-              if (otherCard) {
-                otherCard.classList.remove('ring-2', 'ring-yellow-400');
-                var badge = otherCard.querySelector('.bg-yellow-400');
-                if (badge) badge.remove();
-              }
-            }
-          });
-        } else {
-          buttonElement.classList.remove('text-yellow-500');
-          buttonElement.classList.add('text-gray-400');
-          imageCard.classList.remove('ring-2', 'ring-yellow-400');
-          
-          var pinnedBadge = imageCard.querySelector('.bg-yellow-400');
-          if (pinnedBadge) pinnedBadge.remove();
-        }
-      })
-      .catch(error => {
-        console.error('Error toggling pin status:', error);
-        buttonElement.classList.remove('processing');
-        showNotification('Error toggling pin status', 'error');
-      });
-    });
-  });
-  
+}
+
+// Initialize delete button functionality
+function initializeDeleteButtons() {
   // Handle delete buttons
   document.querySelectorAll('.js-remove-image').forEach(function(button) {
     button.addEventListener('click', function(e) {
@@ -443,18 +481,42 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   });
-  
-  // Helper function to show notifications
-  function showNotification(message, type) {
-    // Create a simple notification if no toast library is available
-    var notification = document.createElement('div');
-    notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} z-50`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(function() {
-      notification.remove();
-    }, 3000);
-  }
+}
+
+// Helper function to show notifications
+function showNotification(message, type) {
+  // Create a simple notification if no toast library is available
+  var notification = document.createElement('div');
+  notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} z-50`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(function() {
+    notification.remove();
+  }, 3000);
+}
+
+// Initialize everything on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSortable();
+  initializePinButtons();
+  initializeDeleteButtons();
+});
+
+// Watch for Alpine.js dynamic content changes
+// This ensures buttons work even when gallery tab is shown after page load
+var observer = new MutationObserver(function(mutations) {
+  // Re-initialize buttons when new content is added
+  initializePinButtons();
+  initializeDeleteButtons();
+  initializeSortable();
+});
+
+// Start observing the document for changes
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['x-show', 'style'] // Watch for Alpine.js visibility changes
 });
 </script>

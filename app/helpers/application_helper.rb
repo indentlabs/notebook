@@ -103,8 +103,8 @@ module ApplicationHelper
   # @return [Hash] The best image to use as a preview (pinned if available)
   def get_preview_image(regular_images, basil_images)
     # First look for pinned images
-    pinned_regular = regular_images.find { |img| img.respond_to?(:pinned?) && img.pinned? }
-    pinned_basil = basil_images.find { |img| img.respond_to?(:pinned?) && img.pinned? }
+    pinned_regular = regular_images.find { |img| img.pinned == true }
+    pinned_basil = basil_images.find { |img| img.pinned == true }
     
     # Use the first pinned image found (prioritize regular uploads if both exist)
     if pinned_regular.present?

@@ -34,7 +34,7 @@
                 image_data = image_item[:data]
                 image_type = image_item[:type]
                 image_id = image_item[:id]
-                is_pinned = image_data.respond_to?(:pinned?) && image_data.pinned?
+                is_pinned = image_data.pinned == true
               %>
               <div class="col s12 m6 l6 gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
                 <div class="image-card <%= is_pinned ? 'image-pinned' : '' %>">
@@ -53,7 +53,6 @@
                     <!-- Pin button with tooltip (positioned absolutely) -->
                     <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image_data.id),
                       class: "pin-button-overlay js-toggle-pin #{is_pinned ? 'amber-text' : 'grey-text'} tooltipped",
-                      remote: true,
                       method: :post,
                       data: { 
                         type: 'json',
@@ -102,7 +101,6 @@
                     <!-- Pin button with tooltip (positioned absolutely) -->
                     <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: image_data.id),
                       class: "pin-button-overlay js-toggle-pin #{is_pinned ? 'amber-text' : 'grey-text'} tooltipped",
-                      remote: true,
                       method: :post,
                       data: { 
                         type: 'json',

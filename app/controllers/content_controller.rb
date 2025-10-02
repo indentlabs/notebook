@@ -609,6 +609,8 @@ class ContentController < ApplicationController
   end
 
   def toggle_image_pin
+    # Note: Authentication is handled by before_action :authenticate_user! in the controller
+
     # Find the image based on type and ID
     if params[:image_type] == 'image_upload'
       @image = ImageUpload.find_by(id: params[:image_id])
@@ -624,32 +626,47 @@ class ContentController < ApplicationController
     end
     
     # Check permissions
-    content = params[:image_type] == 'image_upload' ? 
-      @image.content : 
+    content = params[:image_type] == 'image_upload' ?
+      @image.content :
       @image.entity
-      
+
+    # Check if content exists (important for orphaned Basil images)
+    if content.nil?
+      return render json: { error: 'Content not found for this image' }, status: 422
+    end
+
     # Need to check if user owns or contributes to the content directly
-    unless content.user_id == current_user.id || 
-           (content.respond_to?(:universe_id) && 
-            content.universe_id.present? && 
+    unless content.user_id == current_user.id ||
+           (content.respond_to?(:universe_id) &&
+            content.universe_id.present? &&
             current_user.contributable_universe_ids.include?(content.universe_id))
       return render json: { error: 'Unauthorized' }, status: 403
     end
-    
-    # Are we pinning or unpinning?
-    new_pin_status = !@image.pinned
+
+    # Are we pinning or unpinning? Handle nil pinned values explicitly
+    current_pinned_status = @image.pinned == true
+    new_pin_status = !current_pinned_status
     
     # If we're pinning this image, unpin all other images for this content first
     # This prevents database locking issues from the model callbacks
     if new_pin_status == true
-      # Unpin other image uploads for this content
-      ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
-                .where.not(id: @image.id)
-                .update_all(pinned: false)
-      
-      # Also unpin any basil commissions for this content
-      BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
-                     .update_all(pinned: false)
+      if params[:image_type] == 'image_upload'
+        # Unpinning an ImageUpload, so exclude it from the ImageUpload query
+        ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
+                  .where.not(id: @image.id)
+                  .update_all(pinned: false)
+        # Unpin all basil commissions
+        BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
+                       .update_all(pinned: false)
+      else  # basil_commission
+        # Unpin all image uploads
+        ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
+                  .update_all(pinned: false)
+        # Unpinning a BasilCommission, so exclude it from the BasilCommission query
+        BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
+                       .where.not(id: @image.id)
+                       .update_all(pinned: false)
+      end
     end
     
     # Now update this image's pin status (without triggering callbacks that cause locks)
