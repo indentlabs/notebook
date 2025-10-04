@@ -150,7 +150,7 @@ class TimelineEventsController < ApplicationController
     
     render json: { 
       success: true, 
-      message: "Timeline event moved to position #{intended_position + 1}",
+      message: "New position saved", # "Timeline event moved to position #{intended_position + 1}"
       timeline_event: {
         id: timeline_event.id,
         position: timeline_event.position,
