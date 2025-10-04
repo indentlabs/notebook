@@ -1,4 +1,4 @@
-<div x-data="timelineEditor()" class="h-screen flex flex-col bg-gray-50">
+<div x-data="timelineEditor()" class="min-h-screen flex flex-col bg-gray-50">
 
   <!-- Timeline Header - Modern Application Style -->
   <header class="bg-white border-b border-gray-200 shadow-sm z-40 flex-shrink-0">
@@ -17,8 +17,8 @@
             <!-- View Mode -->
             <div x-show="!editingTitle && !editingSubtitle" class="flex items-center min-w-0">
               <!-- Title -->
-              <h1 @click="editingTitle = true; tempTitle = timelineName; $nextTick(() => document.querySelector('[x-ref=titleInput]')?.focus())" 
-                  class="text-xl font-semibold text-gray-900 cursor-pointer hover:text-gray-700 transition-colors truncate">
+              <h1 @click="editingTitle = true; tempTitle = timelineName; $nextTick(() => { const input = document.querySelector('[x-ref=titleInput]'); input?.focus(); input?.select(); })"
+                  class="text-xl font-semibold text-gray-900 cursor-pointer hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all truncate">
                 <span x-text="timelineName || 'Untitled Timeline'"></span>
               </h1>
               
@@ -26,15 +26,15 @@
               <template x-if="timelineSubtitle && timelineSubtitle.trim()">
                 <div class="flex items-center ml-2 min-w-0">
                   <span class="text-gray-400 mx-2 flex-shrink-0">•</span>
-                  <span @click="editingSubtitle = true; tempSubtitle = timelineSubtitle; $nextTick(() => document.querySelector('[x-ref=subtitleInput]')?.focus())" 
+                  <span @click="editingSubtitle = true; tempSubtitle = timelineSubtitle; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
                         class="text-sm text-gray-600 cursor-pointer hover:text-gray-500 transition-colors truncate"
                         x-text="timelineSubtitle"></span>
                 </div>
               </template>
-              
+
               <!-- Add Subtitle Link (only shown if no subtitle exists) -->
               <template x-if="!timelineSubtitle || !timelineSubtitle.trim()">
-                <button @click="editingSubtitle = true; tempSubtitle = ''; $nextTick(() => document.querySelector('[x-ref=subtitleInput]')?.focus())"
+                <button @click="editingSubtitle = true; tempSubtitle = ''; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
                         class="ml-3 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
                   + Add subtitle
                 </button>
@@ -101,14 +101,15 @@
               <span class="hidden sm:inline">Error</span>
             </div>
           </div>
-          
+
           <!-- Action Buttons -->
-          <button @click="typeof showShareModal !== 'undefined' ? (showShareModal = true) : console.error('showShareModal not available')" 
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
-            <i class="material-icons text-lg mr-2">share</i>
-            <span class="hidden sm:inline">Share</span>
+          <button @click="showMetaPanel = !showMetaPanel"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                  :class="{ 'bg-gray-100 text-gray-900': showMetaPanel }">
+            <i class="material-icons text-lg mr-2">settings</i>
+            <span class="hidden sm:inline">Settings</span>
           </button>
-          
+
           <%= link_to timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors" do %>
             <i class="material-icons text-lg mr-2">visibility</i>
             <span class="hidden sm:inline">View</span>
@@ -130,22 +131,15 @@
         
         <!-- Sidebar Content -->
         <div class="flex-1 overflow-y-auto">
-          <!-- Search Section -->
+          <!-- Quick Actions -->
           <div class="p-6 border-b border-gray-100">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search Events</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class="material-icons text-gray-400 text-lg">search</i>
-              </div>
-              <input type="text" 
-                     x-model="searchQuery"
-                     @input="applyEventFilters()"
-                     @keydown.escape="searchQuery = ''; applyEventFilters()"
-                     placeholder="Search timeline..."
-                     class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm">
-            </div>
+            <button id="js-create-timeline-event"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+              <i class="material-icons text-lg mr-2">add</i>
+              Add Event
+            </button>
           </div>
-          
+
           <!-- Filter Events Section -->
           <div class="p-6 border-b border-gray-100">
             <button @click="showFilterSection = !showFilterSection" 
@@ -170,7 +164,20 @@
                  x-transition:leave-start="opacity-100 translate-y-0"
                  x-transition:leave-end="opacity-0 -translate-y-2"
                  class="mt-4">
-              
+
+              <!-- Search Box -->
+              <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="material-icons text-gray-400 text-lg">search</i>
+                </div>
+                <input type="text"
+                       x-model="searchQuery"
+                       @input="applyEventFilters()"
+                       @keydown.escape="searchQuery = ''; applyEventFilters()"
+                       placeholder="Search timeline..."
+                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm">
+              </div>
+
               <!-- Filter Mode Toggle -->
               <div class="mb-4">
                 <div class="flex rounded-lg bg-gray-100 p-1">
@@ -223,25 +230,6 @@
                   <p class="text-xs text-gray-400">Add tags to events to enable filtering</p>
                 </div>
               <% end %>
-            </div>
-          </div>
-          
-          <!-- Quick Actions -->
-          <div class="p-6 border-b border-gray-100">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Quick Actions</h4>
-            <div class="space-y-2">
-              <button id="js-create-timeline-event" 
-                      class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
-                <i class="material-icons text-lg mr-2">add</i>
-                Add Event
-              </button>
-              
-              <button @click="showMetaPanel = !showMetaPanel"
-                      class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors"
-                      :class="{ 'bg-gray-100 text-gray-900': showMetaPanel }">
-                <i class="material-icons text-lg mr-2">settings</i>
-                Timeline Settings
-              </button>
             </div>
           </div>
           
@@ -324,6 +312,18 @@
                 <p class="text-xs text-gray-400 mt-1">
                   Content will appear here when you link pages to events
                 </p>
+              </div>
+            <% end %>
+
+            <!-- Drag & Drop Tip -->
+            <% if @timeline_content_summary.any? %>
+              <div class="mt-4 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
+                <div class="flex items-start">
+                  <i class="material-icons text-sm text-blue-600 mr-2 mt-0.5">lightbulb</i>
+                  <p class="text-xs text-blue-700">
+                    <strong>Tip:</strong> You can drag and drop these pages onto events to quickly link them!
+                  </p>
+                </div>
               </div>
             <% end %>
           </div>
@@ -666,10 +666,11 @@
                         <div class="flex-1 min-w-0">
                           <div class="group relative">
                             <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
-                              <%= f.text_field :title, 
+                              <%= f.text_field :title,
                                   value: event.title.presence || "Untitled Event",
                                   class: "text-xl font-semibold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400",
                                   placeholder: "Event title...",
+                                  '@focus': '$el.select()',
                                   '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
                             <% end %>
                           </div>
@@ -691,30 +692,28 @@
                                     <% end %>
                                   </div>
                                 </div>
-                                
-                                <!-- Duration Connector and End Field (shown only when start time exists) -->
-                                <template x-if="startTime && startTime.trim() !== ''">
-                                  <div class="timeline-duration-end-section">
-                                    <!-- Duration Connector -->
-                                    <div class="timeline-duration-connector">
-                                      <span class="timeline-duration-arrow">—</span>
-                                    </div>
-                                    
-                                    <!-- End Time Field -->
-                                    <div class="timeline-duration-end">
-                                      <div class="timeline-duration-field-wrapper">
-                                        <i class="material-icons timeline-duration-icon">schedule</i>
-                                        <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
-                                          <%= f.text_field :end_time_label, 
-                                              value: event.end_time_label,
-                                              class: "timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400",
-                                              placeholder: "End time",
-                                              '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
-                                        <% end %>
-                                      </div>
+
+                                <!-- Duration Connector and End Field -->
+                                <div class="timeline-duration-end-section">
+                                  <!-- Duration Connector -->
+                                  <div class="timeline-duration-connector">
+                                    <span class="timeline-duration-arrow">—</span>
+                                  </div>
+
+                                  <!-- End Time Field -->
+                                  <div class="timeline-duration-end">
+                                    <div class="timeline-duration-field-wrapper">
+                                      <i class="material-icons timeline-duration-icon">schedule</i>
+                                      <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
+                                        <%= f.text_field :end_time_label,
+                                            value: event.end_time_label,
+                                            class: "timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400",
+                                            placeholder: "End time",
+                                            '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
+                                      <% end %>
                                     </div>
                                   </div>
-                                </template>
+                                </div>
                               </div>
                             </div>
                           <% end %>
@@ -824,8 +823,8 @@
     </main>
     
     <!-- Right Inspector Panel -->
-    <aside class="w-96 bg-white border-l border-gray-200 flex-shrink-0 hidden xl:block">
-      <div class="h-full flex flex-col">
+    <aside class="w-96 bg-white border-l border-gray-200 flex-shrink-0 hidden xl:block sticky top-0 max-h-screen">
+      <div class="h-full flex flex-col overflow-hidden">
         <!-- Inspector Header -->
         <div class="px-6 py-4 border-b border-gray-100">
           <h3 class="text-lg font-semibold text-gray-900">Event Details</h3>
@@ -851,12 +850,12 @@
               <div class="space-y-1">
                 <div x-show="selectedEventTimeLabel" class="flex items-center text-sm text-gray-600">
                   <i class="material-icons text-sm mr-2 text-green-600">schedule</i>
-                  <span>Starts: </span>
+                  <span class="font-medium mr-1">Starts:</span>
                   <span x-text="selectedEventTimeLabel"></span>
                 </div>
                 <div x-show="selectedEventEndTimeLabel" class="flex items-center text-sm text-gray-600">
                   <i class="material-icons text-sm mr-2 text-red-600">schedule</i>
-                  <span>Ends: </span>
+                  <span class="font-medium mr-1">Ends:</span>
                   <span x-text="selectedEventEndTimeLabel"></span>
                 </div>
                 <div x-show="!selectedEventTimeLabel && !selectedEventEndTimeLabel" class="text-sm text-gray-500 italic">
@@ -1067,11 +1066,12 @@
                 <form class="autosave-form" action="" method="post" data-remote="true">
                   <input name="_method" type="hidden" value="patch">
                   <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
-                  <input type="text" 
-                         name="timeline_event[title]" 
+                  <input type="text"
+                         name="timeline_event[title]"
                          value="Untitled Event"
                          class="text-xl font-semibold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400"
                          placeholder="Event title..."
+                         @focus="$el.select()"
                          x-on:input.debounce.500ms="submitFormRemotely($el.form)">
                 </form>
               </div>
@@ -1094,32 +1094,31 @@
                       </form>
                     </div>
                   </div>
-                  
-                  <!-- Duration Connector and End Field (shown only when start time exists) -->
-                  <template x-if="startTime && startTime.trim() !== ''">
-                    <div class="timeline-duration-end-section">
-                      <!-- Duration Connector -->
-                      <div class="timeline-duration-connector">
-                        <span class="timeline-duration-arrow">—</span>
-                      </div>
-                      
-                      <!-- End Time Field -->
-                      <div class="timeline-duration-end">
-                        <div class="timeline-duration-field-wrapper">
-                          <i class="material-icons timeline-duration-icon">schedule</i>
-                          <form class="autosave-form" action="" method="post" data-remote="true">
-                            <input name="_method" type="hidden" value="patch">
-                            <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
-                            <input type="text" 
-                                   name="timeline_event[end_time_label]" 
-                                   class="timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400"
-                                   placeholder="End time"
-                                   x-on:input.debounce.500ms="submitFormRemotely($el.form)">
-                          </form>
-                        </div>
+
+
+                  <!-- Duration Connector and End Field -->
+                  <div class="timeline-duration-end-section">
+                    <!-- Duration Connector -->
+                    <div class="timeline-duration-connector">
+                      <span class="timeline-duration-arrow">—</span>
+                    </div>
+
+                    <!-- End Time Field -->
+                    <div class="timeline-duration-end">
+                      <div class="timeline-duration-field-wrapper">
+                        <i class="material-icons timeline-duration-icon">schedule</i>
+                        <form class="autosave-form" action="" method="post" data-remote="true">
+                          <input name="_method" type="hidden" value="patch">
+                          <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>">
+                          <input type="text"
+                                 name="timeline_event[end_time_label]"
+                                 class="timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400"
+                                 placeholder="End time"
+                                 x-on:input.debounce.500ms="submitFormRemotely($el.form)">
+                        </form>
                       </div>
                     </div>
-                  </template>
+                  </div>
                 </div>
               </div>
             </div>
