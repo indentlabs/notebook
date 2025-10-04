@@ -170,14 +170,23 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/1/tag_suggestions
   def tag_suggestions
-    # Get all unique tags from all of the current user's timelines
-    user_timeline_tags = PageTag.where(
+    # Get all unique tags from both Timeline objects and TimelineEvent objects
+    # This includes tags from the timeline itself AND all its events
+    timeline_tags = PageTag.where(
       user: current_user,
       page_type: 'Timeline'
-    ).distinct.pluck(:tag).sort
+    ).distinct.pluck(:tag)
+
+    event_tags = PageTag.where(
+      user: current_user,
+      page_type: 'TimelineEvent'
+    ).distinct.pluck(:tag)
+
+    # Combine and sort all unique tags
+    all_tags = (timeline_tags + event_tags).uniq.sort
 
     render json: {
-      suggestions: user_timeline_tags
+      suggestions: all_tags
     }
   end
 

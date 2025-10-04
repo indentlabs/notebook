@@ -659,6 +659,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update event count in header
     updateEventCount(eventsContainer.children.length);
 
+    // Auto-select the newly created event in the Event Details panel
+    const alpineEl = document.querySelector('[x-data]');
+    if (alpineEl) {
+      const eventData = {
+        id: eventId,
+        title: title ? title.value : 'Untitled Event',
+        time_label: timeLabel ? timeLabel.value : '',
+        end_time_label: endTimeLabel ? endTimeLabel.value : '',
+        description: description ? description.value : '',
+        event_type: 'general',
+        status: 'completed',
+        tags: []
+      };
+
+      setTimeout(() => {
+        const alpineData = Alpine.$data(alpineEl);
+        if (alpineData && typeof alpineData.selectEvent === 'function') {
+          alpineData.selectEvent(eventId, eventData);
+        }
+      }, 100);
+    }
+
     // Focus on the title field for immediate editing
     setTimeout(() => {
       const titleField = newEvent.querySelector('input[name="timeline_event[title]"]');
