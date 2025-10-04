@@ -519,8 +519,8 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(response => response.json())
     .then(data => {
-      if (data.status === 'success') {
-        addEventToTimeline(data.id, timelineId);
+      if (data.status === 'success' && data.html) {
+        addEventToTimeline(data.id, data.html);
         const alpineEl = document.querySelector('[x-data]');
         if (alpineEl) Alpine.$data(alpineEl).autoSaveStatus = 'saved';
       } else {
@@ -539,115 +539,28 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  function addEventToTimeline(eventId, timelineId) {
-    const templateEl = document.querySelector('.timeline-event-template');
+  function addEventToTimeline(eventId, html) {
     const eventsContainer = document.querySelector('.timeline-events-container');
 
-
-    if (!templateEl) {
-      showErrorMessage('Template not found. Please refresh the page and try again.');
-      return;
-    }
-
-    const emptyState = eventsContainer.querySelector('.text-center.py-16');
-
     // Hide empty state if it exists
+    const emptyState = eventsContainer.querySelector('.text-center.py-16');
     if (emptyState) {
       emptyState.style.display = 'none';
     }
 
-    // Clone the template container directly
-    const templateContainer = templateEl.querySelector('.timeline-event-container');
+    // Insert the server-rendered HTML
+    eventsContainer.insertAdjacentHTML('beforeend', html);
 
-    if (!templateContainer) {
-      showErrorMessage('Template structure error. Please refresh the page and try again.');
+    // Get reference to the newly added event
+    const newEvent = eventsContainer.querySelector(`[data-event-id="${eventId}"]`);
+    if (!newEvent) {
+      showErrorMessage('Failed to add event to timeline. Please refresh the page.');
       return;
     }
 
-    const newEvent = templateContainer.cloneNode(true);
-
-    // Update the event with the new ID and required data attributes
-    newEvent.setAttribute('data-event-id', eventId);
-    newEvent.setAttribute('data-timeline-id', timelineId);
-    newEvent.setAttribute('data-event-type', 'general');
-    newEvent.setAttribute('data-importance', 'minor');
-    newEvent.setAttribute('data-status', 'completed');
-
-    // Update the timeline dot tooltip for new events
-    const timelineDotContainer = newEvent.querySelector('.timeline-dot');
-    if (timelineDotContainer) {
-      timelineDotContainer.title = 'General';
-    }
-
-    // Update all form action URLs
-    const forms = newEvent.querySelectorAll('.autosave-form');
-    forms.forEach(form => {
-      form.setAttribute('action', `/plan/timeline_events/${eventId}`);
-    });
-
-    // Update link button - replace template link button with functional one
-    const linkButton = newEvent.querySelector('.js-template-link-btn');
-    if (linkButton) {
-      linkButton.classList.remove('js-template-link-btn');
-      linkButton.setAttribute('onclick', '');
-      linkButton.addEventListener('click', function() {
-        const alpineEl = document.querySelector('[x-data]');
-        if (alpineEl) Alpine.$data(alpineEl).openLinkModal(eventId);
-      });
-    }
-
-    // Update unique IDs for form fields
-    const timeLabel = newEvent.querySelector('input[name="timeline_event[time_label]"]');
-    const endTimeLabel = newEvent.querySelector('input[name="timeline_event[end_time_label]"]');
-    const title = newEvent.querySelector('input[name="timeline_event[title]"]');
-    const description = newEvent.querySelector('textarea[name="timeline_event[description]"]');
-    const notes = newEvent.querySelector('textarea[name="timeline_event[notes]"]');
-
-    if (timeLabel) timeLabel.id = `timeline_event_time_label_${eventId}`;
-    if (endTimeLabel) endTimeLabel.id = `timeline_event_end_time_label_${eventId}`;
-    if (title) title.id = `timeline_event_title_${eventId}`;
-    if (description) description.id = `timeline_event_description_${eventId}`;
-    if (notes) notes.id = `timeline_event_notes_${eventId}`;
-
-    // Update the tag container ID
-    const tagContainer = newEvent.querySelector('.js-template-event-tags');
-    if (tagContainer) {
-      tagContainer.id = `event-tags-${eventId}`;
-      tagContainer.classList.remove('js-template-event-tags');
-    }
-
-    // Add click handler for event selection
-    const eventCard = newEvent.querySelector('.js-template-event-card');
-    if (eventCard) {
-      eventCard.classList.remove('js-template-event-card');
-      // Add event ID to the drop zone for drag & drop functionality
-      eventCard.setAttribute('data-event-id', eventId);
-      eventCard.addEventListener('click', function(e) {
-
-        const alpineEl = document.querySelector('[x-data]');
-        if (alpineEl) {
-          const alpineData = Alpine.$data(alpineEl);
-
-          const eventData = {
-            id: eventId,
-            title: title ? title.value : 'Untitled Event',
-            time_label: timeLabel ? timeLabel.value : '',
-            end_time_label: endTimeLabel ? endTimeLabel.value : '',
-            description: description ? description.value : '',
-            event_type: 'general',
-            status: 'completed',
-            tags: []
-          };
-          alpineData.selectEvent(eventId, eventData);
-        }
-      });
-    }
-
-    // Add the new event with animation
+    // Add entrance animation
     newEvent.style.opacity = '0';
     newEvent.style.transform = 'translateY(-20px)';
-    eventsContainer.appendChild(newEvent);
-
 
     // Trigger animation
     setTimeout(() => {
@@ -657,25 +570,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 10);
 
     // Update event count in header
-    updateEventCount(eventsContainer.children.length);
+    const eventCount = eventsContainer.querySelectorAll('.timeline-event-container:not(.timeline-event-template)').length;
+    updateEventCount(eventCount);
+
+    // Initialize drag and drop for the new event (if sortable is initialized)
+    if ($.fn.sortable && $(eventsContainer).hasClass('ui-sortable')) {
+      $(eventsContainer).sortable('refresh');
+    }
 
     // Auto-select the newly created event in the Event Details panel
     const alpineEl = document.querySelector('[x-data]');
     if (alpineEl) {
-      const eventData = {
-        id: eventId,
-        title: title ? title.value : 'Untitled Event',
-        time_label: timeLabel ? timeLabel.value : '',
-        end_time_label: endTimeLabel ? endTimeLabel.value : '',
-        description: description ? description.value : '',
-        event_type: 'general',
-        status: 'completed',
-        tags: []
-      };
-
       setTimeout(() => {
         const alpineData = Alpine.$data(alpineEl);
         if (alpineData && typeof alpineData.selectEvent === 'function') {
+          // Extract event data from the newly added element
+          const title = newEvent.querySelector('input[name*="[title]"]');
+          const timeLabel = newEvent.querySelector('input[name*="[time_label]"]');
+          const endTimeLabel = newEvent.querySelector('input[name*="[end_time_label]"]');
+          const description = newEvent.querySelector('textarea[name*="[description]"]');
+
+          const eventData = {
+            id: eventId,
+            title: title ? title.value : 'Untitled Event',
+            time_label: timeLabel ? timeLabel.value : '',
+            end_time_label: endTimeLabel ? endTimeLabel.value : '',
+            description: description ? description.value : '',
+            event_type: newEvent.dataset.eventType || 'general',
+            status: newEvent.dataset.status || 'completed',
+            tags: []
+          };
+
           alpineData.selectEvent(eventId, eventData);
         }
       }, 100);
@@ -683,7 +608,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Focus on the title field for immediate editing
     setTimeout(() => {
-      const titleField = newEvent.querySelector('input[name="timeline_event[title]"]');
+      const titleField = newEvent.querySelector('input[name*="[title]"]');
       if (titleField) {
         titleField.focus();
         titleField.select();

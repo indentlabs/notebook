@@ -27,10 +27,27 @@ class TimelineEventsController < ApplicationController
   def create
     raise "No Access: (signed in: #{user_signed_in?})" unless user_signed_in? && current_user.timelines.pluck(:id).include?(timeline_event_params.fetch('timeline_id').to_i)
 
-    @timeline_event = TimelineEvent.new(timeline_event_params) 
+    @timeline_event = TimelineEvent.new(timeline_event_params)
 
     if @timeline_event.save
-      render json: { status: 'success', id: @timeline_event.reload.id }
+      @timeline_event.reload
+
+      # Render the event card partial as HTML for client-side injection
+      html = render_to_string(
+        partial: 'timeline_events/event_card',
+        locals: {
+          event: @timeline_event,
+          timeline: @timeline_event.timeline,
+          index: @timeline_event.timeline.timeline_events.count - 1
+        },
+        formats: [:html]
+      )
+
+      render json: {
+        status: 'success',
+        id: @timeline_event.id,
+        html: html
+      }
     else
       raise "Failed to create TimelineEvent"
     end
