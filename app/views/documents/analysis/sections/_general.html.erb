@@ -1,50 +1,39 @@
-<div class="row">
-  <div class="col s12">
-    <div class="card horizontal">
-      <div class="card-image">
-        <%= image_tag 'card-headers/document-mini.webp' %>
-      </div>
-      <div class="card-stacked">
-        <div class="card-content">
-          <div class="card-title">
-            <%= document.title || 'Untitled document' %><br />
-            <span class="grey-text">by</span>
-            <%= link_to document.user.name, document.user %>
-          </div>
+<div class="bg-white rounded-lg border shadow-sm p-6 mb-6">
+  <div class="flex items-start justify-between mb-4">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 mb-1">
+        <%= document.title || 'Untitled document' %>
+      </h2>
+      <p class="text-sm text-gray-500">
+        by <%= link_to document.user.name, document.user, class: 'text-blue-600 hover:underline' %>
+      </p>
+    </div>
+    <%= link_to edit_document_path(document), class: "text-sm font-medium hover:underline", style: "color: #{Document.hex_color}" do %>
+      Edit document →
+    <% end %>
+  </div>
 
-          <!--<p>Language: <%= analysis.language %></p>-->
-          <ul class="browser-default">
-            <li>This document:</li>
-              <ul class="browser-default">
-                <li>Originally created <%= time_ago_in_words document.created_at %> ago</li>
-                <li>Last edited <%= time_ago_in_words document.updated_at %> ago</li>
-              </ul>
-            <li>This analysis:</li>
-              <ul class="browser-default">
-                <li>Took <%= distance_of_time_in_words((analysis.completed_at - analysis.created_at).round(1)) %> to complete</li>
-                <li>Completed <%= time_ago_in_words analysis.completed_at %> ago</li>
-              </ul>
-          </ul>
-        </div>
-        <div class="card-action">
-          <%= link_to edit_document_path(document), class: "#{Document.text_color}" do %>
-            <i class="material-icons left"><%= Document.icon %></i>
-            Edit document
-          <% end %>
-        </div>
-      </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+    <div>
+      <h3 class="font-semibold text-gray-900 mb-2">Document</h3>
+      <ul class="space-y-1 text-gray-600">
+        <li>Created <%= time_ago_in_words document.created_at %> ago</li>
+        <li>Last edited <%= time_ago_in_words document.updated_at %> ago</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="font-semibold text-gray-900 mb-2">Analysis</h3>
+      <ul class="space-y-1 text-gray-600">
+        <li>Took <%= distance_of_time_in_words((analysis.completed_at - analysis.created_at).round(1)) %> to complete</li>
+        <li>Completed <%= time_ago_in_words analysis.completed_at %> ago</li>
+      </ul>
     </div>
   </div>
 </div>
 
 <% if analysis.created_at < document.updated_at %>
-  <div class="row">
-    <div class="col s12">
-      <div class="card-panel red lighten-5">
-        Heads up! <%= document.name %> was edited after this analysis was run; depending on how much it has changed, this analysis may now be out of date.
-        You can delete this analysis by <%= link_to 'clicking here', destroy_analysis_document_path(document) %>. 
-        You can then run another analysis on this document at any time.
-      </div>
-    </div>
+  <div class="bg-red-50 border border-red-200 text-red-900 rounded-lg p-4 mb-6 text-sm">
+    <strong>Heads up!</strong> <%= document.name %> was edited after this analysis was run. This analysis may now be out of date.
+    You can <%= link_to 'delete this analysis', destroy_analysis_document_path(document), class: 'font-semibold hover:underline' %> and run a new one at any time.
   </div>
 <% end %>

@@ -405,42 +405,34 @@
                    }
                  }">
               <!-- Header Dot - Now Connected to Main Spine -->
-              <div class="absolute left-6 top-6 w-6 h-6 bg-blue-600 rounded-full z-10 timeline-header-dot shadow-sm flex items-center justify-center"
+              <div class="absolute w-12 h-12 bg-blue-600 rounded-full z-10 timeline-header-dot shadow-sm flex items-center justify-center"
+                   style="left: 16px; top: 16px;"
                    title="Timeline Overview">
-                <i class="material-icons text-white text-xs">description</i>
+                <i class="material-icons text-white text-base">description</i>
               </div>
-              
+
               <!-- Header Card -->
-              <div class="ml-16 timeline-header-card bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-200">
+              <div class="ml-20 timeline-header-card bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-200">
                 <!-- Clickable Header Toggle -->
-                <div @click="showDescription = !showDescription" 
-                     class="timeline-header-toggle px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200 flex items-center justify-between border-b border-gray-100">
-                  <div class="flex items-center space-x-3">
-                    <div class="flex items-center space-x-2">
-                      <h3 class="text-lg font-semibold text-gray-900">Timeline Overview</h3>
-                      <template x-if="hasContent">
-                        <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                          <span x-text="getTotalWords()"></span>
-                        </span>
-                      </template>
-                    </div>
-                  </div>
-                  
-                  <div class="flex items-center space-x-3">
-                    <!-- Description Preview (when collapsed and has content) -->
-                    <template x-if="hasContent && !showDescription">
-                      <p class="text-sm text-gray-600 max-w-md truncate hidden md:block" x-text="descriptionPreview"></p>
-                    </template>
-                    
-                    <!-- Add Description Prompt (when collapsed and no content) -->
-                    <template x-if="!hasContent && !showDescription">
-                      <p class="text-sm text-gray-400 hidden md:block">Add a description to provide context for this timeline...</p>
-                    </template>
-                    
+                <div @click="showDescription = !showDescription"
+                     class="timeline-header-toggle px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900">Timeline Overview</h3>
+
                     <!-- Expand/Collapse Chevron -->
-                    <i class="material-icons text-gray-400 transition-transform duration-200" 
+                    <i class="material-icons text-gray-400 transition-transform duration-200"
                        :class="showDescription ? 'rotate-180' : ''">expand_more</i>
                   </div>
+
+                  <!-- Description Preview (when collapsed and has content) -->
+                  <template x-if="hasContent && !showDescription">
+                    <p class="text-sm text-gray-600 mt-2 truncate" x-text="descriptionPreview"></p>
+                  </template>
+
+                  <!-- Add Description Prompt (when collapsed and no content) -->
+                  <template x-if="!hasContent && !showDescription">
+                    <p class="text-sm text-gray-400 mt-2">Add a description to provide context for this timeline...</p>
+                  </template>
                 </div>
                 
                 <!-- Collapsible Description Area -->

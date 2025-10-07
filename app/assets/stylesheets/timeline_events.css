@@ -10,28 +10,29 @@
 }
 
 /* Timeline Spine - Continuous Vertical Rail */
-.timeline-spine {
-  background: linear-gradient(to bottom, 
-    transparent 0%, 
-    #d1d5db 10%, 
-    #9ca3af 50%, 
-    #d1d5db 90%, 
+.timeline-events-container .timeline-spine {
+  background: linear-gradient(to bottom,
+    transparent 0%,
+    #d1d5db 10%,
+    #9ca3af 50%,
+    #d1d5db 90%,
     transparent 100%
   );
   box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.1);
-  left: 35.75px; /* Positioned to intersect with dot centers (left-6 + w-6/2 = 24px + 12px = 36px center - 0.25px for 0.5px width) */
+  left: 39px; /* Centered with dots: 16px (dot left) + 24px (w-12/2) - 1px (spine w-0.5/2) = 39px */
 }
 
 /* Timeline Dots - Connected to Spine */
 .timeline-dot {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 10;
 }
 
 .timeline-dot:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transform: scale(1.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  filter: brightness(1.1);
 }
 
 .timeline-dot::before {
@@ -65,36 +66,12 @@
   transform: translateY(-1px) scale(1.01);
 }
 
-.timeline-event-card.ring-2::before {
-  opacity: 1;
-}
-
-.timeline-event-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, 
-    #10b981 0%, 
-    #059669 50%, 
-    #10b981 100%
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
 .timeline-event-card:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 
+  box-shadow:
     0 10px 25px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-color: #d1d5db;
-}
-
-.timeline-event-card:hover::before {
-  opacity: 1;
 }
 
 /* Card Header Styling */
@@ -470,8 +447,9 @@
 
 /* Hover Group Effects */
 .timeline-event-container:hover .timeline-dot {
-  transform: scale(1.15);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transform: scale(1.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.15);
 }
 
 /* Card Content Spacing */
@@ -636,16 +614,12 @@
     margin-left: 0;
     border-radius: 12px;
   }
-  
-  .timeline-spine {
-    display: none;
-  }
-  
+
+  /* Keep timeline spine visible on medium screens */
+
   .timeline-dot {
-    position: relative;
-    left: auto;
-    top: auto;
-    margin-bottom: 1rem;
+    position: absolute;
+    /* Keep left/top positioning */
   }
   
   /* Tablet duration field adjustments */

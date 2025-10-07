@@ -42,6 +42,25 @@ class TimelineEvent < ApplicationRecord
     event_type_info[:name]
   end
 
+  def event_type_color
+    colors = {
+      'general' => 'bg-gray-500',
+      'setup' => 'bg-blue-500',
+      'exposition' => 'bg-indigo-500',
+      'inciting_incident' => 'bg-yellow-500',
+      'complication' => 'bg-orange-500',
+      'obstacle' => 'bg-red-400',
+      'conflict' => 'bg-red-600',
+      'progress' => 'bg-green-500',
+      'revelation' => 'bg-purple-500',
+      'transformation' => 'bg-pink-500',
+      'climax' => 'bg-rose-600',
+      'resolution' => 'bg-emerald-500',
+      'aftermath' => 'bg-cyan-500'
+    }
+    colors[event_type] || colors['general']
+  end
+
   def has_duration?
     end_time_label.present?
   end

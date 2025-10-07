@@ -1,111 +1,144 @@
-<div class="row">
-  <div class="col s12 m8 offset-m2">
-    <div class="hoverable card center" style="margin: 20px 0 0 0; padding: 50px; border-bottom: 10px solid <%= Document.hex_color %>">
-
-    <i class="material-icons large <%= Document.text_color %>"><%= Document.icon %></i>
-    <h4>Document analysis</h4>
-
-    <p>
+<div class="max-w-3xl mx-auto px-4 py-12">
+  <!-- Header -->
+  <div class="text-center mb-12">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-white border-2 shadow-sm" style="border-color: <%= Document.hex_color %>">
+      <svg class="w-8 h-8" style="color: <%= Document.hex_color %>" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+      </svg>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">Document analysis</h1>
+    <p class="text-gray-600 mb-2">
       No analysis has been requested for <strong><%= document.title %></strong> yet.
     </p>
-    <p>
-      Our automated document analysis is a Premium-only feature currently in beta. 
+    <p class="text-sm text-gray-500 mb-8">
+      Our automated document analysis is a Premium-only feature.
       <% unless user_signed_in? && current_user.on_premium_plan? %>
-        To request an analysis for your document, please <%= link_to 'upgrade to a Premium account', subscription_path %>.
+        <%= link_to 'Upgrade to Premium', subscription_path, class: 'text-blue-600 hover:underline' %> to get started.
       <% end %>
     </p>
-    <p>
-      <% if user_signed_in? && current_user.on_premium_plan? %>
-        <%=
-          link_to 'Request an analysis',
-                  queue_analysis_document_path(@document),
-                  class: 'btn orange white-text'
-        %>
-      <% else %>
-        <%=
-          link_to 'Request an analysis',
-                  queue_analysis_document_path(@document),
-                  class: 'btn orange white-text disabled'
-        %>
-      <% end %>
-    </p>
-  </div>
-</div>
 
-<p style="clear: both">
-  &nbsp;
-</p>
-
-<div class="row">
-  <div class="col s12 m4">
-    <div class="hoverable card" style="border-bottom: 5px solid <%= Document.hex_color %>">
-      <div class="card-content">
-        <div class="card-title">Writing style</div>
-        <ul>
-          <li><i class="material-icons green-text left">check</i> Sentence rhythm</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Word preferences</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Comparison to famous authors</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m4">
-    <div class="hoverable card" style="border-bottom: 5px solid <%= Document.hex_color %>">
-      <div class="card-content">
-        <div class="card-title">Word choice</div>
-        <ul>
-          <li><i class="material-icons green-text left">check</i> Parts of speech</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Word complexity</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Lexical richness</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m4">
-    <div class="hoverable card" style="border-bottom: 5px solid <%= Document.hex_color %>">
-      <div class="card-content">
-        <div class="card-title">Readability</div>
-        <ul>
-          <li><i class="material-icons green-text left">check</i> Reading ease</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Word complexity</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Industry-standard readability tests</li>
-        </ul>
-      </div>
-    </div>
+    <% if user_signed_in? && current_user.on_premium_plan? %>
+      <%= link_to 'Request an analysis',
+          queue_analysis_document_path(@document),
+          class: 'inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium shadow-sm hover:shadow transition-all',
+          style: "background-color: #{Document.hex_color}" %>
+    <% else %>
+      <%= link_to 'Request an analysis',
+          queue_analysis_document_path(@document),
+          class: 'inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium shadow-sm opacity-50 cursor-not-allowed',
+          style: "background-color: #{Document.hex_color}" %>
+    <% end %>
   </div>
 
-  <div class="col s12 m4">
-    <div class="hoverable card" style="border-bottom: 5px solid <%= Document.hex_color %>">
-      <div class="card-content">
-        <div class="card-title">Emotion</div>
-        <ul>
-          <li><i class="material-icons green-text left">check</i> Character emotional ranges</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Story sentiment</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Story-wide emotions</li>
+  <!-- Features Grid -->
+  <div class="mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">What you'll get:</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-white rounded-lg border shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Writing style</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Sentence rhythm</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Word preferences</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Comparison to famous authors</span>
+          </li>
         </ul>
       </div>
-    </div>
-  </div>
-  <div class="col s12 m4">
-    <div class="hoverable card" style="border-bottom: 5px solid <%= Document.hex_color %>">
-      <div class="card-content">
-        <div class="card-title">Length</div>
-        <ul>
-          <li><i class="material-icons green-text left">check</i> Length measurements</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Estimated time to read</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Character counter</li>
+
+      <div class="bg-white rounded-lg border shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Word choice</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Parts of speech</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Word complexity</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Lexical richness</span>
+          </li>
         </ul>
       </div>
-    </div>
-  </div>
-  <div class="col s12 m4">
-    <div class="hoverable card" style="border-bottom: 5px solid <%= Document.hex_color %>">
-      <div class="card-content">
-        <div class="card-title">Entities</div>
-        <ul>
-          <li><i class="material-icons green-text left">check</i> Extract entities</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Link your pages</li>
-          <li class="clearfix"><i class="material-icons green-text left">check</i> Quick reference while writing</li>
+
+      <div class="bg-white rounded-lg border shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Readability</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Reading ease</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Word complexity</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Industry-standard readability tests</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-lg border shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Emotion</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Character emotional ranges</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Story sentiment</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Story-wide emotions</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-lg border shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Length</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Length measurements</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Estimated time to read</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Character counter</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-white rounded-lg border shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 mb-3">Entities</h3>
+        <ul class="space-y-2 text-sm text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Extract entities</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Link your pages</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <span>Quick reference while writing</span>
+          </li>
         </ul>
       </div>
     </div>
