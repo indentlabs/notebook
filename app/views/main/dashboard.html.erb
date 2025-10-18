@@ -273,12 +273,15 @@
         <!-- Two-Column Layout: 2/3 and 1/3 split -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          <!-- Left Column: Charts & Serendipitous Question (2/3) -->
+          <!-- Left Column: Serendipitous Question & Charts (2/3) -->
           <div class="lg:col-span-2 space-y-6">
-            
+
+            <!-- Serendipitous Question -->
+            <%= render partial: 'main/components/serendipitous_question', locals: { } %>
+
             <!-- Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              
+
               <!-- 30-Day Activity Chart -->
               <div class="bg-gradient-to-br from-purple-50 via-white to-purple-25 rounded-lg shadow-sm border border-gray-200 p-4">
                 <h4 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
@@ -289,17 +292,17 @@
                   <!-- Chart Container -->
                   <div id="dashboard-activity-chart" class="flex items-end justify-between h-10 space-x-0.5 relative overflow-hidden">
                     <% if @dashboard_daily_activity %>
-                      <% 
+                      <%
                         # Extract counts from array of [date, count] pairs and find max
                         max_count = @dashboard_daily_activity.map { |_, count| count }.max || 1
                         max_height = 40 # h-10 = 40px
                       %>
                       <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
-                        <% 
+                        <%
                           # Scale bar height proportionally to fit within container
                           bar_height = count > 0 ? [(count.to_f / max_count * max_height).round, 2].max : 1
                         %>
-                        <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer" 
+                        <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer"
                              style="height: <%= bar_height %>px;"
                              data-date="<%= date %>"
                              data-count="<%= count %>"
@@ -308,7 +311,7 @@
                       <% end %>
                     <% end %>
                   </div>
-                  
+
                   <!-- Custom Tooltip -->
                   <div id="dashboard-chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
                     <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
@@ -319,7 +322,7 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Chart Legend -->
                 <div class="flex items-center justify-between text-xs text-gray-500">
                   <span>30 days ago</span>
@@ -333,7 +336,7 @@
                   <i class="material-icons mr-1 text-orange-600 text-base">local_fire_department</i>
                   Editing Streak
                 </h4>
-                
+
                 <!-- Streak Visualization -->
                 <div class="flex flex-row items-center space-x-4">
                   <div class="flex items-center justify-center space-x-1 flex-1">
@@ -356,7 +359,7 @@
                           <div class="text-xs text-gray-500 mt-0.5"><%= day[:day_name] %></div>
                         </div>
                       <% end %>
-                      
+
                       <!-- Streak extension for 7+ days -->
                       <% if (@current_streak || 0) > 7 %>
                         <div class="flex items-center ml-1">
@@ -370,7 +373,7 @@
                       <% end %>
                     <% end %>
                   </div>
-                  
+
                   <div class="text-center mb-3 flex-1 relative">
                     <div class="streak-counter-bg absolute inset-0 opacity-10"></div>
                     <% if (@current_streak || 0) > 0 %>
@@ -391,7 +394,7 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <!-- Streak Day Tooltip -->
                 <div id="streak-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-30">
                   <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
@@ -401,7 +404,7 @@
                     <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
                   </div>
                 </div>
-                
+
                 <!-- Streak Info Tooltip -->
                 <div id="streak-info-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-200 z-30">
                   <div class="relative">
@@ -422,11 +425,8 @@
                   </div>
                 </div>
               </div>
-              
+
             </div>
-            
-            <!-- Serendipitous Question -->
-            <%= render partial: 'main/components/serendipitous_question', locals: { } %>
             
           </div>
           
