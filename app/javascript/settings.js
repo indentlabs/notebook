@@ -165,13 +165,18 @@ function validateEmail(field) {
   const validEmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (validEmailRegex.test(email)) {
-    field.classList.add('border-green-300', 'focus:border-green-300');
-    feedbackElement.textContent = 'Email is valid';
-    feedbackElement.className = 'validation-feedback h-5 text-xs text-green-600 mt-1';
+    // Valid email: just clear error states, no success message
+    field.classList.remove('border-red-300', 'focus:border-red-300');
+    // Optional: Add neutral focus border if needed, but usually default is fine or handled by CSS
+    feedbackElement.textContent = '';
+    feedbackElement.className = 'validation-feedback h-5 text-xs mt-1';
   } else {
+    // Invalid email
     field.classList.add('border-red-300', 'focus:border-red-300');
     feedbackElement.textContent = 'Please enter a valid email address';
-    feedbackElement.className = 'validation-feedback h-5 text-xs text-red-600 mt-1';
+    // Improved styling: slightly larger text, maybe a background or just distinct color
+    // Using a "badge" style or just cleaner text
+    feedbackElement.className = 'validation-feedback text-xs text-red-600 mt-1 bg-red-50 px-2 py-1 rounded border border-red-100 inline-block';
   }
 }
 

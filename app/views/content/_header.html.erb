@@ -1,0 +1,147 @@
+<nav class="bg-white h-16 border-b border-gray-200 flex sticky top-14 z-40" aria-label="Breadcrumb">
+  <ol role="list" class="flex-1 mx-auto px-4 flex space-x-4 sm:px-6 lg:px-8">
+    <li class="flex">
+      <div class="flex items-center">
+        <%= link_to root_path, class: 'text-gray-400 hover:text-gray-500' do %>
+          <i class="material-icons flex-shrink-0 text-2xl relative top-1">dashboard</i>
+          <span class="sr-only">Home</span>
+        <% end %>
+      </div>
+    </li>
+
+    <li class="flex">
+      <div class="flex items-center">
+        <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+        </svg>
+        <%= link_to content.class_name.pluralize, send("#{content.class_name.downcase.pluralize}_path"), class: 'ml-4 text-sm font-medium text-gray-500 hover:text-gray-700' %>
+      </div>
+    </li>
+
+    <li class="flex">
+      <div class="flex items-center">
+        <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+        </svg>
+        <%= link_to content.name, content.raw_model, class: 'ml-4 text-sm font-medium text-gray-500 hover:text-gray-700', aria: { current: (current_page == :show ? 'page' : nil) }, data: { breadcrumb_name: true } %>
+      </div>
+    </li>
+
+    <!-- Edit breadcrumb for edit pages -->
+    <% if current_page == :edit %>
+      <li class="flex">
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+          </svg>
+          <span class="ml-4 text-sm font-medium text-gray-900" aria-current="page">Edit</span>
+        </div>
+      </li>
+    <% end %>
+
+    <!-- Changelog breadcrumb for changelog pages -->
+    <% if current_page == :changelog %>
+      <li class="flex">
+        <div class="flex items-center">
+          <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
+          </svg>
+          <span class="ml-4 text-sm font-medium text-gray-900" aria-current="page">Change History</span>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+
+  <div class="flex flex-row pt-3">
+    <% if show_edit_controls && @content.updatable_by?(current_user) %>
+      
+      <!-- Primary Action Button -->
+      <div class="mr-3">
+        <% if current_page == :edit %>
+          <!-- Edit page - Done Editing button -->
+          <%= link_to @content do %>
+            <button type="button" class="w-full bg-gray-600 border border-gray-600 rounded-md shadow-sm px-4 py-2 inline-flex items-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+              <i class="material-icons text-2xl leading-3 mr-3">visibility</i>
+              Done Editing
+            </button>
+          <% end %>
+        <% else %>
+          <!-- Show/Changelog page - Edit Page button -->
+          <%= link_to polymorphic_path(@content, action: :edit) do %>
+            <button type="button" class="w-full bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 min-h-[42px] inline-flex items-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-2xl leading-3 mr-3">edit</i>
+              Edit Page
+            </button>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Three-dot menu dropdown -->
+      <div class="relative inline-block text-left mr-3" x-data="{ open: false }">
+        <button @click="open = !open" 
+                @click.away="open = false"
+                type="button" 
+                class="bg-notebook-blue border border-notebook-blue rounded-md shadow-sm px-4 py-2 min-h-[42px] inline-flex items-center justify-center text-sm font-medium text-gray-200 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+          &nbsp;
+          <i class="material-icons text-2xl leading-3">more_vert</i>
+          &nbsp;
+        </button>
+        
+        <!-- Dropdown menu -->
+        <div x-show="open" 
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="transform opacity-100 scale-100"
+             x-transition:leave-end="transform opacity-0 scale-95"
+             class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+          <div class="py-1">
+            <!-- Changelog -->
+            <% unless current_page == :changelog %>
+              <%= link_to polymorphic_path(@content, action: :changelog), 
+                  class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
+                <i class="material-icons mr-3 text-gray-400 group-hover:text-gray-500">history</i>
+                View Changelog
+              <% end %>
+            <% end %>
+            
+            <!-- Archive/Unarchive -->
+            <%= link_to polymorphic_path(@content, action: :toggle_archive), 
+                method: :get,
+                class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
+              <i class="material-icons mr-3 text-gray-400 group-hover:text-gray-500">
+                <%= @content.archived? ? 'unarchive' : 'archive' %>
+              </i>
+              <%= @content.archived? ? 'Unarchive Page' : 'Archive Page' %>
+            <% end %>
+            
+            <!-- Privacy Settings -->
+            <%= link_to polymorphic_path(@content, action: :edit) + '#privacy', 
+                class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
+              <i class="material-icons mr-3 text-gray-400 group-hover:text-gray-500">
+                <%= @content.privacy == 'public' ? 'public' : 'lock' %>
+              </i>
+              Update Privacy Settings
+            <% end %>
+            
+            <div class="border-t border-gray-100"></div>
+            
+            <!-- Delete -->
+            <%= link_to @content, 
+                method: :delete,
+                data: { 
+                  confirm: "Are you sure you want to delete #{@content.name}? This action cannot be undone.",
+                  turbo: false 
+                },
+                class: "group flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700" do %>
+              <i class="material-icons mr-3 text-red-400 group-hover:text-red-500">delete</i>
+              Delete Page
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+    <% end %>
+  </div>
+</nav>
