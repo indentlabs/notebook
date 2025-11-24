@@ -62,15 +62,14 @@
            class="lg:hidden fixed left-0 top-0 h-full w-72 bg-white border-r border-gray-200 shadow-xl z-50 overflow-y-auto">
 
         <!-- Mobile Close button -->
-        <div class="p-4 border-b border-gray-200 bg-white lg:hidden">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-900">Navigation</h2>
-            <button @click="showLeftSidebar = false"
-                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label="Close navigation">
-              <i class="material-icons text-gray-500">close</i>
-            </button>
-          </div>
+        <div class="p-3 border-b border-gray-200 bg-white lg:hidden">
+          <button @click="showLeftSidebar = false"
+                  class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Close navigation">
+            <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+            <i class="material-icons text-gray-600 text-lg mr-1.5">menu</i>
+            <h2 class="text-sm font-semibold text-gray-900">Navigation</h2>
+          </button>
         </div>
 
         <%= render partial: 'content/edit/navigation_sidebar', locals: {
@@ -129,15 +128,13 @@
 
         <!-- Desktop Header with Title and Toggle Button -->
         <div class="hidden xl:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
-          <h2 class="text-sm font-semibold text-gray-900 flex items-center">
-            <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
-            Page Tools
-          </h2>
           <button @click="toggleRightSidebar()"
-                  class="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
-                  title="Hide sidebar"
-                  aria-label="Hide sidebar">
-            <i class="material-icons text-gray-500 text-lg">chevron_right</i>
+                  class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5"
+                  title="Hide page tools"
+                  aria-label="Hide page tools">
+            <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+            <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
+            <h2 class="text-sm font-semibold text-gray-900">Page Tools</h2>
           </button>
         </div>
 
@@ -205,15 +202,14 @@
            aria-labelledby="mobile-sidebar-title">
 
         <!-- Close button -->
-        <div class="p-4 border-b border-gray-200 bg-white">
-          <div class="flex items-center justify-between">
-            <h2 id="mobile-sidebar-title" class="text-lg font-semibold text-gray-900">Edit Tools</h2>
-            <button @click="closeMobileSidebar()"
-                    class="p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label="Close edit tools">
-              <i class="material-icons text-gray-500">close</i>
-            </button>
-          </div>
+        <div class="p-3 border-b border-gray-200 bg-white">
+          <button @click="closeMobileSidebar()"
+                  class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Close edit tools">
+            <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+            <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
+            <h2 class="text-sm font-semibold text-gray-900">Edit Tools</h2>
+          </button>
         </div>
         
         <%= render partial: 'content/edit/secondary_sidebar', locals: { 
@@ -653,6 +649,14 @@ function editPageController() {
       } catch (e) {
         // If localStorage is not available, default to shown
         return true;
+      }
+    },
+
+    saveSidebarState() {
+      try {
+        localStorage.setItem('content_edit_right_sidebar_visible', this.showRightSidebar.toString());
+      } catch (e) {
+        // Silently fail if localStorage is not available
       }
     },
 
