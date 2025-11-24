@@ -80,7 +80,7 @@
 
       <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
       <div x-show="!showLeftSidebar && isDesktop"
-           :style="siteSidebarVisible ? 'left: 15rem; top: 132px;' : 'left: 0; top: 132px;'"
+           :style="{ left: siteSidebarVisible ? '15rem' : '0', top: '132px' }"
            class="hidden lg:block fixed z-40 transition-all duration-300">
         <button @click="toggleLeftSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
@@ -237,6 +237,7 @@ function editPageController() {
     showRightSidebar: false,
     hasUnsavedChanges: false,
     isDesktop: window.innerWidth >= 1024, // Changed to match lg breakpoint
+    isXlDesktop: window.innerWidth >= 1280, // For Right Sidebar (xl breakpoint)
     
     // Privacy state
     selectedPrivacy: '<%= @content.privacy || 'private' %>',
@@ -314,21 +315,22 @@ function editPageController() {
       
       // Handle window resize
       window.addEventListener('resize', () => {
-        const wasDesktop = this.isDesktop;
-        this.isDesktop = window.innerWidth >= 1024; // Changed to match lg breakpoint
+        // Left Sidebar Logic (lg breakpoint)
+        this.isDesktop = window.innerWidth >= 1024; 
+        this.showLeftSidebar = window.innerWidth >= 1024;
 
-        // When transitioning from mobile to desktop, restore saved right sidebar state
-        if (!wasDesktop && this.isDesktop) {
+        // Right Sidebar Logic (xl breakpoint)
+        const wasXlDesktop = this.isXlDesktop;
+        this.isXlDesktop = window.innerWidth >= 1280;
+
+        // When transitioning from mobile to desktop (xl), restore saved right sidebar state
+        if (!wasXlDesktop && this.isXlDesktop) {
           this.showRightSidebar = this.getSavedSidebarState();
         }
-        // When transitioning from desktop to mobile, always close right sidebar
-        if (wasDesktop && !this.isDesktop) {
+        // When transitioning from desktop (xl) to mobile, always close right sidebar
+        if (wasXlDesktop && !this.isXlDesktop) {
           this.showRightSidebar = false;
         }
-        // Set left sidebar based on screen size
-        // lg+ (>= 1024px): permanent space, default open
-        // Smaller: overlay, default closed
-        this.showLeftSidebar = window.innerWidth >= 1024;
       });
       
       // Listen for universe field changes and update Privacy tab
@@ -632,9 +634,9 @@ function editPageController() {
     },
     
     initializeSidebarState() {
-      // On desktop, restore saved preference (default: shown)
+      // On desktop (xl), restore saved preference (default: shown)
       // On mobile, always start closed
-      if (this.isDesktop) {
+      if (this.isXlDesktop) {
         this.showRightSidebar = this.getSavedSidebarState();
       } else {
         this.showRightSidebar = false;
@@ -668,15 +670,15 @@ function editPageController() {
     toggleRightSidebar() {
       this.showRightSidebar = !this.showRightSidebar;
 
-      // Only save preference on desktop (mobile is always session-based)
-      if (this.isDesktop) {
+      // Only save preference on desktop (xl) (mobile is always session-based)
+      if (this.isXlDesktop) {
         this.saveSidebarState();
       }
     },
 
     closeMobileSidebar() {
       // Only close if on mobile (< 1280px)
-      if (!this.isDesktop) {
+      if (!this.isXlDesktop) {
         this.showRightSidebar = false;
       }
     },
