@@ -12,7 +12,7 @@
   <%= render partial: 'javascripts/content_linking_alpine' %>
   
   <!-- Header with breadcrumbs -->
-  <%= render partial: 'content/shared/breadcrumb_nav', locals: { 
+  <%= render partial: 'content/header', locals: { 
     content: @serialized_content, 
     show_edit_controls: true,
     current_page: :edit 
@@ -81,8 +81,8 @@
 
       <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
       <div x-show="!showLeftSidebar && isDesktop"
-           class="hidden lg:block fixed left-0 z-40"
-           style="top: 132px;">
+           :style="siteSidebarVisible ? 'left: 15rem; top: 132px;' : 'left: 0; top: 132px;'"
+           class="hidden lg:block fixed z-40 transition-all duration-300">
         <button @click="toggleLeftSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
                 data-tooltip="Show Navigation"
@@ -93,7 +93,8 @@
       </div>
 
       <!-- Mobile/Tablet Left Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed left-0 top-1/2 transform -translate-y-1/2 z-40">
+      <div class="lg:hidden fixed left-0 z-40"
+           style="top: 132px;">
         <button @click="toggleLeftSidebar()"
                 @keydown.escape="showLeftSidebar && toggleLeftSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
@@ -122,12 +123,12 @@
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="hidden lg:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0"
+           class="hidden xl:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0"
            role="complementary"
            aria-label="Edit tools and page information">
 
         <!-- Desktop Header with Title and Toggle Button -->
-        <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
+        <div class="hidden xl:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
           <h2 class="text-sm font-semibold text-gray-900 flex items-center">
             <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
             Page Tools
@@ -148,7 +149,7 @@
 
       <!-- Desktop Collapsed Toggle Tab -->
       <div x-show="!showRightSidebar && isDesktop"
-           class="hidden lg:block fixed right-0 z-40"
+           class="hidden xl:block fixed right-0 z-40"
            style="top: 132px;">
         <button @click="toggleRightSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
@@ -160,7 +161,8 @@
       </div>
 
       <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed right-0 top-1/2 transform -translate-y-1/2 z-40">
+      <div class="xl:hidden fixed right-0 z-40"
+           style="top: 132px;">
         <button @click="toggleRightSidebar()"
                 @keydown.escape="showRightSidebar && toggleRightSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
@@ -183,7 +185,7 @@
            x-transition:leave-end="opacity-0"
            @click="closeMobileSidebar()"
            @keydown.escape.window="closeMobileSidebar()"
-           class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+           class="xl:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
            role="presentation"
            aria-hidden="true">
       </div>
@@ -197,7 +199,7 @@
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
            @keydown.escape="closeMobileSidebar()"
-           class="lg:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto"
+           class="xl:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto"
            role="dialog"
            aria-modal="true"
            aria-labelledby="mobile-sidebar-title">
@@ -232,19 +234,13 @@ function editPageController() {
     currentCategory: null,
     expandAllCategories: true,
     showLeftSidebar: (() => {
-      // Initialize from localStorage if available
-      try {
-        const saved = localStorage.getItem('content_edit_left_sidebar_visible');
-        const isDesktop = window.innerWidth >= 1024;
-        // On desktop, use saved preference (default true), on mobile default false
-        return isDesktop ? (saved === null ? true : saved === 'true') : false;
-      } catch (e) {
-        return window.innerWidth >= 1024; // Default true on desktop, false on mobile
-      }
+      // Default open on lg+ screens where it takes permanent space (>= 1024px)
+      // Default closed on smaller screens where it's a temporary overlay (< 1024px)
+      return window.innerWidth >= 1024;
     })(),
     showRightSidebar: false,
     hasUnsavedChanges: false,
-    isDesktop: window.innerWidth >= 1024,
+    isDesktop: window.innerWidth >= 1024, // Changed to match lg breakpoint
     
     // Privacy state
     selectedPrivacy: '<%= @content.privacy || 'private' %>',
@@ -258,6 +254,9 @@ function editPageController() {
     get showUniverseIndicator() {
       return this.selectedPrivacy !== 'public' && this.universePrivacy === 'public';
     },
+    
+    // Reactive property for site-wide sidebar state
+    siteSidebarVisible: false,
     
     init() {
       // Initialize right sidebar state from localStorage
@@ -320,18 +319,20 @@ function editPageController() {
       // Handle window resize
       window.addEventListener('resize', () => {
         const wasDesktop = this.isDesktop;
-        this.isDesktop = window.innerWidth >= 1024;
+        this.isDesktop = window.innerWidth >= 1024; // Changed to match lg breakpoint
 
-        // When transitioning from mobile to desktop, restore saved states
+        // When transitioning from mobile to desktop, restore saved right sidebar state
         if (!wasDesktop && this.isDesktop) {
           this.showRightSidebar = this.getSavedSidebarState();
-          this.showLeftSidebar = this.getLeftSidebarState();
         }
-        // When transitioning from desktop to mobile, always close both
+        // When transitioning from desktop to mobile, always close right sidebar
         if (wasDesktop && !this.isDesktop) {
           this.showRightSidebar = false;
-          this.showLeftSidebar = false;
         }
+        // Set left sidebar based on screen size
+        // lg+ (>= 1024px): permanent space, default open
+        // Smaller: overlay, default closed
+        this.showLeftSidebar = window.innerWidth >= 1024;
       });
       
       // Listen for universe field changes and update Privacy tab
@@ -341,6 +342,39 @@ function editPageController() {
       window.addEventListener('privacy-updated', (e) => {
         this.selectedPrivacy = e.detail.privacy;
       });
+      
+      // Sync site-wide sidebar state
+      this.syncSiteSidebarState();
+    },
+    
+    syncSiteSidebarState() {
+      const updateFromStorage = () => {
+        try {
+          // Check localStorage
+          const saved = localStorage.getItem('site_navigation_sidebar_visible');
+          const isOpenFromStorage = saved === null ? true : saved === 'true';
+          
+          // Check DOM - look for the site sidebar element
+          const siteSidebar = document.querySelector('.notebook--sidebar');
+          const isVisibleInDOM = siteSidebar && window.getComputedStyle(siteSidebar).display !== 'none';
+          
+          // Check Alpine scope
+          const alpineState = document.body.__x?.$data?.showSidebar;
+          
+          // Use DOM visibility as source of truth
+          const actualState = isVisibleInDOM !== undefined ? isVisibleInDOM : isOpenFromStorage;
+          
+          if (this.siteSidebarVisible !== actualState) {
+            this.siteSidebarVisible = actualState;
+          }
+        } catch (e) {
+          // Silently fail
+        }
+      };
+      
+      updateFromStorage();
+      window.addEventListener('storage', updateFromStorage);
+      setInterval(updateFromStorage, 200);
     },
     
     watchUniverseChanges() {
@@ -622,42 +656,9 @@ function editPageController() {
       }
     },
 
-    getLeftSidebarState() {
-      try {
-        const saved = localStorage.getItem('content_edit_left_sidebar_visible');
-        // Default to true (shown) if not set
-        return saved === null ? true : saved === 'true';
-      } catch (e) {
-        // If localStorage is not available, default to shown
-        return true;
-      }
-    },
-
-    saveSidebarState() {
-      try {
-        localStorage.setItem('content_edit_right_sidebar_visible', this.showRightSidebar.toString());
-      } catch (e) {
-        // Silently fail if localStorage is not available
-        console.warn('Could not save sidebar state to localStorage', e);
-      }
-    },
-
-    saveLeftSidebarState() {
-      try {
-        localStorage.setItem('content_edit_left_sidebar_visible', this.showLeftSidebar.toString());
-      } catch (e) {
-        // Silently fail if localStorage is not available
-        // Silently fail if localStorage is not available
-      }
-    },
-
     toggleLeftSidebar() {
       this.showLeftSidebar = !this.showLeftSidebar;
-
-      // Only save preference on desktop (mobile is always session-based)
-      if (this.isDesktop) {
-        this.saveLeftSidebarState();
-      }
+      // No longer saving to localStorage - state is always based on screen size on page load
     },
 
     toggleRightSidebar() {
@@ -670,7 +671,7 @@ function editPageController() {
     },
 
     closeMobileSidebar() {
-      // Only close if on mobile (< 1024px)
+      // Only close if on mobile (< 1280px)
       if (!this.isDesktop) {
         this.showRightSidebar = false;
       }
