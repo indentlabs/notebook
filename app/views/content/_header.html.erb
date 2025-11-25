@@ -96,6 +96,7 @@
         
         <!-- Dropdown menu -->
         <div x-show="open" 
+             x-cloak
              x-transition:enter="transition ease-out duration-100"
              x-transition:enter-start="transform opacity-0 scale-95"
              x-transition:enter-end="transform opacity-100 scale-100"
@@ -105,7 +106,7 @@
              class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
           <div class="py-1">
             <!-- Changelog -->
-            <% unless current_page == :changelog %>
+            <% unless current_page == :changelog || current_page == :edit %>
               <%= link_to polymorphic_path(@content, action: :changelog), 
                   class: "group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" do %>
                 <i class="material-icons mr-3 text-gray-400 group-hover:text-gray-500">history</i>

@@ -4,7 +4,7 @@
     
     <!-- Tools -->
     <div class="pb-4 border-b border-gray-200">
-      <div class="w-full">
+      <div class="w-full space-y-2">
         <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
           <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
                       target: "_blank",
@@ -18,13 +18,32 @@
             </div>
             <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
           <% end %>
-        <% else %>
-          <div class="p-3 w-full rounded-lg bg-gray-50">
-            <div class="flex items-center justify-center">
-              <i class="material-icons text-gray-400 mr-2">construction</i>
-              <span class="text-sm text-gray-600">More tools coming soon!</span>
+        <% end %>
+
+        <%= link_to polymorphic_path(@content, action: :changelog),
+                    class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 transition-all duration-200 bg-gray-50" do %>
+          <div class="flex items-center">
+            <i class="material-icons text-xl text-gray-400 group-hover:text-blue-500 mr-3">history</i>
+            <div>
+              <div class="font-medium text-gray-700 group-hover:text-blue-700 text-sm">Changelog</div>
+              <div class="text-xs text-gray-500 group-hover:text-blue-600">View history</div>
             </div>
           </div>
+          <i class="material-icons text-gray-400 group-hover:text-blue-500 text-lg">arrow_forward</i>
+        <% end %>
+
+        <% if forum_url = ForumsLinkbuilderService.worldbuilding_url(raw_content.class) %>
+          <%= link_to forum_url,
+                      class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 transition-all duration-200 bg-gray-50" do %>
+            <div class="flex items-center">
+              <i class="material-icons text-xl text-gray-400 group-hover:text-blue-500 mr-3">forum</i>
+              <div>
+                <div class="font-medium text-gray-700 group-hover:text-blue-700 text-sm">Community</div>
+                <div class="text-xs text-gray-500 group-hover:text-blue-600">Get feedback</div>
+              </div>
+            </div>
+            <i class="material-icons text-gray-400 group-hover:text-blue-500 text-lg">arrow_outward</i>
+          <% end %>
         <% end %>
       </div>
     </div>
