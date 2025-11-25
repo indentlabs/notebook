@@ -6,28 +6,33 @@
     </span>
   <% end %>
 
-  <div x-cloak x-show="!showSidebar" class="lg:hidden">
-    <span class="sr-only">Menu</span> 
-    <div @click.stop="showSidebar = true" class="mt-2 mr-1 p-1 border-2 border-white border-opacity-30 hover:border-opacity-50 rounded-full transition-all duration-200">
-      <svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-      </svg>
-    </div>
-  </div>
+
   <div class="flex-grow"></div>
 
   <!-- right-hand side of navbar -->
-  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false }">
+  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false, mobileSearchOpen: false }">
     <% if user_signed_in? %>
+      <!-- Mobile Search Toggle -->
+      <button @click.stop="mobileSearchOpen = true; $nextTick(() => document.getElementById('navbar-search-input').focus())" 
+              x-show="!mobileSearchOpen"
+              class="md:hidden w-10 h-10 flex items-center justify-center bg-white bg-opacity-20 border-white border-opacity-30 border-2 hover:bg-opacity-30 rounded-full transition-all duration-200 focus:outline-none text-white">
+        <i class="material-icons">search</i>
+      </button>
+
       <!-- Dynamic Autocomplete Search -->
-      <div class="hidden md:inline-flex items-center relative"
+      <div class="items-center relative"
+           :class="{ 'hidden md:inline-flex': !mobileSearchOpen, 'flex fixed top-0 left-0 w-full h-14 z-50 bg-white dark:bg-gray-800 px-2 items-center': mobileSearchOpen }"
+           @keydown.escape.window="mobileSearchOpen = false"
            x-data="searchAutocomplete()"
            x-init="init()"
-           @click.away="closeDropdown()">
+           @click.away="closeDropdown(); mobileSearchOpen = false">
+
+
 
         <!-- Wrap in form to isolate autocomplete context -->
-        <form onsubmit="return false;" autocomplete="off">
-          <input class="w-32 lg:w-48 xl:w-96 border-2 border-blue-400 dark:border-blue-500 text-notebook-blue dark:text-blue-400 focus:border-notebook-blue dark:focus:border-blue-400 bg-white dark:bg-gray-800 h-9 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
+        <form onsubmit="return false;" autocomplete="off" class="w-full md:w-auto">
+          <input class="border-2 border-blue-400 dark:border-blue-500 text-notebook-blue dark:text-blue-400 focus:border-notebook-blue dark:focus:border-blue-400 bg-white dark:bg-gray-800 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                 :class="{ 'w-full h-10': mobileSearchOpen, 'w-64 lg:w-80 xl:w-96 h-9': !mobileSearchOpen }"
                  type="search"
                  id="navbar-search-input"
                  name="navbar_search_query"
