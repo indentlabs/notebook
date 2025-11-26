@@ -33,9 +33,19 @@
   }
 
   /* Active universe styling - subtle */
+  /* Active universe styling - subtle */
   .universe-active {
     border-color: #9333ea;
     box-shadow: 0 0 0 1px #9333ea;
+  }
+
+  .dark .universe-card {
+    background-color: #1f2937; /* gray-800 */
+    border-color: #374151; /* gray-700 */
+  }
+  
+  .dark .universe-card:hover {
+    border-color: #4b5563; /* gray-600 */
   }
 </style>
 
@@ -76,8 +86,8 @@
   <ul role="list" class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
     <!-- All Universes Card -->
     <li class="col-span-1 flex flex-col">
-      <% active_class = @universe_scope.nil? ? 'universe-active border-purple-500' : 'border-gray-200' %>
-      <%= link_to dashboard_path(universe: 'all'), class: "universe-card universe-card-link flex flex-col h-full bg-white rounded-lg border #{active_class} relative" do %>
+      <% active_class = @universe_scope.nil? ? 'universe-active border-purple-500' : 'border-gray-200 dark:border-gray-700' %>
+      <%= link_to dashboard_path(universe: 'all'), class: "universe-card universe-card-link flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg border #{active_class} relative" do %>
         <% if @universe_scope.nil? %>
           <div class="absolute top-3 right-3 z-10">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
@@ -89,10 +99,10 @@
           <div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center mb-4">
             <i class="material-icons text-4xl text-purple-600"><%= Universe.icon %></i>
           </div>
-          <h3 class="text-center text-base font-medium text-gray-900 mb-2">View Everything</h3>
-          <p class="text-center text-sm text-gray-600 flex-grow">See content from all your universes together</p>
+          <h3 class="text-center text-base font-medium text-gray-900 dark:text-white mb-2">View Everything</h3>
+          <p class="text-center text-sm text-gray-600 dark:text-gray-400 flex-grow">See content from all your universes together</p>
           <div class="mt-4 text-center">
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
               No Filter
             </span>
           </div>
@@ -103,8 +113,8 @@
     <!-- Individual Universe Cards -->
     <% @universes.each do |universe| %>
       <li class="col-span-1 flex flex-col">
-        <% active_class = @universe_scope&.id == universe.id ? 'universe-active border-purple-500' : 'border-gray-200' %>
-        <%= link_to dashboard_path(universe: universe.id), class: "universe-card universe-card-link flex flex-col h-full bg-white rounded-lg border #{active_class} relative" do %>
+        <% active_class = @universe_scope&.id == universe.id ? 'universe-active border-purple-500' : 'border-gray-200 dark:border-gray-700' %>
+        <%= link_to dashboard_path(universe: universe.id), class: "universe-card universe-card-link flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg border #{active_class} relative" do %>
           <% if @universe_scope&.id == universe.id %>
             <div class="absolute top-3 right-3 z-10">
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
@@ -113,16 +123,16 @@
             </div>
           <% end %>
           <div class="flex-1 flex flex-col p-6">
-            <%= image_tag universe.random_image_including_private, class: 'universe-image w-32 h-32 flex-shrink-0 mx-auto rounded-full object-cover mb-4 border border-gray-200' %>
-            <h3 class="text-center text-base font-medium text-gray-900 mb-2"><%= universe.name %></h3>
-            <p class="text-center text-sm text-gray-600 flex-grow line-clamp-2"><%= universe.description %></p>
+            <%= image_tag universe.random_image_including_private, class: 'universe-image w-32 h-32 flex-shrink-0 mx-auto rounded-full object-cover mb-4 border border-gray-200 dark:border-gray-700' %>
+            <h3 class="text-center text-base font-medium text-gray-900 dark:text-white mb-2"><%= universe.name %></h3>
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400 flex-grow line-clamp-2"><%= universe.description %></p>
             <div class="mt-4 text-center">
               <% if universe.user_id == current_user.id %>
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
                   Owner
                 </span>
               <% else %>
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200">
                   Collaborator
                 </span>
               <% end %>
@@ -136,7 +146,7 @@
   <!-- Universe Count and Create Section -->
   <div class="mt-12 mb-8">
     <div class="max-w-4xl mx-auto">
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between">
           <div class="flex-1">
             <% universe_count = @universes.size %>
@@ -151,10 +161,10 @@
                   </div>
                 </div>
                 <div class="ml-4">
-                  <h3 class="text-lg font-medium text-gray-900">
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white">
                     <%= universe_count %> <%= 'universe'.pluralize(universe_count) %>
                   </h3>
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
                     Unlimited universes with Premium
                   </p>
                 </div>
@@ -165,7 +175,7 @@
                 <div class="flex-shrink-0">
                   <div class="relative">
                     <svg class="w-12 h-12 transform -rotate-90">
-                      <circle cx="24" cy="24" r="20" stroke="#E5E7EB" stroke-width="4" fill="none" />
+                      <circle cx="24" cy="24" r="20" class="stroke-gray-200 dark:stroke-gray-700" stroke-width="4" fill="none" />
                       <circle cx="24" cy="24" r="20"
                               stroke="#9333EA"
                               stroke-width="4"
@@ -174,15 +184,15 @@
                               stroke-linecap="round" />
                     </svg>
                     <div class="absolute inset-0 flex items-center justify-center">
-                      <span class="text-sm font-bold text-gray-900"><%= universe_count %>/5</span>
+                      <span class="text-sm font-bold text-gray-900 dark:text-white"><%= universe_count %>/5</span>
                     </div>
                   </div>
                 </div>
                 <div class="ml-4">
-                  <h3 class="text-lg font-medium text-gray-900">
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white">
                     <%= universe_count %> <%= 'universe'.pluralize(universe_count) %>
                   </h3>
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
                     <% if universe_count < 5 %>
                       Starter plan includes 5 universes • <%= 5 - universe_count %> more available
                     <% else %>
@@ -198,7 +208,7 @@
             <% if !is_premium && universe_count >= 5 %>
               <div class="text-right">
                 <p class="text-xs text-gray-500 mb-2">Need more universes?</p>
-                <%= link_to subscription_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" do %>
+                <%= link_to subscription_path, class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-white bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500" do %>
                   <i class="material-icons mr-1 text-base">info</i>
                   View Plan Options
                 <% end %>
