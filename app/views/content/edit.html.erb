@@ -4,7 +4,7 @@
                 description: page_description.truncate(160)
 %>
 
-<div class="min-h-screen bg-gray-50" 
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900" 
      x-data="editPageController()" 
      x-init="init()">
   
@@ -30,7 +30,7 @@
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="hidden md:block w-72 bg-white border-r border-gray-200 shadow-sm flex-shrink-0 h-full overflow-y-auto">
+           class="hidden md:block w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 h-full overflow-y-auto">
         <%= render partial: 'content/edit/navigation_sidebar', locals: {
           content: @serialized_content,
           raw_content: @content
@@ -59,16 +59,16 @@
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="md:hidden fixed left-0 top-0 h-full w-72 bg-white border-r border-gray-200 shadow-xl z-50 overflow-y-auto">
+           class="md:hidden fixed left-0 top-0 h-full w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto">
 
         <!-- Mobile Close button -->
-        <div class="p-3 border-b border-gray-200 bg-white md:hidden">
+        <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 md:hidden">
           <button @click="showLeftSidebar = false"
                   class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Close Table of Contents">
             <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
             <i class="material-icons text-gray-600 text-lg mr-1.5">menu</i>
-            <h2 class="text-sm font-semibold text-gray-900">Table of Contents</h2>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Table of Contents</h2>
           </button>
         </div>
 
@@ -107,7 +107,7 @@
       </div>
       
       <!-- Center Column - Dynamic Content -->
-      <div class="flex-1 bg-white">
+      <div class="flex-1 bg-white dark:bg-gray-900">
         <%= render partial: 'content/edit/dynamic_content', locals: { 
           content: @serialized_content, 
           raw_content: @content 
@@ -122,19 +122,19 @@
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="hidden xl:block w-64 bg-gray-50 border-l border-gray-200 flex-shrink-0"
+           class="hidden xl:block w-64 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0"
            role="complementary"
            aria-label="Edit tools and page information">
 
         <!-- Desktop Header with Title and Toggle Button -->
-        <div class="hidden xl:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
+        <div class="hidden xl:flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <button @click="toggleRightSidebar()"
-                  class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5"
+                  class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
                   title="Hide page tools"
                   aria-label="Hide page tools">
-            <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
-            <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
-            <h2 class="text-sm font-semibold text-gray-900">Page Tools</h2>
+            <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
+            <i class="material-icons text-gray-600 dark:text-gray-400 text-lg mr-1.5">construction</i>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Page Tools</h2>
           </button>
         </div>
 
@@ -196,19 +196,19 @@
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
            @keydown.escape="closeMobileSidebar()"
-           class="xl:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 border-l border-gray-200 shadow-xl z-50 overflow-y-auto"
+           class="xl:hidden fixed right-0 top-0 h-full w-72 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
            role="dialog"
            aria-modal="true"
            aria-labelledby="mobile-sidebar-title">
 
         <!-- Close button -->
-        <div class="p-3 border-b border-gray-200 bg-white">
+        <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
           <button @click="closeMobileSidebar()"
-                  class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Close edit tools">
-            <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
-            <i class="material-icons text-gray-600 text-lg mr-1.5">construction</i>
-            <h2 class="text-sm font-semibold text-gray-900">Edit Tools</h2>
+            <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
+            <i class="material-icons text-gray-600 dark:text-gray-400 text-lg mr-1.5">construction</i>
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Edit Tools</h2>
           </button>
         </div>
         

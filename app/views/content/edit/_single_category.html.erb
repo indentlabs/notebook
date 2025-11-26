@@ -1,4 +1,9 @@
 <div class="space-y-8">
+  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
+    <i class="material-icons text-gray-400 dark:text-gray-500 mr-2"><%= category[:icon] %></i>
+    <%= category[:label] %>
+  </h3>
+
   <% category[:fields].each do |field| %>
     <div class="border-t border-gray-200 pt-6"
          data-field-id="<%= field[:id] %>"
@@ -6,7 +11,7 @@
 
       <!-- Field label -->
       <div class="mb-2">
-        <label for="<%= field[:name] %>" class="inline-flex items-center bg-gray-50 rounded px-2 py-0.5 text-sm font-medium text-gray-600 border border-gray-200">
+        <label for="<%= field[:name] %>" class="inline-flex items-center bg-gray-50 dark:bg-gray-800 rounded px-2 py-0.5 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
           <%
             # Map field types to appropriate icons (matching template editor)
             icon = case field[:type]
@@ -34,7 +39,7 @@
             when 'tags'
               'text-green-600'
             else
-              'text-gray-600'
+              'text-gray-600 dark:text-gray-400'
             end
           %>
           <i class="material-icons opacity-70 <%= icon_color %>" style="font-size: 14px; margin-right: 5px;"><%= icon %></i>

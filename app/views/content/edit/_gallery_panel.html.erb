@@ -40,7 +40,7 @@
     <!-- Gallery preview section -->
     <div>
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-medium text-gray-900">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
           Current Images (<%= total_images %>)
         </h3>
         <p class="text-sm text-gray-500 reordering-instructions hidden">
@@ -59,14 +59,14 @@
               is_pinned = image_data.pinned == true
             %>
             <div class="gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
-              <div class="relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow <%= is_pinned ? 'ring-2 ring-yellow-400' : '' %>">
+              <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow <%= is_pinned ? 'ring-2 ring-yellow-400' : '' %>">
                 <% if image_type == 'image_upload' %>
-                  <div class="aspect-w-16 aspect-h-9 bg-gray-100">
+                  <div class="aspect-w-16 aspect-h-9 bg-gray-100 dark:bg-gray-900">
                     <%= link_to image_data.src(:original), target: '_blank', class: 'block w-full h-full' do %>
                       <%= image_tag image_data.src(:medium), class: "w-full h-full object-cover" %>
                     <% end %>
                   </div>
-                  <div class="p-3 border-t border-gray-100">
+                  <div class="p-3 border-t border-gray-100 dark:border-gray-700">
                     <span class="text-xs text-gray-500">
                       <%= Filesize.from("#{image_data.src_file_size}B").to_f('KB').round(2) %> KB
                     </span>
@@ -74,7 +74,7 @@
                   
                   <!-- Pin button -->
                   <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image_data.id),
-                    class: "absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400'}",
+                    class: "absolute top-2 right-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-300'}",
                     method: :post,
                     title: 'Pin this image to always use it in previews of this page',
                     data: { type: 'json' } do %>
@@ -83,7 +83,7 @@
                   
                   <!-- Delete button -->
                   <%= link_to image_deletion_path(image_data.id),
-                    class: 'absolute top-2 left-2 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all js-remove-image text-red-500',
+                    class: 'absolute top-2 left-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-remove-image text-red-500',
                     method: 'delete',
                     remote: true,
                     title: 'Delete this image',
@@ -101,20 +101,20 @@
                     <i class="material-icons text-gray-400">drag_handle</i>
                   </div>
                 <% else %>
-                  <div class="aspect-w-16 aspect-h-9 bg-purple-50">
+                  <div class="aspect-w-16 aspect-h-9 bg-purple-50 dark:bg-purple-900">
                     <% if image_data.image.attached? %>
                       <%= link_to rails_blob_path(image_data.image, disposition: "attachment"), target: '_blank', class: 'block w-full h-full' do %>
                         <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "w-full h-full object-cover" %>
                       <% end %>
                     <% end %>
                   </div>
-                  <div class="p-3 border-t border-gray-100">
-                    <span class="text-xs text-purple-600 font-medium">Generated with Basil</span>
+                  <div class="p-3 border-t border-gray-100 dark:border-gray-700">
+                    <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Generated with Basil</span>
                   </div>
                   
                   <!-- Pin button -->
                   <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: image_data.id),
-                    class: "absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400'}",
+                    class: "absolute top-2 right-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-300'}",
                     method: :post,
                     title: 'Pin this image to always use it in previews of this page',
                     data: { type: 'json' } do %>
@@ -123,7 +123,7 @@
                   
                   <!-- Delete button -->
                   <%= link_to basil_delete_path(image_data),
-                    class: 'absolute top-2 left-2 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all js-remove-image text-red-500',
+                    class: 'absolute top-2 left-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-remove-image text-red-500',
                     method: 'delete',
                     remote: true,
                     title: 'Delete this image',
@@ -150,19 +150,19 @@
   <% end %>
   
   <!-- Upload section -->
-  <div class="bg-gray-50 rounded-lg p-6">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">
+  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
       <i class="material-icons text-sm align-middle mr-2">file_upload</i>
       Upload Images
     </h3>
     
     <% if current_user.upload_bandwidth_kb > 0 %>
-      <p class="text-sm text-gray-600 mb-4">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
         You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
       </p>
     <% else %>
-      <div class="bg-yellow-50 border border-yellow-200 rounded-md p-3 mb-4">
-        <p class="text-sm text-yellow-800">
+      <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 mb-4">
+        <p class="text-sm text-yellow-800 dark:text-yellow-200">
           <i class="material-icons text-xs align-middle mr-1">warning</i>
           You have no upload bandwidth remaining. Upgrade to Premium or delete some existing images for more.
         </p>
@@ -175,7 +175,7 @@
       <div class="flex items-center justify-between">
         <%= link_to_add_association f,
           :image_uploads,
-          class: 'inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+          class: 'inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
           partial: 'content/form/images/upload',
           render_options: { locals: { f: f, content: content }} do %>
           <i class='material-icons text-sm mr-2'>add_photo_alternate</i>
@@ -190,7 +190,7 @@
         <% end %>
       </div>
       
-      <p class="text-xs text-gray-500 mt-2">
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
         Once you've selected your images, press the upload button above. This will reload the page.
       </p>
     </div>
@@ -198,28 +198,28 @@
   
   <!-- Generate with Basil section -->
   <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
-    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">
-        <i class="material-icons text-sm align-middle mr-2 text-purple-600">auto_awesome</i>
+    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <i class="material-icons text-sm align-middle mr-2 text-purple-600 dark:text-purple-400">auto_awesome</i>
         Generate with Basil
       </h3>
 
-      <p class="text-sm text-gray-600 mb-4">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
         Let Basil create unique images for your <%= raw_content.page_type.downcase %> based on the details you've added.
       </p>
 
-      <div class="bg-white rounded-lg p-4 mb-4 border border-purple-100">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 border border-purple-100 dark:border-purple-900">
         <div class="flex items-start space-x-3">
           <div class="flex-shrink-0">
-            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-              <i class="material-icons text-purple-600 text-sm">tips_and_updates</i>
+            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <i class="material-icons text-purple-600 dark:text-purple-300 text-sm">tips_and_updates</i>
             </div>
           </div>
           <div class="flex-1">
-            <p class="text-sm text-gray-700 mb-2">
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
               Basil uses the information from your <%= raw_content.page_type.downcase %> page to generate images that match your vision.
             </p>
-            <p class="text-xs text-gray-500">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
               The more details you've added about appearance and characteristics, the better the results will be.
             </p>
           </div>
@@ -251,7 +251,7 @@
               <%= generated_count %> / <%= free_limit %> free images generated
             </span>
             <% if generated_count >= free_limit %>
-              <%= link_to "Upgrade", subscription_path, class: "text-xs font-medium text-purple-600 hover:text-purple-700 underline" %>
+              <%= link_to "Upgrade", subscription_path, class: "text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 underline" %>
             <% end %>
           </div>
         <% end %>

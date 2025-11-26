@@ -4,18 +4,18 @@
     <% next if category[:label] == 'Contributors' && raw_content.class.name == 'Universe' %>
     
     <div class="category-section" id="category-<%= category[:label].parameterize %>">
-      <div class="pb-4 border-b border-gray-200">
+      <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <i class="material-icons text-2xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
-            <h3 class="text-xl font-semibold text-gray-900"><%= category[:label] %></h3>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white"><%= category[:label] %></h3>
           </div>
           
           <!-- Progress indicator -->
           <% if category[:percent_complete].present? && category[:percent_complete] > 0 %>
             <div class="flex items-center space-x-3">
-              <span class="text-sm text-gray-500"><%= category[:percent_complete] %>% complete</span>
-              <div class="w-32 bg-gray-200 rounded-full h-2">
+              <span class="text-sm text-gray-500 dark:text-gray-400"><%= category[:percent_complete] %>% complete</span>
+              <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div class="<%= content.class_color %> h-2 rounded-full" style="width: <%= category[:percent_complete] %>%"></div>
               </div>
             </div>
@@ -31,7 +31,7 @@
 
             <!-- Field label -->
             <div class="mb-2">
-              <label for="<%= field[:name] %>" class="inline-flex items-center bg-gray-50 rounded px-2 py-0.5 text-sm font-medium text-gray-600 border border-gray-200">
+              <label for="<%= field[:name] %>" class="inline-flex items-center bg-gray-50 dark:bg-gray-800 rounded px-2 py-0.5 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                 <%
                   # Map field types to appropriate icons (matching template editor)
                   icon = case field[:type]
@@ -59,7 +59,7 @@
                   when 'tags'
                     'text-green-600'
                   else
-                    'text-gray-600'
+                    'text-gray-600 dark:text-gray-400'
                   end
                 %>
                 <i class="material-icons opacity-70 <%= icon_color %>" style="font-size: 14px; margin-right: 5px;"><%= icon %></i>
@@ -70,7 +70,7 @@
               </label>
 
               <% if field[:help_text].present? %>
-                <p class="mt-1 text-xs text-gray-500"><%= field[:help_text] %></p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400"><%= field[:help_text] %></p>
               <% end %>
             </div>
 

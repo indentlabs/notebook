@@ -6,8 +6,8 @@
     <!-- Show All Categories (Expanded View) -->
     <div x-show="expandAllCategories">
       <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Edit All Details</h2>
-        <p class="text-gray-600">Complete information for this <%= content.class_name.downcase %></p>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Edit All Details</h2>
+        <p class="text-gray-600 dark:text-gray-400">Complete information for this <%= content.class_name.downcase %></p>
       </div>
       
       <%= render partial: 'content/edit/all_categories', locals: { content: content, raw_content: raw_content } %>
@@ -24,8 +24,8 @@
               <div class="flex items-center">
                 <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900">Edit <%= category[:label] %></h2>
-                  <p class="text-gray-600">Update <%= category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Edit <%= category[:label] %></h2>
+                  <p class="text-gray-600 dark:text-gray-400">Update <%= category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
                 </div>
               </div>
             </div>
@@ -37,7 +37,7 @@
                      style="width: <%= category[:percent_complete] %>%">
                 </div>
               </div>
-              <p class="text-sm text-gray-600 mb-4"><%= category[:percent_complete] %>% complete</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4"><%= category[:percent_complete] %>% complete</p>
             <% end %>
           </div>
           
@@ -60,8 +60,8 @@
               <div class="flex items-center">
                 <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= first_category[:icon] %></i>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900">Edit <%= first_category[:label] %></h2>
-                  <p class="text-gray-600">Update <%= first_category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Edit <%= first_category[:label] %></h2>
+                  <p class="text-gray-600 dark:text-gray-400">Update <%= first_category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
                 </div>
               </div>
             </div>
@@ -82,8 +82,8 @@
     <div class="mb-6">
       <div class="flex items-center justify-between">
         <div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">Gallery Management</h2>
-          <p class="text-gray-600">Upload and manage images for this <%= content.class_name.downcase %></p>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Gallery Management</h2>
+          <p class="text-gray-600 dark:text-gray-400">Upload and manage images for this <%= content.class_name.downcase %></p>
         </div>
       </div>
     </div>
@@ -101,7 +101,7 @@
   <div x-show="currentView === 'privacy'" class="py-8 px-6 md:px-8 lg:px-12 max-w-5xl mx-auto">
     <div class="mb-6">
       <h2 class="text-2xl font-bold text-gray-900 mb-2">Privacy & Sharing</h2>
-      <p class="text-gray-600">Control who can see and edit this <%= content.class_name.downcase %></p>
+      <p class="text-gray-600 dark:text-gray-400">Control who can see and edit this <%= content.class_name.downcase %></p>
     </div>
     
     <div x-data="{ 
@@ -190,18 +190,18 @@
       </div>
       
       <!-- Current Status Overview -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
-            <div :class="selectedPrivacy === 'public' ? 'bg-green-100' : 'bg-gray-100'"
+            <div :class="selectedPrivacy === 'public' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'"
                  class="w-12 h-12 rounded-lg flex items-center justify-center mr-4 transition-colors duration-200">
-              <i :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+              <i :class="selectedPrivacy === 'public' ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'"
                  class="material-icons text-xl transition-colors duration-200"
                  x-text="selectedPrivacy === 'public' ? 'public' : 'lock'">
               </i>
             </div>
             <div>
-              <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                 Current Status
                 <div x-show="isLoading" class="ml-2">
                   <svg class="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -210,9 +210,9 @@
                   </svg>
                 </div>
               </h3>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-gray-600 dark:text-gray-400">
                 This <%= content.class_name.downcase %> is currently 
-                <span :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+                <span :class="selectedPrivacy === 'public' ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'"
                       class="font-medium transition-colors duration-200"
                       x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)">
                 </span>
@@ -220,15 +220,15 @@
             </div>
           </div>
           <div class="text-right">
-            <div class="text-sm text-gray-500">Effective visibility</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Effective visibility</div>
             <% if raw_content.respond_to?(:universe) && raw_content.universe.present? && raw_content.universe.privacy == 'public' %>
-              <div class="font-medium text-green-600 flex items-center justify-end mt-1">
+              <div class="font-medium text-green-600 dark:text-green-300 flex items-center justify-end mt-1">
                 <span>Public</span>
                 <i class="material-icons text-sm ml-1 text-blue-500" title="Set by universe '<%= raw_content.universe.name %>'">info</i>
               </div>
-              <div class="text-xs text-gray-500 mt-1">via Universe</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">via Universe</div>
             <% else %>
-              <div :class="selectedPrivacy === 'public' ? 'text-green-600' : 'text-gray-600'"
+              <div :class="selectedPrivacy === 'public' ? 'text-green-600 dark:text-green-300' : 'text-gray-600 dark:text-gray-300'"
                    class="font-medium transition-colors duration-200 mt-1"
                    x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)">
               </div>
@@ -238,10 +238,10 @@
       </div>
       
       <!-- Privacy Level Selection -->
-      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
         <div class="mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">Privacy Settings</h3>
-          <p class="text-gray-600 text-sm">Choose who can see and access this <%= content.class_name.downcase %></p>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Privacy Settings</h3>
+          <p class="text-gray-600 dark:text-gray-400 text-sm">Choose who can see and access this <%= content.class_name.downcase %></p>
         </div>
         
         <%= form_for raw_content, remote: true, html: { id: "privacy-settings-form", class: "space-y-4" } do |f| %>
@@ -250,21 +250,21 @@
             <%= f.radio_button :privacy, 'private', 
                 class: 'sr-only',
                 'x-model': 'selectedPrivacy' %>
-            <div :class="selectedPrivacy === 'private' ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+            <div :class="selectedPrivacy === 'private' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 shadow-sm' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm'"
                  class="border-2 rounded-lg p-4 transition-all duration-200">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
-                  <div :class="selectedPrivacy === 'private' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'"
+                  <div :class="selectedPrivacy === 'private' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300'"
                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200">
                     <i class="material-icons text-lg">lock</i>
                   </div>
                 </div>
                 <div class="ml-4 flex-1">
-                  <div class="text-base font-semibold text-gray-900">Private</div>
-                  <div class="text-sm text-gray-600">Only you and collaborators can see this page</div>
+                  <div class="text-base font-semibold text-gray-900 dark:text-gray-100">Private</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">Only you and collaborators can see this page</div>
                 </div>
                 <div class="flex-shrink-0 ml-4">
-                  <div :class="selectedPrivacy === 'private' ? 'text-blue-500' : 'text-gray-300'"
+                  <div :class="selectedPrivacy === 'private' ? 'text-blue-500' : 'text-gray-300 dark:text-gray-600'"
                        class="transition-colors duration-200">
                     <i class="material-icons text-xl">check_circle</i>
                   </div>
@@ -278,21 +278,21 @@
             <%= f.radio_button :privacy, 'public', 
                 class: 'sr-only',
                 'x-model': 'selectedPrivacy' %>
-            <div :class="selectedPrivacy === 'public' ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+            <div :class="selectedPrivacy === 'public' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 shadow-sm' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm'"
                  class="border-2 rounded-lg p-4 transition-all duration-200">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
-                  <div :class="selectedPrivacy === 'public' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400'"
+                  <div :class="selectedPrivacy === 'public' ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-300'"
                        class="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200">
                     <i class="material-icons text-lg">public</i>
                   </div>
                 </div>
                 <div class="ml-4 flex-1">
-                  <div class="text-base font-semibold text-gray-900">Public</div>
-                  <div class="text-sm text-gray-600">Anyone with the link can view this page</div>
+                  <div class="text-base font-semibold text-gray-900 dark:text-gray-100">Public</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">Anyone with the link can view this page</div>
                 </div>
                 <div class="flex-shrink-0 ml-4">
-                  <div :class="selectedPrivacy === 'public' ? 'text-blue-500' : 'text-gray-300'"
+                  <div :class="selectedPrivacy === 'public' ? 'text-blue-500' : 'text-gray-300 dark:text-gray-600'"
                        class="transition-colors duration-200">
                     <i class="material-icons text-xl">check_circle</i>
                   </div>
@@ -307,23 +307,23 @@
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform -translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
-             class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 class="text-sm font-medium text-gray-900 mb-3 flex items-center">
-            <i class="material-icons text-gray-600 text-sm mr-2">tune</i>
+             class="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+            <i class="material-icons text-gray-600 dark:text-gray-400 text-sm mr-2">tune</i>
             Additional Options
           </h4>
           
           <div class="space-y-3">
             <!-- Password Protected -->
-            <div class="flex items-start p-3 bg-white rounded-lg border border-gray-200 opacity-60">
-              <div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <i class="material-icons text-sm text-orange-600">key</i>
+            <div class="flex items-start p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60">
+              <div class="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-sm text-orange-600 dark:text-orange-400">key</i>
               </div>
               <div class="flex-1">
-                <div class="font-medium text-gray-900 text-sm">Password Protected</div>
-                <div class="text-xs text-gray-600">Require a password to view this private page when shared</div>
+                <div class="font-medium text-gray-900 dark:text-gray-100 text-sm">Password Protected</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Require a password to view this private page when shared</div>
               </div>
-              <span class="text-xs text-orange-600 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</span>
+              <span class="text-xs text-orange-600 dark:text-orange-400 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-md font-medium">Coming Soon</span>
             </div>
           </div>
         </div>
@@ -333,23 +333,23 @@
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 transform -translate-y-4"
              x-transition:enter-end="opacity-100 transform translate-y-0"
-             class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <h4 class="text-sm font-medium text-gray-900 mb-3 flex items-center">
-            <i class="material-icons text-gray-600 text-sm mr-2">tune</i>
+             class="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+          <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+            <i class="material-icons text-gray-600 dark:text-gray-400 text-sm mr-2">tune</i>
             Additional Options
           </h4>
           
           <div class="space-y-3">
             <!-- Discoverable -->
-            <div class="flex items-start p-3 bg-white rounded-lg border border-gray-200 opacity-60">
-              <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <i class="material-icons text-sm text-green-600">search</i>
+            <div class="flex items-start p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 opacity-60">
+              <div class="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="material-icons text-sm text-green-600 dark:text-green-400">search</i>
               </div>
               <div class="flex-1">
-                <div class="font-medium text-gray-900 text-sm">Discoverable</div>
-                <div class="text-xs text-gray-600">Appears in public searches and content indexes</div>
+                <div class="font-medium text-gray-900 dark:text-gray-100 text-sm">Discoverable</div>
+                <div class="text-xs text-gray-600 dark:text-gray-400">Appears in public searches and content indexes</div>
               </div>
-              <span class="text-xs text-orange-600 px-2 py-1 bg-orange-100 rounded-md font-medium">Coming Soon</span>
+              <span class="text-xs text-orange-600 dark:text-orange-400 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 rounded-md font-medium">Coming Soon</span>
             </div>
           </div>
         </div>
@@ -357,23 +357,23 @@
       
       <!-- Universe Privacy Section -->
       <% if raw_content.respond_to?(:universe) %>
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6" data-privacy-universe-section>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6" data-privacy-universe-section>
           <div class="mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center">
               <i class="material-icons text-lg <%= Universe.text_color %> mr-2"><%= Universe.icon %></i>
               Universe Privacy
             </h3>
             <% if raw_content.universe.present? %>
-              <p class="text-sm text-gray-600">This page belongs to a universe with its own privacy settings</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">This page belongs to a universe with its own privacy settings</p>
             <% else %>
-              <p class="text-sm text-gray-600">Organize your pages in a universe to manage privacy settings collectively</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Organize your pages in a universe to manage privacy settings collectively</p>
             <% end %>
           </div>
           
           <div data-universe-content>
             <% if raw_content.universe.present? %>
               <!-- Current universe settings -->
-              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
                   <div class="w-10 h-10 rounded-lg <%= Universe.color %> flex items-center justify-center">
@@ -381,34 +381,34 @@
                   </div>
                 </div>
                 <div class="ml-3 flex-1">
-                  <div class="font-semibold text-gray-900 mb-1"><%= raw_content.universe.name %></div>
+                  <div class="font-semibold text-gray-900 dark:text-gray-100 mb-1"><%= raw_content.universe.name %></div>
                   <div class="flex items-center mb-2">
-                    <span class="text-sm text-gray-600 mr-2">Universe is:</span>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (raw_content.universe.privacy || 'private') == 'public' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                    <span class="text-sm text-gray-600 dark:text-gray-400 mr-2">Universe is:</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= (raw_content.universe.privacy || 'private') == 'public' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300' %>">
                       <i class="material-icons text-xs mr-1"><%= (raw_content.universe.privacy || 'private') == 'public' ? 'public' : 'lock' %></i>
                       <%= (raw_content.universe.privacy || 'private').capitalize %>
                     </span>
                   </div>
                   
                   <% if (raw_content.universe.privacy || 'private') == 'public' %>
-                    <div class="bg-blue-100 border border-blue-200 rounded p-2">
+                    <div class="bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded p-2">
                       <div class="flex items-start">
-                        <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
+                        <i class="material-icons text-blue-600 dark:text-blue-300 text-sm mr-2 mt-0.5">bolt</i>
                         <div>
-                          <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
-                          <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
+                          <div class="text-xs font-medium text-blue-900 dark:text-blue-100">Universe Override Active</div>
+                          <div class="text-xs text-blue-700 dark:text-blue-300">All pages in this universe are automatically public</div>
                         </div>
                       </div>
                     </div>
                   <% else %>
-                    <div class="text-xs text-gray-600">
+                    <div class="text-xs text-gray-600 dark:text-gray-400">
                       Individual page privacy settings apply
                     </div>
                   <% end %>
                 </div>
                 <div class="ml-3 flex-shrink-0">
                   <%= link_to edit_polymorphic_path(raw_content.universe), 
-                              class: "inline-flex items-center px-3 py-1.5 bg-white border border-blue-300 rounded text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors" do %>
+                              class: "inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-blue-300 dark:border-blue-600 rounded text-xs font-medium text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-800 transition-colors" do %>
                     <i class="material-icons text-xs mr-1">settings</i>
                     Manage
                   <% end %>
@@ -417,21 +417,21 @@
             </div>
           <% else %>
             <!-- No universe - show feature promotion -->
-            <div class="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-lg p-4">
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <div class="flex items-start">
                 <div class="flex-shrink-0">
-                  <div class="w-10 h-10 rounded-lg bg-gray-200 flex items-center justify-center">
-                    <i class="material-icons text-gray-500 text-sm"><%= Universe.icon %></i>
+                  <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <i class="material-icons text-gray-500 dark:text-gray-400 text-sm"><%= Universe.icon %></i>
                   </div>
                 </div>
                 <div class="ml-3 flex-1">
-                  <div class="font-semibold text-gray-900 mb-1">No Universe Assigned</div>
-                  <div class="text-sm text-gray-600 mb-3">
+                  <div class="font-semibold text-gray-900 dark:text-gray-100 mb-1">No Universe Assigned</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400 mb-3">
                     This <%= content.class_name.downcase %> isn't part of a universe yet.
                   </div>
-                  <div class="bg-white border border-gray-200 rounded p-3 mb-3">
-                    <div class="text-xs font-medium text-gray-700 mb-1">Benefits of using universes:</div>
-                    <ul class="text-xs text-gray-600 space-y-1">
+                  <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-3 mb-3">
+                    <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Benefits of using universes:</div>
+                    <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                       <li class="flex items-start">
                         <i class="material-icons text-xs text-blue-500 mr-1 mt-0.5">check_circle</i>
                         <span>Control privacy for all pages at once</span>
@@ -464,23 +464,23 @@
       <!-- Collaborators Section -->
       <% if raw_content.class.name == 'Universe' && raw_content.respond_to?(:contributors) %>
         <!-- For Universes, show a link to the Contributors tab instead -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Universe Contributors</h3>
-          <p class="text-sm text-gray-600 mb-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Universe Contributors</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
             Manage who can collaborate on this universe and all its content
           </p>
           
           <% contributor_count = raw_content.contributors.count rescue 0 %>
-          <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div class="bg-purple-50 dark:bg-purple-900 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
             <div class="flex items-start justify-between">
               <div>
                 <div class="flex items-center mb-2">
-                  <i class="material-icons text-purple-600 mr-2">group</i>
-                  <span class="font-medium text-purple-900">
+                  <i class="material-icons text-purple-600 dark:text-purple-400 mr-2">group</i>
+                  <span class="font-medium text-purple-900 dark:text-purple-100">
                     <%= contributor_count %> <%= 'contributor'.pluralize(contributor_count) %>
                   </span>
                 </div>
-                <p class="text-sm text-purple-800">
+                <p class="text-sm text-purple-800 dark:text-purple-200">
                   Contributors can edit all content within this universe
                 </p>
               </div>
@@ -494,15 +494,15 @@
         </div>
       <% elsif raw_content.respond_to?(:contributors) %>
         <!-- For other content types that might have contributors in the future -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Collaborators</h3>
-          <p class="text-sm text-gray-600 mb-4">Collaboration features coming soon</p>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Collaborators</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Collaboration features coming soon</p>
         </div>
       <% end %>
       
       <!-- Auto-save indicator -->
       <div class="flex justify-center pt-4">
-        <div class="text-sm text-gray-500 flex items-center">
+        <div class="text-sm text-gray-500 dark:text-gray-400 flex items-center">
           <i class="material-icons text-sm mr-2">info</i>
           Changes are saved automatically
         </div>
@@ -516,8 +516,8 @@
   <% if raw_content.class.name == 'Universe' %>
     <div x-show="currentView === 'contributors'" class="py-8 px-6 md:px-8 lg:px-12 max-w-5xl mx-auto">
       <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-2">Universe Contributors</h2>
-        <p class="text-gray-600">Manage who can collaborate on this universe and all its content</p>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Universe Contributors</h2>
+        <p class="text-gray-600 dark:text-gray-400">Manage who can collaborate on this universe and all its content</p>
       </div>
       
       <%= render partial: 'content/shared/contributors_panel', locals: { 
@@ -530,18 +530,18 @@
   <!-- Settings View -->
   <div x-show="currentView === 'settings'" class="py-8 px-6 md:px-8 lg:px-12 max-w-5xl mx-auto">
     <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Page Settings</h2>
-      <p class="text-gray-600">Advanced settings for this <%= content.class_name.downcase %></p>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Page Settings</h2>
+      <p class="text-gray-600 dark:text-gray-400">Advanced settings for this <%= content.class_name.downcase %></p>
     </div>
     
     <div class="max-w-2xl space-y-6">
       <!-- Archive Section -->
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Archive Page</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Archive Page</h3>
         
-        <div class="border border-yellow-300 rounded-lg p-4 bg-yellow-50">
-          <h4 class="text-sm font-medium text-yellow-800 mb-2">Archive this <%= content.class_name.downcase %></h4>
-          <p class="text-sm text-yellow-700 mb-4">
+        <div class="border border-yellow-300 dark:border-yellow-800 rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900">
+          <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">Archive this <%= content.class_name.downcase %></h4>
+          <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
             Archiving will hide this page from your main lists and searches. You can restore it anytime from your archives.
           </p>
           <div class="flex items-center space-x-3">
@@ -551,13 +551,13 @@
                           confirm: "Are you sure you want to archive #{raw_content.name}? You can restore it later from your archives.",
                           'soft-delete': true 
                         },
-                        class: "inline-flex items-center px-4 py-2 border border-yellow-600 text-sm font-medium rounded-md text-yellow-700 bg-white hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" do %>
+                        class: "inline-flex items-center px-4 py-2 border border-yellow-600 dark:border-yellow-500 text-sm font-medium rounded-md text-yellow-700 dark:text-yellow-300 bg-white dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" do %>
               <i class="material-icons text-sm mr-2">archive</i>
               Archive this page
             <% end %>
             
             <%= link_to recently_deleted_content_path, 
-                        class: "inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-700 hover:text-yellow-800" do %>
+                        class: "inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200" do %>
               <i class="material-icons text-sm mr-1">restore</i>
               View archives
             <% end %>
@@ -566,17 +566,17 @@
       </div>
       
       <!-- Delete Section -->
-      <div class="bg-white rounded-lg shadow border border-gray-200 p-6">
-        <h3 class="text-lg font-medium text-red-900 mb-4">Danger Zone</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-medium text-red-900 dark:text-red-100 mb-4">Danger Zone</h3>
         
-        <div class="border border-red-300 rounded-lg p-4 bg-red-50">
-          <h4 class="text-sm font-medium text-red-800 mb-2">Delete this <%= content.class_name.downcase %></h4>
-          <p class="text-sm text-red-600 mb-4">
+        <div class="border border-red-300 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900">
+          <h4 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">Delete this <%= content.class_name.downcase %></h4>
+          <p class="text-sm text-red-600 dark:text-red-300 mb-4">
             Once deleted, this page cannot be recovered. All associated data will be permanently removed.
           </p>
           <button type="button" 
                   onclick="confirmDelete('<%= raw_content.name %>', '<%= polymorphic_path(raw_content) %>')"
-                  class="inline-flex items-center px-4 py-2 border border-red-600 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  class="inline-flex items-center px-4 py-2 border border-red-600 dark:border-red-500 text-sm font-medium rounded-md text-red-600 dark:text-red-300 bg-white dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
             <i class="material-icons text-sm mr-2">delete_forever</i>
             Delete this page
           </button>

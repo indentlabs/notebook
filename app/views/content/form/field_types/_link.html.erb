@@ -33,11 +33,11 @@
       <div class="flex flex-col items-center relative">
         <%# Closed state %>
         <div class="w-full">
-          <div @click="open()" class="flex border-0 border-l-4 border-r-4 border-gray-200 bg-white rounded-md cursor-pointer hover:border-gray-400 transition-colors shadow-sm">
+          <div @click="open()" class="flex border-0 border-l-4 border-r-4 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-md cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors shadow-sm">
             <div class="flex flex-auto flex-wrap">
               <%# Chips for all selected options %>
               <template x-for="(option,index) in selected" :key="index">
-                <div class="flex justify-center items-center m-1 font-medium py-1 px-1 bg-white rounded bg-gray-100 border hover:border-notebook-blue cursor-pointer">
+                <div class="flex justify-center items-center m-1 font-medium py-1 px-1 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-notebook-blue cursor-pointer">
                   <div class="text-xs font-normal leading-none max-w-full flex-initial inline-flex items-center" x-model="options[option]">
                     <span x-text="options[option].icon" class="material-icons text-xl leading-3" :class="`${options[option].icon_color}`"></span>
                     <span x-text="options[option].text" class="mr-1 px-1"></span>
@@ -59,7 +59,7 @@
               <%# Placeholder component for when no options are selected %>
               <div x-show="selected.length == 0" class="flex-1 pointer-events-none">
                 <input placeholder="Link your other pages"
-                       class="bg-transparent p-1 px-2 appearance-none outline-none border-none h-full w-full text-gray-800 cursor-pointer focus:outline-none focus:ring-0 focus:border-none"
+                       class="bg-transparent p-1 px-2 appearance-none outline-none border-none h-full w-full text-gray-800 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-0 focus:border-none"
                        x-bind:value="selectedValues()"
                        disabled
                        readonly
@@ -81,16 +81,16 @@
 
         <%# Opened state %>
         <div class="w-full">
-          <div x-show.transition.origin.top="isOpen()" class="absolute shadow-xl top-100 bg-white z-40 w-full left-0 rounded-lg border border-gray-200 overflow-hidden" x-on:click.away="close">
+          <div x-show.transition.origin.top="isOpen()" class="absolute shadow-xl top-100 bg-white dark:bg-gray-800 z-40 w-full left-0 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden" x-on:click.away="close">
 
             <%# Search box %>
-            <div class="p-3 border-b border-gray-200 bg-gray-50">
+            <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
               <input type="text"
                      x-model="searchQuery"
                      @input="filterOptions()"
                      placeholder="Search pages..."
                      x-ref="searchInput"
-                     class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                      @click.stop>
             </div>
 
@@ -109,13 +109,13 @@
                   <%# Options list %>
                   <div class="py-1">
                     <template x-for="(option, optionIndex) in optgroup.filteredOptions" :key="optionIndex">
-                      <div class="cursor-pointer hover:bg-blue-50 transition-colors"
+                      <div class="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors"
                            @click="select(option.index,$event)"
-                           :class="option.selected ? 'bg-blue-50' : ''">
+                           :class="option.selected ? 'bg-blue-50 dark:bg-blue-900' : ''">
                         <div class="flex items-center px-3 py-2.5 gap-3">
                           <%# Checkbox/checkmark %>
                           <div class="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
-                               :class="option.selected ? 'border-blue-500 bg-blue-500' : 'border-gray-300'">
+                               :class="option.selected ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-600'">
                             <svg x-show="option.selected" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
                             </svg>
@@ -123,12 +123,12 @@
 
                           <%# Page name %>
                           <div class="flex-1 min-w-0">
-                            <div class="text-sm font-medium text-gray-900 truncate" x-text="option.text"></div>
+                            <div class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="option.text"></div>
                           </div>
 
                           <%# Thumbnail %>
                           <div class="flex-shrink-0">
-                            <img :src="option.imageUrl" class="h-8 w-8 rounded-full object-cover border border-gray-200" :alt="option.text">
+                            <img :src="option.imageUrl" class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-700" :alt="option.text">
                           </div>
                         </div>
                       </div>
