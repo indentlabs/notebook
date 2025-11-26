@@ -29,67 +29,29 @@
   }
 </style>
 
-<div x-data="{
-  showNewFolderModal: false,
-  showEditFolderModal: false,
-  leftSidebarOpen: window.innerWidth >= 1280,
-  rightSidebarOpen: window.innerWidth >= 1536,
-  mobileMenuOpen: false,
-  viewMode: localStorage.getItem('documentsViewMode') || 'list',
-  searchQuery: '',
-  globalSearchQuery: '',
-  isSearching: false,
-  showFilters: false,
-  selectedDate: 'all',
-  selectedTags: []
-}" 
-x-init="
-  // Handle responsive sidebar behavior
-  window.addEventListener('resize', () => {
-    if (window.innerWidth < 1280) {
-      leftSidebarOpen = false;
-      rightSidebarOpen = false;
-    } else if (window.innerWidth < 1536) {
-      leftSidebarOpen = true;
-      rightSidebarOpen = false;
-    } else {
-      leftSidebarOpen = true;
-      rightSidebarOpen = true;
-    }
-  });
-"
-class="min-h-screen bg-gray-50">
+<div x-data="documentsIndexController()" 
+     x-init="init()"
+     class="min-h-screen bg-gray-50">
 
   <!-- Three Column Layout -->
   <div class="flex min-h-screen"> <!-- Natural height with sticky sidebars -->
     
-    <!-- Mobile Backdrop -->
-    <div x-show="(leftSidebarOpen || rightSidebarOpen) && window.innerWidth < 1280" 
-         x-transition:enter="transition-opacity ease-linear duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @click="leftSidebarOpen = false; rightSidebarOpen = false"
-         class="fixed inset-0 bg-black bg-opacity-25 z-40 lg:hidden"></div>
-
-    <!-- Left Sidebar - Quick Actions & Navigation -->
-    <aside x-show="leftSidebarOpen"
-           x-transition:enter="transition ease-out duration-300"
-           x-transition:enter-start="-translate-x-full"
-           x-transition:enter-end="translate-x-0"
-           x-transition:leave="transition ease-in duration-300"
-           x-transition:leave-start="translate-x-0"
-           x-transition:leave-end="-translate-x-full"
-           class="w-80 bg-white border-r border-b border-gray-200 flex-shrink-0 fixed lg:sticky lg:top-0 lg:self-start lg:max-h-screen overflow-y-auto z-40 top-0 h-full lg:h-auto pt-14 lg:pt-0 styled-scrollbar"
-           :class="{ 'translate-x-0': leftSidebarOpen, '-translate-x-full': !leftSidebarOpen }">
+    <!-- Left Column - Navigation (Desktop) -->
+    <div x-show="showLeftSidebar && isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         class="hidden xl:block w-80 bg-white border-r border-gray-200 shadow-sm flex-shrink-0 h-screen sticky top-0 overflow-y-auto styled-scrollbar">
       
-      <!-- Sidebar Header -->
-      <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-900">Quick Access</h2>
-        <button @click="leftSidebarOpen = false" class="lg:hidden p-1 text-gray-400 hover:text-gray-600">
-          <i class="material-icons">close</i>
+      <!-- Desktop Header with Title and Toggle Button -->
+      <div class="hidden xl:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
+        <button @click="toggleLeftSidebar()"
+                class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5"
+                title="Hide navigation"
+                aria-label="Hide navigation">
+          <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+          <i class="material-icons text-gray-600 text-lg mr-1.5">menu</i>
+          <h2 class="text-sm font-semibold text-gray-900">Quick Access</h2>
         </button>
       </div>
 
@@ -176,7 +138,153 @@ class="min-h-screen bg-gray-50">
           <p class="text-sm text-gray-500 italic">No folders yet</p>
         <% end %>
       </div>
-    </aside>
+    </div>
+
+    <!-- Mobile/Tablet Left Sidebar Overlay -->
+    <div x-show="showLeftSidebar && !isDesktop" x-cloak
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="showLeftSidebar = false"
+         class="xl:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+    </div>
+
+    <!-- Mobile/Tablet Left Sidebar -->
+    <div x-show="showLeftSidebar && !isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="xl:hidden fixed left-0 top-0 h-full w-80 bg-white border-r border-gray-200 shadow-xl z-50 overflow-y-auto styled-scrollbar">
+      
+      <!-- Sidebar Header -->
+      <div class="p-3 border-b border-gray-200 bg-white">
+        <button @click="showLeftSidebar = false"
+                class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Close navigation">
+          <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+          <i class="material-icons text-gray-600 text-lg mr-1.5">menu</i>
+          <h2 class="text-sm font-semibold text-gray-900">Quick Access</h2>
+        </button>
+      </div>
+
+      <!-- Recent Documents -->
+      <div class="p-4 border-b border-gray-200">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+            <i class="material-icons text-purple-500 text-sm mr-1">history</i>
+            Recent Documents
+          </h3>
+          <%= link_to new_document_path(folder: @current_folder&.id), class: "p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors", title: "New Document" do %>
+            <i class="material-icons text-sm">add</i>
+          <% end %>
+        </div>
+        <% if @recent_documents.any? %>
+          <div class="space-y-1">
+            <% @recent_documents.first(7).each do |document| %>
+              <%= link_to edit_document_path(document), class: "block group" do %>
+                <div class="px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-all duration-200 border border-transparent hover:border-gray-200">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1 min-w-0">
+                      <h4 class="text-sm font-medium text-gray-900 truncate group-hover:<%= Document.text_color %>">
+                        <%= document.title %>
+                      </h4>
+                      <div class="flex items-center mt-1 text-xs text-gray-500">
+                        <span><%= number_with_delimiter(document.cached_word_count || 0) %> words</span>
+                        <span class="mx-1">•</span>
+                        <span><%= time_ago_in_words(document.updated_at) %> ago</span>
+                      </div>
+                    </div>
+                    <% 
+                      time_diff = Time.current - document.updated_at
+                      recency_class = case
+                        when time_diff < 1.hour then "bg-red-500 animate-pulse"
+                        when time_diff < 6.hours then "bg-orange-500"
+                        when time_diff < 24.hours then "bg-yellow-500"
+                        else "bg-gray-400"
+                      end
+                    %>
+                    <div class="w-2 h-2 rounded-full <%= recency_class %> mt-1.5 ml-2 flex-shrink-0"></div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-500 italic">No recent documents</p>
+        <% end %>
+      </div>
+      
+      <!-- Frequent Folders -->
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-gray-900 flex items-center">
+            <i class="material-icons <%= Folder.text_color %> text-sm mr-1">folder_special</i>
+            Frequent Folders
+          </h3>
+          <button
+            @click="showNewFolderModal = true"
+            class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+            title="New Folder">
+            <i class="material-icons text-sm">add</i>
+          </button>
+        </div>
+        <% if @frequent_folders.any? %>
+          <div class="space-y-2">
+            <% @frequent_folders.each do |folder| %>
+              <%= link_to folder_path(folder), class: "block group" do %>
+                <div class="p-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <i class="material-icons <%= Folder.text_color %> text-sm mr-2">folder</i>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
+                      <%= folder.title %>
+                    </h4>
+                  </div>
+                  <span class="text-xs text-gray-500 ml-2">
+                    <%= folder.documents.count %> docs
+                  </span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-gray-500 italic">No folders yet</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
+    <div x-show="!showLeftSidebar && isDesktop" x-cloak
+         :style="{ left: siteSidebarVisible ? '15rem' : '0', top: '132px' }"
+         class="hidden xl:block fixed z-40 transition-all duration-300">
+      <button @click="toggleLeftSidebar()"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
+              data-tooltip="Show Navigation"
+              aria-label="Show Navigation">
+        <i class="material-icons text-base">menu</i>
+        <i class="material-icons text-base">chevron_right</i>
+      </button>
+    </div>
+
+    <!-- Mobile/Tablet Left Sidebar Toggle Tab -->
+    <div class="xl:hidden fixed left-0 z-40"
+         style="top: 110px;">
+      <button @click="toggleLeftSidebar()"
+              @keydown.escape="showLeftSidebar && toggleLeftSidebar()"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
+              :title="showLeftSidebar ? 'Close navigation' : 'Open navigation'"
+              :aria-label="showLeftSidebar ? 'Close navigation' : 'Open navigation'"
+              :aria-expanded="showLeftSidebar">
+        <i class="material-icons text-base" x-show="!showLeftSidebar">menu</i>
+        <i class="material-icons text-base" x-show="!showLeftSidebar">chevron_right</i>
+        <i class="material-icons text-base" x-show="showLeftSidebar">chevron_left</i>
+      </button>
+    </div>
     
     <!-- Main Content Area -->
     <main class="flex-1 min-w-0 flex flex-col">
@@ -204,14 +312,7 @@ class="min-h-screen bg-gray-50">
         <div class="px-6 py-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2 sm:space-x-4">
-              <!-- Left Sidebar Toggle -->
-              <button
-                @click="leftSidebarOpen = !leftSidebarOpen"
-                class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                :class="{ 'bg-gray-100 text-gray-600': leftSidebarOpen }"
-              >
-                <i class="material-icons" x-text="leftSidebarOpen ? 'menu_open' : 'menu'"></i>
-              </button>
+
               <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
                 <%= @current_folder ? @current_folder.title : 'Documents' %>
                 <% if params[:q].present? %>
@@ -234,14 +335,7 @@ class="min-h-screen bg-gray-50">
                 </button>
               <% end %>
 
-              <!-- Right Sidebar Toggle -->
-              <button
-                @click="rightSidebarOpen = !rightSidebarOpen"
-                class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                :class="{ 'bg-gray-100 text-gray-600': rightSidebarOpen }"
-              >
-                <i class="material-icons">insights</i>
-              </button>
+
             </div>
           </div>
         </div>
@@ -673,21 +767,22 @@ class="min-h-screen bg-gray-50">
     </main>
     
     <!-- Right Sidebar - Writing Stats -->
-    <aside x-show="rightSidebarOpen"
-           x-transition:enter="transition ease-out duration-300"
-           x-transition:enter-start="translate-x-full"
-           x-transition:enter-end="translate-x-0"
-           x-transition:leave="transition ease-in duration-300"
-           x-transition:leave-start="translate-x-0"
-           x-transition:leave-end="translate-x-full"
-           class="w-80 bg-white border-l border-b border-gray-200 flex-shrink-0 fixed lg:sticky lg:top-0 lg:self-start lg:max-h-screen overflow-y-auto z-40 right-0 lg:right-auto top-0 h-full lg:h-auto pt-14 lg:pt-0 styled-scrollbar"
-           :class="{ 'translate-x-0': rightSidebarOpen, 'translate-x-full': !rightSidebarOpen }">
-      
-      <!-- Sidebar Header -->
-      <div class="p-6 border-b border-gray-200 flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-900">Writing Stats</h2>
-        <button @click="rightSidebarOpen = false" class="lg:hidden p-1 text-gray-400 hover:text-gray-600">
-          <i class="material-icons">close</i>
+    <!-- Right Column - Desktop (Toggleable) -->
+    <div x-show="showRightSidebar" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         class="hidden xl:block w-80 bg-white border-l border-gray-200 flex-shrink-0 h-screen sticky top-0 overflow-y-auto styled-scrollbar">
+
+      <!-- Desktop Header with Title and Toggle Button -->
+      <div class="hidden xl:flex items-center justify-between p-3 border-b border-gray-200 bg-white">
+        <button @click="toggleRightSidebar()"
+                class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5"
+                title="Hide writing stats"
+                aria-label="Hide writing stats">
+          <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+          <i class="material-icons text-gray-600 text-lg mr-1.5">insights</i>
+          <h2 class="text-sm font-semibold text-gray-900">Writing Stats</h2>
         </button>
       </div>
       
@@ -801,9 +896,182 @@ class="min-h-screen bg-gray-50">
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- Desktop Collapsed Toggle Tab -->
+    <div x-show="!showRightSidebar && isDesktop" x-cloak
+         class="hidden xl:block fixed right-0 z-40"
+         style="top: 132px;">
+      <button @click="toggleRightSidebar()"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              data-tooltip="Show Writing Stats"
+              aria-label="Show Writing Stats">
+        <i class="material-icons text-base">chevron_left</i>
+        <i class="material-icons text-base">insights</i>
+      </button>
+    </div>
 
-    </aside>
+    <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
+    <div class="xl:hidden fixed right-0 z-40"
+         style="top: 116px;">
+      <button @click="toggleRightSidebar()"
+              @keydown.escape="showRightSidebar && toggleRightSidebar()"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
+              :title="showRightSidebar ? 'Close writing stats' : 'Open writing stats'"
+              :aria-label="showRightSidebar ? 'Close writing stats' : 'Open writing stats'"
+              :aria-expanded="showRightSidebar">
+        <i class="material-icons text-base" x-show="!showRightSidebar">insights</i>
+        <i class="material-icons text-base" x-show="!showRightSidebar">chevron_left</i>
+        <i class="material-icons text-base" x-show="showRightSidebar">chevron_right</i>
+      </button>
+    </div>
+
+    <!-- Mobile/Tablet Right Sidebar Overlay -->
+    <div x-show="showRightSidebar" x-cloak
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="closeMobileSidebar()"
+         @keydown.escape.window="closeMobileSidebar()"
+         class="xl:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+    </div>
+
+    <!-- Mobile/Tablet Right Sidebar -->
+    <div x-show="showRightSidebar" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         @keydown.escape="closeMobileSidebar()"
+         class="xl:hidden fixed right-0 top-0 h-full w-80 bg-white border-l border-gray-200 shadow-xl z-50 overflow-y-auto styled-scrollbar">
+
+      <!-- Close button -->
+      <div class="p-3 border-b border-gray-200 bg-white">
+        <button @click="closeMobileSidebar()"
+                class="flex items-center hover:bg-gray-100 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Close writing stats">
+          <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+          <i class="material-icons text-gray-600 text-lg mr-1.5">insights</i>
+          <h2 class="text-sm font-semibold text-gray-900">Writing Stats</h2>
+        </button>
+      </div>
+      
+      <!-- Overall Stats -->
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Overall Statistics</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Documents</span>
+            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@documents.count) %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Folders</span>
+            <span class="text-sm font-medium text-gray-900"><%= @folders.count %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Total Words</span>
+            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@documents.map(&:cached_word_count).compact.sum) %></span>
+          </div>
+        </div>
+
+        <!-- Data Vault Link Card -->
+        <%= link_to data_documents_path, class: "block group mt-4 -mx-4" do %>
+          <div class="bg-amber-900 rounded-lg px-4 py-2 hover:bg-amber-800 transition-colors">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <i class="material-icons text-white text-lg">analytics</i>
+                <span class="text-xs font-medium text-white">More statistics in your Data Vault</span>
+              </div>
+              <i class="material-icons text-white text-lg group-hover:translate-x-1 transition-transform">arrow_forward</i>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Today's Progress -->
+      <div class="p-6 border-b border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-900 mb-4">Today's Progress</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Words Today</span>
+            <span class="text-sm font-bold text-green-600"><%= number_with_delimiter(@words_written_today) %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600">Words This Week</span>
+            <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@words_written_this_week) %></span>
+          </div>
+        </div>
+        
+        <!-- Progress bar for daily goal (future feature) -->
+        <div class="mt-4">
+          <div class="flex justify-between text-xs text-gray-500 mb-1">
+            <span>Daily Goal</span>
+            <span>1,000 words</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-green-500 h-2 rounded-full" style="width: <%= [@words_written_today.to_f / 1000 * 100, 100].min %>%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Writing Streak -->
+      <div class="p-6">
+        <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+          <i class="material-icons text-orange-500 text-sm mr-1">whatshot</i>
+          Writing Streak
+        </h3>
+        <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            <%
+              # Calculate words written for each of the last 7 days
+              (6.downto(0)).each do |days_ago|
+                date = Date.current - days_ago
+                words_for_day = WordCountUpdate
+                  .where(user: current_user, for_date: date)
+                  .sum(:word_count)
+
+                # Determine opacity based on word count
+                opacity_class = if words_for_day >= 1000
+                  "bg-green-600"
+                elsif words_for_day >= 500
+                  "bg-green-400"
+                elsif words_for_day >= 100
+                  "bg-green-300"
+                elsif words_for_day > 0
+                  "bg-green-200"
+                else
+                  "bg-gray-200"
+                end
+
+                is_today = days_ago == 0
+            %>
+              <div class="relative group">
+                <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400' : '' %> transition-colors hover:opacity-80"
+                     title="<%= date.strftime('%b %d') %>: <%= number_with_delimiter(words_for_day) %> words"></div>
+                <div class="text-center mt-0.5">
+                  <span class="text-xs text-gray-400"><%= date.strftime('%a')[0] %></span>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="pt-2 border-t border-gray-200">
+            <div class="flex justify-between items-baseline">
+              <div class="text-xs text-gray-600">
+                Today: <span class="font-medium <%= @words_written_today > 0 ? 'text-green-600' : 'text-gray-400' %>"><%= number_with_delimiter(@words_written_today) %></span>
+              </div>
+              <div class="text-xs text-gray-600">
+                Week: <span class="font-medium text-gray-700"><%= number_with_delimiter(@words_written_this_week) %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   
   <!-- New Folder Modal -->
@@ -862,4 +1130,127 @@ class="min-h-screen bg-gray-50">
       window.location.href = '<%= new_document_path(folder: @current_folder&.id) %>';
     }
   });
+</script>
+
+<script>
+function documentsIndexController() {
+  return {
+    showNewFolderModal: false,
+    showEditFolderModal: false,
+    
+    // Sidebar states
+    showLeftSidebar: (() => {
+      return window.innerWidth >= 1280; // Default open on xl+ (matching original logic)
+    })(),
+    showRightSidebar: false,
+    
+    // Breakpoint checks
+    isDesktop: window.innerWidth >= 1280, // xl breakpoint for left sidebar
+    isXlDesktop: window.innerWidth >= 1280, // xl breakpoint for right sidebar (matching content#edit)
+    
+    // Other state
+    mobileMenuOpen: false,
+    viewMode: localStorage.getItem('documentsViewMode') || 'list',
+    searchQuery: '',
+    globalSearchQuery: '',
+    isSearching: false,
+    showFilters: false,
+    selectedDate: 'all',
+    selectedTags: [],
+    
+    // Site sidebar sync
+    siteSidebarVisible: false,
+
+    init() {
+      // Initialize right sidebar state
+      this.initializeSidebarState();
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        // Left Sidebar Logic (xl breakpoint)
+        this.isDesktop = window.innerWidth >= 1280;
+        if (window.innerWidth >= 1280) {
+          this.showLeftSidebar = true;
+        } else {
+          this.showLeftSidebar = false;
+        }
+
+        // Right Sidebar Logic (xl breakpoint)
+        const wasXlDesktop = this.isXlDesktop;
+        this.isXlDesktop = window.innerWidth >= 1280;
+
+        // When transitioning from mobile to desktop (xl), restore saved right sidebar state
+        if (!wasXlDesktop && this.isXlDesktop) {
+          this.showRightSidebar = this.getSavedSidebarState();
+        }
+        // When transitioning from desktop (xl) to mobile, always close right sidebar
+        if (wasXlDesktop && !this.isXlDesktop) {
+          this.showRightSidebar = false;
+        }
+      });
+      
+      this.syncSiteSidebarState();
+    },
+    
+    initializeSidebarState() {
+      if (this.isXlDesktop) {
+        this.showRightSidebar = this.getSavedSidebarState();
+      } else {
+        this.showRightSidebar = false;
+      }
+    },
+
+    getSavedSidebarState() {
+      try {
+        const saved = localStorage.getItem('documents_index_right_sidebar_visible');
+        return saved === null ? true : saved === 'true';
+      } catch (e) {
+        return true;
+      }
+    },
+
+    saveSidebarState() {
+      try {
+        localStorage.setItem('documents_index_right_sidebar_visible', this.showRightSidebar.toString());
+      } catch (e) {}
+    },
+
+    toggleLeftSidebar() {
+      this.showLeftSidebar = !this.showLeftSidebar;
+    },
+
+    toggleRightSidebar() {
+      this.showRightSidebar = !this.showRightSidebar;
+      if (this.isXlDesktop) {
+        this.saveSidebarState();
+      }
+    },
+
+    closeMobileSidebar() {
+      if (!this.isXlDesktop) {
+        this.showRightSidebar = false;
+      }
+    },
+    
+    syncSiteSidebarState() {
+      const updateFromStorage = () => {
+        try {
+          const saved = localStorage.getItem('site_navigation_sidebar_visible');
+          const isOpenFromStorage = saved === null ? true : saved === 'true';
+          const siteSidebar = document.querySelector('.notebook--sidebar');
+          const isVisibleInDOM = siteSidebar && window.getComputedStyle(siteSidebar).display !== 'none';
+          const actualState = isVisibleInDOM !== undefined ? isVisibleInDOM : isOpenFromStorage;
+          
+          if (this.siteSidebarVisible !== actualState) {
+            this.siteSidebarVisible = actualState;
+          }
+        } catch (e) {}
+      };
+      
+      updateFromStorage();
+      window.addEventListener('storage', updateFromStorage);
+      setInterval(updateFromStorage, 200);
+    }
+  }
+}
 </script>
