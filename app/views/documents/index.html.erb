@@ -272,12 +272,12 @@
     </div>
 
     <!-- Mobile/Tablet Left Sidebar Toggle Tab -->
-    <div class="xl:hidden fixed left-0 z-40"
-         style="top: 110px;">
+    <div class="xl:hidden fixed left-0 z-30"
+         style="top: 132px;">
       <button @click="toggleLeftSidebar()"
               @keydown.escape="showLeftSidebar && toggleLeftSidebar()"
-              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
-              :title="showLeftSidebar ? 'Close navigation' : 'Open navigation'"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1 tooltip-right"
+              :data-tooltip="showLeftSidebar ? 'Hide Navigation' : 'Show Navigation'"
               :aria-label="showLeftSidebar ? 'Close navigation' : 'Open navigation'"
               :aria-expanded="showLeftSidebar">
         <i class="material-icons text-base" x-show="!showLeftSidebar">menu</i>
@@ -292,7 +292,7 @@
       <div class="bg-white border-b border-gray-200">
         <!-- Breadcrumb Navigation (if in folder) -->
         <% if @current_folder %>
-          <div class="px-6 pt-3 pb-2 border-b border-gray-100">
+          <div class="px-4 sm:px-6 pt-3 pb-2 border-b border-gray-100">
             <nav class="flex items-center space-x-2 text-sm">
               <%= link_to documents_path, class: "text-gray-500 hover:text-gray-700 transition-colors" do %>
                 <i class="material-icons text-sm">folder</i>
@@ -309,7 +309,7 @@
           </div>
         <% end %>
 
-        <div class="px-6 py-4">
+        <div class="px-4 sm:px-6 py-4">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-2 sm:space-x-4">
 
@@ -341,34 +341,32 @@
         </div>
         
         <!-- Filter Bar -->
-        <div class="px-4 sm:px-6 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <!-- Search -->
-            <div class="relative flex-1 sm:flex-initial">
-              <input
-                x-model="searchQuery"
-                type="text"
-                placeholder="Filter current view..."
-                class="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-              />
-              <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
-            </div>
-            
-            <div class="flex items-center gap-3">
-              <!-- View Toggle -->
-              <div class="flex border border-gray-300 rounded-lg bg-white shadow-sm">
-                <button @click="viewMode = 'list'; localStorage.setItem('documentsViewMode', 'list')" :class="viewMode === 'list' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg" title="List View">
-                  <i class="material-icons text-sm">view_list</i>
-                </button>
-                <button @click="viewMode = 'timeline'; localStorage.setItem('documentsViewMode', 'timeline')" :class="viewMode === 'timeline' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg" title="Timeline View">
-                  <i class="material-icons text-sm">timeline</i>
-                </button>
-              </div>
+        <div class="px-4 sm:px-6 pb-4 flex flex-wrap items-center gap-3">
+          <!-- Search -->
+          <div class="relative flex-grow min-w-[140px]">
+            <input
+              x-model="searchQuery"
+              type="text"
+              placeholder="Filter current view..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+            <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
+          </div>
+          
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <!-- View Toggle -->
+            <div class="flex border border-gray-300 rounded-lg bg-white shadow-sm">
+              <button @click="viewMode = 'list'; localStorage.setItem('documentsViewMode', 'list')" :class="viewMode === 'list' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-l-lg" title="List View">
+                <i class="material-icons text-sm">view_list</i>
+              </button>
+              <button @click="viewMode = 'timeline'; localStorage.setItem('documentsViewMode', 'timeline')" :class="viewMode === 'timeline' ? 'bg-blue-50 text-blue-700' : 'text-gray-500 hover:text-gray-700'" class="p-2 rounded-r-lg" title="Timeline View">
+                <i class="material-icons text-sm">timeline</i>
+              </button>
             </div>
           </div>
 
           <!-- Filter Controls with Responsive Behavior -->
-          <div class="flex items-center gap-1.5 flex-wrap">
+          <div class="flex items-center gap-1.5 flex-shrink-0">
             <!-- Compact Filters Dropdown (shown when very tight on space) -->
             <div class="relative lg:hidden" x-data="{ open: false }" @click.away="open = false">
               <button @click="open = !open"
@@ -703,12 +701,12 @@
                             
                             <!-- Document info -->
                             <div class="min-w-0 flex-1">
-                              <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-4">
+                              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <div class="flex items-center space-x-4 mb-1 sm:mb-0">
                                   <h3 class="text-sm font-medium text-gray-900 truncate"><%= document.title %></h3>
                                 </div>
-                                <div class="flex items-center space-x-6 text-xs">
-                                  <span class="text-gray-600 font-medium">
+                                <div class="flex items-center space-x-3 sm:space-x-6 text-xs">
+                                  <span class="text-gray-600 font-medium flex items-center">
                                     <i class="material-icons text-xs mr-0.5 <%= Document.text_color %> align-middle">description</i>
                                     <%= number_with_delimiter(document.cached_word_count || 0) %> words
                                   </span>
@@ -916,8 +914,8 @@
          style="top: 116px;">
       <button @click="toggleRightSidebar()"
               @keydown.escape="showRightSidebar && toggleRightSidebar()"
-              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
-              :title="showRightSidebar ? 'Close writing stats' : 'Open writing stats'"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1 tooltip-left"
+              :data-tooltip="showRightSidebar ? 'Hide Writing Stats' : 'Show Writing Stats'"
               :aria-label="showRightSidebar ? 'Close writing stats' : 'Open writing stats'"
               :aria-expanded="showRightSidebar">
         <i class="material-icons text-base" x-show="!showRightSidebar">insights</i>
