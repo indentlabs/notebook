@@ -36,17 +36,17 @@
   <!-- Referenced in Timelines Section -->
   <% if linked_timelines.any? %>
     <div class="mb-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
         <i class="material-icons text-xl <%= content.class_text_color %> mr-2">timeline</i>
         Referenced in Timelines
-        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">
+        <span class="ml-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm px-2 py-1 rounded-full">
           <%= linked_timelines.count %>
         </span>
       </h3>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <% linked_timelines.each do |timeline| %>
-          <div class="timeline-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+          <div class="timeline-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
             <%= link_to timeline, class: "block p-6" do %>
               <div class="flex items-start space-x-4">
                 <!-- Timeline Icon -->
@@ -58,19 +58,19 @@
                 
                 <!-- Timeline Info -->
                 <div class="flex-1 min-w-0">
-                  <h4 class="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
+                  <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                     <%= timeline.name %>
                   </h4>
                   
                   <% if timeline.respond_to?(:description) && timeline.description.present? %>
-                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                       <%= truncate(strip_tags(timeline.description), length: 120) %>
                     </p>
                   <% end %>
                   
                   <div class="flex items-center justify-between">
-                    <p class="text-xs text-indigo-600 font-medium">Timeline</p>
-                    <div class="flex items-center text-xs text-gray-500">
+                    <p class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Timeline</p>
+                    <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
                       <% if timeline.respond_to?(:timeline_events) %>
                         <i class="material-icons text-sm mr-1">event</i>
                         <%= pluralize(timeline.timeline_events.count, 'event') %>
@@ -81,7 +81,7 @@
                 
                 <!-- Arrow -->
                 <div class="flex-shrink-0 mt-1">
-                  <i class="material-icons text-gray-400">chevron_right</i>
+                  <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
                 </div>
               </div>
             <% end %>
@@ -94,10 +94,10 @@
   <!-- Appears in Timeline Events Section -->
   <% if mentioned_in_timelines.any? %>
     <div class="mb-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
         <i class="material-icons text-xl <%= content.class_text_color %> mr-2">event</i>
         Appears in Timeline Events
-        <span class="ml-2 bg-gray-100 text-gray-600 text-sm px-2 py-1 rounded-full">
+        <span class="ml-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm px-2 py-1 rounded-full">
           <%= mentioned_in_timelines.count %>
         </span>
       </h3>
@@ -106,7 +106,7 @@
         <% mentioned_in_timelines.each do |timeline| %>
           <% timeline_events = raw_content.timeline_events.where(timeline: timeline).limit(3) %>
           
-          <div class="timeline-event-card bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div class="timeline-event-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <%= link_to timeline, class: "block mb-4" do %>
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -114,25 +114,25 @@
                     <i class="material-icons text-white text-lg">timeline</i>
                   </div>
                   <div>
-                    <h4 class="text-base font-semibold text-gray-900"><%= timeline.name %></h4>
-                    <p class="text-sm text-indigo-600">Timeline</p>
+                    <h4 class="text-base font-semibold text-gray-900 dark:text-white"><%= timeline.name %></h4>
+                    <p class="text-sm text-indigo-600 dark:text-indigo-400">Timeline</p>
                   </div>
                 </div>
-                <i class="material-icons text-gray-400">chevron_right</i>
+                <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
               </div>
             <% end %>
             
             <!-- Sample Events -->
-            <div class="mt-4 pl-4 border-l-2 border-indigo-200">
-              <h5 class="text-sm font-medium text-gray-700 mb-3">Related Events:</h5>
+            <div class="mt-4 pl-4 border-l-2 border-indigo-200 dark:border-indigo-800">
+              <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Related Events:</h5>
               <div class="space-y-2">
                 <% timeline_events.each do |event| %>
                   <div class="flex items-start space-x-3">
                     <div class="w-2 h-2 bg-indigo-400 rounded-full mt-2 flex-shrink-0"></div>
                     <div class="flex-1">
-                      <p class="text-sm text-gray-900 font-medium"><%= event.title %></p>
+                      <p class="text-sm text-gray-900 dark:text-white font-medium"><%= event.title %></p>
                       <% if event.time_label.present? %>
-                        <p class="text-xs text-gray-500"><%= event.time_label %></p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400"><%= event.time_label %></p>
                       <% end %>
                     </div>
                   </div>
@@ -140,8 +140,8 @@
                 
                 <% if raw_content.timeline_events.where(timeline: timeline).count > 3 %>
                   <div class="flex items-center space-x-3">
-                    <div class="w-2 h-2 bg-gray-300 rounded-full flex-shrink-0"></div>
-                    <p class="text-xs text-gray-500">
+                    <div class="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full flex-shrink-0"></div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
                       +<%= raw_content.timeline_events.where(timeline: timeline).count - 3 %> more events
                     </p>
                   </div>
@@ -157,7 +157,7 @@
   <!-- View All Timelines Link -->
   <div class="text-center">
     <%= link_to "/timelines", 
-                class: "inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                class: "inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
       <i class="material-icons text-lg mr-2">timeline</i>
       Browse All Timelines
       <i class="material-icons text-sm ml-2">open_in_new</i>
@@ -167,11 +167,11 @@
 <% else %>
   <!-- Empty timelines state -->
   <div class="text-center py-12">
-    <div class="mx-auto h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-      <i class="material-icons text-2xl text-gray-400">timeline</i>
+    <div class="mx-auto h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4">
+      <i class="material-icons text-2xl text-gray-400 dark:text-gray-500">timeline</i>
     </div>
-    <h3 class="text-lg font-medium text-gray-900 mb-2">No timeline connections yet</h3>
-    <p class="text-gray-500 mb-6 max-w-md mx-auto">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No timeline connections yet</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
       This <%= content.class_name.downcase %> isn't connected to any timelines yet. 
       Timelines help organize events chronologically and show how your content fits into the broader history of your world.
     </p>
@@ -179,7 +179,7 @@
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <!-- Browse timelines -->
       <%= link_to "/timelines", 
-                  class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
         <i class="material-icons text-lg mr-2">explore</i>
         Browse Timelines
       <% end %>
@@ -195,7 +195,7 @@
     </div>
     
     <div class="mt-6">
-      <p class="text-xs text-gray-400 max-w-lg mx-auto">
+      <p class="text-xs text-gray-400 dark:text-gray-500 max-w-lg mx-auto">
         Tip: Create timelines to organize important events in your world's history. Link characters, locations, and other content to specific events to build rich, interconnected narratives.
       </p>
     </div>

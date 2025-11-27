@@ -20,19 +20,19 @@
   <!-- Collections Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% published_collections.each do |collection| %>
-      <div class="collection-card bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+      <div class="collection-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
         <%= link_to collection, class: "block" do %>
           
           <!-- Collection Header -->
           <div class="p-6">
             <div class="flex items-start justify-between mb-4">
               <div class="flex-1">
-                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                   <%= collection.name %>
                 </h3>
                 
                 <% if collection.respond_to?(:description) && collection.description.present? %>
-                  <p class="text-sm text-gray-600 line-clamp-3 mb-3">
+                  <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">
                     <%= truncate(strip_tags(collection.description), length: 150) %>
                   </p>
                 <% end %>
@@ -40,14 +40,14 @@
               
               <!-- Collection Icon -->
               <div class="flex-shrink-0 ml-4">
-                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <i class="material-icons text-purple-600 text-xl">collections_bookmark</i>
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                  <i class="material-icons text-purple-600 dark:text-purple-200 text-xl">collections_bookmark</i>
                 </div>
               </div>
             </div>
             
             <!-- Collection Stats -->
-            <div class="flex items-center justify-between text-xs text-gray-500">
+            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
               <div class="flex items-center space-x-4">
                 <% if collection.respond_to?(:page_collections) %>
                   <span class="flex items-center">
@@ -65,7 +65,7 @@
               </div>
               
               <!-- Published badge -->
-              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                 <i class="material-icons text-xs mr-1">public</i>
                 Published
               </span>
@@ -74,9 +74,9 @@
           
           <!-- Collection Preview (if it has cover images) -->
           <% if collection.respond_to?(:page_collections) && collection.page_collections.limit(3).any? %>
-            <div class="border-t border-gray-100 px-6 py-4 bg-gray-50">
+            <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4 bg-gray-50 dark:bg-gray-700/30">
               <div class="flex items-center space-x-2">
-                <span class="text-xs text-gray-500 mr-2">Also includes:</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 mr-2">Also includes:</span>
                 <div class="flex items-center space-x-1 flex-wrap">
                   <% collection.page_collections.includes(:page).limit(3).each_with_index do |page_collection, index| %>
                     <% next unless page_collection.page %>
@@ -91,12 +91,12 @@
                       </span>
                     </div>
                     <% unless index == 2 || index == collection.page_collections.limit(3).count - 1 %>
-                      <span class="text-xs text-gray-400">•</span>
+                      <span class="text-xs text-gray-400 dark:text-gray-500">•</span>
                     <% end %>
                   <% end %>
                   
                   <% if collection.page_collections.count > 3 %>
-                    <span class="text-xs text-gray-400">
+                    <span class="text-xs text-gray-400 dark:text-gray-500">
                       +<%= collection.page_collections.count - 3 %> more
                     </span>
                   <% end %>
@@ -114,7 +114,7 @@
   <% if raw_content.respond_to?(:page_collections) && raw_content.page_collections.count > published_collections.count %>
     <div class="mt-8 text-center">
       <%= link_to send("collections_#{raw_content.class.name.downcase}_path", raw_content), 
-                  class: "inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  class: "inline-flex items-center px-6 py-3 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
         <i class="material-icons text-lg mr-2">collections_bookmark</i>
         View All Collections
         <i class="material-icons text-sm ml-2">open_in_new</i>
@@ -125,11 +125,11 @@
 <% else %>
   <!-- Empty collections state -->
   <div class="text-center py-12">
-    <div class="mx-auto h-16 w-16 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
-      <i class="material-icons text-2xl text-gray-400">collections_bookmark</i>
+    <div class="mx-auto h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4">
+      <i class="material-icons text-2xl text-gray-400 dark:text-gray-500">collections_bookmark</i>
     </div>
-    <h3 class="text-lg font-medium text-gray-900 mb-2">Not in any collections yet</h3>
-    <p class="text-gray-500 mb-6 max-w-md mx-auto">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Not in any collections yet</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
       This <%= content.class_name.downcase %> hasn't been published in any collections yet. 
       Collections are curated groups of related content that help organize and showcase your world.
     </p>
@@ -137,7 +137,7 @@
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <!-- Browse collections -->
       <%= link_to "/collections", 
-                  class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
         <i class="material-icons text-lg mr-2">explore</i>
         Browse Collections
       <% end %>
@@ -153,7 +153,7 @@
     </div>
     
     <div class="mt-6">
-      <p class="text-xs text-gray-400 max-w-lg mx-auto">
+      <p class="text-xs text-gray-400 dark:text-gray-500 max-w-lg mx-auto">
         Tip: Collections are a great way to group related content together and share themed stories or worldbuilding elements with others.
       </p>
     </div>

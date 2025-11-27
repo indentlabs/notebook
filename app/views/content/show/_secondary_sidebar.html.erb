@@ -13,11 +13,11 @@
       preview_image = get_preview_image(regular_images, basil_images)
     %>
     
-    <div class="pb-4 border-b border-gray-200">
+    <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
       <button @click="switchView('gallery')" 
               class="block group w-full text-left" 
               title="View full gallery">
-        <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100">
+        <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100 dark:bg-gray-800">
           <% if preview_image.present? %>
             <% image_type = preview_image[:type] %>
             <% image_data = preview_image[:data] %>
@@ -52,16 +52,16 @@
         </div>
         
         <div class="mt-3 text-center">
-          <p class="text-sm font-medium text-gray-900">View Gallery</p>
-          <p class="text-xs text-gray-500">Click to see all images</p>
+          <p class="text-sm font-medium text-gray-900 dark:text-white">View Gallery</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Click to see all images</p>
         </div>
       </button>
     </div>
     
     <!-- Tools -->
     <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
-      <div class="pb-4 border-b border-gray-200">
-        <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+      <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
           <i class="material-icons text-sm <%= content.class_text_color %> mr-2">build</i>
           Tools
         </h2>
@@ -69,12 +69,12 @@
         <div class="w-full">
           <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
                       target: "_blank",
-                      class: "group flex items-center justify-between p-3 w-full rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 bg-white" do %>
+                      class: "group flex items-center justify-between p-3 w-full rounded-lg border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900 transition-all duration-200 bg-white dark:bg-gray-800" do %>
             <div class="flex items-center">
               <i class="material-icons text-xl text-gray-400 group-hover:text-purple-500 mr-3">visibility</i>
               <div>
-                <div class="font-medium text-gray-700 group-hover:text-purple-700 text-sm">Visualize</div>
-                <div class="text-xs text-gray-500 group-hover:text-purple-600">Generate images</div>
+                <div class="font-medium text-gray-700 dark:text-gray-300 group-hover:text-purple-700 dark:group-hover:text-purple-300 text-sm">Visualize</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-purple-600 dark:group-hover:text-purple-400">Generate images</div>
               </div>
             </div>
             <i class="material-icons text-gray-400 group-hover:text-purple-500 text-lg">arrow_outward</i>
@@ -86,18 +86,18 @@
     <!-- Community -->
     <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
     <% if forum_url %>
-      <div class="pb-4 border-b border-gray-200">
-        <h2 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
+      <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
           <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
           Community
         </h2>
         
         <div class="space-y-2">
-          <%= link_to forum_url, target: "_blank", class: "group flex items-center p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors" do %>
+          <%= link_to forum_url, target: "_blank", class: "group flex items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors" do %>
             <i class="material-icons text-base text-gray-400 group-hover:text-blue-500 mr-3">forum</i>
             <div class="flex-1">
-              <div class="text-sm font-medium text-gray-900 group-hover:text-blue-700"><%= content.class_name.pluralize %> Forum</div>
-              <div class="text-xs text-gray-500">Discuss <%= content.class_name.pluralize.downcase %> with others</div>
+              <div class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300"><%= content.class_name.pluralize %> Forum</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Discuss <%= content.class_name.pluralize.downcase %> with others</div>
             </div>
             <i class="material-icons text-xs text-gray-400 group-hover:text-blue-500">open_in_new</i>
           <% end %>
@@ -111,11 +111,11 @@
 <!-- Custom styling for the secondary sidebar -->
 <style>
 .secondary-sidebar-item {
-  @apply flex items-center p-2 text-sm text-gray-600 rounded-md hover:bg-gray-100 transition-colors cursor-pointer;
+  @apply flex items-center p-2 text-sm text-gray-600 dark:text-gray-400 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer;
 }
 
 .secondary-sidebar-item:hover {
-  @apply text-gray-900;
+  @apply text-gray-900 dark:text-white;
 }
 
 .secondary-sidebar-section {
@@ -123,6 +123,6 @@
 }
 
 .secondary-sidebar-header {
-  @apply text-sm font-semibold text-gray-900 flex items-center;
+  @apply text-sm font-semibold text-gray-900 dark:text-white flex items-center;
 }
 </style>

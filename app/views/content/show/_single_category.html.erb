@@ -2,7 +2,7 @@
 
 <% if has_content %>
   <!-- Clean category container focused on content -->
-  <div class="category-section bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" id="category-<%= category[:label].parameterize %>">
+  <div class="category-section bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden" id="category-<%= category[:label].parameterize %>">
     <!-- Category Fields - clean vertical layout -->
     <div class="p-8">
       <div class="space-y-10">
@@ -19,7 +19,7 @@
             </dt>
             
             <!-- Field Content -->
-            <dd class="text-gray-800 leading-relaxed">
+            <dd class="text-gray-800 dark:text-gray-300 leading-relaxed">
               <%=
                 case field[:type]
                 when 'name'
@@ -33,7 +33,7 @@
                 when 'tags'
                   render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
                 else
-                  content_tag(:div, simple_format(field[:value]), class: "prose prose-gray prose-lg max-w-none leading-relaxed")
+                  content_tag(:div, simple_format(field[:value]), class: "prose prose-gray dark:prose-invert prose-lg max-w-none leading-relaxed")
                 end
               %>
             </dd>
@@ -45,13 +45,13 @@
 <% else %>
   <!-- Empty category state -->
   <div class="text-center py-12">
-    <div class="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-      <i class="material-icons text-2xl text-gray-400"><%= category[:icon] %></i>
+    <div class="mx-auto h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+      <i class="material-icons text-2xl text-gray-400 dark:text-gray-500"><%= category[:icon] %></i>
     </div>
-    <h3 class="text-lg font-medium text-gray-900 mb-2">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
       No <%= category[:label].downcase %> information yet
     </h3>
-    <p class="text-gray-500 mb-6">
+    <p class="text-gray-500 dark:text-gray-400 mb-6">
       This section doesn't have any information filled in yet.
     </p>
     <% if defined?(raw_content) && raw_content.updatable_by?(current_user) %>
