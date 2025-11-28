@@ -1,33 +1,23 @@
-<li class="flex">
-  <div class="flex items-center">
-    <%= link_to main_app.thredded_path, class: 'px-2 py-1 -mx-2 -my-1 text-gray-400 hover:text-blue-500 rounded transition-colors' do %>
-      <i class="material-icons flex-shrink-0 relative top-1">forum</i>
-      <span class="sr-only">Home</span>
-    <% end %>
-  </div>
+<li class="flex items-center">
+  <%= link_to main_app.thredded_path, class: 'flex items-center text-stone-400 hover:text-notebook-blue dark:text-gray-500 dark:hover:text-blue-400 transition-colors' do %>
+    <i class="material-icons text-lg">home</i>
+    <span class="sr-only">Home</span>
+  <% end %>
 </li>
 
 <% if messageboard_or_nil.try(:persisted?) %>
-  <li class="flex">
-    <div class="flex items-center">
-      <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
-      </svg>
-      <%= link_to messageboard.name, messageboard_topics_path(messageboard), class: 'ml-4 px-2 py-1 -mx-2 -my-1 text-sm font-medium text-gray-500 hover:text-blue-500 rounded transition-colors' %>
-    </div>
+  <li class="flex items-center">
+    <i class="material-icons text-stone-300 dark:text-gray-600 text-base mx-2">chevron_right</i>
+    <%= link_to messageboard.name, messageboard_topics_path(messageboard), class: 'text-sm font-medium text-stone-500 hover:text-notebook-blue dark:text-gray-400 dark:hover:text-blue-400 transition-colors' %>
   </li>
 <% else %>
-  <li class="flex">
-    <div class="flex items-center">
-      <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
-      </svg>
-      <% if controller_name == 'private_topics' || controller_name == 'private_posts' %>
-        <%= link_to 'Inbox', thredded.private_topics_path, class: 'ml-4 px-2 py-1 -mx-2 -my-1 text-sm font-medium text-gray-500 hover:text-blue-500 rounded transition-colors' %>
-      <% else %>
-        <%= link_to 'Notebook.ai Forums', root_path, class: 'ml-4 px-2 py-1 -mx-2 -my-1 text-sm font-medium text-gray-500 hover:text-blue-500 rounded transition-colors' %>
-      <% end %>
-    </div>
+  <li class="flex items-center">
+    <i class="material-icons text-stone-300 dark:text-gray-600 text-base mx-2">chevron_right</i>
+    <% if controller_name == 'private_topics' || controller_name == 'private_posts' %>
+      <%= link_to 'Inbox', thredded.private_topics_path, class: 'text-sm font-medium text-stone-500 hover:text-notebook-blue dark:text-gray-400 dark:hover:text-blue-400 transition-colors' %>
+    <% else %>
+      <%= link_to 'Forums', root_path, class: 'text-sm font-medium text-stone-500 hover:text-notebook-blue dark:text-gray-400 dark:hover:text-blue-400 transition-colors' %>
+    <% end %>
   </li>
 <% end %>
 
@@ -38,12 +28,8 @@
 <% topic = local_assigns[:topic] if !topic && defined?(local_assigns) && local_assigns[:topic].try(:persisted?) %>
 
 <% if topic %>
-  <li class="flex">
-    <div class="flex items-center">
-      <svg class="flex-shrink-0 w-6 h-full text-gray-200" viewBox="0 0 24 44" preserveAspectRatio="none" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M.293 0l22 22-22 22h1.414l22-22-22-22H.293z" />
-      </svg>
-      <span class="ml-4 px-2 py-1 -mx-2 -my-1 text-sm font-medium text-gray-700 truncate max-w-xs"><%= topic.title %></span>
-    </div>
+  <li class="flex items-center min-w-0">
+    <i class="material-icons text-stone-300 dark:text-gray-600 text-base mx-2">chevron_right</i>
+    <span class="text-sm font-semibold text-stone-800 dark:text-gray-200 truncate"><%= topic.title %></span>
   </li>
 <% end %>
