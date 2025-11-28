@@ -67,8 +67,17 @@ class="thredded--new-topic-form-wrapper">
     
     <div class="form-header">
       <div class="form-title">
-        <i class="material-icons">edit</i>
-        New Discussion
+        <% if user_signed_in? %>
+          <%= image_tag current_user.image_url(80), class: "w-8 h-8 rounded-full mr-3 border border-gray-200 dark:border-gray-700" %>
+        <% else %>
+          <div class="w-8 h-8 rounded-full mr-3 bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300">
+            <i class="material-icons text-sm">person</i>
+          </div>
+        <% end %>
+        <div>
+          <span class="block text-sm font-bold text-gray-900 dark:text-white">Start a Conversation</span>
+          <span class="block text-xs text-gray-500 dark:text-gray-400 font-normal">Share your ideas with the community</span>
+        </div>
       </div>
     </div>
 
@@ -96,6 +105,10 @@ class="thredded--new-topic-form-wrapper">
                 'x-model': 'titleValue',
                 '@input': 'checkContent()' %>
             <%= render 'thredded/shared/field_errors', messages: form.object.errors[:title] %>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              <i class="material-icons text-[10px] align-middle mr-0.5">lightbulb</i>
+              Tip: Make your title descriptive and interesting to attract more readers.
+            </p>
           </li>
 
           <li>

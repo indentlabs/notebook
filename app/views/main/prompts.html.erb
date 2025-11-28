@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50" x-data="writingPrompt()">
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" x-data="writingPrompt()">
   <!-- Include content linking functionality -->
   <%= render partial: 'javascripts/content_linking_alpine' %>
   
@@ -9,19 +9,19 @@
       <!-- Top Stats Bar -->
       <div class="mb-8 flex items-center justify-between">
         <!-- Left: Writing Stats -->
-        <div class="flex items-center space-x-4 text-sm text-gray-500">
+        <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
           <div class="flex items-center space-x-1" x-show="hasStartedWriting">
             <i class="material-icons text-base" :class="{ 'text-orange-500': isPaused }">
               <span x-text="isPaused ? 'pause_circle' : 'schedule'"></span>
             </i>
             <span x-text="formattedTime" :class="{ 'text-orange-500': isPaused }"></span>
           </div>
-          <div class="text-gray-300" x-show="hasStartedWriting">•</div>
+          <div class="text-gray-300 dark:text-gray-600" x-show="hasStartedWriting">•</div>
           <div class="flex items-center space-x-1">
             <i class="material-icons text-base">edit</i>
             <span><span x-text="wordCount"></span> words</span>
           </div>
-          <div class="text-gray-300" x-show="hasStartedWriting && wpm > 0">•</div>
+          <div class="text-gray-300 dark:text-gray-600" x-show="hasStartedWriting && wpm > 0">•</div>
           <div class="flex items-center space-x-1" x-show="hasStartedWriting && wpm > 0">
             <i class="material-icons text-base">speed</i>
             <span><span x-text="wpm"></span> wpm</span>
@@ -31,7 +31,7 @@
         <!-- Right: Actions -->
         <div class="flex items-center space-x-2">
           <button @click="getNewPrompt()" 
-                  class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors flex items-center space-x-2 text-sm">
+                  class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center space-x-2 text-sm">
             <i class="material-icons text-base">refresh</i>
             <span>New Prompt</span>
           </button>
@@ -42,20 +42,20 @@
       <div class="mb-6 animate-fade-in">
         <!-- Content Context -->
         <div class="mb-6 flex items-center space-x-3">
-          <div class="flex items-center space-x-2 text-sm text-gray-500">
+          <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <span class="uppercase tracking-wider text-xs">Expanding</span>
-            <span class="text-gray-300">•</span>
+            <span class="text-gray-300 dark:text-gray-600">•</span>
           </div>
           <%= link_to @content.view_path, class: "flex items-center space-x-2 group" do %>
             <i class="material-icons text-lg <%= @content.text_color %>"><%= @content.icon %></i>
-            <span class="text-gray-700 group-hover:text-gray-900 font-medium transition-colors"><%= @content.name %></span>
-            <i class="material-icons text-base text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</i>
+            <span class="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition-colors"><%= @content.name %></span>
+            <i class="material-icons text-base text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</i>
           <% end %>
         </div>
         
         <!-- The Prompt - Clean presentation -->
         <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 leading-relaxed mb-3">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed mb-3">
             <%=
               t(
                 "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
@@ -64,7 +64,7 @@
               )
             %>
           </h1>
-          <div class="text-sm text-gray-500">
+          <div class="text-sm text-gray-500 dark:text-gray-400">
             <span class="inline-flex items-center space-x-1">
               <i class="material-icons text-base">label</i>
               <span><%= @attribute_field_to_question.label %></span>
@@ -82,53 +82,53 @@
         <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
         
         <!-- Beautiful Writing Box -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-xl">
           <!-- Editor Toolbar -->
-          <div class="border-b border-gray-100 px-6 py-3 flex items-center justify-between bg-gradient-to-b from-gray-50 to-white">
+          <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-3 flex items-center justify-between bg-gradient-to-b from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
             <div class="flex items-center space-x-3">
               <button type="button" @click="insertMarkdown('**', '**')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Bold (Cmd/Ctrl+B)">
                 <i class="material-icons text-lg">format_bold</i>
               </button>
               <button type="button" @click="insertMarkdown('*', '*')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Italic (Cmd/Ctrl+I)">
                 <i class="material-icons text-lg">format_italic</i>
               </button>
-              <div class="w-px h-6 bg-gray-200"></div>
+              <div class="w-px h-6 bg-gray-200 dark:bg-gray-600"></div>
               <button type="button" @click="insertMarkdown('# ', '')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Heading">
                 <i class="material-icons text-lg">title</i>
               </button>
               <button type="button" @click="insertMarkdown('- ', '')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="List">
                 <i class="material-icons text-lg">format_list_bulleted</i>
               </button>
               <button type="button" @click="insertMarkdown('> ', '')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Quote">
                 <i class="material-icons text-lg">format_quote</i>
               </button>
             </div>
             
-            <div class="flex items-center space-x-3 text-sm text-gray-500">
-              <span class="text-xs text-gray-400" x-text="autosaveStatus">
+            <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
+              <span class="text-xs text-gray-400 dark:text-gray-500" x-text="autosaveStatus">
                 Auto-saves every 30 seconds • Press Esc to save now
               </span>
             </div>
           </div>
           
           <!-- Text Editor with Auto-Expand -->
-          <div class="relative bg-gradient-to-b from-white to-gray-50/30" x-data="contentLinking()">
+          <div class="relative bg-gradient-to-b from-white to-gray-50/30 dark:from-gray-800 dark:to-gray-900" x-data="contentLinking()">
             <%=
               text_area_tag "field[value]",
                             @attribute_field_to_question[:value],
-                            class: "js-can-mention-pages autosave-closest-form-on-change w-full p-8 text-lg leading-relaxed text-gray-800 
-                                   placeholder-gray-400 border-2 border-gray-200 focus:ring-0 focus:outline-none resize-none
-                                   transition-all duration-200",
+                            class: "js-can-mention-pages autosave-closest-form-on-change w-full p-8 text-lg leading-relaxed text-gray-800 dark:text-gray-200 
+                                   placeholder-gray-400 dark:placeholder-gray-500 border-2 border-gray-200 dark:border-gray-600 focus:ring-0 focus:outline-none resize-none
+                                   transition-all duration-200 dark:bg-gray-800",
                             placeholder: "Start writing your thoughts here...\n\nYour response will be saved automatically as you type.",
                             "x-model": "content",
                             "@input": "handleInput",
@@ -149,19 +149,19 @@
             <%= render partial: 'javascripts/content_linking_dropdown' %>
             
             <!-- Mention Helper Tooltip -->
-            <div class="absolute bottom-4 right-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+            <div class="absolute bottom-4 right-4 text-xs text-gray-400 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm px-3 py-1 rounded-full">
               Press @ to mention other pages
             </div>
           </div>
           
           <!-- Footer Actions -->
-          <div class="border-t border-gray-100 px-6 py-4 bg-gradient-to-b from-white to-gray-50 flex items-center justify-between">
-            <div class="flex items-center space-x-4 text-sm text-gray-500">
+          <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-between">
+            <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
               <span class="flex items-center space-x-1">
                 <i class="material-icons text-base">subject</i>
                 <span><span x-text="characterCount"></span> characters</span>
               </span>
-              <span class="text-gray-300">•</span>
+              <span class="text-gray-300 dark:text-gray-600">•</span>
               <span class="flex items-center space-x-1">
                 <i class="material-icons text-base">timer</i>
                 <span>~<span x-text="readingTime"></span> min read</span>
@@ -180,26 +180,26 @@
       <% end %>
       
       <!-- Writing Tips Card -->
-      <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-6 shadow-sm">
-        <h3 class="font-semibold text-blue-900 mb-3 flex items-center space-x-2">
+      <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-100 dark:border-blue-800/30 rounded-xl p-6 shadow-sm">
+        <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-3 flex items-center space-x-2">
           <i class="material-icons text-xl">lightbulb</i>
           <span>Writing Tips</span>
         </h3>
-        <ul class="space-y-2 text-sm text-blue-800">
+        <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
           <li class="flex items-start space-x-2">
-            <span class="text-blue-500 mt-0.5">•</span>
+            <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Take your time to explore the prompt deeply. Quality over speed.</span>
           </li>
           <li class="flex items-start space-x-2">
-            <span class="text-blue-500 mt-0.5">•</span>
+            <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Use @ to reference and create connections to other pages in your world.</span>
           </li>
           <li class="flex items-start space-x-2">
-            <span class="text-blue-500 mt-0.5">•</span>
+            <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Press Cmd/Ctrl + S to manually save, or let auto-save handle it.</span>
           </li>
           <li class="flex items-start space-x-2">
-            <span class="text-blue-500 mt-0.5">•</span>
+            <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Press Esc to pause your writing and timer.</span>
           </li>
         </ul>
@@ -240,6 +240,11 @@
   /* Smooth focus transition for textarea */
   textarea:focus {
     background: linear-gradient(to bottom, #ffffff, #fafafa);
+  }
+  
+  /* Dark mode focus transition */
+  .dark textarea:focus {
+    background: linear-gradient(to bottom, #1f2937, #111827);
   }
   
   /* Custom scrollbar for textarea */

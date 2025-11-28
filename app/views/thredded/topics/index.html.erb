@@ -10,17 +10,17 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
-            <i class="material-icons text-blue-600 mr-3 text-3xl">forum</i>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+            <i class="material-icons text-blue-600 dark:text-blue-400 mr-3 text-3xl">forum</i>
             <%= messageboard.name %>
           </h1>
           <% if messageboard.description.present? %>
-            <p class="text-gray-600 mt-2"><%= messageboard.description %></p>
+            <p class="text-gray-600 dark:text-gray-400 mt-2"><%= messageboard.description %></p>
           <% end %>
         </div>
         
         <% if messageboard.topics_count > 0 %>
-          <div class="flex items-center gap-4 text-sm text-gray-500">
+          <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
             <div class="flex items-center">
               <i class="material-icons text-base mr-1">chat_bubble_outline</i>
               <span><%= number_with_delimiter(messageboard.topics_count) %> <%= 'topic'.pluralize(messageboard.topics_count) %></span>
@@ -39,20 +39,20 @@
       <div class="mb-6">
         <%= render 'thredded/topics/form',
                    topic: @new_topic,
-                   css_class: 'bg-white rounded-lg shadow-sm border border-gray-200 p-6',
+                   css_class: 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6',
                    placeholder: t('thredded.topics.form.title_placeholder_start') %>
       </div>
     <% end %>
     
     <!-- Topics List -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
          data-thredded-topics="true"
          data-thredded-topic-posts-per-page="<%= Thredded.posts_per_page %>">
       
       <% if @topics.to_a.any? %>
         <!-- Topics Header -->
-        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
-          <div class="flex items-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div class="bg-gray-50 dark:bg-gray-900 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
             <div class="flex-1">Topic</div>
             <div class="hidden sm:block w-32 text-center">Replies</div>
             <div class="hidden md:block w-48 text-right">Last Activity</div>
@@ -60,7 +60,7 @@
         </div>
         
         <!-- Topics -->
-        <div class="divide-y divide-gray-200">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
           <%= render partial: 'thredded/topics/topic',
                      collection: @topics,
                      locals: {
@@ -71,9 +71,9 @@
       <% else %>
         <!-- Empty State -->
         <div class="text-center py-12">
-          <i class="material-icons text-6xl text-gray-300 mb-4">forum</i>
-          <h3 class="text-lg font-medium text-gray-900 mb-2">No topics yet</h3>
-          <p class="text-gray-500 mb-6">Be the first to start a discussion!</p>
+          <i class="material-icons text-6xl text-gray-300 dark:text-gray-600 mb-4">forum</i>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No topics yet</h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6">Be the first to start a discussion!</p>
           <% if @new_topic %>
             <button type="button" 
                     onclick="document.querySelector('#new_topic input[name=\"topic[title]\"]').focus();"
