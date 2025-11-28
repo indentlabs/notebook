@@ -1,62 +1,63 @@
-<%= view_hooks.messageboards_index.messageboard.render self, messageboard: messageboard do %>
   <%= link_to messageboard.path,
-              class: "messageboard-card messageboard-compact block" do %>
+              class: "thredded-messageboard-card block bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group h-full flex flex-col" do %>
     
-    <!-- Card Header -->
-    <div class="messageboard-header">
-      <div class="flex items-start justify-between">
-        <h3 class="text-sm font-semibold text-gray-900 flex items-center group-hover:text-purple-600 transition-colors">
+    <!-- Card Content -->
+    <div class="p-4 flex-grow flex flex-col">
+      <div class="flex items-start justify-between mb-1">
+        <h3 class="text-base font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
           <% if messageboard.locked? %>
-            <i class="material-icons text-gray-500 mr-1 text-xs" title="<%= t('thredded.messageboard.form.locked_notice') %>">lock</i>
+            <i class="material-icons text-gray-400 mr-1 text-sm align-middle" title="<%= t('thredded.messageboard.form.locked_notice') %>">lock</i>
           <% end %>
           <%= messageboard.name %>
         </h3>
         
         <% if messageboard.unread_followed_topics? %>
-          <span class="messageboard-unread-badge followed inline-flex items-center">
+          <span class="bg-blue-100 text-blue-600 text-xs font-bold px-1.5 py-0.5 rounded ml-2">
             <%= messageboard.unread_followed_topics_count %>
           </span>
         <% elsif messageboard.unread_topics? %>
-          <span class="messageboard-unread-badge new inline-flex items-center">
+          <span class="bg-blue-50 text-blue-600 text-xs font-bold px-1.5 py-0.5 rounded ml-2">
             <%= messageboard.unread_topics_count %>
           </span>
         <% end %>
       </div>
       
-      <!-- Description (single line) -->
+      <!-- Description -->
       <% if messageboard.description.present? %>
-        <p class="messageboard-description">
+        <p class="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
           <%= messageboard.description %>
         </p>
+      <% else %>
+        <p class="text-xs text-gray-400 italic mb-3">No description available</p>
       <% end %>
       
       <!-- Stats -->
-      <div class="messageboard-stats flex items-center gap-3">
-        <span class="flex items-center">
-          <i class="material-icons mr-0.5">chat_bubble_outline</i>
-          <%= number_with_delimiter(messageboard.topics_count) %>
+      <div class="mt-auto flex items-center gap-3 text-xs text-gray-400 font-medium">
+        <span class="flex items-center" title="Topics">
+          <i class="material-icons mr-1 text-[13px]">chat_bubble_outline</i>
+          <%= number_with_delimiter(messageboard.topics_count) %> Topics
         </span>
-        <span class="flex items-center">
-          <i class="material-icons mr-0.5">forum</i>
-          <%= number_with_delimiter(messageboard.posts_count) %>
+        <span class="flex items-center" title="Posts">
+          <i class="material-icons mr-1 text-[13px]">forum</i>
+          <%= number_with_delimiter(messageboard.posts_count) %> Posts
         </span>
       </div>
     </div>
     
-    <!-- Last Activity Footer -->
-    <% if messageboard.last_topic %>
-      <div class="messageboard-footer">
-        <p class="text-gray-600 truncate">
-          <%= time_ago(messageboard.last_topic.last_post_at) %> •
-          <span class="font-medium text-gray-700">
-            <%= messageboard.last_user.respond_to?(:display_name) ? messageboard.last_user.display_name : messageboard.last_user.thredded_display_name %>
+    <!-- Footer -->
+    <div class="px-4 py-2.5 border-t border-gray-100 text-[11px] text-gray-500 bg-gray-50/50">
+      <% if messageboard.last_topic %>
+        <div class="flex items-center truncate">
+          <span class="whitespace-nowrap mr-1">
+            <%= messageboard.last_topic.last_post_at.strftime("%b %d") %>
           </span>
-        </p>
-      </div>
-    <% else %>
-      <div class="messageboard-footer">
-        <p class="text-gray-500 italic">No topics yet</p>
-      </div>
-    <% end %>
+          <span class="mx-1 text-gray-300">•</span>
+          <span class="truncate font-medium text-gray-700">
+            @<%= messageboard.last_user.respond_to?(:display_name) ? messageboard.last_user.display_name : messageboard.last_user.thredded_display_name %>
+          </span>
+        </div>
+      <% else %>
+        <span class="italic text-gray-400">No activity yet</span>
+      <% end %>
+    </div>
   <% end %>
-<% end %>
