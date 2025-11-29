@@ -1,21 +1,21 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center mb-8">
-    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
       <i class="material-icons">arrow_back</i>
     <% end %>
-    <h1 class="text-3xl font-bold text-gray-700">Your year in review: <%= @year %></h1>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Your year in review: <%= @year %></h1>
   </div>
 
   <% if current_user.created_at.year == @year %>
-    <div class="bg-white rounded-lg shadow-md mb-12">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-12">
       <div class="p-6">
         <div class="flex items-start">
           <i class="material-icons text-orange-500 text-4xl mr-4">cake</i>
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
               You signed up to Notebook.ai on <%= current_user.created_at.strftime("%B %d of this year, a very fine %A") %>!
             </h2>
-            <p class="text-gray-600">
+            <p class="text-gray-600 dark:text-gray-300">
               Thank you so much for finding and enjoying the site. It's been a pleasure to build over the years;
               I hope it's been as helpful for your worldbuilding as it has been for mine!
             </p>
@@ -28,16 +28,16 @@
   <% if @earliest_page %>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
       <div class="md:col-span-1">
-        <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
           <div class="flex items-start mb-4">
             <i class="material-icons <%= @earliest_page.class.text_color %> text-3xl mr-3">
               <%= @earliest_page.class.icon %>
             </i>
-            <h2 class="text-xl font-semibold text-gray-800">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
               It all started with <%= @earliest_page.name %>...
             </h2>
           </div>
-          <p class="text-gray-600">
+          <p class="text-gray-600 dark:text-gray-300">
             The first notebook page you created this year was <%= @earliest_page.name %>,
             which you created on <%= @earliest_page.created_at.strftime("%B %d") %>. What a good omen for
             things to come!
@@ -46,7 +46,7 @@
       </div>
       
       <div class="md:col-span-2">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
           <div class="flex flex-col sm:flex-row">
             <div class="sm:w-1/3">
               <%= link_to @earliest_page do %>
@@ -54,8 +54,8 @@
               <% end %>
             </div>
             <div class="sm:w-2/3 p-6">
-              <h3 class="text-xl font-semibold text-gray-800 mb-2"><%= @earliest_page.name %></h3>
-              <p class="text-gray-600 mb-4">
+              <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2"><%= @earliest_page.name %></h3>
+              <p class="text-gray-600 dark:text-gray-300 mb-4">
                 First created <%= time_ago_in_words @earliest_page.created_at %> ago
                 and last updated <%= time_ago_in_words @earliest_page.updated_at %> ago.
               </p>
@@ -73,14 +73,14 @@
     <div class="mb-16">
       <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Universe', content_class: Universe, image_only: true } %>
       
-      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <div class="flex items-start">
           <i class="material-icons <%= Universe.text_color %> text-4xl mr-4"><%= Universe.icon %></i>
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
               You started creating <%= pluralize @created_content['Universe'].count, 'new universe' %> in <%= @year %>!
             </h2>
-            <p class="text-gray-600">
+            <p class="text-gray-600 dark:text-gray-300">
               That's awesome!
               <% if @created_content['Universe'].count > 1 %>
                 More than one is more than most! You must be great at multi-tasking!
@@ -107,16 +107,16 @@
 
   <% if @total_created_non_universe_content > 0 %>
     <div class="mb-16">
-      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <div class="flex items-start mb-4">
-          <i class="material-icons text-blue-600 text-4xl mr-4">dashboard</i>
+          <i class="material-icons text-blue-600 dark:text-blue-400 text-4xl mr-4">dashboard</i>
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
               In your worlds, you created
               <%= pluralize @total_created_non_universe_content, 'notebook pages' %>
               this year!
             </h2>
-            <p class="text-gray-600">
+            <p class="text-gray-600 dark:text-gray-300">
               That's a big deal! Fictitious worlds can be extremely hard and complex to create.
               Filling out worldbuilding pages is just the first step to make the world in your head a reality.
               The more you create and flesh out, the richer your world becomes!
@@ -124,7 +124,7 @@
           </div>
         </div>
         
-        <p class="text-gray-700 font-medium mb-4">In all, you created...</p>
+        <p class="text-gray-700 dark:text-gray-300 font-medium mb-4">In all, you created...</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
           <% Rails.application.config.content_types[:all_non_universe].each do |content_type| %>
@@ -145,7 +145,7 @@
           <% end %>
         </div>
         
-        <div class="text-right text-gray-700">
+        <div class="text-right text-gray-700 dark:text-gray-300">
           <div class="flex items-center justify-end">
             <i class="material-icons mr-2">upload</i>
             <span>You also uploaded <%= pluralize @created_content['ImageUpload'].count, 'image' %> to your notebook pages this year!</span>
@@ -159,14 +159,14 @@
     <div class="mb-16">
       <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Document', content_class: Document, image_only: true } %>
 
-      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
         <div class="flex items-start">
           <i class="material-icons <%= Document.text_color %> text-4xl mr-4"><%= Document.icon %></i>
           <div>
-            <h2 class="text-xl font-semibold text-gray-800 mb-2">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">
               You started writing <%= pluralize @created_content['Document'].count, 'document' %> in <%= @year %>!
             </h2>
-            <p class="text-gray-600">
+            <p class="text-gray-600 dark:text-gray-300">
               Sometimes it can be hard to stare down that blank sheet... but you seem to be entirely unphased!
             </p>
           </div>
@@ -205,44 +205,44 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div>
-          <div class="bg-white rounded-lg shadow-md p-6 h-full">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 h-full">
             <div class="flex items-start mb-4">
-              <i class="material-icons text-blue-600 text-3xl mr-3">forum</i>
-              <h2 class="text-xl font-semibold text-gray-800">
+              <i class="material-icons text-blue-600 dark:text-blue-400 text-3xl mr-3">forum</i>
+              <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
                 You're a social bee!
               </h2>
             </div>
-            <p class="text-gray-600">
+            <p class="text-gray-600 dark:text-gray-300">
               You seem to strike a good balance between working alone and with others.
             </p>
           </div>
         </div>
         
         <div>
-          <div class="bg-white rounded-lg shadow-md border-t-4 border-blue-500 p-6 text-center mb-6">
-            <p class="text-gray-700 mb-2">This year, you created</p>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-t-4 border-blue-500 p-6 text-center mb-6">
+            <p class="text-gray-700 dark:text-gray-300 mb-2">This year, you created</p>
             <%= link_to thredded_path, class: "block" do %>
-              <div class="text-5xl font-bold text-blue-600 mb-2"><%= @created_content['Thredded::Topic'].count %></div>
+              <div class="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2"><%= @created_content['Thredded::Topic'].count %></div>
             <% end %>
-            <p class="text-gray-700"><%= 'discussion topic'.pluralize @created_content['Thredded::Topic'].count %> on the forums.</p>
+            <p class="text-gray-700 dark:text-gray-300"><%= 'discussion topic'.pluralize @created_content['Thredded::Topic'].count %> on the forums.</p>
           </div>
           
-          <div class="bg-white rounded-lg shadow-md border-t-4 border-<%= ContentPageShare.hex_color %> p-6 text-center">
-            <p class="text-gray-700 mb-2">You shared your worldbuilding progress</p>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-t-4 border-<%= ContentPageShare.hex_color %> p-6 text-center">
+            <p class="text-gray-700 dark:text-gray-300 mb-2">You shared your worldbuilding progress</p>
             <%= link_to stream_path, class: "block" do %>
               <div class="text-5xl font-bold <%= ContentPageShare.text_color %> mb-2"><%= @created_content['ContentPageShare'].count %></div>
             <% end %>
-            <p class="text-gray-700"><%= 'time'.pluralize @created_content['ContentPageShare'].count %> with your followers.</p>
+            <p class="text-gray-700 dark:text-gray-300"><%= 'time'.pluralize @created_content['ContentPageShare'].count %> with your followers.</p>
           </div>
         </div>
         
         <div>
-          <div class="bg-white rounded-lg shadow-md border-t-4 border-blue-500 p-6 text-center h-full">
-            <p class="text-gray-700 mb-2">and you replied to discussions</p>
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border-t-4 border-blue-500 p-6 text-center h-full">
+            <p class="text-gray-700 dark:text-gray-300 mb-2">and you replied to discussions</p>
             <%= link_to thredded_path, class: "block" do %>
-              <div class="text-5xl font-bold text-blue-600 mb-2"><%= @created_content['Thredded::Post'].count %></div>
+              <div class="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2"><%= @created_content['Thredded::Post'].count %></div>
             <% end %>
-            <p class="text-gray-700"><%= 'time'.pluralize @created_content['Thredded::Post'].count %>!</p>
+            <p class="text-gray-700 dark:text-gray-300"><%= 'time'.pluralize @created_content['Thredded::Post'].count %>!</p>
           </div>
         </div>
       </div>
@@ -254,10 +254,10 @@
       <%= render partial: 'content/components/parallax_header', locals: { content_type: 'PageCollection', content_class: PageCollection, image_only: true } %>
       
       <% if @created_content['PageCollection'].any? %>
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
           <div class="flex items-start">
             <i class="material-icons <%= PageCollection.text_color %> text-4xl mr-4"><%= PageCollection.icon %></i>
-            <h2 class="text-xl font-semibold text-gray-800">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
               You created <%= pluralize @created_content['PageCollection'].count, 'new Collection' %> in <%= @year %>!
             </h2>
           </div>
@@ -271,19 +271,19 @@
       <% if @publish_rate > 0 %>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div>
-            <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
               <div class="flex items-start mb-4">
                 <i class="material-icons <%= PageCollection.text_color %> text-3xl mr-3">
                   <%= PageCollection.icon %>
                 </i>
-                <h2 class="text-xl font-semibold text-gray-800">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
                   You were published in <%= pluralize @published_collections.count, 'Collection' %> this year!
                 </h2>
               </div>
-              <p class="text-gray-600 mb-2">
+              <p class="text-gray-600 dark:text-gray-300 mb-2">
                 You managed a <span class="font-bold"><%= (@publish_rate * 100 + 0.5).to_i %>%</span> acceptance rate when submitting to a Collection!
               </p>
-              <p class="text-gray-600">
+              <p class="text-gray-600 dark:text-gray-300">
                 Congratulations on being awesome!
               </p>
             </div>
@@ -297,17 +297,17 @@
     </div>
   <% end %>
 
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
     <div class="flex items-start mb-4">
-      <i class="material-icons text-blue-600 text-4xl mr-4">date_range</i>
-      <h2 class="text-xl font-semibold text-gray-800">
+      <i class="material-icons text-blue-600 dark:text-blue-400 text-4xl mr-4">date_range</i>
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
         <%= @year %> was a productive year for you!
       </h2>
     </div>
-    <p class="text-gray-600 mb-4">
+    <p class="text-gray-600 dark:text-gray-300 mb-4">
       Thanks for spending it on Notebook.ai. I can't wait to see what you accomplish in <%= @year + 1 %>! :)
     </p>
-    <p class="text-right text-gray-700 italic">
+    <p class="text-right text-gray-700 dark:text-gray-400 italic">
       &mdash; Andrew
     </p>
   </div>

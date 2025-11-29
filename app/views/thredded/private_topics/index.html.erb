@@ -3,72 +3,78 @@
 <% content_for :thredded_breadcrumbs, render('thredded/private_topics/breadcrumbs') %>
 
 <%= thredded_page do %>
-  <div class="thredded--private-topics">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Page Header -->
-    <div class="private-messages-header">
-      <div class="header-content">
-        <h1>
-          <i class="material-icons">mail</i>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+      <div class="flex-1 min-w-0">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+          <i class="material-icons mr-3 text-blue-600 dark:text-blue-400">mail</i>
           Private Messages
         </h1>
         
-        <div class="header-actions">
-          <a href="<%= new_private_topic_path %>" class="btn-compose">
-            <i class="material-icons">edit</i>
-            Compose
-          </a>
-        </div>
+        <% if @private_topics.to_a.any? %>
+          <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
+            <div class="flex items-center">
+              <i class="material-icons text-sm mr-1.5">inbox</i>
+              <span><strong><%= @private_topics.to_a.count %></strong> conversations</span>
+            </div>
+            <% unread_count = unread_private_topics_count %>
+            <% if unread_count > 0 %>
+              <div class="flex items-center text-blue-600 dark:text-blue-400">
+                <i class="material-icons text-sm mr-1.5">mark_email_unread</i>
+                <span><strong><%= unread_count %></strong> unread</span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
       </div>
       
-      <% if @private_topics.to_a.any? %>
-        <div class="inbox-stats">
-          <div class="stat">
-            <i class="material-icons">inbox</i>
-            <span><strong><%= @private_topics.to_a.count %></strong> conversations</span>
-          </div>
-          <% unread_count = unread_private_topics_count %>
-          <% if unread_count > 0 %>
-            <div class="stat">
-              <i class="material-icons">mark_email_unread</i>
-              <span><strong><%= unread_count %></strong> unread</span>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
+      <div class="mt-4 md:mt-0 flex md:ml-4">
+        <a href="<%= new_private_topic_path %>" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+          <i class="material-icons mr-2 -ml-1">edit</i>
+          Compose
+        </a>
+      </div>
     </div>
     
     <!-- Messages List or Empty State -->
     <% if @private_topics.to_a.empty? %>
       <%= render 'thredded/private_topics/no_private_topics' %>
     <% else %>
-      <div class="messages-list">
+      <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <%= content_tag :section,
                         'data-thredded-topics' => 'private',
                         'data-thredded-topic-posts-per-page' => Thredded.posts_per_page do %>
           
           <% if @new_private_topic %>
-            <%= render 'thredded/private_topics/form',
-                       private_topic: @new_private_topic,
-                       css_class: 'thredded--is-compact',
-                       placeholder: t('thredded.private_topics.form.title_placeholder_start') %>
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <%= render 'thredded/private_topics/form',
+                         private_topic: @new_private_topic,
+                         css_class: 'thredded--is-compact',
+                         placeholder: t('thredded.private_topics.form.title_placeholder_start') %>
+            </div>
           <% end %>
           
-          <%= render @private_topics %>
+          <div class="divide-y divide-gray-200 dark:divide-gray-700">
+            <%= render @private_topics %>
+          </div>
         <% end %>
       </div>
       
       <% unless unread_private_topics_count.zero? %>
-        <%= link_to mark_all_private_topics_read_path,
-                    class: 'thredded--button-wide',
-                    method: :put do %>
-          <i class="material-icons mr-2">done_all</i>
-          <%= t('thredded.nav.mark_all_read') %>
-        <% end %>
+        <div class="mt-4 flex justify-end">
+          <%= link_to mark_all_private_topics_read_path,
+                      class: 'inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors',
+                      method: :put do %>
+            <i class="material-icons mr-2 text-green-500">done_all</i>
+            <%= t('thredded.nav.mark_all_read') %>
+          <% end %>
+        </div>
       <% end %>
     <% end %>
     
     <!-- Pagination -->
-    <footer class="thredded--pagination-bottom">
+    <footer class="mt-6">
       <%= paginate @private_topics %>
     </footer>
   </div>

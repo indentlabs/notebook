@@ -1,21 +1,21 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center mb-8">
-    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
       <i class="material-icons">arrow_back</i>
     <% end %>
-    <h1 class="text-3xl font-bold text-gray-700">Achievements & Milestones</h1>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Achievements & Milestones</h1>
   </div>
 
-  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-    <div class="p-6 border-b border-gray-200">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
       <div class="flex justify-between items-center">
         <div>
-          <h2 class="text-xl font-semibold text-gray-800 mb-1">Your Worldbuilding Journey</h2>
-          <p class="text-gray-600">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">Your Worldbuilding Journey</h2>
+          <p class="text-gray-600 dark:text-gray-400">
             Track your progress and unlock achievements as you build your world
           </p>
         </div>
-        <div class="text-sm text-gray-500">
+        <div class="text-sm text-gray-500 dark:text-gray-400">
           <%= current_user.content_change_events.count %> total updates
         </div>
       </div>
@@ -222,27 +222,27 @@
       
       <!-- Achievement Categories -->
       <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Content Creation</h3>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Content Creation</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <% all_achievements.select { |a| a[:icon] == "auto_stories" }.each do |achievement| %>
-            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200" : "border-gray-200" %>">
-              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50" : "bg-gray-50" %>">
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
                 <div class="flex items-center">
-                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 text-#{achievement[:color]}-600" : "bg-gray-200 text-gray-400" %>">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
                     <i class="material-icons"><%= achievement[:icon] %></i>
                   </div>
                   <div class="ml-3">
-                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800" : "text-gray-500" %>"><%= achievement[:name] %></h3>
-                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:description] %></p>
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
                   </div>
                 </div>
                 
                 <div class="mt-3">
                   <div class="flex items-center">
-                    <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
                     </div>
-                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:progress] %>%</span>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
                   </div>
                 </div>
               </div>
@@ -252,27 +252,27 @@
       </div>
       
       <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Activity & Engagement</h3>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Activity & Engagement</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <% all_achievements.select { |a| a[:icon] == "edit" || a[:icon] == "calendar_today" }.each do |achievement| %>
-            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200" : "border-gray-200" %>">
-              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50" : "bg-gray-50" %>">
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
                 <div class="flex items-center">
-                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 text-#{achievement[:color]}-600" : "bg-gray-200 text-gray-400" %>">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
                     <i class="material-icons"><%= achievement[:icon] %></i>
                   </div>
                   <div class="ml-3">
-                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800" : "text-gray-500" %>"><%= achievement[:name] %></h3>
-                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:description] %></p>
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
                   </div>
                 </div>
                 
                 <div class="mt-3">
                   <div class="flex items-center">
-                    <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
                     </div>
-                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:progress] %>%</span>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
                   </div>
                 </div>
               </div>
@@ -282,27 +282,27 @@
       </div>
       
       <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Consistency</h3>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Consistency</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <% all_achievements.select { |a| a[:icon] == "local_fire_department" }.each do |achievement| %>
-            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200" : "border-gray-200" %>">
-              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50" : "bg-gray-50" %>">
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
                 <div class="flex items-center">
-                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 text-#{achievement[:color]}-600" : "bg-gray-200 text-gray-400" %>">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
                     <i class="material-icons"><%= achievement[:icon] %></i>
                   </div>
                   <div class="ml-3">
-                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800" : "text-gray-500" %>"><%= achievement[:name] %></h3>
-                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:description] %></p>
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
                   </div>
                 </div>
                 
                 <div class="mt-3">
                   <div class="flex items-center">
-                    <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
                     </div>
-                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:progress] %>%</span>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
                   </div>
                 </div>
               </div>
@@ -312,27 +312,27 @@
       </div>
       
       <div class="mb-8">
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Diversity</h3>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Diversity</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <% all_achievements.select { |a| a[:icon] == "category" }.each do |achievement| %>
-            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200" : "border-gray-200" %>">
-              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50" : "bg-gray-50" %>">
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
                 <div class="flex items-center">
-                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 text-#{achievement[:color]}-600" : "bg-gray-200 text-gray-400" %>">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
                     <i class="material-icons"><%= achievement[:icon] %></i>
                   </div>
                   <div class="ml-3">
-                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800" : "text-gray-500" %>"><%= achievement[:name] %></h3>
-                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:description] %></p>
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
                   </div>
                 </div>
                 
                 <div class="mt-3">
                   <div class="flex items-center">
-                    <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
                     </div>
-                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:progress] %>%</span>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
                   </div>
                 </div>
               </div>
@@ -342,27 +342,27 @@
       </div>
       
       <div>
-        <h3 class="text-lg font-medium text-gray-800 mb-4">Special Achievements</h3>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Special Achievements</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <% all_achievements.select { |a| !["auto_stories", "edit", "calendar_today", "category", "local_fire_department"].include?(a[:icon]) }.each do |achievement| %>
-            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200" : "border-gray-200" %>">
-              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50" : "bg-gray-50" %>">
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
                 <div class="flex items-center">
-                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 text-#{achievement[:color]}-600" : "bg-gray-200 text-gray-400" %>">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
                     <i class="material-icons"><%= achievement[:icon] %></i>
                   </div>
                   <div class="ml-3">
-                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800" : "text-gray-500" %>"><%= achievement[:name] %></h3>
-                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:description] %></p>
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
                   </div>
                 </div>
                 
                 <div class="mt-3">
                   <div class="flex items-center">
-                    <div class="flex-grow h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
                     </div>
-                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600" : "text-gray-400" %>"><%= achievement[:progress] %>%</span>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
                   </div>
                 </div>
               </div>

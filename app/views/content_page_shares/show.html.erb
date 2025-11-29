@@ -1,11 +1,11 @@
-<div class="min-h-screen bg-gray-50" data-in-app="true">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900" data-in-app="true">
   <!-- Clean Header -->
-  <header class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+  <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
         <!-- Left: Back Navigation -->
         <div class="flex items-center space-x-4">
-          <button onclick="window.history.back()" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+          <button onclick="window.history.back()" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
             </svg>
@@ -15,7 +15,7 @@
 
         <!-- Center: Title -->
         <div class="flex-1 text-center">
-          <h1 class="text-lg font-semibold text-gray-900">
+          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
             <% if @share.content_page %>
               <%= @share.content_page.name %>
             <% else %>
@@ -26,8 +26,10 @@
 
         <!-- Right: Share Actions -->
         <div class="flex items-center space-x-2">
-          <button onclick="copyToClipboard('<%= user_content_page_share_url(@share.user, @share) %>')" 
-                  class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors"
+          <button data-controller="clipboard" 
+                  data-clipboard-text-value="<%= user_content_page_share_url(@share.user, @share) %>"
+                  data-action="clipboard#copy"
+                  class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
                   title="Copy link to this post">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
@@ -46,7 +48,7 @@
         <!-- Main Content -->
         <div class="lg:col-span-8">
           <!-- Share Post -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <!-- Header -->
             <div class="flex items-start justify-between mb-4">
               <div class="flex items-center space-x-4">
@@ -61,29 +63,29 @@
                 
                 <div class="flex-1">
                   <div class="flex items-center space-x-2">
-                    <%= link_to @share.user, class: "font-semibold text-gray-900 hover:text-blue-600 transition-colors" do %>
+                    <%= link_to @share.user, class: "font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors" do %>
                       <%= @share.user.display_name %>
                     <% end %>
                     <% if @share.content_page %>
-                      <span class="text-gray-500">shared a</span>
+                      <span class="text-gray-500 dark:text-gray-400">shared a</span>
                       <% if @share.content_page.class.respond_to?(:hex_color) %>
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: <%= @share.content_page.class.hex_color %>20; color: <%= @share.content_page.class.hex_color %>;">
                           <%= @share.content_page.class.name.downcase %>
                         </span>
                       <% else %>
-                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                           <%= @share.content_page.class.name.downcase %>
                         </span>
                       <% end %>
                     <% else %>
-                      <span class="text-red-500">shared a deleted page</span>
+                      <span class="text-red-500 dark:text-red-400">shared a deleted page</span>
                     <% end %>
                   </div>
                   <div class="flex items-center space-x-2 mt-0.5">
-                    <span class="text-sm text-gray-500">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
                       <%= time_ago_in_words @share.created_at %> ago
                     </span>
-                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-3 h-3 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                     </svg>
                   </div>
@@ -93,7 +95,7 @@
               <!-- Action menu -->
               <div class="relative" x-data="{ open: false }">
                 <button @click="open = !open" @click.away="open = false"
-                        class="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">
+                        class="p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
                   </svg>
@@ -107,12 +109,12 @@
                      x-transition:leave="transition ease-in duration-75"
                      x-transition:leave-start="transform opacity-100 scale-100"
                      x-transition:leave-end="transform opacity-0 scale-95"
-                     class="absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                     class="absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 border border-gray-200 dark:border-gray-700"
                      style="display: none;">
                   <div class="py-1" role="menu">
                     <% if @share.followed_by?(current_user) %>
                       <%= link_to unfollow_user_content_page_share_path(user_id: @share.user.id, id: @share.id),
-                          class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" do %>
+                          class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" do %>
                         <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -120,7 +122,7 @@
                       <% end %>
                     <% else %>
                       <%= link_to follow_user_content_page_share_path(user_id: @share.user.id, id: @share.id),
-                          class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" do %>
+                          class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" do %>
                         <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
@@ -128,15 +130,17 @@
                       <% end %>
                     <% end %>
 
-                    <button onclick="copyToClipboard('<%= user_content_page_share_url(@share.user, @share) %>')"
-                            class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left">
+                    <button data-controller="clipboard"
+                            data-clipboard-text-value="<%= user_content_page_share_url(@share.user, @share) %>"
+                            data-action="clipboard#copy"
+                            class="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
                       <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                       </svg>
                       Copy link
                     </button>
 
-                    <div class="border-t border-gray-100 my-1"></div>
+                    <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 
                     <% if @share.user == current_user %>
                       <%= link_to user_content_page_share_path(user_id: @share.user.id, id: @share.id),
@@ -165,7 +169,7 @@
             <!-- Message -->
             <% if @share.message.present? %>
               <div class="mb-4">
-                <div class="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                <div class="prose prose-sm max-w-none text-gray-700 dark:text-gray-300 leading-relaxed">
                   <%= simple_format ContentFormatterService.show(text: @share.message, viewing_user: current_user) %>
                 </div>
               </div>
@@ -173,8 +177,8 @@
             
             <!-- Content Preview -->
             <% if @share.content_page %>
-              <%= link_to @share.content_page, class: 'block group/content' do %>
-                <div class="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 hover:shadow-sm hover:border-gray-300 transition-all duration-200">
+              <%= link_to @share.content_page, class: 'block group' do %>
+                <div class="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                   <div class="flex">
                     <% if @share.content_page.respond_to?(:first_public_image) && @share.content_page.first_public_image.present? %>
                       <div class="flex-shrink-0 w-32 h-24">
@@ -186,30 +190,30 @@
                     <% else %>
                       <div class="flex-1 p-4" style="border-left: 3px solid #9CA3AF;">
                     <% end %>
-                      <h3 class="font-semibold text-gray-900 group-hover/content:text-blue-600 transition-colors flex items-center">
+                      <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center">
                         <% if @share.content_page.class.respond_to?(:hex_color) && @share.content_page.class.respond_to?(:icon) %>
                           <i class="material-icons text-lg mr-2" style="color: <%= @share.content_page.class.hex_color %>"><%= @share.content_page.class.icon %></i>
                         <% elsif @share.content_page.class.respond_to?(:icon) %>
-                          <i class="material-icons text-lg mr-2 text-gray-500"><%= @share.content_page.class.icon %></i>
+                          <i class="material-icons text-lg mr-2 text-gray-500 dark:text-gray-400"><%= @share.content_page.class.icon %></i>
                         <% else %>
-                          <i class="material-icons text-lg mr-2 text-gray-500">article</i>
+                          <i class="material-icons text-lg mr-2 text-gray-500 dark:text-gray-400">article</i>
                         <% end %>
                         <%= @share.content_page.name %>
                       </h3>
                       <% if @share.content_page.respond_to?(:description) && @share.content_page.description.present? %>
-                        <p class="text-sm text-gray-600 mt-2 line-clamp-2">
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
                           <%= truncate(strip_tags(@share.content_page.description), length: 120) %>
                         </p>
                       <% end %>
                       <div class="flex items-center justify-between mt-3">
-                        <span class="inline-flex items-center text-xs text-gray-500">
+                        <span class="inline-flex items-center text-xs text-gray-500 dark:text-gray-400">
                           <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                           </svg>
                           View <%= @share.content_page.class.name.downcase %>
                         </span>
                         <% if @share.content_page.respond_to?(:privacy) && @share.content_page.privacy == 'public' %>
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
                             </svg>
@@ -222,21 +226,21 @@
                 </div>
               <% end %>
             <% else %>
-              <div class="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
+              <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-8 text-center">
                 <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Content No Longer Available</h3>
-                <p class="text-sm text-gray-600">The shared page has been removed or made private.</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Content No Longer Available</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">The shared page has been removed or made private.</p>
               </div>
             <% end %>
             
             <!-- Interaction Bar -->
-            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
+            <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
               <div class="flex items-center space-x-6">
                 <!-- Comments -->
-                <button onclick="document.getElementById('comment-input').focus()" class="flex items-center space-x-2 text-gray-500 hover:text-blue-600 transition-colors group/btn">
-                  <div class="p-1.5 rounded-lg group-hover/btn:bg-blue-50 transition-colors">
+                <button onclick="document.getElementById('comment-input').focus()" class="flex items-center space-x-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+                  <div class="p-1.5 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-blue-900 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                     </svg>
@@ -254,8 +258,8 @@
           </div>
 
           <!-- Comments Section -->
-          <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               <%= pluralize @share.share_comments.count, 'comment' %>
             </h3>
             
@@ -273,7 +277,7 @@
                           placeholder: "Add a thoughtful comment...", 
                           rows: 3,
                           id: "comment-input",
-                          class: "flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors resize-none" %>
+                          class: "flex-1 px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 transition-colors resize-none" %>
                       <%= f.submit "Post", class: "flex-shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
                     </div>
                   <% end %>
@@ -281,9 +285,9 @@
               </div>
             <% else %>
               <div class="mb-6 pb-6 border-b border-gray-200">
-                <div class="bg-gray-50 rounded-lg p-4 text-center">
-                  <p class="text-gray-600 text-sm">
-                    <%= link_to "Sign in", new_user_session_path, class: "text-blue-600 hover:text-blue-700 font-medium" %> to leave a comment
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+                  <p class="text-gray-600 dark:text-gray-400 text-sm">
+                    <%= link_to "Sign in", new_user_session_path, class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" %> to leave a comment
                   </p>
                 </div>
               </div>
@@ -296,12 +300,12 @@
                   <div class="flex space-x-3">
                     <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0 border border-green-200" %>
                     <div class="flex-1 min-w-0">
-                      <div class="bg-gray-50 rounded-lg px-3 py-2">
+                      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
                         <div class="flex items-center space-x-2 mb-1">
-                          <span class="font-medium text-sm text-gray-900"><%= comment.user.display_name %></span>
-                          <span class="text-xs text-gray-500"><%= time_ago_in_words comment.created_at %> ago</span>
+                          <span class="font-medium text-sm text-gray-900 dark:text-white"><%= comment.user.display_name %></span>
+                          <span class="text-xs text-gray-500 dark:text-gray-400"><%= time_ago_in_words comment.created_at %> ago</span>
                         </div>
-                        <div class="text-sm text-gray-700">
+                        <div class="text-sm text-gray-700 dark:text-gray-300">
                           <%= simple_format ContentFormatterService.show(text: comment.message, viewing_user: current_user) %>
                         </div>
                       </div>
@@ -311,10 +315,10 @@
               </div>
             <% else %>
               <div class="text-center py-8">
-                <svg class="w-8 h-8 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-                <p class="text-sm text-gray-500">No comments yet. Be the first to comment!</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">No comments yet. Be the first to comment!</p>
               </div>
             <% end %>
           </div>
@@ -325,10 +329,10 @@
           <div class="sticky top-24 space-y-4">
             <!-- Share Creator Card -->
             <%= link_to @share.user, class: "block group" do %>
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                  <h3 class="text-sm font-semibold text-gray-900 flex items-center">
-                    <i class="material-icons text-sm mr-2 text-gray-600"><%= User.icon %></i>
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
+                <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="material-icons text-sm mr-2 text-gray-600 dark:text-gray-400"><%= User.icon %></i>
                     Share Creator
                   </h3>
                 </div>
@@ -337,14 +341,14 @@
                   <div class="flex items-center space-x-3">
                     <%= image_tag @share.user.image_url(size: 48), class: "h-12 w-12 rounded-full" %>
                     <div class="flex-1 min-w-0">
-                      <h4 class="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      <h4 class="text-base font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         <%= @share.user.display_name %>
                       </h4>
-                      <p class="text-sm text-gray-500">
+                      <p class="text-sm text-gray-500 dark:text-gray-400">
                         <%= pluralize(@share.user.public_content_count, 'public page') %>
                       </p>
                     </div>
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                   </div>
@@ -354,22 +358,24 @@
 
             <% if user_signed_in? && @share.user != current_user %>
               <% unless @is_blocked %>
-                <button type="button" id="follow-btn"
-                        class="w-full mt-2 <%= @is_following ? 'bg-gray-100 hover:bg-gray-200 text-gray-700' : 'bg-blue-600 hover:bg-blue-700 text-white' %> inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-                        data-user-id="<%= @share.user.id %>"
-                        data-following="<%= @is_following %>">
-                  <i class="material-icons text-sm mr-1.5"><%= @is_following ? 'check' : 'person_add' %></i>
-                  <span><%= @is_following ? 'Following' : 'Follow User' %></span>
+                <button type="button" 
+                        class="w-full mt-2 <%= @is_following ? 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200' : 'bg-blue-600 hover:bg-blue-700 text-white' %> inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+                        data-controller="follow-button"
+                        data-follow-button-user-id-value="<%= @share.user.id %>"
+                        data-follow-button-following-value="<%= @is_following %>"
+                        data-action="follow-button#toggle">
+                  <i class="material-icons text-sm mr-1.5" data-follow-button-target="icon"><%= @is_following ? 'check' : 'person_add' %></i>
+                  <span data-follow-button-target="text"><%= @is_following ? 'Following' : 'Follow User' %></span>
                 </button>
               <% end %>
             <% end %>
             
             <!-- More from Creator -->
             <% if @share.user.public_content_count > 0 %>
-              <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                  <h3 class="text-sm font-semibold text-gray-900 flex items-center">
-                    <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
+                  <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                     </svg>
                     More from <%= @share.user.display_name.truncate(240) %>
@@ -387,7 +393,7 @@
                         end
                       %>
                       <%= link_to page_path, class: "block group" do %>
-                        <div class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <div class="flex-shrink-0">
                             <% content_class = content_page_data.page_type.constantize rescue nil %>
                             <% if content_class && content_class.respond_to?(:hex_color) %>
@@ -395,20 +401,20 @@
                                 <i class="material-icons text-xs" style="color: <%= content_class.hex_color %>;"><%= content_class.icon if content_class.respond_to?(:icon) %></i>
                               </div>
                             <% else %>
-                              <div class="w-6 h-6 rounded-md flex items-center justify-center bg-gray-100">
-                                <i class="material-icons text-xs text-gray-500">article</i>
+                              <div class="w-6 h-6 rounded-md flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+                                <i class="material-icons text-xs text-gray-500 dark:text-gray-400">article</i>
                               </div>
                             <% end %>
                           </div>
                           <div class="flex-1 min-w-0">
-                            <h4 class="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
                               <%= content_page_data.name %>
                             </h4>
-                            <p class="text-xs text-gray-500">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
                               <%= content_page_data.page_type %> • <%= time_ago_in_words(content_page_data.updated_at) %> ago
                             </p>
                           </div>
-                          <svg class="w-3 h-3 text-gray-400 group-hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg class="w-3 h-3 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                           </svg>
                         </div>
@@ -420,10 +426,10 @@
             <% end %>
 
             <!-- More shares from this user -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                <h3 class="text-sm font-semibold text-gray-900 flex items-center">
-                  <svg class="w-4 h-4 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                  <svg class="w-4 h-4 text-purple-600 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                   </svg>
                   More from <%= @share.user.display_name.truncate(240) %>
@@ -441,7 +447,7 @@
                   <div class="space-y-2">
                     <% other_shares.each do |share| %>
                       <%= link_to user_content_page_share_path(share.user, share), class: "block group" do %>
-                        <div class="flex items-start space-x-3 p-2 rounded-md hover:bg-gray-50 transition-colors">
+                        <div class="flex items-start space-x-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <% if share.content_page %>
                             <% if share.content_page.class.respond_to?(:hex_color) %>
                               <div class="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center"
@@ -451,21 +457,21 @@
                                 </i>
                               </div>
                             <% else %>
-                              <div class="flex-shrink-0 w-8 h-8 rounded bg-gray-100 flex items-center justify-center">
-                                <i class="material-icons text-xs text-gray-500">article</i>
+                              <div class="flex-shrink-0 w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <i class="material-icons text-xs text-gray-500 dark:text-gray-400">article</i>
                               </div>
                             <% end %>
                           <% else %>
-                            <div class="flex-shrink-0 w-8 h-8 rounded bg-gray-100 flex items-center justify-center">
-                              <i class="material-icons text-xs text-gray-500">description</i>
+                            <div class="flex-shrink-0 w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                              <i class="material-icons text-xs text-gray-500 dark:text-gray-400">description</i>
                             </div>
                           <% end %>
 
                           <div class="flex-1 min-w-0">
-                            <h4 class="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
                               <%= share.content_page ? share.content_page.name : "Deleted content" %>
                             </h4>
-                            <p class="text-xs text-gray-500 line-clamp-2">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
                               <%= share.message.present? ? share.message.truncate(60) : "Shared #{time_ago_in_words(share.created_at)} ago" %>
                             </p>
                           </div>
@@ -474,7 +480,7 @@
                     <% end %>
                   </div>
                 <% else %>
-                  <p class="text-xs text-gray-500 text-center py-4">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
                     No other shares yet
                   </p>
                 <% end %>
@@ -486,177 +492,3 @@
     </div>
   </div>
 </div>
-
-<script>
-// Copy to clipboard functionality with improved UX
-function copyToClipboard(text) {
-  if (!text) {
-    showNotification('No link to copy', 'error');
-    return;
-  }
-
-  if (navigator.clipboard && window.isSecureContext) {
-    // Use the modern clipboard API
-    navigator.clipboard.writeText(text).then(function() {
-      showNotification('Link copied to clipboard!', 'success');
-    }).catch(function(err) {
-      console.error('Failed to copy: ', err);
-      fallbackCopyTextToClipboard(text);
-    });
-  } else {
-    // Fallback for older browsers
-    fallbackCopyTextToClipboard(text);
-  }
-}
-
-function fallbackCopyTextToClipboard(text) {
-  var textArea = document.createElement("textarea");
-  textArea.value = text;
-  textArea.style.position = "fixed";
-  textArea.style.top = "0";
-  textArea.style.left = "0";
-  textArea.style.width = "2em";
-  textArea.style.height = "2em";
-  textArea.style.padding = "0";
-  textArea.style.border = "none";
-  textArea.style.outline = "none";
-  textArea.style.boxShadow = "none";
-  textArea.style.background = "transparent";
-  textArea.style.opacity = "0";
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-
-  try {
-    var successful = document.execCommand('copy');
-    if (successful) {
-      showNotification('Link copied to clipboard!', 'success');
-    } else {
-      showNotification('Unable to copy link. Please copy manually.', 'error');
-    }
-  } catch (err) {
-    console.error('Fallback copy failed:', err);
-    showNotification('Copy failed. Please copy link manually.', 'error');
-  }
-
-  document.body.removeChild(textArea);
-}
-
-function showNotification(message, type) {
-  // Remove any existing notifications
-  var existingNotifications = document.querySelectorAll('.copy-notification');
-  existingNotifications.forEach(function(notif) {
-    notif.remove();
-  });
-
-  // Create notification element
-  var notification = document.createElement('div');
-  var bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
-  notification.className = 'copy-notification fixed bottom-4 right-4 ' + bgColor + ' text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-y-0 opacity-100';
-  
-  // Add icon based on type
-  var icon = type === 'success' ? 
-    '<svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
-    '<svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-  
-  notification.innerHTML = icon + message;
-  notification.style.transform = 'translateY(100%)';
-  notification.style.opacity = '0';
-  document.body.appendChild(notification);
-  
-  // Animate in (slide up from bottom)
-  setTimeout(function() {
-    notification.style.transform = 'translateY(0)';
-    notification.style.opacity = '1';
-  }, 10);
-  
-  // Remove after 4 seconds
-  setTimeout(function() {
-    notification.style.opacity = '0';
-    notification.style.transform = 'translateY(100%)';
-    setTimeout(function() {
-      if (notification.parentNode) {
-        notification.parentNode.removeChild(notification);
-      }
-    }, 300);
-  }, 4000);
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', function(e) {
-  // Escape key to go back
-  if (e.key === 'Escape') {
-    window.history.back();
-  }
-  
-  // Ctrl/Cmd + K to copy link
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-    e.preventDefault();
-    copyToClipboard('<%= user_content_page_share_url(@share.user, @share) %>');
-  }
-});
-
-// Follow button functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const followBtn = document.getElementById('follow-btn');
-  
-  if (followBtn) {
-    followBtn.addEventListener('click', function() {
-      const userId = this.dataset.userId;
-      const isFollowing = this.dataset.following === 'true';
-      const button = this;
-      const buttonText = button.querySelector('span');
-      const buttonIcon = button.querySelector('i');
-      
-      // Disable button during request
-      button.disabled = true;
-      button.style.opacity = '0.7';
-      
-      // Determine action and endpoint
-      const action = isFollowing ? 'DELETE' : 'POST';
-      const endpoint = isFollowing ? `/users/${userId}/unfollow` : `/users/${userId}/follow`;
-      
-      fetch(endpoint, {
-        method: action,
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        credentials: 'same-origin'
-      })
-      .then(response => {
-        if (response.ok) {
-          // Toggle the follow state
-          const newFollowingState = !isFollowing;
-          button.dataset.following = newFollowingState.toString();
-          
-          // Update button appearance
-          if (newFollowingState) {
-            button.className = button.className.replace('bg-blue-600 hover:bg-blue-700', 'bg-gray-600 hover:bg-gray-700');
-            buttonText.textContent = 'Following';
-            buttonIcon.textContent = 'person_remove';
-          } else {
-            button.className = button.className.replace('bg-gray-600 hover:bg-gray-700', 'bg-blue-600 hover:bg-blue-700');
-            buttonText.textContent = 'Follow';
-            buttonIcon.textContent = 'person_add';
-          }
-          
-          // Show success notification
-          showNotification(newFollowingState ? 'Now following user!' : 'Unfollowed user', 'success');
-        } else {
-          throw new Error('Network response was not ok');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showNotification('Failed to update follow status', 'error');
-      })
-      .finally(() => {
-        // Re-enable button
-        button.disabled = false;
-        button.style.opacity = '1';
-      });
-    });
-  }
-});
-</script>

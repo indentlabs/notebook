@@ -1,9 +1,9 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center mb-8">
-    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
       <i class="material-icons">arrow_back</i>
     <% end %>
-    <h1 class="text-3xl font-bold text-gray-700">Document statistics</h1>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Document statistics</h1>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -31,45 +31,45 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-lg shadow-md mb-8 overflow-hidden">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-800">You've written <%= pluralize @documents.count, 'document' %> on Notebook.ai</h2>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-8 overflow-hidden">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white">You've written <%= pluralize @documents.count, 'document' %> on Notebook.ai</h2>
     </div>
 
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Word count</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">History</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Analyzed?</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Word count</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">History</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Analyzed?</th>
           </tr>
         </thead>
 
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           <% @documents.each do |document| %>
-            <tr class="hover:bg-gray-50">
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex items-center">
                   <i class="material-icons <%= Document.text_color %> mr-2"><%= Document.icon %></i>
                   <%= link_to document.title, document, class: "#{Document.text_color} hover:underline" %>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
                 <%= number_with_delimiter(document.cached_word_count || 0) %>
                 <%= 'word'.pluralize(document.cached_word_count || 0) %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-700">
+                <div class="text-sm text-gray-700 dark:text-gray-300">
                   Created <%= time_ago_in_words document.created_at %> ago
-                  <span class="text-gray-500">
+                  <span class="text-gray-500 dark:text-gray-400">
                     (<%= document.created_at.strftime("%m/%d/%Y") %>)
                   </span>
                 </div>
-                <div class="text-sm text-gray-700">
+                <div class="text-sm text-gray-700 dark:text-gray-300">
                   Last updated <%= time_ago_in_words document.updated_at %> ago
-                  <span class="text-gray-500">
+                  <span class="text-gray-500 dark:text-gray-400">
                     (<%= document.updated_at.strftime("%m/%d/%Y") %>)
                   </span>
                 </div>
@@ -90,10 +90,10 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-lg shadow-md mb-8">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Writing activity over time</h2>
-      <p class="text-gray-600">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-8">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Writing activity over time</h2>
+      <p class="text-gray-600 dark:text-gray-400">
         Notebook.ai automatically creates backups of your documents as often as every five minutes as you're writing.
         The following charts estimate approximately how much time you spend writing in Notebook.ai each day
         based on how many of those automatic backups were created.
@@ -125,7 +125,7 @@
         download: true
       %>
       
-      <div class="text-center mt-8 text-gray-700">
+      <div class="text-center mt-8 text-gray-700 dark:text-gray-300">
         You have written something in a Notebook.ai document on
         <span class="font-bold">
           <%= @revisions.group_by_day(:created_at).keys.count %>
@@ -136,10 +136,10 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-    <div class="bg-white rounded-lg shadow-md">
-      <div class="p-6 border-b border-gray-200 text-center">
-        <h2 class="text-xl font-semibold text-gray-800">Words-written distribution per document</h2>
-        <p class="text-gray-500 text-sm">(for your 10 longest documents)</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 text-center">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Words-written distribution per document</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">(for your 10 longest documents)</p>
       </div>
       <div class="p-6">
         <%=
@@ -151,10 +151,10 @@
       </div>
     </div>
     
-    <div class="bg-white rounded-lg shadow-md">
-      <div class="p-6 border-b border-gray-200 text-center">
-        <h2 class="text-xl font-semibold text-gray-800">Words-written distribution per document</h2>
-        <p class="text-gray-500 text-sm">(for your 10 most recent documents)</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 text-center">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Words-written distribution per document</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">(for your 10 most recent documents)</p>
       </div>
       <div class="p-6">
         <%=
@@ -167,9 +167,9 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-lg shadow-md">
-    <div class="p-6 border-b border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-800">Revisions per document</h2>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Revisions per document</h2>
     </div>
     <div class="p-6">
       <%=

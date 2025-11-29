@@ -1,41 +1,41 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center mb-8">
-    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 mr-3', title: "Back to your Data Vault" do %>
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
       <i class="material-icons">arrow_back</i>
     <% end %>
-    <h1 class="text-3xl font-bold text-gray-700">Recycle Bin</h1>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Recycle Bin</h1>
   </div>
 
   <!-- Information Card -->
-  <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
-    <div class="p-6 border-b border-gray-200">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
       <div class="flex flex-col md:flex-row">
         <div class="md:w-2/3 pr-6">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Recently Deleted Content</h2>
-          <p class="text-gray-600 mb-4">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Recently Deleted Content</h2>
+          <p class="text-gray-600 dark:text-gray-300 mb-4">
             Whenever you delete a page from your notebook, it ends up here for a limited time.
             You can recover any page during this period to add it back to your notebook.
             If not recovered, pages will be permanently deleted after the recovery period ends.
           </p>
-          <p class="text-gray-600">
+          <p class="text-gray-600 dark:text-gray-300">
             Use this page if you've accidentally deleted content and need to recover it.
           </p>
           
-          <div class="mt-6 bg-red-50 border-l-4 border-red-400 p-4">
+          <div class="mt-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-400 dark:border-red-500 p-4">
             <div class="flex">
               <div class="flex-shrink-0">
-                <i class="material-icons text-red-400">alarm</i>
+                <i class="material-icons text-red-400 dark:text-red-300">alarm</i>
               </div>
               <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Recovery Period</h3>
-                <div class="mt-2 text-sm text-red-700">
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-100">Recovery Period</h3>
+                <div class="mt-2 text-sm text-red-700 dark:text-red-200">
                   <p>
                     <% if current_user.on_premium_plan? %>
                       Premium users can recover pages up to <strong>7 days</strong> after deletion.
                     <% else %>
                       You can recover pages up to <strong>2 days</strong> after deletion.
                       <span class="block mt-1">
-                        <a href="<%= subscription_path %>" class="text-red-800 font-medium hover:text-red-900 underline">
+                        <a href="<%= subscription_path %>" class="text-red-800 dark:text-white font-medium hover:text-red-900 dark:hover:text-red-100 underline">
                           Upgrade to Premium
                         </a>
                         for a 7-day recovery period.
@@ -86,11 +86,11 @@
         <div class="w-8 h-8 rounded-full bg-<%= content_type.text_color %> flex items-center justify-center mr-3">
           <i class="material-icons text-white text-sm"><%= content_type.icon %></i>
         </div>
-        <h2 class="text-xl font-semibold text-gray-800"><%= content_type_name.pluralize %></h2>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200"><%= content_type_name.pluralize %></h2>
       </div>
       
-      <div class="bg-white rounded-lg shadow-md overflow-hidden">
-        <ul class="divide-y divide-gray-200">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <ul class="divide-y divide-gray-200 dark:divide-gray-700">
           <% content_list.each do |content| %>
             <li class="p-6">
               <div class="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -103,12 +103,12 @@
                     <% end %>
                   </div>
                   <div class="ml-4">
-                    <h3 class="text-lg font-medium text-gray-900">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white">
                       <%= (content.respond_to?(:label) ? content.label : list_name_lookup_cache[content.id].presence || content.name) %>
                     </h3>
                     <div class="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-                      <div class="mt-2 flex items-center text-sm text-gray-500">
-                        <i class="material-icons text-gray-400 text-sm mr-1">delete</i>
+                      <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1">delete</i>
                         Deleted <%= time_ago_in_words content.deleted_at %> ago
                       </div>
                       
@@ -120,11 +120,11 @@
                         
                         # Determine urgency level for color coding
                         urgency_color = if days_remaining < 1 && hours_remaining < 6
-                          "text-red-600"
+                          "text-red-600 dark:text-red-400"
                         elsif days_remaining < 1
-                          "text-orange-500"
+                          "text-orange-500 dark:text-orange-400"
                         else
-                          "text-gray-500"
+                          "text-gray-500 dark:text-gray-400"
                         end
                       %>
                       
@@ -138,7 +138,7 @@
                       </div>
                       
                       <% if content.respond_to?(:image_uploads) && content.image_uploads.any? %>
-                        <div class="mt-2 flex items-center text-sm text-gray-500">
+                        <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
                           <i class="material-icons text-sm mr-1">image</i>
                           <%= pluralize content.image_uploads.count, 'uploaded image' %> 
                           (<%= (content.image_uploads.sum(:src_file_size) / 1000.0).round(1) %> KB)
@@ -159,7 +159,7 @@
                   
                   <%= form_for content do |f| %>
                     <%= f.hidden_field :deleted_at, value: "1/1 1970".to_date %>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                       <i class="material-icons mr-1">delete_forever</i>
                       Delete Permanently
                     </button>
@@ -174,12 +174,12 @@
   <% end %>
 
   <% if !showed_any_content %>
-    <div class="bg-white rounded-lg shadow-md p-12 text-center">
-      <div class="inline-block p-4 rounded-full bg-gray-100 mb-4">
-        <i class="material-icons text-gray-400 text-4xl">delete_outline</i>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
+      <div class="inline-block p-4 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+        <i class="material-icons text-gray-400 dark:text-gray-500 text-4xl">delete_outline</i>
       </div>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No Recently Deleted Content</h3>
-      <p class="text-gray-500 max-w-md mx-auto">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Recently Deleted Content</h3>
+      <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
         Looks like you haven't deleted any pages recently. If you do, they will show up here for a limited time.
       </p>
     </div>
