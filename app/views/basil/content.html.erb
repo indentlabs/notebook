@@ -55,7 +55,35 @@ function commission_basil(style) {
           <% end %>
         </ul>
 
-        <% if @relevant_fields.empty? %>
+        <% if @additional_fields.any? %>
+          <div style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1rem;">
+            <a href="#" class="js-toggle-additional-fields-section grey-text text-darken-2" style="display: block; font-weight: bold;">
+              <i class="material-icons tiny" style="vertical-align: middle;">add_circle_outline</i>
+              Show <%= pluralize(@additional_fields.count, 'more field') %> you can include
+              <i class="material-icons tiny js-chevron" style="vertical-align: middle;">expand_more</i>
+            </a>
+
+            <div class="js-additional-fields-container hide" style="margin-top: 0.5rem;">
+              <ul style="margin-top: 0.5rem;">
+                <% @additional_fields.each do |field, value| %>
+                  <li style="margin-bottom: 0.5em; opacity: 0.7;">
+                    <label>
+                      <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, false, class: 'js-toggle-additional-field' %>
+                      <span class="grey-text"><%= field.label %></span>
+                    </label>
+                    <div class="js-additional-field-inputs hide" data-field-id="<%= field.id %>">
+                      <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: true %>
+                      <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: true %>
+                      <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: true } %>
+                    </div>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        <% end %>
+
+        <% if @relevant_fields.empty? && @additional_fields.empty? %>
           <div class="red card-panel lighten-3">
             <strong>Basil works best with guidance!</strong>
             <br /><br />
@@ -65,7 +93,7 @@ function commission_basil(style) {
         <% end %>
 
         <div>
-          <% if @can_request_another && @relevant_fields.any? %>
+          <% if @can_request_another && (@relevant_fields.any? || @additional_fields.any?) %>
             <a href="javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide'); document.getElementById('importance-explainer').classList.remove('hide');" class="waves-effect waves-light btn-small purple lighten-1" style="margin-bottom: 1rem;">Customize importance</a>
           <% end %>
 
@@ -121,7 +149,7 @@ function commission_basil(style) {
   <div class="col s12 m8" style="margin-top: 1rem">
     <%= render partial: 'notice_dismissal/messages/19' if show_notice?(id: 19) %>
 
-    <% if @can_request_another && @relevant_fields.any? %>
+    <% if @can_request_another && (@relevant_fields.any? || @additional_fields.any?) %>
       <div class="row" style="padding-left: 0.5rem">
         <div class="grey-text center" style="font-size: 1.2rem; margin-bottom: 0.5rem;"><strong>Image Styles</strong></div>
         <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
@@ -302,6 +330,36 @@ $(document).ready(function() {
     });
 
     e.preventDefault();
+  });
+
+  // Toggle the additional fields section open/closed
+  $('.js-toggle-additional-fields-section').click(function(e) {
+    e.preventDefault();
+    var container = $(this).siblings('.js-additional-fields-container');
+    var chevron = $(this).find('.js-chevron');
+
+    container.toggleClass('hide');
+    if (container.hasClass('hide')) {
+      chevron.text('expand_more');
+    } else {
+      chevron.text('expand_less');
+    }
+  });
+
+  // Toggle individual additional field on/off
+  $('.js-toggle-additional-field').change(function() {
+    var inputs = $(this).closest('li').find('.js-additional-field-inputs');
+    var inputFields = inputs.find('input');
+
+    if ($(this).is(':checked')) {
+      inputs.removeClass('hide');
+      inputFields.prop('disabled', false);
+      $(this).closest('li').css('opacity', '1');
+    } else {
+      inputs.addClass('hide');
+      inputFields.prop('disabled', true);
+      $(this).closest('li').css('opacity', '0.7');
+    }
   });
 });
 <% end %>

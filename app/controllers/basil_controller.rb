@@ -198,6 +198,16 @@ class BasilController < ApplicationController
     end
     @relevant_fields.compact!
 
+    # Get IDs of fields already included
+    included_field_ids = @relevant_fields.map { |field, _| field.id }
+
+    # Get additional filled fields not in the hardcoded template
+    @additional_fields = BasilService.get_additional_filled_fields(
+      current_user,
+      @content,
+      exclude_field_ids: included_field_ids
+    )
+
     # Finally, cache some state we can reference in the view
     @commissions = BasilCommission.where(entity_type: @content.page_type, entity_id: @content.id)
                                   .where(saved_at: nil)
