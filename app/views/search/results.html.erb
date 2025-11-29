@@ -16,10 +16,10 @@
             </div>
 
             <!-- All Results Link -->
-            <%= link_to search_params.merge({ filter: 'all' }), class: "#{@filter == 'all' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50'} group flex items-center px-3 py-2 text-sm font-medium rounded-md" do %>
-              <i class="material-icons mr-2 text-gray-400">search</i>
+            <%= link_to search_params.merge({ filter: 'all' }), class: "#{@filter == 'all' ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'} group flex items-center px-3 py-2 text-sm font-medium rounded-md" do %>
+              <i class="material-icons mr-2 text-gray-400 dark:text-gray-500">search</i>
               <span class="truncate">All results</span>
-              <span class="ml-auto text-xs text-gray-500"><%= @matched_attributes.size %></span>
+              <span class="ml-auto text-xs text-gray-500 dark:text-gray-400"><%= @matched_attributes.size %></span>
             <% end %>
           </div>
 
@@ -30,10 +30,10 @@
               <% @result_types.each do |page_type_name| %>
                 <% content_class = content_class_from_name(page_type_name) %>
                 <% type_count = @matched_attributes.count { |attr| attr.entity_type == page_type_name } %>
-                <%= link_to search_params.merge({ filter: page_type_name }), class: "#{@filter == page_type_name ? 'text-black bg-white' : 'text-gray-600' } group flex items-center px-3 py-2 text-sm font-medium rounded-md hover:text-gray-900 hover:bg-gray-50" do %>
+                <%= link_to search_params.merge({ filter: page_type_name }), class: "#{@filter == page_type_name ? 'text-black bg-white dark:bg-gray-800 dark:text-white' : 'text-gray-600 dark:text-gray-400' } group flex items-center px-3 py-2 text-sm font-medium rounded-md hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-gray-800" do %>
                   <i class="material-icons mr-2 <%= content_class.text_color %> text-lg"><%= content_class.icon %></i>
                   <span class="truncate flex-1"><%= page_type_name.pluralize %></span>
-                  <span class="text-xs text-gray-500"><%= type_count %></span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400"><%= type_count %></span>
                 <% end %>
               <% end %>
             </div>
@@ -45,22 +45,22 @@
               <p class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Suggestions</p>
               <div class="mt-3 space-y-1">
                 <% if @query.length > 30 %>
-                  <div class="px-3 py-2 text-sm text-gray-600 bg-blue-50 rounded-md">
-                    <i class="material-icons text-xs mr-1 text-blue-500">lightbulb</i>
+                  <div class="px-3 py-2 text-sm text-gray-600 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 rounded-md">
+                    <i class="material-icons text-xs mr-1 text-blue-500 dark:text-blue-400">lightbulb</i>
                     Try shorter search terms
                   </div>
                 <% end %>
                 
                 <% if @matched_attributes.empty? && @query.split.length > 3 %>
-                  <div class="px-3 py-2 text-sm text-gray-600 bg-blue-50 rounded-md">
-                    <i class="material-icons text-xs mr-1 text-blue-500">lightbulb</i>
+                  <div class="px-3 py-2 text-sm text-gray-600 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 rounded-md">
+                    <i class="material-icons text-xs mr-1 text-blue-500 dark:text-blue-400">lightbulb</i>
                     Try using fewer words
                   </div>
                 <% end %>
 
                 <% if @filter != 'all' && @matched_attributes.empty? %>
-                  <div class="px-3 py-2 text-sm text-gray-600 bg-blue-50 rounded-md">
-                    <i class="material-icons text-xs mr-1 text-blue-500">lightbulb</i>
+                  <div class="px-3 py-2 text-sm text-gray-600 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 rounded-md">
+                    <i class="material-icons text-xs mr-1 text-blue-500 dark:text-blue-400">lightbulb</i>
                     Try searching in "All results"
                   </div>
                 <% end %>
@@ -76,8 +76,8 @@
         
         <!-- Mobile Filters -->
         <div class="lg:hidden mb-6">
-          <label for="mobile-filter" class="block text-sm font-medium text-gray-700 mb-2">Filter by type:</label>
-          <select id="mobile-filter" onchange="window.location.href=this.value" class="w-full border border-gray-300 rounded-md px-3 py-2 bg-white">
+          <label for="mobile-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter by type:</label>
+          <select id="mobile-filter" onchange="window.location.href=this.value" class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 bg-white dark:bg-gray-700 dark:text-white">
             <option value="<%= search_params.merge(filter: 'all') %>" <%= 'selected' if @filter == 'all' %>>
               All Results (<%= @matched_attributes.size %>)
             </option>
@@ -91,9 +91,9 @@
         </div>
 
         <!-- Search Header -->
-        <div class="mb-6 border-b border-gray-200 pb-4">
-          <h1 class="text-2xl font-bold text-gray-900">Search Results</h1>
-          <p class="text-sm text-gray-600 mt-1">
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Search Results</h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
             Found <%= pluralize(@matched_attributes.size, 'result') %> for 
             <span class="font-medium">"<%= @query %>"</span>
             <% if @filter != 'all' %>
@@ -104,8 +104,8 @@
 
         <!-- Search Refinement -->
         <% if @matched_attributes.any? && @matched_attributes.size > 5 %>
-          <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
+          <div class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <i class="material-icons text-sm mr-1">tune</i>
               Refine search within results:
             </label>
@@ -115,7 +115,7 @@
               <%= hidden_field_tag :filter, @filter %>
               <%= text_field_tag :refine, params[:refine], 
                   placeholder: "Additional keywords...", 
-                  class: "flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500" %>
+                  class: "flex-1 border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" %>
               <%= button_tag class: "px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500" do %>
                 <i class="material-icons text-sm mr-1">search</i>
                 Refine
@@ -135,18 +135,18 @@
             </select>
           </div>
           <div class="hidden sm:block">
-            <nav class="relative z-0 rounded-lg shadow flex divide-x divide-gray-200" aria-label="Tabs">
-              <%= link_to search_params.merge({ sort: 'relevance' }), class: "#{@sort == 'relevance' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'} rounded-l-lg group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 focus:z-10" do %>
+            <nav class="relative z-0 rounded-lg shadow flex divide-x divide-gray-200 dark:divide-gray-700" aria-label="Tabs">
+              <%= link_to search_params.merge({ sort: 'relevance' }), class: "#{@sort == 'relevance' ? 'text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'} rounded-l-lg group relative min-w-0 flex-1 overflow-hidden bg-white dark:bg-gray-800 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10" do %>
                 <span>Best Match</span>
                 <span aria-hidden="true" class="<%= @sort == 'relevance' ? 'bg-blue-500' : 'bg-transparent' %> absolute inset-x-0 bottom-0 h-0.5"></span>
               <% end %>
 
-              <%= link_to search_params.merge({ sort: 'recent' }), class: "#{@sort == 'recent' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'} group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 focus:z-10" do %>
+              <%= link_to search_params.merge({ sort: 'recent' }), class: "#{@sort == 'recent' ? 'text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'} group relative min-w-0 flex-1 overflow-hidden bg-white dark:bg-gray-800 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10" do %>
                 <span>Most Recent</span>
                 <span aria-hidden="true" class="<%= @sort == 'recent' ? 'bg-blue-500' : 'bg-transparent' %> absolute inset-x-0 bottom-0 h-0.5"></span>
               <% end %>
 
-              <%= link_to search_params.merge({ sort: 'oldest' }), class: "#{@sort == 'oldest' ? 'text-gray-900' : 'text-gray-500 hover:text-gray-700'} rounded-r-lg group relative min-w-0 flex-1 overflow-hidden bg-white py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 focus:z-10" do %>
+              <%= link_to search_params.merge({ sort: 'oldest' }), class: "#{@sort == 'oldest' ? 'text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'} rounded-r-lg group relative min-w-0 flex-1 overflow-hidden bg-white dark:bg-gray-800 py-4 px-6 text-sm font-medium text-center hover:bg-gray-50 dark:hover:bg-gray-700 focus:z-10" do %>
                 <span>Oldest</span>
                 <span aria-hidden="true" class="<%= @sort == 'oldest' ? 'bg-blue-500' : 'bg-transparent' %> absolute inset-x-0 bottom-0 h-0.5"></span>
               <% end %>
@@ -174,7 +174,7 @@
                   @seen_result_pages[seen_key] = true
                 %>
 
-                <li class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                <li class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
                   <%= link_to entity.view_path, class: 'block p-6' do %>
                     <div class="flex items-start space-x-4">
                       
@@ -182,10 +182,10 @@
                       <div class="flex-shrink-0">
                         <% if entity.respond_to?(:random_image_including_private) && entity.random_image_including_private.present? %>
                           <%= image_tag entity.random_image_including_private, 
-                              class: 'w-16 h-16 rounded-lg object-cover bg-gray-100',
+                              class: 'w-16 h-16 rounded-lg object-cover bg-gray-100 dark:bg-gray-700',
                               onerror: "this.style.display='none'" %>
                         <% else %>
-                          <div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center">
+                          <div class="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                             <i class="material-icons <%= entity.text_color %> text-2xl"><%= entity.icon %></i>
                           </div>
                         <% end %>
@@ -195,14 +195,14 @@
                         <!-- Entity Header -->
                         <div class="flex items-center space-x-2 mb-2">
                           <i class="material-icons <%= entity.text_color %> text-lg"><%= entity.icon %></i>
-                          <h3 class="text-lg font-semibold text-gray-900 truncate"><%= entity.name %></h3>
-                          <span class="text-sm text-gray-500"><%= attribute.entity_type %></span>
+                          <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate"><%= entity.name %></h3>
+                          <span class="text-sm text-gray-500 dark:text-gray-400"><%= attribute.entity_type %></span>
                         </div>
                         
                         <!-- Universe Context -->
                         <% if entity.respond_to?(:universe) && entity.universe.present? %>
-                          <div class="text-xs text-gray-500 mb-2">
-                            <%= link_to entity.universe, class: 'hover:text-gray-700 underline' do %>
+                          <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                            <%= link_to entity.universe, class: 'hover:text-gray-700 dark:hover:text-gray-300 underline' do %>
                               <%= entity.universe.name %>
                             <% end %> →
                             <%= attribute.entity_type %>
@@ -211,14 +211,14 @@
                         
                         <!-- Match Context -->
                         <div class="mb-3">
-                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                             <i class="material-icons text-xs mr-1">label</i>
                             <%= attribute.attribute_field.label %>
                           </span>
                         </div>
                         
                         <!-- Content Preview -->
-                        <div class="text-sm text-gray-600">
+                        <div class="text-sm text-gray-600 dark:text-gray-300">
                           <p class="line-clamp-2">
                             <%= highlight_search_terms(
                               truncate(strip_tags(attribute.value), length: 200, separator: ' '), 
@@ -235,18 +235,18 @@
           <% else %>
             <!-- Empty State -->
             <div class="text-center py-12">
-              <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                <i class="material-icons text-gray-400 text-4xl">search_off</i>
+              <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                <i class="material-icons text-gray-400 dark:text-gray-500 text-4xl">search_off</i>
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No results found</h3>
-              <p class="text-gray-500 mb-6 max-w-md mx-auto">
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No results found</h3>
+              <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 We couldn't find anything matching "<%= @query %>"
                 <% if @filter != 'all' %> in <%= @filter.pluralize %><% end %>.
               </p>
               
-              <div class="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
-                <h4 class="text-sm font-medium text-gray-900 mb-3">Try:</h4>
-                <ul class="text-sm text-gray-600 space-y-2">
+              <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 max-w-md mx-auto">
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Try:</h4>
+                <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-2">
                   <li class="flex items-center">
                     <i class="material-icons text-xs mr-2 text-gray-400">check_circle</i>
                     Using different keywords
@@ -258,7 +258,7 @@
                   <% if @filter != 'all' %>
                     <li class="flex items-center">
                       <i class="material-icons text-xs mr-2 text-gray-400">check_circle</i>
-                      <%= link_to "Searching in all results", search_params.merge(filter: 'all'), class: 'text-blue-600 hover:text-blue-800 underline' %>
+                      <%= link_to "Searching in all results", search_params.merge(filter: 'all'), class: 'text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline' %>
                     </li>
                   <% end %>
                   <li class="flex items-center">
@@ -278,23 +278,23 @@
               <% current_page = (params[:page] || 1).to_i %>
               <% if current_page > 1 %>
                 <%= link_to search_params.merge(page: current_page - 1), 
-                    class: "flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+                    class: "flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
                   <i class="material-icons text-sm mr-1">chevron_left</i>
                   Previous
                 <% end %>
               <% else %>
-                <span class="flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-400 bg-gray-50 cursor-not-allowed">
+                <span class="flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-900 cursor-not-allowed">
                   <i class="material-icons text-sm mr-1">chevron_left</i>
                   Previous
                 </span>
               <% end %>
               
-              <span class="px-3 py-2 text-sm text-gray-700">
+              <span class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300">
                 Page <%= current_page %>
               </span>
               
               <%= link_to search_params.merge(page: current_page + 1), 
-                  class: "flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" do %>
+                  class: "flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
                 Next
                 <i class="material-icons text-sm ml-1">chevron_right</i>
               <% end %>
