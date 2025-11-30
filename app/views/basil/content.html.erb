@@ -56,28 +56,30 @@ function commission_basil(style) {
         </ul>
 
         <% if @additional_fields.any? %>
+          <% has_previously_used_fields = @additional_fields.any? { |field, _| @guidance.key?(field.id.to_s) } %>
           <% if @relevant_fields.any? %>
-            <%# Show collapsed when there ARE primary fields %>
+            <%# Show collapsed when there ARE primary fields (unless user has previously selected additional fields) %>
             <div style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1rem;">
               <a href="#" class="js-toggle-additional-fields-section grey-text text-darken-2" style="display: block; font-weight: bold;">
-                <i class="material-icons tiny" style="vertical-align: middle;">add_circle_outline</i>
+                <i class="material-icons tiny js-plus-minus" style="vertical-align: middle;"><%= has_previously_used_fields ? 'remove_circle_outline' : 'add_circle_outline' %></i>
                 Show <%= pluralize(@additional_fields.count, 'more field') %> you can include
-                <i class="material-icons tiny js-chevron" style="vertical-align: middle;">expand_more</i>
+                <i class="material-icons tiny js-chevron" style="vertical-align: middle;"><%= has_previously_used_fields ? 'expand_less' : 'expand_more' %></i>
               </a>
 
-              <div class="js-additional-fields-container hide" style="margin-top: 0.5rem;">
+              <div class="js-additional-fields-container<%= ' hide' unless has_previously_used_fields %>" style="margin-top: 0.5rem;">
                 <ul style="margin-top: 0.5rem;">
                   <% @additional_fields.each do |field, value| %>
-                    <li style="margin-bottom: 0.5em; opacity: 0.7;">
+                    <% field_previously_used = @guidance.key?(field.id.to_s) %>
+                    <li style="margin-bottom: 0.5em; opacity: <%= field_previously_used ? '1' : '0.7' %>;">
                       <label>
-                        <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, false, class: 'js-toggle-additional-field' %>
+                        <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, field_previously_used, class: 'js-toggle-additional-field' %>
                         <span class="grey-text"><%= field.label %></span>
                       </label>
                       <div class="grey-text text-darken-1" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
-                      <div class="js-additional-field-inputs hide" data-field-id="<%= field.id %>">
-                        <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: true %>
-                        <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: true %>
-                        <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: true, class: 'js-importance-slider hide' } %>
+                      <div class="js-additional-field-inputs <%= 'hide' unless field_previously_used %>" data-field-id="<%= field.id %>">
+                        <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: !field_previously_used %>
+                        <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: !field_previously_used %>
+                        <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: !field_previously_used, class: 'js-importance-slider hide' } %>
                       </div>
                     </li>
                   <% end %>
@@ -93,16 +95,17 @@ function commission_basil(style) {
               </div>
               <ul style="margin-top: 0.5rem;">
                 <% @additional_fields.each do |field, value| %>
-                  <li style="margin-bottom: 0.5em; opacity: 0.7;">
+                  <% field_previously_used = @guidance.key?(field.id.to_s) %>
+                  <li style="margin-bottom: 0.5em; opacity: <%= field_previously_used ? '1' : '0.7' %>;">
                     <label>
-                      <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, false, class: 'js-toggle-additional-field' %>
+                      <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, field_previously_used, class: 'js-toggle-additional-field' %>
                       <span class="grey-text"><%= field.label %></span>
                     </label>
                     <div class="grey-text text-darken-1" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
-                    <div class="js-additional-field-inputs hide" data-field-id="<%= field.id %>">
-                      <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: true %>
-                      <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: true %>
-                      <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: true, class: 'js-importance-slider hide' } %>
+                    <div class="js-additional-field-inputs <%= 'hide' unless field_previously_used %>" data-field-id="<%= field.id %>">
+                      <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: !field_previously_used %>
+                      <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: !field_previously_used %>
+                      <%= range_field_tag "basil_commission[field][#{field.id}][importance]", @guidance.fetch(field.id.to_s, 1), { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: !field_previously_used, class: 'js-importance-slider hide' } %>
                     </div>
                   </li>
                 <% end %>
@@ -365,12 +368,15 @@ $(document).ready(function() {
     e.preventDefault();
     var container = $(this).siblings('.js-additional-fields-container');
     var chevron = $(this).find('.js-chevron');
+    var plusMinus = $(this).find('.js-plus-minus');
 
     container.toggleClass('hide');
     if (container.hasClass('hide')) {
       chevron.text('expand_more');
+      plusMinus.text('add_circle_outline');
     } else {
       chevron.text('expand_less');
+      plusMinus.text('remove_circle_outline');
     }
   });
 
