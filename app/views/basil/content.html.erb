@@ -56,14 +56,41 @@ function commission_basil(style) {
         </ul>
 
         <% if @additional_fields.any? %>
-          <div style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1rem;">
-            <a href="#" class="js-toggle-additional-fields-section grey-text text-darken-2" style="display: block; font-weight: bold;">
-              <i class="material-icons tiny" style="vertical-align: middle;">add_circle_outline</i>
-              Show <%= pluralize(@additional_fields.count, 'more field') %> you can include
-              <i class="material-icons tiny js-chevron" style="vertical-align: middle;">expand_more</i>
-            </a>
+          <% if @relevant_fields.any? %>
+            <%# Show collapsed when there ARE primary fields %>
+            <div style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1rem;">
+              <a href="#" class="js-toggle-additional-fields-section grey-text text-darken-2" style="display: block; font-weight: bold;">
+                <i class="material-icons tiny" style="vertical-align: middle;">add_circle_outline</i>
+                Show <%= pluralize(@additional_fields.count, 'more field') %> you can include
+                <i class="material-icons tiny js-chevron" style="vertical-align: middle;">expand_more</i>
+              </a>
 
-            <div class="js-additional-fields-container hide" style="margin-top: 0.5rem;">
+              <div class="js-additional-fields-container hide" style="margin-top: 0.5rem;">
+                <ul style="margin-top: 0.5rem;">
+                  <% @additional_fields.each do |field, value| %>
+                    <li style="margin-bottom: 0.5em; opacity: 0.7;">
+                      <label>
+                        <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, false, class: 'js-toggle-additional-field' %>
+                        <span class="grey-text"><%= field.label %></span>
+                      </label>
+                      <div class="grey-text text-darken-1" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
+                      <div class="js-additional-field-inputs hide" data-field-id="<%= field.id %>">
+                        <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: true %>
+                        <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: true %>
+                        <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: true, class: 'js-importance-slider hide' } %>
+                      </div>
+                    </li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          <% else %>
+            <%# Show expanded when there are NO primary fields - these are the only fields available %>
+            <div style="margin-top: 0.5rem;">
+              <div class="grey-text text-darken-2" style="font-weight: bold; margin-bottom: 0.5rem;">
+                <i class="material-icons tiny" style="vertical-align: middle;">check_box_outline_blank</i>
+                Select fields to include in your image:
+              </div>
               <ul style="margin-top: 0.5rem;">
                 <% @additional_fields.each do |field, value| %>
                   <li style="margin-bottom: 0.5em; opacity: 0.7;">
@@ -71,16 +98,17 @@ function commission_basil(style) {
                       <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, false, class: 'js-toggle-additional-field' %>
                       <span class="grey-text"><%= field.label %></span>
                     </label>
+                    <div class="grey-text text-darken-1" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
                     <div class="js-additional-field-inputs hide" data-field-id="<%= field.id %>">
                       <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: true %>
                       <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: true %>
-                      <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: true } %>
+                      <%= range_field_tag "basil_commission[field][#{field.id}][importance]", 1, { min: 0, max: 1.3, step: 0.1, style: 'width: 60%;', disabled: true, class: 'js-importance-slider hide' } %>
                     </div>
                   </li>
                 <% end %>
               </ul>
             </div>
-          </div>
+          <% end %>
         <% end %>
 
         <% if @relevant_fields.empty? && @additional_fields.empty? %>
@@ -92,12 +120,12 @@ function commission_basil(style) {
           </div>
         <% end %>
 
-        <div>
+        <div style="margin-top: 1rem;">
           <% if @can_request_another && (@relevant_fields.any? || @additional_fields.any?) %>
-            <a href="javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.remove('hide'); document.getElementById('importance-explainer').classList.remove('hide');" class="waves-effect waves-light btn-small purple lighten-1" style="margin-bottom: 1rem;">Customize importance</a>
+            <a href="javascript:var sliders = document.getElementsByClassName('js-importance-slider'); for(var i = 0; i < sliders.length; i++) sliders.item(i).classList.toggle('hide'); document.getElementById('importance-explainer').classList.toggle('hide');" class="waves-effect waves-light btn-small purple lighten-1" style="margin-bottom: 1rem;">Customize importance</a>
           <% end %>
 
-          <div id="importance-explainer" class="js-importance-slider hide grey lighten-5" style="margin-right: 1em; padding: 1rem;">
+          <div id="importance-explainer" class="hide grey lighten-5" style="margin-right: 1em; padding: 1rem;">
             <strong>How to customize per-field importance</strong>
             <br /><br />
 
