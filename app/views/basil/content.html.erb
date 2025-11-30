@@ -60,7 +60,7 @@ function commission_basil(style) {
           <% if @relevant_fields.any? %>
             <%# Show collapsed when there ARE primary fields (unless user has previously selected additional fields) %>
             <div style="margin-top: 1.5rem; border-top: 1px solid #e0e0e0; padding-top: 1rem;">
-              <a href="#" class="js-toggle-additional-fields-section grey-text text-darken-2" style="display: block; font-weight: bold;">
+              <a href="#" class="js-toggle-additional-fields-section basil-additional-fields-toggle" style="display: block; font-weight: bold;">
                 <i class="material-icons tiny js-plus-minus" style="vertical-align: middle;"><%= has_previously_used_fields ? 'remove_circle_outline' : 'add_circle_outline' %></i>
                 Show <%= pluralize(@additional_fields.count, 'more field') %> you can include
                 <i class="material-icons tiny js-chevron" style="vertical-align: middle;"><%= has_previously_used_fields ? 'expand_less' : 'expand_more' %></i>
@@ -73,9 +73,9 @@ function commission_basil(style) {
                     <li style="margin-bottom: 0.5em; opacity: <%= field_previously_used ? '1' : '0.7' %>;">
                       <label>
                         <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, field_previously_used, class: 'js-toggle-additional-field' %>
-                        <span class="grey-text"><%= field.label %></span>
+                        <span class="basil-field-label"><%= field.label %></span>
                       </label>
-                      <div class="grey-text text-darken-1" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
+                      <div class="basil-field-value" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
                       <div class="js-additional-field-inputs <%= 'hide' unless field_previously_used %>" data-field-id="<%= field.id %>">
                         <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: !field_previously_used %>
                         <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: !field_previously_used %>
@@ -89,7 +89,7 @@ function commission_basil(style) {
           <% else %>
             <%# Show expanded when there are NO primary fields - these are the only fields available %>
             <div style="margin-top: 0.5rem;">
-              <div class="grey-text text-darken-2" style="font-weight: bold; margin-bottom: 0.5rem;">
+              <div class="basil-additional-fields-toggle" style="font-weight: bold; margin-bottom: 0.5rem;">
                 <i class="material-icons tiny" style="vertical-align: middle;">check_box_outline_blank</i>
                 Select fields to include in your image:
               </div>
@@ -99,9 +99,9 @@ function commission_basil(style) {
                   <li style="margin-bottom: 0.5em; opacity: <%= field_previously_used ? '1' : '0.7' %>;">
                     <label>
                       <%= check_box_tag "basil_commission[include_field][#{field.id}]", field.id, field_previously_used, class: 'js-toggle-additional-field' %>
-                      <span class="grey-text"><%= field.label %></span>
+                      <span class="basil-field-label"><%= field.label %></span>
                     </label>
-                    <div class="grey-text text-darken-1" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
+                    <div class="basil-field-value" style="font-size: 0.85em; margin-left: 1.5rem;"><%= truncate(value, length: 140) %></div>
                     <div class="js-additional-field-inputs <%= 'hide' unless field_previously_used %>" data-field-id="<%= field.id %>">
                       <%= hidden_field_tag "basil_commission[field][#{field.id}][label]", field.label, disabled: !field_previously_used %>
                       <%= hidden_field_tag "basil_commission[field][#{field.id}][value]", value, disabled: !field_previously_used %>
@@ -416,6 +416,32 @@ $(document).ready(function() {
 
     .basil-loading-card {
       animation: pulse-border 2s infinite;
+    }
+
+    /* Additional fields toggle - light mode */
+    .basil-additional-fields-toggle {
+      color: #616161;
+    }
+
+    .basil-field-label {
+      color: #757575;
+    }
+
+    .basil-field-value {
+      color: #616161;
+    }
+
+    /* Additional fields toggle - dark mode */
+    body.dark .basil-additional-fields-toggle {
+      color: #bdbdbd;
+    }
+
+    body.dark .basil-field-label {
+      color: #9e9e9e;
+    }
+
+    body.dark .basil-field-value {
+      color: #bdbdbd;
     }
   </style>
 <% end %>
