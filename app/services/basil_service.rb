@@ -88,16 +88,19 @@ class BasilService < Service
     end
   end
 
-  def self.include_all_fields_in_category(user, page, category_label)
-    category = AttributeCategory.where(
+  def self.include_all_fields_in_category(user, page, category_labels)
+    category_labels = Array(category_labels)
+
+    # Find all categories matching ANY of the provided labels (case-insensitive)
+    # This allows users with renamed categories to still match
+    categories = AttributeCategory.where(
       user_id:     user.id,
-      entity_type: page.page_type.downcase,
-      label:       category_label
-    )
-    return nil if category.empty?
+      entity_type: page.page_type.downcase
+    ).where('LOWER(label) IN (?)', category_labels.map(&:downcase))
+    return nil if categories.empty?
 
     fields = AttributeField.where(
-      attribute_category_id: category.pluck(:id),
+      attribute_category_id: categories.pluck(:id),
       field_type:            ['name', 'text_area', 'textarea'],
       hidden:                [nil, false]
     )
@@ -118,19 +121,21 @@ class BasilService < Service
     end
   end
 
-  def self.include_specific_field(user, page, category_label, field_label)
-    category = AttributeCategory.find_by(
-      user_id:     user.id,
-      entity_type: page.page_type.downcase,
-      label:       category_label
-    )
-    return nil if category.nil?
+  def self.include_specific_field(user, page, _category_label, field_label)
+    # Note: category_label parameter kept for backward compatibility but ignored
+    # We now search by field label across ALL categories for this user/page_type
+    # This allows users with custom/renamed categories to still match fields by label
 
-    field = AttributeField.find_by(
-      attribute_category_id: category.id,
-      label:                 field_label,
-      hidden:                [nil, false]
-    )
+    field = AttributeField.joins(:attribute_category)
+                          .where(
+                            attribute_categories: {
+                              user_id:     user.id,
+                              entity_type: page.page_type.downcase
+                            },
+                            label:  field_label,
+                            hidden: [nil, false]
+                          )
+                          .first
     return nil if field.nil?
 
     value = Attribute.where(attribute_field_id: field.id,
@@ -143,5 +148,45 @@ class BasilService < Service
     # If we get through it all and ACTUALLY have a value, return it
     # in the form of [field, value].
     return [field, value.value]
+  end
+
+  def self.get_additional_filled_fields(user, page, exclude_field_ids: [])
+    # Get all text-type fields for this page type that have values
+    # but weren't already included in the relevant_fields
+
+    category_ids = AttributeCategory.where(
+      user_id:     user.id,
+      entity_type: page.page_type.downcase,
+      hidden:      [nil, false]
+    ).where.not(label: ['Settings', 'Contributors', 'Gallery', 'Changelog'])
+     .pluck(:id)
+
+    return [] if category_ids.empty?
+
+    fields = AttributeField.where(
+      attribute_category_id: category_ids,
+      field_type:            ['name', 'text_area', 'textarea'],
+      hidden:                [nil, false]
+    ).where.not(id: exclude_field_ids)
+     .includes(:attribute_category)
+
+    return [] if fields.empty?
+
+    answers = Attribute.where(
+      attribute_field_id: fields.pluck(:id),
+      entity_id:          page.id,
+      entity_type:        page.page_type
+    ).where.not(value: IGNORED_VALUES)
+
+    return [] if answers.empty?
+
+    # Sort by category position, then field position
+    answers.map do |answer|
+      field = fields.find { |f| f.id == answer.attribute_field_id }
+      next nil if field.nil?
+      [field, answer.value]
+    end.compact.sort_by do |field, _|
+      [field.attribute_category&.position || 999, field.position || 999]
+    end
   end
 end

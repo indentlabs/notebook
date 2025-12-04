@@ -19,7 +19,7 @@ class GenerateBasilImageJob < ApplicationJob
     return if commission.image.attached?
 
     # Filter out specific words from the prompt that we don't want to include in image generation
-    sanitized_commmission_prompt = commission.prompt.gsub(/(nudity|nsfw|nude|xxx|porn|pornographic|naked|sex|blowjob|undressed|stripped|stripping|stripper)/i, '')
+    sanitized_commmission_prompt = commission.prompt.gsub(/(nudity|nsfw|nude|xxx|porn|pornographic|naked|sex|blowjob|undressed|stripped|stripping|stripper|birthmark)/i, '')
 
     # Details we can use:
     # commission.prompt - the prompt for the image
@@ -40,7 +40,7 @@ class GenerateBasilImageJob < ApplicationJob
       steps: 20,
       # Add other parameters like negative_prompt, width, height, sampler_index, etc. as needed
       # Example:
-      negative_prompt: "(naked, nudity, nsfw, nude), (sex, hardcore, porn, pornographic), xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked, words, text",
+      negative_prompt: "(naked, nudity, nsfw, nude), (tits, breasts, boobs), (sex, hardcore, porn, pornographic), xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked, words, text",
       width: 512,
       height: 512,
       override_settings: {

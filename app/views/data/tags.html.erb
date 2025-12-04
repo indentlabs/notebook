@@ -157,6 +157,16 @@
               </div>
             </div>
           <% end %>
+
+          <!-- Delete All Tags Button -->
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-right">
+            <%= link_to "Delete all #{content_type.name.downcase} tags",
+                tag_remove_all_path(page_type: content_type.name),
+                data: {
+                  confirm: "Are you sure? This will permanently delete ALL #{grouped_tags.values.length} tags from your #{content_type.name.pluralize.downcase}. This cannot be undone."
+                },
+                class: 'inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors' %>
+          </div>
         </div>
       </div>
     <% end %>

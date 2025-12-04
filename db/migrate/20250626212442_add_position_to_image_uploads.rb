@@ -23,7 +23,7 @@ class AddPositionToImageUploads < ActiveRecord::Migration[6.1]
         else
           # Database-agnostic approach using Ruby
           say_with_time("Backfilling positions for ImageUploads") do
-            ImageUpload.group_by { |img| [img.content_type, img.content_id] }.each do |group_key, images|
+            ImageUpload.all.group_by { |img| [img.content_type, img.content_id] }.each do |group_key, images|
               ordered_images = images.sort_by { |img| [img.created_at || Time.current, img.id] }
               ordered_images.each_with_index do |img, idx|
                 img.update_column(:position, idx + 1)

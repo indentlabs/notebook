@@ -206,6 +206,16 @@ class BasilController < ApplicationController
     end
     @relevant_fields.compact!
 
+    # Get IDs of fields already included
+    included_field_ids = @relevant_fields.map { |field, _| field.id }
+
+    # Get additional filled fields not in the hardcoded template
+    @additional_fields = BasilService.get_additional_filled_fields(
+      current_user,
+      @content,
+      exclude_field_ids: included_field_ids
+    )
+
     # Identify suggested fields for helpful empty state guidance
     @suggested_fields = []
     if @relevant_fields.empty?
