@@ -61,7 +61,7 @@
   </div>
 
   <div class="space-y-6">
-    <% (Rails.application.config.content_types[:all] + [Document, Timeline]).each do |content_type| %>
+    <% (Rails.application.config.content_types[:all] + [Document]).each do |content_type| %>
       <%
         grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).order('tag ASC').group_by(&:tag)
 
@@ -159,7 +159,7 @@
           <% end %>
 
           <!-- Delete All Tags Button -->
-          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 text-right">
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-right">
             <%= link_to "Delete all #{content_type.name.downcase} tags",
                 tag_remove_all_path(page_type: content_type.name),
                 data: {
