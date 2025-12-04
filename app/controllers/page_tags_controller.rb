@@ -1,4 +1,6 @@
 class PageTagsController < ApplicationController
+  before_action :authenticate_user!
+
   def update
     raise "placeholder"
   end
@@ -32,6 +34,24 @@ class PageTagsController < ApplicationController
     ).destroy_all
 
     return redirect_back fallback_location: root_path, notice: 'Tag(s) deleted successfully.'
+  end
+
+  # Remove ALL tags for a specific content type
+  def remove_all
+    return unless params.key?(:page_type)
+
+    deleted_count = PageTag.where(
+      page_type: params[:page_type],
+      user_id:   current_user.id
+    ).count
+
+    PageTag.where(
+      page_type: params[:page_type],
+      user_id:   current_user.id
+    ).destroy_all
+
+    redirect_back fallback_location: root_path,
+      notice: "Deleted #{deleted_count} #{params[:page_type].downcase} tag(s) successfully."
   end
 
   # Destroy a specific tag by ID

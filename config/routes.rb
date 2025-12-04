@@ -149,6 +149,7 @@ Rails.application.routes.draw do
     get '/scratchpad',      to: 'main#notes', as: :notes
 
     get 'tag/remove',         to: 'page_tags#remove'
+    get 'tag/remove_all',     to: 'page_tags#remove_all'
     # post 'tag/:slug/update',  to: 'page_tags#update',  as: :update_tag
     post '/tag/:tag/rename', to: 'page_tags#rename', as: :rename_tag
     delete 'tag/:id/destroy', to: 'page_tags#destroy', as: :destroy_specific_tag
