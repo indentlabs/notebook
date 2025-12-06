@@ -1,0 +1,180 @@
+<% topic = @posts.topic %>
+<% content_for :thredded_page_title, topic.title %>
+<% content_for :thredded_page_id, 'thredded--private-topic-show' %>
+
+<%# Signal layout to hide breadcrumbs and footer for full-screen messenger %>
+<% content_for :messenger_fullscreen, true %>
+
+<style>
+  /* Prevent page-level scrollbars for fullscreen messenger */
+  body { overflow: hidden !important; }
+  main { padding: 0 !important; height: calc(100vh - 56px) !important; overflow: hidden !important; }
+</style>
+
+<%# Flash messages inline (since we're not using thredded_page) %>
+<% if flash.any? %>
+  <div class="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4">
+    <% flash.each do |type, message| %>
+      <div class="mb-2 p-4 rounded-lg shadow-lg <%= type == 'alert' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' %>">
+        <%= message %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<%# Full-height messenger container - pl-4 adds breathing room from site sidebar %>
+<div class="h-full pl-4 flex flex-col md:flex-row bg-white dark:bg-gray-800 overflow-hidden">
+
+  <!-- Sidebar: Conversation List (desktop only) -->
+  <div class="hidden md:flex flex-col w-80 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+    <!-- Sidebar Header -->
+    <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800">
+      <h2 class="text-lg font-bold text-gray-900 dark:text-white">Messages</h2>
+      <%= link_to thredded.new_private_topic_path, class: "p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-blue-600 dark:text-blue-400 transition-colors" do %>
+        <i class="material-icons">add</i>
+      <% end %>
+    </div>
+
+    <!-- Conversation List -->
+    <div class="flex-1 overflow-y-auto p-2 space-y-1">
+      <% sidebar_topics = @private_topics || Thredded::PrivateTopic.distinct.for_user(current_user).order(updated_at: :desc).limit(20) %>
+
+      <% sidebar_topics.each do |pt| %>
+        <% is_active = pt.to_model.id == topic.to_model.id %>
+        <%= link_to thredded.private_topic_path(pt), class: "flex items-center px-3 py-3 text-sm rounded-lg group transition-colors #{is_active ? 'bg-notebook-blue text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}" do %>
+          <!-- Avatars -->
+          <div class="flex -space-x-2 mr-3 flex-shrink-0">
+            <% pt.users.reject { |u| u == current_user }.first(2).each do |user| %>
+              <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
+                <%= image_tag user.avatar_url, class: "h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
+              <% else %>
+                <div class="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-900 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
+                  <%= user.thredded_display_name.first(1).upcase %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+
+          <!-- Conversation Info -->
+          <div class="min-w-0 flex-1">
+            <div class="flex justify-between items-baseline">
+              <p class="truncate font-medium <%= is_active ? 'text-white' : 'text-gray-900 dark:text-white' %>">
+                <%= pt.users.reject { |u| u == current_user }.map(&:thredded_display_name).join(', ').presence || 'You' %>
+              </p>
+              <% if pt.last_post_at %>
+                <span class="text-xs ml-2 flex-shrink-0 <%= is_active ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500' %>">
+                  <%= time_ago pt.last_post_at %>
+                </span>
+              <% end %>
+            </div>
+            <% if pt.last_post %>
+              <p class="truncate text-xs mt-0.5 <%= is_active ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400' %>">
+                <%= truncate(pt.last_post.content.to_s.gsub(/<[^>]*>/, ''), length: 50) %>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Main Chat Area -->
+  <div class="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-800">
+    <!-- Chat Header -->
+    <div class="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between bg-white dark:bg-gray-800">
+      <div class="flex items-center min-w-0">
+        <!-- Back button (mobile) -->
+        <div class="md:hidden mr-3">
+          <%= link_to thredded.private_topics_path, class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" do %>
+            <i class="material-icons">arrow_back</i>
+          <% end %>
+        </div>
+
+        <!-- Participant Avatars -->
+        <div class="flex -space-x-2 mr-3">
+          <% topic.users.reject { |u| u == current_user }.first(3).each do |user| %>
+            <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
+              <%= image_tag user.avatar_url, class: "h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
+            <% else %>
+              <div class="h-9 w-9 rounded-full bg-gray-300 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-900 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300">
+                <%= user.thredded_display_name.first(1).upcase %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+
+        <!-- Conversation Title -->
+        <div class="min-w-0">
+          <h1 class="text-base font-bold text-gray-900 dark:text-white truncate">
+            <%= topic.title %>
+          </h1>
+          <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <%= topic.users.map(&:thredded_display_name).join(', ') %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Settings (if can update) -->
+      <% if topic.can_update? %>
+        <%= link_to thredded.edit_private_topic_path(topic.to_model), class: "p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" do %>
+          <i class="material-icons text-xl">settings</i>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900" id="messages-container">
+      <% if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
+        <div class="flex justify-center py-2">
+          <%= paginate @posts %>
+        </div>
+      <% end %>
+
+      <%= render_posts @posts,
+                       partial: 'thredded/private_posts/private_post',
+                       content_partial: 'thredded/posts/content',
+                       locals: { actions: { quote: true } } %>
+
+      <% if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
+        <div class="flex justify-center py-2">
+          <%= paginate @posts %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Message Input -->
+    <div class="flex-shrink-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+      <% if policy(@new_post.post).create? %>
+        <%= form_for @new_post, url: @new_post.submit_path, as: :post, html: { class: "relative", data: { thredded_remote: true } } do |f| %>
+          <div class="flex items-end gap-3 bg-gray-100 dark:bg-gray-700 rounded-2xl p-2 border border-transparent focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
+            <%= f.text_area :content,
+                rows: 1,
+                class: "flex-1 bg-transparent border-0 focus:ring-0 p-2 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none max-h-32",
+                placeholder: "Type a message...",
+                required: true,
+                style: "min-height: 44px;" %>
+
+            <button type="submit" class="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-900 transition-colors flex-shrink-0">
+              <i class="material-icons text-lg">send</i>
+            </button>
+          </div>
+        <% end %>
+      <% else %>
+        <div class="text-center p-4 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <i class="material-icons text-2xl mb-2">lock</i>
+          <p>You cannot reply to this conversation.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-scroll to bottom of messages on load
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('messages-container');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+</script>

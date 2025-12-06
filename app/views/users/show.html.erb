@@ -19,6 +19,11 @@
 
 <!-- Modern User Profile Page -->
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+
+  <!-- Floating Share FAB -->
+  <button type="button" class="share-profile-btn fixed top-20 right-4 z-50 w-10 h-10 bg-white border border-gray-200 text-gray-600 rounded-full shadow-lg hover:bg-gray-100 hover:shadow-xl hover:text-gray-900 transition-all duration-200 flex items-center justify-center" title="Share this profile">
+    <i class="material-icons text-lg">share</i>
+  </button>
   
   <!-- Hero Section with Banner and User Identity -->
   <div class="relative">
@@ -125,18 +130,34 @@
               <div class="flex items-center space-x-3">
                 <% if user_signed_in? %>
                   <% unless @is_blocked %>
-                    <button type="button" id="follow-btn" 
-                            class="<%= @is_following ? 'bg-gray-600 hover:bg-gray-700' : 'bg-blue-600 hover:bg-blue-700' %> text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
-                            data-user-id="<%= @user.id %>"
-                            data-following="<%= @is_following %>">
-                      <i class="material-icons text-sm"><%= @is_following ? 'person_remove' : 'person_add' %></i>
-                      <span><%= @is_following ? 'Unfollow' : 'Follow' %></span>
-                    </button>
-                    
-                    <button type="button" class="border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2">
-                      <i class="material-icons text-sm">message</i>
-                      <span>Message</span>
-                    </button>
+                    <% if @is_following %>
+                      <%= form_with model: current_user.user_followings.find_by(followed_user_id: @user.id),
+                                    method: :delete,
+                                    local: true,
+                                    class: 'inline' do |f| %>
+                        <%= f.submit 'Unfollow',
+                            class: 'bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center space-x-2 cursor-pointer' %>
+                      <% end %>
+                    <% else %>
+                      <%= form_with model: UserFollowing.new,
+                                    method: :post,
+                                    local: true,
+                                    class: 'inline' do |f| %>
+                        <%= f.hidden_field :followed_user_id, value: @user.id %>
+                        <%= f.submit 'Follow',
+                            class: 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center space-x-2 cursor-pointer' %>
+                      <% end %>
+                    <% end %>
+
+                    <% if @user.username.present? %>
+                      <%= link_to Thredded::UrlsHelper.send_private_message_path(current_user: current_user, to: @user),
+                          class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2" do %>
+                        <i class="material-icons text-sm">message</i>
+                        <span>Message</span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-xs text-gray-400 italic self-center">Not accepting messages</span>
+                    <% end %>
                   <% else %>
                     <div class="text-sm text-gray-500 italic">You've blocked this user</div>
                   <% end %>
@@ -146,11 +167,6 @@
                     <span>Follow</span>
                   <% end %>
                 <% end %>
-                
-                <!-- Share Button -->
-                <button type="button" class="border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                  <i class="material-icons text-sm">share</i>
-                </button>
               </div>
             <% end %>
           </div>
@@ -318,16 +334,39 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// Follow button functionality
+// Share button functionality
 document.addEventListener('DOMContentLoaded', function() {
-  const followBtn = document.getElementById('follow-btn');
-  if (followBtn) {
-    followBtn.addEventListener('click', function() {
-      const userId = this.dataset.userId;
-      const isFollowing = this.dataset.following === 'true';
-      
-      // TODO: Implement AJAX follow/unfollow functionality
-      console.log('Follow/unfollow user:', userId, 'Currently following:', isFollowing);
+  const shareBtn = document.querySelector('.share-profile-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async function() {
+      const profileUrl = window.location.href;
+      const profileName = document.querySelector('h1')?.textContent?.trim() || 'User Profile';
+
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: profileName,
+            url: profileUrl
+          });
+        } catch (err) {
+          // User cancelled or error - fall back to clipboard
+          copyProfileLink(profileUrl);
+        }
+      } else {
+        copyProfileLink(profileUrl);
+      }
+    });
+  }
+
+  function copyProfileLink(url) {
+    navigator.clipboard.writeText(url).then(() => {
+      if (window.showToast) {
+        window.showToast('Profile link copied to clipboard!', 'success');
+      }
+    }).catch(() => {
+      if (window.showToast) {
+        window.showToast('Failed to copy link', 'error');
+      }
     });
   }
 });
