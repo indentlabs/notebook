@@ -1,0 +1,188 @@
+<!-- Beautiful Timeline Layout -->
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" 
+     x-data="{ 
+       expandedDates: new Set(),
+       searchQuery: '',
+       toggleDate(date) {
+         if (this.expandedDates.has(date)) {
+           this.expandedDates.delete(date);
+         } else {
+           this.expandedDates.add(date);
+         }
+       },
+       isExpanded(date) {
+         return this.expandedDates.has(date);
+       }
+     }"
+     x-init="
+       // Expand the first few dates by default
+       <% @grouped_changes.first(3).each do |group| %>
+         expandedDates.add('<%= group[:date].to_s %>');
+       <% end %>
+     ">
+
+  <!-- Timeline Header -->
+  <div class="text-center mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-2">Change Timeline</h2>
+    <p class="text-gray-600">Your creative journey, day by day</p>
+    <% if @paginated_events.total_pages > 1 %>
+      <div class="mt-4 text-sm text-gray-500">
+        Showing page <%= @paginated_events.current_page %> of <%= @paginated_events.total_pages %>
+        (<%= @paginated_events.total_entries %> total changes)
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Timeline Container -->
+  <div class="relative">
+    <!-- Vertical Timeline Line -->
+    <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-400 via-purple-400 to-green-400"></div>
+    
+    <% if @grouped_changes.empty? %>
+      <!-- Empty State -->
+      <div class="text-center py-16">
+        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+          <i class="material-icons text-gray-400 text-2xl">history</i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Changes Yet</h3>
+        <p class="text-gray-600">Start editing your <%= @serialized_content.class_name.downcase %> to see your creative journey unfold here.</p>
+      </div>
+    <% else %>
+      <!-- Timeline Items -->
+      <div class="space-y-8">
+        <% @grouped_changes.each_with_index do |group, index| %>
+          <div class="relative">
+            <!-- Timeline Node -->
+            <div class="absolute left-6 w-4 h-4 bg-white border-4 border-blue-400 rounded-full shadow-sm z-10"
+                 style="top: 1.5rem;"></div>
+            
+            <!-- Date Group Card -->
+            <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <!-- Date Header (Clickable) -->
+              <button @click="toggleDate('<%= group[:date].to_s %>')"
+                      class="w-full px-6 py-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 mr-4">
+                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                        <i class="material-icons text-blue-600">today</i>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 class="text-lg font-semibold text-gray-900">
+                        <%= group[:date].strftime('%B %d, %Y') %>
+                      </h3>
+                      <div class="flex items-center text-sm text-gray-600 mt-1">
+                        <span class="flex items-center mr-4">
+                          <i class="material-icons text-xs mr-1">edit</i>
+                          <%= pluralize(group[:total_field_changes], 'change') %>
+                        </span>
+                        <span class="flex items-center mr-4">
+                          <i class="material-icons text-xs mr-1">event</i>
+                          <%= pluralize(group[:events].length, 'edit session') %>
+                        </span>
+                        <% if group[:users].length > 1 %>
+                          <span class="flex items-center">
+                            <i class="material-icons text-xs mr-1">people</i>
+                            <%= pluralize(group[:users].length, 'contributor') %>
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="text-sm text-gray-500 mr-2">
+                      <%= distance_of_time_in_words(group[:date], Date.current) %> ago
+                    </div>
+                    <i class="material-icons text-gray-400 transition-transform duration-200"
+                       :class="isExpanded('<%= group[:date].to_s %>') ? 'rotate-180' : ''"
+                       >expand_more</i>
+                  </div>
+                </div>
+              </button>
+
+              <!-- Changes for this Date (Collapsible) -->
+              <div x-show="isExpanded('<%= group[:date].to_s %>')"
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 -translate-y-2"
+                   x-transition:enter-end="opacity-100 translate-y-0"
+                   x-transition:leave="transition ease-in duration-150"
+                   x-transition:leave-start="opacity-100 translate-y-0"
+                   x-transition:leave-end="opacity-0 -translate-y-2"
+                   class="border-t border-gray-100">
+                
+                <div class="p-6 space-y-6">
+                  <%= render partial: 'content/changelog/date_changes', 
+                             locals: { 
+                               events: group[:events], 
+                               content: @serialized_content,
+                               date: group[:date]
+                             } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- Creation Event -->
+    <div class="relative mt-12">
+      <!-- Timeline Node -->
+      <div class="absolute left-6 w-4 h-4 bg-white border-4 border-green-400 rounded-full shadow-sm z-10"
+           style="top: 1.5rem;"></div>
+      
+      <!-- Creation Card -->
+      <div class="ml-16 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6">
+        <div class="flex items-center">
+          <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center shadow-lg mr-4">
+            <i class="material-icons text-white text-xl">star</i>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">The Beginning</h3>
+            <p class="text-gray-700">
+              <span class="font-medium"><%= @serialized_content.name %></span> was created 
+              <% if @content.user.present? %>
+                by <%= link_to @content.user.display_name, @content.user, class: "font-medium text-green-700 hover:text-green-800" %>
+              <% end %>
+              <span class="text-gray-600">
+                <%= distance_of_time_in_words(@content.created_at, Time.current) %> ago
+                (<%= @content.created_at.strftime('%B %d, %Y at %I:%M %p') %>)
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <% if @paginated_events.total_pages > 1 %>
+      <div class="mt-16 flex justify-center">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
+          <div class="flex items-center space-x-4">
+            <% if @paginated_events.previous_page %>
+              <%= link_to url_for(params.permit(:page).merge(page: @paginated_events.previous_page)),
+                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700" do %>
+                <i class="material-icons text-sm mr-1">chevron_left</i>
+                Previous
+              <% end %>
+            <% end %>
+            
+            <div class="flex items-center space-x-2 text-sm text-gray-600">
+              <span>Page <%= @paginated_events.current_page %> of <%= @paginated_events.total_pages %></span>
+            </div>
+            
+            <% if @paginated_events.next_page %>
+              <%= link_to url_for(params.permit(:page).merge(page: @paginated_events.next_page)),
+                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700" do %>
+                Next
+                <i class="material-icons text-sm ml-1">chevron_right</i>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+</div>

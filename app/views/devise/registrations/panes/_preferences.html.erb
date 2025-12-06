@@ -1,95 +1,207 @@
-<div class="card">
-  <div class="card-content">
-    <h4>Your Notebook.ai design</h4>
-    <div class="field">
-      <%= f.label :fluid_preference do %>
-        <%= f.check_box :fluid_preference %>
-        <span class="black-text">
-          I want to use <strong>full-width</strong> Notebook.ai.
-          <div class="help-text">Great for small monitors/laptops, phones, and tablets.</div>
-        </span>
-      <% end %>
-    </div>
-    <br />
-    <div class="field">
-      <%= f.label :dark_mode_enabled do %>
-        <%= f.check_box :dark_mode_enabled %>
-        <span class="black-text">
-          I want to use <strong>dark mode</strong>.
-          <div class="help-text">Great for night-time worldbuilding sessions.</div>
-        </span>
-      <% end %>
-    </div>
-  </div>
-</div>
+<style>
+  /* Toggle Switch Styles */
+  .toggle-switch {
+    width: 44px;
+    height: 24px;
+    background-color: #e5e7eb;
+    border-radius: 12px;
+    position: relative;
+    transition: background-color 0.2s;
+    cursor: pointer;
+  }
 
-<div class="card">
-  <div class="card-content">
-    <h4>Accessibility settings</h4>
-    <div class="field">
-      <%= f.label :keyboard_shortcuts_preference do %>
-        <%= f.check_box :keyboard_shortcuts_preference %>
-        <span class="black-text">
-          Enable keyboard shortcuts that let me navigate around the site without using a mouse.<br />
-          <div class="help-text">
-            Press <strong>?</strong> to view what's available when the feature is enabled.
+  .toggle-switch.checked {
+    background-color: #2196F3;
+  }
+
+  .toggle-dot {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .toggle-switch.checked .toggle-dot {
+    transform: translateX(20px);
+  }
+
+  /* Dark mode styles */
+  .dark .toggle-switch {
+    background-color: #4b5563; /* gray-600 */
+  }
+  .dark .toggle-switch.checked {
+    background-color: #2196F3;
+  }
+</style>
+
+<div class="space-y-8">
+  <!-- Design preferences card -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-base font-medium text-gray-900 dark:text-white">Your Notebook.ai design</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Customize how Notebook.ai looks and feels</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div class="flex items-start">
+        <div class="flex-grow pr-4">
+          <label for="user_dark_mode_enabled" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Dark mode</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Great for night-time worldbuilding sessions.</p>
+        </div>
+        <label class="relative inline-block cursor-pointer" x-data="{ checked: <%= current_user.dark_mode_enabled? ? 'true' : 'false' %> }">
+          <%= f.check_box :dark_mode_enabled, class: "sr-only", "x-model": "checked" %>
+          <div class="toggle-switch"
+               :class="{ 'checked': checked }"
+               role="switch"
+               :aria-checked="checked.toString()"
+               tabindex="0">
+            <span class="toggle-dot"></span>
           </div>
-        </span>
-      <% end %>
+        </label>
+      </div>
+      
     </div>
   </div>
-</div>
 
-<div class="card">
-  <div class="card-content">
-    <h4>Notification preferences</h4>
-    <div class="field">
-      <%= f.label :notification_updates do %>
-        <%= f.check_box :notification_updates %>
-        <span class="black-text">I want to receive <strong>occasional notifications</strong> inside Notebook.ai about new features.</span>
-      <% end %>
+  <!-- Accessibility settings card -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-base font-medium text-gray-900 dark:text-white">Accessibility settings</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Make Notebook.ai work better for you</p>
     </div>
-    <br />
-    <div class="field">
-      <%= f.label :email_updates do %>
-        <%= f.check_box :email_updates %>
-        <span class="black-text">I want to receive <strong>very rare updates by email</strong> about new Notebook.ai features.</span>
-      <% end %>
-    </div>
-    <br />
-    <div class="field">
-      To change your forum preferences, including email notifications for posts you are following, please
-      <%= link_to thredded.edit_global_preferences_path do %>
-        click here.
-      <% end %>
-    </div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-content">
-    <h4>Community preferences</h4>
-    <div class="field">
-      <%= f.label :community_features_enabled do %>
-        <%= f.check_box :community_features_enabled %>
-        <span class="black-text">
-          I want to be able to see and use Notebook.ai community features.
-          <div class="help-text">Unchecking this box will remove all links in the "Community" section of the sidebar.</div>
-        </span>
-      <% end %>
-    </div>
-    <br />
-    <div class="field">
-      <%= f.label :private_profile do %>
-        <%= f.check_box :private_profile %>
-        <span class="black-text">
-          Make my profile page private.
-          <div class="help-text">
-            All of your worldbuilding pages, documents, timelines, and other content on Notebook.ai are private by default.
-            Checking this box will also make your <%= link_to 'profile page', current_user %> private.
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div class="flex items-start">
+        <div class="flex-grow pr-4">
+          <label for="user_keyboard_shortcuts_preference" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Keyboard shortcuts</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Enable navigation around the site without using a mouse. Press <span class="font-semibold">?</span> to view available shortcuts.</p>
+        </div>
+        <label class="relative inline-block cursor-pointer" x-data="{ checked: <%= current_user.keyboard_shortcuts_preference? ? 'true' : 'false' %> }">
+          <%= f.check_box :keyboard_shortcuts_preference, class: "sr-only", "x-model": "checked" %>
+          <div class="toggle-switch"
+               :class="{ 'checked': checked }"
+               role="switch"
+               :aria-checked="checked.toString()"
+               tabindex="0">
+            <span class="toggle-dot"></span>
           </div>
-        </span>
-      <% end %>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification preferences card -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-base font-medium text-gray-900 dark:text-white">Notification preferences</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control how and when you receive updates</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div class="flex items-start">
+        <div class="flex-grow pr-4">
+          <label for="user_notification_updates" class="block text-sm font-medium text-gray-700 dark:text-gray-300">In-app notifications</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Receive occasional notifications inside Notebook.ai about new features.</p>
+        </div>
+        <label class="relative inline-block cursor-pointer" x-data="{ checked: <%= current_user.notification_updates? ? 'true' : 'false' %> }">
+          <%= f.check_box :notification_updates, class: "sr-only", "x-model": "checked" %>
+          <div class="toggle-switch"
+               :class="{ 'checked': checked }"
+               role="switch"
+               :aria-checked="checked.toString()"
+               tabindex="0">
+            <span class="toggle-dot"></span>
+          </div>
+        </label>
+      </div>
+      
+      <div class="flex items-start">
+        <div class="flex-grow pr-4">
+          <label for="user_email_updates" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email updates</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400">Receive very rare updates by email about new Notebook.ai features.</p>
+        </div>
+        <label class="relative inline-block cursor-pointer" x-data="{ checked: <%= current_user.email_updates? ? 'true' : 'false' %> }">
+          <%= f.check_box :email_updates, class: "sr-only", "x-model": "checked" %>
+          <div class="toggle-switch"
+               :class="{ 'checked': checked }"
+               role="switch"
+               :aria-checked="checked.toString()"
+               tabindex="0">
+            <span class="toggle-dot"></span>
+          </div>
+        </label>
+      </div>
+      
+      <div class="rounded-md bg-blue-50 dark:bg-blue-900 p-4">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-blue-400 dark:text-blue-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3 flex-1 md:flex md:justify-between">
+            <p class="text-sm text-blue-700 dark:text-blue-100">
+              To change your forum preferences, including email notifications for posts you are following
+            </p>
+            <p class="mt-3 text-sm md:mt-0 md:ml-6">
+              <%= link_to thredded.edit_global_preferences_path, class: "whitespace-nowrap font-medium text-blue-700 dark:text-blue-100 hover:text-blue-600 dark:hover:text-blue-200" do %>
+                Click here <span aria-hidden="true">&rarr;</span>
+              <% end %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community preferences card -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="px-4 py-5 sm:px-6 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-base font-medium text-gray-900 dark:text-white">Community preferences</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Control your visibility and interaction with the community</p>
+    </div>
+    
+    <div class="px-4 py-5 sm:p-6 space-y-6">
+      <div class="flex items-start">
+        <div class="flex-grow pr-4">
+          <label for="user_community_features_enabled" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Enable community features</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400">When enabled, you'll have access to Notebook.ai community features. Unchecking will remove all links in the "Community" section of the sidebar.</p>
+        </div>
+        <label class="relative inline-block cursor-pointer" x-data="{ checked: <%= current_user.community_features_enabled? ? 'true' : 'false' %> }">
+          <%= f.check_box :community_features_enabled, class: "sr-only", "x-model": "checked" %>
+          <div class="toggle-switch"
+               :class="{ 'checked': checked }"
+               role="switch"
+               :aria-checked="checked.toString()"
+               tabindex="0">
+            <span class="toggle-dot"></span>
+          </div>
+        </label>
+      </div>
+      
+      <div class="flex items-start">
+        <div class="flex-grow pr-4">
+          <label for="user_private_profile" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Private profile</label>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Make your <%= link_to 'profile page', current_user, class: "text-notebook-blue hover:text-blue-700 dark:hover:text-blue-400" %> private. All of your worldbuilding pages, documents, timelines, and other content on Notebook.ai are private by default.
+          </p>
+        </div>
+        <label class="relative inline-block cursor-pointer" x-data="{ checked: <%= current_user.private_profile? ? 'true' : 'false' %> }">
+          <%= f.check_box :private_profile, class: "sr-only", "x-model": "checked" %>
+          <div class="toggle-switch"
+               :class="{ 'checked': checked }"
+               role="switch"
+               :aria-checked="checked.toString()"
+               tabindex="0">
+            <span class="toggle-dot"></span>
+          </div>
+        </label>
+      </div>
     </div>
   </div>
 </div>

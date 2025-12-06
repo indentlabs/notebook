@@ -1,0 +1,294 @@
+<div class="hidden lg:block w-80 h-full flex flex-col" id="desktop-edit-tools">
+  <div class="flex-1 overflow-y-auto px-6 pt-6 pb-6">
+    <!-- Edit Status Panel -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
+    <!-- Overall completion -->
+    <% total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum %>
+    <% completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum %>
+    <% completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0 %>
+    
+    <div class="mb-3">
+      <div class="flex justify-between text-sm text-gray-600 mb-1">
+        <span>Overall Progress</span>
+        <span><%= completed_fields %>/<%= total_fields %> fields</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div class="<%= content.class_color %> h-2 rounded-full transition-all duration-300" style="width: <%= completion_percent %>%"></div>
+      </div>
+    </div>
+    
+    <!-- Quick stats -->
+    <div class="grid grid-cols-2 gap-3 text-sm">
+      <div>
+        <span class="text-gray-500">Completion:</span>
+        <span class="text-gray-900 font-medium"><%= completion_percent %>%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Field Navigator -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
+    <h3 class="text-sm font-medium text-gray-900 mb-3">Quick Navigation</h3>
+    <div class="space-y-2 max-h-64 overflow-y-auto">
+      <% content.data[:categories].each do |category| %>
+        <% next if category[:label] == 'Gallery' %>
+        <div class="category-nav-item">
+          <button type="button" 
+                  onclick="document.getElementById('<%= category[:label] %>').scrollIntoView({behavior: 'smooth'})"
+                  class="flex items-center justify-between w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex items-center">
+              <i class="material-icons text-sm <%= content.class_text_color %> mr-2"><%= category[:icon] %></i>
+              <span class="text-gray-700"><%= category[:label] %></span>
+            </div>
+            <% empty_fields = category[:fields].count { |field| field[:value].blank? } %>
+            <% if empty_fields > 0 %>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <%= empty_fields %> empty
+              </span>
+            <% else %>
+              <span class="inline-flex items-center text-green-600">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+              </span>
+            <% end %>
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Privacy & Sharing -->
+  <% if @content.updatable_by?(current_user) %>
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6 p-4">
+      <h3 class="text-sm font-medium text-gray-900 mb-3">Privacy & Sharing</h3>
+      
+      <!-- Privacy toggle -->
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex-1">
+          <div class="text-sm font-medium text-gray-700">Visibility</div>
+          <div class="text-xs text-gray-500">
+            <% if @content.privacy == 'public' %>
+              Public - Anyone can view this page
+            <% else %>
+              Private - Only you can view this page
+            <% end %>
+          </div>
+        </div>
+        <%= form_for @content, remote: true, html: { class: "inline-flex ml-3" } do |f| %>
+          <%= f.select :privacy, 
+                       options_for_select([['Public', 'public'], ['Private', 'private']], @content.privacy),
+                       {},
+                       { 
+                         class: "text-sm border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500",
+                         onchange: "this.form.submit();"
+                       } %>
+        <% end %>
+      </div>
+      
+      <!-- Universe assignment -->
+      <% if @content.respond_to?(:universe_id) %>
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <div class="text-sm font-medium text-gray-700">Universe</div>
+            <div class="text-xs text-gray-500">
+              <% if @content.universe %>
+                <%= @content.universe.name %>
+              <% else %>
+                Not assigned to a universe
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <!-- Keyboard Shortcuts Help -->
+  <div class="bg-gray-50 rounded-lg p-4 text-xs text-gray-600">
+    <h4 class="font-medium text-gray-700 mb-2">Keyboard Shortcuts</h4>
+    <div class="space-y-1">
+      <div class="flex justify-between">
+        <span>Save current field</span>
+        <kbd class="px-1 py-0.5 bg-gray-200 rounded keyboard-shortcut-save">⌘S</kbd>
+      </div>
+      <div class="flex justify-between">
+        <span>Exit editing</span>
+        <kbd class="px-1 py-0.5 bg-gray-200 rounded">Esc</kbd>
+      </div>
+      <div class="flex justify-between">
+        <span>Navigate fields</span>
+        <kbd class="px-1 py-0.5 bg-gray-200 rounded">Tab</kbd>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+// Detect OS and update keyboard shortcuts
+document.addEventListener('DOMContentLoaded', function() {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
+                navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+  
+  // Update all save shortcut displays
+  document.querySelectorAll('.keyboard-shortcut-save').forEach(function(element) {
+    element.textContent = isMac ? '⌘S' : 'Ctrl+S';
+  });
+});
+
+function expandAllCategories() {
+  // Show all field sections
+  document.querySelectorAll('.category-section').forEach(section => {
+    section.style.display = 'block';
+  });
+  
+  // Update button text
+  const button = event.target;
+  button.innerHTML = '<i class="material-icons text-lg mr-2">unfold_less</i>Hide Empty Fields';
+  button.onclick = collapseEmptyCategories;
+}
+
+function collapseEmptyCategories() {
+  // Hide sections with no content
+  document.querySelectorAll('.category-section').forEach(section => {
+    const hasContent = section.querySelector('input[value!=""], textarea[value!=""]');
+    if (!hasContent) {
+      section.style.display = 'none';
+    }
+  });
+  
+  // Update button text
+  const button = event.target;
+  button.innerHTML = '<i class="material-icons text-lg mr-2">unfold_more</i>Show All Fields';
+  button.onclick = expandAllCategories;
+}
+
+// Update last saved time
+document.addEventListener('autosave:success', function() {
+  const lastSavedEl = document.getElementById('last-saved');
+  if (lastSavedEl) {
+    lastSavedEl.textContent = 'Saved ' + new Date().toLocaleTimeString();
+  }
+  
+  // Also update mobile indicator if present
+  const mobileIndicator = document.getElementById('mobile-save-status');
+  if (mobileIndicator) {
+    mobileIndicator.textContent = 'Saved ' + new Date().toLocaleTimeString();
+    mobileIndicator.className = 'text-green-600 text-xs';
+  }
+});
+
+// Mobile edit tools toggle
+function toggleMobileEditTools() {
+  const tools = document.getElementById('mobile-edit-tools');
+  const button = document.getElementById('mobile-tools-toggle');
+  
+  if (tools.classList.contains('hidden')) {
+    tools.classList.remove('hidden');
+    button.innerHTML = '<i class="material-icons">expand_less</i> Hide Tools';
+  } else {
+    tools.classList.add('hidden');
+    button.innerHTML = '<i class="material-icons">expand_more</i> Edit Tools';
+  }
+}
+
+// Advanced editing functions
+function saveAllFields() {
+  const button = document.getElementById('save-all-btn');
+  const originalText = button.innerHTML;
+  
+  button.innerHTML = '<i class="material-icons text-lg mr-2 animate-spin">sync</i>Saving All...';
+  button.disabled = true;
+  
+  // Trigger autosave on all modified fields
+  const modifiedFields = document.querySelectorAll('.field-form input:not([value=""]), .field-form textarea:not(:empty)');
+  let savePromises = [];
+  
+  modifiedFields.forEach(field => {
+    if (field.classList.contains('autosave-closest-form-on-change')) {
+      // Trigger the autosave
+      field.blur();
+    }
+  });
+  
+  // Reset button after a short delay
+  setTimeout(() => {
+    button.innerHTML = originalText;
+    button.disabled = false;
+  }, 2000);
+}
+
+function focusNextEmptyField() {
+  const emptyFields = document.querySelectorAll('.field-form input[value=""], .field-form textarea:empty');
+  
+  if (emptyFields.length > 0) {
+    emptyFields[0].focus();
+    emptyFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    // Show success message
+    const message = document.createElement('div');
+    message.className = 'fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+    message.textContent = 'All fields have content! 🎉';
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+      message.remove();
+    }, 3000);
+  }
+}
+</script>
+
+<!-- Mobile Edit Tools -->
+<div class="lg:hidden bg-white border-t border-gray-200 p-4">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center space-x-4">
+      <div class="text-sm">
+        <span class="text-gray-500">Status:</span>
+        <span id="mobile-save-status" class="text-gray-600 text-xs">Auto-saving...</span>
+      </div>
+      <div class="text-sm">
+        <span class="text-gray-500">Progress:</span>
+        <span class="text-gray-900 font-medium text-xs"><%= completed_fields %>/<%= total_fields %></span>
+      </div>
+    </div>
+    
+    <button type="button" 
+            id="mobile-tools-toggle"
+            onclick="toggleMobileEditTools()"
+            class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+      <i class="material-icons text-lg mr-1">expand_more</i>
+      Edit Tools
+    </button>
+  </div>
+  
+  <div id="mobile-edit-tools" class="hidden space-y-4">
+    <!-- Quick Navigation -->
+    <div>
+      <h4 class="text-sm font-medium text-gray-900 mb-2">Jump to Section</h4>
+      <div class="grid grid-cols-2 gap-2">
+        <% content.data[:categories].each do |category| %>
+          <% next if category[:label] == 'Gallery' %>
+          <button type="button" 
+                  onclick="document.getElementById('<%= category[:label] %>').scrollIntoView({behavior: 'smooth'}); toggleMobileEditTools();"
+                  class="flex items-center px-2 py-1 text-sm rounded-md bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <i class="material-icons text-sm <%= content.class_text_color %> mr-1"><%= category[:icon] %></i>
+            <span class="text-gray-700 truncate"><%= category[:label] %></span>
+          </button>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div>
+      <h4 class="text-sm font-medium text-gray-900 mb-2">Quick Actions</h4>
+      <div class="flex space-x-2">
+        <%= link_to @content, 
+                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons text-lg mr-1">visibility</i>
+          View
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

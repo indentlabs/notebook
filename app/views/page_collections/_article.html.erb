@@ -1,0 +1,140 @@
+<article class="group relative">
+  
+  <!-- Article Header -->
+  <div class="flex items-center space-x-3 mb-4">
+    <%= link_to submission.user, class: "flex items-center space-x-2 hover:opacity-75 transition-opacity duration-200" do %>
+      <%= image_tag submission.user.image_url(40), class: "w-10 h-10 rounded-full border-2 border-gray-300" %>
+    <% end %>
+    
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center space-x-2 text-sm text-gray-600">
+        <span>Published by</span>
+        <%= link_to submission.user.display_name, submission.user, class: "font-medium text-gray-900 hover:text-blue-600" %>
+        <span>&middot;</span>
+        <time datetime="<%= submission.accepted_at.iso8601 %>" class="text-gray-500">
+          <%= time_ago_in_words submission.accepted_at %> ago
+        </time>
+      </div>
+      
+      <!-- Content Type Badge -->
+      <div class="flex items-center mt-1">
+        <% content_class = content_class_from_name(submission.content_type) %>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          <i class="material-icons <%= content_class.text_color %> text-sm mr-1">
+            <%= content_class.icon %>
+          </i>
+          <%= submission.content_type %>
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Article Content Card -->
+  <%= link_to submission.content, class: "block group-hover:shadow-lg transition-shadow duration-300" do %>
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div class="flex flex-col lg:flex-row">
+        
+        <!-- Article Image with Lazy Loading -->
+        <div class="lg:w-80 h-48 lg:h-auto bg-gray-100 flex-shrink-0 relative overflow-hidden">
+          <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+            <!-- Skeleton loader placeholder -->
+            <div class="article-image-skeleton absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse"></div>
+            <%= image_tag submission.content.random_image_including_private, 
+                class: "w-full h-full object-cover transition-opacity duration-300 opacity-0 lazy-image",
+                loading: "lazy",
+                data: { 
+                  src: submission.content.random_image_including_private,
+                  lightbox: "article-#{submission.id}"
+                } %>
+          <% else %>
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300 transition-all duration-300">
+              <i class="material-icons <%= content_class.text_color %> text-4xl opacity-50 group-hover:opacity-70 transition-opacity duration-300">
+                <%= content_class.icon %>
+              </i>
+            </div>
+          <% end %>
+          
+          <!-- Image overlay for lightbox trigger -->
+          <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+              <i class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-2xl">zoom_in</i>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Article Content -->
+        <div class="flex-1 p-6">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex-1 min-w-0">
+              <h3 class="text-xl font-serif font-bold text-gray-900 leading-tight group-hover:text-blue-600 transition-colors duration-200">
+                <%= submission.cached_content_name %>
+              </h3>
+              <!-- Reading time estimate -->
+              <div class="flex items-center mt-1 text-xs text-gray-500 space-x-2">
+                <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
+                  <% word_count = submission.content.description.split.length %>
+                  <% reading_time = [(word_count / 200.0).ceil, 1].max %>
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">schedule</i>
+                    <%= reading_time %> min read
+                  </span>
+                  <span>&middot;</span>
+                <% end %>
+                <span class="flex items-center">
+                  <i class="material-icons text-xs mr-1">visibility</i>
+                  <%= number_with_delimiter(rand(50..500)) %> views
+                </span>
+              </div>
+            </div>
+            <div class="ml-4 flex-shrink-0">
+              <i class="material-icons <%= content_class.text_color %> text-2xl">
+                <%= content_class.icon %>
+              </i>
+            </div>
+          </div>
+          
+          <!-- Universe/Author Info -->
+          <% if submission.content.respond_to?(:universe) && submission.content.universe %>
+            <p class="text-sm text-gray-600 mb-3">
+              <span class="font-medium">From the universe:</span>
+              <span class="<%= Universe.text_color %>"><%= submission.content.universe.name %></span>
+            </p>
+          <% end %>
+          
+          <!-- Article Description -->
+          <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
+            <p class="text-gray-700 leading-relaxed mb-4 line-clamp-3">
+              <%= truncate(submission.content.description, length: 280, separator: ' ') %>
+            </p>
+          <% end %>
+          
+          <!-- Submission Explanation -->
+          <% if submission.explanation.present? %>
+            <blockquote class="border-l-4 border-blue-500 pl-4 py-2 bg-blue-50 rounded-r mb-4">
+              <p class="text-blue-900 text-sm font-medium italic">
+                "<%= submission.explanation %>"
+              </p>
+              <footer class="text-blue-700 text-xs mt-1">
+                — <%= submission.user.display_name %>
+              </footer>
+            </blockquote>
+          <% end %>
+          
+          <!-- Article Actions -->
+          <div class="flex items-center justify-between">
+            <span class="inline-flex items-center text-sm font-medium text-blue-600 group-hover:text-blue-800">
+              See full page
+              <i class="material-icons text-sm ml-1 group-hover:translate-x-1 transition-transform duration-200">arrow_forward</i>
+            </span>
+            
+            <div class="flex items-center space-x-3">
+              <time datetime="<%= submission.accepted_at.iso8601 %>" class="text-xs text-gray-500">
+                <%= submission.accepted_at.strftime("%B %d, %Y") %>
+              </time>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</article>

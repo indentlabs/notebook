@@ -108,7 +108,14 @@ class DataController < ApplicationController
   end
 
   def uploads
-    @used_kb      = current_user.image_uploads.sum(:src_file_size) / 1000
+    # Calculate total size by iterating through uploads instead of using SQL sum
+    # This avoids the "no such column: src_file_size" error
+    total_size = 0
+    current_user.image_uploads.each do |upload|
+      total_size += upload.src_file_size if upload.src_file_size.present?
+    end
+    
+    @used_kb      = total_size / 1000
     @remaining_kb = current_user.upload_bandwidth_kb.abs
 
     if current_user.upload_bandwidth_kb < 0
@@ -116,9 +123,16 @@ class DataController < ApplicationController
     else
       @percent_used = (@used_kb.to_f / (@used_kb + @remaining_kb) * 100).round(3)
     end
+    
+    # Preload content associations for better performance
+    @uploads = current_user.image_uploads.includes(:content).order(created_at: :desc)
   end
 
   def usage
+    @content = current_user.content
+  end
+
+  def achievements
     @content = current_user.content
   end
 

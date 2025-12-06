@@ -1,0 +1,404 @@
+<!-- Main Container -->
+<div class="min-h-screen bg-gray-50">
+  
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="mb-6">
+        <div class="flex items-center space-x-2 text-white/80 text-sm">
+          <%= link_to "Collections", page_collections_path, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <%= link_to @page_collection.title, @page_collection, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <span class="text-white font-medium">Manage Editor's Picks</span>
+        </div>
+      </nav>
+      
+      <!-- Header Content -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center">
+            <i class="material-icons text-white text-2xl">star</i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Editor's Picks</h1>
+            <p class="text-white/90">
+              Feature up to 6 published submissions at the top of your collection
+            </p>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="hidden lg:flex items-center space-x-6 bg-white/10 backdrop-blur-sm rounded-lg px-6 py-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-white"><%= @current_picks.count %></div>
+            <div class="text-white/70 text-sm">Current Picks</div>
+          </div>
+          <div class="w-px h-8 bg-white/30"></div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-white"><%= 6 - @current_picks.count %></div>
+            <div class="text-white/70 text-sm">Available Slots</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Content Section -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    
+    <!-- Info Banner -->
+    <div class="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <i class="material-icons text-blue-600">info</i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-blue-800">
+            <strong>Editor's Picks</strong> appear at the top of your collection page. You can feature up to 6 published submissions and reorder them by dragging and dropping.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Current Editor's Picks -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-serif font-bold text-gray-900">Current Editor's Picks</h2>
+          <span class="text-sm text-gray-500"><%= @current_picks.count %> of 6</span>
+        </div>
+        
+        <% if @current_picks.any? %>
+          <div id="current-picks" class="space-y-4">
+            <% @current_picks.each do |pick| %>
+              <div class="editor-pick-item bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-shadow duration-200" data-submission-id="<%= pick.id %>" data-position="<%= pick.editor_pick_position %>">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3 flex-1 min-w-0">
+                    <!-- Drag Handle -->
+                    <div class="drag-handle cursor-move text-gray-400 hover:text-gray-600">
+                      <i class="material-icons">drag_indicator</i>
+                    </div>
+                    
+                    <!-- Position Badge -->
+                    <div class="flex-shrink-0">
+                      <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                        <%= pick.editor_pick_position %>
+                      </span>
+                    </div>
+                    
+                    <!-- Content Info -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center mb-1">
+                        <% content_class = content_class_from_name(pick.content_type) %>
+                        <i class="material-icons <%= content_class.text_color %> text-sm mr-2">
+                          <%= content_class.icon %>
+                        </i>
+                        <h3 class="text-sm font-medium text-gray-900 truncate">
+                          <%= pick.cached_content_name %>
+                        </h3>
+                      </div>
+                      <p class="text-xs text-gray-600">
+                        by <%= pick.user.display_name %>
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <!-- Actions -->
+                  <div class="flex items-center space-x-2 ml-4">
+                    <%= link_to pick.content, class: "p-1 text-gray-400 hover:text-blue-600 transition-colors duration-200", title: "View content" do %>
+                      <i class="material-icons text-sm">open_in_new</i>
+                    <% end %>
+                    <button type="button" class="remove-pick p-1 text-gray-400 hover:text-red-600 transition-colors duration-200" data-submission-id="<%= pick.id %>" title="Remove from picks">
+                      <i class="material-icons text-sm">close</i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="material-icons text-gray-400 text-2xl">star_border</i>
+            </div>
+            <p class="text-gray-500 text-sm">No editor's picks selected yet</p>
+            <p class="text-gray-400 text-xs mt-1">Add submissions from the list on the right</p>
+          </div>
+        <% end %>
+      </div>
+      
+      <!-- Available Submissions -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-serif font-bold text-gray-900">Available Submissions</h2>
+          <span class="text-sm text-gray-500"><%= @available_submissions.count %> submissions</span>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="mb-4">
+          <div class="relative">
+            <input type="text" id="submission-search" placeholder="Search submissions..." 
+                   class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
+              <i class="material-icons text-gray-400 text-sm">search</i>
+            </div>
+          </div>
+        </div>
+        
+        <% if @available_submissions.any? %>
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            <% @available_submissions.each do |submission| %>
+              <div class="submission-item bg-gray-50 rounded-lg p-3 border border-gray-200 hover:bg-gray-100 transition-colors duration-200" data-submission-name="<%= submission.cached_content_name.downcase %>">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-3 flex-1 min-w-0">
+                    <!-- Content Info -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center mb-1">
+                        <% content_class = content_class_from_name(submission.content_type) %>
+                        <i class="material-icons <%= content_class.text_color %> text-sm mr-2">
+                          <%= content_class.icon %>
+                        </i>
+                        <h3 class="text-sm font-medium text-gray-900 truncate">
+                          <%= submission.cached_content_name %>
+                        </h3>
+                      </div>
+                      <p class="text-xs text-gray-600">
+                        by <%= submission.user.display_name %> • 
+                        <%= time_ago_in_words(submission.accepted_at) %> ago
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <!-- Add Button -->
+                  <button type="button" class="add-pick flex-shrink-0 inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md transition-colors duration-200" data-submission-id="<%= submission.id %>" <%= 'disabled' if @current_picks.count >= 6 %>>
+                    <i class="material-icons text-xs mr-1">add</i>
+                    Add
+                  </button>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="material-icons text-gray-400 text-2xl">inbox</i>
+            </div>
+            <p class="text-gray-500 text-sm">All submissions are already featured</p>
+            <p class="text-gray-400 text-xs mt-1">Great job curating your collection!</p>
+          </div>
+        <% end %>
+      </div>
+      
+    </div>
+    
+    <!-- Navigation Footer -->
+    <div class="mt-12 pt-8 border-t border-gray-200 text-center">
+      <%= link_to @page_collection, 
+          class: "inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200" do %>
+        <i class="material-icons text-sm mr-2">arrow_back</i>
+        Back to <%= @page_collection.title %>
+      <% end %>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Toast Notification Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize drag and drop functionality using jQuery UI Sortable
+  initEditorPicksSortable();
+  
+  // Initialize jQuery UI Sortable for editor picks
+  function initEditorPicksSortable() {
+    if (typeof $ === 'undefined' || !$.fn.sortable) {
+      console.error('jQuery UI Sortable not found');
+      return;
+    }
+    
+    $('#current-picks').sortable({
+      items: '.editor-pick-item',
+      handle: '.drag-handle',
+      placeholder: 'editor-pick-placeholder',
+      cursor: 'move',
+      opacity: 0.8,
+      tolerance: 'pointer',
+      update: function(event, ui) {
+        updatePositions();
+      }
+    });
+  }
+  
+  // Update positions after drag and drop
+  function updatePositions() {
+    const items = document.querySelectorAll('.editor-pick-item');
+    items.forEach((item, index) => {
+      const submissionId = item.dataset.submissionId;
+      const newPosition = index + 1;
+      
+      fetch(`<%= page_collection_editor_picks_path(@page_collection) %>/${submissionId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ position: newPosition })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          item.dataset.position = newPosition;
+          item.querySelector('.bg-blue-100').textContent = newPosition;
+          showToast('Editor\'s picks reordered successfully', 'success');
+        } else {
+          showToast('Failed to reorder picks', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error updating position:', error);
+        showToast('Error reordering picks', 'error');
+      });
+    });
+  }
+  
+  // Add pick functionality
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.add-pick')) {
+      const button = e.target.closest('.add-pick');
+      const submissionId = button.dataset.submissionId;
+      
+      // Check if already at max picks
+      if (document.querySelectorAll('.editor-pick-item').length >= 6) {
+        showToast('Maximum of 6 editor\'s picks allowed', 'error');
+        return;
+      }
+      
+      button.disabled = true;
+      button.innerHTML = '<i class="material-icons text-xs mr-1 animate-spin">refresh</i>Adding...';
+      
+      fetch(`<%= page_collection_editor_picks_path(@page_collection) %>`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ submission_id: submissionId })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(data.message, 'success');
+          location.reload(); // Simple reload for now
+        } else {
+          showToast(data.message, 'error');
+          button.disabled = false;
+          button.innerHTML = '<i class="material-icons text-xs mr-1">add</i>Add';
+        }
+      });
+    }
+  });
+  
+  // Remove pick functionality
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.remove-pick')) {
+      const button = e.target.closest('.remove-pick');
+      const submissionId = button.dataset.submissionId;
+      
+      fetch(`<%= page_collection_editor_picks_path(@page_collection) %>/${submissionId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showToast(data.message, 'success');
+          location.reload(); // Simple reload for now
+        } else {
+          showToast(data.message, 'error');
+        }
+      });
+    }
+  });
+  
+  // Search functionality
+  const searchInput = document.getElementById('submission-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const submissions = document.querySelectorAll('.submission-item');
+      
+      submissions.forEach(submission => {
+        const name = submission.dataset.submissionName;
+        if (name.includes(searchTerm)) {
+          submission.style.display = '';
+        } else {
+          submission.style.display = 'none';
+        }
+      });
+    });
+  }
+  
+  // Toast notification function
+  function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+    
+    toast.className = `${bgColor} text-white px-4 py-3 rounded-lg shadow-lg mb-4 transform translate-x-full transition-transform duration-300`;
+    toast.innerHTML = `
+      <div class="flex items-center">
+        <span class="mr-2">${message}</span>
+        <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white/80 hover:text-white">
+          <i class="material-icons text-sm">close</i>
+        </button>
+      </div>
+    `;
+    
+    document.getElementById('toast-container').appendChild(toast);
+    
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove('translate-x-full');
+    }, 100);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      toast.classList.add('translate-x-full');
+      setTimeout(() => toast.remove(), 300);
+    }, 5000);
+  }
+});
+</script>
+
+<style>
+  /* Drag and drop placeholder styling */
+  .editor-pick-placeholder {
+    height: 80px;
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    border-radius: 8px;
+    margin: 16px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 14px;
+  }
+  
+  .editor-pick-placeholder:before {
+    content: "Drop here";
+  }
+  
+  /* Visual feedback during drag */
+  .ui-sortable-helper {
+    transform: rotate(3deg);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  }
+</style>

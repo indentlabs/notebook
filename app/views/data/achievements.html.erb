@@ -1,0 +1,375 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Achievements & Milestones</h1>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">Your Worldbuilding Journey</h2>
+          <p class="text-gray-600 dark:text-gray-400">
+            Track your progress and unlock achievements as you build your world
+          </p>
+        </div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          <%= current_user.content_change_events.count %> total updates
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <% 
+        total_pages = @content.values.sum(&:count)
+        total_updates = current_user.content_change_events.count
+        active_days = current_user.content_change_events.group_by_day(:created_at).count
+        content_type_count = @content.select { |_, pages| pages.count > 0 }.count
+        
+        # Define all possible achievements
+        all_achievements = []
+        
+        # Page count achievements
+        [1, 10, 25, 50, 100, 250, 500, 1000].each do |threshold|
+          completed = total_pages >= threshold
+          progress = [total_pages.to_f / threshold * 100, 100].min.round
+          
+          all_achievements << {
+            name: "#{threshold} Pages Created",
+            description: "Created #{threshold} worldbuilding pages",
+            icon: "auto_stories",
+            color: "blue",
+            completed: completed,
+            progress: completed ? 100 : progress
+          }
+        end
+        
+        # Update count achievements
+        [10, 100, 500, 1000, 5000, 10000].each do |threshold|
+          completed = total_updates >= threshold
+          progress = [total_updates.to_f / threshold * 100, 100].min.round
+          
+          all_achievements << {
+            name: "#{threshold} Updates Made",
+            description: "Made #{threshold} updates to your pages",
+            icon: "edit",
+            color: "purple",
+            completed: completed,
+            progress: completed ? 100 : progress
+          }
+        end
+        
+        # Active days achievements
+        [5, 10, 30, 60, 100, 365].each do |threshold|
+          completed = active_days >= threshold
+          progress = [active_days.to_f / threshold * 100, 100].min.round
+          
+          all_achievements << {
+            name: "#{threshold} Active Days",
+            description: "Made updates on #{threshold} different days",
+            icon: "calendar_today",
+            color: "green",
+            completed: completed,
+            progress: completed ? 100 : progress
+          }
+        end
+        
+        # Content diversity achievements
+        [3, 5, 10, 15, 20, 25].each do |threshold|
+          completed = content_type_count >= threshold
+          progress = [content_type_count.to_f / threshold * 100, 100].min.round
+          
+          all_achievements << {
+            name: "#{threshold} Content Types",
+            description: "Created #{threshold} different types of content",
+            icon: "category",
+            color: "amber",
+            completed: completed,
+            progress: completed ? 100 : progress
+          }
+        end
+        
+        # Streak achievements
+        streak_days = 0
+        current_date = Date.today
+        
+        while current_user.content_change_events.where('DATE(created_at) = ?', current_date).exists?
+          streak_days += 1
+          current_date = current_date - 1.day
+        end
+        
+        [3, 7, 14, 30, 60, 100].each do |threshold|
+          completed = streak_days >= threshold
+          progress = [streak_days.to_f / threshold * 100, 100].min.round
+          
+          all_achievements << {
+            name: "#{threshold}-Day Streak",
+            description: "Updated your notebook #{threshold} days in a row",
+            icon: "local_fire_department",
+            color: "red",
+            completed: completed,
+            progress: completed ? 100 : progress
+          }
+        end
+        
+        # Special achievements
+        if @content["Universe"]&.any?
+          all_achievements << {
+            name: "Universe Creator",
+            description: "Created your first universe",
+            icon: "public",
+            color: "indigo",
+            completed: true,
+            progress: 100
+          }
+        else
+          all_achievements << {
+            name: "Universe Creator",
+            description: "Create your first universe",
+            icon: "public",
+            color: "indigo",
+            completed: false,
+            progress: 0
+          }
+        end
+        
+        if @content["Character"]&.count.to_i >= 10
+          all_achievements << {
+            name: "Character Ensemble",
+            description: "Created at least 10 characters",
+            icon: "people",
+            color: "pink",
+            completed: true,
+            progress: 100
+          }
+        else
+          character_count = @content["Character"]&.count.to_i || 0
+          all_achievements << {
+            name: "Character Ensemble",
+            description: "Create at least 10 characters",
+            icon: "people",
+            color: "pink",
+            completed: false,
+            progress: [character_count.to_f / 10 * 100, 100].min.round
+          }
+        end
+        
+        if @content["Location"]&.count.to_i >= 5
+          all_achievements << {
+            name: "World Explorer",
+            description: "Created at least 5 locations",
+            icon: "explore",
+            color: "teal",
+            completed: true,
+            progress: 100
+          }
+        else
+          location_count = @content["Location"]&.count.to_i || 0
+          all_achievements << {
+            name: "World Explorer",
+            description: "Create at least 5 locations",
+            icon: "explore",
+            color: "teal",
+            completed: false,
+            progress: [location_count.to_f / 5 * 100, 100].min.round
+          }
+        end
+        
+        # Environmental achievement - Save 1 tree
+        tree_pages_equivalent = 0
+        @content.each do |content_type, content_list|
+          content_list_count = content_list.count
+          
+          physical_page_equivalent = case content_type
+          when 'Timeline'
+            GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
+          when 'Document'
+            [
+              content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
+              content_list_count
+            ].max
+          else
+            GreenService.physical_pages_equivalent_for(content_type) * content_list_count
+          end
+          
+          tree_pages_equivalent += physical_page_equivalent
+        end
+        
+        trees_saved = tree_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
+        
+        if trees_saved >= 1
+          all_achievements << {
+            name: "Tree Saver",
+            description: "Saved 1 tree through worldbuilding",
+            icon: "park",
+            color: "green",
+            completed: true,
+            progress: 100
+          }
+        else
+          all_achievements << {
+            name: "Tree Saver",
+            description: "Save 1 tree through worldbuilding",
+            icon: "park",
+            color: "green",
+            completed: false,
+            progress: [trees_saved * 100, 100].min.round
+          }
+        end
+      %>
+      
+      <!-- Achievement Categories -->
+      <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Content Creation</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% all_achievements.select { |a| a[:icon] == "auto_stories" }.each do |achievement| %>
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
+                <div class="flex items-center">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
+                    <i class="material-icons"><%= achievement[:icon] %></i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
+                  </div>
+                </div>
+                
+                <div class="mt-3">
+                  <div class="flex items-center">
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    </div>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Activity & Engagement</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% all_achievements.select { |a| a[:icon] == "edit" || a[:icon] == "calendar_today" }.each do |achievement| %>
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
+                <div class="flex items-center">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
+                    <i class="material-icons"><%= achievement[:icon] %></i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
+                  </div>
+                </div>
+                
+                <div class="mt-3">
+                  <div class="flex items-center">
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    </div>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Consistency</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% all_achievements.select { |a| a[:icon] == "local_fire_department" }.each do |achievement| %>
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
+                <div class="flex items-center">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
+                    <i class="material-icons"><%= achievement[:icon] %></i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
+                  </div>
+                </div>
+                
+                <div class="mt-3">
+                  <div class="flex items-center">
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    </div>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <div class="mb-8">
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Diversity</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% all_achievements.select { |a| a[:icon] == "category" }.each do |achievement| %>
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
+                <div class="flex items-center">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
+                    <i class="material-icons"><%= achievement[:icon] %></i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
+                  </div>
+                </div>
+                
+                <div class="mt-3">
+                  <div class="flex items-center">
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    </div>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      
+      <div>
+        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-4">Special Achievements</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% all_achievements.select { |a| !["auto_stories", "edit", "calendar_today", "category", "local_fire_department"].include?(a[:icon]) }.each do |achievement| %>
+            <div class="border rounded-lg overflow-hidden <%= achievement[:completed] ? "border-#{achievement[:color]}-200 dark:border-#{achievement[:color]}-800" : "border-gray-200 dark:border-gray-700" %>">
+              <div class="p-4 <%= achievement[:completed] ? "bg-#{achievement[:color]}-50 dark:bg-#{achievement[:color]}-900" : "bg-gray-50 dark:bg-gray-800" %>">
+                <div class="flex items-center">
+                  <div class="rounded-full p-2 <%= achievement[:completed] ? "bg-#{achievement[:color]}-100 dark:bg-#{achievement[:color]}-800 text-#{achievement[:color]}-600 dark:text-#{achievement[:color]}-200" : "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500" %>">
+                    <i class="material-icons"><%= achievement[:icon] %></i>
+                  </div>
+                  <div class="ml-3">
+                    <h3 class="font-medium <%= achievement[:completed] ? "text-gray-800 dark:text-white" : "text-gray-500 dark:text-gray-400" %>"><%= achievement[:name] %></h3>
+                    <p class="text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:description] %></p>
+                  </div>
+                </div>
+                
+                <div class="mt-3">
+                  <div class="flex items-center">
+                    <div class="flex-grow h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full <%= achievement[:completed] ? "bg-#{achievement[:color]}-500" : "bg-gray-300 dark:bg-gray-600" %>" style="width: <%= achievement[:progress] %>%"></div>
+                    </div>
+                    <span class="ml-2 text-sm <%= achievement[:completed] ? "text-gray-600 dark:text-#{achievement[:color]}-200" : "text-gray-400 dark:text-gray-500" %>"><%= achievement[:progress] %>%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

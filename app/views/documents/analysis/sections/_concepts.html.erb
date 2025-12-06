@@ -1,17 +1,19 @@
-<% if analysis.document_concepts.relevant.any? %> 
-  <div class="row">
-    <div class="col s12 m6">
-      <h5 class="grey-text">External references</h5>
-      <% analysis.document_concepts.relevant.each do |concept| %>
-        <%= link_to concept.reference_link, target: '_new' do %>
-          <div class="chip">
-            <%= concept.text %>
-          </div>
+<% if analysis.document_concepts.relevant.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <div>
+      <h5 class="text-gray-500 text-xl font-semibold mb-4">External references</h5>
+      <div class="flex flex-wrap gap-2">
+        <% analysis.document_concepts.relevant.each do |concept| %>
+          <%= link_to concept.reference_link, target: '_new', class: 'inline-block' do %>
+            <span class="inline-block px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-full text-sm transition">
+              <%= concept.text %>
+            </span>
+          <% end %>
         <% end %>
-      <% end %>
+      </div>
     </div>
-    <div class="col s12 m6">
-      <p class="help-text">
+    <div>
+      <p class="text-sm text-gray-500 mt-11">
         When our AI detects that your story may be referencing a real-world concept, we include clickable reference chips here. Notebook.ai is not affiliated with any of the sites linked here.
       </p>
     </div>

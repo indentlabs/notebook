@@ -1,60 +1,38 @@
-<div class="content-field universe">
-  <div class="input-field">
-    <div>
-      <i class="material-icons grey-text left"><%= Universe.icon %></i>
-      <%= f.label field[:id], field[:label] %>
-    </div>
-
-    <% if page.new_record? || (page.persisted? && page.universe && page.universe.user == current_user) || page.universe_id.nil? || current_user.contributable_universes.count >= 1 # || page.universe_id.zero? %>
-      <%# todo not like this %>
-      <%
-        valid_universes = []
-        show_premium_notice = false
-
-        if Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name)
-          valid_universes += current_user.universes
-          valid_universes += current_user.contributable_universes
-        else
-          # Premium content
-          if current_user.on_premium_plan? \
-            || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: page.class.name)
-
-            valid_universes += current_user.universes
-
-            # Allow premium users to add premium content to non-premium universes
-            valid_universes += current_user.contributable_universes
-          else
-            show_premium_notice = true
-          end
-
-          current_user.contributable_universes.each do |potential_universe|
-            if potential_universe.user.on_premium_plan?
-              valid_universes += [potential_universe]
-            end
-          end
-        end
-      %>
-
-      <%= hidden_field_tag "field[name]", field[:id] %>
-      <%=
-        @universe_dropdown_options ||= valid_universes.uniq.sort_by(&:name).map { |u| [u.name, u.id] }
-        select_tag "field[value]",
-          options_for_select(
-            @universe_dropdown_options.compact,
-            page.try(:universe_id) || @universe_scope.try(:id)
-          ),
-          include_blank: current_user.on_premium_plan? || Rails.application.config.content_types[:free].map(&:name).include?(raw_model.class.name),
-          class: 'autosave-closest-form-on-change'
-      %>
-      <% if show_premium_notice %>
-        <div class="help-text">
-          <i class="material-icons" style="font-size: 90%">info</i>
-          While on a <%= link_to 'Starter plan', subscription_path %>, you can only create premium content in universes you're a contributor to.
-        </div>
-      <% end %>
-    <% else %>
-      <br />
-      <%= link_to(page.universe.name, page.universe) if page.universe %>
-    <% end %>
+<% if @linkables_raw.fetch('Universe', []).any? %>
+  <div class="max-w-2xl">
+    <%= hidden_field_tag "field[name]", field[:id] %>
+    <%=
+      # TODO: audit which universes are included here for 1. collaborating and 2. free users collaborating on premium universes
+      select_tag "field[value]",
+        options_for_select(
+          @linkables_raw['Universe'].compact.sort_by(&:name).map { |u| 
+            [u.name, u.id, { 'data-universe-privacy': u.privacy || 'private' }] 
+          },
+          raw_model.try(:universe_id) || @universe_scope.try(:id)
+        ),
+        include_blank: true,
+        class: 'autosave-closest-form-on-change universe-select-field block w-full px-3 py-2 text-base border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-purple-800 focus:border-purple-800 sm:text-sm rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100',
+        data: { 
+          'universe-select': true,
+          'content-id': raw_model.id,
+          'content-type': raw_model.class.name
+        }
+    %>
   </div>
-</div>
+<% else %>
+  <%= link_to new_universe_path do %>
+    <div class="bg-purple-200 p-4 rounded-lg flex hover:shadow-md">
+      <i class="material-icons text-4xl mr-3"><%= Universe.icon %></i>
+
+      <div class="flex-1">
+        <p>
+          You haven't created any universes yet!
+        </p>
+        <p class="text-xs">
+          Universes allow you to organize your separate worlds and focus on just one universe's pages at a time. Your changes here are automatically saved. Click this box to go
+          create your first universe.
+        </p>
+      </div>
+    </div>
+  <% end %>
+<% end %>

@@ -1,24 +1,23 @@
-$(document).ready(function() {
-  $('.js-enable-content-type').click(function () {
-    var content_type = $(this).data('content-type');
-    var related_card = $(this).children('.card').first();
-    var is_currently_active = related_card.hasClass('active');
-    var ie_badge = $(this).find('.enabled-badge');
-
-    $.post('/customization/toggle_content_type', {
+// x-on:click="enabled = !enabled; togglePageType('Character', enabled)"
+function togglePageType(content_type, active) {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  fetch('/customization/toggle_content_type', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-Token': csrfToken
+    },
+    body: JSON.stringify({
       content_type: content_type,
-      active: is_currently_active ? 'off' : 'on'
-    });
-
-    if (is_currently_active) {
-      related_card.removeClass('active');
-      ie_badge.attr('data-badge-caption', 'hidden');
-    } else {
-      related_card.addClass('active');
-      ie_badge.attr('data-badge-caption', 'active');
-    }
-
-    // Return false so we don't jump to the top of the page on link click
-    return false;
+      active: active ? 'on' : 'off'
+    })
+  })
+  .then(response => {
+    // Handle the response
+    console.log('toggled successfully');
+  })
+  .catch(error => {
+    // Handle the error
+    console.log('couldnt toggle');
   });
-});
+}

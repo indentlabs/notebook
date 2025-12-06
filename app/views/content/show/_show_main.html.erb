@@ -1,0 +1,110 @@
+<div class="space-y-8 divide-y divide-gray-200 px-6">
+  <div class="divide-y divide-gray-200 space-y-20 mb-20">
+    <% content.data[:categories].each do |category| %>
+      <% next if category[:label] == 'Gallery' %>
+      
+      <!-- Only show categories that have content -->
+      <% has_content = category[:fields].any? { |field| field[:value].present? } %>
+      <% next unless has_content %>
+
+      <div class="category-section" id="category-<%= category[:label].parameterize %>">
+        <div class="pt-4">
+          <div id="<%= category[:label] %>" class="anchor-offset"></div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-6">
+            <i class="material-icons float-left <%= content.class_text_color %> mr-2"><%= category[:icon] %></i>
+            <%= category[:label] %>
+          </h3>
+        </div>
+
+        <div class="mt-6 sm:mt-5 space-y-6 pb-8">
+          <% category[:fields].each do |field| %>
+            <!-- Only show fields that have content -->
+            <% next if field[:value].blank? %>
+            
+            <div class="field-display">
+              <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start">
+                <!-- Field label -->
+                <div class="text-right">
+                  <dt class="text-sm font-medium text-gray-500">
+                    <%= field[:label] %>
+                  </dt>
+                </div>
+                
+                <!-- Field content -->
+                <div class="mt-1 sm:mt-0 col-span-3">
+                  <dd class="text-sm text-gray-900">
+                    <%=
+                      case field[:type]
+                      when 'name'
+                        render partial: 'content/tailwind_components/fields/name', locals: { field: field }
+                      when 'text_area', 'textarea'
+                        render partial: 'content/tailwind_components/fields/text', locals: { field: field }
+                      when 'link'
+                        render partial: 'content/tailwind_components/fields/link', locals: { field: field }
+                      when 'universe'
+                        render partial: 'content/tailwind_components/fields/universe', locals: { field: field }
+                      when 'tags'
+                        render partial: 'content/tailwind_components/fields/tags', locals: { field: field }
+                      else
+                        # Fallback for unknown field types
+                        simple_format(field[:value])
+                      end
+                    %>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Empty state if no content -->
+  <% if content.data[:categories].none? { |cat| cat[:fields].any? { |field| field[:value].present? } } %>
+    <div class="text-center py-12">
+      <div class="mx-auto h-12 w-12 text-gray-400">
+        <i class="material-icons text-4xl"><%= content.class_icon %></i>
+      </div>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No content yet</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by adding some information about this <%= content.class_name.downcase %>.</p>
+      <% if @content.updatable_by?(current_user) %>
+        <div class="mt-6">
+          <%= link_to polymorphic_path(@content, action: :edit), 
+                      class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white #{content.class_color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <i class="material-icons text-lg mr-2">edit</i>
+            Start Editing
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+.field-display {
+  @apply transition-colors duration-150;
+}
+
+.field-display:hover {
+  @apply bg-gray-50 rounded-lg p-3 -m-3;
+}
+
+.anchor-offset {
+  position: relative;
+  top: -80px; /* Account for sticky header */
+}
+
+/* Print styles for better printing */
+@media print {
+  .field-display {
+    @apply bg-transparent;
+    break-inside: avoid;
+  }
+  
+  .category-section {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+}
+</style>

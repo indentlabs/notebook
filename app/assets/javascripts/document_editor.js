@@ -1,3 +1,6 @@
+// Ensure Notebook namespace exists
+if (!window.Notebook) { window.Notebook = {}; }
+
 Notebook.DocumentEditor = class DocumentEditor {
   constructor(el) {
     this.el = el;

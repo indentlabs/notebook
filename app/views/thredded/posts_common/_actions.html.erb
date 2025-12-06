@@ -1,0 +1,55 @@
+<% actions ||= {} %>
+<% actions_html = capture do %>
+  <%= view_hooks.post_common.actions.render self, post: post do %>
+    <%# Primary actions %>
+    <div class="py-1">
+      <% if actions[:quote] && post.can_reply? %>
+        <%= render 'thredded/posts_common/actions/quote', post: post %>
+      <% end  %>
+      <% if post.can_update? %>
+        <%= render 'thredded/posts_common/actions/edit', post: post %>
+      <% end %>
+      <% if post.can_destroy? %>
+        <%= render 'thredded/posts_common/actions/delete', post: post %>
+      <% end %>
+      <% if post.read_state %>
+        <%= view_hooks.post_common.mark_as_unread.render self, post: post do %>
+          <%= render 'thredded/posts_common/actions/mark_as_unread', post: post %>
+        <% end %>
+      <% end %>
+    </div>
+    
+    <%# Moderation/dangerous actions %>
+    <% if post.can_report? || (user_signed_in? && current_user.forum_moderator? && post.instance_variable_get(:@post).is_a?(Thredded::Post)) %>
+      <div class="py-1 border-t border-gray-100 dark:border-gray-700">
+        <% if post.can_report? %>
+          <%= render 'thredded/posts_common/actions/report', post: post %>
+        <% end %>
+        <% if user_signed_in? && current_user.forum_moderator? && post.instance_variable_get(:@post).is_a?(Thredded::Post) %>
+          <%= render 'thredded/moderation/post_moderation_actions', post: post %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%- if actions_html.present? %>
+  <div class='relative inline-block text-left' x-data="{ open: false }" @click.outside="open = false">
+    <button @click="open = !open" type="button" class="flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 p-2 transition-colors">
+      <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+      </svg>
+    </button>
+    <div x-show="open" 
+         x-transition:enter="transition ease-out duration-100"
+         x-transition:enter-start="transform opacity-0 scale-95"
+         x-transition:enter-end="transform opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-75"
+         x-transition:leave-start="transform opacity-100 scale-100"
+         x-transition:leave-end="transform opacity-0 scale-95"
+         class='absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 focus:outline-none'
+         style="display: none;">
+      <%= actions_html %>
+    </div>
+  </div>
+<% end %>

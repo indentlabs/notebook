@@ -17,6 +17,7 @@ class SubscriptionsController < ApplicationController
     @active_promo_code   = @active_promotions.first.try(:page_unlock_promo_code)
 
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
+    @stripe_payment_methods = @stripe_customer.list_payment_methods(type: 'card')
   end
 
   def history

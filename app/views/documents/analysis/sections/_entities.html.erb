@@ -1,13 +1,13 @@
-<h5 class="grey-text">Entities</h5>
+<h5 class="text-gray-500 text-xl font-semibold mb-4">Entities</h5>
 
 <script type="text/javascript">
   var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
   var radarChartOptions = {
     h: 300,
     margin: {
-      top: 10, 
-      right: 0, 
-      bottom: 10, 
+      top: 10,
+      right: 0,
+      bottom: 10,
       left: 0
     },
     levels: 4,
@@ -18,82 +18,102 @@
   };
 </script>
 
-<div class="row">
-  <%# todo aren't document entities precached somewhere on this page? %>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
   <% analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
     <% entity_class = content_class_from_name(entity.entity_type) %>
-    <div class="col s12 m6">
-      <div class="card">
-        <div class="card-image waves-effect waves-block waves-light" style="max-height: 600px;">
-          <% if entity.entity && entity.entity.image_uploads.any? %>
-            <%= image_tag entity.entity.image_uploads.sample.src.url(:large), class: 'activator' %>
-          <% else %>
-            <%= image_tag 'card-headers/' + entity_class.name.downcase.pluralize + '.webp', class: 'activator' %>
-          <% end %>
-        </div>
-        <div class="card-content">
-          <span class="card-title activator <%= entity_class.text_color %>">
-            <i class="material-icons left"><%= entity_class.icon %></i>
-            <%= entity.linked_name_if_possible %>
-            <i class="material-icons right black-text">more_vert</i>
-          </span>
-          <p>
-            Relevance score: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%
-            <div class="progress <%= entity_class.color %> lighten-5">
-              <div class="determinate <%= entity_class.color %>" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%"></div>
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <details class="group">
+        <summary class="cursor-pointer">
+          <div class="relative h-64 overflow-hidden">
+            <% if entity.entity && entity.entity.image_uploads.any? %>
+              <%= image_tag entity.entity.image_uploads.sample.src.url(:large), class: 'w-full h-full object-cover' %>
+            <% else %>
+              <%= image_tag 'card-headers/' + entity_class.name.downcase.pluralize + '.webp', class: 'w-full h-full object-cover' %>
+            <% end %>
+          </div>
+          <div class="p-6">
+            <h5 class="text-xl font-bold mb-2 flex items-center justify-between" style="color: <%= entity_class.hex_color %>">
+              <span class="flex items-center gap-2">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                </svg>
+                <%= entity.linked_name_if_possible %>
+              </span>
+              <svg class="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" />
+              </svg>
+            </h5>
+            <p class="text-sm mb-2">
+              Relevance score: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%
+            </p>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="h-2 rounded-full" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%; background-color: <%= entity_class.hex_color %>"></div>
             </div>
-          </p>
-        </div>
-        <div class="card-reveal">
-          <span class="card-title <%= entity_class.text_color %>">
-            <i class="material-icons left"><%= entity_class.icon %></i>
+          </div>
+        </summary>
+        <div class="bg-gray-50 p-6 border-t">
+          <h5 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: <%= entity_class.hex_color %>">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
             <%= entity.linked_name_if_possible %>
-            <i class="material-icons right black-text">close</i>
-          </span>
-          <div class="card-title">Emotional range</div>
-          <div id="graph-character-emotions-<%= entity.id %>"></div>
-          <ul class="help-text">
+          </h5>
+          <div class="mb-4">
+            <h6 class="font-semibold mb-3">Emotional range</h6>
+            <div id="graph-character-emotions-<%= entity.id %>"></div>
+          </div>
+          <ul class="space-y-3 text-sm">
             <% [:joy, :sadness, :fear, :disgust, :anger].each do |emotion| %>
               <% emotion_score = entity.send("#{emotion}_score") %>
               <li>
-                <%= emotion.to_s.titleize %>: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %>
-                <div class="progress">
-                  <div class="determinate <%= EmotionService.color_for_emotion(emotion) %>" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
+                <div class="font-semibold"><%= emotion.to_s.titleize %>: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %></div>
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                  <div class="h-2 rounded-full <%= EmotionService.color_for_emotion(emotion) %>" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
                 </div>
               </li>
             <% end %>
-            <li>
-              Overall sentiment: <%= entity.sentiment_label %> (<%= (entity.sentiment_score.present? ? (100 * entity.sentiment_score).round(1) : 'Calculating...') %>)
+            <li class="pt-2">
+              <strong>Overall sentiment:</strong> <%= entity.sentiment_label %> (<%= (entity.sentiment_score.present? ? (100 * entity.sentiment_score).round(1) : 'Calculating...') %>)
             </li>
           </ul>
 
-          <p class="center" style="margin-top: 40px;">
-            If you'd like, you can remove this <%= entity_class.name.downcase %> from the analysis.<br />
-            <%= link_to "Remove this #{entity_class.name}", destroy_entity_document_path(entity), class: "btn #{entity_class.color}" %>
-          </p>
+          <div class="text-center mt-6 pt-6 border-t">
+            <p class="mb-3 text-sm text-gray-600">
+              If you'd like, you can remove this <%= entity_class.name.downcase %> from the analysis.
+            </p>
+            <%= link_to "Remove this #{entity_class.name}", destroy_entity_document_path(entity), class: "px-4 py-2 rounded text-white hover:opacity-90 transition inline-block", style: "background-color: #{entity_class.hex_color}" %>
+          </div>
         </div>
-        <div class="card-action">
-          <% if entity.entity_id %>
-            <% linked_entity_class = entity.entity.class %>
-            <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'blue-text' do %>
-              <i class="material-icons left"><%= linked_entity_class.icon %></i>
-              View
-            <% end %>
-            <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'green-text right' do %>
-              <i class="material-icons left"><%= linked_entity_class.icon %></i>
-              Edit
-            <% end %>
-          <% else %>
-            <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
-              <i class="material-icons left">add</i>
-              New <%= entity_class.name %>
-            <% end %>
-            <%= link_to '#', class: entity_class.color + '-text right js-link-entity', data: { id: entity.id } do %>
-              <i class="material-icons left">link</i>
-              Link existing
-            <% end %>
+      </details>
+      <div class="border-t p-4 flex justify-between items-center bg-white">
+        <% if entity.entity_id %>
+          <% linked_entity_class = entity.entity.class %>
+          <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'text-blue-600 hover:underline flex items-center gap-1' do %>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            View
           <% end %>
-        </div>
+          <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'text-green-600 hover:underline flex items-center gap-1' do %>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+            </svg>
+            Edit
+          <% end %>
+        <% else %>
+          <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: 'hover:underline flex items-center gap-1', style: "color: #{entity_class.hex_color}" do %>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+            </svg>
+            New <%= entity_class.name %>
+          <% end %>
+          <%= link_to '#', class: 'hover:underline flex items-center gap-1 js-link-entity', style: "color: #{entity_class.hex_color}", data: { id: entity.id } do %>
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z" />
+            </svg>
+            Link existing
+          <% end %>
+        <% end %>
       </div>
     </div>
 
@@ -115,58 +135,67 @@
 
   <% end %>
 
-  <div class="col s12 m6">
-    <%= link_to '#', class: 'white-text js-link-entity', data: { id: -1 } do %>
-      <div class="card-panel <%= Document.color %>">
-        <i class="material-icons right">add</i>
-        <div class="card-title">Link a missing page</div>
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <%= link_to '#', class: 'block text-white js-link-entity hover:opacity-90 transition', style: "background-color: #{Document.hex_color}", data: { id: -1 } do %>
+      <div class="p-6 flex items-center justify-between">
+        <h5 class="text-xl font-bold">Link a missing page</h5>
+        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+        </svg>
       </div>
     <% end %>
+  </div>
 
-    <div class="card-panel <%= Document.color %> lighten-5 black-text">
-      You can click on the picture of any card in this section to view more information about it or remove it.
-    </div>
+  <div class="rounded-lg p-4 text-gray-900 opacity-80" style="background-color: <%= Document.hex_color %>20">
+    You can click on any card in this section to view more information about it or remove it.
   </div>
 </div>
 
-<div id="entity-link-modal" class="modal">
-  <div class="modal-content">
-    <h4>Link an existing page you've created</h4>
-    <p>
-      You can link a detected entity to one of your already-created pages by selecting it below.
-    </p>
-    <%= form_with url: link_entity_documents_path do |f| %>
-      <%= f.hidden_field :document_id,          value: analysis.document_id %>
-      <%= f.hidden_field :document_analysis_id, value: analysis.id %>
-      <%= f.hidden_field :entity_type,          value: nil %>
-      <%= f.hidden_field :entity_id,            value: nil %>
-      <%= f.hidden_field :document_entity_id,   value: nil %>
+<div id="entity-link-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+    <div class="p-6">
+      <h4 class="text-2xl font-bold mb-4">Link an existing page you've created</h4>
+      <p class="mb-6 text-gray-600">
+        You can link a detected entity to one of your already-created pages by selecting it below.
+      </p>
+      <%= form_with url: link_entity_documents_path do |f| %>
+        <%= f.hidden_field :document_id,          value: analysis.document_id %>
+        <%= f.hidden_field :document_analysis_id, value: analysis.id %>
+        <%= f.hidden_field :entity_type,          value: nil %>
+        <%= f.hidden_field :entity_id,            value: nil %>
+        <%= f.hidden_field :document_entity_id,   value: nil %>
 
-      <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_class_from_name(content_type) %>
-        <% next if content_type == 'Document' %>
-        <h5><%= content_type.pluralize %></h5>
-        <ul class="collection">
-          <% content_list.each do |content| %>
-            <a href="#" 
-               class="<%= content_type_class.text_color %> js-link-entity-selection" 
-               data-id="<%= content.id %>"
-               data-type="<%= content_type %>">
-              <li class="collection-item">
-                <i class="material-icons left"><%= content_type_class.icon %></i>
-                <%= content.name %>
-                <span class="secondary-content">
-                  <i class="material-icons">link</i>
-                </span>
-              </li>
-            </a>
-          <% end %>
-        </ul>
+        <% @current_user_content.each do |content_type, content_list| %>
+          <% content_type_class = content_class_from_name(content_type) %>
+          <% next if content_type == 'Document' %>
+          <h5 class="text-lg font-semibold mb-2 mt-4"><%= content_type.pluralize %></h5>
+          <ul class="border rounded-lg overflow-hidden">
+            <% content_list.each do |content| %>
+              <a href="#"
+                 class="js-link-entity-selection block hover:bg-gray-50 transition"
+                 style="color: <%= content_type_class.hex_color %>"
+                 data-id="<%= content.id %>"
+                 data-type="<%= content_type %>">
+                <li class="border-b last:border-b-0 p-4 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                    </svg>
+                    <%= content.name %>
+                  </div>
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M3.9,12C3.9,10.29 5.29,8.9 7,8.9H11V7H7A5,5 0 0,0 2,12A5,5 0 0,0 7,17H11V15.1H7C5.29,15.1 3.9,13.71 3.9,12M8,13H16V11H8V13M17,7H13V8.9H17C18.71,8.9 20.1,10.29 20.1,12C20.1,13.71 18.71,15.1 17,15.1H13V17H17A5,5 0 0,0 22,12A5,5 0 0,0 17,7Z" />
+                  </svg>
+                </li>
+              </a>
+            <% end %>
+          </ul>
+        <% end %>
       <% end %>
-    <% end %>
-  </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+    </div>
+    <div class="border-t p-4 flex justify-end">
+      <a href="#!" class="modal-close px-4 py-2 text-gray-600 hover:text-gray-900">Cancel</a>
+    </div>
   </div>
 </div>
 
@@ -175,9 +204,12 @@
 
     $('.js-link-entity').click(function () {
       $('#entity-link-modal').find('input[name=document_entity_id]').val($(this).data('id'));
+      $('#entity-link-modal').removeClass('hidden');
+      return false;
+    });
 
-      $('#entity-link-modal').modal('open');
-
+    $('.modal-close').click(function () {
+      $('#entity-link-modal').addClass('hidden');
       return false;
     });
 
@@ -187,7 +219,7 @@
 
       form.find('input[name=entity_id]').val(entity.data('id'));
       form.find('input[name=entity_type]').val(entity.data('type'));
-      
+
       form.submit();
       return false;
     });

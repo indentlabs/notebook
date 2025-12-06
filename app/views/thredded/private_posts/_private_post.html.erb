@@ -1,19 +1,43 @@
 <% private_post, content = post_and_content if local_assigns.key?(:post_and_content) %>
+<% is_current_user = private_post.user == current_user %>
 
-<%
-  blocked_post = user_signed_in? && private_post.user.present? && private_post.user.blocked_by?(current_user)
-%>
+<div id="<%= dom_id(private_post) %>" class="flex w-full <%= is_current_user ? 'justify-end' : 'justify-start' %> mb-4 group">
+  <div class="flex max-w-[85%] md:max-w-[70%] <%= is_current_user ? 'flex-row-reverse' : 'flex-row' %> gap-2">
+    
+    <!-- Avatar -->
+    <div class="flex-shrink-0 self-end mb-1">
+      <% if private_post.user.respond_to?(:avatar_url) && private_post.user.avatar_url.present? %>
+        <%= image_tag private_post.user.avatar_url, class: "w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" %>
+      <% else %>
+        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500">
+          <%= private_post.user.thredded_display_name.first(2).upcase %>
+        </div>
+      <% end %>
+    </div>
 
-<% if blocked_post %>
-  <div class='grey-text text-lighten-2'>
-    <em class="tooltipped" data-tooltip="This message is hidden because you've blocked the user it's from.">1 message hidden.</em>
+    <!-- Message Bubble -->
+    <div class="flex flex-col <%= is_current_user ? 'items-end' : 'items-start' %>">
+      <!-- Sender Name (only for others) -->
+      <% unless is_current_user %>
+        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1 mb-1">
+          <%= private_post.user.thredded_display_name %>
+        </span>
+      <% end %>
+
+      <div class="px-4 py-2 rounded-2xl shadow-sm text-sm md:text-base break-words
+                  <%= is_current_user ? 
+                      'bg-blue-600 text-white rounded-br-none' : 
+                      'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-bl-none' %>">
+        <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/private_posts/content', post: private_post) %>
+      </div>
+      
+      <!-- Timestamp & Status -->
+      <div class="flex items-center gap-1 mt-1 text-[10px] text-gray-400 dark:text-gray-500 <%= is_current_user ? 'mr-1' : 'ml-1' %>">
+        <%= time_ago private_post.created_at %>
+        <% if is_current_user && private_post.read_state == 'read' %>
+          <i class="material-icons text-[12px] text-blue-500" title="Read">done_all</i>
+        <% end %>
+      </div>
+    </div>
   </div>
-<% else %>
-  <%= render 'thredded/posts_common/before_first_unread_post', post: private_post if private_post.first_unread_in_page? %>
-  <%= content_tag :article, id: dom_id(private_post), class: "thredded--post thredded--#{private_post.read_state}--post" do %>
-    <%= render 'thredded/posts_common/actions', post: private_post, actions: local_assigns[:actions] %>
-    <%= render 'thredded/posts_common/header', post: private_post %>
-    <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/private_posts/content', post: private_post) %>
-    <%# content || render('thredded/private_posts/content', post: private_post) %>
-  <% end %>
-<% end %>
+</div>

@@ -1,0 +1,79 @@
+<%# 
+  Universe Card Partial
+  
+  Locals:
+    - raw_content: The content object that may have a universe association
+    - show_label: (optional, default true) Whether to show the "In Universe" label
+%>
+
+<% show_label = local_assigns.fetch(:show_label, true) %>
+
+<% if raw_content.respond_to?(:universe) %>
+  <div class="px-4 py-4 border-b border-gray-200" data-sidebar-universe-section>
+    <% if show_label %>
+      <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">In Universe</h3>
+    <% end %>
+    
+    <div data-sidebar-universe-content>
+      <% if raw_content.universe.present? %>
+        <% if raw_content.universe.respond_to?(:first_public_image) && raw_content.universe.first_public_image.present? %>
+          <!-- Visual universe card with background image -->
+          <%= link_to raw_content.universe, class: "block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200" do %>
+            <!-- Background image -->
+            <%= image_tag raw_content.universe.first_public_image, 
+                          class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" %>
+            
+            <!-- Gradient overlay for text readability -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            
+            <!-- Content overlay -->
+            <div class="absolute inset-0 p-3 flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    <%= raw_content.universe.name %>
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">open_in_new</i>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <!-- Fallback card for universes without images -->
+          <%= link_to raw_content.universe, class: "block relative h-24 rounded-lg overflow-hidden group hover:ring-2 hover:ring-blue-500 hover:ring-offset-2 transition-all duration-200 #{Universe.color}" do %>
+            <!-- Pattern background -->
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.3\"%3E%3Cpath d=\"M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+            
+            <!-- Content -->
+            <div class="relative p-3 h-full flex flex-col justify-end">
+              <div class="flex items-end justify-between">
+                <div class="flex-1 min-w-0">
+                  <p class="text-white font-semibold text-sm truncate mb-1">
+                    <%= raw_content.universe.name %>
+                  </p>
+                  <p class="text-white/90 text-xs flex items-center">
+                    <i class="material-icons text-xs mr-1"><%= Universe.icon %></i>
+                    Universe
+                  </p>
+                </div>
+                <i class="material-icons text-white/80 group-hover:text-white text-lg ml-2">open_in_new</i>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      <% else %>
+        <!-- No universe assigned - empty state -->
+        <div class="text-center py-3">
+          <div class="w-10 h-10 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+            <i class="material-icons text-gray-400 text-sm"><%= Universe.icon %></i>
+          </div>
+          <p class="text-xs text-gray-500">No universe assigned</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
