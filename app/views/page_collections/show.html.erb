@@ -40,7 +40,7 @@
 <% end %>
 
 <!-- Publication Masthead -->
-<div class="relative bg-gradient-to-br <% if @show_page_type_highlight && @page_type %>from-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-50 to-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-100 border-b-4 border-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-600<% else %>from-gray-50 to-white border-b-4 border-gray-900<% end %>">
+<div class="relative bg-gradient-to-br <% if @show_page_type_highlight && @page_type %>from-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-50 to-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-100 dark:from-gray-900 dark:to-gray-800 border-b-4 border-<%= @page_type.color.split(' ').first.gsub('bg-', '') %>-600<% else %>from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 border-b-4 border-gray-900 dark:border-gray-700<% end %>">
   
   <!-- Background Pattern/Image -->
   <div class="absolute inset-0">
@@ -54,12 +54,12 @@
   <!-- Breadcrumb Navigation with Controls -->
   <div class="relative z-10 max-w-7xl mx-auto px-6 pt-6">
     <div class="flex items-center justify-between mb-8">
-      <nav class="flex items-center space-x-2 text-sm text-gray-500">
-        <%= link_to "Collections", page_collections_path, class: "hover:text-gray-700 transition-colors duration-200" %>
-        <i class="material-icons text-xs">chevron_right</i>
-        <%= link_to @page_collection.title, @page_collection, class: "hover:text-gray-700 transition-colors duration-200" %>
+      <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-200">
+        <%= link_to "Collections", page_collections_path, class: "hover:text-gray-900 dark:hover:text-white transition-colors duration-200" %>
+        <i class="material-icons text-xs text-gray-400 dark:text-gray-400">chevron_right</i>
+        <%= link_to @page_collection.title, @page_collection, class: "hover:text-gray-900 dark:hover:text-white transition-colors duration-200" %>
         <% if @show_page_type_highlight && @page_type %>
-          <i class="material-icons text-xs">chevron_right</i>
+          <i class="material-icons text-xs text-gray-400 dark:text-gray-400">chevron_right</i>
           <span class="<%= @page_type.text_color %> font-medium"><%= @page_type.name.pluralize %></span>
         <% end %>
       </nav>
@@ -67,12 +67,12 @@
       <!-- Publication Controls -->
       <div class="flex items-center space-x-3">
         <!-- Dark Mode Toggle -->
-        <button type="button" id="theme-toggle" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200" title="Toggle dark mode">
+        <button type="button" id="theme-toggle" class="p-2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200" title="Toggle dark mode">
           <i class="material-icons text-sm">dark_mode</i>
         </button>
-        
+
         <!-- Share Publication -->
-        <button type="button" class="share-publication p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all duration-200" title="Share this collection">
+        <button type="button" class="share-publication p-2 text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all duration-200" title="Share this collection">
           <i class="material-icons text-sm">share</i>
         </button>
       </div>
@@ -102,11 +102,11 @@
           </p>
         <% else %>
           <!-- Default Collection Title -->
-          <h1 class="text-5xl lg:text-7xl font-serif font-bold text-gray-900 dark:text-gray-900 leading-tight tracking-tight">
+          <h1 class="text-5xl lg:text-7xl font-serif font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
             <%= @page_collection.title %>
           </h1>
           <% if @page_collection.subtitle.present? %>
-            <p class="text-xl lg:text-2xl text-gray-600 font-light italic mt-4 max-w-3xl mx-auto">
+            <p class="text-xl lg:text-2xl text-gray-600 dark:text-gray-300 font-light italic mt-4 max-w-3xl mx-auto">
               <%= @page_collection.subtitle %>
             </p>
           <% end %>
@@ -114,19 +114,19 @@
       </div>
       
       <!-- Publication Info -->
-      <div class="flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-8 text-sm text-gray-600 mb-8">
+      <div class="flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0 lg:space-x-8 text-sm text-gray-600 dark:text-gray-300 mb-8">
         <div class="flex items-center space-x-2">
-          <%= link_to @page_collection.user, class: "flex items-center space-x-2 hover:text-gray-900 transition-colors duration-200" do %>
-            <%= image_tag @page_collection.user.image_url(32), class: "w-8 h-8 rounded-full border-2 border-gray-300" %>
+          <%= link_to @page_collection.user, class: "flex items-center space-x-2 hover:text-gray-900 dark:hover:text-white transition-colors duration-200" do %>
+            <%= image_tag @page_collection.user.image_url(32), class: "w-8 h-8 rounded-full border-2 border-gray-300 dark:border-gray-600" %>
             <span class="font-medium">Curated by <%= @page_collection.user.display_name %></span>
           <% end %>
         </div>
-        <div class="hidden lg:block w-1 h-1 bg-gray-400 rounded-full"></div>
+        <div class="hidden lg:block w-1 h-1 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
         <div class="flex items-center space-x-1">
           <i class="material-icons text-sm">schedule</i>
           <span>Updated <%= time_ago_in_words(@page_collection.updated_at) %> ago</span>
         </div>
-        <div class="hidden lg:block w-1 h-1 bg-gray-400 rounded-full"></div>
+        <div class="hidden lg:block w-1 h-1 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
         <div class="flex items-center space-x-1">
           <i class="material-icons text-sm">library_books</i>
           <span><%= pluralize @pages.count, 'page' %></span>
@@ -138,13 +138,13 @@
         <% @page_collection.page_types.each do |submittable_class_name| %>
           <% submittable_class = content_class_from_name(submittable_class_name) %>
           <% is_active = @show_page_type_highlight && @page_type && @page_type.name == submittable_class_name %>
-          <%= link_to send("#{submittable_class_name.downcase.pluralize}_page_collection_path", @page_collection.id), 
-              class: "group inline-flex items-center px-4 py-2 #{is_active ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-gray-300 hover:border-gray-400'} rounded-full shadow-sm hover:shadow-md transition-all duration-200",
+          <%= link_to send("#{submittable_class_name.downcase.pluralize}_page_collection_path", @page_collection.id),
+              class: "group inline-flex items-center px-4 py-2 #{is_active ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white' : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'} rounded-full shadow-sm hover:shadow-md transition-all duration-200",
               title: "View #{submittable_class_name.pluralize} in this collection" do %>
-            <i class="material-icons #{is_active ? 'text-white' : submittable_class.text_color} text-lg mr-2 group-hover:scale-110 transition-transform duration-200">
+            <i class="material-icons #{is_active ? 'text-white dark:text-gray-900' : submittable_class.text_color} text-lg mr-2 group-hover:scale-110 transition-transform duration-200">
               <%= submittable_class.icon %>
             </i>
-            <span class="text-sm font-medium #{is_active ? 'text-white' : 'text-gray-700 group-hover:text-gray-900'}">
+            <span class="text-sm font-medium #{is_active ? 'text-white dark:text-gray-900' : 'text-gray-700 dark:text-gray-200'}">
               <%= submittable_class_name.pluralize %>
             </span>
           <% end %>
@@ -162,7 +162,7 @@
 </div>
 
 <!-- Main Content Layout -->
-<div class="bg-white">
+<div class="bg-white dark:bg-gray-900">
   <div class="max-w-7xl mx-auto px-6 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
       
@@ -484,42 +484,42 @@
       <div class="lg:col-span-1 space-y-8">
         
         <!-- Advanced Search & Filters -->
-        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h3 class="text-lg font-serif font-bold text-gray-900 mb-4">Search & Filter</h3>
-          
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-serif font-bold text-gray-900 dark:text-white mb-4">Search & Filter</h3>
+
           <!-- Search Input -->
           <div class="mb-4">
             <div class="relative">
-              <input type="text" id="article-search" placeholder="Search articles..." 
-                     class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <input type="text" id="article-search" placeholder="Search articles..."
+                     class="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center">
                 <i class="material-icons text-gray-400 text-sm">search</i>
               </div>
             </div>
           </div>
-          
+
           <!-- Content Type Filters -->
           <div class="mb-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-2">Content Types</h4>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Content Types</h4>
             <div class="space-y-2">
               <% @page_collection.page_types.each do |type| %>
                 <% content_class = content_class_from_name(type) %>
-                <label class="flex items-center">
-                  <input type="checkbox" class="content-type-filter rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
+                <label class="flex items-center cursor-pointer">
+                  <input type="checkbox" class="content-type-filter rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:checked:bg-blue-600 dark:hover:bg-gray-600 dark:focus:bg-gray-700"
                          value="<%= type %>" checked>
                   <i class="material-icons <%= content_class.text_color %> text-sm ml-2 mr-1">
                     <%= content_class.icon %>
                   </i>
-                  <span class="text-sm text-gray-700"><%= type.pluralize %></span>
+                  <span class="text-sm text-gray-700 dark:text-gray-200"><%= type.pluralize %></span>
                 </label>
               <% end %>
             </div>
           </div>
-          
+
           <!-- Date Range Filter -->
           <div class="mb-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-2">Published Date</h4>
-            <select id="date-filter" class="w-full text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-no-materialize="true">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Published Date</h4>
+            <select id="date-filter" class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" data-no-materialize="true">
               <option value="">All time</option>
               <option value="today">Today</option>
               <option value="week">This week</option>
@@ -527,12 +527,12 @@
               <option value="year">This year</option>
             </select>
           </div>
-          
+
           <!-- Author Filter -->
           <% if @contributors.any? %>
             <div class="mb-4">
-              <h4 class="text-sm font-medium text-gray-900 mb-2">Authors</h4>
-              <select id="author-filter" class="w-full text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" data-no-materialize="true">
+              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">Authors</h4>
+              <select id="author-filter" class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" data-no-materialize="true">
                 <option value="">All authors</option>
                 <% @contributors.each do |contributor| %>
                   <option value="<%= contributor.id %>"><%= contributor.display_name %></option>
@@ -540,68 +540,68 @@
               </select>
             </div>
           <% end %>
-          
+
           <!-- Clear Filters -->
-          <button type="button" id="clear-filters" class="w-full mt-4 px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg border border-gray-300 transition-colors duration-200">
+          <button type="button" id="clear-filters" class="w-full mt-4 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 transition-colors duration-200">
             Clear all filters
           </button>
         </div>
         
         <!-- Publication Stats -->
-        <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-          <h3 class="text-lg font-serif font-bold text-gray-900 mb-6">Collection Stats</h3>
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-serif font-bold text-gray-900 dark:text-white mb-6">Collection Stats</h3>
           <dl class="space-y-4">
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-600">Pages</dt>
-              <dd class="text-sm font-semibold text-gray-900"><%= number_with_delimiter @pages.count %></dd>
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Pages</dt>
+              <dd class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @pages.count %></dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-600">Contributors</dt>
-              <dd class="text-sm font-semibold text-gray-900"><%= number_with_delimiter @contributors.count %></dd>
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Contributors</dt>
+              <dd class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @contributors.count %></dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-600">Followers</dt>
-              <dd class="text-sm font-semibold text-gray-900"><%= number_with_delimiter @page_collection.followers.count %></dd>
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Followers</dt>
+              <dd class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @page_collection.followers.count %></dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-sm text-gray-600">Updated</dt>
-              <dd class="text-sm font-semibold text-gray-900"><%= time_ago_in_words(@page_collection.updated_at) %> ago</dd>
+              <dt class="text-sm text-gray-600 dark:text-gray-400">Updated</dt>
+              <dd class="text-sm font-semibold text-gray-900 dark:text-white"><%= time_ago_in_words(@page_collection.updated_at) %> ago</dd>
             </div>
           </dl>
         </div>
-        
+
         <!-- Editorial Board -->
-        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h3 class="text-lg font-serif font-bold text-gray-900 mb-6">Editorial Board</h3>
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-serif font-bold text-gray-900 dark:text-white mb-6">Editorial Board</h3>
           
           <!-- Editor-in-Chief -->
           <div class="mb-6">
-            <%= link_to @page_collection.user, class: "group flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors duration-200" do %>
-              <%= image_tag @page_collection.user.image_url(48), class: "w-12 h-12 rounded-full border-2 border-gray-300" %>
+            <%= link_to @page_collection.user, class: "group flex items-center space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors duration-200" do %>
+              <%= image_tag @page_collection.user.image_url(48), class: "w-12 h-12 rounded-full border-2 border-gray-300 dark:border-gray-600" %>
               <div>
-                <p class="text-sm font-semibold text-gray-900 group-hover:text-blue-600">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600">
                   <%= @page_collection.user.display_name %>
                 </p>
-                <p class="text-xs text-gray-500">Editor-in-Chief</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Editor-in-Chief</p>
               </div>
             <% end %>
           </div>
-          
+
           <!-- Contributors -->
           <% if @contributors.any? %>
-            <div class="border-t border-gray-200 pt-4">
-              <h4 class="text-sm font-medium text-gray-900 mb-3">Contributors</h4>
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+              <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Contributors</h4>
               <div class="space-y-2">
                 <% @contributors.first(5).each do |contributor| %>
-                  <%= link_to contributor, class: "group flex items-center space-x-2 hover:bg-gray-50 rounded p-1 -m-1 transition-colors duration-200" do %>
-                    <%= image_tag contributor.image_url(32), class: "w-8 h-8 rounded-full border border-gray-300" %>
-                    <span class="text-xs text-gray-700 group-hover:text-blue-600 font-medium">
+                  <%= link_to contributor, class: "group flex items-center space-x-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded p-1 -m-1 transition-colors duration-200" do %>
+                    <%= image_tag contributor.image_url(32), class: "w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600" %>
+                    <span class="text-xs text-gray-700 dark:text-gray-200 group-hover:text-blue-600 font-medium">
                       <%= contributor.display_name %>
                     </span>
                   <% end %>
                 <% end %>
                 <% if @contributors.count > 5 %>
-                  <p class="text-xs text-gray-500 pl-10">
+                  <p class="text-xs text-gray-500 dark:text-gray-400 pl-10">
                     and <%= @contributors.count - 5 %> other contributors
                   </p>
                 <% end %>
@@ -609,10 +609,10 @@
             </div>
           <% end %>
         </div>
-        
+
         <!-- Follow & Submit Actions -->
-        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h3 class="text-lg font-serif font-bold text-gray-900 mb-4">Get Involved</h3>
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-serif font-bold text-gray-900 dark:text-white mb-4">Get Involved</h3>
           
           <!-- Submit Button -->
           <% if @page_collection.allow_submissions? %>
@@ -622,18 +622,18 @@
                 Submit to Collection
               </button>
             <% elsif user_signed_in? %>
-              <p class="text-xs text-gray-500 text-center">
+              <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
                 You don't have any content eligible for submission to this collection.
               </p>
             <% else %>
               <%= link_to new_user_session_path,
-                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
                 <i class="material-icons text-sm mr-2">send</i>
                 Sign in to Submit
               <% end %>
             <% end %>
           <% else %>
-            <p class="text-xs text-gray-500 text-center">
+            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
               This collection is not currently accepting submissions.
             </p>
           <% end %>
@@ -643,35 +643,35 @@
             <% if user_signed_in? %>
               <% if @page_collection.followed_by?(current_user) %>
                 <%= link_to unfollow_page_collection_path(@page_collection), method: :post,
-                    class: "w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                    class: "w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
                   <i class="material-icons text-sm mr-2">notifications_off</i>
                   Unfollow Collection
                 <% end %>
               <% else %>
                 <%= link_to follow_page_collection_path(@page_collection), method: :post,
-                    class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                    class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors duration-200" do %>
                   <i class="material-icons text-sm mr-2">notifications</i>
                   Follow Collection
                 <% end %>
               <% end %>
             <% else %>
               <%= link_to new_user_session_path,
-                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200" do %>
+                  class: "w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm bg-blue-600 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors duration-200" do %>
                 <i class="material-icons text-sm mr-2">notifications</i>
                 Sign in to Follow
               <% end %>
             <% end %>
           </div>
-          
-          <p class="mt-4 text-xs text-gray-500 text-center">
+
+          <p class="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">
             Get notified when new content is published or submissions reopen.
           </p>
         </div>
         
         <!-- Enhanced Social & Subscribe -->
-        <div class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm">
-          <h3 class="text-lg font-serif font-bold text-gray-900 mb-4">Share & Subscribe</h3>
-          
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-serif font-bold text-gray-900 dark:text-white mb-4">Share & Subscribe</h3>
+
           <!-- Social Sharing -->
           <div class="mb-4">
             <div class="grid grid-cols-2 gap-2">
@@ -680,35 +680,35 @@
                 'url=' + CGI.escape(page_collection_url(@page_collection)),
                 '&text=' + CGI.escape("Check out this amazing collection: #{@page_collection.title}")
               ].join, target: '_blank',
-                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" do %>
                 <i class="material-icons text-sm mr-1">share</i>
                 Twitter
               <% end %>
-              <%= link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button", 
+              <%= link_to "https://www.facebook.com/sharer/sharer.php?app_id=1523926344336934&u=#{CGI.escape(page_collection_url(@page_collection))}&display=popup&ref=plugin&src=share_button",
                   target: '_blank',
                   onclick: "return !window.open(this.href, 'Facebook', 'width=640,height=580')",
-                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" do %>
                 <i class="material-icons text-sm mr-1">share</i>
                 Facebook
               <% end %>
-              <%= link_to "https://www.linkedin.com/sharing/share-offsite/?url=#{CGI.escape(page_collection_url(@page_collection))}", 
+              <%= link_to "https://www.linkedin.com/sharing/share-offsite/?url=#{CGI.escape(page_collection_url(@page_collection))}",
                   target: '_blank',
-                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                  class: "inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" do %>
                 <i class="material-icons text-sm mr-1">share</i>
                 LinkedIn
               <% end %>
-              <button type="button" id="copy-link" class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+              <button type="button" id="copy-link" class="inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200">
                 <i class="material-icons text-sm mr-1">link</i>
                 Copy Link
               </button>
             </div>
           </div>
-          
+
           <!-- RSS Feed -->
-          <div class="pt-4 border-t border-gray-200">
+          <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
             <div class="flex space-x-2">
               <%= link_to feed_page_collection_path(@page_collection),
-                  class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-orange-300 rounded-md shadow-sm bg-orange-50 text-xs font-medium text-orange-700 hover:bg-orange-100 transition-colors duration-200" do %>
+                  class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-md shadow-sm bg-orange-50 dark:bg-orange-900/30 text-xs font-medium text-orange-700 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors duration-200" do %>
                 <i class="material-icons text-sm mr-1">rss_feed</i>
                 RSS Feed
               <% end %>
