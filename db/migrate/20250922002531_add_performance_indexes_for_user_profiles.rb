@@ -83,10 +83,10 @@ class AddPerformanceIndexesForUserProfiles < ActiveRecord::Migration[6.1]
                 name: 'index_page_collections_on_user_updated'
     end
     
-    # Page collection submissions
+    # Page collection submissions - index on accepted_at since status is derived from it
     if table_exists?(:page_collection_submissions)
-      add_index :page_collection_submissions, [:user_id, :status],
-                name: 'index_page_collection_submissions_on_user_status'
+      add_index :page_collection_submissions, [:user_id, :accepted_at],
+                name: 'index_page_collection_submissions_on_user_accepted'
     end
   end
 end

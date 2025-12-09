@@ -2466,10 +2466,10 @@ ActiveRecord::Schema.define(version: 2025_09_22_002741) do
     t.string "cached_content_name"
     t.datetime "deleted_at"
     t.integer "editor_pick_position"
-    t.index "\"user_id\", \"status\"", name: "index_page_collection_submissions_on_user_status"
     t.index ["content_type", "content_id"], name: "polycontent_collection_index"
     t.index ["page_collection_id", "editor_pick_position"], name: "index_page_collection_submissions_on_editor_pick_position", unique: true, where: "editor_pick_position IS NOT NULL"
     t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
+    t.index ["user_id", "accepted_at"], name: "index_page_collection_submissions_on_user_accepted"
     t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
   end
 
