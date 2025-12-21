@@ -60,7 +60,7 @@
                   </h3>
                   <% if collection.respond_to?(:description) && collection.description.present? %>
                     <p class="text-white/90 text-sm line-clamp-2">
-                      <%= truncate(collection.description, length: 100) %>
+                      <%= truncate(CGI.unescapeHTML(strip_tags(collection.description.to_s)), length: 100) %>
                     </p>
                   <% end %>
                 </div>
@@ -197,7 +197,7 @@
               <div class="p-4">
                 <% if collection.respond_to?(:description) && collection.description.present? %>
                   <p class="text-gray-600 text-sm line-clamp-2 mb-3">
-                    <%= truncate(collection.description, length: 120) %>
+                    <%= truncate(CGI.unescapeHTML(strip_tags(collection.description.to_s)), length: 120) %>
                   </p>
                 <% end %>
                 
