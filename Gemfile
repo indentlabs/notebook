@@ -138,7 +138,6 @@ group :test, :production do
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', require: false # TODO: remove this
   gem 'database_cleaner'
   gem 'selenium-webdriver'
   gem 'rspec-rails', '~> 5.0'
