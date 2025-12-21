@@ -29,7 +29,9 @@
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+      :class="{ 'overflow-hidden': showSidebar && !isDesktop }"
       x-data="{
+        isDesktop: window.innerWidth >= 1024,
         showSidebar: (() => {
           <% if user_signed_in? %>
             try {
@@ -52,13 +54,28 @@
             try {
               localStorage.setItem('site_navigation_sidebar_visible', value.toString());
             } catch (e) {
-              // Silently fail if localStorage is not available
+              // Silently fail is localstorage is not available
+            }
+
+            // Lock scroll on mobile
+            if (!isDesktop) {
+              if (value) {
+                document.documentElement.classList.add('overflow-hidden');
+                document.body.classList.add('overflow-hidden');
+              } else {
+                document.documentElement.classList.remove('overflow-hidden');
+                document.body.classList.remove('overflow-hidden');
+              }
+            } else {
+              // Ensure no scroll lock on desktop
+              document.documentElement.classList.remove('overflow-hidden');
+              document.body.classList.remove('overflow-hidden');
             }
           });
 
           // Handle window resize
           window.addEventListener('resize', () => {
-            const isDesktop = window.innerWidth >= 1024;
+            isDesktop = window.innerWidth >= 1024;
             if (!isDesktop) {
               showSidebar = false;
             } else {
@@ -69,6 +86,9 @@
               } catch (e) {
                 showSidebar = true;
               }
+              // Ensure lock is cleared
+              document.documentElement.classList.remove('overflow-hidden');
+              document.body.classList.remove('overflow-hidden');
             }
           });
         <% end %>
