@@ -1138,7 +1138,8 @@ function documentsIndexController() {
     
     // Sidebar states
     showLeftSidebar: (() => {
-      return window.innerWidth >= 1280; // Default open on xl+ (matching original logic)
+      // Only show left sidebar by default if user has documents and on desktop
+      return window.innerWidth >= 1280 && <%= @recent_documents.any? %>;
     })(),
     showRightSidebar: false,
     
@@ -1168,7 +1169,8 @@ function documentsIndexController() {
         // Left Sidebar Logic (xl breakpoint)
         this.isDesktop = window.innerWidth >= 1280;
         if (window.innerWidth >= 1280) {
-          this.showLeftSidebar = true;
+          // Only auto-show if user has documents
+          this.showLeftSidebar = <%= @recent_documents.any? %>;
         } else {
           this.showLeftSidebar = false;
         }
