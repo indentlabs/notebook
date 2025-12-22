@@ -398,30 +398,30 @@
                       </div>
                       
                       <!-- Feedback Section -->
-                      <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), 
-                          url: basil_feedback_path(commission.job_id), 
-                          method: :POST, 
-                          remote: true,
-                          html: { class: 'feedback-form', data: { commission_id: commission.id } } do |f| %>
-                        <div class="flex items-center justify-center space-x-1 mb-2 sm:mb-3">
-                          <% [
-                            [-2, 'sentiment_very_dissatisfied', 'text-red-500', 'hover:text-red-400'],
-                            [-1, 'sentiment_dissatisfied', 'text-orange-500', 'hover:text-orange-400'],
-                            [1, 'sentiment_satisfied', 'text-yellow-500', 'hover:text-yellow-400'],
-                            [2, 'sentiment_very_satisfied', 'text-green-500', 'hover:text-green-400'],
-                            [3, 'favorite', 'text-pink-500', 'hover:text-pink-400']
-                          ].each do |score, icon, color, hover_color| %>
-                            <label class="cursor-pointer">
-                              <%= f.radio_button :score_adjustment, score,
-                                  class: 'hidden peer feedback-radio',
-                                  onchange: "this.form.requestSubmit()" %>
-                              <i class="material-icons text-xl sm:text-2xl text-gray-300 <%= hover_color %> peer-checked:<%= color %> transition-colors">
-                                <%= icon %>
-                              </i>
-                            </label>
-                          <% end %>
-                        </div>
-                      <% end %>
+                      <% existing_feedback = commission.basil_feedbacks.find_by(user: current_user) %>
+                      <div class="flex items-center justify-center space-x-1 mb-2 sm:mb-3">
+                        <% [
+                          [-2, 'sentiment_very_dissatisfied', 'text-red-500', 'hover:text-red-400'],
+                          [-1, 'sentiment_dissatisfied', 'text-orange-500', 'hover:text-orange-400'],
+                          [1, 'sentiment_satisfied', 'text-yellow-500', 'hover:text-yellow-400'],
+                          [2, 'sentiment_very_satisfied', 'text-green-500', 'hover:text-green-400'],
+                          [3, 'favorite', 'text-pink-500', 'hover:text-pink-400']
+                        ].each do |score, icon, color, hover_color| %>
+                          <label class="cursor-pointer">
+                            <input type="radio"
+                                   name="feedback_<%= commission.id %>"
+                                   value="<%= score %>"
+                                   class="hidden feedback-radio"
+                                   data-feedback-url="<%= basil_feedback_path(commission.job_id) %>"
+                                   data-color="<%= color %>"
+                                   onchange="submitFeedback(this)"
+                                   <%= 'checked' if existing_feedback&.score_adjustment == score %>>
+                            <i class="material-icons text-xl sm:text-2xl <%= existing_feedback&.score_adjustment == score ? color : 'text-gray-300' %> <%= hover_color %> transition-colors">
+                              <%= icon %>
+                            </i>
+                          </label>
+                        <% end %>
+                      </div>
                       
                       <!-- Actions -->
                       <div class="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
@@ -530,6 +530,39 @@ function closeLightbox() {
   const lightboxImage = document.getElementById('lightbox-image');
   lightboxModal.classList.add('hidden');
   lightboxImage.src = '';
+}
+
+// Submit feedback rating for Basil images
+function submitFeedback(radio) {
+  const url = radio.dataset.feedbackUrl;
+  const score = radio.value;
+  const color = radio.dataset.color;
+
+  // Update visual state - remove color from siblings, add to selected
+  const container = radio.closest('.flex');
+  container.querySelectorAll('input[type="radio"]').forEach(r => {
+    const icon = r.nextElementSibling;
+    icon.classList.remove('text-red-500', 'text-orange-500', 'text-yellow-500', 'text-green-500', 'text-pink-500');
+    icon.classList.add('text-gray-300');
+  });
+  const selectedIcon = radio.nextElementSibling;
+  selectedIcon.classList.remove('text-gray-300');
+  selectedIcon.classList.add(color);
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json'
+    },
+    body: `basil_feedback[score_adjustment]=${score}`
+  })
+  .then(response => {
+    if (response.ok) {
+      showNotification('Rating saved! Thanks for your feedback.');
+    }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
