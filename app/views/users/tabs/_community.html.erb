@@ -9,7 +9,7 @@
           <i class="material-icons text-blue-600 text-2xl">people</i>
         </div>
         <div class="ml-4">
-          <div class="text-2xl font-bold text-gray-900"><%= @followers_count %></div>
+          <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@followers_count) %></div>
           <div class="text-sm text-gray-500">Followers</div>
         </div>
       </div>
@@ -21,7 +21,7 @@
           <i class="material-icons text-green-600 text-2xl">person_add</i>
         </div>
         <div class="ml-4">
-          <div class="text-2xl font-bold text-gray-900"><%= @following_count %></div>
+          <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter(@following_count) %></div>
           <div class="text-sm text-gray-500">Following</div>
         </div>
       </div>
@@ -35,7 +35,7 @@
         <div class="ml-4">
           <div class="text-2xl font-bold text-gray-900">
             <% mutual_count = user_signed_in? ? (@user.followed_users & current_user.followed_users).count : 0 %>
-            <%= mutual_count %>
+            <%= number_with_delimiter(mutual_count) %>
           </div>
           <div class="text-sm text-gray-500">Mutual connections</div>
         </div>
@@ -58,7 +58,7 @@
       
       <% if @followers_count > 12 %>
         <%= link_to followers_user_path(@user), class: "text-sm text-blue-600 hover:text-blue-700 font-medium" do %>
-          View all <%= @followers_count %> followers →
+          View all <%= number_with_delimiter(@followers_count) %> followers →
         <% end %>
       <% end %>
     </div>
@@ -128,7 +128,7 @@
       
       <% if @following_count > 12 %>
         <%= link_to following_user_path(@user), class: "text-sm text-green-600 hover:text-green-700 font-medium" do %>
-          View all <%= @following_count %> following →
+          View all <%= number_with_delimiter(@following_count) %> following →
         <% end %>
       <% end %>
     </div>
