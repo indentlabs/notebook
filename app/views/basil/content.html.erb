@@ -123,8 +123,8 @@
                   </div>
                   
                   <!-- Importance Help (Hidden by default) -->
-                  <div id="importance-help" class="hidden mt-3 p-2 sm:p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
-                    <p class="text-xs text-purple-700 dark:text-purple-300">
+                  <div id="importance-help" class="hidden mt-3 p-2 sm:p-3 bg-purple-50 dark:bg-gray-700 rounded-lg">
+                    <p class="text-xs text-purple-700 dark:text-purple-200">
                       <strong>Adjust importance:</strong> Drag sliders to control how much Basil focuses on each field.
                       Set to 0 to ignore a field completely.
                     </p>
@@ -324,10 +324,10 @@
                     <% BasilService.experimental_styles_for(@content.page_type).each do |style| %>
                       <button type="button"
                               onclick="submitBasilForm('<%= style %>')"
-                              class="group relative bg-amber-50 border border-amber-200 rounded-lg p-2 sm:p-3 hover:border-amber-400 hover:bg-amber-100 transition-all duration-200 text-left">
+                              class="group relative bg-amber-50 dark:bg-gray-700 border border-amber-200 dark:border-amber-600 rounded-lg p-2 sm:p-3 hover:border-amber-400 hover:bg-amber-100 dark:hover:bg-gray-600 transition-all duration-200 text-left">
                         <div class="flex items-center">
-                          <i class="material-icons text-amber-600 text-xs sm:text-sm mr-1 sm:mr-2">science</i>
-                          <span class="text-xs font-medium text-gray-700 truncate">
+                          <i class="material-icons text-amber-600 dark:text-amber-400 text-xs sm:text-sm mr-1 sm:mr-2 flex-shrink-0">science</i>
+                          <span class="text-xs font-medium text-gray-700 dark:text-gray-100">
                             <%= style.humanize %>
                           </span>
                         </div>
@@ -372,7 +372,7 @@
             <% end %>
             
             <!-- Grid layout for larger screens -->
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
               <% @commissions.each do |commission| %>
                 <% if commission.complete? %>
                   <!-- Completed Image Card -->
@@ -405,17 +405,17 @@
                           html: { class: 'feedback-form', data: { commission_id: commission.id } } do |f| %>
                         <div class="flex items-center justify-center space-x-1 mb-2 sm:mb-3">
                           <% [
-                            [-2, 'sentiment_very_dissatisfied', 'text-red-500'],
-                            [-1, 'sentiment_dissatisfied', 'text-orange-500'],
-                            [1, 'sentiment_satisfied', 'text-green-500'],
-                            [2, 'sentiment_very_satisfied', 'text-green-600'],
-                            [3, 'favorite', 'text-red-500']
-                          ].each do |score, icon, color| %>
+                            [-2, 'sentiment_very_dissatisfied', 'text-red-500', 'hover:text-red-400'],
+                            [-1, 'sentiment_dissatisfied', 'text-orange-500', 'hover:text-orange-400'],
+                            [1, 'sentiment_satisfied', 'text-yellow-500', 'hover:text-yellow-400'],
+                            [2, 'sentiment_very_satisfied', 'text-green-500', 'hover:text-green-400'],
+                            [3, 'favorite', 'text-pink-500', 'hover:text-pink-400']
+                          ].each do |score, icon, color, hover_color| %>
                             <label class="cursor-pointer">
-                              <%= f.radio_button :score_adjustment, score, 
+                              <%= f.radio_button :score_adjustment, score,
                                   class: 'hidden peer feedback-radio',
                                   onchange: "this.form.requestSubmit()" %>
-                              <i class="material-icons text-xl sm:text-2xl text-gray-300 hover:text-gray-400 peer-checked:<%= color %> transition-colors">
+                              <i class="material-icons text-xl sm:text-2xl text-gray-300 <%= hover_color %> peer-checked:<%= color %> transition-colors">
                                 <%= icon %>
                               </i>
                             </label>
@@ -457,7 +457,7 @@
                         <div class="w-10 h-10 sm:w-12 sm:h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                       </div>
                       <div class="ml-3 sm:ml-4 flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Generating...</p>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">In queue...</p>
                         <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
                           <%= commission.style.try(:humanize) || 'Style' %> • 
                           Started <%= time_ago_in_words commission.created_at %> ago
@@ -534,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }).then(response => response.json())
         .then(data => {
           // Show success message
-          showNotification("Image saved to <%= @content.name.gsub('"', '\"') %>'s page");
+          showNotification("Image saved to <%= j @content.name %>'s page");
         });
     });
   });
