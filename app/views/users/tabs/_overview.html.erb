@@ -56,43 +56,8 @@
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <% @featured_universes.each do |universe| %>
-              <%= link_to universe, class: "group" do %>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                  <div class="relative h-48 overflow-hidden">
-                    <% if universe.respond_to?(:first_public_image) && universe.first_public_image.present? %>
-                      <%= image_tag universe.first_public_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
-                    <% else %>
-                      <div class="w-full h-full bg-gradient-to-br from-purple-400 via-blue-500 to-indigo-600 flex items-center justify-center">
-                        <i class="material-icons text-white text-6xl opacity-80"><%= Universe.icon %></i>
-                      </div>
-                    <% end %>
-                    
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    
-                    <div class="absolute bottom-4 left-4 right-4">
-                      <h3 class="text-white font-bold text-lg line-clamp-1"><%= universe.name %></h3>
-                      <% if universe.respond_to?(:description) && universe.description.present? %>
-                        <p class="text-white/90 text-sm mt-1 line-clamp-2"><%= truncate(universe.description, length: 100) %></p>
-                      <% end %>
-                    </div>
-                  </div>
-                  
-                  <div class="p-4">
-                    <div class="flex items-center justify-between text-xs text-gray-500">
-                      <span class="flex items-center">
-                        <i class="material-icons text-xs mr-1">schedule</i>
-                        Updated <%= time_ago_in_words(universe.updated_at) %> ago
-                      </span>
-                      <% if universe.respond_to?(:cached_word_count) && universe.cached_word_count && universe.cached_word_count > 0 %>
-                        <span class="flex items-center">
-                          <i class="material-icons text-xs mr-1">description</i>
-                          <%= number_with_delimiter universe.cached_word_count %> words
-                        </span>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
+                <%= render partial: 'content/display/card', locals: { content_page: universe } %>
+
             <% end %>
           </div>
         </div>

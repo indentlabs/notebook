@@ -255,67 +255,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
           <% @paginated_content.each do |item| %>
             <div class="content-card group">
-              <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block' do %>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                  
-                  <!-- Card Header with Image -->
-                  <div class="relative h-48 overflow-hidden">
-                    <% if item[:has_image] %>
-                      <%= image_tag item[:page].random_image_including_private, class: 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' %>
-                    <% else %>
-                      <div class="w-full h-full <%= item[:page].color %> bg-opacity-20 flex items-center justify-center">
-                        <i class="material-icons text-6xl text-white opacity-80"><%= item[:page].icon %></i>
-                      </div>
-                    <% end %>
-                    
-                    <!-- Overlay gradient -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                    
-                    <!-- Content Type Badge -->
-                    <div class="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= item[:page].color %>">
-                      <i class="material-icons text-xs mr-1"><%= item[:page].icon %></i>
-                      <%= item[:page].page_type %>
-                    </div>
-                    
-                    <!-- Action Badge -->
-                    <div class="absolute top-3 left-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:action] == 'created' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white' %>">
-                      <i class="material-icons text-xs mr-1"><%= item[:action] == 'created' ? 'add_circle' : 'edit' %></i>
-                      <%= item[:action].titleize %>
-                    </div>
-                    
-                    <!-- Title -->
-                    <h3 class="absolute bottom-3 left-3 right-3 text-white font-semibold text-lg line-clamp-2">
-                      <%= item[:page].name %>
-                    </h3>
-                  </div>
-                  
-                  <!-- Card Footer with Stats -->
-                  <div class="px-4 py-3 border-t border-gray-100">
-                    <div class="flex items-center justify-between text-xs text-gray-500">
-                      <span class="flex items-center space-x-1">
-                        <i class="material-icons text-xs">schedule</i>
-                        <span><%= time_ago_in_words item[:page].updated_at %> ago</span>
-                      </span>
-                      
-                      <div class="flex items-center space-x-3">
-                        <% if item[:edit_count] > 0 %>
-                          <span class="flex items-center space-x-1">
-                            <i class="material-icons text-xs">edit</i>
-                            <span><%= item[:edit_count] %></span>
-                          </span>
-                        <% end %>
-                        
-                        <% if item[:word_count] > 0 %>
-                          <span class="flex items-center space-x-1">
-                            <i class="material-icons text-xs">description</i>
-                            <span><%= number_with_delimiter item[:word_count] %></span>
-                          </span>
-                        <% end %>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
+              <%= render partial: 'content/display/card', locals: { content_page: item[:page], action: item[:action] } %>
             </div>
           <% end %>
         </div>

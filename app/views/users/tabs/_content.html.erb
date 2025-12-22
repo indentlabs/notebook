@@ -72,53 +72,8 @@
                data-name="<%= content_page.name.downcase %>"
                data-updated="<%= content_page.updated_at.to_i %>">
             
-            <%= link_to content_page, class: "group block" do %>
-              <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-                
-                <!-- Content Image -->
-                <div class="relative h-48 overflow-hidden">
-                  <% if content_page.respond_to?(:random_image_including_private) && content_page.random_image_including_private.present? %>
-                    <%= image_tag content_page.random_image_including_private, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
-                  <% else %>
-                    <div class="w-full h-full <%= content_type_klass.color %> bg-opacity-20 flex items-center justify-center">
-                      <i class="material-icons text-6xl <%= content_type_klass.text_color %> opacity-80"><%= content_type_klass.icon %></i>
-                    </div>
-                  <% end %>
-                  
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  
-                  <!-- Content Type Badge -->
-                  <div class="absolute top-3 right-3 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white <%= content_type_klass.color %>">
-                    <i class="material-icons text-xs mr-1"><%= content_type_klass.icon %></i>
-                    <%= content_type_klass.name %>
-                  </div>
-                  
-                  <!-- Content Title -->
-                  <div class="absolute bottom-3 left-3 right-3">
-                    <h3 class="text-white font-semibold text-lg line-clamp-2">
-                      <%= content_page.name %>
-                    </h3>
-                  </div>
-                </div>
-                
-                <!-- Content Details -->
-                <div class="p-4">
-                  <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span class="flex items-center">
-                      <i class="material-icons text-xs mr-1">schedule</i>
-                      <%= time_ago_in_words(content_page.updated_at) %> ago
-                    </span>
-                    
-                    <% if content_page.respond_to?(:cached_word_count) && content_page.cached_word_count && content_page.cached_word_count > 0 %>
-                      <span class="flex items-center">
-                        <i class="material-icons text-xs mr-1">description</i>
-                        <%= number_with_delimiter content_page.cached_word_count %>
-                      </span>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
-            <% end %>
+            <%= render partial: 'content/display/card', locals: { content_page: content_page } %>
+
           </div>
         <% end %>
       <% end %>
