@@ -304,10 +304,14 @@
             <i class="material-icons text-brown-600 dark:text-brown-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">lock</i>
             <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Data Vault</span>
           <% end %>
-          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white border-b border-gray-300 dark:border-gray-700' do %>
+          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
             <i class="material-icons text-pink-400 dark:text-pink-300 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">help</i>
             <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Help Center</span>
           <% end %>
+          <a href="#" onclick="switchToOldLayout(); return false;" class="flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white border-b border-gray-300 dark:border-gray-700">
+            <i class="material-icons text-gray-500 dark:text-gray-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">undo</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Back to old layout</span>
+          </a>
           <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
             <i class="material-icons text-black dark:text-gray-300 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">power_settings_new</i>
             <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Sign Out</span>
@@ -424,5 +428,19 @@ function searchAutocomplete() {
       }
     }
   }
+}
+
+function switchToOldLayout() {
+  const currentUrl = new URL(window.location.href);
+  if (currentUrl.hostname.includes('new.notebook.ai')) {
+    // Production: swap new -> www
+    currentUrl.hostname = currentUrl.hostname.replace('new.', 'www.');
+  } else {
+    // Localhost or other environments: redirect to www.notebook.ai with current path
+    currentUrl.hostname = 'www.notebook.ai';
+    currentUrl.port = '';
+    currentUrl.protocol = 'https:';
+  }
+  window.location.href = currentUrl.href;
 }
 </script>
