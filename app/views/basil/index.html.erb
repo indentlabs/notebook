@@ -1,97 +1,186 @@
-<div class="row">
-  <div class="col s12 m4 l3">
-    <%= image_tag 'basil/portrait.png', style: 'width: 100%' %>
-  </div>
-  <div class="col s12 m8 l9">
-    <h1 style="font-size: 2em; margin-left: 1rem">Hey, I'm Basil.</h4>
-    <h2 style="font-size: 1.4em; margin-left: 1rem">I can help you visualize your characters and other pages.</h2>
-    <p style="margin-left: 1rem">
-      To get started, select the page you want to generate images for. Their description
-      will be pulled from any answers you've given to relevant fields on their notebook page.
-    </p>
-    <p style="margin-left: 1rem">
-      You can also
-      <%= link_to 'help Basil get better by leaving feedback on your images', basil_rating_queue_path %>.
-    </p>
-  </div>
-</div>
+<% content_for :full_width_page, true %>
 
-<div class="row">
-  <div class="col s12 m4 l3">
-    <div class="grey-text text-darken-1 center">Draw my...</div>
-    <% @enabled_content_types.each do |content_type| %>
-      <%= link_to basil_content_index_path(content_type.downcase) do %>
-        <div class="<%= content_class_from_name(content_type).color %> white-text hoverable card-panel">
-          <i class="material-icons left"><%= content_class_from_name(content_type).icon %></i>
-          <%= content_type.pluralize %>
-          <% if @content_type == content_type %>
-            <i class="material-icons right">chevron_right</i>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header Section -->
+  <div class="relative overflow-hidden bg-gradient-to-r from-indigo-900 to-purple-900 rounded-3xl shadow-2xl mb-12">
+    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+    <div class="absolute -right-20 -top-20 w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+    <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-indigo-500 rounded-full blur-3xl opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+    
+    <div class="relative z-10 flex flex-col md:flex-row items-center p-8 md:p-12">
+      <div class="shrink-0 mb-6 md:mb-0 md:mr-10">
+        <div class="relative">
+          <div class="absolute inset-0 bg-blue-500 blur-lg opacity-50 rounded-full"></div>
+          <%= image_tag 'basil/portrait.png', class: 'relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/20 shadow-2xl ring-4 ring-purple-500/20 object-cover' %>
+        </div>
+      </div>
+      <div class="text-center md:text-left max-w-2xl">
+        <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+          Hey, I'm <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">Basil</span>.
+        </h1>
+        <h2 class="text-xl md:text-2xl text-indigo-100 font-light mb-6 leading-relaxed">
+          I can help you visualize your characters and world.
+        </h2>
+        <p class="text-indigo-200/90 text-lg mb-2">
+          Select a page on the left to start generating images based on your descriptions.
+        </p>
+        <p class="text-sm text-indigo-300/80">
+          You can also
+          <%= link_to 'help me improve by rating images', basil_rating_queue_path, class: 'text-white underline decoration-blue-400 hover:decoration-blue-300 underline-offset-2 transition-all hover:text-blue-100' %>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <!-- Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <div class="sticky top-6">
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest px-2 mb-4 flex items-center gap-2">
+          <span>Draw my...</span>
+          <div class="h-px bg-gray-200 flex-1"></div>
+        </h3>
+        
+        <div class="space-y-3">
+          <% @enabled_content_types.each do |content_type| %>
+            <%= link_to basil_content_index_path(content_type.downcase), class: 'block group' do %>
+              <div class="<%= content_class_from_name(content_type).color %> relative overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform group-hover:-translate-y-1">
+                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+                <div class="relative p-4 flex items-center justify-between text-white">
+                  <div class="flex items-center gap-3">
+                    <i class="material-icons text-2xl opacity-90 group-hover:scale-110 transition-transform"><%= content_class_from_name(content_type).icon %></i>
+                    <span class="font-bold text-lg tracking-wide"><%= content_type.pluralize %></span>
+                  </div>
+                  <% if @content_type == content_type %>
+                    <div class="bg-white/20 p-1 rounded-full">
+                      <i class="material-icons text-sm">check</i>
+                    </div>
+                  <% else %>
+                    <i class="material-icons opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">chevron_right</i>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
           <% end %>
         </div>
-      <% end %>
-    <% end %>
 
-    <p class="grey-text">
-      <strong>What about other pages?</strong><br />
-      A lot of work goes into making sure each page produces accurate, high quality images.
-      More page types will be added soon!
-    </p>
-  </div>
-  <div class="col s12 m8 l9">
-
-    <% unless current_user.on_premium_plan? %>
-      <div class="orange lighten-2 card-panel">
-        <strong>
-          Image generation is a Premium-only feature, but free accounts can still generate up
-          to <%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %> for free.
-        </strong>
-        <br /><br />
-        You have generated <%= pluralize @generated_images_count, 'image' %>
-        and have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'free image' %> remaining:
-        <div class="progress white">
-          <div class="determinate blue" style="width: <%= [@generated_images_count, BasilService::FREE_IMAGE_LIMIT].min %>%"></div>
+        <div class="mt-8 bg-gray-50 dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
+          <h4 class="font-bold text-gray-900 dark:text-gray-100 mb-2">What about other pages?</h4>
+          <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            A lot of work goes into making sure each page produces accurate, high quality images.
+            More page types will be added soon!
+          </p>
         </div>
-
-        <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
-          <%= link_to 'Click here to manage your billing plan', subscription_path, class: 'blue-text text-darken-4' %>
-        <% end %>
       </div>
-    <% end %>
+    </div>
 
-    <% if @universe_scope %>
-      <div class="card-panel <%= Universe.color %> white-text">
-        <i class="material-icons left"><%= Universe.icon %></i>
-        Showing <%= pluralize @content.count, @content_type %> from <%= @universe_scope.name %>.
-        <%= link_to "Show #{@content_type.pluralize.downcase} from all universes instead.", basil_content_index_path(@content_type, universe: "all"), class: 'purple-text text-lighten-4' %>
-      </div>
-    <% end %>
+    <!-- Main Content -->
+    <div class="lg:col-span-3">
+      
+      <% unless current_user.on_premium_plan? %>
+        <div class="mb-8 overflow-hidden bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border border-orange-100 dark:border-orange-500/20 rounded-2xl p-0 shadow-sm relative transition-colors">
+          <div class="p-6 sm:p-8">
+            <div class="flex items-start gap-4">
+              <div class="p-3 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 rounded-xl shrink-0">
+                <i class="material-icons">star</i>
+              </div>
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-orange-900 dark:text-orange-100 mb-1">Premium Feature Preview</h3>
+                <p class="text-orange-800/80 dark:text-orange-200/80 mb-4">
+                  Image generation is a Premium-only feature, but free accounts can still generate up
+                  to <span class="font-bold"><%= pluralize BasilService::FREE_IMAGE_LIMIT, 'image' %></span> for free.
+                </p>
+                
+                <div class="flex items-center justify-between text-sm font-medium text-orange-800 dark:text-orange-200 mb-2">
+                  <span>Usage</span>
+                  <span><%= @generated_images_count %> / <%= BasilService::FREE_IMAGE_LIMIT %></span>
+                </div>
+                
+                <div class="w-full bg-orange-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden mb-6">
+                  <div class="bg-orange-500 dark:bg-orange-500 h-2.5 rounded-full transition-all duration-500" style="width: <%= [@generated_images_count * 100.0 / BasilService::FREE_IMAGE_LIMIT, 100].min %>%"></div>
+                </div>
 
-    <div class="row" style="margin-left: 0rem">
-      <% @content.each do |content| %>
-        <%= link_to basil_content_path(@content_type, content.id) do %>
-          <div class="col s12 m4 l3">
-            <div class="hoverable card">
-              <div class="card-image">
-                <%= image_tag content.random_image_including_private(format: :medium), style: 'height: 200px' %>
-                <span class="card-title"><%= content.name %></span>
+                <% if @generated_images_count >= BasilService::FREE_IMAGE_LIMIT %>
+                  <%= link_to subscription_path, class: 'inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors shadow-sm' do %>
+                    <span>Upgrade to Premium</span>
+                    <i class="material-icons text-sm">arrow_forward</i>
+                  <% end %>
+                <% else %>
+                  <p class="text-sm text-orange-700 dark:text-orange-300">
+                    You have <%= pluralize [0, BasilService::FREE_IMAGE_LIMIT - @generated_images_count].max, 'free image' %> remaining.
+                  </p>
+                <% end %>
               </div>
             </div>
           </div>
-        <% end %>
-      <% end %>
-
-      <%= link_to new_polymorphic_path(@content_type.downcase) do %>
-        <div class="col s12 m4 l3">
-          <div class="hoverable card">
-            <div class="card-content <%= @content_type.constantize.color %> white-text center-align" style="height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-              <i class="material-icons" style="font-size: 3rem;">add</i>
-              <span>New <%= @content_type %></span>
-            </div>
-          </div>
         </div>
       <% end %>
+
+      <% if @universe_scope %>
+        <div class="<%= Universe.color %> bg-opacity-100 text-white rounded-2xl p-6 mb-8 shadow-md flex items-center justify-between flex-wrap gap-4">
+          <div class="flex items-center gap-4">
+            <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+              <i class="material-icons text-2xl"><%= Universe.icon %></i>
+            </div>
+            <div>
+              <p class="text-white/80 text-sm font-medium uppercase tracking-wider mb-1">Filtering by Universe</p>
+              <h3 class="text-xl font-bold"><%= @universe_scope.name %></h3>
+            </div>
+          </div>
+          <%= link_to basil_content_index_path(@content_type, universe: "all"), class: 'bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors backdrop-blur-sm flex items-center gap-2' do %>
+            <span>Show all <%= @content_type.pluralize.downcase %></span>
+            <i class="material-icons text-sm">close</i>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @content.each do |content| %>
+          <%= link_to basil_content_path(@content_type, content.id), class: "group" do %>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden h-full flex flex-col transform hover:-translate-y-1">
+              <div class="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                <%= image_tag content.random_image_including_private(format: :medium), class: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" %>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+              </div>
+              <div class="p-5 flex-1 flex flex-col justify-center">
+                <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                  <%= content.name %>
+                </h3>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if current_user.can_create?(@content_type.constantize) %>
+          <%= link_to new_polymorphic_path(@content_type.downcase), class: "group" do %>
+            <div class="h-full min-h-[250px] bg-gray-50 dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-gray-700 transition-all duration-300 flex flex-col items-center justify-center p-6 text-center cursor-pointer">
+              <div class="w-16 h-16 bg-white dark:bg-gray-700 rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all">
+                <i class="material-icons text-3xl text-gray-400 group-hover:text-blue-500"><%= @content_type.constantize.icon rescue 'add' %></i>
+              </div>
+              <span class="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                New <%= @content_type %>
+              </span>
+              <span class="text-sm text-gray-500 dark:text-gray-400 mt-2">Create a new page</span>
+            </div>
+          <% end %>
+        <% elsif Rails.application.config.content_types[:premium].include?(@content_type.constantize) %>
+          <% ct = @content_type.constantize %>
+          <%= link_to subscription_path, class: "group" do %>
+            <div class="h-full min-h-[250px] <%= ct.color %> bg-opacity-10 dark:bg-gray-800 rounded-2xl border-2 border-dashed <%= ct.text_color.to_s.gsub('text-', 'border-') %> border-opacity-40 dark:border-gray-600 hover:border-opacity-100 dark:hover:border-gray-500 hover:bg-opacity-20 dark:hover:bg-gray-700 transition-all duration-300 flex flex-col items-center justify-center p-6 text-center cursor-pointer">
+              <div class="w-16 h-16 bg-white dark:bg-gray-700 rounded-full shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all">
+                <i class="material-icons text-3xl <%= ct.text_color %>"><%= ct.icon rescue 'lock' %></i>
+              </div>
+              <span class="font-bold <%= ct.text_color %> brightness-75 dark:brightness-100 dark:text-gray-100 transition-colors">
+                New <%= @content_type %>
+              </span>
+              <span class="text-sm <%= ct.text_color %> opacity-80 dark:text-gray-400 mt-2">
+                Upgrade to Premium to create <%= @content_type.pluralize.downcase %>
+              </span>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
     </div>
   </div>
 </div>
-
-

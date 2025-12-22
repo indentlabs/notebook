@@ -1,33 +1,33 @@
 <!-- Modern Recent Activity Dashboard -->
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-900 dark:bg-gray-900">
   
   <!-- Hero Section with Activity Overview -->
-  <div class="bg-white shadow-sm border-b border-gray-200">
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
         
         <!-- Title and Overview -->
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
             <i class="material-icons mr-3 text-blue-600 text-4xl">timeline</i>
             Recent Activity
           </h1>
-          <p class="text-gray-600 mt-2">Your worldbuilding journey at a glance</p>
+          <p class="text-gray-600 dark:text-gray-400 mt-2">Your worldbuilding journey at a glance</p>
         </div>
         
         <!-- Quick Stats -->
         <div class="grid grid-cols-3 gap-6">
           <div class="text-center">
             <div class="text-2xl font-bold text-blue-600"><%= number_with_delimiter @total_content %></div>
-            <div class="text-sm text-gray-500">Total Pages</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Total Pages</div>
           </div>
           <div class="text-center">
             <div class="text-2xl font-bold text-green-600"><%= number_with_delimiter @total_edits %></div>
-            <div class="text-sm text-gray-500">Total Edits</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Total Edits</div>
           </div>
           <div class="text-center">
             <div class="text-2xl font-bold text-purple-600"><%= number_with_delimiter @total_words %></div>
-            <div class="text-sm text-gray-500">Total Words</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Total Words</div>
           </div>
         </div>
       </div>
@@ -39,56 +39,56 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
       
       <!-- Recent Activity Summary -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <i class="material-icons mr-2 text-blue-600">today</i>
           Recent Activity
         </h3>
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">Today</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">Today</span>
             <span class="font-semibold text-blue-600"><%= @recent_summary[:today] %></span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">This Week</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">This Week</span>
             <span class="font-semibold text-green-600"><%= @recent_summary[:this_week] %></span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">This Month</span>
+            <span class="text-sm text-gray-600 dark:text-gray-400">This Month</span>
             <span class="font-semibold text-purple-600"><%= @recent_summary[:this_month] %></span>
           </div>
         </div>
       </div>
 
       <!-- Content Type Breakdown -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <i class="material-icons mr-2 text-green-600">pie_chart</i>
           Content Types
         </h3>
         <div class="space-y-2">
           <% @content_type_stats.first(4).each do |type, count| %>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 flex items-center">
+              <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                 <i class="material-icons text-xs mr-1 <%= type.constantize.text_color %>"><%= type.constantize.icon %></i>
                 <%= type %>
               </span>
-              <span class="text-sm font-semibold"><%= count %></span>
+              <span class="text-sm font-semibold dark:text-gray-200"><%= count %></span>
             </div>
           <% end %>
         </div>
       </div>
 
       <!-- Most Active Types -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <i class="material-icons mr-2 text-orange-600">trending_up</i>
           Most Edited
         </h3>
         <div class="space-y-2">
           <% @most_active_types.each do |type, edit_count| %>
             <div class="flex justify-between items-center">
-              <span class="text-sm text-gray-600 flex items-center">
+              <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                 <i class="material-icons text-xs mr-1 <%= type.constantize.text_color %>"><%= type.constantize.icon %></i>
                 <%= type %>
               </span>
@@ -99,8 +99,8 @@
       </div>
 
       <!-- Activity Chart -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
           <i class="material-icons mr-2 text-purple-600">show_chart</i>
           7-Day Activity
         </h3>
@@ -139,7 +139,7 @@
         </div>
         
         <!-- Chart Legend -->
-        <div class="flex items-center justify-between text-xs text-gray-500">
+        <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
           <span>7 days ago</span>
           <span>Today</span>
         </div>
@@ -147,24 +147,24 @@
     </div>
 
     <!-- Advanced Filter Bar -->
-    <%= form_with url: recent_content_path, method: :get, local: true, class: "bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8", id: "filter-form" do |f| %>
+    <%= form_with url: recent_content_path, method: :get, local: true, class: "bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8", id: "filter-form" do |f| %>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
         
         <!-- Search -->
         <div class="lg:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Search Content</label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search Content</label>
           <div class="relative">
             <input type="text" name="search" value="<%= params[:search] %>" 
                    placeholder="Search by name..." 
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10">
+                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pl-10 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
             <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
           </div>
         </div>
 
         <!-- Content Type Filter -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Content Type</label>
-          <select name="content_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content Type</label>
+          <select name="content_type" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             <option value="all" <%= 'selected' if params[:content_type] == 'all' || params[:content_type].blank? %>>All Types</option>
             <% if @content_type_stats && @content_type_stats.any? %>
               <% @content_type_stats.each do |type, _| %>
@@ -181,8 +181,8 @@
 
         <!-- Date Range Filter -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Time Range</label>
-          <select name="date_range" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Range</label>
+          <select name="date_range" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             <option value="" <%= 'selected' if params[:date_range].blank? %>>All Time</option>
             <option value="today" <%= 'selected' if params[:date_range] == 'today' %>>Today</option>
             <option value="week" <%= 'selected' if params[:date_range] == 'week' %>>This Week</option>
@@ -193,8 +193,8 @@
 
         <!-- Sort Options -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-          <select name="sort" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort By</label>
+          <select name="sort" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             <option value="updated_at" <%= 'selected' if params[:sort] == 'updated_at' || params[:sort].blank? %>>Last Updated</option>
             <option value="created_at" <%= 'selected' if params[:sort] == 'created_at' %>>Created Date</option>
             <option value="name" <%= 'selected' if params[:sort] == 'name' %>>Name</option>
@@ -214,15 +214,15 @@
       </div>
 
       <!-- View Mode and Results Info -->
-      <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200">
+      <div class="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center space-x-4">
-          <span class="text-sm text-gray-600">
+          <span class="text-sm text-gray-600 dark:text-gray-400">
             Showing <%= @paginated_content.length %> of <%= @filtered_content.length %> items
           </span>
           
           <!-- Quick Clear Filters -->
           <% if params[:search].present? || params[:content_type].present? || params[:date_range].present? || params[:sort].present? || params[:view].present? %>
-            <%= link_to recent_content_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" do %>
+            <%= link_to recent_content_path, class: "text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium" do %>
               <i class="material-icons text-xs mr-1">clear</i>
               Clear Filters
             <% end %>
@@ -230,17 +230,17 @@
         </div>
 
         <!-- View Mode Toggle -->
-        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+        <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
           <%= link_to recent_content_path(params.to_unsafe_h.except('view').merge(view: 'grid')), 
-                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white text-blue-600 shadow-sm' if @view_mode == 'grid'} #{'text-gray-600 hover:text-gray-900' unless @view_mode == 'grid'}" do %>
+                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm' if @view_mode == 'grid'} #{'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' unless @view_mode == 'grid'}" do %>
             <i class="material-icons text-sm">grid_view</i>
           <% end %>
           <%= link_to recent_content_path(params.to_unsafe_h.except('view').merge(view: 'list')), 
-                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white text-blue-600 shadow-sm' if @view_mode == 'list'} #{'text-gray-600 hover:text-gray-900' unless @view_mode == 'list'}" do %>
+                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm' if @view_mode == 'list'} #{'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' unless @view_mode == 'list'}" do %>
             <i class="material-icons text-sm">view_list</i>
           <% end %>
           <%= link_to recent_content_path(params.to_unsafe_h.except('view').merge(view: 'timeline')), 
-                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white text-blue-600 shadow-sm' if @view_mode == 'timeline'} #{'text-gray-600 hover:text-gray-900' unless @view_mode == 'timeline'}" do %>
+                      class: "px-3 py-1 rounded-md text-sm font-medium transition-colors duration-200 #{'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm' if @view_mode == 'timeline'} #{'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200' unless @view_mode == 'timeline'}" do %>
             <i class="material-icons text-sm">timeline</i>
           <% end %>
         </div>
@@ -263,10 +263,10 @@
 
       <!-- List View -->
       <% if @view_mode == 'list' %>
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
-          <div class="divide-y divide-gray-200">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+          <div class="divide-y divide-gray-200 dark:divide-gray-700">
             <% @paginated_content.each do |item| %>
-              <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block hover:bg-gray-50 transition-colors duration-200' do %>
+              <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200' do %>
                 <div class="px-6 py-4 flex items-center space-x-4">
                   
                   <!-- Image/Icon -->
@@ -283,7 +283,7 @@
                   <!-- Content Info -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center space-x-2 mb-1">
-                      <h3 class="text-lg font-semibold text-gray-900 truncate"><%= item[:page].name %></h3>
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white truncate"><%= item[:page].name %></h3>
                       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:page].color %> text-white">
                         <%= item[:page].page_type %>
                       </span>
@@ -291,7 +291,7 @@
                         <%= item[:action].titleize %>
                       </span>
                     </div>
-                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                       <span class="flex items-center space-x-1">
                         <i class="material-icons text-xs">schedule</i>
                         <span><%= time_ago_in_words item[:page].updated_at %> ago</span>
@@ -315,7 +315,7 @@
                   
                   <!-- Arrow -->
                   <div class="flex-shrink-0">
-                    <i class="material-icons text-gray-400">chevron_right</i>
+                    <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
                   </div>
                 </div>
               <% end %>
@@ -328,7 +328,7 @@
       <% if @view_mode == 'timeline' %>
         <div class="relative">
           <!-- Timeline line -->
-          <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+          <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700"></div>
           
           <div class="space-y-8 mb-8">
             <% @paginated_content.group_by { |item| item[:page].updated_at.to_date }.each do |date, items| %>
@@ -338,8 +338,8 @@
                   <%= date.strftime('%d') %>
                 </div>
                 <div class="ml-4">
-                  <h3 class="text-lg font-semibold text-gray-900"><%= date.strftime('%B %d, %Y') %></h3>
-                  <p class="text-sm text-gray-500"><%= pluralize(items.length, 'item') %> updated</p>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><%= date.strftime('%B %d, %Y') %></h3>
+                  <p class="text-sm text-gray-500 dark:text-gray-400"><%= pluralize(items.length, 'item') %> updated</p>
                 </div>
               </div>
               
@@ -347,7 +347,7 @@
               <div class="ml-20 space-y-4">
                 <% items.each do |item| %>
                   <%= link_to send("edit_#{item[:page].page_type.downcase}_path", item[:page].id), class: 'block' do %>
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 p-4">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 p-4">
                       <div class="flex items-center space-x-3">
                         <div class="flex-shrink-0">
                           <% if item[:has_image] %>
@@ -361,12 +361,12 @@
                         
                         <div class="flex-1 min-w-0">
                           <div class="flex items-center space-x-2">
-                            <h4 class="font-medium text-gray-900 truncate"><%= item[:page].name %></h4>
+                            <h4 class="font-medium text-gray-900 dark:text-white truncate"><%= item[:page].name %></h4>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= item[:page].color %> text-white">
                               <%= item[:page].page_type %>
                             </span>
                           </div>
-                          <div class="flex items-center space-x-3 mt-1 text-xs text-gray-500">
+                          <div class="flex items-center space-x-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
                             <span><%= item[:action].titleize %> at <%= item[:page].updated_at.strftime('%I:%M %p') %></span>
                             <% if item[:edit_count] > 0 %>
                               <span><%= item[:edit_count] %> edits total</span>
@@ -385,8 +385,8 @@
 
       <!-- Pagination -->
       <% if @total_pages > 1 %>
-        <div class="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
-          <div class="text-sm text-gray-600">
+        <div class="flex items-center justify-between bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-6 py-4">
+          <div class="text-sm text-gray-600 dark:text-gray-400">
             Page <%= @page %> of <%= @total_pages %>
           </div>
           
@@ -394,7 +394,7 @@
             <!-- Previous Page -->
             <% if @page > 1 %>
               <%= link_to recent_content_path(params.to_unsafe_h.merge(page: @page - 1)), 
-                          class: "px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                          class: "px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" do %>
                 <i class="material-icons text-sm">chevron_left</i>
               <% end %>
             <% end %>
@@ -406,7 +406,7 @@
                 <span class="px-3 py-2 rounded-lg bg-blue-600 text-white font-medium"><%= page_num %></span>
               <% elsif (page_num - @page).abs <= 2 || page_num == 1 || page_num == @total_pages %>
                 <%= link_to recent_content_path(params.to_unsafe_h.merge(page: page_num)), 
-                            class: "px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                            class: "px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" do %>
                   <%= page_num %>
                 <% end %>
               <% elsif (page_num - @page).abs == 3 %>
@@ -417,7 +417,7 @@
             <!-- Next Page -->
             <% if @page < @total_pages %>
               <%= link_to recent_content_path(params.to_unsafe_h.merge(page: @page + 1)), 
-                          class: "px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors duration-200" do %>
+                          class: "px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" do %>
                 <i class="material-icons text-sm">chevron_right</i>
               <% end %>
             <% end %>
@@ -428,11 +428,11 @@
     <% else %>
       <!-- Empty State -->
       <div class="text-center py-16">
-        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+        <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
           <i class="material-icons text-4xl text-gray-400">search_off</i>
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">No content found</h3>
-        <p class="text-gray-600 mb-6">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No content found</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
           <% if params[:search].present? || params[:content_type].present? || params[:date_range].present? %>
             Try adjusting your filters or search terms.
           <% else %>
@@ -490,10 +490,18 @@
     opacity: 0.5;
   }
   
+  .dark .activity-bar[data-count="0"] {
+    background: #374151;
+  }
+
   .activity-bar[data-count="0"]:hover {
     background: #d1d5db;
     transform: none;
     box-shadow: none;
+  }
+
+  .dark .activity-bar[data-count="0"]:hover {
+    background: #4b5563;
   }
   
   /* Smooth transitions for all interactive elements */
@@ -529,6 +537,10 @@
     -webkit-appearance: none !important;
     -moz-appearance: none !important;
     appearance: none !important;
+  }
+  
+  .dark select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
   }
 
   /* Hide any MaterializeCSS generated elements */
