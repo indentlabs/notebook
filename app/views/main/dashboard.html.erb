@@ -502,52 +502,9 @@
         <div class="overflow-x-auto pb-4">
           <div class="flex space-x-4 min-w-max">
             <% @most_edited_pages.first(20).each do |content_page, edit_count| %>
-              <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id), class: 'block flex-shrink-0' do %>
-                <div class="w-64 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-                  <div class="relative h-32 overflow-hidden">
-                    <% if content_page.random_image_including_private.present? %>
-                      <%= image_tag content_page.random_image_including_private, class: 'w-full h-full object-cover' %>
-                    <% else %>
-                      <div class="w-full h-full <%= content_page.color %> bg-opacity-20 flex items-center justify-center">
-                        <i class="material-icons text-4xl text-white opacity-80"><%= content_page.icon %></i>
-                      </div>
-                    <% end %>
-                    
-                    <div class="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent dark:from-black/60"></div>
-                    
-                    <div class="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white backdrop-blur-sm <%= content_page.color %>">
-                      <i class="material-icons text-xs mr-1"><%= content_page.icon %></i>
-                      <%= content_page.page_type %>
-                    </div>
-                    
-                    <% if content_page.respond_to?(:favorite?) && content_page.favorite? %>
-                      <div class="absolute top-2 left-2">
-                        <i class="material-icons text-yellow-400 text-sm">star</i>
-                      </div>
-                    <% end %>
-                    
-                    <h3 class="absolute bottom-2 left-2 right-2 text-gray-900 dark:text-white font-semibold text-sm line-clamp-2">
-                      <%= content_page.name %>
-                    </h3>
-                  </div>
-                  
-                  <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
-                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span class="flex items-center space-x-1">
-                        <i class="material-icons text-xs">edit</i>
-                        <span><%= number_with_delimiter edit_count %> <%= 'edit'.pluralize(edit_count) %></span>
-                      </span>
-                      
-                      <% if content_page.cached_word_count.present? %>
-                        <span class="flex items-center space-x-1">
-                          <i class="material-icons text-xs">description</i>
-                          <span><%= number_with_delimiter content_page.cached_word_count %> <%= 'word'.pluralize(content_page.cached_word_count) %></span>
-                        </span>
-                      <% end %>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
+              <div class="w-64 flex-shrink-0">
+                <%= render partial: 'content/display/card', locals: { content_page: content_page } %>
+              </div>
             <% end %>
           </div>
         </div>

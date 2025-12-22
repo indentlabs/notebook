@@ -786,7 +786,7 @@ class ContentController < ApplicationController
     UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
 
     respond_to do |format|
-      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.html { redirect_back(fallback_location: root_path, notice: "#{attribute_value.entity.name}'s #{@attribute_field.label.downcase} updated!") }
       format.json { render json: attribute_value.to_json, status: 200 }
     end
   end
@@ -806,7 +806,7 @@ class ContentController < ApplicationController
     update_page_tags
 
     respond_to do |format|
-      format.html { redirect_back(fallback_location: root_path, notice: "#{@attribute_field.label} updated!") }
+      format.html { redirect_back(fallback_location: root_path, notice: "#{attribute_value.entity.name}'s #{@attribute_field.label.downcase} updated!") }
       format.json { render json: attribute_value.to_json, status: 200 }
     end
   end
