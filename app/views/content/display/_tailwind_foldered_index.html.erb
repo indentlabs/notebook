@@ -116,8 +116,8 @@
 
       <div x-data="{ questionExpanded: false }" class="border-b border-gray-200 dark:border-gray-700">
         <!-- Compact Question Header -->
-        <button 
-          @click="questionExpanded = !questionExpanded"
+        <button
+          @click="questionExpanded = !questionExpanded; if(questionExpanded) $nextTick(() => $refs.questionInput.focus())"
           class="w-full px-6 lg:px-8 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-gray-700 dark:hover:to-gray-700 transition-all duration-200 focus:outline-none"
         >
           <div class="flex items-center justify-between">
@@ -184,6 +184,7 @@
                 text_area_tag "field[value]",
                               @attribute_field_to_question[:value],
                               id: "field_value",
+                              "x-ref": "questionInput",
                               class: "w-full px-4 py-3 text-base dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none placeholder-gray-500 dark:placeholder-gray-400 js-enhanced-autosave js-can-mention-pages",
                               rows: 3,
                               placeholder: "Share your thoughts..."
