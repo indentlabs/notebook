@@ -15,22 +15,22 @@
 
   <div class="space-y-6">
     <!-- Template Information -->
-    <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
+    <div class="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
       <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center">
         <i class="material-icons text-gray-600 dark:text-gray-400 mr-2 text-lg"><%= content_type_class.icon %></i>
         <%= content_type.titleize %> Template
       </h3>
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+      <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
         This template defines the structure and fields for your <%= content_type.titleize.downcase %> pages.
       </p>
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span class="text-gray-500 dark:text-gray-400">Categories:</span>
-          <span class="ml-1 font-medium general-settings-categories-count dark:text-gray-200"><%= @attribute_categories.count %></span>
+          <span class="ml-1 font-medium text-gray-900 dark:text-gray-100 general-settings-categories-count"><%= @attribute_categories.count %></span>
         </div>
         <div>
           <span class="text-gray-500 dark:text-gray-400">Total Fields:</span>
-          <span class="ml-1 font-medium general-settings-fields-count"><%= @attribute_categories.sum { |cat| cat.attribute_fields.count } %></span>
+          <span class="ml-1 font-medium text-gray-900 dark:text-gray-100 general-settings-fields-count"><%= @attribute_categories.sum { |cat| cat.attribute_fields.count } %></span>
         </div>
       </div>
     </div>
@@ -111,16 +111,16 @@
                x-transition:leave="transition ease-in duration-150"
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
-               class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/30 p-4">
+               class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 p-4">
             <div class="text-center py-6">
-              <div class="text-gray-400 mb-3">
+              <div class="text-gray-400 dark:text-gray-500 mb-3">
                 <i class="material-icons text-4xl">construction</i>
               </div>
               <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Coming Soon!</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
                 Template import functionality is currently in development. Soon you'll be able to:
               </p>
-              <ul class="text-sm text-gray-600 dark:text-gray-400 text-left space-y-1 mb-4 max-w-md mx-auto">
+              <ul class="text-sm text-gray-600 dark:text-gray-300 text-left space-y-1 mb-4 max-w-md mx-auto">
                 <li>• Import YAML/JSON template files</li>
                 <li>• Share templates with other users</li>
                 <li>• Load community-created templates</li>
@@ -153,7 +153,7 @@
                x-transition:leave="transition ease-in duration-150"
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
-               class="border-t border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4">
+               class="border-t border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900 p-4">
             
             <!-- Loading State -->
             <div x-show="loading" class="text-center py-4">
@@ -163,25 +163,25 @@
             
             <!-- Reset Analysis -->
             <div x-show="!loading && resetAnalysis && !resetConfirm" class="space-y-4">
-              <div class="bg-white dark:bg-slate-800 rounded-md p-3 border border-red-200 dark:border-red-900/30">
+              <div class="bg-white dark:bg-slate-800 rounded-md p-3 border border-red-200 dark:border-red-700">
                 <h4 class="font-medium text-red-900 dark:text-red-200 mb-2 flex items-center">
-                  <i class="material-icons text-red-600 mr-2">warning</i>
+                  <i class="material-icons text-red-600 dark:text-red-400 mr-2">warning</i>
                   Reset Impact Analysis
                 </h4>
                 <div class="text-sm text-red-700 dark:text-red-300 space-y-1">
                   <p><strong x-text="resetAnalysis?.total_categories || 0"></strong> categories and <strong x-text="resetAnalysis?.total_fields || 0"></strong> fields will be deleted</p>
                   <p x-show="resetAnalysis?.custom_categories?.length > 0"><strong x-text="resetAnalysis?.custom_categories?.length || 0"></strong> custom categories you created</p>
-                  <p x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="text-red-800 font-medium">
+                  <p x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="text-red-800 dark:text-red-300 font-medium">
                     <strong x-text="resetAnalysis?.data_loss_warnings?.length || 0"></strong> fields have data that will be permanently lost!
                   </p>
-                  <p x-show="resetAnalysis?.filled_attributes_count > 0" class="text-red-900 font-bold">
+                  <p x-show="resetAnalysis?.filled_attributes_count > 0" class="text-red-900 dark:text-red-200 font-bold">
                     <strong x-text="resetAnalysis?.filled_attributes_count || 0"></strong> filled answers will be deleted across <strong x-text="resetAnalysis?.affected_pages_count || 0"></strong> different pages
                   </p>
                 </div>
               </div>
               
               <!-- Data Loss Warnings -->
-              <div x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="bg-red-100 dark:bg-red-900/40 rounded-md p-3 border border-red-300 dark:border-red-800">
+              <div x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="bg-red-100 dark:bg-slate-800 rounded-md p-3 border border-red-300 dark:border-red-700">
                 <h5 class="font-medium text-red-900 dark:text-red-100 mb-2">⚠️ Data Loss Warning</h5>
                 <div class="text-sm text-red-800 dark:text-red-200 space-y-1 max-h-32 overflow-y-auto">
                   <template x-for="warning in (resetAnalysis?.data_loss_warnings || [])" :key="warning.category + warning.field">
@@ -202,9 +202,9 @@
               </div>
             </div>
             
-            <!-- Final Confirmation -->  
+            <!-- Final Confirmation -->
             <div x-show="resetConfirm" class="space-y-4">
-              <div class="bg-red-100 dark:bg-red-900/40 rounded-md p-3 border border-red-300 dark:border-red-800">
+              <div class="bg-red-100 dark:bg-slate-800 rounded-md p-3 border border-red-300 dark:border-red-700">
                 <h4 class="font-medium text-red-900 dark:text-red-100 mb-2">⚠️ Final Confirmation Required</h4>
                 <p class="text-sm text-red-800 dark:text-red-200 mb-3">
                   Type "<strong><%= content_type.titleize %></strong>" below to confirm you want to permanently reset this template:
@@ -256,7 +256,7 @@
             <span class="toggle-dot absolute left-0 inline-block h-5 w-5 bg-white rounded-full shadow transform transition-transform duration-200 ease-in-out translate-x-0"></span>
           </div>
         </div>
-        <div x-show="archivedItemsCount === 0" class="text-xs text-gray-400 bg-gray-50 p-2 rounded-md">
+        <div x-show="archivedItemsCount === 0" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-700 p-2 rounded-md">
           <i class="material-icons text-xs mr-1">info</i>
           No archived items. Archive categories or fields to organize your workspace.
         </div>
@@ -264,12 +264,12 @@
     </div>
 
     <!-- Help Section -->
-    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+    <div class="bg-blue-50 dark:bg-slate-700 rounded-lg p-4">
       <h3 class="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center">
         <i class="material-icons text-blue-600 dark:text-blue-400 mr-2">help_outline</i>
         Need Help?
       </h3>
-      <p class="text-sm text-blue-700 dark:text-blue-300 mb-3">
+      <p class="text-sm text-blue-700 dark:text-gray-300 mb-3">
         Learn more about customizing your templates and organizing your content.
       </p>
       <%= link_to help_page_templates_path, class: "text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 flex items-center", target: "_blank" do %>
