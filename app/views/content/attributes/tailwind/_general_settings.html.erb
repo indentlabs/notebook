@@ -1,13 +1,13 @@
 <div class="p-4">
   <div class="flex justify-between items-center mb-4">
-    <h2 class="text-lg font-medium text-gray-900 flex items-center">
-      <i class="material-icons text-gray-600 mr-2">settings</i>
+    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+      <i class="material-icons text-gray-600 dark:text-gray-400 mr-2">settings</i>
       General Settings
     </h2>
     <button @click="configuring = false; selectedCategory = null; selectedField = null;" 
-            class="p-1.5 rounded hover:bg-gray-100" 
+            class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-700" 
             title="Close Settings">
-      <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
       </svg>
     </button>
@@ -15,21 +15,21 @@
 
   <div class="space-y-6">
     <!-- Template Information -->
-    <div class="bg-gray-50 rounded-lg p-4">
-      <h3 class="font-medium text-gray-900 mb-2 flex items-center">
-        <i class="material-icons text-gray-600 mr-2 text-lg"><%= content_type_class.icon %></i>
+    <div class="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
+      <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center">
+        <i class="material-icons text-gray-600 dark:text-gray-400 mr-2 text-lg"><%= content_type_class.icon %></i>
         <%= content_type.titleize %> Template
       </h3>
-      <p class="text-sm text-gray-600 mb-3">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
         This template defines the structure and fields for your <%= content_type.titleize.downcase %> pages.
       </p>
       <div class="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <span class="text-gray-500">Categories:</span>
-          <span class="ml-1 font-medium general-settings-categories-count"><%= @attribute_categories.count %></span>
+          <span class="text-gray-500 dark:text-gray-400">Categories:</span>
+          <span class="ml-1 font-medium general-settings-categories-count dark:text-gray-200"><%= @attribute_categories.count %></span>
         </div>
         <div>
-          <span class="text-gray-500">Total Fields:</span>
+          <span class="text-gray-500 dark:text-gray-400">Total Fields:</span>
           <span class="ml-1 font-medium general-settings-fields-count"><%= @attribute_categories.sum { |cat| cat.attribute_fields.count } %></span>
         </div>
       </div>
@@ -37,16 +37,16 @@
 
     <!-- Template Actions -->
     <div>
-      <h3 class="font-medium text-gray-900 mb-3">Template Actions</h3>
+      <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-3">Template Actions</h3>
       <div class="space-y-2">
-        <div class="border border-gray-200 rounded-lg overflow-hidden" x-data="{ exportOpen: false }">
+        <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden" x-data="{ exportOpen: false }">
           <button @click="exportOpen = !exportOpen" 
-                  class="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors text-left">
+                  class="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-left">
             <div class="flex items-center">
-              <i class="material-icons text-gray-600 mr-3">file_download</i>
+              <i class="material-icons text-gray-600 dark:text-gray-400 mr-3">file_download</i>
               <div>
-                <div class="font-medium text-gray-900">Export Template</div>
-                <div class="text-sm text-gray-500">Download this template configuration</div>
+                <div class="font-medium text-gray-900 dark:text-gray-100">Export Template</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Download this template configuration</div>
               </div>
             </div>
             <i class="material-icons text-gray-400 transition-transform" 
@@ -59,46 +59,46 @@
                x-transition:leave="transition ease-in duration-150"
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
-               class="border-t border-gray-200 bg-gray-50 p-3">
+               class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/30 p-3">
             <div class="grid grid-cols-2 gap-2">
               <!-- Technical Formats Row -->
               <a href="<%= export_template_path(content_type: content_type, format: 'yml') %>" 
-                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                 class="px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center dark:text-gray-200 transition-colors">
                 <i class="material-icons text-xs mr-1">code</i>
                 YAML
               </a>
               <a href="<%= export_template_path(content_type: content_type, format: 'json') %>"
-                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                 class="px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center dark:text-gray-200 transition-colors">
                 <i class="material-icons text-xs mr-1">data_object</i>
                 JSON
               </a>
               
               <!-- User-Friendly Formats Row -->
               <a href="<%= export_template_path(content_type: content_type, format: 'md') %>"
-                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                 class="px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center dark:text-gray-200 transition-colors">
                 <i class="material-icons text-xs mr-1">description</i>
                 Markdown
               </a>
               <a href="<%= export_template_path(content_type: content_type, format: 'csv') %>"
-                 class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-center transition-colors">
+                 class="px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center dark:text-gray-200 transition-colors">
                 <i class="material-icons text-xs mr-1">table_chart</i>
                 CSV
               </a>
             </div>
-            <p class="text-xs text-gray-500 mt-2">
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
               YAML/JSON for technical users, Markdown/CSV for human readability.
             </p>
           </div>
         </div>
         
-        <div class="border border-gray-200 rounded-lg overflow-hidden" x-data="{ importOpen: false }">
+        <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden" x-data="{ importOpen: false }">
           <button @click="importOpen = !importOpen" 
-                  class="w-full flex items-center justify-between p-3 hover:bg-gray-50 transition-colors text-left">
+                  class="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-left">
             <div class="flex items-center">
-              <i class="material-icons text-gray-600 mr-3">file_upload</i>
+              <i class="material-icons text-gray-600 dark:text-gray-400 mr-3">file_upload</i>
               <div>
-                <div class="font-medium text-gray-900">Import Template</div>
-                <div class="text-sm text-gray-500">Load a saved template configuration</div>
+                <div class="font-medium text-gray-900 dark:text-gray-100">Import Template</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Load a saved template configuration</div>
               </div>
             </div>
             <i class="material-icons text-gray-400 transition-transform" 
@@ -111,16 +111,16 @@
                x-transition:leave="transition ease-in duration-150"
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
-               class="border-t border-gray-200 bg-gray-50 p-4">
+               class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700/30 p-4">
             <div class="text-center py-6">
               <div class="text-gray-400 mb-3">
                 <i class="material-icons text-4xl">construction</i>
               </div>
-              <h4 class="font-medium text-gray-900 mb-2">Coming Soon!</h4>
-              <p class="text-sm text-gray-600 mb-3">
+              <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Coming Soon!</h4>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
                 Template import functionality is currently in development. Soon you'll be able to:
               </p>
-              <ul class="text-sm text-gray-600 text-left space-y-1 mb-4 max-w-md mx-auto">
+              <ul class="text-sm text-gray-600 dark:text-gray-400 text-left space-y-1 mb-4 max-w-md mx-auto">
                 <li>• Import YAML/JSON template files</li>
                 <li>• Share templates with other users</li>
                 <li>• Load community-created templates</li>
@@ -130,16 +130,16 @@
           </div>
         </div>
         
-        <div class="border border-red-200 rounded-lg overflow-hidden" 
+        <div class="border border-red-200 dark:border-red-900/50 rounded-lg overflow-hidden"  
              x-data="templateResetComponent()"
              id="reset-template-component">
           <button @click="toggleReset()" 
-                  class="w-full flex items-center justify-between p-3 hover:bg-red-50 transition-colors text-left">
+                  class="w-full flex items-center justify-between p-3 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-left">
             <div class="flex items-center">
               <i class="material-icons text-red-600 mr-3">restore</i>
               <div>
-                <div class="font-medium text-red-900">Reset Template</div>
-                <div class="text-sm text-red-600">Delete all customizations and start fresh</div>
+                <div class="font-medium text-red-900 dark:text-red-300">Reset Template</div>
+                <div class="text-sm text-red-600 dark:text-red-400">Delete all customizations and start fresh</div>
               </div>
             </div>
             <i class="material-icons text-red-400 transition-transform" 
@@ -153,22 +153,22 @@
                x-transition:leave="transition ease-in duration-150"
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
-               class="border-t border-red-200 bg-red-50 p-4">
+               class="border-t border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 p-4">
             
             <!-- Loading State -->
             <div x-show="loading" class="text-center py-4">
-              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 mx-auto mb-2"></div>
-              <p class="text-sm text-red-700">Analyzing template...</p>
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600 dark:border-red-400 mx-auto mb-2"></div>
+              <p class="text-sm text-red-700 dark:text-red-300">Analyzing template...</p>
             </div>
             
             <!-- Reset Analysis -->
             <div x-show="!loading && resetAnalysis && !resetConfirm" class="space-y-4">
-              <div class="bg-white rounded-md p-3 border border-red-200">
-                <h4 class="font-medium text-red-900 mb-2 flex items-center">
+              <div class="bg-white dark:bg-slate-800 rounded-md p-3 border border-red-200 dark:border-red-900/30">
+                <h4 class="font-medium text-red-900 dark:text-red-200 mb-2 flex items-center">
                   <i class="material-icons text-red-600 mr-2">warning</i>
                   Reset Impact Analysis
                 </h4>
-                <div class="text-sm text-red-700 space-y-1">
+                <div class="text-sm text-red-700 dark:text-red-300 space-y-1">
                   <p><strong x-text="resetAnalysis?.total_categories || 0"></strong> categories and <strong x-text="resetAnalysis?.total_fields || 0"></strong> fields will be deleted</p>
                   <p x-show="resetAnalysis?.custom_categories?.length > 0"><strong x-text="resetAnalysis?.custom_categories?.length || 0"></strong> custom categories you created</p>
                   <p x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="text-red-800 font-medium">
@@ -181,9 +181,9 @@
               </div>
               
               <!-- Data Loss Warnings -->
-              <div x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="bg-red-100 rounded-md p-3 border border-red-300">
-                <h5 class="font-medium text-red-900 mb-2">⚠️ Data Loss Warning</h5>
-                <div class="text-sm text-red-800 space-y-1 max-h-32 overflow-y-auto">
+              <div x-show="resetAnalysis?.data_loss_warnings?.length > 0" class="bg-red-100 dark:bg-red-900/40 rounded-md p-3 border border-red-300 dark:border-red-800">
+                <h5 class="font-medium text-red-900 dark:text-red-100 mb-2">⚠️ Data Loss Warning</h5>
+                <div class="text-sm text-red-800 dark:text-red-200 space-y-1 max-h-32 overflow-y-auto">
                   <template x-for="warning in (resetAnalysis?.data_loss_warnings || [])" :key="warning.category + warning.field">
                     <p><strong x-text="warning.category"></strong> → <span x-text="warning.field"></span> (<span x-text="warning.filled_count"></span> filled answers)</p>
                   </template>
@@ -192,7 +192,7 @@
               
               <div class="flex justify-end space-x-2">
                 <button @click="resetOpen = false" 
-                        class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600">
                   Cancel
                 </button>
                 <button @click="resetConfirm = true" 
@@ -204,20 +204,20 @@
             
             <!-- Final Confirmation -->  
             <div x-show="resetConfirm" class="space-y-4">
-              <div class="bg-red-100 rounded-md p-3 border border-red-300">
-                <h4 class="font-medium text-red-900 mb-2">⚠️ Final Confirmation Required</h4>
-                <p class="text-sm text-red-800 mb-3">
+              <div class="bg-red-100 dark:bg-red-900/40 rounded-md p-3 border border-red-300 dark:border-red-800">
+                <h4 class="font-medium text-red-900 dark:text-red-100 mb-2">⚠️ Final Confirmation Required</h4>
+                <p class="text-sm text-red-800 dark:text-red-200 mb-3">
                   Type "<strong><%= content_type.titleize %></strong>" below to confirm you want to permanently reset this template:
                 </p>
                 <input type="text" 
                        x-model="confirmText"
                        placeholder="<%= content_type.titleize %>"
-                       class="w-full px-3 py-2 border border-red-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+                       class="w-full px-3 py-2 border border-red-300 dark:border-red-700 dark:bg-slate-900 dark:text-red-100 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
               </div>
               
               <div class="flex justify-end space-x-2">
                 <button @click="resetConfirm = false" 
-                        class="px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600">
                   Cancel
                 </button>
                 <button @click="performReset()" 
@@ -237,18 +237,18 @@
 
     <!-- Archive Management -->
     <div x-data="{ showArchived: true, archivedItemsCount: 0 }" x-init="updateArchivedItemsCount()">
-      <h3 class="font-medium text-gray-900 mb-3">Editor Settings</h3>
+      <h3 class="font-medium text-gray-900 dark:text-gray-100 mb-3">Editor Settings</h3>
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <div class="font-medium text-gray-900">Show archived items</div>
-            <div class="text-sm text-gray-500">
+            <div class="font-medium text-gray-900 dark:text-gray-100">Show archived items</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
               <span x-show="archivedItemsCount > 0" 
                     x-text="`(${archivedItemsCount} archived)`" 
                     class="text-xs text-gray-400"></span>
             </div>
           </div>
-          <div class="toggle-switch relative inline-flex items-center h-6 w-11 bg-gray-200 rounded-full cursor-pointer transition-colors duration-200 ease-in-out">
+          <div class="toggle-switch relative inline-flex items-center h-6 w-11 bg-gray-200 dark:bg-slate-700 rounded-full cursor-pointer transition-colors duration-200 ease-in-out">
             <input type="checkbox" 
                    x-model="showArchived" 
                    @change="toggleArchivedItems($event.target.checked)"
@@ -264,15 +264,15 @@
     </div>
 
     <!-- Help Section -->
-    <div class="bg-blue-50 rounded-lg p-4">
-      <h3 class="font-medium text-blue-900 mb-2 flex items-center">
-        <i class="material-icons text-blue-600 mr-2">help_outline</i>
+    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+      <h3 class="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center">
+        <i class="material-icons text-blue-600 dark:text-blue-400 mr-2">help_outline</i>
         Need Help?
       </h3>
-      <p class="text-sm text-blue-700 mb-3">
+      <p class="text-sm text-blue-700 dark:text-blue-300 mb-3">
         Learn more about customizing your templates and organizing your content.
       </p>
-      <%= link_to help_page_templates_path, class: "text-sm font-medium text-blue-600 hover:text-blue-500 flex items-center", target: "_blank" do %>
+      <%= link_to help_page_templates_path, class: "text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 flex items-center", target: "_blank" do %>
         View Documentation
         <i class="material-icons text-sm ml-1">open_in_new</i>
       <% end %>

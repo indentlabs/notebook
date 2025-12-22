@@ -1,4 +1,4 @@
-<div class="field-item bg-white border rounded-md shadow-sm p-2.5 flex items-center cursor-pointer hover:bg-gray-50 <%= field.hidden? ? 'bg-gray-100 border-gray-300 opacity-60 archived-field' : '' %>"
+<div class="field-item bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-md shadow-sm p-2.5 flex items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 <%= field.hidden? ? 'bg-gray-100 dark:bg-slate-900 border-gray-300 dark:border-slate-600 opacity-60 archived-field' : '' %>"
      data-field-id="<%= field.id %>"
      data-position="<%= field.position %>"
      data-archived="<%= field.hidden? %>"
@@ -7,32 +7,32 @@
      @click="console.log('Field clicked:', <%= field.id %>); $dispatch('select-field', { id: <%= field.id %> })"
      <% if field.hidden? %>style="display: none;"<% end %>>
   <!-- Drag Handle -->
-  <div class="field-drag-handle p-1.5 mr-2 rounded hover:bg-gray-100 cursor-move" @click.stop>
-    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <div class="field-drag-handle p-1.5 mr-2 rounded hover:bg-gray-100 dark:hover:bg-slate-600 cursor-move" @click.stop>
+    <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path>
     </svg>
   </div>
   
   <!-- Field Type Icon -->
-  <div class="field-type-icon flex-shrink-0 w-6 h-6 rounded bg-gray-100 flex items-center justify-center mr-2.5">
+  <div class="field-type-icon flex-shrink-0 w-6 h-6 rounded bg-gray-100 dark:bg-slate-700 flex items-center justify-center mr-2.5">
     <% if field.field_type == 'text_area' %>
-      <i class="material-icons text-gray-600 text-sm">text_fields</i>
+      <i class="material-icons text-gray-600 dark:text-gray-400 text-sm">text_fields</i>
     <% elsif field.field_type == 'link' %>
-      <i class="material-icons text-blue-600 text-sm">link</i>
+      <i class="material-icons text-blue-600 dark:text-blue-400 text-sm">link</i>
     <% elsif field.field_type == 'name' %>
-      <i class="material-icons text-purple-600 text-sm">label</i>
+      <i class="material-icons text-purple-600 dark:text-purple-400 text-sm">label</i>
     <% elsif field.field_type == 'universe' %>
-      <i class="material-icons text-indigo-600 text-sm">language</i>
+      <i class="material-icons text-indigo-600 dark:text-indigo-400 text-sm">language</i>
     <% elsif field.field_type == 'tags' %>
-      <i class="material-icons text-green-600 text-sm">local_offer</i>
+      <i class="material-icons text-green-600 dark:text-green-400 text-sm">local_offer</i>
     <% else %>
-      <i class="material-icons text-gray-600 text-sm">subject</i>
+      <i class="material-icons text-gray-600 dark:text-gray-400 text-sm">subject</i>
     <% end %>
   </div>
   
   <!-- Field Info -->
   <div class="flex-grow min-w-0">
-    <div class="field-label font-medium text-sm text-gray-800 truncate <%= field.hidden? ? 'text-gray-500' : '' %>">
+    <div class="field-label font-medium text-sm text-gray-800 dark:text-gray-200 truncate <%= field.hidden? ? 'text-gray-500 dark:text-gray-400' : '' %>">
       <%= field.label %>
       <% if field.hidden? %>
         <i class="material-icons text-amber-600 text-sm ml-1.5 align-middle">archive</i>
@@ -41,7 +41,7 @@
     
     <!-- Linkable Content Types Visual Indicators (for link fields only) -->
     <% if field.field_type == 'link' && field.field_options&.dig('linkable_types')&.any? %>
-      <div class="flex items-center text-xs text-gray-600 mt-1 mb-1">
+      <div class="flex items-center text-xs text-gray-600 dark:text-gray-400 mt-1 mb-1">
         <i class="material-icons text-xs mr-1" style="font-size: 14px;">link</i>
         <% linkable_types = field.field_options['linkable_types'] || [] %>
         <% content_types = get_linkable_content_types(linkable_types) %>
@@ -51,12 +51,12 @@
           </i>
         <% end %>
         <% if content_types.length > 5 %>
-          <span class="text-xs text-gray-500 ml-1">+<%= content_types.length - 5 %> more</span>
+          <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">+<%= content_types.length - 5 %> more</span>
         <% end %>
       </div>
     <% end %>
     
-    <div class="text-xs text-gray-500">
+    <div class="text-xs text-gray-500 dark:text-gray-400">
       <% if field.name_field? %>
         Name field
       <% elsif field.universe_field? %>
@@ -83,7 +83,7 @@
   <div class="flex items-center space-x-1.5">
     <!-- Archive Button -->
     <% unless field.name_field? %>
-      <button class="field-archive-toggle p-1.5 rounded hover:bg-gray-100 transition-colors" 
+      <button class="field-archive-toggle p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors" 
               data-field-id="<%= field.id %>"
               data-archived="<%= field.hidden? %>"
               title="<%= field.hidden? ? 'Archived field - Click to restore' : 'Active field - Click to archive' %>"
@@ -91,7 +91,7 @@
         <% if field.hidden? %>
           <i class="material-icons text-amber-600 text-sm">unarchive</i>
         <% else %>
-          <i class="material-icons text-gray-500 text-sm">archive</i>
+          <i class="material-icons text-gray-500 dark:text-gray-400 text-sm">archive</i>
         <% end %>
       </button>
     <% end %>

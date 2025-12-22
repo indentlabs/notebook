@@ -1,11 +1,11 @@
-<div class="category-card bg-white rounded-lg shadow-md overflow-hidden border-l-4 <%= category.hidden? ? 'border-gray-300 opacity-60 archived-category' : '' %>"
+<div class="category-card bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden border-l-4 border-transparent <%= category.hidden? ? 'border-gray-300 dark:border-slate-600 opacity-60 archived-category' : '' %>"
      data-category-id="<%= category.id %>"
      data-position="<%= category.position %>"
      data-archived="<%= category.hidden? %>"
      x-data="{ isOpen: false }"
      :class="{ 'ring-2 ring-opacity-70': selectedCategory == <%= category.id %> }"
      :style="selectedCategory == <%= category.id %> ? '--tw-ring-color: var(--content-type-color);' : ''"
-     style="<%= category.hidden? ? '' : "border-color: #{content_type_class.hex_color};" %>"
+     style="<%= category.hidden? ? '' : "border-left-color: #{content_type_class.hex_color};" %>"
      <% if category.hidden? %>style="display: none;"<% end %>>
   
   <!-- Category Header -->
@@ -13,28 +13,28 @@
        @click="console.log('Category header clicked, toggling isOpen from', isOpen, 'to', !isOpen); isOpen = !isOpen; if (isOpen) { $dispatch('select-category', { id: <%= category.id %> }) }"
        <%= category.hidden? ? 'style="background-color: #f9fafb;"' : "style=\"background-color: #{content_type_class.hex_color}20;\"" %>>
     <!-- Drag Handle -->
-    <div class="category-drag-handle flex items-center justify-center p-2 mr-2 rounded hover:bg-white hover:bg-opacity-50 cursor-move" 
+    <div class="category-drag-handle flex items-center justify-center p-2 mr-2 rounded hover:bg-white/50 dark:hover:bg-black/20 cursor-move" 
          @click.stop>
-      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
     </div>
     
     <!-- Category Icon -->
-    <div class="category-icon flex-shrink-0 w-8 h-8 rounded-full <%= category.hidden? ? 'bg-white' : 'bg-white' %> flex items-center justify-center mr-3 shadow-sm">
+    <div class="category-icon flex-shrink-0 w-8 h-8 rounded-full <%= category.hidden? ? 'bg-white dark:bg-slate-700' : 'bg-white dark:bg-slate-700' %> flex items-center justify-center mr-3 shadow-sm">
       <i class="material-icons <%= category.hidden? ? 'text-gray-400' : '' %> text-lg"
          <%= category.hidden? ? '' : "style=\"color: #{content_type_class.hex_color};\"" %>><%= category.icon %></i>
     </div>
     
     <!-- Category Title -->
     <div class="flex-grow">
-      <h3 class="category-label text-gray-900 font-medium">
+      <h3 class="category-label text-gray-900 dark:text-gray-100 font-medium">
         <%= category.label %>
         <% if category.hidden? %>
           <i class="material-icons text-amber-600 text-sm ml-1.5 align-middle">archive</i>
         <% end %>
       </h3>
-      <p class="text-gray-500 text-xs">
+      <p class="text-gray-500 dark:text-gray-400 text-xs">
         <%= pluralize(category.attribute_fields.count, 'field') %>
         <% if category.hidden? %>
           <span class="text-amber-600 ml-2">— Archived</span>
@@ -45,16 +45,16 @@
     <!-- Actions -->
     <div class="flex items-center space-x-1">
       <!-- Edit Button -->
-      <button class="p-1.5 rounded hover:bg-white hover:bg-opacity-50" 
+      <button class="p-1.5 rounded hover:bg-white/50 dark:hover:bg-black/20" 
               title="Configure Category"
               @click.stop="$dispatch('select-category', { id: <%= category.id %> })">
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
         </svg>
       </button>
       
       <!-- Archive Toggle -->
-      <button class="category-archive-toggle p-1.5 rounded hover:bg-white hover:bg-opacity-50 transition-colors" 
+      <button class="category-archive-toggle p-1.5 rounded hover:bg-white/50 dark:hover:bg-black/20 transition-colors" 
               data-category-id="<%= category.id %>"
               data-archived="<%= category.hidden? %>"
               title="<%= category.hidden? ? 'Archived category - Click to restore' : 'Active category - Click to archive' %>"
@@ -62,7 +62,7 @@
         <% if category.hidden? %>
           <i class="material-icons text-amber-600 text-sm">unarchive</i>
         <% else %>
-          <i class="material-icons text-gray-500 text-sm">archive</i>
+          <i class="material-icons text-gray-500 dark:text-gray-400 text-sm">archive</i>
         <% end %>
           <% if category.hidden? %>
             <!-- Hidden state - show EYE CLOSED icon -->
@@ -76,7 +76,7 @@
       </button>
       
       <!-- Expand/Collapse Button -->
-      <svg class="w-4 h-4 text-gray-500 transition-transform duration-200" 
+      <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200" 
            :class="{ 'transform rotate-180': isOpen }" 
            fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -101,7 +101,7 @@
     </div>
     
     <!-- Add Field Section -->
-    <div class="mt-4 pt-3 border-t border-gray-100" x-data="{ addingField: false, fieldType: 'text_area' }">
+    <div class="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700" x-data="{ addingField: false, fieldType: 'text_area' }">
       <button x-show="!addingField"
               @click="addingField = true" 
               class="flex items-center text-sm hover:underline focus:outline-none"
@@ -115,14 +115,14 @@
         <div class="flex space-x-2">
           <button @click="fieldType = 'text_area'" 
                   :style="fieldType === 'text_area' ? 'background-color: <%= content_type_class.hex_color %>20; border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
-                  :class="fieldType === 'text_area' ? '' : 'bg-white border-gray-300 text-gray-700'"
+                  :class="fieldType === 'text_area' ? '' : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300'"
                   class="flex-1 py-2 px-3 border rounded-md text-sm font-medium flex justify-center items-center">
             <i class="material-icons text-sm mr-1.5">text_fields</i>
             Text
           </button>
           <button @click="fieldType = 'link'" 
                   :style="fieldType === 'link' ? 'background-color: <%= content_type_class.hex_color %>20; border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
-                  :class="fieldType === 'link' ? '' : 'bg-white border-gray-300 text-gray-700'"
+                  :class="fieldType === 'link' ? '' : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300'"
                   class="flex-1 py-2 px-3 border rounded-md text-sm font-medium flex justify-center items-center">
             <i class="material-icons text-sm mr-1.5">link</i>
             Link
@@ -141,17 +141,17 @@
             </div>
             
             <div class="flex justify-end space-x-2">
-              <button type="button" @click="addingField = false" class="px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50">
+              <button type="button" @click="addingField = false" class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                 Cancel
               </button>
               <%= f.submit 'Add Text Field', class: "px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white", style: "background-color: #{content_type_class.hex_color};" %>
             </div>
           <% end %>
           
-          <div class="mt-3 pt-3 border-t border-gray-200">
-            <div class="text-xs font-medium text-gray-700 mb-2">Field Suggestions</div>
+          <div class="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700">
+            <div class="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Field Suggestions</div>
             <div class="suggest-fields-container flex flex-wrap gap-2 mb-2"></div>
-            <button type="button" class="js-show-field-suggestions px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50">
+            <button type="button" class="js-show-field-suggestions px-3 py-1 border border-gray-300 dark:border-slate-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
               Show Suggestions
             </button>
           </div>
@@ -164,13 +164,13 @@
             <%= f.hidden_field :field_type, value: 'link' %>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Field Name</label>
-              <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md js-field-input focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field Name</label>
+              <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-md js-field-input focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
             </div>
             
             <div>
               <div class="flex items-center justify-between mb-2">
-                <label class="block text-sm font-medium text-gray-700">Link to Content Types</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Link to Content Types</label>
                 <div class="flex space-x-2">
                   <button type="button" 
                           onclick="selectAllLinkableTypes()" 
@@ -188,14 +188,14 @@
               <!-- Hidden field to ensure linkable_types parameter is always sent -->
               <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="" />
               
-              <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-md p-3 bg-gray-50">
+              <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-slate-600 rounded-md p-3 bg-gray-50 dark:bg-slate-900">
                 <% Rails.application.config.content_types[:all].each do |content_type| %>
-                  <label class="flex items-center p-2 bg-white rounded-md border border-gray-200 hover:border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors">
+                  <label class="flex items-center p-2 bg-white dark:bg-slate-800 rounded-md border border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
                     <input type="checkbox" 
                            name="attribute_field[field_options][linkable_types][]"
                            value="<%= content_type.name %>"
                            id="link_type_<%= content_type.name.downcase %>_new_<%= category.id %>"
-                           class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2 mr-3"
+                           class="h-4 w-4 border-gray-300 dark:border-slate-500 dark:bg-slate-700 rounded focus:ring-2 focus:ring-offset-2 mr-3"
                            style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
                     
                     <div class="flex items-center flex-grow">
@@ -204,18 +204,18 @@
                         <i class="material-icons text-xs"><%= content_type.icon %></i>
                       </div>
                       
-                      <div class="text-sm font-medium text-gray-900">
+                      <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
                         <%= content_type.name.pluralize %>
                       </div>
                     </div>
                   </label>
                 <% end %>
               </div>
-              <p class="text-xs text-gray-500 mt-2">Select which page types users can link to from this field.</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Select which page types users can link to from this field.</p>
             </div>
             
             <div class="flex justify-end space-x-2">
-              <button type="button" @click="addingField = false" class="px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50">
+              <button type="button" @click="addingField = false" class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                 Cancel
               </button>
               <%= f.submit 'Add Link Field', class: "px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white", style: "background-color: #{content_type_class.hex_color};" %>

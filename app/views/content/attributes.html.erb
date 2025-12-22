@@ -11,17 +11,17 @@
      x-data="initTemplateEditor()">
 
   <!-- Mobile Panel Switch Tabs (visible only on small screens) -->
-  <div class="md:hidden bg-white border-b border-gray-200 sticky top-0 z-10">
+  <div class="md:hidden bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-10">
     <div class="flex -mb-px">
       <button @click="activePanel = 'template'" 
               :style="activePanel === 'template' ? 'border-color: var(--content-type-color); color: var(--content-type-color)' : ''"
-              :class="activePanel === 'template' ? '' : 'border-transparent text-gray-500'"
+              :class="activePanel === 'template' ? '' : 'border-transparent text-gray-500 dark:text-gray-400'"
               class="flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors">
         Template Editor
       </button>
       <button @click="activePanel = 'config'; configuring = true;" 
               :style="activePanel === 'config' ? 'border-color: var(--content-type-color); color: var(--content-type-color)' : ''"
-              :class="activePanel === 'config' ? '' : 'border-transparent text-gray-500'"
+              :class="activePanel === 'config' ? '' : 'border-transparent text-gray-500 dark:text-gray-400'"
               class="flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm transition-colors">
         Configuration
       </button>
@@ -35,7 +35,7 @@
          class="flex-1 min-w-0">
       
       <!-- Streamlined Header -->
-      <div class="template-header relative overflow-hidden rounded-lg shadow-md mb-6 bg-white">
+      <div class="template-header relative overflow-hidden rounded-lg shadow-md mb-6 bg-white dark:bg-slate-800">
         <!-- Background with Frosted Glass Effect -->
         <div class="absolute inset-0">
           <%= image_tag "card-headers/#{@content_type.downcase.pluralize}.jpg", 
@@ -78,40 +78,40 @@
         <% end %>
         
         <!-- Add Category Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-dashed border-gray-300 hover:border-gray-400 transition-colors p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-dashed border-gray-300 dark:border-slate-600 hover:border-gray-400 dark:hover:border-slate-500 transition-colors p-4">
           <div class="flex justify-center items-center p-6 cursor-pointer" 
                data-action="click->attributes-editor#showAddCategoryForm">
             <i class="material-icons text-gray-400 mr-2">add_circle_outline</i>
-            <span class="text-gray-500 font-medium">Add a New Category</span>
+            <span class="text-gray-500 dark:text-gray-400 font-medium">Add a New Category</span>
           </div>
           
           <!-- Category Form (Hidden by Default) -->
-          <div id="add-category-form" class="hidden p-4 border-t border-gray-200 mt-4">
+          <div id="add-category-form" class="hidden p-4 border-t border-gray-200 dark:border-slate-700 mt-4">
             <%= form_for(current_user.attribute_categories.build, method: :post, html: { class: "space-y-4", 'data-type': 'json', 'data-remote': 'true', '@submit.prevent': 'submitCategoryForm($event)' }, remote: true) do |f| %>
               <%= f.hidden_field :entity_type, value: @content_type %>
               
               <div>
-                <label for="category_label" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
-                <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: var(--content-type-color); --tw-border-opacity: 1; border-color: var(--content-type-color);" %>
+                <label for="category_label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
+                <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: var(--content-type-color); --tw-border-opacity: 1; border-color: var(--content-type-color);" %>
               </div>
               
               <div class="flex justify-end space-x-3">
                 <button type="button" 
                         @click="document.getElementById('add-category-form').classList.add('hidden')"
-                        class="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        class="px-4 py-2 border border-gray-300 dark:border-slate-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none">
                   Cancel
                 </button>
                 <%= f.submit "Add Category", class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: var(--content-type-color); --tw-ring-color: var(--content-type-color);" %>
               </div>
             <% end %>
             
-            <div class="mt-6 pt-4 border-t border-gray-200">
-              <div class="text-sm font-medium text-gray-700 mb-2">Category Suggestions</div>
-              <p class="text-sm text-gray-500 mb-2">
+            <div class="mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+              <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category Suggestions</div>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
                 Notebook.ai can suggest additional categories for your pages.
               </p>
               <div class="suggest-categories-container flex flex-wrap gap-2 mb-3"></div>
-              <button type="button" class="js-show-category-suggestions px-3 py-1.5 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none">
+              <button type="button" class="js-show-category-suggestions px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 focus:outline-none">
                 Show Suggestions
               </button>
             </div>
@@ -130,47 +130,47 @@
          
         <!-- No Selection State -->
         <div x-show="!selectedCategory && !selectedField && !configuring" 
-             class="bg-white rounded-lg shadow-md p-6 text-center config-panel-content">
-        <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <i class="material-icons text-gray-400 text-2xl">tune</i>
+             class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 text-center config-panel-content">
+        <div class="mx-auto w-16 h-16 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center mb-4">
+          <i class="material-icons text-gray-400 font-2xl">tune</i>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Configure Your Template</h3>
-        <p class="text-sm text-gray-500 mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Configure Your Template</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
           Select a category or field to customize it, or add a new one to get started.
         </p>
         <p class="text-xs text-gray-400 mb-1">Tip: You can drag and drop to reorder categories and fields.</p>
-        <button @click="configuring = true" class="mt-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+        <button @click="configuring = true" class="mt-2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none">
           <span>General Settings</span>
         </button>
       </div>
       
         <!-- Field Configuration -->
         <div x-show="selectedField" 
-             class="bg-white rounded-lg shadow-md overflow-hidden config-panel-content">
+             class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden config-panel-content">
           <!-- Content will be loaded dynamically -->
           <div id="field-config-container" class="p-4">
             <div class="flex justify-center items-center p-8">
               <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: var(--content-type-color);"></div>
-              <span class="ml-2 text-gray-600">Loading field settings...</span>
+              <span class="ml-2 text-gray-600 dark:text-gray-400">Loading field settings...</span>
             </div>
           </div>
         </div>
         
         <!-- Category Configuration -->
         <div x-show="selectedCategory" 
-             class="bg-white rounded-lg shadow-md overflow-hidden config-panel-content">
+             class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden config-panel-content">
           <!-- Content will be loaded dynamically -->
           <div id="category-config-container" class="p-4">
             <div class="flex justify-center items-center p-8">
               <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: var(--content-type-color);"></div>
-              <span class="ml-2 text-gray-600">Loading category settings...</span>
+              <span class="ml-2 text-gray-600 dark:text-gray-400">Loading category settings...</span>
             </div>
           </div>
         </div>
         
         <!-- General Configuration -->
         <div x-show="configuring && !selectedCategory && !selectedField" 
-             class="bg-white rounded-lg shadow-md overflow-hidden config-panel-content">
+             class="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden config-panel-content">
         <%= render partial: 'content/attributes/tailwind/general_settings', locals: {
           content_type: @content_type,
           content_type_class: @content_type_class

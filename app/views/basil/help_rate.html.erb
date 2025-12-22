@@ -1,25 +1,13 @@
 <%
   # Define colors and labels map for reuse
   rating_config = {
-    -2 => { color: 'red', label: 'Very Bad', icon: ":'(" },
-    -1 => { color: 'orange', label: 'Bad', icon: ':(' },
-     0 => { color: 'gray', label: 'Meh', icon: ':|' },
-     1 => { color: 'green', label: 'Good', icon: ':)' },
-     2 => { color: 'blue', label: 'Great', icon: ':D' },
-     3 => { color: 'pink', label: 'Loved', icon: '♥u♥' }
+    -2 => { color: 'text-red-500', hover: 'hover:text-red-400', label: 'Very Bad', icon: 'sentiment_very_dissatisfied' },
+    -1 => { color: 'text-orange-500', hover: 'hover:text-orange-400', label: 'Bad', icon: 'sentiment_dissatisfied' },
+     0 => { color: 'text-gray-500', hover: 'hover:text-gray-400', label: 'Meh', icon: 'sentiment_neutral' },
+     1 => { color: 'text-yellow-500', hover: 'hover:text-yellow-400', label: 'Good', icon: 'sentiment_satisfied' },
+     2 => { color: 'text-green-500', hover: 'hover:text-green-400', label: 'Great', icon: 'sentiment_very_satisfied' },
+     3 => { color: 'text-pink-500', hover: 'hover:text-pink-400', label: 'Loved', icon: 'favorite' }
   }
-  
-  # Helper to get generic tailwind classes for rating colors
-  def rating_classes(color)
-    case color
-    when 'red' then 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/50 peer-checked:bg-red-500 peer-checked:text-white peer-checked:border-red-600'
-    when 'orange' then 'bg-orange-50 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/50 peer-checked:bg-orange-500 peer-checked:text-white peer-checked:border-orange-600'
-    when 'gray' then 'bg-gray-50 text-gray-800 border-gray-200 dark:bg-gray-700/50 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 peer-checked:bg-gray-500 peer-checked:text-white peer-checked:border-gray-600'
-    when 'green' then 'bg-green-50 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800 hover:bg-green-100 dark:hover:bg-green-900/50 peer-checked:bg-green-500 peer-checked:text-white peer-checked:border-green-600'
-    when 'blue' then 'bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 peer-checked:bg-blue-500 peer-checked:text-white peer-checked:border-blue-600'
-    when 'pink' then 'bg-pink-50 text-pink-800 border-pink-200 dark:bg-pink-900/30 dark:text-pink-300 dark:border-pink-800 hover:bg-pink-100 dark:hover:bg-pink-900/50 peer-checked:bg-pink-500 peer-checked:text-white peer-checked:border-pink-600'
-    end
-  end
 
   current_rating_filter = params[:rating].present? ? params[:rating].to_i : nil
 %>
@@ -52,16 +40,22 @@
           <h3 class="font-semibold text-gray-700 dark:text-gray-200">Filter by Rating</h3>
         </div>
         <nav class="flex flex-col">
-          <%= link_to basil_rating_queue_path, class: "flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors #{'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' if current_rating_filter.nil?}" do %>
-            <span>Unrated images</span>
+          <%= link_to basil_rating_queue_path, class: "flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors #{current_rating_filter.nil? ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}" do %>
+            <span class="flex items-center">
+              <i class="material-icons text-lg mr-2 text-gray-400">image</i>
+              Unrated images
+            </span>
             <% if current_rating_filter.nil? %>
               <i class="material-icons text-sm">check</i>
             <% end %>
           <% end %>
 
           <% [3, 2, 1, 0, -1, -2].each do |rating| %>
-            <%= link_to basil_rating_queue_path(rating: rating), class: "flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors #{'bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' if current_rating_filter == rating}" do %>
-              <span><%= rating_config[rating][:label] %> images</span>
+            <%= link_to basil_rating_queue_path(rating: rating), class: "flex items-center justify-between px-4 py-3 border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors #{current_rating_filter == rating ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : 'text-gray-700 dark:text-gray-300'}" do %>
+              <span class="flex items-center">
+                <i class="material-icons text-lg mr-2 <%= rating_config[rating][:color] %>"><%= rating_config[rating][:icon] %></i>
+                <%= rating_config[rating][:label] %> images
+              </span>
               <% if current_rating_filter == rating %>
                 <i class="material-icons text-sm">check</i>
               <% end %>
@@ -75,10 +69,11 @@
     <main class="w-full lg:w-3/4">
       <% if current_rating_filter %>
         <!-- Filter Context Header -->
-        <div class="mb-6 p-4 rounded-lg <%= rating_classes(rating_config[current_rating_filter][:color]).split(' ').select{|c| c.start_with?('bg-', 'text-', 'border-', 'dark:')}.join(' ') %> border">
-          <p class="text-lg">
-            Showing <strong><%= pluralize @commissions.count, 'image' %></strong> you rated
-            <span class="font-bold">"<%= rating_config[current_rating_filter][:label] %>"</span>.
+        <div class="mb-6 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+          <p class="text-lg text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons mr-2 <%= rating_config[current_rating_filter][:color] %>"><%= rating_config[current_rating_filter][:icon] %></i>
+            Showing <strong class="mx-1"><%= pluralize @commissions.count, 'image' %></strong> you rated
+            <span class="font-bold ml-1">"<%= rating_config[current_rating_filter][:label] %>"</span>.
           </p>
         </div>
       <% else %>
@@ -143,31 +138,31 @@
                 <!-- Feedback Section -->
                 <div>
                   <div class="text-center text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Feedback for Basil</div>
-                  
-                  <%= form_for commission.basil_feedbacks.find_or_initialize_by(user: current_user), url: basil_feedback_path(commission.job_id), method: :POST, remote: true, html: { class: "w-full" } do |f| %>
-                    <% f.object.score_adjustment = nil if !f.object.persisted? %>
-                    
-                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                       <% [-2, -1, 0, 1, 2, 3].each do |score| %>
-                         <% config = rating_config[score] %>
-                         <label class="cursor-pointer group relative">
-                           <%= f.radio_button :score_adjustment, score, class: 'peer sr-only autosave-closest-form-on-change' %>
-                           
-                           <!-- Button visual -->
-                           <div class="flex flex-col items-center justify-center p-3 rounded-lg border transition-all duration-200 ease-in-out <%= rating_classes(config[:color]) %> h-full">
-                             <span class="text-2xl mb-1 group-hover:scale-110 transition-transform block">
-                               <%= config[:icon] %>
-                             </span>
-                           </div>
-                           
-                           <!-- Tooltip on hover (optional enhancement) -->
-                           <div class="absolute inset-x-0 -bottom-6 opacity-0 group-hover:opacity-100 transition-opacity text-center pointer-events-none">
-                             <span class="text-xs font-bold text-gray-500"><%= config[:label] %></span>
-                           </div>
-                         </label>
-                       <% end %>
-                    </div>
-                  <% end %>
+
+                  <% existing_feedback = commission.basil_feedbacks.find_by(user: current_user) %>
+                  <div class="flex items-center justify-center space-x-1 sm:space-x-2">
+                    <% [-2, -1, 0, 1, 2, 3].each do |score| %>
+                      <% config = rating_config[score] %>
+                      <label class="cursor-pointer group relative">
+                        <input type="radio"
+                               name="feedback_<%= commission.id %>"
+                               value="<%= score %>"
+                               class="hidden"
+                               data-feedback-url="<%= basil_feedback_path(commission.job_id) %>"
+                               data-color="<%= config[:color] %>"
+                               onchange="submitFeedback(this)"
+                               <%= 'checked' if existing_feedback&.score_adjustment == score %>>
+                        <i class="material-icons text-2xl sm:text-3xl <%= existing_feedback&.score_adjustment == score ? config[:color] : 'text-gray-300' %> <%= config[:hover] %> transition-colors group-hover:scale-110">
+                          <%= config[:icon] %>
+                        </i>
+
+                        <!-- Tooltip on hover -->
+                        <div class="absolute inset-x-0 -bottom-6 opacity-0 group-hover:opacity-100 transition-opacity text-center pointer-events-none">
+                          <span class="text-xs font-bold text-gray-500"><%= config[:label] %></span>
+                        </div>
+                      </label>
+                    <% end %>
+                  </div>
                 </div>
 
               </div>
@@ -192,3 +187,50 @@
     </main>
   </div>
 </div>
+
+<script>
+function submitFeedback(radio) {
+  const url = radio.dataset.feedbackUrl;
+  const score = radio.value;
+  const color = radio.dataset.color;
+
+  // Update visual state - remove color from siblings, add to selected
+  const container = radio.closest('.flex');
+  container.querySelectorAll('input[type="radio"]').forEach(r => {
+    const icon = r.nextElementSibling;
+    icon.classList.remove('text-red-500', 'text-orange-500', 'text-gray-500', 'text-yellow-500', 'text-green-500', 'text-pink-500');
+    icon.classList.add('text-gray-300');
+  });
+  const selectedIcon = radio.nextElementSibling;
+  selectedIcon.classList.remove('text-gray-300');
+  selectedIcon.classList.add(color);
+
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Accept': 'application/json'
+    },
+    body: `basil_feedback[score_adjustment]=${score}`
+  })
+  .then(response => {
+    if (response.ok) {
+      showNotification('Rating saved! Thanks for your feedback.');
+    }
+  });
+}
+
+function showNotification(message) {
+  const notification = document.createElement('div');
+  notification.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-y-20 text-sm';
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.style.transform = 'translateY(0)', 100);
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+</script>
