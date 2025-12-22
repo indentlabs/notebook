@@ -1,7 +1,7 @@
 <!-- Basil Content Page - TailwindCSS Redesign -->
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50/30">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
   <!-- Header with Breadcrumb -->
-  <div class="bg-white border-b sticky top-0 z-10">
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 space-y-2 sm:space-y-0">
         <nav class="flex items-center space-x-2 text-sm">
@@ -44,7 +44,7 @@
         <!-- Left Column: Content Info & Fields -->
         <div class="lg:col-span-1 xl:col-span-1">
           <!-- Content Card -->
-          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-4">
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
             <% if @content.random_image_including_private(format: :medium) %>
               <div class="aspect-w-16 aspect-h-9 bg-gray-100">
                 <%= image_tag @content.random_image_including_private(format: :medium), 
@@ -59,7 +59,7 @@
                     <i class="material-icons <%= @content.text_color %> text-sm mr-1.5"><%= @content.icon %></i>
                     <span class="text-xs font-medium text-gray-500 uppercase tracking-wider"><%= @content.page_type %></span>
                   </div>
-                  <h2 class="text-xl sm:text-2xl font-bold text-gray-900 truncate"><%= @content.name %></h2>
+                  <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white truncate"><%= @content.name %></h2>
                 </div>
               </div>
               
@@ -81,7 +81,7 @@
                 <% else %>
                   <div class="space-y-2">
                     <div class="flex items-center justify-between mb-2">
-                      <h3 class="text-sm font-semibold text-gray-900">Field Details</h3>
+                      <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Field Details</h3>
                       <button type="button" 
                               id="customize-importance-btn"
                               class="text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors">
@@ -95,13 +95,13 @@
                         <%= f.hidden_field "field[#{field.id}][label]", value: field.label %>
                         <%= f.hidden_field "field[#{field.id}][value]", value: value %>
                         
-                        <div class="border-l-2 border-gray-200 pl-3 py-1 hover:border-purple-400 transition-colors">
+                        <div class="border-l-2 border-gray-200 dark:border-gray-600 pl-3 py-1 hover:border-purple-400 transition-colors">
                           <div class="flex items-start justify-between">
                             <div class="flex-1 min-w-0 mr-2">
-                              <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 <%= field.label %>
                               </label>
-                              <p class="text-sm text-gray-900 mt-0.5 break-words">
+                              <p class="text-sm text-gray-900 dark:text-gray-100 mt-0.5 break-words">
                                 <%= value.presence || "—" %>
                               </p>
                             </div>
@@ -123,8 +123,8 @@
                   </div>
                   
                   <!-- Importance Help (Hidden by default) -->
-                  <div id="importance-help" class="hidden mt-3 p-2 sm:p-3 bg-purple-50 rounded-lg">
-                    <p class="text-xs text-purple-700">
+                  <div id="importance-help" class="hidden mt-3 p-2 sm:p-3 bg-purple-50 dark:bg-purple-900/30 rounded-lg">
+                    <p class="text-xs text-purple-700 dark:text-purple-300">
                       <strong>Adjust importance:</strong> Drag sliders to control how much Basil focuses on each field.
                       Set to 0 to ignore a field completely.
                     </p>
@@ -212,7 +212,7 @@
         <div class="<%= @relevant_fields.empty? ? 'lg:col-span-2 xl:col-span-3' : 'lg:col-span-1 xl:col-span-1' %>">
           <% if @relevant_fields.empty? %>
             <!-- Empty State: No fields filled -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div class="p-8 sm:p-12 text-center">
                 <!-- Icon -->
                 <div class="mx-auto w-20 h-20 bg-purple-50 rounded-full flex items-center justify-center mb-6">
@@ -263,8 +263,8 @@
               </div>
             </div>
           <% elsif @can_request_another && @relevant_fields.any? %>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-5 lg:p-6">
-              <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4 flex items-center">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-5 lg:p-6">
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-3 sm:mb-4 flex items-center">
                 <i class="material-icons text-purple-500 mr-2 text-lg sm:text-base">palette</i>
                 Choose a Style
               </h3>
@@ -274,9 +274,9 @@
                 <% BasilService.enabled_styles_for(@content.page_type).each do |style| %>
                   <button type="button"
                           onclick="submitBasilForm('<%= style %>')"
-                          class="group relative bg-white border-2 border-gray-200 rounded-lg p-2 sm:p-3 lg:p-4 hover:border-purple-500 hover:shadow-md transition-all duration-200 text-left">
+                          class="group relative bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-lg p-2 sm:p-3 lg:p-4 hover:border-purple-500 dark:hover:border-purple-400 hover:shadow-md transition-all duration-200 text-left">
                     <div class="flex flex-col items-center text-center">
-                      <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-1 sm:mb-2 group-hover:bg-purple-200 transition-colors">
+                      <div class="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center mb-1 sm:mb-2 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
                         <i class="material-icons text-purple-600 text-sm sm:text-base">
                           <%= case style
                               when 'photograph' then 'photo_camera'
@@ -305,7 +305,7 @@
                               end %>
                         </i>
                       </div>
-                      <span class="text-xs sm:text-sm font-medium text-gray-900 group-hover:text-purple-700">
+                      <span class="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-purple-700 dark:group-hover:text-purple-400">
                         <%= style.humanize %>
                       </span>
                     </div>
@@ -315,8 +315,8 @@
               
               <!-- Experimental Styles -->
               <% if BasilService.experimental_styles_for(@content.page_type).any? %>
-                <div class="border-t pt-3 sm:pt-4">
-                  <h4 class="text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3 flex items-center">
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-3 sm:pt-4">
+                  <h4 class="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 sm:mb-3 flex items-center">
                     <i class="material-icons text-amber-500 text-sm mr-1">science</i>
                     Experimental Styles
                   </h4>
@@ -365,7 +365,7 @@
         <div class="lg:col-span-1 xl:col-span-2">
           <div class="space-y-4">
             <% if @commissions.any? %>
-              <h3 class="text-base sm:text-lg font-semibold text-gray-900 flex items-center">
+              <h3 class="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center">
                 <i class="material-icons text-purple-500 mr-2 text-lg sm:text-base">collections</i>
                 Generated Images
               </h3>
@@ -376,7 +376,7 @@
               <% @commissions.each do |commission| %>
                 <% if commission.complete? %>
                   <!-- Completed Image Card -->
-                  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden group">
+                  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden group">
                     <div class="relative">
                       <%= link_to commission.image, target: '_blank', class: 'block' do %>
                         <%= image_tag commission.image, class: 'w-full h-auto' %>
@@ -389,7 +389,7 @@
                     <div class="p-3 sm:p-4">
                       <div class="flex items-start justify-between mb-2 sm:mb-3">
                         <div class="min-w-0 flex-1">
-                          <p class="text-sm font-medium text-gray-900 truncate"><%= @content.name %></p>
+                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate"><%= @content.name %></p>
                           <p class="text-xs text-gray-500">
                             <%= commission.style.try(:humanize) %> • 
                             <%= time_ago_in_words commission.completed_at %> ago
@@ -424,7 +424,7 @@
                       <% end %>
                       
                       <!-- Actions -->
-                      <div class="flex items-center justify-between pt-2 sm:pt-3 border-t">
+                      <div class="flex items-center justify-between pt-2 sm:pt-3 border-t border-gray-200 dark:border-gray-700">
                         <% if commission.saved_at? %>
                           <span class="inline-flex items-center text-xs sm:text-sm text-green-600">
                             <i class="material-icons text-sm mr-1">check_circle</i>
@@ -451,14 +451,14 @@
                   </div>
                 <% else %>
                   <!-- Loading Card -->
-                  <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border border-purple-200 p-4 sm:p-5 lg:p-6">
+                  <div class="bg-purple-50 dark:bg-gray-800 rounded-xl border border-purple-200 dark:border-purple-800 p-4 sm:p-5 lg:p-6">
                     <div class="flex items-center">
                       <div class="relative flex-shrink-0">
                         <div class="w-10 h-10 sm:w-12 sm:h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
                       </div>
                       <div class="ml-3 sm:ml-4 flex-1 min-w-0">
-                        <p class="text-sm font-semibold text-gray-900">Generating...</p>
-                        <p class="text-xs text-gray-600 truncate">
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">Generating...</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
                           <%= commission.style.try(:humanize) || 'Style' %> • 
                           Started <%= time_ago_in_words commission.created_at %> ago
                         </p>
@@ -473,8 +473,8 @@
             </div>
             
             <% if @commissions.count == 10 %>
-              <div class="bg-gray-50 rounded-lg p-3 sm:p-4 text-center">
-                <p class="text-xs sm:text-sm text-gray-600">
+              <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 sm:p-4 text-center">
+                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   Showing last 10 images. 
                   <%= link_to 'View all in feedback center', basil_rating_queue_path, class: 'text-purple-600 hover:text-purple-700 font-medium' %>
                 </p>
