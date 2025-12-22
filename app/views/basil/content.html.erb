@@ -5,21 +5,21 @@
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 space-y-2 sm:space-y-0">
         <nav class="flex items-center space-x-2 text-sm">
-          <%= link_to basil_path, class: 'inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors' do %>
+          <%= link_to basil_path, class: 'inline-flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors' do %>
             <i class="material-icons text-purple-500 text-lg mr-1">auto_awesome</i>
             <span>Basil</span>
           <% end %>
-          <i class="material-icons text-gray-400 text-sm">chevron_right</i>
-          <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'text-gray-500 hover:text-gray-700 transition-colors' do %>
+          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm">chevron_right</i>
+          <%= link_to basil_content_index_path(content_type: @content.page_type), class: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors' do %>
             <span class="hidden sm:inline"><%= @content.page_type.pluralize %></span>
             <span class="sm:hidden"><%= @content.page_type.pluralize.truncate(10) %></span>
           <% end %>
-          <i class="material-icons text-gray-400 text-sm">chevron_right</i>
-          <span class="font-medium text-gray-900 truncate max-w-[200px] sm:max-w-none"><%= @content.name %></span>
+          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm">chevron_right</i>
+          <span class="font-medium text-gray-900 dark:text-white truncate max-w-[200px] sm:max-w-none"><%= @content.name %></span>
         </nav>
         
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <%= link_to @content.view_path, class: 'inline-flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors' do %>
+          <%= link_to @content.view_path, class: 'inline-flex items-center px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors' do %>
             <i class="material-icons text-sm mr-1">visibility</i>
             <span class="hidden sm:inline">View Page</span>
             <span class="sm:hidden">View</span>
@@ -378,12 +378,12 @@
                   <!-- Completed Image Card -->
                   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden group">
                     <div class="relative">
-                      <%= link_to commission.image, target: '_blank', class: 'block' do %>
+                      <button type="button" class="block w-full lightbox-trigger" data-image-url="<%= url_for(commission.image) %>">
                         <%= image_tag commission.image, class: 'w-full h-auto' %>
                         <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
                           <i class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity text-2xl sm:text-3xl">zoom_in</i>
                         </div>
-                      <% end %>
+                      </button>
                     </div>
                     
                     <div class="p-3 sm:p-4">
@@ -488,11 +488,48 @@
   <% end %>
 </div>
 
+<!-- Lightbox Modal -->
+<div id="lightbox-modal" class="fixed inset-0 z-50 hidden cursor-pointer" onclick="closeLightbox()">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
+
+  <!-- Image container -->
+  <div class="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
+    <div class="relative" onclick="event.stopPropagation()">
+      <!-- Close button attached to image -->
+      <button type="button" onclick="closeLightbox()" class="absolute -top-3 -right-3 z-10 w-8 h-8 bg-white dark:bg-gray-800 rounded-full shadow-lg flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:scale-110 transition-all">
+        <i class="material-icons text-xl">close</i>
+      </button>
+      <img id="lightbox-image" src="" alt="Full size image" class="max-w-[90vw] max-h-[85vh] object-contain rounded-lg shadow-2xl cursor-default" />
+    </div>
+  </div>
+
+  <!-- Hint text -->
+  <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm pointer-events-none">
+    Click outside image or press <kbd class="px-2 py-1 bg-white/20 rounded text-xs">ESC</kbd> to close
+  </div>
+</div>
+
 <script>
 // Submit form with selected style
 function submitBasilForm(style) {
   document.getElementById('basil_commission_style').value = style;
   document.getElementById('basil-commission-form').submit();
+}
+
+// Lightbox functions (global for onclick handlers)
+function openLightbox(imageUrl) {
+  const lightboxModal = document.getElementById('lightbox-modal');
+  const lightboxImage = document.getElementById('lightbox-image');
+  lightboxImage.src = imageUrl;
+  lightboxModal.classList.remove('hidden');
+}
+
+function closeLightbox() {
+  const lightboxModal = document.getElementById('lightbox-modal');
+  const lightboxImage = document.getElementById('lightbox-image');
+  lightboxModal.classList.add('hidden');
+  lightboxImage.src = '';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -580,6 +617,22 @@ document.addEventListener('DOMContentLoaded', function() {
       setTimeout(() => notification.remove(), 300);
     }, 3000);
   }
+
+  // Lightbox: Open when clicking on images
+  document.querySelectorAll('.lightbox-trigger').forEach(trigger => {
+    trigger.addEventListener('click', function() {
+      const imageUrl = this.dataset.imageUrl;
+      if (imageUrl) openLightbox(imageUrl);
+    });
+  });
+
+  // Lightbox: Close on ESC key
+  document.addEventListener('keydown', function(e) {
+    const lightboxModal = document.getElementById('lightbox-modal');
+    if (e.key === 'Escape' && lightboxModal && !lightboxModal.classList.contains('hidden')) {
+      closeLightbox();
+    }
+  });
 
   // Toggle additional fields section
   const additionalToggle = document.getElementById('toggle-additional-fields');
