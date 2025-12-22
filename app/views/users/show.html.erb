@@ -18,10 +18,10 @@
 </script>
 
 <!-- Modern User Profile Page -->
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
 
   <!-- Floating Share FAB -->
-  <button type="button" class="share-profile-btn fixed top-20 right-4 z-50 w-10 h-10 bg-white border border-gray-200 text-gray-600 rounded-full shadow-lg hover:bg-gray-100 hover:shadow-xl hover:text-gray-900 transition-all duration-200 flex items-center justify-center" title="Share this profile">
+  <button type="button" class="share-profile-btn fixed top-20 right-4 z-50 w-10 h-10 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-gray-400 rounded-full shadow-lg hover:bg-gray-100 dark:hover:bg-slate-700 hover:shadow-xl hover:text-gray-900 dark:hover:text-gray-200 transition-all duration-200 flex items-center justify-center" title="Share this profile">
     <i class="material-icons text-lg">share</i>
   </button>
   
@@ -43,14 +43,14 @@
     
     <!-- User Identity Section -->
     <div class="relative -mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-gray-200 dark:border-slate-700 p-8">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
           
           <!-- Left: Profile Info -->
           <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <!-- Profile Picture -->
             <div class="relative flex-shrink-0">
-              <%= image_tag @user.image_url(120), class: "w-24 h-24 rounded-full border-4 border-white shadow-lg" %>
+              <%= image_tag @user.image_url(120), class: "w-24 h-24 rounded-full border-4 border-white dark:border-slate-700 shadow-lg" %>
               <% if @user.respond_to?(:online?) && @user.online? %>
                 <div class="absolute bottom-1 right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white"></div>
               <% end %>
@@ -59,7 +59,7 @@
             <!-- Name and Bio -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center space-x-3">
-                <h1 class="text-3xl font-bold text-gray-900 truncate">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 truncate">
                   <%= @user.name || @user.display_name %>
                 </h1>
                 <% if @user.respond_to?(:verified?) && @user.verified? %>
@@ -68,15 +68,15 @@
               </div>
               
               <% if @user.username.present? %>
-                <p class="text-lg text-gray-500 mt-1">@<%= @user.username %></p>
+                <p class="text-lg text-gray-500 dark:text-gray-400 mt-1">@<%= @user.username %></p>
               <% end %>
               
               <% if @user.bio.present? %>
-                <p class="text-gray-700 mt-3 max-w-2xl line-clamp-2"><%= @user.bio %></p>
+                <p class="text-gray-700 dark:text-gray-300 mt-3 max-w-2xl line-clamp-2"><%= @user.bio %></p>
               <% end %>
               
               <!-- User Details -->
-              <div class="flex flex-wrap items-center space-x-6 mt-4 text-sm text-gray-500">
+              <div class="flex flex-wrap items-center space-x-6 mt-4 text-sm text-gray-500 dark:text-gray-400">
                 <% if @user.respond_to?(:location) && @user.location.present? %>
                   <div class="flex items-center space-x-1">
                     <i class="material-icons text-xs">location_on</i>
@@ -94,7 +94,7 @@
                 <% if @user.respond_to?(:website) && @user.website.present? %>
                   <div class="flex items-center space-x-1">
                     <i class="material-icons text-xs">link</i>
-                    <%= link_to @user.website, @user.website, target: '_blank', rel: 'nofollow', class: 'text-blue-600 hover:text-blue-700' %>
+                    <%= link_to @user.website, @user.website, target: '_blank', rel: 'nofollow', class: 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300' %>
                   </div>
                 <% end %>
               </div>
@@ -106,21 +106,21 @@
             <!-- User Stats -->
             <div class="flex items-center space-x-6">
               <div class="text-center">
-                <div class="text-2xl font-bold text-gray-900"><%= number_with_delimiter @total_public_pages %></div>
-                <div class="text-sm text-gray-500">Pages</div>
+                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= number_with_delimiter @total_public_pages %></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Pages</div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-blue-600"><%= number_with_delimiter @followers_count %></div>
-                <div class="text-sm text-gray-500">Followers</div>
+                <div class="text-2xl font-bold text-blue-600 dark:text-blue-400"><%= number_with_delimiter @followers_count %></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Followers</div>
               </div>
               <div class="text-center">
-                <div class="text-2xl font-bold text-green-600"><%= number_with_delimiter @following_count %></div>
-                <div class="text-sm text-gray-500">Following</div>
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400"><%= number_with_delimiter @following_count %></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Following</div>
               </div>
               <% if @total_words > 0 %>
                 <div class="text-center">
-                  <div class="text-2xl font-bold text-purple-600"><%= number_with_delimiter @total_words %></div>
-                  <div class="text-sm text-gray-500">Words</div>
+                  <div class="text-2xl font-bold text-purple-600 dark:text-purple-400"><%= number_with_delimiter @total_words %></div>
+                  <div class="text-sm text-gray-500 dark:text-gray-400">Words</div>
                 </div>
               <% end %>
             </div>
@@ -151,7 +151,7 @@
 
                     <% if @user.username.present? %>
                       <%= link_to Thredded::UrlsHelper.send_private_message_path(current_user: current_user, to: @user),
-                          class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-2" do %>
+                          class: "border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200 flex items-center space-x-2" do %>
                         <i class="material-icons text-sm">message</i>
                         <span>Message</span>
                       <% end %>
@@ -179,33 +179,33 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
     
     <!-- Tab Navigation -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 mb-8">
       <nav class="flex space-x-8 px-6" aria-label="Profile Tabs">
-        <button class="profile-tab active-tab border-b-2 border-blue-500 text-blue-600 py-4 px-1 font-medium text-sm" data-tab="overview">
+        <button class="profile-tab active-tab border-b-2 border-blue-500 dark:border-blue-400 text-blue-600 dark:text-blue-400 py-4 px-1 font-medium text-sm" data-tab="overview">
           <i class="material-icons mr-2 text-sm">dashboard</i>
           Overview
         </button>
-        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="universes">
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 py-4 px-1 font-medium text-sm" data-tab="universes">
           <i class="material-icons mr-2 text-sm">public</i>
           Universes
         </button>
-        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="content">
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 py-4 px-1 font-medium text-sm" data-tab="content">
           <i class="material-icons mr-2 text-sm">library_books</i>
           Content
         </button>
-        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="tags">
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 py-4 px-1 font-medium text-sm" data-tab="tags">
           <i class="material-icons mr-2 text-sm">tag</i>
           Tags
         </button>
-        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="activity">
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 py-4 px-1 font-medium text-sm" data-tab="activity">
           <i class="material-icons mr-2 text-sm">timeline</i>
           Activity
         </button>
-        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="collections">
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 py-4 px-1 font-medium text-sm" data-tab="collections">
           <i class="material-icons mr-2 text-sm">collections_bookmark</i>
           Collections
         </button>
-        <button class="profile-tab border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 py-4 px-1 font-medium text-sm" data-tab="community">
+        <button class="profile-tab border-b-2 border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-slate-600 py-4 px-1 font-medium text-sm" data-tab="community">
           <i class="material-icons mr-2 text-sm">people</i>
           Community
         </button>
@@ -310,8 +310,8 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Remove active state from all tabs
       tabs.forEach(t => {
-        t.classList.remove('active-tab', 'border-blue-500', 'text-blue-600');
-        t.classList.add('border-transparent', 'text-gray-500');
+        t.classList.remove('active-tab', 'border-blue-500', 'text-blue-600', 'dark:border-blue-400', 'dark:text-blue-400');
+        t.classList.add('border-transparent', 'text-gray-500', 'dark:text-gray-400');
       });
       
       // Hide all tab contents
@@ -321,8 +321,8 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       
       // Activate clicked tab
-      this.classList.add('active-tab', 'border-blue-500', 'text-blue-600');
-      this.classList.remove('border-transparent', 'text-gray-500');
+      this.classList.add('active-tab', 'border-blue-500', 'text-blue-600', 'dark:border-blue-400', 'dark:text-blue-400');
+      this.classList.remove('border-transparent', 'text-gray-500', 'dark:text-gray-400');
       
       // Show corresponding content
       const targetContent = document.getElementById(targetTab + '-content');

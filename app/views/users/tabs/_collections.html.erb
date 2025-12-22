@@ -5,11 +5,11 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
           <i class="material-icons mr-3 <%= PageCollection.text_color %> text-3xl"><%= PageCollection.icon %></i>
           Collections I Maintain
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="text-gray-600 dark:text-gray-400 mt-1">
           Collections curated and managed by <%= @user.name || @user.display_name %>
         </p>
       </div>
@@ -26,7 +26,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <% @maintained_collections.each do |collection| %>
           <%= link_to collection, class: "group" do %>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               
               <!-- Collection Cover -->
               <div class="relative h-48 overflow-hidden">
@@ -45,7 +45,7 @@
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                 
                 <!-- Collection Stats Badge -->
-                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur-sm text-gray-900 px-3 py-1 rounded-full text-sm font-medium">
+                <div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full text-sm font-medium">
                   <% if collection.respond_to?(:page_collection_submissions) %>
                     <%= collection.page_collection_submissions.accepted.count %> items
                   <% else %>
@@ -68,7 +68,7 @@
               
               <!-- Collection Details -->
               <div class="p-5">
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
                   <span class="flex items-center">
                     <i class="material-icons text-xs mr-1">schedule</i>
                     Updated <%= time_ago_in_words(collection.updated_at) %> ago
@@ -85,7 +85,7 @@
                 <!-- Collection Metrics -->
                 <% if collection.respond_to?(:page_collection_submissions) %>
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4 text-xs text-gray-500">
+                    <div class="flex items-center space-x-4 text-xs text-gray-500 dark:text-gray-400">
                       <span class="flex items-center">
                         <i class="material-icons text-xs mr-1">collections</i>
                         <% 
@@ -96,7 +96,7 @@
                       </span>
                     </div>
                     
-                    <div class="flex items-center text-blue-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div class="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                       <span>View collection</span>
                       <i class="material-icons ml-1 text-sm">arrow_forward</i>
                     </div>
@@ -108,16 +108,16 @@
         <% end %>
       </div>
     <% else %>
-      <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="text-center py-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
         <i class="material-icons text-gray-400 text-5xl mb-4"><%= PageCollection.icon %></i>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
           <% if user_signed_in? && @user == current_user %>
             You haven't created any collections yet
           <% else %>
             <%= @user.name || @user.display_name %> hasn't created any collections
           <% end %>
         </h3>
-        <p class="text-gray-500 max-w-md mx-auto">
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
           <% if user_signed_in? && @user == current_user %>
             Collections let you curate and organize content from the community. Create your first collection to get started!
           <% else %>
@@ -141,16 +141,16 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
           <i class="material-icons mr-3 bg-notebook-blue text-white rounded p-1 text-3xl"><%= PageCollection.icon %></i>
           Published In Collections
         </h2>
-        <p class="text-gray-600 mt-1">
+        <p class="text-gray-600 dark:text-gray-400 mt-1">
           Collections featuring <%= @user.name || @user.display_name %>'s content
         </p>
       </div>
       
-      <div class="text-sm text-gray-500">
+      <div class="text-sm text-gray-500 dark:text-gray-400">
         <%= pluralize(@published_in_collections.count, 'collection') %>
       </div>
     </div>
@@ -159,7 +159,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <% @published_in_collections.each do |collection| %>
           <%= link_to collection, class: "group" do %>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               
               <!-- Collection Cover -->
               <div class="relative h-40 overflow-hidden">
@@ -196,12 +196,12 @@
               <!-- Collection Details -->
               <div class="p-4">
                 <% if collection.respond_to?(:description) && collection.description.present? %>
-                  <p class="text-gray-600 text-sm line-clamp-2 mb-3">
+                  <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-3">
                     <%= truncate(CGI.unescapeHTML(strip_tags(collection.description.to_s)), length: 120) %>
                   </p>
                 <% end %>
                 
-                <div class="flex items-center justify-between text-xs text-gray-500">
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                   <span class="flex items-center">
                     <i class="material-icons text-xs mr-1">schedule</i>
                     <%= time_ago_in_words(collection.updated_at) %> ago
@@ -228,16 +228,16 @@
         <% end %>
       </div>
     <% else %>
-      <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-200">
+      <div class="text-center py-12 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
         <i class="material-icons text-gray-400 text-5xl mb-4">featured_play_list</i>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
           <% if user_signed_in? && @user == current_user %>
             Your content hasn't been featured in collections yet
           <% else %>
             <%= @user.name || @user.display_name %>'s content hasn't been featured in collections
           <% end %>
         </h3>
-        <p class="text-gray-500 max-w-md mx-auto">
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
           <% if user_signed_in? && @user == current_user %>
             When other users accept your content into their collections, those collections will appear here. Keep creating great content!
           <% else %>
@@ -252,7 +252,7 @@
               Create More Content
             <% end %>
             
-            <%= link_to page_collections_path, class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 inline-flex items-center" do %>
+            <%= link_to page_collections_path, class: "border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200 inline-flex items-center" do %>
               <i class="material-icons mr-2 text-sm">explore</i>
               Browse Collections
             <% end %>

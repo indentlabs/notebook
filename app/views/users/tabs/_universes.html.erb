@@ -4,8 +4,8 @@
   <!-- Header with Stats -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h2 class="text-2xl font-bold text-gray-900">Public Universes</h2>
-      <p class="text-gray-600 mt-1">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Public Universes</h2>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">
         <% universes_count = @user.respond_to?(:universes) ? @user.universes.is_public.count : 0 %>
         <%= pluralize(universes_count, 'universe') %> shared publicly
       </p>
@@ -16,12 +16,12 @@
       <div class="relative">
         <input type="text" 
                placeholder="Search universes..." 
-               class="w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               class="w-64 px-4 py-2 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"
                id="universe-search">
         <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
       </div>
       
-      <select class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      <select class="px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100"
               id="universe-sort">
         <option value="updated">Recently Updated</option>
         <option value="created">Recently Created</option>
@@ -44,7 +44,7 @@
              data-words="<%= universe.respond_to?(:cached_word_count) && universe.cached_word_count ? universe.cached_word_count : 0 %>">
           
           <%= link_to universe, class: "block" do %>
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden hover:shadow-lg hover:-translate-y-2 transition-all duration-300">
               
               <!-- Universe Cover Image -->
               <div class="relative h-56 overflow-hidden">
@@ -87,7 +87,7 @@
               <!-- Universe Details Card Footer -->
               <div class="p-5">
                 <!-- Stats Row -->
-                <div class="flex items-center justify-between text-sm text-gray-500 mb-3">
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
                   <div class="flex items-center space-x-4">
                     <span class="flex items-center">
                       <i class="material-icons text-xs mr-1">schedule</i>
@@ -128,7 +128,7 @@
                 
                 <!-- Action Hint -->
                 <div class="mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <div class="flex items-center text-blue-600 text-sm font-medium">
+                  <div class="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium">
                     <span>Explore universe</span>
                     <i class="material-icons ml-1 text-sm">arrow_forward</i>
                   </div>
@@ -143,19 +143,19 @@
     <!-- Empty Search Results -->
     <div id="no-results" class="hidden text-center py-12">
       <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No universes found</h3>
-      <p class="text-gray-500">Try adjusting your search terms or filters.</p>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No universes found</h3>
+      <p class="text-gray-500 dark:text-gray-400">Try adjusting your search terms or filters.</p>
     </div>
     
   <% else %>
     
     <!-- Empty State -->
     <div class="text-center py-16">
-      <div class="mx-auto w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mb-6">
-        <i class="material-icons text-purple-600 text-4xl">public</i>
+      <div class="mx-auto w-24 h-24 bg-purple-100 dark:bg-purple-900/40 rounded-full flex items-center justify-center mb-6">
+        <i class="material-icons text-purple-600 dark:text-purple-400 text-4xl">public</i>
       </div>
       
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
         <% if user_signed_in? && @user == current_user %>
           No public universes yet
         <% else %>
@@ -163,7 +163,7 @@
         <% end %>
       </h3>
       
-      <p class="text-gray-600 max-w-md mx-auto mb-6">
+      <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
         <% if user_signed_in? && @user == current_user %>
           Create your first universe and make it public to share your world with others.
         <% else %>
@@ -178,7 +178,7 @@
             Create Universe
           <% end %>
           
-          <%= link_to universes_path, class: "border border-gray-300 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors duration-200 inline-flex items-center" do %>
+          <%= link_to universes_path, class: "border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200 inline-flex items-center" do %>
             <i class="material-icons mr-2 text-sm">settings</i>
             Manage Privacy
           <% end %>

@@ -4,8 +4,8 @@
   <!-- Header with Controls -->
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
     <div>
-      <h2 class="text-2xl font-bold text-gray-900">Public Content</h2>
-      <p class="text-gray-600 mt-1">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Public Content</h2>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">
         Browse <%= @user.name || @user.display_name %>'s public pages by content type
       </p>
     </div>
@@ -16,17 +16,18 @@
       <div class="relative">
         <input type="text" 
                placeholder="Search content..." 
-               class="w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+
+               class="w-64 px-4 py-2 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"
                id="content-search">
         <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
       </div>
       
       <!-- View Toggle -->
-      <div class="flex items-center bg-gray-100 rounded-lg p-1">
-        <button id="grid-view-btn" class="px-3 py-1 rounded-md text-sm font-medium bg-white text-blue-600 shadow-sm">
+      <div class="flex items-center bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
+        <button id="grid-view-btn" class="px-3 py-1 rounded-md text-sm font-medium bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm">
           <i class="material-icons text-sm">grid_view</i>
         </button>
-        <button id="list-view-btn" class="px-3 py-1 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900">
+        <button id="list-view-btn" class="px-3 py-1 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200">
           <i class="material-icons text-sm">view_list</i>
         </button>
       </div>
@@ -34,24 +35,24 @@
   </div>
   
   <!-- Content Type Filter -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+  <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
     <div class="flex flex-wrap items-center gap-2">
-      <span class="text-sm font-medium text-gray-700 mr-2">Filter by type:</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Filter by type:</span>
       
-      <button class="content-type-filter active px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200" data-type="all">
+      <button class="content-type-filter active px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800" data-type="all">
         All Types
-        <span class="ml-1 px-2 py-0.5 bg-blue-200 text-blue-900 rounded-full text-xs">
+        <span class="ml-1 px-2 py-0.5 bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 rounded-full text-xs">
           <%= @total_public_pages %>
         </span>
       </button>
       
       <% @content.each do |content_type, content_list| %>
         <% content_type_klass = User.new.send(content_type).klass %>
-        <button class="content-type-filter px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200" 
+        <button class="content-type-filter px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600" 
                 data-type="<%= content_type %>">
           <i class="material-icons text-xs mr-1"><%= content_type_klass.icon %></i>
           <%= content_type.to_s.humanize.pluralize %>
-          <span class="ml-1 px-2 py-0.5 bg-gray-200 text-gray-800 rounded-full text-xs">
+          <span class="ml-1 px-2 py-0.5 bg-gray-200 dark:bg-slate-600 text-gray-800 dark:text-gray-200 rounded-full text-xs">
             <%= content_list.length %>
           </span>
         </button>
@@ -80,7 +81,7 @@
     </div>
     
     <!-- List View -->
-    <div id="content-list" class="hidden bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div id="content-list" class="hidden bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
       <div class="divide-y divide-gray-200">
         <% @content.each do |content_type, content_list| %>
           <% content_type_klass = User.new.send(content_type).klass %>
@@ -90,7 +91,7 @@
                  data-name="<%= content_page.name.downcase %>"
                  data-updated="<%= content_page.updated_at.to_i %>">
               
-              <%= link_to content_page, class: "block hover:bg-gray-50 transition-colors duration-200" do %>
+              <%= link_to content_page, class: "block hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200" do %>
                 <div class="px-6 py-4 flex items-center space-x-4">
                   
                   <!-- Content Image/Icon -->
@@ -107,13 +108,13 @@
                   <!-- Content Info -->
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center space-x-2 mb-1">
-                      <h3 class="text-lg font-semibold text-gray-900 truncate"><%= content_page.name %></h3>
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate"><%= content_page.name %></h3>
                       <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium <%= content_type_klass.color %> text-white">
                         <%= content_type_klass.name %>
                       </span>
                     </div>
                     
-                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                       <span class="flex items-center">
                         <i class="material-icons text-xs mr-1">schedule</i>
                         <%= time_ago_in_words(content_page.updated_at) %> ago
@@ -150,19 +151,19 @@
     <!-- No Results -->
     <div id="no-content-results" class="hidden text-center py-12">
       <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
-      <h3 class="text-lg font-medium text-gray-900 mb-2">No content found</h3>
-      <p class="text-gray-500">Try adjusting your search terms or content type filter.</p>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No content found</h3>
+      <p class="text-gray-500 dark:text-gray-400">Try adjusting your search terms or content type filter.</p>
     </div>
     
   <% else %>
     
     <!-- Empty State -->
     <div class="text-center py-16">
-      <div class="mx-auto w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-        <i class="material-icons text-blue-600 text-4xl">library_books</i>
+      <div class="mx-auto w-24 h-24 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mb-6">
+        <i class="material-icons text-blue-600 dark:text-blue-400 text-4xl">library_books</i>
       </div>
       
-      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
         <% if user_signed_in? && @user == current_user %>
           No public content yet
         <% else %>
@@ -170,7 +171,7 @@
         <% end %>
       </h3>
       
-      <p class="text-gray-600 max-w-md mx-auto mb-6">
+      <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
         <% if user_signed_in? && @user == current_user %>
           Create characters, locations, items, and more to build your fictional worlds. Make them public to share with the community.
         <% else %>
@@ -261,19 +262,19 @@ document.addEventListener('DOMContentLoaded', function() {
   if (gridViewBtn && listViewBtn) {
     gridViewBtn.addEventListener('click', function() {
       currentView = 'grid';
-      this.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
-      this.classList.remove('text-gray-600');
-      listViewBtn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
-      listViewBtn.classList.add('text-gray-600');
+      this.classList.add('bg-white', 'dark:bg-slate-600', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm');
+      this.classList.remove('text-gray-600', 'dark:text-gray-400');
+      listViewBtn.classList.remove('bg-white', 'dark:bg-slate-600', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm');
+      listViewBtn.classList.add('text-gray-600', 'dark:text-gray-400');
       updateDisplay();
     });
     
     listViewBtn.addEventListener('click', function() {
       currentView = 'list';
-      this.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
-      this.classList.remove('text-gray-600');
-      gridViewBtn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
-      gridViewBtn.classList.add('text-gray-600');
+      this.classList.add('bg-white', 'dark:bg-slate-600', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm');
+      this.classList.remove('text-gray-600', 'dark:text-gray-400');
+      gridViewBtn.classList.remove('bg-white', 'dark:bg-slate-600', 'text-blue-600', 'dark:text-blue-400', 'shadow-sm');
+      gridViewBtn.classList.add('text-gray-600', 'dark:text-gray-400');
       updateDisplay();
     });
   }
@@ -285,12 +286,12 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Update active state
       typeFilters.forEach(f => {
-        f.classList.remove('active', 'bg-blue-100', 'text-blue-800', 'border-blue-200');
-        f.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
+        f.classList.remove('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-800', 'dark:text-blue-200', 'border-blue-200', 'dark:border-blue-800');
+        f.classList.add('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-slate-600');
       });
       
-      this.classList.add('active', 'bg-blue-100', 'text-blue-800', 'border-blue-200');
-      this.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+      this.classList.add('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-800', 'dark:text-blue-200', 'border-blue-200', 'dark:border-blue-800');
+      this.classList.remove('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-slate-600');
       
       updateDisplay();
     });
