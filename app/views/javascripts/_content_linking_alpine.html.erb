@@ -309,9 +309,15 @@
           // The color is already in Tailwind format like 'bg-red-500'
           // Convert bg-* to text-* for icon colors
           if (color && color.startsWith('bg-')) {
+            const colorName = color.match(/bg-(\w+)-/)?.[1];
+            const shade = color.match(/-(\d+)$/)?.[1] || '500';
+            
+            if (colorName) {
+              return `text-${colorName}-${shade} dark:text-${colorName}-400`;
+            }
             return color.replace('bg-', 'text-');
           }
-          return color || 'text-gray-500';
+          return color || 'text-gray-500 dark:text-gray-400';
         },
         
         getBackgroundColor(color) {
@@ -319,10 +325,10 @@
           if (color && color.startsWith('bg-')) {
             const colorName = color.match(/bg-(\w+)-/)?.[1];
             if (colorName) {
-              return `bg-${colorName}-50`;
+              return `bg-${colorName}-100 dark:bg-${colorName}-900/30`;
             }
           }
-          return 'bg-gray-50';
+          return 'bg-gray-100 dark:bg-gray-700';
         },
         
         calculateDropdownPosition() {

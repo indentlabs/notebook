@@ -10,10 +10,10 @@
 
 <div x-data="{
   entitiesSidebarOpen: false
-}" class="min-h-screen bg-gray-50 flex flex-col">
+}" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 
   <!-- Document editor navbar - sticky beneath site navbar, provides tools and stats -->
-  <header class="bg-white border-b border-gray-200 sticky top-14 z-20 shadow-sm">
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-20 shadow-sm">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
       <!-- Full navbar -->
       <div class="flex flex-row items-center justify-between">
@@ -32,14 +32,14 @@
           <!-- Metadata button -->
           <button
             @click="$dispatch('open-modal', 'document-metadata-modal')"
-            class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+            class="flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm"
           >
             <i class="material-icons mr-1 text-sm align-middle">description</i>
             <span class="font-medium">Metadata</span>
           </button>
           
           <!-- Preview as Reader -->
-          <%= link_to document_path(@document), class: "flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm" do %>
+          <%= link_to document_path(@document), class: "flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm" do %>
             <i class="material-icons mr-1 text-sm align-middle">visibility</i>
             <span class="font-medium">Preview as Reader</span>
           <% end %>
@@ -50,7 +50,7 @@
           <div class="relative" x-data="{ open: false }">
             <button
               @click="open = !open"
-              class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+              class="flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm"
             >
               <i class="material-icons text-sm align-middle">more_horiz</i>
             </button>
@@ -64,31 +64,31 @@
               x-transition:leave="transition ease-in duration-75"
               x-transition:leave-start="transform opacity-100 scale-100"
               x-transition:leave-end="transform opacity-0 scale-95"
-              class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+              class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
               x-cloak
             >
               <div class="py-1">
                 <!-- Analyze document -->
-                <%= link_to queue_analysis_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do %>
+                <%= link_to queue_analysis_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
                   <i class="material-icons text-blue-500 mr-3 text-sm">analytics</i>
                   <span>Analyze this document</span>
                 <% end %>
                 
                 <!-- Revision log -->
-                <%= link_to document_document_revisions_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50" do %>
-                  <i class="material-icons text-gray-600 mr-3 text-sm">history</i>
+                <%= link_to document_document_revisions_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
+                  <i class="material-icons text-gray-600 dark:text-gray-400 mr-3 text-sm">history</i>
                   <span>Revision log</span>
                 <% end %>
                 
                 <!-- Plaintext view -->
-                <%= link_to plaintext_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50", target: "_blank" do %>
-                  <i class="material-icons text-gray-600 mr-3 text-sm">text_format</i>
+                <%= link_to plaintext_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700", target: "_blank" do %>
+                  <i class="material-icons text-gray-600 dark:text-gray-400 mr-3 text-sm">text_format</i>
                   <span>Plaintext view</span>
                 <% end %>
                 
-                <hr class="my-1 border-gray-100">
+                <hr class="my-1 border-gray-100 dark:border-gray-700">
                 
-                <hr class="my-1 border-gray-100">
+                <hr class="my-1 border-gray-100 dark:border-gray-700">
                 
                 <!-- Delete Document -->
                 <%= button_to document_path(@document), 
@@ -100,7 +100,7 @@
                       },
                       onsubmit: "return confirm('Are you sure you want to delete this document? This action cannot be undone.');"
                     },
-                    class: "flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left" do %>
+                    class: "flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 w-full text-left" do %>
                   <i class="material-icons text-red-500 mr-3 text-sm">delete</i>
                   <span>Delete document</span>
                 <% end %>
@@ -112,18 +112,18 @@
         <!-- Right side: Document stats -->
         <div class="flex items-center space-x-4 text-sm">
           <!-- Word count -->
-          <div class="flex items-center bg-gray-50 px-3 py-1.5 rounded-md shadow-sm border border-gray-100">
-            <i class="material-icons mr-1 text-sm text-gray-500">text_fields</i>
-            <span><span id="word-count" class="font-medium">0</span> words</span>
+          <div class="flex items-center bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-md shadow-sm border border-gray-100 dark:border-gray-600">
+            <i class="material-icons mr-1 text-sm text-gray-500 dark:text-gray-400">text_fields</i>
+            <span><span id="word-count" class="font-medium text-gray-900 dark:text-gray-100">0</span> words</span>
           </div>
           
           <!-- Privacy status - now a clickable button -->
           <button
             type="button"
             @click="$dispatch('open-modal', 'document-privacy-modal')"
-            class="flex items-center px-3 py-1.5 rounded-md bg-white text-gray-700 hover:bg-gray-100 transition-colors shadow-sm border border-gray-200 hover:border-gray-300"
+            class="flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
           >
-            <i class="material-icons mr-1 text-sm <%= @document.privacy == 'private' ? 'text-gray-500' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+            <i class="material-icons mr-1 text-sm <%= @document.privacy == 'private' ? 'text-gray-500 dark:text-gray-400' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
             <span class="capitalize font-medium"><%= @document.privacy || 'private' %></span>
             <i class="material-icons ml-1 text-xs text-gray-400">edit</i>
           </button>
@@ -144,13 +144,13 @@
         <!-- Document title input -->
         <div class="mb-4">
     <%= form_for @document do |f| %>
-      <div class="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-3 py-2 border-r border-gray-200">
+      <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div class="px-3 py-2 border-r border-gray-200 dark:border-gray-700">
           <i class="material-icons <%= Document.text_color %>"><%= Document.icon %></i>
         </div>
         <%= f.text_field :title,
           id: "document_title",
-          class: "flex-1 px-4 py-3 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+          class: "flex-1 px-4 py-3 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-transparent text-gray-900 dark:text-gray-100 dark:placeholder-gray-400",
           placeholder: "Document title"
         %>
       </div>
@@ -158,12 +158,12 @@
         </div>
 
         <!-- Editor with integrated toolbar -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[500px] overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 min-h-[500px] overflow-hidden">
           <!-- Wrap editor in Alpine component for @mentions -->
           <div x-data="contentLinking()" class="relative">
             <!-- Editor content area -->
             <div id="editor" 
-                 class="editable js-can-mention-pages prose prose-lg max-w-none p-6 min-h-[500px] focus:outline-none border-0" 
+                 class="editable js-can-mention-pages prose prose-lg dark:prose-invert max-w-none p-6 min-h-[500px] focus:outline-none border-0 text-gray-900 dark:text-gray-100" 
                  data-save-url="<%= document_url(@document) %>"
                  x-ref="editor"><%= @document.body.try(:html_safe) %></div>
             
@@ -202,7 +202,7 @@
           <!-- Modal content -->
           <div class="relative min-h-screen flex items-center justify-center p-4">
             <div
-              class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
+              class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
               x-show="open"
               x-transition:enter="ease-out duration-300"
               x-transition:enter-start="opacity-0 translate-y-4"
@@ -213,10 +213,10 @@
               @click.away="open = false"
             >
               <!-- Modal header -->
-              <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-teal-600">
+              <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500 to-teal-600">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                    <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
                       <i class="material-icons text-teal-500"><%= Document.icon %></i>
                     </div>
                     <h3 class="text-lg font-medium text-white">Privacy Settings</h3>
@@ -228,12 +228,12 @@
               </div>
               
               <!-- Tab navigation -->
-              <div class="border-b border-gray-200 bg-gray-50">
+              <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                 <nav class="flex px-6" aria-label="Tabs">
                   <button
                     type="button"
                     @click="activeTab = 'document'"
-                    :class="activeTab === 'document' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                    :class="activeTab === 'document' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                     class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
                   >
                     <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'document' ? 'text-teal-500' : 'text-gray-400'"><%= Document.icon %></i>
@@ -244,7 +244,7 @@
                     <button
                       type="button"
                       @click="activeTab = 'universe'"
-                      :class="activeTab === 'universe' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      :class="activeTab === 'universe' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                       class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
                     >
                       <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-blue-500' : 'text-gray-400'">public</i>
@@ -269,7 +269,7 @@
                         <i class="material-icons text-teal-500">info</i>
                       </td>
                       <td class="align-top">
-                        <span class="text-sm text-gray-600">
+                        <span class="text-sm text-gray-600 dark:text-gray-300">
                           Control who can view this document. More privacy options will be available in the future.
                         </span>
                       </td>
@@ -425,8 +425,8 @@
               </div>
               
               <!-- Modal footer -->
-              <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
-                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+              <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
                   Close
                 </button>
               </div>
@@ -451,7 +451,8 @@
           <!-- Modal content -->
           <div class="relative min-h-screen flex items-center justify-center p-4">
             <div
-              class="bg-white rounded-lg shadow-xl overflow-hidden w-full max-w-3xl transform transition-all"
+            <div
+              class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-3xl transform transition-all"
               x-show="open"
               x-transition:enter="ease-out duration-300"
               x-transition:enter-start="opacity-0 translate-y-4"
@@ -463,10 +464,10 @@
             >
               <%= form_for(@document, remote: true, html: { id: 'document-metadata-form' }) do |f| %>
                 <!-- Modal header -->
-                <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-teal-500 to-teal-600">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500 to-teal-600">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center">
-                      <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                      <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
                         <i class="material-icons text-teal-500"><%= Document.icon %></i>
                       </div>
                       <h3 class="text-lg font-medium text-white">Document Metadata</h3>
@@ -478,12 +479,12 @@
                 </div>
                 
                 <!-- Tab navigation -->
-                <div class="border-b border-gray-200 bg-gray-50">
+                <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                   <nav class="flex px-6" aria-label="Tabs">
                     <button
                       type="button"
                       @click="activeTab = 'notes'"
-                      :class="activeTab === 'notes' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      :class="activeTab === 'notes' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                       class="py-4 px-4 border-b-2 font-medium text-sm mr-8 transition-colors flex items-center"
                     >
                       <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'notes' ? 'text-teal-500' : 'text-gray-400'">notes</i>
@@ -492,7 +493,7 @@
                     <button
                       type="button"
                       @click="activeTab = 'synopsis'"
-                      :class="activeTab === 'synopsis' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      :class="activeTab === 'synopsis' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                       class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
                     >
                       <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'synopsis' ? 'text-teal-500' : 'text-gray-400'">short_text</i>
@@ -501,7 +502,7 @@
                     <button
                       type="button"
                       @click="activeTab = 'universe'"
-                      :class="activeTab === 'universe' ? 'border-teal-500 text-teal-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                      :class="activeTab === 'universe' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
                       class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
                     >
                       <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-teal-500' : 'text-gray-400'">public</i>
@@ -520,7 +521,7 @@
                           <i class="material-icons text-teal-500">info</i>
                         </td>
                         <td class="align-top">
-                          <span class="text-sm text-gray-600">
+                          <span class="text-sm text-gray-600 dark:text-gray-300">
                             Document notes are for your reference only and won't be visible to readers. Use this space for research notes, planning, or any other information you want to keep with your document.
                           </span>
                         </td>
@@ -528,7 +529,7 @@
                     </table>
                     
                     <%= f.text_area :notes_text,
-                      class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30',
+                      class: 'w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100',
                       placeholder: "Write as little or as much as you'd like!",
                       style: 'min-height: 300px; padding: 12px;'
                     %>
@@ -542,7 +543,7 @@
                           <i class="material-icons text-teal-500">visibility</i>
                         </td>
                         <td class="align-top">
-                          <span class="text-sm text-gray-600">
+                          <span class="text-sm text-gray-600 dark:text-gray-300">
                             A brief summary of your document's content. This will be displayed in document listings and previews to give readers an idea of what your document is about.
                           </span>
                         </td>
@@ -550,7 +551,7 @@
                     </table>
                     
                     <%= f.text_area :synopsis,
-                      class: 'w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30',
+                      class: 'w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100',
                       placeholder: "Summarize your document in a few sentences...",
                       style: 'min-height: 300px; padding: 12px;'
                     %>
@@ -564,7 +565,7 @@
                           <i class="material-icons text-teal-500">public</i>
                         </td>
                         <td class="align-top">
-                          <span class="text-sm text-gray-600">
+                          <span class="text-sm text-gray-600 dark:text-gray-300">
                             Select a universe for this document. Documents in a universe can be organized together and share common worldbuilding elements.
                           </span>
                         </td>
@@ -572,13 +573,13 @@
                     </table>
                     
                     <div class="mt-4">
-                      <label for="document_universe_id" class="block text-sm font-medium text-gray-700 mb-1">Universe</label>
+                      <label for="document_universe_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Universe</label>
                       <%= f.collection_select :universe_id,
                           current_user.universes.order(:name),
                           :id,
                           :name,
                           { include_blank: "No universe" },
-                          { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md" }
+                          { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" }
                       %>
                       <p class="mt-2 text-sm text-gray-500">
                         Selecting a universe will make this document part of that universe's worldbuilding.
@@ -588,13 +589,13 @@
                 </div>
                 
                 <!-- Modal footer -->
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
-                  <div class="text-sm text-gray-500">
+                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                  <div class="text-sm text-gray-500 dark:text-gray-400">
                     <i class="material-icons text-sm align-middle mr-1">save</i>
                     All changes will be saved
                   </div>
                   <div class="flex space-x-3">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
                       Cancel
                     </button>
                     <button type="button" id="save-metadata-button" @click="open = false" class="px-4 py-2 text-sm font-medium text-white bg-teal-500 border border-transparent rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
@@ -625,20 +626,20 @@
         >
           <!-- Entities sidebar - in right column on large screens -->
           <div
-            class="bg-white border-l border-gray-200 transition-all duration-300 ease-in-out overflow-hidden h-full sticky top-14 z-50"
+            class="bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out overflow-hidden h-full sticky top-14 z-50"
             :class="entitiesSidebarOpen ? 'block' : 'hidden'"
             style="height: calc(100vh - 112px);"
             x-cloak
           >
             <!-- Sidebar header -->
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
               <div class="flex items-center">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
                   <i class="material-icons text-white text-sm">people_alt</i>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900">Document Entities</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Document Entities</h3>
               </div>
-              <button @click="entitiesSidebarOpen = false" class="text-gray-500 hover:text-gray-700 lg:hidden">
+              <button @click="entitiesSidebarOpen = false" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 lg:hidden">
                 <i class="material-icons">close</i>
               </button>
             </div>
@@ -646,14 +647,14 @@
             <!-- Sidebar content -->
             <div class="flex flex-col h-full overflow-hidden" style="height: calc(100vh - 168px);">
               <!-- Link new entity section -->
-              <div class="p-4 border-b border-gray-200">
-                <h4 class="text-sm font-medium text-gray-700 mb-2">Link a page to this document</h4>
+              <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link a page to this document</h4>
                 <div class="relative">
                   <input
                     type="text"
                     id="entity-search-input"
                     placeholder="Search pages to link..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
                     autocomplete="off"
                     x-model="searchQuery"
                     @input="filterSearchResults"
@@ -672,11 +673,11 @@
                        x-transition:leave="transition ease-in duration-150"
                        x-transition:leave-start="opacity-100 scale-100"
                        x-transition:leave-end="opacity-0 scale-95"
-                       class="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto">
+                       class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
                     <template x-for="result in filteredSearchResults" :key="`${result.type}-${result.id}`">
                       <button @click="linkEntity(result)"
                               type="button"
-                              class="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0">
+                              class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
                         <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
                              :class="getEntityColorClass(result.type)">
                           <i class="material-icons text-xs" 
@@ -684,8 +685,8 @@
                              x-text="getEntityIcon(result.type)"></i>
                         </div>
                         <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 truncate" x-text="result.name"></p>
-                          <p class="text-xs text-gray-500" x-text="result.type"></p>
+                          <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" x-text="result.name"></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="result.type"></p>
                         </div>
                       </button>
                     </template>
@@ -694,12 +695,12 @@
               </div>
               
               <!-- Filter tabs - only show types that are actually linked -->
-              <div class="px-4 py-2 border-b border-gray-200 overflow-x-auto whitespace-nowrap">
+              <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto whitespace-nowrap">
                 <div class="flex space-x-2" id="entity-filter-buttons">
                   <!-- All filter (always visible) -->
                   <button
                     @click="filterByType('all')"
-                    :class="activeTab === 'all' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                    :class="activeTab === 'all' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
                     class="p-2 rounded-md text-xs font-medium transition-colors"
                     title="All pages"
                   >
@@ -715,7 +716,7 @@
                     
                     <button
                       @click="filterByType('<%= entity_type %>')"
-                      :class="activeTab === '<%= entity_type %>' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'"
+                      :class="activeTab === '<%= entity_type %>' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
                       class="p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1"
                       title="<%= entity_type.pluralize %>"
                       data-filter-type="<%= entity_type %>"
@@ -731,7 +732,7 @@
             
               <!-- Vertical entity list with expandable previews -->
               <div class="flex-1 overflow-y-auto p-4 h-full" style="flex-grow: 1;">
-                <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages <span id="linked-entities-count">(<%= @linked_entities.count %>)</span></h4>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Linked pages <span id="linked-entities-count">(<%= @linked_entities.count %>)</span></h4>
                 
                 <!-- Entity list with collapsible previews -->
                 <div class="space-y-2" id="linked-entities-list">
@@ -748,8 +749,8 @@
                         <!-- Entity header (always visible) -->
                         <div
                           @click="expanded = !expanded"
-                          :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
-                          class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                          :class="expanded ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'"
+                          class="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         >
                           <div class="flex items-center justify-between">
                             <div class="flex items-center">
@@ -757,14 +758,14 @@
                                 <i class="material-icons <%= entity_class.text_color %> text-xs"><%= entity_class.icon %></i>
                               </div>
                               <div>
-                                <span class="text-sm font-medium"><%= entity.name %></span>
-                                <p class="text-xs text-gray-500"><%= entity_class.name %></p>
+                                <span class="text-sm font-medium dark:text-gray-200"><%= entity.name %></span>
+                                <p class="text-xs text-gray-500 dark:text-gray-400"><%= entity_class.name %></p>
                               </div>
                             </div>
                             <div class="flex items-center space-x-1">
                               <!-- Unlink button -->
                               <button @click.stop="unlinkEntity(<%= document_entity.id %>)"
-                                      class="p-1 hover:bg-red-50 rounded transition-colors"
+                                      class="p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                                       title="Remove from document">
                                 <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
                               </button>
@@ -774,9 +775,9 @@
                         </div>
                         
                         <!-- Expandable preview section -->
-                        <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                        <div x-show="expanded" x-collapse class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
                           <div class="flex items-center justify-between mb-2">
-                            <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Quick reference</h4>
                             <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.id), 
                                         class: "text-xs text-blue-600 hover:text-blue-800",
                                         target: "_blank" do %>
@@ -847,11 +848,11 @@
                   <% else %>
                     <!-- Empty state when no entities are linked -->
                     <div class="flex flex-col items-center justify-center py-8 text-center">
-                      <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
+                      <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
                         <i class="material-icons text-gray-400 text-xl">link_off</i>
                       </div>
-                      <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
-                      <p class="text-xs text-gray-500">Type @ in the editor or search above to link pages</p>
+                      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No linked pages yet</h4>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">Type @ in the editor or search above to link pages</p>
                     </div>
                   <% end %>
                 </div>
@@ -864,18 +865,18 @@
       <!-- Mobile entities sidebar (overlays content on small screens) -->
       <div
         x-show="entitiesSidebarOpen"
-        class="fixed inset-y-0 right-0 z-50 w-80 bg-white border-l border-gray-200 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden"
+        class="fixed inset-y-0 right-0 z-50 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden"
         x-cloak
       >
         <!-- Sidebar header -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gray-50">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
           <div class="flex items-center">
             <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
               <i class="material-icons text-white text-sm">people_alt</i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900">Document Entities</h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Document Entities</h3>
           </div>
-          <button @click="entitiesSidebarOpen = false" class="text-gray-500 hover:text-gray-700">
+          <button @click="entitiesSidebarOpen = false" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
             <i class="material-icons">close</i>
           </button>
         </div>
@@ -883,14 +884,14 @@
         <!-- Sidebar content (same as desktop) -->
         <div class="flex flex-col h-full overflow-hidden">
           <!-- Link new entity section -->
-          <div class="p-4 border-b border-gray-200">
-            <h4 class="text-sm font-medium text-gray-700 mb-2">Link a page to this document</h4>
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link a page to this document</h4>
             <div class="relative">
               <input
                 type="text"
                 id="entity-search-input-mobile"
                 placeholder="Search pages to link..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
                 autocomplete="off"
               >
               <div class="absolute inset-y-0 right-0 flex items-center pr-3">
@@ -900,21 +901,21 @@
           </div>
           
           <!-- Entity list (same as desktop) -->
-          <div class="flex-1 overflow-y-auto p-4">
-            <h4 class="text-sm font-medium text-gray-700 mb-2">Linked pages</h4>
+          <div class="flex-1 overflow-y-auto p-4 bg-white dark:bg-gray-800">
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Linked pages</h4>
             <div class="space-y-2">
               <!-- Same entity list as desktop -->
               <!-- Example entity with collapsible preview -->
-              <div class="border rounded-md overflow-hidden">
-                <div class="p-3 hover:bg-gray-50 transition-colors">
+              <div class="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center">
                       <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center mr-2">
                         <i class="material-icons text-red-600 text-xs">person</i>
                       </div>
                       <div>
-                        <span class="text-sm font-medium">Aragorn</span>
-                        <p class="text-xs text-gray-500">Character</p>
+                        <span class="text-sm font-medium dark:text-gray-200">Aragorn</span>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Character</p>
                       </div>
                     </div>
                     <i class="material-icons text-gray-400 text-sm">chevron_right</i>
@@ -923,16 +924,16 @@
               </div>
               
               <!-- Example entity 2 -->
-              <div class="border rounded-md overflow-hidden">
-                <div class="p-3 hover:bg-gray-50 transition-colors">
+              <div class="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center">
                       <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
                         <i class="material-icons text-green-600 text-xs">place</i>
                       </div>
                       <div>
-                        <span class="text-sm font-medium">Rivendell</span>
-                        <p class="text-xs text-gray-500">Location</p>
+                        <span class="text-sm font-medium dark:text-gray-200">Rivendell</span>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Location</p>
                       </div>
                     </div>
                     <i class="material-icons text-gray-400 text-sm">chevron_right</i>
@@ -955,9 +956,9 @@
   </main>
       
       <!-- Always-visible save status indicator centered at the bottom -->
-      <div id="save-indicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-white rounded-full shadow-md px-3 py-1.5 border border-gray-200 transition-colors duration-300">
-        <i class="material-icons js-autosave-icon text-gray-900 mr-2 text-sm">save</i>
-        <span class="js-autosave-status text-sm text-gray-600">Saved</span>
+      <div id="save-indicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-white dark:bg-gray-800 rounded-full shadow-md px-3 py-1.5 border border-gray-200 dark:border-gray-600 transition-colors duration-300">
+        <i class="material-icons js-autosave-icon text-gray-900 dark:text-gray-100 mr-2 text-sm">save</i>
+        <span class="js-autosave-status text-sm text-gray-600 dark:text-gray-300">Saved</span>
       </div>
       
       <!-- Floating action buttons with tooltip -->
@@ -1663,6 +1664,11 @@
           transform-origin: center bottom;
           animation: toolbar-appear 0.2s ease;
         }
+
+        .dark .medium-editor-toolbar {
+          background-color: #1f2937; /* gray-800 */
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+        }
         
         @keyframes toolbar-appear {
           from { opacity: 0; transform: translateY(10px); }
@@ -1690,15 +1696,30 @@
           background-color: white;
           color: rgba(55, 65, 81, 1);
         }
+
+        .dark .medium-editor-action {
+          background-color: #1f2937; /* gray-800 */
+          color: #e5e7eb; /* gray-200 */
+        }
         
         .medium-editor-action:hover {
           background-color: rgba(243, 244, 246, 1);
           color: rgba(17, 24, 39, 1);
         }
+
+        .dark .medium-editor-action:hover {
+          background-color: #374151; /* gray-700 */
+          color: white;
+        }
         
         .medium-editor-button-active {
           background-color: rgba(239, 246, 255, 1);
           color: rgba(37, 99, 235, 1);
+        }
+
+        .dark .medium-editor-button-active {
+          background-color: rgba(30, 58, 138, 0.3); /* blue-900/30 */
+          color: #60a5fa; /* blue-400 */
         }
         
         .medium-editor-placeholder {
