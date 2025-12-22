@@ -114,11 +114,11 @@
           Wait Times Today
         </h3>
       </div>
-      <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+      <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
         <%= bar_chart @seconds_over_time,
             colors: ['#f97316'],
             label: 'Images that took this long',
-            library: { backgroundColor: 'transparent' }
+            library: { chart: { backgroundColor: 'transparent' } }
         %>
       </div>
     </div>
@@ -131,11 +131,11 @@
           Images Created (Last 30 Days)
         </h3>
       </div>
-      <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+      <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
         <%= area_chart @all_commissions.where('created_at > ?', 30.days.ago.beginning_of_month).group_by_day(:created_at).map { |date, count| [date.to_date, count] },
             colors: ['#a855f7'],
             suffix: ' images',
-            library: { backgroundColor: 'transparent' }
+            library: { chart: { backgroundColor: 'transparent' } }
         %>
       </div>
     </div>
@@ -165,14 +165,14 @@
             <%= number_with_delimiter @feedback_today.values.sum + @feedback_before_today.values.sum %> images rated
           </p>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
           <%= column_chart [
               { name: "Historical average", data: @emoji_counts_all_time },
               { name: "Today", data: @emoji_counts_today }
             ],
             colors: ['#3b82f6', '#c084fc'],
             suffix: '%',
-            library: { backgroundColor: 'transparent' }
+            library: { chart: { backgroundColor: 'transparent' } }
           %>
         </div>
       </div>
@@ -184,13 +184,13 @@
             Today's Breakdown
           </h3>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
           <%= pie_chart @emoji_counts_today,
               colors: ['#b91c1c', '#ea580c', '#6b7280', '#22c55e', '#16a34a', '#ec4899'],
               legend: 'bottom',
               donut: true,
               suffix: '%',
-              library: { backgroundColor: 'transparent' }
+              library: { chart: { backgroundColor: 'transparent' } }
           %>
         </div>
       </div>
@@ -206,12 +206,12 @@
             Average Score by Style
           </h3>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
           <%= bar_chart @average_score_per_style,
               min: -2,
               max: 2,
               colors: ['#22c55e'],
-              library: { backgroundColor: 'transparent' }
+              library: { chart: { backgroundColor: 'transparent' } }
           %>
         </div>
       </div>
@@ -224,10 +224,10 @@
             Total Score by Style
           </h3>
         </div>
-        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
           <%= bar_chart @total_score_per_style,
               colors: ['#22c55e'],
-              library: { backgroundColor: 'transparent' }
+              library: { chart: { backgroundColor: 'transparent' } }
           %>
         </div>
       </div>
@@ -245,12 +245,12 @@
         How well Basil performs for different page types
       </p>
     </div>
-    <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+    <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
       <%= column_chart @average_score_per_page_type,
           colors: ['#3b82f6'],
           min: -3,
           max: 3,
-          library: { backgroundColor: 'transparent' }
+          library: { chart: { backgroundColor: 'transparent' } }
       %>
     </div>
   </div>
