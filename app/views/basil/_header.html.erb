@@ -1,0 +1,37 @@
+<%#
+  Basil header partial
+  Local variables:
+    - subtitle: (optional) Custom subtitle text, defaults to standard intro
+    - show_rating_link: (optional) Show link to rating queue, defaults to true
+%>
+<% subtitle ||= "I can help you visualize your characters and world." %>
+<% show_rating_link = true if local_assigns[:show_rating_link].nil? %>
+
+<div class="relative overflow-hidden bg-gradient-to-r from-indigo-900 to-purple-900 rounded-3xl shadow-2xl mb-12">
+  <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+  <div class="absolute -right-20 -top-20 w-96 h-96 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
+  <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-indigo-500 rounded-full blur-3xl opacity-20 animate-pulse" style="animation-delay: 1s;"></div>
+
+  <div class="relative z-10 flex flex-col md:flex-row items-center p-8 md:p-12">
+    <div class="shrink-0 mb-6 md:mb-0 md:mr-10">
+      <div class="relative">
+        <div class="absolute inset-0 bg-blue-500 blur-lg opacity-50 rounded-full"></div>
+        <%= image_tag 'basil/portrait.png', class: 'relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/20 shadow-2xl ring-4 ring-purple-500/20 object-cover' %>
+      </div>
+    </div>
+    <div class="text-center md:text-left max-w-2xl">
+      <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+        Hey, I'm <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">Basil</span>.
+      </h1>
+      <h2 class="text-xl md:text-2xl text-indigo-100 font-light mb-6 leading-relaxed">
+        <%= subtitle %>
+      </h2>
+      <% if show_rating_link %>
+        <p class="text-sm text-indigo-300/80">
+          You can also
+          <%= link_to 'help me improve by rating images', basil_rating_queue_path, class: 'text-white underline decoration-blue-400 hover:decoration-blue-300 underline-offset-2 transition-all hover:text-blue-100' %>.
+        </p>
+      <% end %>
+    </div>
+  </div>
+</div>

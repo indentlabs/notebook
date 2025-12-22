@@ -481,6 +481,15 @@ class BasilController < ApplicationController
                                                   .average(:score_adjustment)
                                                   .map { |k, v| [k, v.round(1)] }.to_h
 
+    # Today's average rating (convert from -2..+3 scale to 1..5 stars)
+    today_feedback = BasilFeedback.joins(:basil_commission)
+                                  .where(basil_commissions: { basil_version: @version })
+                                  .where('basil_feedbacks.updated_at > ?', 24.hours.ago)
+    @total_ratings_today = today_feedback.count
+    raw_average = today_feedback.average(:score_adjustment)
+    # Map -2..+3 to 1..5: (score + 2) / 5 * 4 + 1
+    @average_rating_today = raw_average ? ((raw_average + 2) / 5.0 * 4 + 1).round(1) : nil
+
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
     # commissions per day bar chart

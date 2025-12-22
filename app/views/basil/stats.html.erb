@@ -1,128 +1,271 @@
-<div class="row">
-  <div class="col s12 m3">
-    <%= image_tag 'basil/portrait.png', style: 'width: 100%' %>
+<div class="container mx-auto px-4 py-8">
+  <!-- Back Link -->
+  <div class="mb-6">
+    <%= link_to basil_path, class: "inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" do %>
+      <i class="material-icons mr-1">chevron_left</i>
+      <span>Back to Basil</span>
+    <% end %>
   </div>
-  <div class="col s12 m9">
-    <h1 style="font-size: 2em; margin-left: 1rem">Hey, I'm Basil.</h4>
-    <h2 style="font-size: 1.4em; margin-left: 1rem">I can help you visualize your ideas.</h2>
-    <p style="margin-left: 1rem">
-      <strong>
-        The latest Basil version is v2.</strong> This page is currently showing stats for v<%= @version %>.
-      
-      <% if @version.to_i != 1 %>
-        You can see v1's stats by <%= link_to 'clicking here', basil_stats_path(v: 1) %>.
+
+  <!-- Header -->
+  <%= render 'basil/header', subtitle: "Here's how I've been doing lately.", show_rating_link: false %>
+
+  <!-- Stats Grid - Row 1 -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+    <!-- Queue Count -->
+    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow p-6 text-center text-white">
+      <div class="flex items-center justify-center mb-3">
+        <i class="material-icons text-orange-200 mr-2">pending</i>
+        <span class="text-sm font-medium uppercase tracking-wide text-orange-100">In Queue</span>
+      </div>
+      <div class="text-4xl font-bold mb-1">
+        <%= number_with_delimiter @queued.count %>
+      </div>
+      <div class="text-xs text-orange-200">
+        waiting to generate
+      </div>
+    </div>
+
+    <!-- Average Wait Time -->
+    <div class="bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg shadow p-6 text-center text-white">
+      <div class="flex items-center justify-center mb-3">
+        <i class="material-icons text-amber-200 mr-2">schedule</i>
+        <span class="text-sm font-medium uppercase tracking-wide text-amber-100">Avg Wait</span>
+      </div>
+      <div class="text-2xl font-bold mb-1">
+        <%= time_ago_in_words @average_wait_time.seconds.ago %>
+      </div>
+      <div class="text-xs text-amber-200">
+        today's average
+      </div>
+    </div>
+
+    <!-- Average Rating Today -->
+    <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow p-6 text-center text-white">
+      <div class="flex items-center justify-center mb-3">
+        <i class="material-icons text-purple-200 mr-2">star</i>
+        <span class="text-sm font-medium uppercase tracking-wide text-purple-100">Avg Rating Today</span>
+      </div>
+      <% if @average_rating_today %>
+        <div class="text-4xl font-bold mb-1">
+          <%= @average_rating_today %><span class="text-2xl text-purple-200">/5</span>
+        </div>
+        <div class="text-xs text-purple-200">
+          from <%= pluralize @total_ratings_today, 'rating' %>
+        </div>
+      <% else %>
+        <div class="text-2xl font-bold mb-1 text-purple-200">
+          No ratings yet
+        </div>
+        <div class="text-xs text-purple-200">
+          <%= link_to 'Be the first!', basil_rating_queue_path, class: 'underline hover:text-white' %>
+        </div>
       <% end %>
-      <% if @version.to_i != 2 %>
-        You can see v2's stats by <%= link_to 'clicking here', basil_stats_path(v: 2) %>.
+    </div>
+  </div>
+
+  <!-- Road to 1M - Full Width -->
+  <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow p-6 mb-8 text-white">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="flex items-center">
+          <i class="material-icons text-blue-200 mr-2">flag</i>
+          <span class="text-sm font-medium uppercase tracking-wide text-blue-100">Road to 1M Visualizations</span>
+        </div>
+        <div class="text-lg font-bold">
+          <%= number_with_delimiter @all_commissions.count %> <span class="text-blue-200 font-normal">/ 1,000,000</span>
+        </div>
+      </div>
+      <div class="flex-1 min-w-[200px] max-w-lg">
+        <div class="relative w-full bg-white/20 rounded-full h-4 overflow-hidden border border-white/10">
+          <!-- Progress fill with gradient -->
+          <% progress_percent = [(@all_commissions.count.to_f / 1_000_000 * 100), 100].min %>
+          <div class="relative h-full rounded-full bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 shadow-lg transition-all duration-500"
+               style="width: <%= [progress_percent, 1].max %>%">
+            <!-- Inner glow -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/40 to-transparent"></div>
+          </div>
+          <!-- Milestone markers -->
+          <% [25, 50, 75].each do |milestone| %>
+            <div class="absolute top-0 h-full w-px bg-white/20" style="left: <%= milestone %>%"></div>
+          <% end %>
+        </div>
+      </div>
+      <div class="flex items-center gap-6 text-sm">
+        <div>
+          <div class="text-blue-200 text-xs">Expected</div>
+          <div class="font-bold"><%= (DateTime.current + @days_til_1_million_commissions.days).strftime "%b %e, %Y" %></div>
+        </div>
+        <div>
+          <div class="text-blue-200 text-xs">Rate</div>
+          <div class="font-bold"><%= @average_commissions_per_day.to_i %>/day</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity Charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Wait Times Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <i class="material-icons text-orange-500 mr-2 text-lg">schedule</i>
+          Wait Times Today
+        </h3>
+      </div>
+      <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+        <%= bar_chart @seconds_over_time,
+            colors: ['#f97316'],
+            label: 'Images that took this long',
+            library: { backgroundColor: 'transparent' }
+        %>
+      </div>
+    </div>
+
+    <!-- Images Per Day Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <i class="material-icons text-purple-500 mr-2 text-lg">show_chart</i>
+          Images Created (Last 30 Days)
+        </h3>
+      </div>
+      <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+        <%= area_chart @all_commissions.where('created_at > ?', 30.days.ago.beginning_of_month).group_by_day(:created_at).map { |date, count| [date.to_date, count] },
+            colors: ['#a855f7'],
+            suffix: ' images',
+            library: { backgroundColor: 'transparent' }
+        %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quality Section -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+        <i class="material-icons text-blue-500 mr-2">star</i>
+        Quality Ratings
+      </h2>
+      <%= link_to basil_rating_queue_path, class: "inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors" do %>
+        <i class="material-icons mr-1 text-sm">thumb_up</i>
+        Help rate images
       <% end %>
-      <br /><br />
-      <%= link_to 'Click here to start generating images of your notebook pages.', basil_path %>
-    </p>
-  </div>
-</div>
+    </div>
 
-<div class="row">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+      <!-- Quality Comparison Chart -->
+      <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100">
+            Historical vs Today
+          </h3>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            <%= number_with_delimiter @feedback_today.values.sum + @feedback_before_today.values.sum %> images rated
+          </p>
+        </div>
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+          <%= column_chart [
+              { name: "Historical average", data: @emoji_counts_all_time },
+              { name: "Today", data: @emoji_counts_today }
+            ],
+            colors: ['#3b82f6', '#c084fc'],
+            suffix: '%',
+            library: { backgroundColor: 'transparent' }
+          %>
+        </div>
+      </div>
 
-  <div class="col s12 m3 l2">
-    <h1 class="center orange-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @queued.count %></h1>
-    <div class="center grey-text"><strong>requests in queue</strong></div>    
+      <!-- Today's Ratings Donut -->
+      <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100">
+            Today's Breakdown
+          </h3>
+        </div>
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+          <%= pie_chart @emoji_counts_today,
+              colors: ['#b91c1c', '#ea580c', '#6b7280', '#22c55e', '#16a34a', '#ec4899'],
+              legend: 'bottom',
+              donut: true,
+              suffix: '%',
+              library: { backgroundColor: 'transparent' }
+          %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Style Performance Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Average Score per Style -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons text-green-500 mr-2 text-lg">palette</i>
+            Average Score by Style
+          </h3>
+        </div>
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+          <%= bar_chart @average_score_per_style,
+              min: -2,
+              max: 2,
+              colors: ['#22c55e'],
+              library: { backgroundColor: 'transparent' }
+          %>
+        </div>
+      </div>
+
+      <!-- Total Score per Style -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons text-green-500 mr-2 text-lg">leaderboard</i>
+            Total Score by Style
+          </h3>
+        </div>
+        <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+          <%= bar_chart @total_score_per_style,
+              colors: ['#22c55e'],
+              library: { backgroundColor: 'transparent' }
+          %>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="col s12 m3 l2">
-    <h1 class="center orange-text" style="margin-bottom: 0; margin-top: 1.6em; font-size: 2.95em"><%= time_ago_in_words @average_wait_time.seconds.ago %></h1>
-    <div class="center grey-text">
-      <strong>average wait time<br />today</strong>
-    </div>    
-  </div>
-  <div class="col s12 m6 l8">
-    <div class="grey lighten-3">
-      <%=
-        bar_chart @seconds_over_time,
-          colors: ['#EF6C00'],
-          label: 'Images that took this long',
-          title: 'Wait times today (in minutes)'
+
+  <!-- Content Type Performance -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+      <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+        <i class="material-icons text-blue-500 mr-2 text-lg">category</i>
+        Average Quality by Content Type
+      </h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        How well Basil performs for different page types
+      </p>
+    </div>
+    <div class="p-4 bg-gray-50 dark:bg-gray-700/50">
+      <%= column_chart @average_score_per_page_type,
+          colors: ['#3b82f6'],
+          min: -3,
+          max: 3,
+          library: { backgroundColor: 'transparent' }
       %>
     </div>
-    <br /><br />
   </div>
 
-  <div class="col s12 m4 l3">
-    <h1 class="center purple-text" style="margin-bottom: 0; margin-top: 1.6em"><%= number_with_delimiter @all_commissions.count %></h1>
-    <div class="center grey-text"><strong>total images created</strong></div>    
-  </div>
-  <div class="col s12 m8 l9 grey lighten-3">
-    <%=
-      area_chart @all_commissions.where('created_at > ?', 30.days.ago.beginning_of_month).group_by_day(:created_at).map { |date, count| [date.to_date, count] },
-        colors: ['#9C27B0', '#2196F3'],
-        title: 'Images created per day',
-        suffix: ' images'
-      %>
-  </div>
-
-  <div class="col s12">
-    <div class="card-panel">
-      At his average rate of <%= pluralize @average_commissions_per_day.to_i, 'image' %> per day, Basil is predicted to generate his 1,000,000<sup>th</sup> image on
-      <%= (DateTime.current + @days_til_1_million_commissions.days).strftime "%A, %B %e, %Y" %>.
+  <!-- Footer with Version Switcher -->
+  <div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+      <span>Viewing v<%= @version %> stats</span>
+      <span class="hidden sm:inline">·</span>
+      <div class="flex items-center gap-2">
+        <span>Other versions:</span>
+        <% [1, 2].reject { |v| v == @version.to_i }.each do |v| %>
+          <%= link_to "v#{v}", basil_stats_path(v: v), class: "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 hover:underline" %>
+        <% end %>
+      </div>
     </div>
-    <br /><br /><br />
-  </div>
-
-  <div class="col s12 m8 l7 grey lighten-3">
-    <%=
-      column_chart [
-        { name: "Historical average",  data: @emoji_counts_all_time },
-        { name: "Today",               data: @emoji_counts_today, }
-      ],
-      colors: ['#2196F3', '#C88ED2'],
-      title: "Quality: #{number_with_delimiter @feedback_today.values.sum + @feedback_before_today.values.sum} #{'image'.pluralize @feedback_before_today.values.sum} rated",
-      suffix: '%'
-    %>
-  </div>
-  <div class="col s12 m4 l5">
-    <div class="grey lighten-3">
-      <%=
-        pie_chart @emoji_counts_today,
-          colors: ['#B71C1C', '#D95151', '#757575' '#1B5E20', '#236428', '#43A047', '#2196F3'],
-          legend: 'right',
-          donut: true,
-          title: "Today's quality ratings",
-          suffix: '%'
-      %>
-    </div>
-    <br /><br /><br />
-  </div>
-
-  <div class="col s12 m6 grey lighten-3">
-    <%=
-      bar_chart @average_score_per_style,
-        title: "Average quality score per style", 
-        min: -2, 
-        max: 2,
-        colors: ['#2196F3']
-    %>
-  </div>
-  <div class="col s12 m6 grey lighten-3">
-    <%=
-      bar_chart @total_score_per_style, 
-        title: "Total quality score per style",
-        colors: ['#2196F3']
-    %>
-  </div>
-  <div class="col s12">
-    <div class="center">
-      <br />
-      <%= link_to 'Click here to help by rating your images.', basil_rating_queue_path %>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col s12">
-    <%=
-      column_chart @average_score_per_page_type,
-        title: "Average quality score per page type",
-        colors: ['#2196F3'],
-        min: -3,
-        max: 3
-    %>
   </div>
 </div>
