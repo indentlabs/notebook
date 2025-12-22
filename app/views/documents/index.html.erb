@@ -29,7 +29,7 @@
   }
 </style>
 
-<div x-data="documentsIndexController()" 
+<div x-data="documentsIndexController()"
      x-init="init()"
      class="min-h-screen bg-gray-50 dark:bg-gray-900">
 
@@ -47,12 +47,34 @@
       <div class="hidden xl:flex items-center justify-end p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <button @click="toggleLeftSidebar()"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5"
-                title="Hide navigation"
-                aria-label="Hide navigation">
+                title="Hide Quick Access"
+                aria-label="Hide Quick Access">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_left</i>
-          <i class="material-icons text-gray-600 dark:text-gray-300 text-lg mr-1.5">menu</i>
+          <i class="material-icons text-gray-600 dark:text-gray-300 text-lg mr-1.5">bolt</i>
           <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Quick Access</h2>
         </button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="space-y-2">
+          <%= link_to new_document_path(folder: @current_folder&.id),
+              class: "flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg #{Document.color} text-white hover:opacity-90 transition-opacity" do %>
+            <span class="flex items-center">
+              <i class="material-icons text-sm mr-2"><%= Document.icon %></i>
+              New Document
+            </span>
+            <i class="material-icons text-sm">add</i>
+          <% end %>
+          <button @click="showNewFolderModal = true"
+              class="flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg <%= Folder.color %> text-white hover:opacity-90 transition-opacity">
+            <span class="flex items-center">
+              <i class="material-icons text-sm mr-2"><%= Folder.icon %></i>
+              New Folder
+            </span>
+            <i class="material-icons text-sm">add</i>
+          </button>
+        </div>
       </div>
 
       <!-- Recent Documents -->
@@ -166,11 +188,33 @@
       <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <button @click="showLeftSidebar = false"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Close navigation">
+                aria-label="Close Quick Access">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_left</i>
-          <i class="material-icons text-gray-600 dark:text-gray-300 text-lg mr-1.5">menu</i>
+          <i class="material-icons text-gray-600 dark:text-gray-300 text-lg mr-1.5">bolt</i>
           <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Quick Access</h2>
         </button>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="space-y-2">
+          <%= link_to new_document_path(folder: @current_folder&.id),
+              class: "flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg #{Document.color} text-white hover:opacity-90 transition-opacity" do %>
+            <span class="flex items-center">
+              <i class="material-icons text-sm mr-2"><%= Document.icon %></i>
+              New Document
+            </span>
+            <i class="material-icons text-sm">add</i>
+          <% end %>
+          <button @click="showNewFolderModal = true"
+              class="flex items-center justify-between w-full px-3 py-2 text-sm font-medium rounded-lg <%= Folder.color %> text-white hover:opacity-90 transition-opacity">
+            <span class="flex items-center">
+              <i class="material-icons text-sm mr-2"><%= Folder.icon %></i>
+              New Folder
+            </span>
+            <i class="material-icons text-sm">add</i>
+          </button>
+        </div>
       </div>
 
       <!-- Recent Documents -->
@@ -264,9 +308,9 @@
          class="hidden xl:block fixed z-40 transition-all duration-300">
       <button @click="toggleLeftSidebar()"
               class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
-              data-tooltip="Show Navigation"
-              aria-label="Show Navigation">
-        <i class="material-icons text-base">menu</i>
+              data-tooltip="Show Quick Access"
+              aria-label="Show Quick Access">
+        <i class="material-icons text-base">bolt</i>
         <i class="material-icons text-base">chevron_right</i>
       </button>
     </div>
@@ -277,10 +321,10 @@
       <button @click="toggleLeftSidebar()"
               @keydown.escape="showLeftSidebar && toggleLeftSidebar()"
               class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1 tooltip-right"
-              :data-tooltip="showLeftSidebar ? 'Hide Navigation' : 'Show Navigation'"
-              :aria-label="showLeftSidebar ? 'Close navigation' : 'Open navigation'"
+              :data-tooltip="showLeftSidebar ? 'Hide Quick Access' : 'Show Quick Access'"
+              :aria-label="showLeftSidebar ? 'Close Quick Access' : 'Open Quick Access'"
               :aria-expanded="showLeftSidebar">
-        <i class="material-icons text-base" x-show="!showLeftSidebar">menu</i>
+        <i class="material-icons text-base" x-show="!showLeftSidebar">bolt</i>
         <i class="material-icons text-base" x-show="!showLeftSidebar">chevron_right</i>
         <i class="material-icons text-base" x-show="showLeftSidebar">chevron_left</i>
       </button>
@@ -596,7 +640,7 @@
                   <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Folders</h3>
                   <button
                     @click="showNewFolderModal = true"
-                    class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                    class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg <%= Folder.color %> text-white hover:opacity-90 transition-opacity">
                     <i class="material-icons text-xs mr-1">add</i>
                     New
                   </button>
@@ -644,7 +688,7 @@
               <div>
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Documents</h3>
-                  <%= link_to new_document_path(folder: @current_folder&.id), class: "inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors" do %>
+                  <%= link_to new_document_path(folder: @current_folder&.id), class: "inline-flex items-center px-3 py-1 text-xs font-medium rounded-lg #{Document.color} text-white hover:opacity-90 transition-opacity" do %>
                     <i class="material-icons text-xs mr-1">add</i>
                     New
                   <% end %>
@@ -656,28 +700,7 @@
                           x-transition:enter="transition ease-out duration-100"
                           x-transition:enter-start="opacity-0"
                           x-transition:enter-end="opacity-100"
-                          x-data="{
-                            isFavorite: <%= document.favorite? %>,
-                            isLoading: false,
-                            async toggleFavorite(event) {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              this.isLoading = true;
-                              try {
-                                const result = await window.toggleDocumentFavorite('<%= document.id %>');
-                                if (result.success) {
-                                  this.isFavorite = !this.isFavorite;
-                                } else {
-                                  alert('Error toggling favorite. Please try again.');
-                                }
-                              } catch (error) {
-                                console.error('Error:', error);
-                                alert('An unexpected error occurred. Please check the console.');
-                              } finally {
-                                this.isLoading = false;
-                              }
-                            }
-                          }">
+                          x-data="{ isFavorite: <%= document.favorite? %>, isLoading: false, async toggleFavorite(event) { event.preventDefault(); event.stopPropagation(); this.isLoading = true; try { const result = await window.toggleDocumentFavorite('<%= document.id %>'); if (result.success) { this.isFavorite = !this.isFavorite; if (window.showToast) window.showToast(this.isFavorite ? 'Added to favorites' : 'Removed from favorites', 'success'); } else { if (window.showToast) window.showToast('Error toggling favorite', 'error'); } } catch (error) { console.error('Error:', error); if (window.showToast) window.showToast('An unexpected error occurred', 'error'); } finally { this.isLoading = false; } } }">
                         <%= link_to edit_document_path(document), class: "block hover:bg-gray-50 dark:hover:bg-gray-700 group" do %>
                           <div class="relative px-4 py-3 flex items-center">
                             <!-- Recency indicator -->
@@ -719,11 +742,11 @@
                             <button
                               @click="toggleFavorite"
                               :disabled="isLoading"
-                              class="ml-2 p-1 text-lg rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                              class="ml-2 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
                               :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
                               title="Toggle favorite"
                             >
-                              <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                              <i class="material-icons text-xl" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
                             </button>
                             
                             <!-- Chevron -->
@@ -1135,7 +1158,7 @@ function documentsIndexController() {
   return {
     showNewFolderModal: false,
     showEditFolderModal: false,
-    
+
     // Sidebar states
     showLeftSidebar: (() => {
       // Only show left sidebar by default if user has documents and on desktop
