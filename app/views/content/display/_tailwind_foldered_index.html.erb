@@ -5,221 +5,17 @@
     content_counts_per_type = Hash.new(0)
     content.each { |page| content_counts_per_type[page.is_a?(ContentPage) ? page['page_type'] : page.class.name] += 1 }
   end
-
-  if @folders.any?
-    content_counts_per_type[Folder.name] = @folders.count
-  end
 %>
 
-<div x-data="{ 
-  showNewFolderModal: false, 
-  sidebarOpen: false,
-  showContentSidebar: <%= folders.any? %>,
+<div x-data="{
   viewMode: 'grid',
   selectedItems: [],
   searchQuery: '',
   showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>,
   isLoading: false
-}" class="min-h-screen flex bg-gray-50 dark:bg-gray-900">
-  
+}" class="min-h-screen bg-gray-50 dark:bg-gray-900">
 
-  <!-- Content Sidebar -->
-  <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-    <!-- Sidebar Header -->
-    <div class="px-6 py-6 border-b border-gray-200 dark:border-gray-700">
-      <div class="flex items-center">
-        <div class="flex-shrink-0">
-          <div class="w-10 h-10 rounded-lg <%= content_type_class.color %> flex items-center justify-center">
-            <i class="material-icons text-white"><%= content_type_class.icon %></i>
-          </div>
-        </div>
-        <div class="ml-4">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Your <%= content_type_name.pluralize %></h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400"><%= pluralize content.count, 'item' %></p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-      <div class="grid grid-cols-2 gap-4">
-        <div class="text-center">
-          <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= content.count %></div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Total</div>
-        </div>
-        <div class="text-center">
-          <% total_words = content.map(&:cached_word_count).reject(&:nil?).sum %>
-          <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(total_words / 1000) %>k</div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Words</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Folders Section -->
-    <div class="flex-1 overflow-y-auto">
-      <div class="px-6 py-4">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white">Folders</h3>
-          <button 
-            @click="showNewFolderModal = true"
-            class="inline-flex items-center p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-          >
-            <i class="material-icons text-lg">add</i>
-          </button>
-        </div>
-        
-        <div class="space-y-1">
-          <% folders.each do |folder| %>
-            <%= link_to folder, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" do %>
-              <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"><%= Folder.icon %></i>
-              <span class="truncate"><%= folder.title %></span>
-            <% end %>
-          <% end %>
-          
-          <% if folders.empty? %>
-            <button 
-              @click="showNewFolderModal = true"
-              class="w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-            >
-              <i class="material-icons text-lg mr-3">folder_open</i>
-              <span>Create your first folder</span>
-            </button>
-          <% end %>
-        </div>
-      </div>
-
-      <!-- Recently Edited Pages -->
-      <% if content.any? %>
-        <% recent_pages = content.sort_by(&:updated_at).reverse.first(5) %>
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Recently Edited</h3>
-          <div class="space-y-1">
-            <% recent_pages.each do |page| %>
-              <%= link_to (page.is_a?(ContentPage) ? page.view_path : page), class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" do %>
-                <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-notebook-blue <%= page.text_color %>"><%= page.icon %></i>
-                <div class="flex-1 min-w-0">
-                  <span class="truncate block"><%= page.name %></span>
-                  <span class="text-xs text-gray-500 dark:text-gray-400 truncate block"><%= distance_of_time_in_words(page.updated_at, Time.current) %> ago</span>
-                </div>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-
-      <!-- Content Type Breakdown (if mixed) -->
-      <% non_folder_content_types = content_counts_per_type.reject { |type, _| type == 'Folder' } %>
-      <% if non_folder_content_types.count > 1 %>
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Content Types</h3>
-          <div class="space-y-2">
-            <% content_counts_per_type.each do |content_type, count| %>
-              <% next if content_type == 'Folder' %>
-              <div class="flex items-center justify-between text-sm">
-                <div class="flex items-center">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center mr-2 dark:bg-gray-100">
-                    <i class="material-icons text-sm <%= content_class_from_name(content_type).text_color %>">
-                      <%= content_class_from_name(content_type).icon %>
-                    </i>
-                  </div>
-                  <span class="text-gray-700 dark:text-gray-300"><%= content_type.downcase.pluralize.humanize %></span>
-                </div>
-                <span class="text-gray-900 dark:text-white font-medium"><%= count %></span>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-
-      <!-- Additional Stats -->
-      <% if content.any? %>
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Activity</h3>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Total words</span>
-              <span class="text-gray-900 dark:text-white">
-                <%= number_with_delimiter(content.map(&:cached_word_count).reject(&:nil?).sum) %>
-              </span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Last edited</span>
-              <span class="text-gray-900 dark:text-white">
-                <%= distance_of_time_in_words(content.map(&:updated_at).max, Time.current) %> ago
-              </span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-gray-600 dark:text-gray-400">Created</span>
-              <span class="text-gray-900 dark:text-white">
-                <%= distance_of_time_in_words(content.map(&:created_at).min, Time.current) %> ago
-              </span>
-            </div>
-          </div>
-        </div>
-      <% end %>
-    </div>
-  </aside>
-
-  <!-- Mobile Sidebar Overlay -->
-  <div 
-    x-show="sidebarOpen" 
-    x-transition:enter="transition-opacity ease-linear duration-300"
-    x-transition:enter-start="opacity-0"
-    x-transition:enter-end="opacity-100"
-    x-transition:leave="transition-opacity ease-linear duration-300"
-    x-transition:leave-start="opacity-100"
-    x-transition:leave-end="opacity-0"
-    class="fixed inset-0 z-40 lg:hidden"
-    style="display: none;"
-  >
-    <div class="fixed inset-0 bg-black bg-opacity-25" @click="sidebarOpen = false"></div>
-    <div 
-      x-show="sidebarOpen"
-      x-transition:enter="transition ease-in-out duration-300 transform"
-      x-transition:enter-start="-translate-x-full"
-      x-transition:enter-end="translate-x-0"
-      x-transition:leave="transition ease-in-out duration-300 transform"
-      x-transition:leave-start="translate-x-0"
-      x-transition:leave-end="-translate-x-full"
-      class="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-gray-800 shadow-xl"
-    >
-      <!-- Mobile sidebar content - simplified version of desktop sidebar -->
-      <div class="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-        <div class="px-4">
-          <div class="flex items-center mb-6">
-            <div class="w-8 h-8 rounded-lg <%= content_type_class.color %> flex items-center justify-center mr-3">
-              <i class="material-icons text-white text-lg"><%= content_type_class.icon %></i>
-            </div>
-            <h2 class="text-lg font-semibold text-gray-900 dark:text-white"><%= content_type_name.pluralize %></h2>
-          </div>
-          
-          <!-- Mobile folders list -->
-          <div class="space-y-1">
-            <% folders.each do |folder| %>
-              <%= link_to folder, class: "flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700", onclick: "document.querySelector('[x-data]').__x.$data.sidebarOpen = false" do %>
-                <i class="material-icons text-lg mr-3 text-gray-400"><%= Folder.icon %></i>
-                <span><%= folder.title %></span>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
-      </div>
-      
-      <div class="absolute top-0 right-0 -mr-12 pt-2">
-        <button
-          @click="sidebarOpen = false"
-          type="button"
-          class="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-        >
-          <span class="sr-only">Close sidebar</span>
-          <i class="material-icons text-white">close</i>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content Area -->
-  <main class="flex-1 flex flex-col lg:pt-0 pt-16" :class="{ 'lg:ml-0': !showContentSidebar }">
+  <main class="flex-1 flex flex-col">
     <!-- Hero Header -->
     <div class="bg-white dark:bg-gray-800 shadow-sm">
       <div class="relative">
@@ -230,15 +26,6 @@
       <div class="px-6 lg:px-8 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-5">
-            <!-- Content Sidebar Toggle Button -->
-            <button 
-              @click="showContentSidebar = !showContentSidebar"
-              class="hidden lg:inline-flex items-center p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-              title="Toggle content sidebar"
-            >
-              <i class="material-icons text-xl" x-text="showContentSidebar ? 'menu_open' : 'menu'"></i>
-            </button>
-            
             <div class="flex-shrink-0">
               <% if @universe_scope %>
                 <%= link_to @universe_scope do %>
@@ -1004,47 +791,6 @@
       <% end %>
     </div>
   </main>
-
-  <!-- New Folder Modal -->
-  <div class="fixed z-50 inset-0 overflow-y-auto" x-show="showNewFolderModal" style="display: none;">
-    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showNewFolderModal = false"></div>
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-
-      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
-        <%= form_for Folder.new do |f| %>
-          <%= f.hidden_field :context, value: content_type_name %>
-          <%= f.hidden_field :parent_folder_id, value: @parent_folder %>
-
-          <div class="sm:flex sm:items-start">
-            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-              <i class="material-icons text-blue-600"><%= Folder.icon %></i>
-            </div>
-            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-              <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Create a folder</h3>
-              <div>
-                <label for="folder_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder name</label>
-                <%= f.text_field :title, 
-                    placeholder: "Enter folder name", 
-                    class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white", 
-                    id: "folder_title" %>
-              </div>
-            </div>
-          </div>
-          
-          <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-            <%= f.submit 'Create folder', 
-                class: "w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 #{Folder.color} text-base font-medium text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm" %>
-            <button type="button" 
-                class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-gray-500 dark:hover:text-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
-                @click="showNewFolderModal = false">
-              Cancel
-            </button>
-          </div>
-        <% end %>
-      </div>
-    </div>
-  </div>
 
   <!-- Enhanced Autosave JavaScript -->
   <script>
