@@ -23,10 +23,10 @@
 
   <!-- Timeline Header -->
   <div class="text-center mb-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-2">Change Timeline</h2>
-    <p class="text-gray-600">Your creative journey, day by day</p>
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Change Timeline</h2>
+    <p class="text-gray-600 dark:text-gray-400">Your creative journey, day by day</p>
     <% if @paginated_events.total_pages > 1 %>
-      <div class="mt-4 text-sm text-gray-500">
+      <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
         Showing page <%= @paginated_events.current_page %> of <%= @paginated_events.total_pages %>
         (<%= @paginated_events.total_entries %> total changes)
       </div>
@@ -41,11 +41,11 @@
     <% if @grouped_changes.empty? %>
       <!-- Empty State -->
       <div class="text-center py-16">
-        <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+        <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4">
           <i class="material-icons text-gray-400 text-2xl">history</i>
         </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No Changes Yet</h3>
-        <p class="text-gray-600">Start editing your <%= @serialized_content.class_name.downcase %> to see your creative journey unfold here.</p>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Changes Yet</h3>
+        <p class="text-gray-600 dark:text-gray-400">Start editing your <%= @serialized_content.class_name.downcase %> to see your creative journey unfold here.</p>
       </div>
     <% else %>
       <!-- Timeline Items -->
@@ -53,26 +53,26 @@
         <% @grouped_changes.each_with_index do |group, index| %>
           <div class="relative">
             <!-- Timeline Node -->
-            <div class="absolute left-6 w-4 h-4 bg-white border-4 border-blue-400 rounded-full shadow-sm z-10"
+            <div class="absolute left-6 w-4 h-4 bg-white dark:bg-gray-900 border-4 border-blue-400 rounded-full shadow-sm z-10"
                  style="top: 1.5rem;"></div>
             
             <!-- Date Group Card -->
-            <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="ml-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <!-- Date Header (Clickable) -->
               <button @click="toggleDate('<%= group[:date].to_s %>')"
-                      class="w-full px-6 py-4 text-left hover:bg-gray-50 transition-colors border-b border-gray-100">
+                      class="w-full px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center">
                     <div class="flex-shrink-0 mr-4">
-                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                        <i class="material-icons text-blue-600">today</i>
+                      <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 flex items-center justify-center">
+                        <i class="material-icons text-blue-600 dark:text-blue-400">today</i>
                       </div>
                     </div>
                     <div>
-                      <h3 class="text-lg font-semibold text-gray-900">
+                      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                         <%= group[:date].strftime('%B %d, %Y') %>
                       </h3>
-                      <div class="flex items-center text-sm text-gray-600 mt-1">
+                      <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mt-1">
                         <span class="flex items-center mr-4">
                           <i class="material-icons text-xs mr-1">edit</i>
                           <%= pluralize(group[:total_field_changes], 'change') %>
@@ -91,7 +91,7 @@
                     </div>
                   </div>
                   <div class="flex items-center">
-                    <div class="text-sm text-gray-500 mr-2">
+                    <div class="text-sm text-gray-500 dark:text-gray-400 mr-2">
                       <%= distance_of_time_in_words(group[:date], Date.current) %> ago
                     </div>
                     <i class="material-icons text-gray-400 transition-transform duration-200"
@@ -109,7 +109,7 @@
                    x-transition:leave="transition ease-in duration-150"
                    x-transition:leave-start="opacity-100 translate-y-0"
                    x-transition:leave-end="opacity-0 -translate-y-2"
-                   class="border-t border-gray-100">
+                   class="border-t border-gray-100 dark:border-gray-700">
                 
                 <div class="p-6 space-y-6">
                   <%= render partial: 'content/changelog/date_changes', 
@@ -129,23 +129,23 @@
     <!-- Creation Event -->
     <div class="relative mt-12">
       <!-- Timeline Node -->
-      <div class="absolute left-6 w-4 h-4 bg-white border-4 border-green-400 rounded-full shadow-sm z-10"
+      <div class="absolute left-6 w-4 h-4 bg-white dark:bg-gray-900 border-4 border-green-400 rounded-full shadow-sm z-10"
            style="top: 1.5rem;"></div>
       
       <!-- Creation Card -->
-      <div class="ml-16 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200 p-6">
+      <div class="ml-16 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-800 dark:to-gray-800 rounded-xl border-2 border-green-200 dark:border-green-900 p-6">
         <div class="flex items-center">
-          <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center shadow-lg mr-4">
+          <div class="w-12 h-12 rounded-lg bg-green-500 dark:bg-green-700 flex items-center justify-center shadow-lg mr-4">
             <i class="material-icons text-white text-xl">star</i>
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">The Beginning</h3>
-            <p class="text-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">The Beginning</h3>
+            <p class="text-gray-700 dark:text-gray-300">
               <span class="font-medium"><%= @serialized_content.name %></span> was created 
               <% if @content.user.present? %>
-                by <%= link_to @content.user.display_name, @content.user, class: "font-medium text-green-700 hover:text-green-800" %>
+                by <%= link_to @content.user.display_name, @content.user, class: "font-medium text-green-700 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300" %>
               <% end %>
-              <span class="text-gray-600">
+              <span class="text-gray-600 dark:text-gray-400">
                 <%= distance_of_time_in_words(@content.created_at, Time.current) %> ago
                 (<%= @content.created_at.strftime('%B %d, %Y at %I:%M %p') %>)
               </span>
@@ -158,23 +158,23 @@
     <!-- Pagination Controls -->
     <% if @paginated_events.total_pages > 1 %>
       <div class="mt-16 flex justify-center">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-6 py-4">
           <div class="flex items-center space-x-4">
             <% if @paginated_events.previous_page %>
               <%= link_to url_for(params.permit(:page).merge(page: @paginated_events.previous_page)),
-                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700" do %>
+                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors text-gray-700 dark:text-gray-200" do %>
                 <i class="material-icons text-sm mr-1">chevron_left</i>
                 Previous
               <% end %>
             <% end %>
             
-            <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <div class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
               <span>Page <%= @paginated_events.current_page %> of <%= @paginated_events.total_pages %></span>
             </div>
             
             <% if @paginated_events.next_page %>
               <%= link_to url_for(params.permit(:page).merge(page: @paginated_events.next_page)),
-                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700" do %>
+                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors text-gray-700 dark:text-gray-200" do %>
                 Next
                 <i class="material-icons text-sm ml-1">chevron_right</i>
               <% end %>
