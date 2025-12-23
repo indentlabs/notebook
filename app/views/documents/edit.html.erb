@@ -22,7 +22,7 @@
           <%= form_for @document do |f| %>
             <%= f.text_field :title,
               id: "document_title",
-              class: "w-full text-left text-3xl md:text-4xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600",
+              class: "w-full text-3xl md:text-4xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600",
               placeholder: "Untitled"
             %>
           <% end %>
@@ -701,7 +701,7 @@
           buttonLabels: 'fontawesome',
           placeholder: {
             text: 'Write as little or as much as you want!',
-            hideOnClick: true
+            hideOnClick: false
           },
           toolbar: {
             buttons: [
@@ -1416,6 +1416,11 @@
           outline: none !important;
         }
 
+        /* Align title input with editor content - strip browser default padding */
+        #document_title {
+          padding: 0;
+        }
+
         /* Enhanced Medium Editor toolbar styling */
         .medium-editor-toolbar {
           border-radius: 0.5rem;
@@ -1484,8 +1489,15 @@
           color: #60a5fa; /* blue-400 */
         }
         
-        .medium-editor-placeholder {
+        .medium-editor-placeholder::after {
+          font-style: normal;
           color: rgba(156, 163, 175, 1);
+          padding: 0;
+          margin: 0;
+        }
+
+        .dark .medium-editor-placeholder::after {
+          color: rgba(107, 114, 128, 1); /* gray-500 */
         }
         
         /* Improve the prose styling for the editor */
