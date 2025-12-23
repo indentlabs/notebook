@@ -1,142 +1,149 @@
 <div class="max-w-3xl mx-auto px-4 py-12">
   <!-- Header -->
   <div class="text-center mb-12">
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-white border-2 shadow-sm" style="border-color: <%= Document.hex_color %>">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-white dark:bg-gray-800 border-2 shadow-sm" style="border-color: <%= Document.hex_color %>">
       <svg class="w-8 h-8" style="color: <%= Document.hex_color %>" fill="currentColor" viewBox="0 0 24 24">
         <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
       </svg>
     </div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-3">Document analysis</h1>
-    <p class="text-gray-600 mb-2">
-      No analysis has been requested for <strong><%= document.title %></strong> yet.
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">Document analysis</h1>
+    <p class="text-gray-600 dark:text-gray-400 mb-2">
+      No analysis has been requested for <strong class="text-gray-900 dark:text-gray-100"><%= document.title %></strong> yet.
     </p>
-    <p class="text-sm text-gray-500 mb-8">
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">
       Our automated document analysis is a Premium-only feature.
       <% unless user_signed_in? && current_user.on_premium_plan? %>
-        <%= link_to 'Upgrade to Premium', subscription_path, class: 'text-blue-600 hover:underline' %> to get started.
+        <%= link_to 'Upgrade to Premium', subscription_path, class: 'text-teal-600 dark:text-teal-400 hover:underline' %> to get started.
       <% end %>
     </p>
 
     <% if user_signed_in? && current_user.on_premium_plan? %>
-      <%= link_to 'Request an analysis',
-          queue_analysis_document_path(@document),
+      <%= link_to queue_analysis_document_path(@document),
           class: 'inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium shadow-sm hover:shadow transition-all',
-          style: "background-color: #{Document.hex_color}" %>
+          style: "background-color: #{Document.hex_color}",
+          data: { turbo_method: :post } do %>
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9,5V7H15V5H9M7,3H17A2,2 0 0,1 19,5V21A2,2 0 0,1 17,23H7A2,2 0 0,1 5,21V5A2,2 0 0,1 7,3M12,18A3,3 0 0,0 15,15A3,3 0 0,0 12,12A3,3 0 0,0 9,15A3,3 0 0,0 12,18Z" />
+        </svg>
+        Request an analysis
+      <% end %>
     <% else %>
-      <%= link_to 'Request an analysis',
-          queue_analysis_document_path(@document),
-          class: 'inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium shadow-sm opacity-50 cursor-not-allowed',
-          style: "background-color: #{Document.hex_color}" %>
+      <span class="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium shadow-sm opacity-50 cursor-not-allowed" style="background-color: <%= Document.hex_color %>">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9,5V7H15V5H9M7,3H17A2,2 0 0,1 19,5V21A2,2 0 0,1 17,23H7A2,2 0 0,1 5,21V5A2,2 0 0,1 7,3M12,18A3,3 0 0,0 15,15A3,3 0 0,0 12,12A3,3 0 0,0 9,15A3,3 0 0,0 12,18Z" />
+        </svg>
+        Request an analysis
+      </span>
     <% end %>
   </div>
 
   <!-- Features Grid -->
   <div class="mb-8">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">What you'll get:</h2>
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">What you'll get:</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="bg-white rounded-lg border shadow-sm p-5">
-        <h3 class="font-semibold text-gray-900 mb-3">Writing style</h3>
-        <ul class="space-y-2 text-sm text-gray-600">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Writing style</h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Sentence rhythm</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Word preferences</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Comparison to famous authors</span>
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-lg border shadow-sm p-5">
-        <h3 class="font-semibold text-gray-900 mb-3">Word choice</h3>
-        <ul class="space-y-2 text-sm text-gray-600">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Word choice</h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Parts of speech</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Word complexity</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Lexical richness</span>
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-lg border shadow-sm p-5">
-        <h3 class="font-semibold text-gray-900 mb-3">Readability</h3>
-        <ul class="space-y-2 text-sm text-gray-600">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Readability</h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Reading ease</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Word complexity</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Industry-standard readability tests</span>
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-lg border shadow-sm p-5">
-        <h3 class="font-semibold text-gray-900 mb-3">Emotion</h3>
-        <ul class="space-y-2 text-sm text-gray-600">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Emotion</h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Character emotional ranges</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Story sentiment</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Story-wide emotions</span>
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-lg border shadow-sm p-5">
-        <h3 class="font-semibold text-gray-900 mb-3">Length</h3>
-        <ul class="space-y-2 text-sm text-gray-600">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Length</h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Length measurements</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Estimated time to read</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Character counter</span>
           </li>
         </ul>
       </div>
 
-      <div class="bg-white rounded-lg border shadow-sm p-5">
-        <h3 class="font-semibold text-gray-900 mb-3">Entities</h3>
-        <ul class="space-y-2 text-sm text-gray-600">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Entities</h3>
+        <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Extract entities</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Link your pages</span>
           </li>
           <li class="flex items-start gap-2">
-            <svg class="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" /></svg>
             <span>Quick reference while writing</span>
           </li>
         </ul>

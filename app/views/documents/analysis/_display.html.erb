@@ -8,6 +8,11 @@
   <!-- Readability Section -->
   <%= render partial: 'documents/analysis/sections/readability', locals: { analysis: analysis } %>
 
+  <!-- Writing Style Section -->
+  <% if analysis.sentence_count && analysis.sentence_count > 0 %>
+    <%= render partial: 'documents/analysis/sections/style', locals: { analysis: analysis } %>
+  <% end %>
+
   <!-- Sentiment & Emotions Section -->
   <% if analysis.has_sentiment_scores? || analysis.sentiment_label.present? %>
     <%= render partial: 'documents/analysis/sections/sentiment', locals: { analysis: analysis } %>

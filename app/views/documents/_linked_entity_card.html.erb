@@ -8,19 +8,18 @@
 
 <%# Extract the base color name (e.g., 'green', 'purple') from the color class %>
 <% base_color = entity_class.color.match(/bg-(\w+)-\d+/)&.[](1) || 'gray' %>
-<% icon_bg_class = "bg-#{base_color}-100 dark:bg-#{base_color}-900/30" %>
+<% icon_bg_class = "bg-#{base_color}-100 dark:bg-#{base_color}-900 dark:bg-opacity-30" %>
 <% icon_text_class = "text-#{base_color}-600 dark:text-#{base_color}-400" %>
 
 <div x-data="{ expanded: false }"
-     class="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden linked-entity bg-white dark:bg-gray-800"
+     class="linked-entity"
      data-entity-type="<%= document_entity.entity_type %>"
      data-entity-id="<%= document_entity.id %>"
      data-linked-entity-id="<%= document_entity.entity_id %>">
   <!-- Entity header (always visible) -->
   <div
     @click="expanded = !expanded"
-    :class="expanded ? 'border-l-blue-500' : 'border-l-transparent'"
-    class="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-l-4"
+    class="px-3 py-2.5 cursor-pointer rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
   >
     <div class="flex items-center justify-between">
       <div class="flex items-center">
@@ -52,7 +51,7 @@
        x-transition:leave="transition ease-in duration-150"
        x-transition:leave-start="opacity-100"
        x-transition:leave-end="opacity-0"
-       class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
+       class="pb-3 pl-2">
     <div class="flex items-center justify-between mb-2">
       <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Quick reference</h4>
       <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.id),
