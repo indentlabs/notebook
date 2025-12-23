@@ -211,22 +211,19 @@ class User < ApplicationRecord
     self[:name].blank? && self.persisted? ? 'Anonymous author' : self[:name]
   end
 
-  def image_url(size=80)
-    @cached_user_image_url ||= if avatar.attached? # manually-uploaded avatar
+  def image_url(size: 80)
+    if avatar.attached? # manually-uploaded avatar
       Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
-
     else # otherwise, grab the default from Gravatar for this email address
-      gravatar_fallback_url(size)
+      gravatar_fallback_url(size: size)
     end
-
   rescue ActiveStorage::FileNotFoundError
-    gravatar_fallback_url(size)
-
+    gravatar_fallback_url(size: size)
   rescue ImageProcessing::Error
-    gravatar_fallback_url(size)
+    gravatar_fallback_url(size: size)
   end
 
-  def gravatar_fallback_url(size=80)
+  def gravatar_fallback_url(size: 80)
     require 'digest/md5' # todo do we actually need to require this all the time?
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe

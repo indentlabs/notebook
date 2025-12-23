@@ -3,7 +3,7 @@
   <%
     set_meta_tags title: "#{@user.name || @user.display_name}'s profile",
                   description: "#{@user.display_name} is creating fictional worlds on Notebook.ai.",
-                  image_src: URI.join(root_url, @user.image_url(120)),
+                  image_src: URI.join(root_url, @user.image_url(size: 120)),
                   og: { type: 'profile' }
 
     content_jsonld = {
@@ -11,7 +11,7 @@
       '@type': 'https://schema.org/Person',
       'https://schema.org/name': @user.name,
       'https://schema.org/description': "#{@user.name}'s worldbuilding profile on Notebook.ai",
-      'https://schema.org/image': URI.join(root_url, @user.image_url(120))
+      'https://schema.org/image': URI.join(root_url, @user.image_url(size: 120))
     }
   %>
   <%= content_jsonld.to_json.html_safe %> %>
@@ -50,7 +50,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <!-- Profile Picture -->
             <div class="relative flex-shrink-0">
-              <%= image_tag @user.image_url(120), class: "w-24 h-24 rounded-full border-4 border-white dark:border-slate-700 shadow-lg" %>
+              <%= image_tag @user.image_url(size: 120), class: "w-24 h-24 rounded-full border-4 border-white dark:border-slate-700 shadow-lg" %>
               <% if @user.respond_to?(:online?) && @user.online? %>
                 <div class="absolute bottom-1 right-1 w-6 h-6 bg-green-400 rounded-full border-2 border-white"></div>
               <% end %>

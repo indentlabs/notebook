@@ -2,14 +2,14 @@
   <%
     set_meta_tags title: @user.name,
     description: "#{@user.name}’s profile",
-    image_src: @user.image_url(120)
+    image_src: @user.image_url(size: 120)
 
     content_jsonld = {
       '@id': user_url(id: @user.id),
       '@type': 'https://schema.org/Person',
       'https://schema.org/name': @user.name,
       'https://schema.org/description': "#{@user.name}’s worldbuilding profile on Notebook.ai",
-      'https://schema.org/image': @user.image_url(120)
+      'https://schema.org/image': @user.image_url(size: 120)
     }
   %>
   <%= content_jsonld.to_json.html_safe %> %>

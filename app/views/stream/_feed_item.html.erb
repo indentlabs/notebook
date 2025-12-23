@@ -6,7 +6,7 @@
     <div class="flex items-start justify-between mb-4">
       <div class="flex items-center space-x-4">
         <div class="relative">
-          <%= image_tag share.user.image_url(48), class: "h-12 w-12 rounded-full shadow-sm" %>
+          <%= image_tag share.user.image_url(size: 48), class: "h-12 w-12 rounded-full shadow-sm" %>
           <% if share.content_page && share.content_page.class.respond_to?(:hex_color) %>
             <div class="absolute -bottom-1 -right-1 h-6 w-6 rounded-full shadow-sm flex items-center justify-center" style="background-color: <%= share.content_page.class.hex_color %>;">
               <i class="material-icons text-white text-sm"><%= share.content_page.class.icon %></i>
@@ -148,7 +148,7 @@
         <div class="space-y-4">
           <% share.share_comments.limit(2).each do |comment| %>
             <div class="flex space-x-3">
-              <%= image_tag comment.user.image_url(32), class: "h-8 w-8 rounded-full flex-shrink-0" %>
+              <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0" %>
               <div class="flex-1 min-w-0">
                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
                   <div class="flex items-center space-x-2 mb-1">
@@ -178,7 +178,7 @@
     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
       <div class="flex items-start space-x-3 w-full">
         <div class="flex-shrink-0">
-          <%= image_tag current_user.image_url(32), class: "h-8 w-8 rounded-full border border-green-200" %>
+          <%= image_tag current_user.image_url(size: 32), class: "h-8 w-8 rounded-full border border-green-200" %>
         </div>
         <%= form_for ShareComment.new, local: true, html: { class: "flex-1" } do |f| %>
           <%= f.hidden_field :content_page_share_id, value: share.id %>
