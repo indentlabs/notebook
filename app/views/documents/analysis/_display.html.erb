@@ -1,50 +1,34 @@
 <div class="space-y-8">
-  <%= render partial: 'documents/analysis/sections/general',      locals: { document: document, analysis: analysis } %>
-  <%= render partial: 'documents/analysis/sections/length',       locals: { analysis: analysis } %>
-  <%= render partial: 'documents/analysis/sections/time_to_read', locals: { analysis: analysis } %>
-  <%= render partial: 'documents/analysis/sections/readability',  locals: { analysis: analysis } %>
-  <%= render partial: 'documents/analysis/sections/entities',     locals: { analysis: analysis } if analysis.document_entities.any? %>
-  <%= render partial: 'documents/analysis/sections/sentiment',    locals: { analysis: analysis } %>
-  <%# render partial: 'documents/analysis/sections/style',        locals: { analysis: analysis } %>
-  <%= render partial: 'documents/analysis/sections/concepts',     locals: { analysis: analysis } %>
-  <%= render partial: 'documents/analysis/sections/categories',   locals: { analysis: analysis } %>
-
-  <div>
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Dive deeper</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <%= link_to analysis_readability_document_path(@document), class: 'block' do %>
-        <div class="bg-white border rounded-lg p-6 hover:shadow-md transition-shadow">
-          <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Explore</div>
-          <div class="text-xl font-bold text-gray-900 flex items-center justify-between">
-            Readability
-            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-            </svg>
-          </div>
-        </div>
-      <% end %>
-      <%= link_to analysis_style_document_path(@document), class: 'block' do %>
-        <div class="bg-white border rounded-lg p-6 hover:shadow-md transition-shadow">
-          <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Explore</div>
-          <div class="text-xl font-bold text-gray-900 flex items-center justify-between">
-            Style
-            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-            </svg>
-          </div>
-        </div>
-      <% end %>
-      <%= link_to analysis_sentiment_document_path(@document), class: 'block' do %>
-        <div class="bg-white border rounded-lg p-6 hover:shadow-md transition-shadow">
-          <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">Explore</div>
-          <div class="text-xl font-bold text-gray-900 flex items-center justify-between">
-            Sentiment
-            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
-            </svg>
-          </div>
-        </div>
-      <% end %>
-    </div>
+  <!-- Length & Time Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <%= render partial: 'documents/analysis/sections/length', locals: { analysis: analysis } %>
+    <%= render partial: 'documents/analysis/sections/time_to_read', locals: { analysis: analysis } %>
   </div>
+
+  <!-- Readability Section -->
+  <%= render partial: 'documents/analysis/sections/readability', locals: { analysis: analysis } %>
+
+  <!-- Sentiment & Emotions Section -->
+  <% if analysis.has_sentiment_scores? || analysis.sentiment_label.present? %>
+    <%= render partial: 'documents/analysis/sections/sentiment', locals: { analysis: analysis } %>
+  <% end %>
+
+  <!-- Entities Section -->
+  <% if analysis.document_entities.any? %>
+    <%= render partial: 'documents/analysis/sections/entities', locals: { analysis: analysis } %>
+  <% end %>
+
+  <!-- Concepts & Categories Section -->
+  <% if analysis.document_concepts.relevant.any? || analysis.document_categories.relevant.any? %>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Discovered Content</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Concepts and categories detected in your writing</p>
+      </div>
+      <div class="p-6 space-y-6">
+        <%= render partial: 'documents/analysis/sections/concepts', locals: { analysis: analysis } %>
+        <%= render partial: 'documents/analysis/sections/categories', locals: { analysis: analysis } %>
+      </div>
+    </div>
+  <% end %>
 </div>

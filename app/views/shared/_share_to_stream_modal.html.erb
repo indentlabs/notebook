@@ -75,7 +75,7 @@
           <!-- Share form -->
           <%= form_with url: user_content_page_shares_path(current_user), method: :post, local: true, class: "space-y-4" do |f| %>
             <!-- Hidden content identifier -->
-            <input type="hidden" name="content_page" value="<%= "#{content_type}-#{content_id}" %>">
+            <input type="hidden" name="content_page_share[content_page]" value="<%= "#{content_type}-#{content_id}" %>">
 
             <!-- Message textarea -->
             <div>
@@ -84,7 +84,7 @@
               </label>
               <textarea
                 id="share-message"
-                name="message"
+                name="content_page_share[message]"
                 rows="3"
                 placeholder="Share your thoughts, ask a question, or tell the community why you're sharing this..."
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
@@ -94,8 +94,8 @@
               </p>
             </div>
 
-            <!-- Privacy notice -->
-            <% if content.respond_to?(:privacy) && content.privacy != 'public' %>
+            <!-- Privacy notice - only show if user can edit the content AND it's not already public -->
+            <% if content.respond_to?(:privacy) && content.privacy != 'public' && content.updatable_by?(current_user) %>
               <div class="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800">
                 <div class="flex items-start">
                   <i class="material-icons text-yellow-600 dark:text-yellow-400 text-sm mr-2 mt-0.5">warning</i>

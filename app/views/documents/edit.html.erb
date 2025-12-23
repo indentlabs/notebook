@@ -273,243 +273,9 @@
     <div>
       <%= render partial: 'javascripts/content_linking_alpine' %>
         
-        <!-- Privacy modal with tabs -->
-        <div
-          id="document-privacy-modal"
-          x-data="{ open: false, activeTab: 'document' }"
-          x-show="open"
-          @open-modal.window="if ($event.detail === 'document-privacy-modal') open = true"
-          @close-modal.window="open = false"
-          @keydown.escape.window="open = false"
-          class="fixed inset-0 z-50 overflow-y-auto"
-          x-cloak
-        >
-          <!-- Modal backdrop -->
-          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
-          
-          <!-- Modal content -->
-          <div class="relative min-h-screen flex items-center justify-center p-4">
-            <div
-              class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
-              x-show="open"
-              x-transition:enter="ease-out duration-300"
-              x-transition:enter-start="opacity-0 translate-y-4"
-              x-transition:enter-end="opacity-100 translate-y-0"
-              x-transition:leave="ease-in duration-200"
-              x-transition:leave-start="opacity-100 translate-y-0"
-              x-transition:leave-end="opacity-0 translate-y-4"
-              @click.away="open = false"
-            >
-              <!-- Modal header -->
-              <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500 to-teal-600">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
-                      <i class="material-icons text-teal-500"><%= Document.icon %></i>
-                    </div>
-                    <h3 class="text-lg font-medium text-white">Privacy Settings</h3>
-                  </div>
-                  <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
-                    <i class="material-icons">close</i>
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Tab navigation -->
-              <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <nav class="flex px-6" aria-label="Tabs">
-                  <button
-                    type="button"
-                    @click="activeTab = 'document'"
-                    :class="activeTab === 'document' ? 'border-teal-500 text-teal-600 dark:text-teal-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                    class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
-                  >
-                    <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'document' ? 'text-teal-500' : 'text-gray-400'"><%= Document.icon %></i>
-                    Document Privacy
-                  </button>
-                  
-                  <% if @document.universe.present? %>
-                    <button
-                      type="button"
-                      @click="activeTab = 'universe'"
-                      :class="activeTab === 'universe' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'"
-                      class="py-4 px-4 border-b-2 font-medium text-sm transition-colors flex items-center"
-                    >
-                      <i class="material-icons text-sm mr-2 align-middle" :class="activeTab === 'universe' ? 'text-blue-500' : 'text-gray-400'">public</i>
-                      Universe Privacy
-                      <% if @document.universe.privacy == 'public' %>
-                        <span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          Public
-                        </span>
-                      <% end %>
-                    </button>
-                  <% end %>
-                </nav>
-              </div>
-              
-              <!-- Tab content -->
-              <div class="p-6">
-                <!-- Document privacy tab -->
-                <div x-show="activeTab === 'document'" x-cloak>
-                  <div class="flex items-start mb-4">
-                    <i class="material-icons text-teal-500 mr-3 mt-0.5">info</i>
-                    <span class="text-sm text-gray-600 dark:text-gray-300">
-                      Control who can view this document. More privacy options will be available in the future.
-                    </span>
-                  </div>
+        <!-- Privacy modal -->
+        <%= render 'documents/privacy_modal' %>
 
-                  <% if @document.universe.present? %>
-                    <div class="mb-4 p-3 rounded-md border <%= @document.universe.privacy == 'public' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' %>">
-                      <div class="flex items-center">
-                        <div class="flex-shrink-0 mr-3">
-                          <div class="w-8 h-8 rounded-full <%= @document.universe.privacy == 'public' ? 'bg-yellow-100 dark:bg-yellow-900/40' : 'bg-gray-100 dark:bg-gray-600' %> flex items-center justify-center">
-                            <i class="material-icons text-sm <%= @document.universe.privacy == 'public' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400' %>"><%= @document.universe.privacy == 'public' ? 'warning' : 'info' %></i>
-                          </div>
-                        </div>
-                        <div>
-                          <p class="text-sm font-medium <%= @document.universe.privacy == 'public' ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-700 dark:text-gray-200' %>">
-                            This document is in the universe "<%= @document.universe.name %>"
-                          </p>
-                          <p class="text-xs <%= @document.universe.privacy == 'public' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400' %>">
-                            <% if @document.universe.privacy == 'public' %>
-                              <strong>Note:</strong> This universe is <strong>public</strong>, so this document will be visible to anyone who can view the universe, regardless of its own privacy setting.
-                            <% else %>
-                              This universe is <strong>private</strong>, so this document's privacy setting will be respected.
-                            <% end %>
-                            <a @click="activeTab = 'universe'" class="underline cursor-pointer <%= @document.universe.privacy == 'public' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300' %> hover:opacity-80">Manage universe privacy</a>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  <% end %>
-
-                  <%= form_for(@document, remote: true, html: { id: 'document-privacy-form' }) do |f| %>
-                    <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                      <%= f.hidden_field :privacy, value: @document.privacy, id: 'document_privacy_field' %>
-
-                      <div class="space-y-3">
-                        <!-- Radio button for Private -->
-                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.privacy == 'private' ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>">
-                          <input type="radio" id="document-privacy-private" name="document-privacy-option" value="private" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.privacy == 'private' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
-                          <label for="document-privacy-private" class="ml-3 flex items-center cursor-pointer">
-                            <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">lock</i>
-                            <div>
-                              <span class="block text-sm font-medium text-gray-900 dark:text-white">Private</span>
-                              <span class="block text-xs text-gray-500 dark:text-gray-400">Only visible to you</span>
-                            </div>
-                          </label>
-                        </div>
-
-                        <!-- Radio button for Public -->
-                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.privacy == 'public' ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>">
-                          <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.privacy == 'public' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
-                          <label for="document-privacy-public" class="ml-3 flex items-center cursor-pointer">
-                            <i class="material-icons text-green-500 mr-2">public</i>
-                            <div>
-                              <span class="block text-sm font-medium text-gray-900 dark:text-white">Public</span>
-                              <span class="block text-xs text-gray-500 dark:text-gray-400">Anyone with the link can view</span>
-                            </div>
-                          </label>
-                        </div>
-                        
-                        <!-- Placeholder for future options (commented out for now) -->
-                        <!--
-                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 opacity-50 cursor-not-allowed">
-                          <input type="radio" id="document-privacy-friends" name="document-privacy-option" value="friends" class="h-4 w-4 text-teal-600 focus:ring-teal-500" disabled>
-                          <label for="document-privacy-friends" class="ml-3 flex items-center">
-                            <i class="material-icons text-blue-500 mr-2">people</i>
-                            <div>
-                              <span class="block text-sm font-medium text-gray-900">Friends Only</span>
-                              <span class="block text-xs text-gray-500">Only visible to you and your friends</span>
-                              <span class="block text-xs text-gray-400 italic">Coming soon</span>
-                            </div>
-                          </label>
-                        </div>
-                        -->
-                      </div>
-                    </div>
-                  <% end %>
-                </div>
-                
-                <!-- Universe privacy tab -->
-                <% if @document.universe.present? %>
-                  <div x-show="activeTab === 'universe'" x-cloak>
-                    <div class="flex items-start mb-4">
-                      <i class="material-icons text-blue-500 mr-3 mt-0.5">info</i>
-                      <span class="text-sm text-gray-600 dark:text-gray-300">
-                        Documents in a public universe are visible to anyone who can view that universe, regardless of the document's privacy setting.
-                      </span>
-                    </div>
-
-                    <% if @document.universe.user == current_user %>
-                      <%= form_for(@document.universe, remote: true, html: { id: 'universe-privacy-form' }) do |f| %>
-                        <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                          <div class="flex items-center mb-4">
-                            <div class="mr-3">
-                              <i class="material-icons text-blue-500">public</i>
-                            </div>
-                            <div>
-                              <span class="font-medium text-gray-900 dark:text-white"><%= @document.universe.name %></span>
-                            </div>
-                          </div>
-
-                          <%= f.hidden_field :privacy, value: @document.universe.privacy, id: 'universe_privacy_field' %>
-
-                          <div class="space-y-3">
-                            <!-- Radio button for Private -->
-                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.universe.privacy == 'private' ? 'bg-white dark:bg-gray-800 border border-blue-500' : '' %>">
-                              <input type="radio" id="universe-privacy-private" name="universe-privacy-option" value="private" class="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.universe.privacy == 'private' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
-                              <label for="universe-privacy-private" class="ml-3 flex items-center cursor-pointer">
-                                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">lock</i>
-                                <div>
-                                  <span class="block text-sm font-medium text-gray-900 dark:text-white">Private</span>
-                                  <span class="block text-xs text-gray-500 dark:text-gray-400">Only visible to you</span>
-                                </div>
-                              </label>
-                            </div>
-
-                            <!-- Radio button for Public -->
-                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.universe.privacy == 'public' ? 'bg-white dark:bg-gray-800 border border-blue-500' : '' %>">
-                              <input type="radio" id="universe-privacy-public" name="universe-privacy-option" value="public" class="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.universe.privacy == 'public' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
-                              <label for="universe-privacy-public" class="ml-3 flex items-center cursor-pointer">
-                                <i class="material-icons text-green-500 mr-2">public</i>
-                                <div>
-                                  <span class="block text-sm font-medium text-gray-900 dark:text-white">Public</span>
-                                  <span class="block text-xs text-gray-500 dark:text-gray-400">Anyone with the link can view</span>
-                                </div>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      <% end %>
-                    <% else %>
-                      <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <div class="flex items-center">
-                          <div class="mr-3">
-                            <i class="material-icons text-blue-500">public</i>
-                          </div>
-                          <div>
-                            <span class="font-medium text-gray-900 dark:text-white"><%= @document.universe.name %></span>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Currently: <span class="font-medium capitalize"><%= @document.universe.privacy || 'private' %></span></p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You don't own this universe, so you can't change its privacy settings.</p>
-                          </div>
-                        </div>
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-              </div>
-              
-              <!-- Modal footer -->
-              <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end">
-                <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
         <!-- Document Notes modal -->
         <div
           id="document-notes-modal"
@@ -667,11 +433,11 @@
               @click.away="open = false"
             >
               <%= form_for(@document, remote: true, html: { id: 'document-universe-form', class: 'metadata-form' }) do |f| %>
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500 to-teal-600">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-purple-700 to-purple-800">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center">
                       <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
-                        <i class="material-icons text-teal-500">public</i>
+                        <i class="material-icons text-purple-800">public</i>
                       </div>
                       <h3 class="text-lg font-medium text-white">Document Universe</h3>
                     </div>
@@ -682,7 +448,7 @@
                 </div>
                 <div class="p-6">
                   <div class="flex items-start mb-4">
-                    <i class="material-icons text-teal-500 mr-3 mt-0.5">public</i>
+                    <i class="material-icons text-purple-800 mr-3 mt-0.5">public</i>
                     <span class="text-sm text-gray-600 dark:text-gray-300">
                       Select a universe for this document. Documents in a universe can be organized together and share common worldbuilding elements.
                     </span>
@@ -694,7 +460,7 @@
                         :id,
                         :name,
                         { include_blank: "No universe" },
-                        { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-teal-500 focus:border-teal-500 sm:text-sm rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" }
+                        { class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" }
                     %>
                     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                       Selecting a universe will make this document part of that universe's worldbuilding.

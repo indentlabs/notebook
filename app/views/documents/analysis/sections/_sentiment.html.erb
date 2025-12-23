@@ -1,232 +1,106 @@
 <%
-  sentiment_color = (analysis.sentiment_score < 0) ? 'blue' : 'green'
-  sentiment_bg = (analysis.sentiment_score < 0) ? 'bg-blue-100 dark:bg-blue-900' : 'bg-green-100 dark:bg-green-900'
-  sentiment_text = (analysis.sentiment_score < 0) ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
+  sentiment_label = analysis.sentiment_label || 'neutral'
+  sentiment_score = ((analysis.sentiment_score || 0) * 100).round.abs
+
+  sentiment_config = case sentiment_label.to_s.downcase
+    when 'positive'
+      { color: 'green', icon: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,17.23C9.97,17.23 8.16,16.5 6.76,15.36L8.67,13.45C9.66,14.13 10.81,14.54 12,14.54C13.19,14.54 14.34,14.13 15.33,13.45L17.24,15.36C15.84,16.5 14.03,17.23 12,17.23M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z' }
+    when 'negative'
+      { color: 'red', icon: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,14C9.67,14 7.69,15.46 6.89,17.5H17.11C16.31,15.46 14.33,14 12,14M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z' }
+    else
+      { color: 'gray', icon: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11M12,17.5C10,17.5 8.23,16.5 7.15,15H16.85C15.77,16.5 14,17.5 12,17.5Z' }
+  end
+
+  emotions = [
+    { name: 'Joy', score: analysis.joy_score, color: 'yellow' },
+    { name: 'Sadness', score: analysis.sadness_score, color: 'blue' },
+    { name: 'Fear', score: analysis.fear_score, color: 'purple' },
+    { name: 'Anger', score: analysis.anger_score, color: 'red' },
+    { name: 'Disgust', score: analysis.disgust_score, color: 'green' }
+  ].select { |e| e[:score].present? }.sort_by { |e| -e[:score] }
 %>
 
-<h5 class="text-gray-500 dark:text-gray-400 text-xl font-semibold mb-4">Sentiment</h5>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-    <div class="<%= sentiment_bg %> p-6">
-      <h5 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-        Overall <%= analysis.sentiment_label %>
-      </h5>
-      <div class="flex items-start gap-4">
-        <div class="<%= sentiment_text %> text-center flex-shrink-0">
-          <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,17.23C9.97,17.23 8.16,16.5 6.76,15.36L8.67,13.45C9.66,14.13 10.81,14.54 12,14.54C13.19,14.54 14.34,14.13 15.33,13.45L17.24,15.36C15.84,16.5 14.03,17.23 12,17.23M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z" />
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Sentiment & Emotion</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Overall tone and emotional content of your writing</p>
+  </div>
+
+  <div class="p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Overall Sentiment -->
+      <div class="bg-<%= sentiment_config[:color] %>-50 dark:bg-<%= sentiment_config[:color] %>-900 rounded-xl p-6">
+        <div class="flex items-center gap-4">
+          <svg class="w-16 h-16 text-<%= sentiment_config[:color] %>-600 dark:text-<%= sentiment_config[:color] %>-400" fill="currentColor" viewBox="0 0 24 24">
+            <path d="<%= sentiment_config[:icon] %>" />
           </svg>
-          <div class="text-2xl font-bold mt-2">
-            <%= (analysis.sentiment_score * 100).round.abs %>
+          <div>
+            <div class="text-3xl font-bold text-<%= sentiment_config[:color] %>-700 dark:text-<%= sentiment_config[:color] %>-300">
+              <%= sentiment_score %>%
+            </div>
+            <div class="text-sm font-medium text-<%= sentiment_config[:color] %>-600 dark:text-<%= sentiment_config[:color] %>-400 capitalize">
+              <%= sentiment_label %> Sentiment
+            </div>
           </div>
         </div>
-        <div class="text-gray-900 dark:text-gray-100">
-          <p class="mb-3">
-            <%
-              modifier = case analysis.sentiment_score * 100
-              when 0..25
-                'somewhat'
-              when 26..50
-                'mostly'
-              when 51..100
-                'very'
-              else
-                'generally'
-              end
-            %>
-            This document expresses a <%= modifier %> <strong><%= analysis.sentiment_label %></strong> sentiment throughout.
-          </p>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
-            Your score is based on a scale from 1 to 100 based on how intense this emotion appears to be, where 100 is most intense.
-          </p>
-        </div>
+        <p class="mt-4 text-sm text-gray-600 dark:text-gray-400">
+          <% modifier = case sentiment_score when 0..25 then 'somewhat' when 26..50 then 'moderately' when 51..100 then 'strongly' else 'generally' end %>
+          This document expresses a <%= modifier %> <strong><%= sentiment_label %></strong> tone throughout.
+        </p>
       </div>
+
+      <!-- Emotions Breakdown -->
+      <% if emotions.any? %>
+        <div>
+          <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Emotions Detected</h3>
+          <div class="space-y-3">
+            <% emotions.each do |emotion| %>
+              <% pct = (emotion[:score] * 100).round %>
+              <div>
+                <div class="flex items-center justify-between text-sm mb-1">
+                  <span class="text-gray-700 dark:text-gray-300"><%= emotion[:name] %></span>
+                  <span class="font-medium text-gray-900 dark:text-gray-100"><%= pct %>%</span>
+                </div>
+                <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div class="h-full bg-<%= emotion[:color] %>-500 rounded-full transition-all" style="width: <%= pct %>%"></div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
   </div>
 
-  <% if analysis.has_sentiment_scores? %>
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-      <div class="p-6">
-        <h5 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Evoked emotions</h5>
-        <div id="graph-emotions"></div>
+  <!-- Character Emotions -->
+  <%
+    character_entities = analysis.document_entities
+      .where(entity_type: 'Character')
+      .select { |e| e.joy_score.present? || e.sadness_score.present? }
+      .sort_by { |e| -(e.relevance || 0) }
+      .first(6)
+  %>
+  <% if character_entities.any? %>
+    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+      <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">Character Emotions</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% character_entities.each do |entity| %>
+          <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+            <div class="font-medium text-gray-900 dark:text-gray-100 mb-2"><%= entity.text %></div>
+            <div class="flex flex-wrap gap-2">
+              <% dominant = entity.dominant_emotion rescue nil %>
+              <% if dominant && dominant.first %>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200">
+                  <%= dominant.first.first.to_s.titleize %>
+                </span>
+              <% end %>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 capitalize">
+                <%= entity.sentiment_label || 'neutral' %>
+              </span>
+            </div>
+          </div>
+        <% end %>
       </div>
     </div>
   <% end %>
-
 </div>
-
-<%
-  entities_in_table = analysis.document_entities
-    .order('relevance desc')
-    .where(entity_type: 'Character')
-    .reject { |e| e.dominant_emotion.first.second.nil? }
-    .reject { |e| e.recessive_emotion.first.second.nil? }
-%>
-<% if entities_in_table.any? %>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden mb-6">
-    <div class="p-6">
-      <h5 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Character emotions</h5>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="border-b dark:border-gray-700">
-              <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Character</th>
-              <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Dominant emotion</th>
-              <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Recessive emotion</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% entities_in_table.each do |character| %>
-              <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
-                <td class="py-3 px-4 text-gray-900 dark:text-gray-100"><%= character.text %></td>
-                <td class="py-3 px-4">
-                  <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> bg-opacity-20">
-                    <%= character.dominant_emotion.first.first.to_s.titleize %>
-                    (<%= (character.dominant_emotion.first.second * 100).round %>%)
-                  </span>
-                </td>
-                <td class="py-3 px-4">
-                  <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold <%= EmotionService.color_for_emotion(character.recessive_emotion.first.first) %> bg-opacity-20">
-                    <%= character.recessive_emotion.first.first.to_s.titleize %>
-                    (<%= (character.recessive_emotion.first.second * 100).round %>%)
-                  </span>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-<% end %>
-
-<style>
-.bar {
-  fill: <%= Document.hex_color %>;
-}
-
-.axis {
-  font-size: 13px;
-}
-.label {
-  font-size: 11px;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  display: none;
-}
-</style>
-
-<script type="text/javascript">
-$(document).ready(function () {
-  var data = [
-    <% if analysis.joy_score %>
-    {
-        "name": "Joy",
-        "value": <%= (100 * analysis.joy_score).round(1) %>,
-    },
-    <% end %>
-    <% if analysis.sadness_score %>
-    {
-        "name": "Sadness",
-        "value": <%= (100 * analysis.sadness_score).round(1) %>,
-    },
-    <% end %>
-    <% if analysis.fear_score %>
-    {
-        "name": "Fear",
-        "value": <%= (100 * analysis.fear_score).round(1) %>,
-    },
-    <% end %>
-    <% if analysis.disgust_score %>
-    {
-        "name": "Disgust",
-        "value": <%= (100 * analysis.disgust_score).round(1) %>,
-    },
-    <% end %>
-    <% if analysis.anger_score %>
-    {
-        "name": "Anger",
-        "value": <%= (100 * analysis.anger_score).round(1) %>,
-    }
-    <% end %>
-  ];
-
-  //sort bars based on value
-  data = data.sort(function (a, b) {
-    return d3.ascending(a.value, b.value);
-  })
-
-  var margin = {
-    top: 10,
-    right: 0,
-    bottom: 30,
-    left: 60
-  };
-
-  var width = 400,
-      height = 300;
-
-  var svg = d3.select("#graph-emotions")
-    .append("svg")
-      .attr("width", '100%')
-      .attr("height", height)
-      .attr('viewBox','0 0 ' + Math.min(width, height) + ' ' + Math.min(width, height + margin.bottom))
-      .attr('preserveAspectRatio', 'xMinYMin')
-    .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  var x = d3.scaleLinear()
-    .range([0, width])
-    .domain([0, d3.max(data, function (d) {
-      return d.value;
-    })]);
-
-  var y = d3.scalePoint()
-    .rangeRound([height, 0], .1)
-    .domain(data.map(function (d) {
-      return d.name;
-    }));
-
-  //make y axis to show bar names
-  var yAxis = d3.axisLeft()
-    .scale(y)
-    .tickSize(0); // no tick marks
-
-  var gy = svg.append("g")
-    .attr("class", "y axis")
-    .call(yAxis)
-
-  var bars = svg.selectAll(".bar")
-    .data(data)
-    .enter()
-    .append("g")
-
-  //append rects
-  bars.append("rect")
-    .attr("class", "bar")
-    .attr("y", function (d) {
-        return y(d.name) - 10;
-    })
-    .attr("height", 30)
-    .attr("x", 0)
-    .attr("width", function (d) {
-        return x(d.value);
-    });
-
-  //add a value label to the right of each bar
-  bars.append("text")
-    .attr("class", "label")
-    .attr("y", function (d) {
-        return y(d.name) + 20;
-    })
-    .attr("x", function (d) {
-        return -25;
-    })
-    .text(function (d) {
-        return d.value;
-    });
-});
-</script>

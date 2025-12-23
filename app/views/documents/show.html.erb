@@ -20,54 +20,26 @@
   
   <!-- Floating action buttons -->
   <div class="fixed bottom-8 right-8 z-20 flex flex-col space-y-3" x-data="{ showButtons: false }">
-    <!-- Share button with dropdown -->
-    <div class="relative" x-data="{ open: false }" @click.away="open = false">
-      <button @click="open = !open"
-              class="flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
-              data-tooltip="Share">
-        <i class="material-icons">share</i>
-      </button>
-      <div x-show="open"
-           x-transition:enter="transition ease-out duration-100"
-           x-transition:enter-start="transform opacity-0 scale-95"
-           x-transition:enter-end="transform opacity-100 scale-100"
-           x-transition:leave="transition ease-in duration-75"
-           x-transition:leave-start="transform opacity-100 scale-100"
-           x-transition:leave-end="transform opacity-0 scale-95"
-           class="origin-bottom-right absolute right-0 bottom-16 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 dark:bg-gray-800 dark:ring-white/10"
-           role="menu"
-           aria-orientation="vertical"
-           style="display: none;">
-        <div class="py-1" role="none">
-          <button type="button"
-                  onclick="navigator.clipboard.writeText('<%= document_url(@document) %>'); this.querySelector('.copy-text').textContent = 'Copied!'; setTimeout(() => this.querySelector('.copy-text').textContent = 'Copy link', 2000);"
-                  class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                  role="menuitem">
-            <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">link</i>
-            <span class="copy-text">Copy link</span>
-          </button>
-          <a href="https://www.facebook.com/sharer/sharer.php?u=<%= url_encode(document_url(@document)) %>"
-             target="_blank"
-             rel="noopener noreferrer"
-             class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-             role="menuitem">
-            <i class="material-icons text-blue-600 mr-2 text-sm">share</i>
-            Share on Facebook
-          </a>
-          <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
-          <button type="button"
-                  @click="open = false; $dispatch('open-modal', 'share-to-stream-modal')"
-                  class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                  role="menuitem">
-            <i class="material-icons text-green-600 mr-2 text-sm">campaign</i>
-            Share to Stream
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Share button -->
+    <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-green-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:text-green-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
+            data-tooltip="Share to Stream">
+      <i class="material-icons">campaign</i>
+    </button>
     
+    <!-- Privacy button (only for users who can edit) -->
+    <% if user_signed_in? && @document.updatable_by?(current_user) %>
+      <button @click="$dispatch('open-modal', 'document-privacy-modal')"
+              class="flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
+              data-tooltip="<%= @document.privacy == 'public' ? 'Public' : 'Private' %>">
+        <i class="material-icons <%= @document.privacy == 'public' ? 'text-green-500' : '' %>">
+          <%= @document.privacy == 'public' ? 'public' : 'lock' %>
+        </i>
+      </button>
+    <% end %>
+
     <!-- Edit button (only for document owner) -->
-    <% if user_signed_in? && current_user.id == @document.user_id %>
+    <% if user_signed_in? && @document.updatable_by?(current_user) %>
       <%= link_to edit_document_path(@document),
                   class: "flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left",
                   "data-tooltip": "Edit this document" do %>
@@ -167,4 +139,9 @@
              content_id: @document.id,
              content_name: @document.title,
              content_owner: @document.user %>
+
+  <!-- Privacy Modal (only for users who can edit) -->
+  <% if user_signed_in? && @document.updatable_by?(current_user) %>
+    <%= render 'documents/privacy_modal' %>
+  <% end %>
 </div>

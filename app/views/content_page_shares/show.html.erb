@@ -1,48 +1,6 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900" data-in-app="true">
-  <!-- Clean Header -->
-  <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Left: Back Navigation -->
-        <div class="flex items-center space-x-4">
-          <button onclick="window.history.back()" class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-            </svg>
-            <span class="hidden sm:inline">Back</span>
-          </button>
-        </div>
-
-        <!-- Center: Title -->
-        <div class="flex-1 text-center">
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
-            <% if @share.content_page %>
-              <%= @share.content_page.name %>
-            <% else %>
-              Shared Post
-            <% end %>
-          </h1>
-        </div>
-
-        <!-- Right: Share Actions -->
-        <div class="flex items-center space-x-2">
-          <button data-controller="clipboard" 
-                  data-clipboard-text-value="<%= user_content_page_share_url(@share.user, @share) %>"
-                  data-action="clipboard#copy"
-                  class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md transition-colors"
-                  title="Copy link to this post">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"/>
-            </svg>
-            <span class="hidden sm:inline ml-1">Share</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
   <!-- Main Content Area -->
-  <div class="py-6 px-4 sm:px-6 lg:px-8">
+  <div class="py-6 px-4 sm:px-6 lg:px-8 lg:pl-12">
     <div class="max-w-7xl mx-auto">
       <div class="lg:grid lg:grid-cols-12 lg:gap-8">
         <!-- Main Content -->
@@ -181,7 +139,7 @@
                 <div class="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                   <div class="flex">
                     <% if @share.content_page.respond_to?(:first_public_image) && @share.content_page.first_public_image.present? %>
-                      <div class="flex-shrink-0 w-32 h-24">
+                      <div class="flex-shrink-0 w-32">
                         <%= image_tag @share.content_page.first_public_image, class: 'w-full h-full object-cover', alt: "#{@share.content_page.name} preview" %>
                       </div>
                     <% end %>
@@ -200,6 +158,11 @@
                         <% end %>
                         <%= @share.content_page.name %>
                       </h3>
+                      <% if @share.content_page.respond_to?(:user) && @share.content_page.user %>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          by <%= @share.content_page.user.display_name %>
+                        </p>
+                      <% end %>
                       <% if @share.content_page.respond_to?(:description) && @share.content_page.description.present? %>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
                           <%= truncate(strip_tags(@share.content_page.description), length: 120) %>
@@ -333,7 +296,7 @@
                 <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
                   <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
                     <i class="material-icons text-sm mr-2 text-gray-600 dark:text-gray-400"><%= User.icon %></i>
-                    Share Creator
+                    Shared by
                   </h3>
                 </div>
 
@@ -354,6 +317,37 @@
                   </div>
                 </div>
               </div>
+            <% end %>
+
+            <!-- Content Creator Card (if different from sharer) -->
+            <% if @share.content_page && @share.content_page.respond_to?(:user) && @share.content_page.user && @share.content_page.user != @share.user %>
+              <%= link_to @share.content_page.user, class: "block group" do %>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
+                  <div class="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                      <i class="material-icons text-sm mr-2 text-gray-600 dark:text-gray-400">create</i>
+                      Created by
+                    </h3>
+                  </div>
+
+                  <div class="p-4">
+                    <div class="flex items-center space-x-3">
+                      <%= image_tag @share.content_page.user.image_url(size: 48), class: "h-12 w-12 rounded-full" %>
+                      <div class="flex-1 min-w-0">
+                        <h4 class="text-base font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          <%= @share.content_page.user.display_name %>
+                        </h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                          <%= pluralize(@share.content_page.user.public_content_count, 'public page') %>
+                        </p>
+                      </div>
+                      <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
             <% end %>
 
             <% if user_signed_in? && @share.user != current_user %>
@@ -432,7 +426,7 @@
                   <svg class="w-4 h-4 text-purple-600 dark:text-purple-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                   </svg>
-                  More from <%= @share.user.display_name.truncate(240) %>
+                  More shares from <%= @share.user.display_name.truncate(240) %>
                 </h3>
               </div>
 
