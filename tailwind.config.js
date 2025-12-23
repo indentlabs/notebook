@@ -81,7 +81,10 @@ module.exports = {
     extend: {
       colors: {
         'notebook-blue': '#2196F3',
-      }
+      },
+      fontSize: {
+        'xxs': '0.625rem', // 10px
+      },
     },
   },
   plugins: [
