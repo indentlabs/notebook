@@ -10,33 +10,6 @@
 
 <div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 
-  <!-- Document editor navbar - sticky beneath site navbar, provides tools and stats -->
-  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-20 shadow-sm">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
-      <!-- Full navbar -->
-      <div class="flex flex-row items-center justify-between">
-        <!-- Left side: Document info -->
-        <div class="flex items-center space-x-2">
-          <!-- Document actions moved to sidebar panels -->
-        </div>
-        
-        <!-- Right side: Document stats -->
-        <div class="flex items-center space-x-4 text-sm">
-          <!-- Privacy status - clickable button -->
-          <button
-            type="button"
-            @click="$dispatch('open-modal', 'document-privacy-modal')"
-            class="flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
-          >
-            <i class="material-icons mr-1 text-sm <%= @document.privacy == 'private' ? 'text-gray-500 dark:text-gray-400' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
-            <span class="capitalize font-medium"><%= @document.privacy || 'private' %></span>
-            <i class="material-icons ml-1 text-xs text-gray-400">edit</i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
   <!-- Main content area - Flex layout -->
   <main class="flex-1 pt-14">
     <div class="flex relative">
@@ -90,7 +63,7 @@
          x-transition:leave="transform transition ease-in-out duration-200"
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
-         class="fixed right-0 top-[112px] w-80 h-[calc(100vh-112px)] bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
+         class="fixed right-0 top-14 w-80 h-[calc(100vh-3.5rem)] bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
          role="complementary"
          :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'">
 
@@ -136,7 +109,7 @@
            'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'information'
          }"
          class="fixed z-50 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 132px;"
+         style="top: 76px;"
          data-tooltip="Information"
          role="button">
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">chevron_left</i>
@@ -154,7 +127,7 @@
            'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'linked_pages'
          }"
          class="fixed z-50 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 180px;"
+         style="top: 124px;"
          data-tooltip="Linked Pages"
          role="button">
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">chevron_left</i>
@@ -172,7 +145,7 @@
            'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'information'
          }"
          class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 132px;"
+         style="top: 76px;"
          data-tooltip="Information"
          role="button">
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">chevron_left</i>
@@ -190,7 +163,7 @@
            'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'linked_pages'
          }"
          class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 180px;"
+         style="top: 124px;"
          data-tooltip="Linked Pages"
          role="button">
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">chevron_left</i>
@@ -208,7 +181,7 @@
            'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'actions'
          }"
          class="fixed z-50 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 228px;"
+         style="top: 172px;"
          data-tooltip="Actions"
          role="button">
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">chevron_left</i>
@@ -226,7 +199,7 @@
            'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'actions'
          }"
          class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 228px;"
+         style="top: 172px;"
          data-tooltip="Actions"
          role="button">
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">chevron_left</i>
@@ -1120,12 +1093,31 @@
             
             // Update UI immediately
             const statusIcon = value === 'public' ? 'public' : 'lock';
-            
-            // Update the privacy button in the top right
+            const isPublic = value === 'public';
+
+            // Update the privacy button in the top right navbar
             const privacyButton = $('button[type="button"][\\@click*="document-privacy-modal"]');
             privacyButton.find('i.material-icons').first().text(statusIcon);
-            privacyButton.find('i.material-icons').first().removeClass('text-gray-500 text-green-500').addClass(value === 'public' ? 'text-green-500' : 'text-gray-500');
+            privacyButton.find('i.material-icons').first().removeClass('text-gray-500 text-green-500').addClass(isPublic ? 'text-green-500' : 'text-gray-500');
             privacyButton.find('span.capitalize.font-medium').text(value);
+
+            // Update sidebar privacy UI
+            const sidebarBadge = document.getElementById('sidebar-privacy-badge');
+            const sidebarIcon = document.getElementById('sidebar-privacy-icon');
+            const sidebarText = document.getElementById('sidebar-privacy-text');
+
+            if (sidebarBadge) {
+              sidebarBadge.className = 'w-8 h-8 rounded-full flex items-center justify-center mr-3 ' +
+                (isPublic ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-200 dark:bg-gray-600');
+            }
+            if (sidebarIcon) {
+              sidebarIcon.textContent = statusIcon;
+              sidebarIcon.className = 'material-icons text-sm ' +
+                (isPublic ? 'text-green-500' : 'text-gray-500 dark:text-gray-400');
+            }
+            if (sidebarText) {
+              sidebarText.textContent = value;
+            }
             
             // Show saving indicator
             const saveIndicator = $('#save-indicator');

@@ -31,6 +31,23 @@
         <p class="text-xs text-gray-500 dark:text-gray-400">min read</p>
       </div>
     </div>
+
+    <!-- Privacy Status -->
+    <div class="mt-4">
+      <button @click="$dispatch('open-modal', 'document-privacy-modal')"
+              class="w-full flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors group">
+        <div class="flex items-center">
+          <div id="sidebar-privacy-badge" class="w-8 h-8 rounded-full <%= @document.privacy == 'private' ? 'bg-gray-200 dark:bg-gray-600' : 'bg-green-100 dark:bg-green-900/30' %> flex items-center justify-center mr-3">
+            <i id="sidebar-privacy-icon" class="material-icons text-sm <%= @document.privacy == 'private' ? 'text-gray-500 dark:text-gray-400' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+          </div>
+          <div class="text-left">
+            <p id="sidebar-privacy-text" class="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize"><%= @document.privacy || 'private' %></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Click to change</p>
+          </div>
+        </div>
+        <i class="material-icons text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 text-sm">chevron_right</i>
+      </button>
+    </div>
   </div>
 
   <!-- Actions Section -->
