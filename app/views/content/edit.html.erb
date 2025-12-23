@@ -18,8 +18,9 @@
     current_page: :edit 
   } %>
 
-  <!-- Main responsive layout -->
-  <div class="max-w-full mx-auto">
+  <!-- Main responsive layout - pt-10 accounts for fixed breadcrumb header height (~40px) -->
+  <!-- Note: Main navbar space is handled by site layout; this is only for the breadcrumb -->
+  <div class="max-w-full mx-auto pt-10">
     <div class="flex relative">
 
       <!-- Left Column - Navigation (Desktop) -->
@@ -28,7 +29,7 @@
            x-transition:enter-start="-translate-x-full"
            x-transition:enter-end="translate-x-0"
            x-transition:leave-end="-translate-x-full"
-           class="hidden lg:block w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 h-full overflow-y-auto">
+           class="hidden lg:block w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0 sticky top-24 max-h-screen overflow-y-auto">
         <%= render partial: 'content/edit/navigation_sidebar', locals: {
           content: @serialized_content,
           raw_content: @content
@@ -77,8 +78,7 @@
 
       <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
       <div x-show="!showLeftSidebar && isDesktop" x-cloak
-           style="top: 132px;"
-           class="hidden lg:block fixed z-30 transition-all duration-300">
+           class="hidden lg:block fixed top-24 z-30 transition-all duration-300">
         <button @click="toggleLeftSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
                 data-tooltip="Show Table of Contents"
@@ -89,8 +89,7 @@
       </div>
 
       <!-- Mobile/Tablet Left Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed z-30 transition-all duration-300"
-           style="top: 132px;">
+      <div class="lg:hidden fixed top-24 z-30 transition-all duration-300">
         <button @click="toggleLeftSidebar()"
                 @keydown.escape="showLeftSidebar && toggleLeftSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
@@ -119,7 +118,7 @@
            x-transition:leave="transform transition ease-in-out duration-200"
            x-transition:leave-start="translate-x-0"
            x-transition:leave-end="translate-x-full"
-           class="hidden lg:block w-64 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0"
+           class="hidden lg:block w-64 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 sticky top-24 max-h-screen overflow-y-auto"
            role="complementary"
            aria-label="Edit tools and page information">
 
@@ -143,8 +142,7 @@
 
       <!-- Desktop Collapsed Toggle Tab -->
       <div x-show="!showRightSidebar && isDesktop" x-cloak
-           class="hidden lg:block fixed right-0 z-40"
-           style="top: 132px;">
+           class="hidden lg:block fixed right-0 top-24 z-40">
         <button @click="toggleRightSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
                 data-tooltip="Show Page Tools"
@@ -155,8 +153,7 @@
       </div>
 
       <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed right-0 z-40"
-           style="top: 116px;">
+      <div class="lg:hidden fixed right-0 top-24 z-40">
         <button @click="toggleRightSidebar()"
                 @keydown.escape="showRightSidebar && toggleRightSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"

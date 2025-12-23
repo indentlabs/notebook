@@ -44,6 +44,9 @@
           if (!this.textElement) return;
 
           // Add event listeners with custom names to avoid conflicts
+          // Use keyup for contenteditable (Medium Editor doesn't fire native input reliably)
+          // Keep input as fallback for textarea elements
+          this.textElement.addEventListener('keyup', (e) => this.handleMentionInput(e));
           this.textElement.addEventListener('input', (e) => this.handleMentionInput(e));
           this.textElement.addEventListener('keydown', (e) => this.handleMentionKeydown(e));
           this.textElement.addEventListener('blur', (e) => this.handleMentionBlur(e));
@@ -51,7 +54,9 @@
         },
 
         handleMentionInput(event) {
-          const text = this.textElement.value || this.textElement.innerText;
+          // Use textContent (not innerText) to match how getCursorPosition() counts characters
+          // innerText inserts \n between <p> elements, but Range.toString() does not
+          const text = this.textElement.value || this.textElement.textContent;
           const cursorPos = this.getCursorPosition();
           
           // Look for @ symbol before cursor
@@ -133,22 +138,31 @@
         },
 
         updateFilteredResults() {
+          // Ensure linkables exist
+          const allLinkables = window.notebookLinkables || [];
+          if (allLinkables.length === 0) {
+            this.filteredResults = [];
+            this.groupedResults = [];
+            return;
+          }
+
           // Progressive caching: if new search extends previous, filter cached results only
           // This is 7x faster than re-searching all linkables every keystroke
           let itemsToSearch;
           if (this.cachedResults &&
+              this.cachedResults.length > 0 &&
               this.searchTerm.startsWith(this.cachedSearchTerm) &&
               this.cachedSearchTerm.length > 0) {
             // Progressive filter: search only within previous results
             itemsToSearch = this.cachedResults;
           } else {
             // New search or backspace: search all linkables
-            itemsToSearch = window.notebookLinkables;
+            itemsToSearch = allLinkables;
           }
 
           // Perform the search
           let itemsToGroup;
-          if (this.searchTerm) {
+          if (this.searchTerm && this.searchTerm.length > 0) {
             const search = this.searchTerm.toLowerCase();
             const scored = itemsToSearch.map(item => {
               const nameMatch = item.name.toLowerCase();
@@ -167,7 +181,8 @@
               .filter(item => item.score > 0)
               .sort((a, b) => b.score - a.score);
           } else {
-            itemsToGroup = itemsToSearch;
+            // No search term - show all linkables
+            itemsToGroup = itemsToSearch.slice();
           }
 
           // Cache results for next keystroke (progressive filtering)
