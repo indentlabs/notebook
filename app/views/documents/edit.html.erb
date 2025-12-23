@@ -8,47 +8,49 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+<div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
 
   <!-- Main content area - Flex layout -->
   <main class="flex-1 pt-14">
     <div class="flex relative">
-    <!-- Center column (editor) -->
-    <div class="flex-1 bg-white dark:bg-gray-900 px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Center column (editor) - seamless canvas -->
+    <div class="flex-1 px-4 sm:px-6 lg:px-8 py-12">
       <!-- Editor container with max width -->
       <div class="max-w-3xl mx-auto">
-        <!-- Document title input -->
-        <div class="mb-4">
-    <%= form_for @document do |f| %>
-      <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-3 py-2 border-r border-gray-200 dark:border-gray-700">
-          <i class="material-icons <%= Document.text_color %>"><%= Document.icon %></i>
-        </div>
-        <%= f.text_field :title,
-          id: "document_title",
-          class: "flex-1 px-4 py-3 text-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-transparent text-gray-900 dark:text-gray-100 dark:placeholder-gray-400",
-          placeholder: "Document title"
-        %>
-      </div>
-    <% end %>
+        <!-- Document title input - Medium style: large, borderless -->
+        <div class="mb-8">
+          <%= form_for @document do |f| %>
+            <%= f.text_field :title,
+              id: "document_title",
+              class: "w-full text-left text-3xl md:text-4xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600",
+              placeholder: "Untitled"
+            %>
+          <% end %>
         </div>
 
-        <!-- Editor with integrated toolbar -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 min-h-[500px] overflow-hidden">
+        <!-- Editor - clean, borderless canvas -->
+        <div class="min-h-[60vh]">
           <!-- Wrap editor in Alpine component for @mentions -->
           <div x-data="contentLinking()" class="relative">
             <!-- Editor content area -->
-            <div id="editor" 
-                 class="editable js-can-mention-pages prose prose-lg dark:prose-invert max-w-none p-6 min-h-[500px] focus:outline-none border-0 text-gray-900 dark:text-gray-100" 
+            <div id="editor"
+                 class="editable js-can-mention-pages prose prose-lg dark:prose-invert max-w-none min-h-[60vh] focus:outline-none text-gray-900 dark:text-gray-100"
                  data-save-url="<%= document_url(@document) %>"
                  x-ref="editor"><%= @document.body.try(:html_safe) %></div>
-            
+
             <!-- Include shared dropdown template for @mentions -->
             <%= render partial: 'javascripts/content_linking_dropdown' %>
-            
-            <!-- Mention Helper Tooltip -->
-            <div class="absolute bottom-4 right-4 text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full pointer-events-none">
-              Press @ to link other pages
+
+            <!-- Mention Helper Tooltip - dismissable after first use -->
+            <div x-data="{ dismissed: localStorage.getItem('mentionTipDismissed') === 'true' }"
+                 x-show="!dismissed"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="dismissed = true; localStorage.setItem('mentionTipDismissed', 'true')"
+                 class="absolute bottom-4 right-4 text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 shadow-sm">
+              <span>Press @ to link pages</span>
+              <i class="material-icons text-xs">close</i>
             </div>
           </div>
         </div>
@@ -684,10 +686,10 @@
     </div>
   </main>
       
-      <!-- Always-visible save status indicator centered at the bottom -->
-      <div id="save-indicator" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-white dark:bg-gray-800 rounded-full shadow-md px-3 py-1.5 border border-gray-200 dark:border-gray-600 transition-colors duration-300">
-        <i class="material-icons js-autosave-icon text-gray-900 dark:text-gray-100 mr-2 text-sm">save</i>
-        <span class="js-autosave-status text-sm text-gray-600 dark:text-gray-300">Saved</span>
+      <!-- Subtle save status indicator - minimal Medium style -->
+      <div id="save-indicator" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-gray-100/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-full px-3 py-1 transition-all duration-300">
+        <i class="material-icons js-autosave-icon text-gray-400 dark:text-gray-500 mr-1.5 text-xs">cloud_done</i>
+        <span class="js-autosave-status text-xs text-gray-500 dark:text-gray-400">Saved</span>
       </div>
 
       <!-- Initialize Medium Editor with enhanced toolbar -->
@@ -771,26 +773,26 @@
         // Function to perform the actual save
         const performSave = function() {
           console.log('Performing save');
-          
-          // Update save indicator to saving state
+
+          // Update save indicator to saving state (subtle)
           $('.js-autosave-status').text('Saving...');
-          $('.js-autosave-icon').addClass('text-gray-400').removeClass('text-gray-900 text-red-500');
-          $('#save-indicator').removeClass('bg-red-500').addClass('bg-white pulse-animation');
-          $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
-          
+          $('.js-autosave-icon').text('cloud_upload').addClass('text-gray-400').removeClass('text-gray-500 text-red-400');
+          $('#save-indicator').removeClass('bg-red-500/80').addClass('bg-gray-100/80 dark:bg-gray-800/80 pulse-animation');
+          $('.js-autosave-status').removeClass('text-white').addClass('text-gray-500 dark:text-gray-400');
+
           // Update mini save indicator
           $('#mini-save-indicator i').addClass('pulse-animation');
-          
+
           // Clear both timers
           clearTimeout(short_timer);
           clearTimeout(long_timer);
           short_timer = null;
           long_timer = null;
-          
+
           // Reset change tracking
           first_change_time = null;
           has_unsaved_changes = false;
-          
+
           // Do the autosave
           last_autosave = $.ajax({
             type: 'PATCH',
@@ -802,34 +804,34 @@
               }
             }
           });
-          
+
           last_autosave.fail(function(jqXHR, textStatus) {
-            // Update indicator to error state with red background and white text
-            $('.js-autosave-status').text('Error saving!');
-            $('.js-autosave-icon').addClass('text-white').removeClass('text-gray-400 text-gray-900 text-red-500');
-            $('#save-indicator').removeClass('bg-white bg-green-50').addClass('bg-red-500');
-            $('.js-autosave-status').removeClass('text-gray-600').addClass('text-white');
-            
+            // Update indicator to error state (subtle red)
+            $('.js-autosave-status').text('Error!');
+            $('.js-autosave-icon').text('cloud_off').addClass('text-white').removeClass('text-gray-400 text-gray-500');
+            $('#save-indicator').removeClass('bg-gray-100/80 dark:bg-gray-800/80 bg-green-100/80').addClass('bg-red-500/90');
+            $('.js-autosave-status').removeClass('text-gray-500 dark:text-gray-400').addClass('text-white');
+
             // Mark that we still have unsaved changes
             has_unsaved_changes = true;
           });
-          
+
           last_autosave.done(function() {
-            // Update indicator to saved state
+            // Update indicator to saved state (subtle)
             $('.js-autosave-status').text('Saved');
-            $('.js-autosave-icon').addClass('text-gray-900').removeClass('text-gray-400 text-red-500 text-white');
-            $('#save-indicator').removeClass('bg-red-500 pulse-animation').addClass('bg-white');
-            $('.js-autosave-status').removeClass('text-white').addClass('text-gray-600');
-            
+            $('.js-autosave-icon').text('cloud_done').addClass('text-gray-400 dark:text-gray-500').removeClass('text-white text-red-400');
+            $('#save-indicator').removeClass('bg-red-500/90 pulse-animation').addClass('bg-gray-100/80 dark:bg-gray-800/80');
+            $('.js-autosave-status').removeClass('text-white').addClass('text-gray-500 dark:text-gray-400');
+
             // Update mini save indicator
             $('#mini-save-indicator i').removeClass('pulse-animation');
-            
-            // Make the indicator more visible for a moment
-            $('#save-indicator').addClass('bg-green-50');
+
+            // Brief subtle green flash for success
+            $('#save-indicator').addClass('bg-green-100/80 dark:bg-green-900/30');
             clearTimeout(autosave_hide_timeout);
             autosave_hide_timeout = setTimeout(function() {
-              $('#save-indicator').removeClass('bg-green-50');
-            }, 1000);
+              $('#save-indicator').removeClass('bg-green-100/80 dark:bg-green-900/30');
+            }, 800);
           });
         };
         
@@ -849,8 +851,9 @@
             }
           }
           
-          // Update indicator to show pending changes
-          $('.js-autosave-status').text('Editing...');
+          // Update indicator to show pending changes (subtle)
+          $('.js-autosave-status').text('Unsaved');
+          $('.js-autosave-icon').text('edit');
           
           // Clear and reset the short timer (2 seconds)
           clearTimeout(short_timer);
@@ -1405,6 +1408,14 @@
       
       <!-- Custom styles for Medium Editor to match Tailwind design -->
       <style>
+        /* Remove Medium Editor's default border/box from editable area */
+        .medium-editor-element {
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          outline: none !important;
+        }
+
         /* Enhanced Medium Editor toolbar styling */
         .medium-editor-toolbar {
           border-radius: 0.5rem;
