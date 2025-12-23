@@ -45,100 +45,107 @@
     </div>
 
     <!-- Views Section -->
-    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
-      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Dive Deeper</h3>
-      <nav class="space-y-0.5">
-        <!-- Gallery View -->
-        <% if @gallery_count && @gallery_count > 0 %>
-          <button @click="switchView('gallery')"
-                  :class="isViewActive('gallery') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
-            <i class="material-icons text-lg mr-3"
-               :class="isViewActive('gallery') ? 'text-white' : '<%= content.class_text_color %>'">photo_library</i>
-            Gallery
-            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
-                  :class="isViewActive('gallery') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
-              <%= @gallery_count %>
-            </span>
-          </button>
-        <% end %>
-
-        <!-- Associations View -->
-        <% if @associations_count && @associations_count > 0 %>
-          <button @click="switchView('associations')"
-                  :class="isViewActive('associations') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
-            <i class="material-icons text-lg mr-3"
-               :class="isViewActive('associations') ? 'text-white' : '<%= content.class_text_color %>'">link</i>
-            Associations
-            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
-                  :class="isViewActive('associations') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
-              <%= @associations_count %>
-            </span>
-          </button>
-        <% end %>
-
-        <!-- Collections View -->
-        <% if @collections_count && @collections_count > 0 %>
-          <button @click="switchView('collections')"
-                  :class="isViewActive('collections') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
-            <i class="material-icons text-lg mr-3"
-               :class="isViewActive('collections') ? 'text-white' : '<%= content.class_text_color %>'">collections_bookmark</i>
-            Collections
-            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
-                  :class="isViewActive('collections') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
-              <%= @collections_count %>
-            </span>
-          </button>
-        <% end %>
-
-        <!-- Timelines View -->
-        <% if @timelines_count && @timelines_count > 0 %>
-          <button @click="switchView('timelines')"
-                  :class="isViewActive('timelines') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
-            <i class="material-icons text-lg mr-3"
-               :class="isViewActive('timelines') ? 'text-white' : '<%= content.class_text_color %>'">timeline</i>
-            Timelines
-            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
-                  :class="isViewActive('timelines') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
-              <%= @timelines_count %>
-            </span>
-          </button>
-        <% end %>
-        
-        <!-- Feedback View (Hidden - unreleased feature) -->
-        <%# TODO: Unhide when ready to release feedback feature %>
-        <% if false %>
-          <button @click="switchView('feedback')"
-                  :class="isViewActive('feedback') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
-                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
-            <i class="material-icons text-lg mr-3"
-               :class="isViewActive('feedback') ? 'text-white' : '<%= content.class_text_color %>'">chat</i>
-            Feedback
-          </button>
-        <% end %>
-        
-        <!-- Contributors View (Universe only) -->
-        <% if raw_content.class.name == 'Universe' %>
-          <button @click="switchView('contributors')" 
-                  :class="isViewActive('contributors') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
-            <i class="material-icons text-lg mr-3" 
-               :class="isViewActive('contributors') ? 'text-white' : 'text-purple-500'">group_add</i>
-            Contributors
-            <% contributor_count = raw_content.contributors.count rescue 0 %>
-            <% if contributor_count > 0 %>
+    <% has_dive_deeper_content = @gallery_count.to_i > 0 ||
+                                  @associations_count.to_i > 0 ||
+                                  @collections_count.to_i > 0 ||
+                                  @timelines_count.to_i > 0 ||
+                                  raw_content.class.name == 'Universe' %>
+    <% if has_dive_deeper_content %>
+      <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Dive Deeper</h3>
+        <nav class="space-y-0.5">
+          <!-- Gallery View -->
+          <% if @gallery_count && @gallery_count > 0 %>
+            <button @click="switchView('gallery')"
+                    :class="isViewActive('gallery') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('gallery') ? 'text-white' : '<%= content.class_text_color %>'">photo_library</i>
+              Gallery
               <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
-                    :class="isViewActive('contributors') ? 'bg-white bg-opacity-20 text-white' : 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-200'">
-                <%= contributor_count %>
+                    :class="isViewActive('gallery') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @gallery_count %>
               </span>
-            <% end %>
-          </button>
-        <% end %>
-      </nav>
-    </div>
+            </button>
+          <% end %>
+
+          <!-- Associations View -->
+          <% if @associations_count && @associations_count > 0 %>
+            <button @click="switchView('associations')"
+                    :class="isViewActive('associations') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('associations') ? 'text-white' : '<%= content.class_text_color %>'">link</i>
+              Associations
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('associations') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @associations_count %>
+              </span>
+            </button>
+          <% end %>
+
+          <!-- Collections View -->
+          <% if @collections_count && @collections_count > 0 %>
+            <button @click="switchView('collections')"
+                    :class="isViewActive('collections') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('collections') ? 'text-white' : '<%= content.class_text_color %>'">collections_bookmark</i>
+              Collections
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('collections') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @collections_count %>
+              </span>
+            </button>
+          <% end %>
+
+          <!-- Timelines View -->
+          <% if @timelines_count && @timelines_count > 0 %>
+            <button @click="switchView('timelines')"
+                    :class="isViewActive('timelines') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('timelines') ? 'text-white' : '<%= content.class_text_color %>'">timeline</i>
+              Timelines
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('timelines') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @timelines_count %>
+              </span>
+            </button>
+          <% end %>
+
+          <!-- Feedback View (Hidden - unreleased feature) -->
+          <%# TODO: Unhide when ready to release feedback feature %>
+          <% if false %>
+            <button @click="switchView('feedback')"
+                    :class="isViewActive('feedback') ? '<%= content.class_color %> text-white' : 'text-gray-700 hover:bg-gray-50'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('feedback') ? 'text-white' : '<%= content.class_text_color %>'">chat</i>
+              Feedback
+            </button>
+          <% end %>
+
+          <!-- Contributors View (Universe only) -->
+          <% if raw_content.class.name == 'Universe' %>
+            <button @click="switchView('contributors')"
+                    :class="isViewActive('contributors') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('contributors') ? 'text-white' : 'text-purple-500'">group_add</i>
+              Contributors
+              <% contributor_count = raw_content.contributors.count rescue 0 %>
+              <% if contributor_count > 0 %>
+                <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                      :class="isViewActive('contributors') ? 'bg-white bg-opacity-20 text-white' : 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-200'">
+                  <%= contributor_count %>
+                </span>
+              <% end %>
+            </button>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
 
     <!-- Universe Card -->
     <%= render partial: 'content/shared/universe_card', locals: { raw_content: raw_content } %>
@@ -148,32 +155,49 @@
       <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Page Stats</h3>
       <div class="space-y-3">
         
-        <!-- Visibility (first and clickable) -->
+        <!-- Visibility -->
         <% if raw_content.respond_to?(:privacy) %>
           <%
             # Determine effective visibility
             is_page_public = raw_content.privacy == 'public'
-            is_universe_public = raw_content.respond_to?(:universe) && 
-                                raw_content.universe.present? && 
+            is_universe_public = raw_content.respond_to?(:universe) &&
+                                raw_content.universe.present? &&
                                 raw_content.universe.privacy == 'public'
             is_effectively_public = is_page_public || is_universe_public
+            can_edit_privacy = raw_content.updatable_by?(current_user)
           %>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">Visibility</span>
-            <button @click="switchView('privacy')" class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>"
-                    title="Click to manage privacy settings">
-              <% if is_effectively_public %>
-                <i class="material-icons text-sm mr-1.5">public</i>
-                Public
-                <% if !is_page_public && is_universe_public %>
-                  <span class="text-xs text-green-600 ml-1">(via universe)</span>
+            <% if can_edit_privacy %>
+              <button @click="switchView('privacy')"
+                      class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>"
+                      title="Click to manage privacy settings">
+                <% if is_effectively_public %>
+                  <i class="material-icons text-sm mr-1.5">public</i>
+                  Public
+                  <% if !is_page_public && is_universe_public %>
+                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(via universe)</span>
+                  <% end %>
+                <% else %>
+                  <i class="material-icons text-sm mr-1.5">lock</i>
+                  Private
                 <% end %>
-              <% else %>
-                <i class="material-icons text-sm mr-1.5">lock</i>
-                Private
-              <% end %>
-              <i class="material-icons text-xs ml-1 text-gray-400">edit</i>
-            </button>
+                <i class="material-icons text-xs ml-1 text-gray-400">edit</i>
+              </button>
+            <% else %>
+              <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>">
+                <% if is_effectively_public %>
+                  <i class="material-icons text-sm mr-1.5">public</i>
+                  Public
+                  <% if !is_page_public && is_universe_public %>
+                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(via universe)</span>
+                  <% end %>
+                <% else %>
+                  <i class="material-icons text-sm mr-1.5">lock</i>
+                  Private
+                <% end %>
+              </span>
+            <% end %>
           </div>
         <% end %>
         
