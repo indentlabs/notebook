@@ -22,13 +22,7 @@
         
         <!-- Right side: Document stats -->
         <div class="flex items-center space-x-4 text-sm">
-          <!-- Word count -->
-          <div class="flex items-center bg-gray-50 dark:bg-gray-700 px-3 py-1.5 rounded-md shadow-sm border border-gray-100 dark:border-gray-600">
-            <i class="material-icons mr-1 text-sm text-gray-500 dark:text-gray-400">text_fields</i>
-            <span><span id="word-count" class="font-medium text-gray-900 dark:text-gray-100">0</span> words</span>
-          </div>
-          
-          <!-- Privacy status - now a clickable button -->
+          <!-- Privacy status - clickable button -->
           <button
             type="button"
             @click="$dispatch('open-modal', 'document-privacy-modal')"
@@ -89,14 +83,14 @@
     </div>
 
     <!-- Right Column - Desktop Sidebar (Toggleable) -->
-    <div x-show="showRightSidebar" x-cloak
+    <div x-show="showRightSidebar && isDesktop" x-cloak
          x-transition:enter="transform transition ease-in-out duration-200"
          x-transition:enter-start="translate-x-full"
          x-transition:enter-end="translate-x-0"
          x-transition:leave="transform transition ease-in-out duration-200"
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
-         class="hidden lg:block w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 sticky top-[112px] h-[calc(100vh-112px)] overflow-y-auto"
+         class="fixed right-0 top-[112px] w-80 h-[calc(100vh-112px)] bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
          role="complementary"
          :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'">
 
@@ -133,72 +127,111 @@
     </div> <!-- Close flex container -->
 
     <!-- Desktop Information Toggle Tab -->
-    <div x-show="activeSidebarPanel !== 'information' && isDesktop"
+    <div x-show="isDesktop"
          @click="togglePanel('information')"
-         class="fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         :class="{
+           'right-80': showRightSidebar,
+           'right-0': !showRightSidebar,
+           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'information',
+           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'information'
+         }"
+         class="fixed z-50 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 132px;"
          data-tooltip="Information"
          role="button">
-      <i class="material-icons text-base">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel === 'information'">chevron_right</i>
       <i class="material-icons text-base">info</i>
     </div>
 
     <!-- Desktop Linked Pages Toggle Tab -->
-    <div x-show="activeSidebarPanel !== 'linked_pages' && isDesktop"
+    <div x-show="isDesktop"
          @click="togglePanel('linked_pages')"
-         class="fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         :class="{
+           'right-80': showRightSidebar,
+           'right-0': !showRightSidebar,
+           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'linked_pages',
+           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'linked_pages'
+         }"
+         class="fixed z-50 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 180px;"
          data-tooltip="Linked Pages"
          role="button">
-      <i class="material-icons text-base">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel === 'linked_pages'">chevron_right</i>
       <i class="material-icons text-base">link</i>
     </div>
 
     <!-- Mobile/Tablet Information Toggle Tab -->
     <div x-show="!isDesktop"
          @click="togglePanel('information')"
-         class="fixed right-0 z-30 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         :class="{
+           'right-80': showRightSidebar,
+           'right-0': !showRightSidebar,
+           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'information',
+           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'information'
+         }"
+         class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 132px;"
          data-tooltip="Information"
          role="button">
-      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">info</i>
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">chevron_left</i>
       <i class="material-icons text-base" x-show="activeSidebarPanel === 'information'">chevron_right</i>
+      <i class="material-icons text-base">info</i>
     </div>
 
     <!-- Mobile/Tablet Linked Pages Toggle Tab -->
     <div x-show="!isDesktop"
          @click="togglePanel('linked_pages')"
-         class="fixed right-0 z-30 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         :class="{
+           'right-80': showRightSidebar,
+           'right-0': !showRightSidebar,
+           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'linked_pages',
+           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'linked_pages'
+         }"
+         class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 180px;"
          data-tooltip="Linked Pages"
          role="button">
-      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">link</i>
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">chevron_left</i>
       <i class="material-icons text-base" x-show="activeSidebarPanel === 'linked_pages'">chevron_right</i>
+      <i class="material-icons text-base">link</i>
     </div>
 
     <!-- Desktop Actions Toggle Tab -->
-    <div x-show="activeSidebarPanel !== 'actions' && isDesktop"
+    <div x-show="isDesktop"
          @click="togglePanel('actions')"
-         class="fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         :class="{
+           'right-80': showRightSidebar,
+           'right-0': !showRightSidebar,
+           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'actions',
+           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'actions'
+         }"
+         class="fixed z-50 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 228px;"
          data-tooltip="Actions"
          role="button">
-      <i class="material-icons text-base">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel === 'actions'">chevron_right</i>
       <i class="material-icons text-base">bolt</i>
     </div>
 
     <!-- Mobile/Tablet Actions Toggle Tab -->
     <div x-show="!isDesktop"
          @click="togglePanel('actions')"
-         class="fixed right-0 z-30 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         :class="{
+           'right-80': showRightSidebar,
+           'right-0': !showRightSidebar,
+           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'actions',
+           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'actions'
+         }"
+         class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 228px;"
          data-tooltip="Actions"
          role="button">
-      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">bolt</i>
       <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">chevron_left</i>
       <i class="material-icons text-base" x-show="activeSidebarPanel === 'actions'">chevron_right</i>
+      <i class="material-icons text-base">bolt</i>
     </div>
 
     <!-- Mobile/Tablet Right Sidebar Overlay -->
@@ -683,25 +716,7 @@
         <i class="material-icons js-autosave-icon text-gray-900 dark:text-gray-100 mr-2 text-sm">save</i>
         <span class="js-autosave-status text-sm text-gray-600 dark:text-gray-300">Saved</span>
       </div>
-      
-      <!-- Floating action buttons with tooltip -->
-      <div class="fixed bottom-8 right-8 flex flex-col space-y-4">
-        <!-- Document analysis button -->
-        <div class="group relative">
-          <%= link_to queue_analysis_document_path(@document), class: "flex items-center justify-center w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-110 focus:outline-none" do %>
-            <i class="material-icons">analytics</i>
-          <% end %>
-          
-          <!-- Enhanced tooltip with CTA - positioned to stay on screen -->
-          <div class="absolute bottom-full mb-3 right-0 w-64 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden opacity-0 group-hover:opacity-100 transition-opacity">
-            <div class="p-3">
-              <h4 class="font-medium text-gray-900 mb-1">Analyze Your Document</h4>
-              <p class="text-xs text-gray-600">Get AI-powered insights about readability, style, and sentiment.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
+
       <!-- Initialize Medium Editor with enhanced toolbar -->
       <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -881,15 +896,36 @@
           // Return 0 if empty, otherwise count words
           return cleanText === '' ? 0 : cleanText.split(' ').length;
         };
-        
+
+        // Function to count characters (excluding HTML)
+        const countCharacters = function(text) {
+          const strippedText = text.replace(/<[^>]*>/g, '');
+          return strippedText.length;
+        };
+
+        // Function to calculate reading time (avg 200 words per minute)
+        const calculateReadingTime = function(wordCount) {
+          const minutes = Math.ceil(wordCount / 200);
+          return minutes < 1 ? '<1' : minutes.toString();
+        };
+
         // Update word count display
         const updateWordCount = function() {
           const content = $('#editor').html();
           const wordCount = countWords(content);
+          const charCount = countCharacters(content);
+          const readingTime = calculateReadingTime(wordCount);
+
+          // Update navbar word count
           $('#word-count').text(wordCount);
-          $('#mini-word-count').text(wordCount); // Update mini word count too
+          $('#mini-word-count').text(wordCount);
+
+          // Update sidebar stats
+          $('#sidebar-word-count').text(wordCount);
+          $('#sidebar-char-count').text(charCount.toLocaleString());
+          $('#sidebar-reading-time').text(readingTime);
         };
-        
+
         // Initial word count
         updateWordCount();
         
