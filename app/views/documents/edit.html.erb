@@ -8,27 +8,15 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<div x-data="{
-  entitiesSidebarOpen: false
-}" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+<div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 
   <!-- Document editor navbar - sticky beneath site navbar, provides tools and stats -->
   <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-14 z-20 shadow-sm">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-2">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
       <!-- Full navbar -->
       <div class="flex flex-row items-center justify-between">
         <!-- Left side: Document action buttons -->
         <div class="flex items-center space-x-2">
-          <!-- Entities button - styled like AI analysis FAB -->
-          <button
-            @click="entitiesSidebarOpen = !entitiesSidebarOpen"
-            class="flex items-center px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 transition-colors shadow-sm"
-          >
-            <i class="material-icons text-white mr-1 text-sm align-middle">people_alt</i>
-            <span class="font-medium">Entities</span>
-          </button>
-          
-          
           <!-- Metadata button -->
           <button
             @click="$dispatch('open-modal', 'document-metadata-modal')"
@@ -132,13 +120,11 @@
     </div>
   </header>
 
-  <!-- Main content area - Three column grid layout -->
-  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12">
-    <!-- Left column (empty space/margin) -->
-    <div class="hidden lg:block lg:col-span-2"></div>
-    
-    <!-- Center column (editor) - always centered -->
-    <div class="lg:col-span-8 px-4 sm:px-6 lg:px-8 py-6">
+  <!-- Main content area - Flex layout -->
+  <main class="flex-1 pt-14">
+    <div class="flex relative">
+    <!-- Center column (editor) -->
+    <div class="flex-1 bg-white dark:bg-gray-900 px-4 sm:px-6 lg:px-8 py-6">
       <!-- Editor container with max width -->
       <div class="max-w-3xl mx-auto">
         <!-- Document title input -->
@@ -178,12 +164,115 @@
         </div>
       </div>
     </div>
-    
-    <!-- Right column (sidebar) -->
-    <div class="lg:col-span-2 relative">
-      <!-- Entities sidebar container - positioned in the right column -->
-      <div class="lg:sticky lg:top-14 lg:h-screen">
-        <%= render partial: 'javascripts/content_linking_alpine' %>
+
+    <!-- Right Column - Desktop Entities Sidebar (Toggleable) -->
+    <div x-show="showRightSidebar" x-cloak
+         x-data="documentEntitiesSidebar()"
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="hidden lg:block w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 sticky top-[112px] h-[calc(100vh-112px)] overflow-y-auto"
+         role="complementary"
+         aria-label="Document Entities">
+
+      <!-- Desktop Header with Title and Toggle Button -->
+      <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <button @click="toggleRightSidebar()"
+                class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+                title="Hide Linked Pages"
+                aria-label="Hide Linked Pages">
+          <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
+          <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
+            <i class="material-icons text-white text-xs">link</i>
+          </div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Linked Pages</h2>
+        </button>
+      </div>
+
+      <%= render partial: 'documents/entities_sidebar' %>
+    </div>
+
+    </div> <!-- Close flex container -->
+
+    <!-- Desktop Collapsed Toggle Tab -->
+    <div x-show="!showRightSidebar && isDesktop" x-cloak
+         class="hidden lg:block fixed right-0 z-40"
+         style="top: 132px;">
+      <button @click="toggleRightSidebar()"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              data-tooltip="Linked Pages"
+              aria-label="Show Linked Pages">
+        <i class="material-icons text-base">chevron_left</i>
+        <i class="material-icons text-base">link</i>
+      </button>
+    </div>
+
+    <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
+    <div class="lg:hidden fixed right-0 z-30"
+         style="top: 132px;">
+      <button @click="toggleRightSidebar()"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1"
+              :title="showRightSidebar ? 'Close Linked Pages' : 'Linked Pages'"
+              :aria-label="showRightSidebar ? 'Close Linked Pages' : 'Open Linked Pages'"
+              :aria-expanded="showRightSidebar">
+        <i class="material-icons text-base" x-show="!showRightSidebar">link</i>
+        <i class="material-icons text-base" x-show="!showRightSidebar">chevron_left</i>
+        <i class="material-icons text-base" x-show="showRightSidebar">chevron_right</i>
+      </button>
+    </div>
+
+    <!-- Mobile/Tablet Right Sidebar Overlay -->
+    <div x-show="showRightSidebar && !isDesktop" x-cloak
+         x-transition:enter="transition-opacity ease-linear duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         @click="closeMobileSidebar()"
+         @keydown.escape.window="closeMobileSidebar()"
+         class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+         role="presentation"
+         aria-hidden="true">
+    </div>
+
+    <!-- Mobile/Tablet Right Sidebar -->
+    <div x-show="showRightSidebar && !isDesktop" x-cloak
+         x-data="documentEntitiesSidebar()"
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         @keydown.escape="closeMobileSidebar()"
+         class="lg:hidden fixed right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobile-entities-title">
+
+      <!-- Mobile Header with close button -->
+      <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <button @click="closeMobileSidebar()"
+                class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Close Linked Pages">
+          <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
+          <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
+            <i class="material-icons text-white text-xs">link</i>
+          </div>
+          <h2 id="mobile-entities-title" class="text-sm font-semibold text-gray-900 dark:text-white">Linked Pages</h2>
+        </button>
+      </div>
+
+      <%= render partial: 'documents/entities_sidebar' %>
+    </div>
+
+    <!-- Modals (fixed position, outside flex layout) -->
+    <div>
+      <%= render partial: 'javascripts/content_linking_alpine' %>
         
         <!-- Privacy modal with tabs -->
         <div
@@ -607,351 +696,6 @@
             </div>
           </div>
         </div>
-        
-        <!-- Document entities sidebar using Alpine.js -->
-        <div
-          x-data="documentEntitiesSidebar()"
-          x-init="$watch('entitiesSidebarOpen', value => {
-            if (value) {
-              document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
-              // Focus the search input when sidebar is shown
-              setTimeout(() => {
-                document.getElementById('entity-search-input').focus();
-              }, 300);
-            } else {
-              document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
-            }
-          })"
-          @keydown.escape.window="entitiesSidebarOpen = false"
-        >
-          <!-- Entities sidebar - in right column on large screens -->
-          <div
-            class="bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out overflow-hidden h-full sticky top-14 z-50"
-            :class="entitiesSidebarOpen ? 'block' : 'hidden'"
-            style="height: calc(100vh - 112px);"
-            x-cloak
-          >
-            <!-- Sidebar header -->
-            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              <div class="flex items-center">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
-                  <i class="material-icons text-white text-sm">people_alt</i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Document Entities</h3>
-              </div>
-              <button @click="entitiesSidebarOpen = false" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 lg:hidden">
-                <i class="material-icons">close</i>
-              </button>
-            </div>
-            
-            <!-- Sidebar content -->
-            <div class="flex flex-col h-full overflow-hidden" style="height: calc(100vh - 168px);">
-              <!-- Link new entity section -->
-              <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link a page to this document</h4>
-                <div class="relative">
-                  <input
-                    type="text"
-                    id="entity-search-input"
-                    placeholder="Search pages to link..."
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
-                    autocomplete="off"
-                    x-model="searchQuery"
-                    @input="filterSearchResults"
-                    @focus="showSearchDropdown = searchQuery.length > 0"
-                    @blur="setTimeout(() => showSearchDropdown = false, 200)"
-                  >
-                  <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <i class="material-icons text-gray-400">search</i>
-                  </div>
-                  
-                  <!-- Search results dropdown -->
-                  <div x-show="showSearchDropdown && filteredSearchResults.length > 0"
-                       x-transition:enter="transition ease-out duration-200"
-                       x-transition:enter-start="opacity-0 scale-95"
-                       x-transition:enter-end="opacity-100 scale-100"
-                       x-transition:leave="transition ease-in duration-150"
-                       x-transition:leave-start="opacity-100 scale-100"
-                       x-transition:leave-end="opacity-0 scale-95"
-                       class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
-                    <template x-for="result in filteredSearchResults" :key="`${result.type}-${result.id}`">
-                      <button @click="linkEntity(result)"
-                              type="button"
-                              class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-                        <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
-                             :class="getEntityColorClass(result.type)">
-                          <i class="material-icons text-xs" 
-                             :class="getEntityTextColorClass(result.type)"
-                             x-text="getEntityIcon(result.type)"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" x-text="result.name"></p>
-                          <p class="text-xs text-gray-500 dark:text-gray-400" x-text="result.type"></p>
-                        </div>
-                      </button>
-                    </template>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Filter tabs - only show types that are actually linked -->
-              <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 overflow-x-auto whitespace-nowrap">
-                <div class="flex space-x-2" id="entity-filter-buttons">
-                  <!-- All filter (always visible) -->
-                  <button
-                    @click="filterByType('all')"
-                    :class="activeTab === 'all' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                    class="p-2 rounded-md text-xs font-medium transition-colors"
-                    title="All pages"
-                  >
-                    <i class="material-icons text-sm">apps</i>
-                  </button>
-                  
-                  <% # Get unique entity types that are actually linked %>
-                  <% linked_types = @linked_entities.map(&:entity_type).uniq.sort %>
-                  
-                  <% linked_types.each do |entity_type| %>
-                    <% entity_class = content_class_from_name(entity_type) %>
-                    <% next unless entity_class %>
-                    
-                    <button
-                      @click="filterByType('<%= entity_type %>')"
-                      :class="activeTab === '<%= entity_type %>' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'"
-                      class="p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1"
-                      title="<%= entity_type.pluralize %>"
-                      data-filter-type="<%= entity_type %>"
-                    >
-                      <i class="material-icons text-sm"><%= entity_class.icon %></i>
-                      <span class="text-xs filter-count">
-                        (<%= @linked_entities.select { |e| e.entity_type == entity_type }.count %>)
-                      </span>
-                    </button>
-                  <% end %>
-                </div>
-              </div>
-            
-              <!-- Vertical entity list with expandable previews -->
-              <div class="flex-1 overflow-y-auto p-4 h-full" style="flex-grow: 1;">
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Linked pages <span id="linked-entities-count">(<%= @linked_entities.count %>)</span></h4>
-                
-                <!-- Entity list with collapsible previews -->
-                <div class="space-y-2" id="linked-entities-list">
-                  <% if @linked_entities.any? %>
-                    <% @linked_entities.each do |document_entity| %>
-                      <% entity = document_entity.entity %>
-                      <% next unless entity.present? %>
-                      <% entity_class = content_class_from_name(document_entity.entity_type) %>
-                      
-                      <div x-data="{ expanded: false }" 
-                           class="border rounded-md overflow-hidden linked-entity"
-                           data-entity-type="<%= document_entity.entity_type %>"
-                           data-entity-id="<%= document_entity.id %>">
-                        <!-- Entity header (always visible) -->
-                        <div
-                          @click="expanded = !expanded"
-                          :class="expanded ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'"
-                          class="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                        >
-                          <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                              <div class="w-6 h-6 rounded-full <%= entity_class.color.gsub('bg-', 'bg-').gsub('-500', '-100') %> flex items-center justify-center mr-2">
-                                <i class="material-icons <%= entity_class.text_color %> text-xs"><%= entity_class.icon %></i>
-                              </div>
-                              <div>
-                                <span class="text-sm font-medium dark:text-gray-200"><%= entity.name %></span>
-                                <p class="text-xs text-gray-500 dark:text-gray-400"><%= entity_class.name %></p>
-                              </div>
-                            </div>
-                            <div class="flex items-center space-x-1">
-                              <!-- Unlink button -->
-                              <button @click.stop="unlinkEntity(<%= document_entity.id %>)"
-                                      class="p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
-                                      title="Remove from document">
-                                <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
-                              </button>
-                              <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <!-- Expandable preview section -->
-                        <div x-show="expanded" x-collapse class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
-                          <div class="flex items-center justify-between mb-2">
-                            <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Quick reference</h4>
-                            <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.id), 
-                                        class: "text-xs text-blue-600 hover:text-blue-800",
-                                        target: "_blank" do %>
-                              View full page
-                            <% end %>
-                          </div>
-                          
-                          <div class="space-y-2">
-                            <% # Display key attributes based on entity type %>
-                            <% case document_entity.entity_type %>
-                            <% when 'Character' %>
-                              <% if entity.respond_to?(:role) && entity.role.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
-                                  <p class="text-sm"><%= entity.role %></p>
-                                </div>
-                              <% end %>
-                              <% if entity.respond_to?(:description) && entity.description.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
-                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
-                                </div>
-                              <% end %>
-                            <% when 'Location' %>
-                              <% if entity.respond_to?(:type_of) && entity.type_of.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
-                                  <p class="text-sm"><%= entity.type_of %></p>
-                                </div>
-                              <% end %>
-                              <% if entity.respond_to?(:description) && entity.description.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
-                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
-                                </div>
-                              <% end %>
-                            <% when 'Item' %>
-                              <% if entity.respond_to?(:item_type) && entity.item_type.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
-                                  <p class="text-sm"><%= entity.item_type %></p>
-                                </div>
-                              <% end %>
-                              <% if entity.respond_to?(:description) && entity.description.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
-                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
-                                </div>
-                              <% end %>
-                            <% else %>
-                              <% # Generic fallback for other content types %>
-                              <% if entity.respond_to?(:description) && entity.description.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
-                                  <p class="text-sm"><%= truncate(entity.description, length: 150) %></p>
-                                </div>
-                              <% elsif entity.respond_to?(:summary) && entity.summary.present? %>
-                                <div>
-                                  <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
-                                  <p class="text-sm"><%= truncate(entity.summary, length: 150) %></p>
-                                </div>
-                              <% end %>
-                            <% end %>
-                          </div>
-                        </div>
-                      </div>
-                    <% end %>
-                  <% else %>
-                    <!-- Empty state when no entities are linked -->
-                    <div class="flex flex-col items-center justify-center py-8 text-center">
-                      <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
-                        <i class="material-icons text-gray-400 text-xl">link_off</i>
-                      </div>
-                      <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No linked pages yet</h4>
-                      <p class="text-xs text-gray-500 dark:text-gray-400">Type @ in the editor or search above to link pages</p>
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Mobile entities sidebar (overlays content on small screens) -->
-      <div
-        x-show="entitiesSidebarOpen"
-        class="fixed inset-y-0 right-0 z-50 w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-lg transform transition-transform duration-300 ease-in-out lg:hidden"
-        x-cloak
-      >
-        <!-- Sidebar header -->
-        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <div class="flex items-center">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mr-2">
-              <i class="material-icons text-white text-sm">people_alt</i>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Document Entities</h3>
-          </div>
-          <button @click="entitiesSidebarOpen = false" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-            <i class="material-icons">close</i>
-          </button>
-        </div>
-        
-        <!-- Sidebar content (same as desktop) -->
-        <div class="flex flex-col h-full overflow-hidden">
-          <!-- Link new entity section -->
-          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link a page to this document</h4>
-            <div class="relative">
-              <input
-                type="text"
-                id="entity-search-input-mobile"
-                placeholder="Search pages to link..."
-                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
-                autocomplete="off"
-              >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                <i class="material-icons text-gray-400">search</i>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Entity list (same as desktop) -->
-          <div class="flex-1 overflow-y-auto p-4 bg-white dark:bg-gray-800">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Linked pages</h4>
-            <div class="space-y-2">
-              <!-- Same entity list as desktop -->
-              <!-- Example entity with collapsible preview -->
-              <div class="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <div class="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center mr-2">
-                        <i class="material-icons text-red-600 text-xs">person</i>
-                      </div>
-                      <div>
-                        <span class="text-sm font-medium dark:text-gray-200">Aragorn</span>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Character</p>
-                      </div>
-                    </div>
-                    <i class="material-icons text-gray-400 text-sm">chevron_right</i>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Example entity 2 -->
-              <div class="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
-                <div class="p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                      <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-2">
-                        <i class="material-icons text-green-600 text-xs">place</i>
-                      </div>
-                      <div>
-                        <span class="text-sm font-medium dark:text-gray-200">Rivendell</span>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Location</p>
-                      </div>
-                    </div>
-                    <i class="material-icons text-gray-400 text-sm">chevron_right</i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Backdrop for mobile -->
-      <div
-        x-show="entitiesSidebarOpen"
-        @click="entitiesSidebarOpen = false"
-        class="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-        x-cloak
-      ></div>
     </div>
   </main>
       
@@ -1782,8 +1526,142 @@
         }
       </style>
       
-      <!-- Alpine.js component for Document Entities Sidebar -->
+      <!-- Alpine.js components for Document Editor -->
       <script>
+        // Main page controller for document edit page
+        function documentEditController() {
+          return {
+            // Sidebar state
+            showRightSidebar: false, // Default closed on desktop
+            isDesktop: window.innerWidth >= 1024,
+
+            init() {
+              this.initializeSidebarState();
+              this.setupResizeListener();
+            },
+
+            initializeSidebarState() {
+              // Always start with sidebar closed on page load
+              this.showRightSidebar = false;
+            },
+
+            toggleRightSidebar() {
+              this.showRightSidebar = !this.showRightSidebar;
+
+              // Focus search input when opening
+              if (this.showRightSidebar) {
+                setTimeout(() => {
+                  const searchInput = document.getElementById('entity-search-input');
+                  if (searchInput) searchInput.focus();
+                }, 300);
+              }
+            },
+
+            closeMobileSidebar() {
+              if (!this.isDesktop) {
+                this.showRightSidebar = false;
+              }
+            },
+
+            setupResizeListener() {
+              window.addEventListener('resize', () => {
+                const wasDesktop = this.isDesktop;
+                this.isDesktop = window.innerWidth >= 1024;
+
+                // Close sidebar when transitioning between desktop and mobile
+                if (wasDesktop !== this.isDesktop) {
+                  this.showRightSidebar = false;
+                }
+              });
+            }
+          }
+        }
+
+        // Global function to unlink entity (accessible from nested Alpine scopes)
+        window.unlinkDocumentEntity = function(documentEntityId) {
+          if (!confirm('Remove this page from the document?')) {
+            return;
+          }
+
+          // Get CSRF token
+          const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+          // Send DELETE request to remove entity
+          fetch('/documents/<%= @document.id %>/unlink_entity/' + documentEntityId, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json().then(data => ({ ok: response.ok, data })))
+          .then(({ ok, data }) => {
+            if (ok) {
+              // Remove from UI (both desktop and mobile sidebars)
+              const entityElements = document.querySelectorAll(`[data-entity-id="${documentEntityId}"]`);
+              let entityType = null;
+              entityElements.forEach(el => {
+                entityType = el.dataset.entityType;
+                el.remove();
+              });
+
+              if (entityElements.length > 0) {
+                // Update total count (in all sidebars)
+                document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                  const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                  countSpan.textContent = `(${Math.max(0, currentCount - 1)})`;
+                });
+
+                // Update filter button count for this entity type (in all sidebars)
+                document.querySelectorAll(`[data-filter-type="${entityType}"] .filter-count`).forEach(filterButton => {
+                  const currentFilterCount = parseInt(filterButton.textContent.replace(/[()]/g, '')) || 0;
+                  const newCount = Math.max(0, currentFilterCount - 1);
+                  if (newCount === 0) {
+                    // Remove the filter button if no more entities of this type
+                    filterButton.closest('button').remove();
+                  } else {
+                    filterButton.textContent = `(${newCount})`;
+                  }
+                });
+
+                // Check if we need to show empty state (in all sidebars)
+                const remainingEntities = document.querySelectorAll('.linked-entity');
+                if (remainingEntities.length === 0) {
+                  document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                    entitiesList.innerHTML = `
+                      <div class="flex flex-col items-center justify-center py-8 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                          <i class="material-icons text-gray-400 text-xl">link_off</i>
+                        </div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No linked pages yet</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Type @ in the editor or search above to link pages</p>
+                      </div>
+                    `;
+                  });
+                }
+              }
+
+              // Show success toast
+              if (typeof showToast === 'function') {
+                showToast(data.message || 'Page unlinked from document', 'success');
+              }
+            } else {
+              console.error('Failed to unlink entity:', data);
+              if (typeof showToast === 'function') {
+                showToast('Failed to unlink page', 'error');
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error unlinking entity:', error);
+            if (typeof showToast === 'function') {
+              showToast('Error unlinking page', 'error');
+            }
+          });
+        };
+
+        // Entities sidebar component
         function documentEntitiesSidebar() {
           return {
             activeTab: 'all',
@@ -1814,12 +1692,23 @@
                 this.showSearchDropdown = false;
                 return;
               }
-              
+
+              // Get currently linked entity IDs (type + id combinations)
+              const linkedEntities = new Set();
+              document.querySelectorAll('.linked-entity').forEach(el => {
+                const type = el.dataset.entityType;
+                const entityId = el.dataset.linkedEntityId;
+                if (type && entityId) {
+                  linkedEntities.add(`${type}-${entityId}`);
+                }
+              });
+
               const query = this.searchQuery.toLowerCase();
               this.filteredSearchResults = this.allLinkables
                 .filter(item => item.name.toLowerCase().includes(query))
+                .filter(item => !linkedEntities.has(`${item.type}-${item.id}`)) // Exclude already linked
                 .slice(0, 10); // Limit to 10 results
-              
+
               this.showSearchDropdown = this.filteredSearchResults.length > 0;
             },
             
@@ -1860,46 +1749,59 @@
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
-                  // Create and insert the new entity element
-                  const newEntityElement = this.createEntityElement(data.document_entity);
-                  
-                  // Remove empty state if it exists
-                  const emptyState = document.querySelector('#linked-entities-list .flex.flex-col.items-center.justify-center');
-                  if (emptyState) {
-                    emptyState.remove();
+                  // Handle "already linked" case
+                  if (data.already_linked) {
+                    if (typeof showToast === 'function') {
+                      showToast(data.message || 'Page is already linked', 'info');
+                    }
+                    return;
                   }
-                  
-                  // Add the new entity to the list
-                  const entitiesList = document.getElementById('linked-entities-list');
-                  entitiesList.insertAdjacentHTML('afterbegin', newEntityElement);
-                  
-                  // Initialize Alpine for the new element
-                  const newElement = entitiesList.firstElementChild;
-                  if (window.Alpine && newElement) {
-                    window.Alpine.initTree(newElement);
-                  }
-                  
-                  // Update count
-                  this.updateEntityCount();
-                  
+
+                  // Remove empty state if it exists (in all sidebars)
+                  document.querySelectorAll('#linked-entities-list .flex.flex-col.items-center.justify-center').forEach(el => el.remove());
+
+                  // Add the new entity card to all sidebar lists (desktop + mobile)
+                  document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                    // Insert the server-rendered card HTML
+                    entitiesList.insertAdjacentHTML('afterbegin', data.card_html);
+
+                    // Initialize Alpine for the new element
+                    const newElement = entitiesList.firstElementChild;
+                    if (window.Alpine && newElement) {
+                      window.Alpine.initTree(newElement);
+                    }
+                  });
+
+                  // Update total count (in all sidebars)
+                  document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                    const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                    countSpan.textContent = `(${currentCount + 1})`;
+                  });
+
                   // Update filter buttons if this is a new entity type
                   this.updateFilterButtons(data.document_entity.entity_type, data.document_entity.entity);
-                  
+
                   // Apply current filter
                   if (this.activeTab !== 'all') {
                     this.filterByType(this.activeTab);
                   }
-                  
-                  // Show success feedback
-                  this.showSuccessFeedback('Page linked successfully!');
+
+                  // Show success toast
+                  if (typeof showToast === 'function') {
+                    showToast(`${data.document_entity.entity.name} linked to document`, 'success');
+                  }
                 } else {
                   console.error('Failed to link entity');
-                  alert('Failed to link page. Please try again.');
+                  if (typeof showToast === 'function') {
+                    showToast('Failed to link page. Please try again.', 'error');
+                  }
                 }
               })
               .catch(error => {
                 console.error('Error linking entity:', error);
-                alert('An error occurred while linking the page.');
+                if (typeof showToast === 'function') {
+                  showToast('An error occurred while linking the page.', 'error');
+                }
               });
               
               // Clear search
@@ -1909,53 +1811,8 @@
             },
             
             unlinkEntity(documentEntityId) {
-              if (!confirm('Remove this page from the document?')) {
-                return;
-              }
-              
-              // Get CSRF token
-              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-              
-              // Send request to remove entity
-              fetch('/documents/<%= @document.id %>/destroy_entity/' + documentEntityId, {
-                method: 'GET',
-                headers: {
-                  'X-CSRF-Token': csrfToken
-                }
-              })
-              .then(response => {
-                if (response.ok) {
-                  // Remove from UI
-                  const entityElement = document.querySelector(`[data-entity-id="${documentEntityId}"]`);
-                  if (entityElement) {
-                    entityElement.remove();
-                    
-                    // Update counts and filter buttons
-                    this.updateEntityCount();
-                    this.updateAllFilterCounts();
-                    
-                    // Check if we need to show empty state
-                    const remainingEntities = document.querySelectorAll('.linked-entity');
-                    if (remainingEntities.length === 0) {
-                      const entitiesList = document.getElementById('linked-entities-list');
-                      entitiesList.innerHTML = `
-                        <div class="flex flex-col items-center justify-center py-8 text-center">
-                          <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                            <i class="material-icons text-gray-400 text-xl">link_off</i>
-                          </div>
-                          <h4 class="text-sm font-medium text-gray-700 mb-1">No linked pages yet</h4>
-                          <p class="text-xs text-gray-500">Type @ in the editor or search above to link pages</p>
-                        </div>
-                      `;
-                    }
-                  }
-                } else {
-                  console.error('Failed to unlink entity');
-                }
-              })
-              .catch(error => {
-                console.error('Error unlinking entity:', error);
-              });
+              // Call the global unlink function
+              window.unlinkDocumentEntity(documentEntityId);
             },
             
             getEntityColorClass(type) {
@@ -2283,3 +2140,5 @@
           }
         }
       </script>
+
+</div> <!-- Close main page container (x-data="documentEditController()") -->

@@ -3,6 +3,9 @@ class DocumentEntity < ApplicationRecord
   belongs_to :document_analysis, optional: true
   has_one :document, through: :document_analysis
 
+  # Prevent linking the same entity multiple times to the same document
+  validates :entity_id, uniqueness: { scope: [:document_analysis_id, :entity_type], message: "is already linked to this document" }, if: -> { entity_id.present? }
+
   after_create :match_notebook_page!, if: Proc.new { |de| de.entity_id.nil? }
 
   # TODO should this be some chain of method aliases maybe? or cached on object?

@@ -186,13 +186,30 @@ class DocumentsController < ApplicationController
       # Now that we have the analysis reference, we just create a new DocumentEntity on it for the associated page
       page = linked_entity_params[:entity_type].constantize.find(linked_entity_params[:entity_id]) # raises exception if not found :+1:
 
+      # Check if already linked (prevent duplicates)
+      existing_entity = document_analysis.document_entities.find_by(
+        entity_type: linked_entity_params[:entity_type],
+        entity_id:   linked_entity_params[:entity_id]
+      )
+
+      if existing_entity.present?
+        # Already linked - return success but indicate it was already linked
+        respond_to do |format|
+          format.html { redirect_back(fallback_location: analysis_document_path(document_analysis.document), notice: "Page is already linked!") }
+          format.json do
+            render json: { success: true, already_linked: true, message: "#{page.name} is already linked to this document." }
+          end
+        end
+        return
+      end
+
       document_entity = document_analysis.document_entities.create!(
         entity_type: linked_entity_params[:entity_type],
         entity_id:   linked_entity_params[:entity_id],
         text:        page.name
       )
 
-      # # Finally, we need to kick off another analysis job to fetch information about this entity
+      # Finally, we need to kick off another analysis job to fetch information about this entity
       document_entity.analyze! if current_user.on_premium_plan?
 
       # Return JSON for AJAX requests, redirect for regular requests
@@ -202,9 +219,17 @@ class DocumentsController < ApplicationController
           # Load the entity with its attributes for display
           entity = document_entity.entity
           entity_class = entity.class
-          
+
+          # Render the card partial as HTML for instant UI insertion
+          card_html = render_to_string(
+            partial: 'documents/linked_entity_card',
+            locals: { document_entity: document_entity },
+            formats: [:html]
+          )
+
           render json: {
             success: true,
+            card_html: card_html,
             document_entity: {
               id: document_entity.id,
               entity_type: document_entity.entity_type,
@@ -392,6 +417,23 @@ class DocumentsController < ApplicationController
     entity.destroy
 
     redirect_back(fallback_location: document, notice: "Page unlinked.")
+  end
+
+  def unlink_entity_by_id
+    document = Document.find_by(id: params[:id])
+    return head :not_found unless document.present?
+    return head :unauthorized unless user_signed_in? && document.user == current_user
+
+    entity = document.document_entities.find_by(id: params[:entity_id])
+    return head :not_found unless entity.present?
+
+    entity_name = entity.entity&.name || 'Page'
+    entity.destroy
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: document, notice: "#{entity_name} unlinked.") }
+      format.json { render json: { success: true, message: "#{entity_name} unlinked from document." } }
+    end
   end
 
   def destroy_analysis

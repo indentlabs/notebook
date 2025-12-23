@@ -164,6 +164,8 @@ Rails.application.routes.draw do
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
+    # API route for unlinking by document_entity ID:
+    delete '/unlink_entity/:entity_id', to: 'documents#unlink_entity_by_id', on: :member
   end
   resources :folders, only: [:create, :update, :destroy, :show]
 

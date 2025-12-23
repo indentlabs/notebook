@@ -1,0 +1,123 @@
+<%# Renders a single linked entity card %>
+<%# Requires: document_entity (DocumentEntity record) %>
+
+<% entity = document_entity.entity %>
+<% return unless entity.present? %>
+<% entity_class = content_class_from_name(document_entity.entity_type) %>
+<% return unless entity_class.present? %>
+
+<%# Extract the base color name (e.g., 'green', 'purple') from the color class %>
+<% base_color = entity_class.color.match(/bg-(\w+)-\d+/)&.[](1) || 'gray' %>
+<% icon_bg_class = "bg-#{base_color}-100 dark:bg-#{base_color}-900/30" %>
+<% icon_text_class = "text-#{base_color}-600 dark:text-#{base_color}-400" %>
+
+<div x-data="{ expanded: false }"
+     class="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden linked-entity bg-white dark:bg-gray-800"
+     data-entity-type="<%= document_entity.entity_type %>"
+     data-entity-id="<%= document_entity.id %>"
+     data-linked-entity-id="<%= document_entity.entity_id %>">
+  <!-- Entity header (always visible) -->
+  <div
+    @click="expanded = !expanded"
+    :class="expanded ? 'border-l-blue-500' : 'border-l-transparent'"
+    class="p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-l-4"
+  >
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <div class="w-6 h-6 rounded-full <%= icon_bg_class %> flex items-center justify-center mr-2 flex-shrink-0">
+          <i class="material-icons <%= icon_text_class %> text-xs"><%= entity_class.icon %></i>
+        </div>
+        <div>
+          <span class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= entity.name %></span>
+          <p class="text-xs text-gray-500 dark:text-gray-400"><%= entity_class.name %></p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-1">
+        <!-- Unlink button -->
+        <button @click.stop="window.unlinkDocumentEntity(<%= document_entity.id %>)"
+                class="p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
+                title="Remove from document">
+          <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+        </button>
+        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expandable preview section -->
+  <div x-show="expanded"
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-3">
+    <div class="flex items-center justify-between mb-2">
+      <h4 class="text-xs font-medium text-gray-700 dark:text-gray-300">Quick reference</h4>
+      <%= link_to polymorphic_path(entity_class.name.downcase, id: entity.id),
+                  class: "text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300",
+                  target: "_blank" do %>
+        View full page
+      <% end %>
+    </div>
+
+    <div class="space-y-2">
+      <% # Display key attributes based on entity type %>
+      <% case document_entity.entity_type %>
+      <% when 'Character' %>
+        <% if entity.respond_to?(:role) && entity.role.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= strip_tags(entity.role) %></p>
+          </div>
+        <% end %>
+        <% if entity.respond_to?(:description) && entity.description.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Description</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= truncate(strip_tags(entity.description), length: 150) %></p>
+          </div>
+        <% end %>
+      <% when 'Location' %>
+        <% if entity.respond_to?(:type_of) && entity.type_of.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= strip_tags(entity.type_of) %></p>
+          </div>
+        <% end %>
+        <% if entity.respond_to?(:description) && entity.description.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Description</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= truncate(strip_tags(entity.description), length: 150) %></p>
+          </div>
+        <% end %>
+      <% when 'Item' %>
+        <% if entity.respond_to?(:item_type) && entity.item_type.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Type</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= strip_tags(entity.item_type) %></p>
+          </div>
+        <% end %>
+        <% if entity.respond_to?(:description) && entity.description.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Description</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= truncate(strip_tags(entity.description), length: 150) %></p>
+          </div>
+        <% end %>
+      <% else %>
+        <% # Generic fallback for other content types %>
+        <% if entity.respond_to?(:description) && entity.description.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Description</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= truncate(strip_tags(entity.description), length: 150) %></p>
+          </div>
+        <% elsif entity.respond_to?(:summary) && entity.summary.present? %>
+          <div>
+            <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Summary</h4>
+            <p class="text-sm text-gray-900 dark:text-gray-100"><%= truncate(strip_tags(entity.summary), length: 150) %></p>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
