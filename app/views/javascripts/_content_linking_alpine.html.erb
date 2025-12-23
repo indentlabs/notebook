@@ -74,8 +74,11 @@
               
               if (this.filteredResults.length > 0) {
                 this.calculateDropdownPosition();
+                // Only reset selectedIndex when dropdown is newly opening
+                if (!this.showDropdown) {
+                  this.selectedIndex = 0;
+                }
                 this.showDropdown = true;
-                this.selectedIndex = 0;
                 this.$dispatch('dropdown-open');
               } else {
                 this.hideDropdown();

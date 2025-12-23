@@ -1,6 +1,6 @@
 <% set_meta_tags title: @document.title, description: truncate(@document.body) %>
 
-<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black">
   <!-- Subtle top decoration -->
   <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-blue-500 to-teal-400"></div>
   
@@ -9,9 +9,9 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
       <div class="flex items-center">
         <% if @document.folder.present? %>
-          <div class="flex items-center text-sm text-gray-500">
-            <i class="material-icons text-gray-400 text-xs mr-1">folder</i>
-            <%= link_to @document.folder.title, folder_path(@document.folder), class: "hover:text-blue-600" %>
+          <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+            <i class="material-icons text-gray-400 dark:text-gray-500 text-xs mr-1">folder</i>
+            <%= link_to @document.folder.title, folder_path(@document.folder), class: "hover:text-blue-600 dark:hover:text-blue-400" %>
           </div>
         <% end %>
       </div>
@@ -23,7 +23,7 @@
     <!-- Share button with dropdown -->
     <div class="relative" x-data="{ open: false }" @click.away="open = false">
       <button @click="open = !open"
-              class="flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200"
+              class="flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 dark:border-gray-700"
               title="Share">
         <i class="material-icons">share</i>
       </button>
@@ -34,20 +34,20 @@
            x-transition:leave="transition ease-in duration-75"
            x-transition:leave-start="transform opacity-100 scale-100"
            x-transition:leave-end="transform opacity-0 scale-95"
-           class="origin-bottom-right absolute right-0 bottom-16 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10"
+           class="origin-bottom-right absolute right-0 bottom-16 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10 dark:bg-gray-800 dark:ring-white/10"
            role="menu"
            aria-orientation="vertical"
            style="display: none;">
         <div class="py-1" role="none">
-          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
-            <i class="material-icons text-gray-400 mr-2 text-sm">link</i>
+          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" role="menuitem">
+            <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">link</i>
             Copy link
           </a>
-          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" role="menuitem">
             <i class="material-icons text-blue-400 mr-2 text-sm">facebook</i>
             Share on Facebook
           </a>
-          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" role="menuitem">
             <i class="material-icons text-blue-400 mr-2 text-sm">twitter</i>
             Share on Twitter
           </a>
@@ -58,7 +58,7 @@
     <!-- Edit button (only for document owner) -->
     <% if user_signed_in? && current_user.id == @document.user_id %>
       <%= link_to edit_document_path(@document),
-                  class: "flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200",
+                  class: "flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800/80 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 dark:border-gray-700",
                   title: "Edit document" do %>
         <i class="material-icons">edit</i>
       <% end %>
@@ -72,23 +72,23 @@
   <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-0 py-16">
     <!-- Document header -->
     <header class="mb-12">
-      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tight">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 leading-tight tracking-tight dark:text-gray-100">
         <%= @document.title %>
       </h1>
       
-      <div class="mt-6 flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2">
+      <div class="mt-6 flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2 dark:text-gray-400">
         <div class="flex items-center">
           <div class="flex-shrink-0">
             <img class="h-5 w-5 rounded-full" src="<%= @document.user.image_url(size: 40) %>" alt="<%= @document.user.display_name %>">
           </div>
           <div class="ml-2">
-            <%= link_to @document.user.display_name, @document.user, class: "font-medium text-gray-900 hover:underline" %>
+            <%= link_to @document.user.display_name, @document.user, class: "font-medium text-gray-900 hover:underline dark:text-gray-200" %>
           </div>
         </div>
         
         <% if @document.updated_at.present? %>
           <div class="flex items-center">
-            <i class="material-icons text-gray-400 text-sm mr-1">calendar_today</i>
+            <i class="material-icons text-gray-400 text-sm mr-1 dark:text-gray-500">calendar_today</i>
             <time datetime="<%= @document.updated_at.strftime('%Y-%m-%d') %>">
               <%= @document.updated_at.strftime('%B %d, %Y') %>
             </time>
@@ -97,7 +97,7 @@
         
         <% if @document.cached_word_count? %>
           <div class="flex items-center">
-            <i class="material-icons text-gray-400 text-sm mr-1">text_fields</i>
+            <i class="material-icons text-gray-400 text-sm mr-1 dark:text-gray-500">text_fields</i>
             <span><%= number_with_delimiter @document.cached_word_count %> <%= 'word'.pluralize @document.cached_word_count %></span>
           </div>
         <% end %>
@@ -105,21 +105,21 @@
     </header>
 
     <!-- Document content -->
-    <div class="prose prose-lg md:prose-xl max-w-none prose-blue prose-headings:text-gray-900 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-p:leading-relaxed prose-headings:tracking-tight prose-headings:font-bold prose-img:rounded-lg prose-img:shadow-md">
+    <div class="prose prose-lg md:prose-xl max-w-none prose-blue prose-headings:text-gray-900 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-p:leading-relaxed prose-headings:tracking-tight prose-headings:font-bold prose-img:rounded-lg prose-img:shadow-md dark:prose-invert dark:prose-headings:text-gray-100 dark:prose-a:text-blue-400">
       <%= ContentFormatterService.substitute_content_links(clean_links(@document.body.try(:html_safe)) || "", current_user).html_safe %>
     </div>
     
     <!-- Author bio -->
-    <div class="mt-20 pt-8 border-t border-gray-100">
+    <div class="mt-20 pt-8 border-t border-gray-100 dark:border-gray-800">
       <div class="flex items-center">
         <div class="flex-shrink-0">
           <img class="h-12 w-12 rounded-full" src="<%= @document.user.image_url(size: 120) %>" alt="<%= @document.user.display_name %>">
         </div>
         <div class="ml-4">
-          <h3 class="text-lg font-medium text-gray-900">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">
             <%= link_to @document.user.display_name, @document.user, class: "hover:underline" %>
           </h3>
-          <p class="text-sm text-gray-500">
+          <p class="text-sm text-gray-500 dark:text-gray-400">
             Writer
           </p>
         </div>
@@ -146,10 +146,10 @@
   </script>
   
   <!-- Minimal Footer -->
-  <footer class="mt-16 border-t border-gray-100 bg-white">
+  <footer class="mt-16 border-t border-gray-100 bg-white dark:bg-black dark:border-gray-800">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-0 py-6">
-      <div class="text-center text-xs text-gray-400">
-        <p>Published with <a href="/" class="text-gray-500 hover:text-blue-600">Notebook.ai</a></p>
+      <div class="text-center text-xs text-gray-400 dark:text-gray-600">
+        <p>Published with <a href="/" class="text-gray-500 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400">Notebook.ai</a></p>
       </div>
     </div>
   </footer>

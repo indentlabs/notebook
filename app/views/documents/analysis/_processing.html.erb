@@ -1,26 +1,26 @@
 <div class="max-w-3xl mx-auto px-4 py-12">
   <!-- Header -->
   <div class="text-center mb-12">
-    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-white border-2 shadow-sm" style="border-color: <%= Document.hex_color %>">
+    <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 bg-white dark:bg-gray-800 border-2 shadow-sm" style="border-color: <%= Document.hex_color %>">
       <svg class="w-7 h-7 animate-spin" style="animation-duration: 2s; color: <%= Document.hex_color %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
       </svg>
     </div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-3">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-3">
       Your document is being analyzed
     </h1>
-    <p class="text-gray-600">
+    <p class="text-gray-600 dark:text-gray-400">
       This usually takes just a few minutes. You'll get a notification when it's ready.
     </p>
   </div>
 
   <!-- Progress Card -->
-  <div class="bg-white rounded-lg border shadow-sm p-8 mb-8">
+  <div class="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm p-8 mb-8">
     <div class="flex items-center justify-between mb-3">
-      <span class="text-sm font-medium text-gray-700 uppercase tracking-wide">Overall Progress</span>
-      <span class="text-2xl font-bold text-gray-900"><%= analysis.progress %>%</span>
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wide">Overall Progress</span>
+      <span class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= analysis.progress %>%</span>
     </div>
-    <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+    <div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
       <div class="h-full rounded-full transition-all duration-500"
            style="width: <%= analysis.progress %>%; background-color: <%= Document.hex_color %>"></div>
     </div>
@@ -29,25 +29,25 @@
   <!-- Analysis Steps -->
   <div class="space-y-3 mb-12">
     <!-- Word Choice -->
-    <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm overflow-hidden">
       <div class="p-5">
         <div class="flex items-center gap-4">
           <div class="flex-shrink-0">
             <% if analysis && analysis.progress >= 25 %>
-              <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <div class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
                 </svg>
               </div>
             <% else %>
-              <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
                 <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: <%= Document.hex_color %>"></div>
               </div>
             <% end %>
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold text-gray-900">Word Choice</h3>
-            <p class="text-sm text-gray-500">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Word Choice</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               <% if analysis && analysis.progress >= 25 %>
                 Complete
               <% else %>
@@ -60,25 +60,25 @@
     </div>
 
     <!-- Readability -->
-    <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm overflow-hidden">
       <div class="p-5">
         <div class="flex items-center gap-4">
           <div class="flex-shrink-0">
             <% if analysis && analysis.progress >= 50 %>
-              <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <div class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
                 </svg>
               </div>
             <% else %>
-              <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
                 <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: <%= Document.hex_color %>"></div>
               </div>
             <% end %>
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold text-gray-900">Readability</h3>
-            <p class="text-sm text-gray-500">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Readability</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               <% if analysis && analysis.progress >= 50 %>
                 Complete
               <% else %>
@@ -91,25 +91,25 @@
     </div>
 
     <!-- Entities -->
-    <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm overflow-hidden">
       <div class="p-5">
         <div class="flex items-center gap-4">
           <div class="flex-shrink-0">
             <% if analysis && analysis.progress >= 75 %>
-              <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+              <div class="w-10 h-10 rounded-full bg-green-50 dark:bg-green-900 flex items-center justify-center">
+                <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" />
                 </svg>
               </div>
             <% else %>
-              <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
                 <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: <%= Document.hex_color %>"></div>
               </div>
             <% end %>
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold text-gray-900">Entities</h3>
-            <p class="text-sm text-gray-500">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Entities</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               <% if analysis && analysis.progress >= 75 %>
                 Complete
               <% else %>
@@ -122,17 +122,17 @@
     </div>
 
     <!-- Emotion -->
-    <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm overflow-hidden">
       <div class="p-5">
         <div class="flex items-center gap-4">
           <div class="flex-shrink-0">
-            <div class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center">
               <div class="w-2 h-2 rounded-full animate-pulse" style="background-color: <%= Document.hex_color %>"></div>
             </div>
           </div>
           <div class="flex-1">
-            <h3 class="font-semibold text-gray-900">Emotion</h3>
-            <p class="text-sm text-gray-500">Analyzing sentiment and emotional tone...</p>
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100">Emotion</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Analyzing sentiment and emotional tone...</p>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@
       </svg>
       Refresh page
     <% end %>
-    <p class="text-sm text-gray-500 mt-4">
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">
       <% if analysis.progress > 0 %>
         Your analysis is currently processing
       <% else %>

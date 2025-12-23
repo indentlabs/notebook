@@ -1,14 +1,14 @@
 <%
   sentiment_color = (analysis.sentiment_score < 0) ? 'blue' : 'green'
-  sentiment_bg = (analysis.sentiment_score < 0) ? 'bg-blue-100' : 'bg-green-100'
-  sentiment_text = (analysis.sentiment_score < 0) ? 'text-blue-600' : 'text-green-600'
+  sentiment_bg = (analysis.sentiment_score < 0) ? 'bg-blue-100 dark:bg-blue-900' : 'bg-green-100 dark:bg-green-900'
+  sentiment_text = (analysis.sentiment_score < 0) ? 'text-blue-600 dark:text-blue-400' : 'text-green-600 dark:text-green-400'
 %>
 
-<h5 class="text-gray-500 text-xl font-semibold mb-4">Sentiment</h5>
+<h5 class="text-gray-500 dark:text-gray-400 text-xl font-semibold mb-4">Sentiment</h5>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-  <div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
     <div class="<%= sentiment_bg %> p-6">
-      <h5 class="text-xl font-bold text-gray-900 mb-4">
+      <h5 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
         Overall <%= analysis.sentiment_label %>
       </h5>
       <div class="flex items-start gap-4">
@@ -20,7 +20,7 @@
             <%= (analysis.sentiment_score * 100).round.abs %>
           </div>
         </div>
-        <div class="text-gray-900">
+        <div class="text-gray-900 dark:text-gray-100">
           <p class="mb-3">
             <%
               modifier = case analysis.sentiment_score * 100
@@ -36,7 +36,7 @@
             %>
             This document expresses a <%= modifier %> <strong><%= analysis.sentiment_label %></strong> sentiment throughout.
           </p>
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-600 dark:text-gray-400">
             Your score is based on a scale from 1 to 100 based on how intense this emotion appears to be, where 100 is most intense.
           </p>
         </div>
@@ -45,9 +45,9 @@
   </div>
 
   <% if analysis.has_sentiment_scores? %>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
       <div class="p-6">
-        <h5 class="text-xl font-bold mb-4">Evoked emotions</h5>
+        <h5 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Evoked emotions</h5>
         <div id="graph-emotions"></div>
       </div>
     </div>
@@ -63,22 +63,22 @@
     .reject { |e| e.recessive_emotion.first.second.nil? }
 %>
 <% if entities_in_table.any? %>
-  <div class="bg-white rounded-lg shadow overflow-hidden mb-6">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden mb-6">
     <div class="p-6">
-      <h5 class="text-xl font-bold mb-4">Character emotions</h5>
+      <h5 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">Character emotions</h5>
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="border-b">
-              <th class="text-left py-3 px-4 font-semibold">Character</th>
-              <th class="text-left py-3 px-4 font-semibold">Dominant emotion</th>
-              <th class="text-left py-3 px-4 font-semibold">Recessive emotion</th>
+            <tr class="border-b dark:border-gray-700">
+              <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Character</th>
+              <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Dominant emotion</th>
+              <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Recessive emotion</th>
             </tr>
           </thead>
           <tbody>
             <% entities_in_table.each do |character| %>
-              <tr class="border-b hover:bg-gray-50">
-                <td class="py-3 px-4"><%= character.text %></td>
+              <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="py-3 px-4 text-gray-900 dark:text-gray-100"><%= character.text %></td>
                 <td class="py-3 px-4">
                   <span class="inline-block px-3 py-1 rounded-full text-sm font-semibold <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> bg-opacity-20">
                     <%= character.dominant_emotion.first.first.to_s.titleize %>

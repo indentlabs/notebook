@@ -1,4 +1,4 @@
-<h5 class="text-gray-500 text-xl font-semibold mb-4">Entities</h5>
+<h5 class="text-gray-500 dark:text-gray-400 text-xl font-semibold mb-4">Entities</h5>
 
 <script type="text/javascript">
   var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
@@ -21,7 +21,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
   <% analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
     <% entity_class = content_class_from_name(entity.entity_type) %>
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
       <details class="group">
         <summary class="cursor-pointer">
           <div class="relative h-64 overflow-hidden">
@@ -39,19 +39,19 @@
                 </svg>
                 <%= entity.linked_name_if_possible %>
               </span>
-              <svg class="w-6 h-6 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+              <svg class="w-6 h-6 text-gray-900 dark:text-gray-100" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12,16A2,2 0 0,1 14,18A2,2 0 0,1 12,20A2,2 0 0,1 10,18A2,2 0 0,1 12,16M12,10A2,2 0 0,1 14,12A2,2 0 0,1 12,14A2,2 0 0,1 10,12A2,2 0 0,1 12,10M12,4A2,2 0 0,1 14,6A2,2 0 0,1 12,8A2,2 0 0,1 10,6A2,2 0 0,1 12,4Z" />
               </svg>
             </h5>
-            <p class="text-sm mb-2">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
               Relevance score: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%
             </p>
-            <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div class="h-2 rounded-full" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%; background-color: <%= entity_class.hex_color %>"></div>
             </div>
           </div>
         </summary>
-        <div class="bg-gray-50 p-6 border-t">
+        <div class="bg-gray-50 dark:bg-gray-700 p-6 border-t dark:border-gray-600">
           <h5 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: <%= entity_class.hex_color %>">
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
@@ -59,15 +59,15 @@
             <%= entity.linked_name_if_possible %>
           </h5>
           <div class="mb-4">
-            <h6 class="font-semibold mb-3">Emotional range</h6>
+            <h6 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Emotional range</h6>
             <div id="graph-character-emotions-<%= entity.id %>"></div>
           </div>
-          <ul class="space-y-3 text-sm">
+          <ul class="space-y-3 text-sm text-gray-900 dark:text-gray-100">
             <% [:joy, :sadness, :fear, :disgust, :anger].each do |emotion| %>
               <% emotion_score = entity.send("#{emotion}_score") %>
               <li>
                 <div class="font-semibold"><%= emotion.to_s.titleize %>: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %></div>
-                <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-1">
                   <div class="h-2 rounded-full <%= EmotionService.color_for_emotion(emotion) %>" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
                 </div>
               </li>
@@ -77,15 +77,15 @@
             </li>
           </ul>
 
-          <div class="text-center mt-6 pt-6 border-t">
-            <p class="mb-3 text-sm text-gray-600">
+          <div class="text-center mt-6 pt-6 border-t dark:border-gray-600">
+            <p class="mb-3 text-sm text-gray-600 dark:text-gray-400">
               If you'd like, you can remove this <%= entity_class.name.downcase %> from the analysis.
             </p>
             <%= link_to "Remove this #{entity_class.name}", destroy_entity_document_path(entity), class: "px-4 py-2 rounded text-white hover:opacity-90 transition inline-block", style: "background-color: #{entity_class.hex_color}" %>
           </div>
         </div>
       </details>
-      <div class="border-t p-4 flex justify-between items-center bg-white">
+      <div class="border-t dark:border-gray-700 p-4 flex justify-between items-center bg-white dark:bg-gray-800">
         <% if entity.entity_id %>
           <% linked_entity_class = entity.entity.class %>
           <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'text-blue-600 hover:underline flex items-center gap-1' do %>
@@ -135,7 +135,7 @@
 
   <% end %>
 
-  <div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
     <%= link_to '#', class: 'block text-white js-link-entity hover:opacity-90 transition', style: "background-color: #{Document.hex_color}", data: { id: -1 } do %>
       <div class="p-6 flex items-center justify-between">
         <h5 class="text-xl font-bold">Link a missing page</h5>
@@ -146,16 +146,16 @@
     <% end %>
   </div>
 
-  <div class="rounded-lg p-4 text-gray-900 opacity-80" style="background-color: <%= Document.hex_color %>20">
+  <div class="rounded-lg p-4 text-gray-900 dark:text-gray-100 opacity-80" style="background-color: <%= Document.hex_color %>20">
     You can click on any card in this section to view more information about it or remove it.
   </div>
 </div>
 
 <div id="entity-link-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-  <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
     <div class="p-6">
-      <h4 class="text-2xl font-bold mb-4">Link an existing page you've created</h4>
-      <p class="mb-6 text-gray-600">
+      <h4 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">Link an existing page you've created</h4>
+      <p class="mb-6 text-gray-600 dark:text-gray-400">
         You can link a detected entity to one of your already-created pages by selecting it below.
       </p>
       <%= form_with url: link_entity_documents_path do |f| %>
@@ -168,15 +168,15 @@
         <% @current_user_content.each do |content_type, content_list| %>
           <% content_type_class = content_class_from_name(content_type) %>
           <% next if content_type == 'Document' %>
-          <h5 class="text-lg font-semibold mb-2 mt-4"><%= content_type.pluralize %></h5>
-          <ul class="border rounded-lg overflow-hidden">
+          <h5 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-4"><%= content_type.pluralize %></h5>
+          <ul class="border dark:border-gray-700 rounded-lg overflow-hidden">
             <% content_list.each do |content| %>
               <a href="#"
-                 class="js-link-entity-selection block hover:bg-gray-50 transition"
+                 class="js-link-entity-selection block hover:bg-gray-50 dark:hover:bg-gray-700 transition"
                  style="color: <%= content_type_class.hex_color %>"
                  data-id="<%= content.id %>"
                  data-type="<%= content_type %>">
-                <li class="border-b last:border-b-0 p-4 flex items-center justify-between">
+                <li class="border-b dark:border-gray-700 last:border-b-0 p-4 flex items-center justify-between">
                   <div class="flex items-center gap-3">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
@@ -193,8 +193,8 @@
         <% end %>
       <% end %>
     </div>
-    <div class="border-t p-4 flex justify-end">
-      <a href="#!" class="modal-close px-4 py-2 text-gray-600 hover:text-gray-900">Cancel</a>
+    <div class="border-t dark:border-gray-700 p-4 flex justify-end">
+      <a href="#!" class="modal-close px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">Cancel</a>
     </div>
   </div>
 </div>
