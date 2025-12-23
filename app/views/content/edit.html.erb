@@ -77,7 +77,7 @@
 
       <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
       <div x-show="!showLeftSidebar && isDesktop" x-cloak
-           :style="{ left: siteSidebarVisible ? '14rem' : '0', top: '132px' }"
+           style="top: 132px;"
            class="hidden lg:block fixed z-30 transition-all duration-300">
         <button @click="toggleLeftSidebar()"
                 class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
@@ -89,7 +89,7 @@
       </div>
 
       <!-- Mobile/Tablet Left Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed left-0 z-30"
+      <div class="lg:hidden fixed z-30 transition-all duration-300"
            style="top: 132px;">
         <button @click="toggleLeftSidebar()"
                 @keydown.escape="showLeftSidebar && toggleLeftSidebar()"
@@ -233,8 +233,8 @@ function editPageController() {
     })(),
     showRightSidebar: false,
     hasUnsavedChanges: false,
-    isDesktop: window.innerWidth >= 1024, // Standardized to lg breakpoint
-    isXlDesktop: window.innerWidth >= 1024, // Standardized to lg (Right Sidebar matches Left)
+    isDesktop: window.innerWidth >= 1024, // Standardized to lg breakpoint (matching site sidebar)
+    isXlDesktop: window.innerWidth >= 1024, // Right Sidebar matches Left
     
     // Privacy state
     selectedPrivacy: '<%= @content.privacy || 'private' %>',
@@ -248,10 +248,7 @@ function editPageController() {
     get showUniverseIndicator() {
       return this.selectedPrivacy !== 'public' && this.universePrivacy === 'public';
     },
-    
-    // Reactive property for site-wide sidebar state
-    siteSidebarVisible: false,
-    
+
     init() {
       // Initialize right sidebar state from localStorage
       // Left sidebar is already initialized in the property definition
@@ -313,18 +310,18 @@ function editPageController() {
       // Handle window resize
       window.addEventListener('resize', () => {
         // Left Sidebar Logic (lg breakpoint)
-        this.isDesktop = window.innerWidth >= 1024; 
+        this.isDesktop = window.innerWidth >= 1024;
         this.showLeftSidebar = window.innerWidth >= 1024;
 
         // Right Sidebar Logic (lg breakpoint)
         const wasXlDesktop = this.isXlDesktop;
         this.isXlDesktop = window.innerWidth >= 1024;
 
-        // When transitioning from mobile to desktop (xl), restore saved right sidebar state
+        // When transitioning from mobile to desktop (lg), restore saved right sidebar state
         if (!wasXlDesktop && this.isXlDesktop) {
           this.showRightSidebar = this.getSavedSidebarState();
         }
-        // When transitioning from desktop (xl) to mobile, always close right sidebar
+        // When transitioning from desktop (lg) to mobile, always close right sidebar
         if (wasXlDesktop && !this.isXlDesktop) {
           this.showRightSidebar = false;
         }
@@ -337,41 +334,8 @@ function editPageController() {
       window.addEventListener('privacy-updated', (e) => {
         this.selectedPrivacy = e.detail.privacy;
       });
-      
-      // Sync site-wide sidebar state
-      this.syncSiteSidebarState();
     },
-    
-    syncSiteSidebarState() {
-      const updateFromStorage = () => {
-        try {
-          // Check localStorage
-          const saved = localStorage.getItem('site_navigation_sidebar_visible');
-          const isOpenFromStorage = saved === null ? true : saved === 'true';
-          
-          // Check DOM - look for the site sidebar element
-          const siteSidebar = document.querySelector('.notebook--sidebar');
-          const isVisibleInDOM = siteSidebar && window.getComputedStyle(siteSidebar).display !== 'none';
-          
-          // Check Alpine scope
-          const alpineState = document.body.__x?.$data?.showSidebar;
-          
-          // Use DOM visibility as source of truth
-          const actualState = isVisibleInDOM !== undefined ? isVisibleInDOM : isOpenFromStorage;
-          
-          if (this.siteSidebarVisible !== actualState) {
-            this.siteSidebarVisible = actualState;
-          }
-        } catch (e) {
-          // Silently fail
-        }
-      };
-      
-      updateFromStorage();
-      window.addEventListener('storage', updateFromStorage);
-      setInterval(updateFromStorage, 200);
-    },
-    
+
     watchUniverseChanges() {
       const self = this;
       
