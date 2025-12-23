@@ -15,86 +15,9 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
       <!-- Full navbar -->
       <div class="flex flex-row items-center justify-between">
-        <!-- Left side: Document action buttons -->
+        <!-- Left side: Document info -->
         <div class="flex items-center space-x-2">
-          <!-- Metadata button -->
-          <button
-            @click="$dispatch('open-modal', 'document-metadata-modal')"
-            class="flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm"
-          >
-            <i class="material-icons mr-1 text-sm align-middle">description</i>
-            <span class="font-medium">Metadata</span>
-          </button>
-          
-          <!-- Preview as Reader -->
-          <%= link_to document_path(@document), class: "flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm" do %>
-            <i class="material-icons mr-1 text-sm align-middle">visibility</i>
-            <span class="font-medium">Preview as Reader</span>
-          <% end %>
-          
-          <!-- Privacy settings button removed from here and moved to the right side -->
-          
-          <!-- Overflow menu -->
-          <div class="relative" x-data="{ open: false }">
-            <button
-              @click="open = !open"
-              class="flex items-center px-3 py-1.5 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors shadow-sm"
-            >
-              <i class="material-icons text-sm align-middle">more_horiz</i>
-            </button>
-            
-            <div
-              x-show="open"
-              @click.away="open = false"
-              x-transition:enter="transition ease-out duration-100"
-              x-transition:enter-start="transform opacity-0 scale-95"
-              x-transition:enter-end="transform opacity-100 scale-100"
-              x-transition:leave="transition ease-in duration-75"
-              x-transition:leave-start="transform opacity-100 scale-100"
-              x-transition:leave-end="transform opacity-0 scale-95"
-              class="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50"
-              x-cloak
-            >
-              <div class="py-1">
-                <!-- Analyze document -->
-                <%= link_to queue_analysis_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
-                  <i class="material-icons text-blue-500 mr-3 text-sm">analytics</i>
-                  <span>Analyze this document</span>
-                <% end %>
-                
-                <!-- Revision log -->
-                <%= link_to document_document_revisions_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700" do %>
-                  <i class="material-icons text-gray-600 dark:text-gray-400 mr-3 text-sm">history</i>
-                  <span>Revision log</span>
-                <% end %>
-                
-                <!-- Plaintext view -->
-                <%= link_to plaintext_document_path(@document), class: "flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700", target: "_blank" do %>
-                  <i class="material-icons text-gray-600 dark:text-gray-400 mr-3 text-sm">text_format</i>
-                  <span>Plaintext view</span>
-                <% end %>
-                
-                <hr class="my-1 border-gray-100 dark:border-gray-700">
-                
-                <hr class="my-1 border-gray-100 dark:border-gray-700">
-                
-                <!-- Delete Document -->
-                <%= button_to document_path(@document), 
-                    method: :delete, 
-                    form: { 
-                      class: "w-full",
-                      data: { 
-                        turbo_confirm: 'Are you sure you want to delete this document? This action cannot be undone.' 
-                      },
-                      onsubmit: "return confirm('Are you sure you want to delete this document? This action cannot be undone.');"
-                    },
-                    class: "flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 w-full text-left" do %>
-                  <i class="material-icons text-red-500 mr-3 text-sm">delete</i>
-                  <span>Delete document</span>
-                <% end %>
-              </div>
-            </div>
-          </div>
+          <!-- Document actions moved to sidebar panels -->
         </div>
         
         <!-- Right side: Document stats -->
@@ -165,9 +88,8 @@
       </div>
     </div>
 
-    <!-- Right Column - Desktop Entities Sidebar (Toggleable) -->
+    <!-- Right Column - Desktop Sidebar (Toggleable) -->
     <div x-show="showRightSidebar" x-cloak
-         x-data="documentEntitiesSidebar()"
          x-transition:enter="transform transition ease-in-out duration-200"
          x-transition:enter-start="translate-x-full"
          x-transition:enter-end="translate-x-0"
@@ -176,51 +98,107 @@
          x-transition:leave-end="translate-x-full"
          class="hidden lg:block w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 sticky top-[112px] h-[calc(100vh-112px)] overflow-y-auto"
          role="complementary"
-         aria-label="Document Entities">
+         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'">
 
-      <!-- Desktop Header with Title and Toggle Button -->
+      <!-- Desktop Header - Dynamic based on active panel -->
       <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <button @click="toggleRightSidebar()"
+        <button @click="activeSidebarPanel = null"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
-                title="Hide Linked Pages"
-                aria-label="Hide Linked Pages">
+                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : 'Hide Linked Pages'"
+                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : 'Hide Linked Pages'">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
           <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-            <i class="material-icons text-white text-xs">link</i>
+            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : 'link'"></i>
           </div>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Linked Pages</h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'"></h2>
         </button>
       </div>
 
-      <%= render partial: 'documents/entities_sidebar' %>
+      <!-- Information Panel -->
+      <div x-show="activeSidebarPanel === 'information'">
+        <%= render partial: 'documents/information_sidebar' %>
+      </div>
+
+      <!-- Linked Pages Panel -->
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()">
+        <%= render partial: 'documents/entities_sidebar' %>
+      </div>
+
+      <!-- Actions Panel -->
+      <div x-show="activeSidebarPanel === 'actions'">
+        <%= render partial: 'documents/actions_sidebar' %>
+      </div>
     </div>
 
     </div> <!-- Close flex container -->
 
-    <!-- Desktop Collapsed Toggle Tab -->
-    <div x-show="!showRightSidebar && isDesktop" x-cloak
-         @click="toggleRightSidebar()"
-         class="hidden lg:block fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+    <!-- Desktop Information Toggle Tab -->
+    <div x-show="activeSidebarPanel !== 'information' && isDesktop"
+         @click="togglePanel('information')"
+         class="fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
          style="top: 132px;"
+         data-tooltip="Information"
+         role="button">
+      <i class="material-icons text-base">chevron_left</i>
+      <i class="material-icons text-base">info</i>
+    </div>
+
+    <!-- Desktop Linked Pages Toggle Tab -->
+    <div x-show="activeSidebarPanel !== 'linked_pages' && isDesktop"
+         @click="togglePanel('linked_pages')"
+         class="fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         style="top: 180px;"
          data-tooltip="Linked Pages"
-         role="button"
-         aria-label="Show Linked Pages">
+         role="button">
       <i class="material-icons text-base">chevron_left</i>
       <i class="material-icons text-base">link</i>
     </div>
 
-    <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
-    <div class="lg:hidden fixed right-0 z-30"
-         style="top: 132px;">
-      <button @click="toggleRightSidebar()"
-              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1"
-              :title="showRightSidebar ? 'Close Linked Pages' : 'Linked Pages'"
-              :aria-label="showRightSidebar ? 'Close Linked Pages' : 'Open Linked Pages'"
-              :aria-expanded="showRightSidebar">
-        <i class="material-icons text-base" x-show="!showRightSidebar">link</i>
-        <i class="material-icons text-base" x-show="!showRightSidebar">chevron_left</i>
-        <i class="material-icons text-base" x-show="showRightSidebar">chevron_right</i>
-      </button>
+    <!-- Mobile/Tablet Information Toggle Tab -->
+    <div x-show="!isDesktop"
+         @click="togglePanel('information')"
+         class="fixed right-0 z-30 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         style="top: 132px;"
+         data-tooltip="Information"
+         role="button">
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">info</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'information'">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel === 'information'">chevron_right</i>
+    </div>
+
+    <!-- Mobile/Tablet Linked Pages Toggle Tab -->
+    <div x-show="!isDesktop"
+         @click="togglePanel('linked_pages')"
+         class="fixed right-0 z-30 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         style="top: 180px;"
+         data-tooltip="Linked Pages"
+         role="button">
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">link</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'linked_pages'">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel === 'linked_pages'">chevron_right</i>
+    </div>
+
+    <!-- Desktop Actions Toggle Tab -->
+    <div x-show="activeSidebarPanel !== 'actions' && isDesktop"
+         @click="togglePanel('actions')"
+         class="fixed right-0 z-50 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         style="top: 228px;"
+         data-tooltip="Actions"
+         role="button">
+      <i class="material-icons text-base">chevron_left</i>
+      <i class="material-icons text-base">bolt</i>
+    </div>
+
+    <!-- Mobile/Tablet Actions Toggle Tab -->
+    <div x-show="!isDesktop"
+         @click="togglePanel('actions')"
+         class="fixed right-0 z-30 bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+         style="top: 228px;"
+         data-tooltip="Actions"
+         role="button">
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">bolt</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'actions'">chevron_left</i>
+      <i class="material-icons text-base" x-show="activeSidebarPanel === 'actions'">chevron_right</i>
     </div>
 
     <!-- Mobile/Tablet Right Sidebar Overlay -->
@@ -240,7 +218,6 @@
 
     <!-- Mobile/Tablet Right Sidebar -->
     <div x-show="showRightSidebar && !isDesktop" x-cloak
-         x-data="documentEntitiesSidebar()"
          x-transition:enter="transform transition ease-in-out duration-200"
          x-transition:enter-start="translate-x-full"
          x-transition:enter-end="translate-x-0"
@@ -251,22 +228,37 @@
          class="lg:hidden fixed right-0 top-0 h-full w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
          role="dialog"
          aria-modal="true"
-         aria-labelledby="mobile-entities-title">
+         :aria-labelledby="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : 'mobile-entities-title'">
 
-      <!-- Mobile Header with close button -->
+      <!-- Mobile Header - Dynamic based on active panel -->
       <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <button @click="closeMobileSidebar()"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Close Linked Pages">
+                :aria-label="activeSidebarPanel === 'information' ? 'Close Information' : activeSidebarPanel === 'actions' ? 'Close Actions' : 'Close Linked Pages'">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
           <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-            <i class="material-icons text-white text-xs">link</i>
+            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : 'link'"></i>
           </div>
-          <h2 id="mobile-entities-title" class="text-sm font-semibold text-gray-900 dark:text-white">Linked Pages</h2>
+          <h2 :id="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : 'mobile-entities-title'"
+              class="text-sm font-semibold text-gray-900 dark:text-white"
+              x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'"></h2>
         </button>
       </div>
 
-      <%= render partial: 'documents/entities_sidebar' %>
+      <!-- Information Panel -->
+      <div x-show="activeSidebarPanel === 'information'">
+        <%= render partial: 'documents/information_sidebar' %>
+      </div>
+
+      <!-- Linked Pages Panel -->
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()">
+        <%= render partial: 'documents/entities_sidebar' %>
+      </div>
+
+      <!-- Actions Panel -->
+      <div x-show="activeSidebarPanel === 'actions'">
+        <%= render partial: 'documents/actions_sidebar' %>
+      </div>
     </div>
 
     <!-- Modals (fixed position, outside flex layout) -->
@@ -351,69 +343,63 @@
               <div class="p-6">
                 <!-- Document privacy tab -->
                 <div x-show="activeTab === 'document'" x-cloak>
-                  <table class="mb-4 w-full">
-                    <tr>
-                      <td class="align-top pr-3" style="width: 24px;">
-                        <i class="material-icons text-teal-500">info</i>
-                      </td>
-                      <td class="align-top">
-                        <span class="text-sm text-gray-600 dark:text-gray-300">
-                          Control who can view this document. More privacy options will be available in the future.
-                        </span>
-                      </td>
-                    </tr>
-                  </table>
-                  
+                  <div class="flex items-start mb-4">
+                    <i class="material-icons text-teal-500 mr-3 mt-0.5">info</i>
+                    <span class="text-sm text-gray-600 dark:text-gray-300">
+                      Control who can view this document. More privacy options will be available in the future.
+                    </span>
+                  </div>
+
                   <% if @document.universe.present? %>
-                    <div class="mb-4 p-3 rounded-md border <%= @document.universe.privacy == 'public' ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-200' %>">
+                    <div class="mb-4 p-3 rounded-md border <%= @document.universe.privacy == 'public' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600' %>">
                       <div class="flex items-center">
                         <div class="flex-shrink-0 mr-3">
-                          <div class="w-8 h-8 rounded-full <%= @document.universe.privacy == 'public' ? 'bg-yellow-100' : 'bg-gray-100' %> flex items-center justify-center">
-                            <i class="material-icons text-sm <%= @document.universe.privacy == 'public' ? 'text-yellow-600' : 'text-gray-500' %>"><%= @document.universe.privacy == 'public' ? 'warning' : 'info' %></i>
+                          <div class="w-8 h-8 rounded-full <%= @document.universe.privacy == 'public' ? 'bg-yellow-100 dark:bg-yellow-900/40' : 'bg-gray-100 dark:bg-gray-600' %> flex items-center justify-center">
+                            <i class="material-icons text-sm <%= @document.universe.privacy == 'public' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400' %>"><%= @document.universe.privacy == 'public' ? 'warning' : 'info' %></i>
                           </div>
                         </div>
                         <div>
-                          <p class="text-sm font-medium <%= @document.universe.privacy == 'public' ? 'text-yellow-800' : 'text-gray-700' %>">
+                          <p class="text-sm font-medium <%= @document.universe.privacy == 'public' ? 'text-yellow-800 dark:text-yellow-200' : 'text-gray-700 dark:text-gray-200' %>">
                             This document is in the universe "<%= @document.universe.name %>"
                           </p>
-                          <p class="text-xs <%= @document.universe.privacy == 'public' ? 'text-yellow-600' : 'text-gray-500' %>">
+                          <p class="text-xs <%= @document.universe.privacy == 'public' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400' %>">
                             <% if @document.universe.privacy == 'public' %>
                               <strong>Note:</strong> This universe is <strong>public</strong>, so this document will be visible to anyone who can view the universe, regardless of its own privacy setting.
                             <% else %>
                               This universe is <strong>private</strong>, so this document's privacy setting will be respected.
                             <% end %>
-                            <a @click="activeTab = 'universe'" class="underline cursor-pointer <%= @document.universe.privacy == 'public' ? 'text-yellow-700' : 'text-gray-600' %> hover:opacity-80">Manage universe privacy</a>
+                            <a @click="activeTab = 'universe'" class="underline cursor-pointer <%= @document.universe.privacy == 'public' ? 'text-yellow-700 dark:text-yellow-300' : 'text-gray-600 dark:text-gray-300' %> hover:opacity-80">Manage universe privacy</a>
                           </p>
                         </div>
                       </div>
                     </div>
                   <% end %>
-                  
+
                   <%= form_for(@document, remote: true, html: { id: 'document-privacy-form' }) do |f| %>
-                    <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                    <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                       <%= f.hidden_field :privacy, value: @document.privacy, id: 'document_privacy_field' %>
-                      
+
                       <div class="space-y-3">
                         <!-- Radio button for Private -->
-                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.privacy == 'private' ? 'bg-white border border-teal-500' : '' %>">
-                          <input type="radio" id="document-privacy-private" name="document-privacy-option" value="private" class="h-4 w-4 text-teal-600 focus:ring-teal-500" <%= @document.privacy == 'private' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.privacy == 'private' ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>">
+                          <input type="radio" id="document-privacy-private" name="document-privacy-option" value="private" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.privacy == 'private' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
                           <label for="document-privacy-private" class="ml-3 flex items-center cursor-pointer">
-                            <i class="material-icons text-gray-500 mr-2">lock</i>
+                            <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">lock</i>
                             <div>
-                              <span class="block text-sm font-medium text-gray-900">Private</span>
-                              <span class="block text-xs text-gray-500">Only visible to you</span>
+                              <span class="block text-sm font-medium text-gray-900 dark:text-white">Private</span>
+                              <span class="block text-xs text-gray-500 dark:text-gray-400">Only visible to you</span>
                             </div>
                           </label>
                         </div>
-                        
+
                         <!-- Radio button for Public -->
-                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.privacy == 'public' ? 'bg-white border border-teal-500' : '' %>">
-                          <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500" <%= @document.privacy == 'public' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                        <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.privacy == 'public' ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>">
+                          <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.privacy == 'public' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
                           <label for="document-privacy-public" class="ml-3 flex items-center cursor-pointer">
                             <i class="material-icons text-green-500 mr-2">public</i>
                             <div>
-                              <span class="block text-sm font-medium text-gray-900">Public</span>
-                              <span class="block text-xs text-gray-500">Anyone with the link can view</span>
+                              <span class="block text-sm font-medium text-gray-900 dark:text-white">Public</span>
+                              <span class="block text-xs text-gray-500 dark:text-gray-400">Anyone with the link can view</span>
                             </div>
                           </label>
                         </div>
@@ -440,54 +426,48 @@
                 <!-- Universe privacy tab -->
                 <% if @document.universe.present? %>
                   <div x-show="activeTab === 'universe'" x-cloak>
-                    <table class="mb-4 w-full">
-                      <tr>
-                        <td class="align-top pr-3" style="width: 24px;">
-                          <i class="material-icons text-blue-500">info</i>
-                        </td>
-                        <td class="align-top">
-                          <span class="text-sm text-gray-600">
-                            Documents in a public universe are visible to anyone who can view that universe, regardless of the document's privacy setting.
-                          </span>
-                        </td>
-                      </tr>
-                    </table>
-                    
+                    <div class="flex items-start mb-4">
+                      <i class="material-icons text-blue-500 mr-3 mt-0.5">info</i>
+                      <span class="text-sm text-gray-600 dark:text-gray-300">
+                        Documents in a public universe are visible to anyone who can view that universe, regardless of the document's privacy setting.
+                      </span>
+                    </div>
+
                     <% if @document.universe.user == current_user %>
                       <%= form_for(@document.universe, remote: true, html: { id: 'universe-privacy-form' }) do |f| %>
-                        <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                        <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                           <div class="flex items-center mb-4">
                             <div class="mr-3">
                               <i class="material-icons text-blue-500">public</i>
                             </div>
                             <div>
-                              <span class="font-medium text-gray-900"><%= @document.universe.name %></span>
+                              <span class="font-medium text-gray-900 dark:text-white"><%= @document.universe.name %></span>
                             </div>
                           </div>
-                          
+
                           <%= f.hidden_field :privacy, value: @document.universe.privacy, id: 'universe_privacy_field' %>
-                          
+
                           <div class="space-y-3">
                             <!-- Radio button for Private -->
-                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.universe.privacy == 'private' ? 'bg-white border border-blue-500' : '' %>">
-                              <input type="radio" id="universe-privacy-private" name="universe-privacy-option" value="private" class="h-4 w-4 text-blue-600 focus:ring-blue-500" <%= @document.universe.privacy == 'private' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
+                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.universe.privacy == 'private' ? 'bg-white dark:bg-gray-800 border border-blue-500' : '' %>">
+                              <input type="radio" id="universe-privacy-private" name="universe-privacy-option" value="private" class="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.universe.privacy == 'private' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
                               <label for="universe-privacy-private" class="ml-3 flex items-center cursor-pointer">
-                                <i class="material-icons text-gray-500 mr-2">lock</i>
+                                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">lock</i>
                                 <div>
-                                  <span class="block text-sm font-medium text-gray-900">Private</span>
-                                  <span class="block text-xs text-gray-500">Only visible to you</span>
+                                  <span class="block text-sm font-medium text-gray-900 dark:text-white">Private</span>
+                                  <span class="block text-xs text-gray-500 dark:text-gray-400">Only visible to you</span>
                                 </div>
                               </label>
                             </div>
-                            
+
                             <!-- Radio button for Public -->
-                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 <%= @document.universe.privacy == 'public' ? 'bg-white border border-blue-500' : '' %>">
-                              <input type="radio" id="universe-privacy-public" name="universe-privacy-option" value="public" class="h-4 w-4 text-blue-600 focus:ring-blue-500" <%= @document.universe.privacy == 'public' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
+                            <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 <%= @document.universe.privacy == 'public' ? 'bg-white dark:bg-gray-800 border border-blue-500' : '' %>">
+                              <input type="radio" id="universe-privacy-public" name="universe-privacy-option" value="public" class="h-4 w-4 text-blue-600 focus:ring-blue-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.universe.privacy == 'public' ? 'checked' : '' %> onchange="updateUniversePrivacy(this)">
                               <label for="universe-privacy-public" class="ml-3 flex items-center cursor-pointer">
                                 <i class="material-icons text-green-500 mr-2">public</i>
                                 <div>
-                                  <span class="block text-sm font-medium text-gray-900">Public</span>
-                                  <span class="block text-xs text-gray-500">Anyone with the link can view</span>
+                                  <span class="block text-sm font-medium text-gray-900 dark:text-white">Public</span>
+                                  <span class="block text-xs text-gray-500 dark:text-gray-400">Anyone with the link can view</span>
                                 </div>
                               </label>
                             </div>
@@ -495,15 +475,15 @@
                         </div>
                       <% end %>
                     <% else %>
-                      <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                      <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                         <div class="flex items-center">
                           <div class="mr-3">
                             <i class="material-icons text-blue-500">public</i>
                           </div>
                           <div>
-                            <span class="font-medium text-gray-900"><%= @document.universe.name %></span>
-                            <p class="text-sm text-gray-500">Currently: <span class="font-medium capitalize"><%= @document.universe.privacy || 'private' %></span></p>
-                            <p class="text-xs text-gray-500 mt-1">You don't own this universe, so you can't change its privacy settings.</p>
+                            <span class="font-medium text-gray-900 dark:text-white"><%= @document.universe.name %></span>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Currently: <span class="font-medium capitalize"><%= @document.universe.privacy || 'private' %></span></p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You don't own this universe, so you can't change its privacy settings.</p>
                           </div>
                         </div>
                       </div>
@@ -1096,9 +1076,9 @@
             document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
               const container = option.closest('div');
               if (option.value === value) {
-                container.classList.add('bg-white', 'border', 'border-teal-500');
+                container.classList.add('bg-white', 'dark:bg-gray-800', 'border', 'border-teal-500');
               } else {
-                container.classList.remove('bg-white', 'border', 'border-teal-500');
+                container.classList.remove('bg-white', 'dark:bg-gray-800', 'border', 'border-teal-500');
               }
             });
             
@@ -1147,9 +1127,9 @@
             document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
               const container = option.closest('div');
               if (option.value === value) {
-                container.classList.add('bg-white', 'border', 'border-blue-500');
+                container.classList.add('bg-white', 'dark:bg-gray-800', 'border', 'border-blue-500');
               } else {
-                container.classList.remove('bg-white', 'border', 'border-blue-500');
+                container.classList.remove('bg-white', 'dark:bg-gray-800', 'border', 'border-blue-500');
               }
             });
             
@@ -1530,35 +1510,43 @@
         // Main page controller for document edit page
         function documentEditController() {
           return {
-            // Sidebar state
-            showRightSidebar: false, // Default closed on desktop
+            // Sidebar state - null means closed, otherwise shows which panel is active
+            activeSidebarPanel: null, // null, 'linked_pages', or 'information'
             isDesktop: window.innerWidth >= 1024,
 
+            // Computed property for backwards compatibility
+            get showRightSidebar() {
+              return this.activeSidebarPanel !== null;
+            },
+
             init() {
-              this.initializeSidebarState();
               this.setupResizeListener();
             },
 
-            initializeSidebarState() {
-              // Always start with sidebar closed on page load
-              this.showRightSidebar = false;
+            togglePanel(panel) {
+              if (this.activeSidebarPanel === panel) {
+                this.activeSidebarPanel = null;
+              } else {
+                this.activeSidebarPanel = panel;
+
+                // Focus search input when opening linked pages panel
+                if (panel === 'linked_pages') {
+                  setTimeout(() => {
+                    const searchInput = document.getElementById('entity-search-input');
+                    if (searchInput) searchInput.focus();
+                  }, 300);
+                }
+              }
             },
 
+            // Legacy method for backwards compatibility
             toggleRightSidebar() {
-              this.showRightSidebar = !this.showRightSidebar;
-
-              // Focus search input when opening
-              if (this.showRightSidebar) {
-                setTimeout(() => {
-                  const searchInput = document.getElementById('entity-search-input');
-                  if (searchInput) searchInput.focus();
-                }, 300);
-              }
+              this.togglePanel('linked_pages');
             },
 
             closeMobileSidebar() {
               if (!this.isDesktop) {
-                this.showRightSidebar = false;
+                this.activeSidebarPanel = null;
               }
             },
 
@@ -1569,7 +1557,7 @@
 
                 // Close sidebar when transitioning between desktop and mobile
                 if (wasDesktop !== this.isDesktop) {
-                  this.showRightSidebar = false;
+                  this.activeSidebarPanel = null;
                 }
               });
             }

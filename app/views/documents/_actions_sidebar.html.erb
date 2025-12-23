@@ -1,0 +1,47 @@
+<%# Actions sidebar content - document actions and tools %>
+
+<div class="flex flex-col h-full">
+  <div class="p-4">
+    <nav class="space-y-1">
+      <!-- Preview as Reader -->
+      <%= link_to document_path(@document),
+                  class: "w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">visibility</i>
+        Preview as Reader
+      <% end %>
+
+      <!-- View as Plaintext -->
+      <%= link_to plaintext_document_path(@document),
+                  target: "_blank",
+                  class: "w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">text_format</i>
+        View as Plaintext
+        <i class="material-icons text-gray-400 ml-auto text-sm">open_in_new</i>
+      <% end %>
+
+      <!-- Manage Privacy -->
+      <button @click="$dispatch('open-modal', 'document-privacy-modal')"
+              class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left">
+        <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">lock</i>
+        Manage Privacy
+      </button>
+    </nav>
+
+    <!-- Danger Zone -->
+    <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <h4 class="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider mb-3">Danger Zone</h4>
+      <nav class="space-y-1">
+        <%= button_to document_path(@document),
+            method: :delete,
+            form: {
+              data: { turbo_confirm: 'Are you sure you want to delete this document? This action cannot be undone.' },
+              onsubmit: "return confirm('Are you sure you want to delete this document? This action cannot be undone.');"
+            },
+            class: "w-full flex items-center px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors text-left" do %>
+          <i class="material-icons text-red-500 mr-3">delete</i>
+          Delete this document
+        <% end %>
+      </nav>
+    </div>
+  </div>
+</div>

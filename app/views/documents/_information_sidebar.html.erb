@@ -1,0 +1,28 @@
+<%# Information sidebar content - actions and tools for the document %>
+
+<div class="flex flex-col h-full">
+  <div class="p-4">
+    <nav class="space-y-1">
+      <!-- Metadata Action -->
+      <button @click="$dispatch('open-modal', 'document-metadata-modal')"
+              class="w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left">
+        <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">description</i>
+        Metadata
+      </button>
+
+      <!-- Revision Log Action -->
+      <%= link_to document_document_revisions_path(@document),
+                  class: "w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">history</i>
+        Revision Log
+      <% end %>
+
+      <!-- Analysis Action -->
+      <%= link_to queue_analysis_document_path(@document),
+                  class: "w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <i class="material-icons text-blue-500 mr-3">analytics</i>
+        Analysis
+      <% end %>
+    </nav>
+  </div>
+</div>
