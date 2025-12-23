@@ -39,17 +39,20 @@
            aria-orientation="vertical"
            style="display: none;">
         <div class="py-1" role="none">
-          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" role="menuitem">
+          <button type="button"
+                  onclick="navigator.clipboard.writeText('<%= document_url(@document) %>'); this.querySelector('.copy-text').textContent = 'Copied!'; setTimeout(() => this.querySelector('.copy-text').textContent = 'Copy link', 2000);"
+                  class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                  role="menuitem">
             <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">link</i>
-            Copy link
-          </a>
-          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" role="menuitem">
-            <i class="material-icons text-blue-400 mr-2 text-sm">facebook</i>
+            <span class="copy-text">Copy link</span>
+          </button>
+          <a href="https://www.facebook.com/sharer/sharer.php?u=<%= url_encode(document_url(@document)) %>"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+             role="menuitem">
+            <i class="material-icons text-blue-600 mr-2 text-sm">share</i>
             Share on Facebook
-          </a>
-          <a href="#" class="flex px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700" role="menuitem">
-            <i class="material-icons text-blue-400 mr-2 text-sm">twitter</i>
-            Share on Twitter
           </a>
         </div>
       </div>
@@ -76,31 +79,26 @@
         <%= @document.title %>
       </h1>
       
-      <div class="mt-6 flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2 dark:text-gray-400">
-        <div class="flex items-center">
-          <div class="flex-shrink-0">
-            <img class="h-5 w-5 rounded-full" src="<%= @document.user.image_url(size: 40) %>" alt="<%= @document.user.display_name %>">
-          </div>
-          <div class="ml-2">
-            <%= link_to @document.user.display_name, @document.user, class: "font-medium text-gray-900 hover:underline dark:text-gray-200" %>
-          </div>
+      <div class="mt-6 flex items-center">
+        <div class="flex-shrink-0">
+          <img class="h-8 w-8 rounded-full" src="<%= @document.user.image_url(size: 64) %>" alt="<%= @document.user.display_name %>">
         </div>
-        
-        <% if @document.updated_at.present? %>
-          <div class="flex items-center">
-            <i class="material-icons text-gray-400 text-sm mr-1 dark:text-gray-500">calendar_today</i>
-            <time datetime="<%= @document.updated_at.strftime('%Y-%m-%d') %>">
-              <%= @document.updated_at.strftime('%B %d, %Y') %>
+        <div class="ml-3 flex flex-wrap items-center gap-x-1 text-sm">
+          <%= link_to @document.user.display_name, @document.user, class: "font-medium text-gray-900 hover:underline dark:text-gray-200" %>
+          <% if @document.cached_word_count? %>
+            <span class="text-gray-500 dark:text-gray-400">&middot;</span>
+            <% read_time = (@document.cached_word_count / 200.0).ceil %>
+            <span class="text-gray-500 dark:text-gray-400"><%= read_time %> min read</span>
+            <span class="text-gray-500 dark:text-gray-400">&middot;</span>
+            <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter @document.cached_word_count %> words</span>
+          <% end %>
+          <% if @document.updated_at.present? %>
+            <span class="text-gray-500 dark:text-gray-400">&middot;</span>
+            <time datetime="<%= @document.updated_at.strftime('%Y-%m-%d') %>" class="text-gray-500 dark:text-gray-400">
+              edited <%= time_ago_in_words(@document.updated_at) %> ago
             </time>
-          </div>
-        <% end %>
-        
-        <% if @document.cached_word_count? %>
-          <div class="flex items-center">
-            <i class="material-icons text-gray-400 text-sm mr-1 dark:text-gray-500">text_fields</i>
-            <span><%= number_with_delimiter @document.cached_word_count %> <%= 'word'.pluralize @document.cached_word_count %></span>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       </div>
     </header>
 

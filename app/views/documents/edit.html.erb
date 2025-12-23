@@ -89,7 +89,7 @@
       </div>
 
       <!-- Linked Pages Panel -->
-      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()">
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()" >
         <%= render partial: 'documents/entities_sidebar' %>
       </div>
 
@@ -259,7 +259,7 @@
       </div>
 
       <!-- Linked Pages Panel -->
-      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()">
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()" >
         <%= render partial: 'documents/entities_sidebar' %>
       </div>
 
@@ -548,7 +548,7 @@
                       </div>
                       <h3 class="text-lg font-medium text-white">Document Metadata</h3>
                     </div>
-                    <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+                    <button type="button" @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
                       <i class="material-icons">close</i>
                     </button>
                   </div>
@@ -1720,6 +1720,60 @@
           });
         };
 
+        // Global function to auto-link entities from @mentions (called once, updates all sidebars)
+        window.autoLinkEntityToDocument = function(entity) {
+          // Create form data for linking
+          const formData = new FormData();
+          formData.append('document_id', '<%= @document.id %>');
+          formData.append('document_analysis_id', '-1');
+          formData.append('entity_type', entity.type);
+          formData.append('entity_id', entity.id);
+          formData.append('document_entity_id', '-1');
+
+          const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+          fetch('/documents/link_entity', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Accept': 'application/json'
+            },
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && !data.already_linked) {
+              // Remove empty state if it exists
+              document.querySelectorAll('#linked-entities-list .flex.flex-col.items-center.justify-center').forEach(el => el.remove());
+
+              // Add the new entity card to all sidebar lists
+              document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                entitiesList.insertAdjacentHTML('afterbegin', data.card_html);
+                const newElement = entitiesList.firstElementChild;
+                if (window.Alpine && newElement) {
+                  window.Alpine.initTree(newElement);
+                }
+              });
+
+              // Update total count
+              document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                countSpan.textContent = `(${currentCount + 1})`;
+              });
+
+              // Show success toast
+              if (typeof showToast === 'function') {
+                showToast(`${entity.name || data.document_entity?.entity?.name} linked to document`, 'success');
+              }
+            }
+            // Silently ignore "already_linked" - no toast needed for auto-links
+          })
+          .catch(error => {
+            // Silently ignore errors for auto-links (e.g., duplicate, network issues)
+            console.debug('Auto-link skipped:', error);
+          });
+        };
+
         // Entities sidebar component
         function documentEntitiesSidebar() {
           return {
@@ -1771,16 +1825,18 @@
               this.showSearchDropdown = this.filteredSearchResults.length > 0;
             },
             
-            linkEntity(entity) {
+            linkEntity(entity, silent = false) {
               // Check if entity is already linked
               const existingEntity = document.querySelector(`[data-entity-type="${entity.type}"][data-entity-id]`);
               if (existingEntity) {
                 const existingIds = Array.from(document.querySelectorAll(`[data-entity-type="${entity.type}"]`))
                   .map(el => el.querySelector('[data-linked-entity-id]')?.dataset.linkedEntityId)
                   .filter(Boolean);
-                
-                if (existingIds.includes(entity.id)) {
-                  alert('This page is already linked to the document.');
+
+                if (existingIds.includes(String(entity.id))) {
+                  if (!silent) {
+                    alert('This page is already linked to the document.');
+                  }
                   return;
                 }
               }
@@ -1808,9 +1864,9 @@
               .then(response => response.json())
               .then(data => {
                 if (data.success) {
-                  // Handle "already linked" case
+                  // Handle "already linked" case (skip toast for silent auto-links)
                   if (data.already_linked) {
-                    if (typeof showToast === 'function') {
+                    if (!silent && typeof showToast === 'function') {
                       showToast(data.message || 'Page is already linked', 'info');
                     }
                     return;

@@ -269,6 +269,20 @@
           setTimeout(() => {
             this.triggerAutosave();
           }, 100);
+
+          // Auto-link to document's Linked Pages if we're in a document editor
+          // Parse entity ID from token format [[Type-ID]]
+          const tokenMatch = item.value.match(/\[\[(\w+)-(\d+)\]\]/);
+          if (tokenMatch && typeof window.autoLinkEntityToDocument === 'function') {
+            const entityType = tokenMatch[1];
+            const entityId = tokenMatch[2];
+            // Call global function (only exists on document edit page)
+            window.autoLinkEntityToDocument({
+              type: entityType,
+              id: entityId,
+              name: item.name
+            });
+          }
         },
 
         // Find the exact DOM range containing the @mention text (from @ to cursor)
