@@ -25,48 +25,10 @@ Notebook.tailwindInit = function() {
       }
     });
   });
-  
-  // Initialize tooltips
-  document.querySelectorAll('[data-tooltip]').forEach(element => {
-    const tooltipText = element.getAttribute('data-tooltip');
-    
-    element.addEventListener('mouseenter', function(e) {
-      const tooltip = document.createElement('div');
-      tooltip.className = 'absolute z-10 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm tooltip';
-      tooltip.textContent = tooltipText;
-      tooltip.style.top = `${e.target.offsetTop - 40}px`;
-      tooltip.style.left = `${e.target.offsetLeft + (e.target.offsetWidth / 2) - 80}px`;
-      
-      document.body.appendChild(tooltip);
-      
-      // Position tooltip
-      const rect = tooltip.getBoundingClientRect();
-      if (rect.left < 0) {
-        tooltip.style.left = '0px';
-      } else if (rect.right > window.innerWidth) {
-        tooltip.style.left = `${window.innerWidth - rect.width - 10}px`;
-      }
-      
-      // Add arrow
-      const arrow = document.createElement('div');
-      arrow.className = 'tooltip-arrow';
-      arrow.style.position = 'absolute';
-      arrow.style.width = '10px';
-      arrow.style.height = '10px';
-      arrow.style.background = '#1F2937';
-      arrow.style.transform = 'rotate(45deg)';
-      arrow.style.bottom = '-5px';
-      arrow.style.left = 'calc(50% - 5px)';
-      tooltip.appendChild(arrow);
-    });
-    
-    element.addEventListener('mouseleave', function() {
-      const tooltip = document.querySelector('.tooltip');
-      if (tooltip) {
-        document.body.removeChild(tooltip);
-      }
-    });
-  });
+
+  // Tooltips are handled via CSS-only (see application.css)
+  // Use classes: tooltip-left, tooltip-right, tooltip-top, tooltip-bottom
+  // With attribute: data-tooltip="Your tooltip text"
 };
 
 // Initialize on DOM ready for Tailwind pages
