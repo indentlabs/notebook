@@ -863,20 +863,33 @@
           }, 2000); // 2 seconds
         };
         
-        // Function to count words in text
-        const countWords = function(text) {
-          // Remove HTML tags
-          const strippedText = text.replace(/<[^>]*>/g, ' ');
-          // Replace multiple spaces, tabs, newlines with a single space
-          const cleanText = strippedText.replace(/\s+/g, ' ').trim();
-          // Return 0 if empty, otherwise count words
-          return cleanText === '' ? 0 : cleanText.split(' ').length;
+        // Function to count words - optimized single-pass algorithm
+        // Uses textContent (browser-native) instead of regex on HTML
+        const countWords = function() {
+          // textContent is browser-optimized and strips HTML automatically
+          const text = document.getElementById('editor').textContent || '';
+          if (text.length === 0) return 0;
+
+          // Single-pass word counting without creating large arrays
+          let count = 0;
+          let inWord = false;
+          for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r';
+            if (!isSpace && !inWord) {
+              count++;
+              inWord = true;
+            } else if (isSpace) {
+              inWord = false;
+            }
+          }
+          return count;
         };
 
-        // Function to count characters (excluding HTML)
-        const countCharacters = function(text) {
-          const strippedText = text.replace(/<[^>]*>/g, '');
-          return strippedText.length;
+        // Function to count characters (uses textContent for efficiency)
+        const countCharacters = function() {
+          const text = document.getElementById('editor').textContent || '';
+          return text.length;
         };
 
         // Function to calculate reading time (avg 200 words per minute)
@@ -887,9 +900,9 @@
 
         // Update word count display
         const updateWordCount = function() {
-          const content = $('#editor').html();
-          const wordCount = countWords(content);
-          const charCount = countCharacters(content);
+          // Use optimized functions that read textContent directly
+          const wordCount = countWords();
+          const charCount = countCharacters();
           const readingTime = calculateReadingTime(wordCount);
 
           // Update navbar word count
@@ -904,13 +917,20 @@
 
         // Initial word count
         updateWordCount();
-        
+
+        // Debounced word count to prevent performance issues on large documents
+        let wordCountTimeout = null;
+        const debouncedWordCount = function() {
+          clearTimeout(wordCountTimeout);
+          wordCountTimeout = setTimeout(updateWordCount, 500); // Max 2x/sec instead of 60x/sec
+        };
+
         // Trigger autosave and update word count on content changes
         editor.subscribe('editableInput', function() {
           // Queue an autosave
           queueAutosave();
-          // Update word count
-          updateWordCount();
+          // Update word count (debounced for performance on large docs)
+          debouncedWordCount();
         });
         
         // Trigger autosave on title changes
@@ -1414,6 +1434,7 @@
           box-shadow: none !important;
           padding: 0 !important;
           outline: none !important;
+          background: transparent !important;
         }
 
         /* Align title input with editor content - strip browser default padding */
