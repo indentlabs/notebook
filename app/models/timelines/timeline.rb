@@ -54,6 +54,14 @@ class Timeline < ApplicationRecord
     'Timeline'
   end
 
+  def view_path
+    timeline_path(self.id)
+  end
+
+  def edit_path
+    edit_timeline_path(self.id)
+  end
+
   def initialize_first_event
     timeline_events.create(title: "Untitled Event", position: 1)
   end
