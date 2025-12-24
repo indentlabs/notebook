@@ -43,6 +43,22 @@ class ContentPageSharesController < ApplicationController
     if @share.save
       @share.content_page.update(privacy: 'public')
 
+      # Notify the content creator if they're different from the sharer
+      content_owner = @share.content_page.user
+      if content_owner != current_user && content_owner.notification_updates?
+        content_type_name = @share.content_page.class.name.downcase
+        content_type_color = @share.content_page.class.respond_to?(:color) ? @share.content_page.class.color : 'bg-blue-500'
+
+        content_owner.notifications.create(
+          message_html: "🎉 <strong>#{current_user.display_name}</strong> shared your <span class='#{content_type_color} text-white px-1 rounded'>#{content_type_name}</span> <strong>#{@share.content_page.name}</strong> with the community!",
+          icon: 'campaign',
+          icon_color: 'green',
+          happened_at: DateTime.current,
+          passthrough_link: user_content_page_share_path(@share.user, @share),
+          reference_code: 'content-shared-by-other'
+        )
+      end
+
       redirect_to [@share.user, @share], notice: 'Thanks for sharing!'
     else
       raise @share.errors.inspect
