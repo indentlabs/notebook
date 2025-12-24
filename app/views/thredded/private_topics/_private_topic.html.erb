@@ -41,8 +41,10 @@
   <cite class="thredded--topics--updated-by">
     <%= time_ago private_topic.last_post_at %>
     <div class="thredded--topics--participants">
-      <% if private_topic.last_user %>
+      <% if private_topic.last_user && !private_topic.last_user.thredded_anonymous? %>
         <%= link_to private_topic.last_user.thredded_display_name, user_path(private_topic.last_user) %>
+      <% elsif private_topic.last_user %>
+        <span><%= private_topic.last_user.thredded_display_name %></span>
       <% end %>
     </div>
   </cite>
