@@ -246,7 +246,7 @@
                   <div class="group">
                     <button type="button"
                             @click="toggleContentSummarySection('<%= content_type.downcase %>')"
-                            class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       <div class="flex items-center min-w-0 flex-1">
                         <i class="material-icons text-sm mr-2 <%= content_class.text_color %> transition-transform duration-200"
                            :class="isContentSummaryCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90'">
@@ -259,7 +259,7 @@
                           <%= content_type.pluralize %>
                         </span>
                       </div>
-                      <span class="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-2 flex-shrink-0">
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full ml-2 flex-shrink-0">
                         <%= summary_data[:count] %>
                       </span>
                     </button>
@@ -276,7 +276,7 @@
                       
                       <% summary_data[:items].each do |item| %>
                         <% item_name = item.name.presence || "Untitled #{content_type}" %>
-                        <div class="flex items-center py-1 draggable-content-item cursor-move hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+                        <div class="flex items-center py-1 draggable-content-item cursor-move hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
                              draggable="true"
                              data-content-type="<%= content_type %>"
                              data-content-id="<%= item.id %>"
@@ -787,7 +787,7 @@
                      x-transition:enter-start="opacity-0 scale-95"
                      x-transition:enter-end="opacity-100 scale-100"
                      @click.away="showTagSuggestions = false"
-                     class="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
+                     class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
                   
                   <div class="py-1">
                     <!-- Your Timeline Tags -->
@@ -805,12 +805,12 @@
                   
                     <!-- Default Suggested Tags -->
                     <div x-show="timelineTagSuggestions.length > 0" class="border-t border-gray-100"></div>
-                    <div class="px-3 py-1 text-xs font-medium text-gray-500 bg-gray-50 border-b border-gray-100">Suggested Tags</div>
+                    <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">Suggested Tags</div>
                     <% %w[Character\ Development Character\ Introduction Worldbuilding Flashback Foreshadowing Action Discovery Plot\ Twist Turning\ Point Relationship Tonal\ Shift POV\ Shift].each do |suggested_tag| %>
                       <button type="button"
                               x-show="'<%= suggested_tag %>'.toLowerCase().includes(tagInput.toLowerCase()) || tagInput === ''"
                               @click="addEventTag('<%= suggested_tag %>'); tagInput = ''; showTagSuggestions = false"
-                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors">
+                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors">
                         <%= suggested_tag %>
                       </button>
                     <% end %>
@@ -819,7 +819,7 @@
                     <div x-show="tagInput && tagInput.length > 1" class="border-t border-gray-100">
                       <button type="button"
                               @click="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
-                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors text-green-600 font-medium">
+                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-green-600 dark:text-green-400 font-medium">
                         <i class="material-icons text-xs mr-1">add</i>
                         <span>Add "</span><span x-text="tagInput"></span><span>"</span>
                       </button>
