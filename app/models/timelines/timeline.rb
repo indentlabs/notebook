@@ -1,4 +1,6 @@
 class Timeline < ApplicationRecord
+  include Rails.application.routes.url_helpers
+
   acts_as_paranoid
 
   include IsContentPage

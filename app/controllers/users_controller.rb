@@ -33,10 +33,11 @@ class UsersController < ApplicationController
                            .order(:name)
                            .paginate(page: params[:page], per_page: 20)
       
-      # Only load images for the content being displayed
+      # Only load public images for the content being displayed
       content_ids = @content_list.pluck(:id)
       @random_image_including_private_pool_cache = ImageUpload
         .where(user_id: @user.id, content_type: content_type.name, content_id: content_ids)
+        .where(privacy: 'public')
         .group_by { |image| [image.content_type, image.content_id] }
 
       # Optimized: Use content_ids we already have
@@ -270,8 +271,8 @@ class UsersController < ApplicationController
   end
   
   def load_user_collections
-    # Collections user maintains
-    @maintained_collections = @user.page_collections.order(updated_at: :desc)
+    # Collections user maintains (only public ones visible on profile)
+    @maintained_collections = @user.page_collections.where(privacy: 'public').order(updated_at: :desc)
     
     # Collections user is published in
     @published_in_collections = @user.published_in_page_collections.limit(20)
