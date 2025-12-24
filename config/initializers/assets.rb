@@ -13,6 +13,7 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # folder are already added.
 # Rails.application.config.assets.precompile += %w( admin.js admin.css )
 Rails.application.config.assets.precompile += %w( thredded.js )
+Rails.application.config.assets.precompile += %w( page_specific/timeline-editor.js )
 
 # Include Rails helpers in the assets pipeline
 # This might be helpful for including e.g. link_to in js components, but is commented out until needed
