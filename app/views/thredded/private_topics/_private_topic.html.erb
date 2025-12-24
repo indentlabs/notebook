@@ -4,10 +4,14 @@
   
   <!-- Participants Avatars -->
   <div class="message-participants">
-    <% participants = [private_topic.last_user, *(private_topic.users - [private_topic.last_user])].compact.uniq.first(3) %>
+    <% participants = [private_topic.last_user, *(private_topic.users - [private_topic.last_user])].compact.reject(&:thredded_anonymous?).uniq.first(3) %>
     <% participants.each do |user| %>
       <div class="participant-avatar" title="<%= user.thredded_display_name %>">
-        <%= image_tag user.image_url(size: 40), alt: user.thredded_display_name %>
+        <% if user.respond_to?(:image_url) %>
+          <%= image_tag user.image_url(size: 40), alt: user.thredded_display_name %>
+        <% else %>
+          <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm font-medium"><%= user.thredded_display_name.first.upcase %></div>
+        <% end %>
       </div>
     <% end %>
     <% if private_topic.users.count > 3 %>
