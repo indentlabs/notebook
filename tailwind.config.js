@@ -85,6 +85,9 @@ module.exports = {
       fontSize: {
         'xxs': '0.625rem', // 10px
       },
+      height: {
+        'screen-minus-nav': 'calc(100vh - 3.5rem)', // Viewport height minus navbar (56px)
+      },
     },
   },
   plugins: [
