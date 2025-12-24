@@ -1,13 +1,13 @@
-<div x-data="timelineEditor()" class="min-h-screen flex flex-col bg-gray-50">
+<div x-data="timelineEditor()" class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
 
   <!-- Timeline Header - Modern Application Style -->
-  <header class="bg-white border-b border-gray-200 shadow-sm z-40 flex-shrink-0">
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 flex-shrink-0">
     <div class="px-6 py-4">
       <!-- Compact Header -->
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4 flex-1 min-w-0">
           <!-- Back Button -->
-          <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0 p-2 rounded-lg hover:bg-gray-100", title: "Back to all Timelines" do %>
+          <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700", title: "Back to all Timelines" do %>
             <i class="material-icons text-lg">arrow_back</i>
           <% end %>
           
@@ -18,7 +18,7 @@
             <div x-show="!editingTitle && !editingSubtitle" class="flex items-center min-w-0">
               <!-- Title -->
               <h1 @click="editingTitle = true; tempTitle = timelineName; $nextTick(() => { const input = document.querySelector('[x-ref=titleInput]'); input?.focus(); input?.select(); })"
-                  class="text-xl font-semibold text-gray-900 cursor-pointer hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 transition-all truncate">
+                  class="text-xl font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-all truncate">
                 <span x-text="timelineName || 'Untitled Timeline'"></span>
               </h1>
               
@@ -27,7 +27,7 @@
                 <div class="flex items-center ml-2 min-w-0">
                   <span class="text-gray-400 mx-2 flex-shrink-0">•</span>
                   <span @click="editingSubtitle = true; tempSubtitle = timelineSubtitle; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
-                        class="text-sm text-gray-600 cursor-pointer hover:text-gray-500 transition-colors truncate"
+                        class="text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-500 dark:hover:text-gray-300 transition-colors truncate"
                         x-text="timelineSubtitle"></span>
                 </div>
               </template>
@@ -45,7 +45,7 @@
             <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit.prevent': 'console.log("Title form submission prevented")', 'x-ref': 'titleForm' }, remote: true do |f| %>
               <div x-show="editingTitle" class="flex items-center space-x-2">
                 <%= f.text_field :name, 
-                    class: "text-xl font-semibold text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
+                    class: "text-xl font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
                     placeholder: "Timeline title...",
                     'x-model': 'tempTitle',
                     'x-ref': 'titleInput',
@@ -66,7 +66,7 @@
             <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit.prevent': 'console.log("Subtitle form submission prevented")', 'x-ref': 'subtitleForm' }, remote: true do |f| %>
               <div x-show="editingSubtitle" class="flex items-center space-x-2 mt-2">
                 <%= f.text_field :subtitle, 
-                    class: "text-sm text-gray-700 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
+                    class: "text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
                     placeholder: "Brief description of this timeline...",
                     'x-model': 'tempSubtitle',
                     'x-ref': 'subtitleInput',
@@ -104,8 +104,8 @@
 
           <!-- Action Buttons -->
           <button @click="showMetaPanel = !showMetaPanel"
-                  class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-                  :class="{ 'bg-gray-100 text-gray-900': showMetaPanel }">
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                  :class="{ 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white': showMetaPanel }">
             <i class="material-icons text-lg mr-2">settings</i>
             <span class="hidden sm:inline">Settings</span>
           </button>
@@ -122,17 +122,17 @@
   <!-- Three-Column Layout -->
   <div class="flex-1 flex min-h-0">
     <!-- Left Sidebar - Tools & Filters -->
-    <aside class="w-80 bg-white border-r border-gray-200 flex-shrink-0 hidden lg:block sticky top-0 max-h-screen">
+    <aside class="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 hidden lg:block sticky top-0 max-h-screen">
       <div class="h-full flex flex-col overflow-hidden">
         <!-- Sidebar Header -->
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900">Timeline Tools</h3>
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Tools</h3>
         </div>
         
         <!-- Sidebar Content -->
         <div class="flex-1 overflow-y-auto">
           <!-- Quick Actions -->
-          <div class="p-6 border-b border-gray-100">
+          <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <button id="js-create-timeline-event"
                     class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
               <i class="material-icons text-lg mr-2">add</i>
@@ -141,16 +141,16 @@
           </div>
 
           <!-- Filter Events Section -->
-          <div class="p-6 border-b border-gray-100">
+          <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <button @click="showFilterSection = !showFilterSection" 
-                    class="w-full flex items-center justify-between hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors">
+                    class="w-full flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors">
               <div class="flex items-center">
                 <i class="material-icons text-sm mr-2 text-gray-600 transition-transform duration-200"
                    :class="showFilterSection ? 'rotate-90' : ''">chevron_right</i>
-                <h4 class="text-sm font-medium text-gray-900">Filter Events</h4>
+                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-200">Filter Events</h4>
               </div>
               <span x-show="selectedTagFilters.length > 0" 
-                    class="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">
                 Active
               </span>
             </button>
@@ -175,24 +175,24 @@
                        @input="applyEventFilters()"
                        @keydown.escape="searchQuery = ''; applyEventFilters()"
                        placeholder="Search timeline..."
-                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm">
+                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
               </div>
 
               <!-- Filter Mode Toggle -->
               <div class="mb-4">
-                <div class="flex rounded-lg bg-gray-100 p-1">
+                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
                   <button @click="changeTagFilterMode('filter')"
-                          :class="tagFilterMode === 'filter' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                          :class="tagFilterMode === 'filter' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
                           class="flex-1 px-3 py-1 text-sm font-medium rounded-md transition-colors">
                     Filter
                   </button>
                   <button @click="changeTagFilterMode('highlight')"
-                          :class="tagFilterMode === 'highlight' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+                          :class="tagFilterMode === 'highlight' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
                           class="flex-1 px-3 py-1 text-sm font-medium rounded-md transition-colors">
                     Highlight
                   </button>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   <span x-show="tagFilterMode === 'filter'">Show only events with selected tags</span>
                   <span x-show="tagFilterMode === 'highlight'">Show all events, highlight selected tags</span>
                 </p>
@@ -202,14 +202,14 @@
               <% if @timeline_event_tags.any? %>
                 <div class="space-y-2 max-h-48 overflow-y-auto">
                   <% @timeline_event_tags.each do |tag_data| %>
-                    <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 rounded px-2 py-1 transition-colors">
+                    <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 py-1 transition-colors">
                       <input type="checkbox"
                              x-model="selectedTagFilters"
                              value="<%= tag_data[:name] %>"
                              @change="applyEventFilters()"
                              class="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-offset-0">
-                      <span class="flex-1 text-gray-700"><%= tag_data[:name] %></span>
-                      <span class="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full"><%= tag_data[:count] %></span>
+                      <span class="flex-1 text-gray-700 dark:text-gray-300"><%= tag_data[:name] %></span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full"><%= tag_data[:count] %></span>
                     </label>
                   <% end %>
                 </div>
@@ -303,8 +303,8 @@
             <% else %>
               <!-- Empty State -->
               <div class="text-center py-6">
-                <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-3">
-                  <i class="material-icons text-gray-400">link_off</i>
+                <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                  <i class="material-icons text-gray-400 dark:text-gray-500">link_off</i>
                 </div>
                 <p class="text-sm text-gray-500">
                   No linked content yet
@@ -317,10 +317,10 @@
 
             <!-- Drag & Drop Tip -->
             <% if @timeline_content_summary.any? %>
-              <div class="mt-4 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
+              <div class="mt-4 px-3 py-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-800 rounded-lg">
                 <div class="flex items-start">
-                  <i class="material-icons text-sm text-blue-600 mr-2 mt-0.5">lightbulb</i>
-                  <p class="text-xs text-blue-700">
+                  <i class="material-icons text-sm text-blue-600 dark:text-blue-400 mr-2 mt-0.5">lightbulb</i>
+                  <p class="text-xs text-blue-700 dark:text-blue-300">
                     <strong>Tip:</strong> You can drag and drop these pages onto events to quickly link them!
                   </p>
                 </div>
@@ -329,20 +329,20 @@
           </div>
           
           <!-- Timeline Stats -->
-          <div class="p-6 border-t border-gray-100">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Timeline Stats</h4>
+          <div class="p-6 border-t border-gray-100 dark:border-gray-700">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Timeline Stats</h4>
             <div class="space-y-3">
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Total Events</span>
-                <span class="text-sm font-medium text-gray-900"><%= @timeline.timeline_events.count %></span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Total Events</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-200"><%= @timeline.timeline_events.count %></span>
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Word Count</span>
-                <span class="text-sm font-medium text-gray-900"><%= number_with_delimiter(@timeline.cached_word_count) %></span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Word Count</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-200"><%= number_with_delimiter(@timeline.cached_word_count) %></span>
               </div>
               <div class="flex justify-between items-center">
-                <span class="text-sm text-gray-600">Total Linked Pages</span>
-                <span class="text-sm font-medium text-gray-900"><%= @timeline.timeline_events.joins(:timeline_event_entities).count %></span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Total Linked Pages</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-200"><%= @timeline.timeline_events.joins(:timeline_event_entities).count %></span>
               </div>
             </div>
           </div>
@@ -353,12 +353,12 @@
     <!-- Center Timeline Area -->
     <main class="flex-1 flex flex-col min-w-0">
       <!-- Timeline Container -->
-      <div class="flex-1 overflow-y-auto bg-gray-50">
+      <div class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
         <div class="max-w-4xl mx-auto py-8 px-6">
           <!-- Timeline Events Container -->
           <div class="timeline-events-container relative" data-timeline-id="<%= @timeline.id %>">
             <!-- Timeline Rail - Extended to Header -->
-            <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 timeline-spine rounded-full"></div>
+            <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700 timeline-spine rounded-full"></div>
             
             <!-- Timeline Header -->
             <div class="timeline-header-container relative mb-8" 
@@ -412,12 +412,12 @@
               </div>
 
               <!-- Header Card -->
-              <div class="ml-20 timeline-header-card bg-white rounded-xl shadow-sm border border-gray-200 transition-all duration-200">
+              <div class="ml-20 timeline-header-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200">
                 <!-- Clickable Header Toggle -->
                 <div @click="showDescription = !showDescription"
-                     class="timeline-header-toggle px-6 py-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100">
+                     class="timeline-header-toggle px-6 py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700">
                   <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900">Timeline Overview</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Overview</h3>
 
                     <!-- Expand/Collapse Chevron -->
                     <i class="material-icons text-gray-400 transition-transform duration-200"
@@ -426,7 +426,7 @@
 
                   <!-- Description Preview (when collapsed and has content) -->
                   <template x-if="hasContent && !showDescription">
-                    <p class="text-sm text-gray-600 mt-2 truncate" x-text="descriptionPreview"></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 truncate" x-text="descriptionPreview"></p>
                   </template>
 
                   <!-- Add Description Prompt (when collapsed and no content) -->
@@ -449,10 +449,10 @@
                     <div class="space-y-6">
                       <!-- Description Field -->
                       <div>
-                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                         <%= f.text_area :description, 
                             rows: 4,
-                            class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none",
+                            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
                             placeholder: "Describe what this timeline covers, its purpose, key themes, or important context that helps understand the events below...",
                             'x-model': 'description',
                             '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("description", $el.value)' %>
@@ -467,30 +467,30 @@
 
                       <!-- Notes Field -->
                       <div>
-                        <label class="block text-sm font-medium text-gray-700">Notes</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
                         <%= f.text_area :notes, 
                             rows: 3,
-                            class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none",
+                            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
                             placeholder: "Public notes about this timeline...",
                             'x-model': 'notes',
                             '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("notes", $el.value)' %>
                         
-                        <div class="text-xs text-gray-500 mt-2">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                           <span>These notes are visible to anyone who can view your timeline</span>
                         </div>
                       </div>
 
                       <!-- Private Notes Field -->
                       <div>
-                        <label class="block text-sm font-medium text-gray-700">Private Notes</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Private Notes</label>
                         <%= f.text_area :private_notes, 
                             rows: 3,
-                            class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none",
+                            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
                             placeholder: "Private notes (only visible to you)...",
                             'x-model': 'private_notes',
                             '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("private_notes", $el.value)' %>
                         
-                        <div class="text-xs text-gray-500 mt-2">
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
                           <span>These notes are private and only visible to you</span>
                         </div>
                       </div>
@@ -549,11 +549,11 @@
                           }
                         }
                       }">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
                         <div class="space-y-2">
                           <div class="flex flex-wrap gap-2">
                             <template x-for="tag in currentTags" :key="tag">
-                              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800 border border-blue-200">
+                              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
                                 <span x-text="tag"></span>
                                 <button type="button" 
                                         @click="removeTag(tag)"
@@ -566,7 +566,7 @@
                           <div class="relative">
                             <input type="text" 
                                    placeholder="Add tags..." 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                    x-model="tagInput"
                                    @focus="showSuggestions = true"
                                    @input="showSuggestions = true"
@@ -583,18 +583,18 @@
                                  x-transition:leave="transition ease-in duration-150"
                                  x-transition:leave-start="opacity-100 scale-100"
                                  x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute z-30 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
+                                 class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
                               <div class="py-1">
                                 <template x-for="tag in filteredSuggestions" :key="tag">
                                   <button type="button"
                                           @click="selectSuggestion(tag)"
-                                          class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center">
+                                          class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center text-gray-700 dark:text-gray-300">
                                     <i class="material-icons text-xs mr-2 text-gray-400">label</i>
                                     <span x-text="tag"></span>
                                   </button>
                                 </template>
                                 <div x-show="filteredSuggestions.length === 0 && tagInput.length > 0" 
-                                     class="px-3 py-2 text-sm text-gray-500 italic">
+                                     class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">
                                   Press Enter to create "<span x-text="tagInput"></span>"
                                 </div>
                               </div>
@@ -608,11 +608,11 @@
 
                       <!-- Universe Field -->
                       <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Universe</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Universe</label>
                         <%= f.select :universe_id, 
                             options_from_collection_for_select(current_user.universes, :id, :name, @timeline.universe_id),
                             { include_blank: "No universe" },
-                            { class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200",
+                            { class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
                               '@change': 'submitFormRemotely($el.form)' } %>
                         <div class="text-xs text-gray-500 mt-2">
                           <span>Organize this timeline within a universe to group related content together</span>
@@ -652,11 +652,11 @@
     </main>
     
     <!-- Right Inspector Panel -->
-    <aside class="w-96 bg-white border-l border-gray-200 flex-shrink-0 hidden xl:block sticky top-0 max-h-screen">
+    <aside class="w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 hidden xl:block sticky top-0 max-h-screen">
       <div class="h-full flex flex-col overflow-hidden">
         <!-- Inspector Header -->
-        <div class="px-6 py-4 border-b border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900">Event Details</h3>
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Event Details</h3>
         </div>
         
         <!-- Inspector Content -->
@@ -672,8 +672,8 @@
           <!-- Event Details Panel -->
           <div x-show="selectedEventId" class="p-6 space-y-6">
             <!-- Event Title Section -->
-            <div class="border-b border-gray-100 pb-4">
-              <h4 class="text-lg font-semibold text-gray-900 mb-2" x-text="selectedEventTitle || 'Untitled Event'"></h4>
+            <div class="border-b border-gray-100 dark:border-gray-700 pb-4">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2" x-text="selectedEventTitle || 'Untitled Event'"></h4>
               
               <!-- Time Information -->
               <div class="space-y-1">
@@ -696,10 +696,10 @@
             
             <!-- Event Type Selector -->
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-2">Event Type</label>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Event Type</label>
               <div class="relative" x-data="{ showEventTypeDropdown: false }">
                 <button @click="showEventTypeDropdown = !showEventTypeDropdown"
-                        class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                        class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm text-gray-700 dark:text-gray-200"
                         type="button">
                   <div class="flex items-center">
                     <i class="material-icons text-sm mr-2 text-green-600" x-text="getEventTypeIcon(selectedEventId)"></i>
@@ -718,12 +718,12 @@
                      x-transition:leave-start="opacity-100 scale-100"
                      x-transition:leave-end="opacity-0 scale-95"
                      @click.away="showEventTypeDropdown = false"
-                     class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                     class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
                   
                   <% TimelineEvent::EVENT_TYPES.each do |type_key, type_info| %>
                     <button type="button"
                             @click="updateEventType('<%= type_key %>'); showEventTypeDropdown = false"
-                            class="w-full text-left px-3 py-2 hover:bg-gray-50 flex items-center transition-colors border-b border-gray-100 last:border-b-0">
+                            class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-gray-700 dark:text-gray-200">
                       <i class="material-icons text-sm mr-3 text-green-600"><%= type_info[:icon] %></i>
                       <span class="text-sm"><%= type_info[:name] %></span>
                     </button>
@@ -734,14 +734,14 @@
             
             <!-- Event Tags -->
             <div>
-              <label class="block text-xs font-medium text-gray-700 mb-2">Tags</label>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
               
               <!-- Existing Tags Display -->
               <div x-show="selectedEventId && getEventTags(selectedEventId).length > 0" class="mb-3">
                 <div class="flex flex-wrap gap-2">
                   <template x-for="tag in getEventTags(selectedEventId)" :key="tag">
                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-200"
-                          :class="isTagLoading(selectedEventId, tag) ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-800'">
+                          :class="isTagLoading(selectedEventId, tag) ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300'">
                       <!-- Loading spinner for tags being processed -->
                       <div x-show="isTagLoading(selectedEventId, tag)" class="animate-spin rounded-full h-3 w-3 border-b border-gray-400 mr-1"></div>
                       <span x-text="tag"></span>
@@ -779,7 +779,7 @@
                        @keydown.enter.prevent="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
                        @keydown.escape="tagInput = ''; showTagSuggestions = false"
                        placeholder="Add tag..."
-                       class="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                       class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
                 
                 <!-- Tag Suggestions Dropdown -->
                 <div x-show="showTagSuggestions"
@@ -830,7 +830,7 @@
               
               <!-- Empty State -->
               <div x-show="selectedEventId && getEventTags(selectedEventId).length === 0" 
-                   class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3 mt-2">
+                   class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mt-2">
                 <i class="material-icons text-xs mr-1">label_outline</i>
                 No tags yet. Add tags to categorize this event.
               </div>
@@ -839,7 +839,7 @@
             <!-- Linked Content Section -->
             <div>
               <div class="flex items-center justify-between mb-3">
-                <h5 class="text-sm font-medium text-gray-900">Linked Content</h5>
+                <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">Linked Content</h5>
                 <button @click="typeof openLinkModal !== 'undefined' ? openLinkModal(selectedEventId) : console.error('openLinkModal not available')"
                         class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
                   <i class="material-icons text-sm mr-2">add</i>
@@ -873,22 +873,22 @@
        style="display: none;"
        @click.self="showMetaPanel = false">
     <div class="flex items-start justify-center min-h-screen pt-16 px-4">
-      <div class="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-auto border border-gray-100">
+      <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full mx-auto border border-gray-100 dark:border-gray-700">
         <!-- Close Button -->
         <button @click="showMetaPanel = false" 
-                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors z-10">
+                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10">
           <i class="material-icons text-lg">close</i>
         </button>
         
         <!-- Panel Header -->
-        <div class="px-8 py-6 border-b border-gray-200">
+        <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center">
-            <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+            <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100 dark:bg-green-900">
               <i class="material-icons text-green-600 text-lg">settings</i>
             </div>
             <div class="ml-4">
-              <h3 class="text-lg font-semibold text-gray-900">Timeline Settings</h3>
-              <p class="text-sm text-gray-500">Configure your timeline details and metadata</p>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Settings</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Configure your timeline details and metadata</p>
             </div>
           </div>
         </div>
@@ -897,37 +897,37 @@
         <div class="px-8 py-6 space-y-8">
           <!-- Timeline Actions -->
           <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-              <i class="material-icons text-gray-600 mr-2">manage_history</i>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+              <i class="material-icons text-gray-600 dark:text-gray-400 mr-2">manage_history</i>
               Timeline Actions
             </h3>
             
             <div class="space-y-4">
               <!-- Archive/Unarchive Action -->
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center mb-2">
                       <i class="material-icons text-blue-600 mr-2"><%= @timeline.archived? ? 'unarchive' : 'archive' %></i>
-                      <h4 class="text-lg font-medium text-gray-900">
+                      <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">
                         <%= @timeline.archived? ? 'Unarchive Timeline' : 'Archive Timeline' %>
                       </h4>
                     </div>
                     <% if @timeline.archived? %>
-                      <p class="text-sm text-gray-700 mb-3">
+                      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
                         This timeline is currently archived and hidden from your main timeline list. 
                         Unarchive it to make it active again.
                       </p>
-                      <p class="text-xs text-blue-700">
+                      <p class="text-xs text-blue-700 dark:text-blue-300">
                         <i class="material-icons text-xs mr-1">info</i>
                         Archived timeline content is preserved and can be restored at any time.
                       </p>
                     <% else %>
-                      <p class="text-sm text-gray-700 mb-3">
+                      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
                         Archive this timeline to hide it from your main timeline list while preserving all content and events. 
                         You can unarchive it at any time.
                       </p>
-                      <p class="text-xs text-blue-700">
+                      <p class="text-xs text-blue-700 dark:text-blue-300">
                         <i class="material-icons text-xs mr-1">info</i>
                         Archiving is reversible and keeps all your timeline data intact.
                       </p>
@@ -939,7 +939,7 @@
                         data: { confirm: @timeline.archived? ? 
                           "Are you sure you want to unarchive this timeline?" : 
                           "Are you sure you want to archive this timeline?" },
-                        class: "inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-lg text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                        class: "inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-700 text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
                       <i class="material-icons text-lg mr-2"><%= @timeline.archived? ? 'unarchive' : 'archive' %></i>
                       <%= @timeline.archived? ? 'Unarchive' : 'Archive' %>
                     <% end %>
@@ -950,23 +950,23 @@
           </div>
 
           <!-- Danger Zone -->
-          <div class="pt-6 border-t border-gray-200">
+          <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-semibold text-red-900 mb-4 flex items-center">
               <i class="material-icons text-red-600 mr-2">warning</i>
               Danger Zone
             </h3>
             
-            <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+            <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-800 dark:border-opacity-50 rounded-lg p-6">
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center mb-2">
                     <i class="material-icons text-red-600 mr-2">delete_forever</i>
-                    <h4 class="text-lg font-medium text-gray-900">Delete Timeline</h4>
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">Delete Timeline</h4>
                   </div>
-                  <p class="text-sm text-gray-700 mb-3">
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
                     Permanently delete this timeline and all its events. This action cannot be undone.
                   </p>
-                  <p class="text-xs text-red-700">
+                  <p class="text-xs text-red-700 dark:text-red-400">
                     <i class="material-icons text-xs mr-1">warning</i>
                     This will permanently remove all timeline events, linked content, and metadata.
                   </p>
@@ -975,7 +975,7 @@
                   <%= link_to timeline_path(@timeline), 
                       method: :delete,
                       data: { confirm: "Are you sure you want to permanently delete this timeline?\n\nThis will delete:\n• All timeline events\n• All linked content connections\n• All timeline metadata\n\nThis action cannot be undone!" },
-                      class: "inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
+                      class: "inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-700 text-sm font-medium rounded-lg text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
                     <i class="material-icons text-lg mr-2">delete_forever</i>
                     Delete Timeline
                   <% end %>
@@ -1003,25 +1003,25 @@
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"></div>
       
       <!-- Modal -->
-      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
+      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
         <!-- Modal Header -->
         <div class="flex items-center mb-6">
           <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
             <i class="material-icons text-green-600">link</i>
           </div>
-          <h3 class="ml-4 text-xl font-semibold text-gray-900">Link Content to Event</h3>
+          <h3 class="ml-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Link Content to Event</h3>
         </div>
         
         <!-- Two-Column Layout -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6" style="height: 32rem;">
           <!-- Left Sidebar - Filters (Hidden on mobile) -->
-          <div class="hidden md:block col-span-1 bg-gray-50 rounded-lg p-4 overflow-y-auto">
+          <div class="hidden md:block col-span-1 bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50 rounded-lg p-4 overflow-y-auto">
             <div class="space-y-3">
               <!-- All Pages Filter -->
               <button type="button"
                       @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'all' ? '' : 'all') : console.error('selectedFilter not available')"
                       :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? (selectedFilter === 'all' || !selectedFilter) : true }"
-                      class="w-full text-left px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors flex items-center">
+                      class="w-full text-left px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center">
                 <i class="material-icons text-sm mr-2 text-gray-600">view_list</i>
                 <span class="text-sm font-medium">All Pages</span>
               </button>
@@ -1038,8 +1038,8 @@
               <% end %>
               
               <!-- Divider -->
-              <div class="border-t border-gray-300 my-3"></div>
-              <div class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-2">By Type</div>
+              <div class="border-t border-gray-300 dark:border-gray-600 my-3"></div>
+              <div class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">By Type</div>
               
               <!-- Content Type Filters -->
               <div class="space-y-1">
@@ -1049,12 +1049,12 @@
                   <button type="button"
                           @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === '<%= content_type.downcase %>' ? '' : '<%= content_type.downcase %>') : console.error('selectedFilter not available')"
                           :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
-                          class="w-full text-left px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-between group">
+                          class="w-full text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between group">
                     <div class="flex items-center min-w-0">
                       <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
                       <span class="text-sm truncate"><%= content_type.pluralize %></span>
                     </div>
-                    <span class="text-xs text-gray-500 flex-shrink-0">(<%= @current_user_content[content_type].count %>)</span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">(<%= @current_user_content[content_type].count %>)</span>
                   </button>
                 <% end %>
               </div>
@@ -1118,7 +1118,7 @@
                      :value="typeof linkModalSearchQuery !== 'undefined' ? linkModalSearchQuery : ''"
                      @input="typeof linkModalSearchQuery !== 'undefined' ? (linkModalSearchQuery = $event.target.value) : null"
                      placeholder="Search your content..." 
-                     class="link-modal-search block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                     class="link-modal-search block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                      @keydown.escape="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
                      @keydown.enter.prevent="typeof linkFirstResult !== 'undefined' ? linkFirstResult() : console.error('linkFirstResult not available')">
             </div>
@@ -1202,11 +1202,11 @@
                 <div x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_type) %>', '<%= j(content_type) %>') : true">
                   <button type="button"
                           @click="typeof toggleSection !== 'undefined' ? toggleSection('<%= content_type.downcase %>') : console.error('toggleSection not available')"
-                          class="w-full text-left mb-3 flex items-center justify-between hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors">
+                          class="w-full text-left mb-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors">
                     <div class="flex items-center">
                       <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
-                      <h4 class="text-sm font-semibold text-gray-900"><%= content_type.pluralize %></h4>
-                      <span class="ml-2 text-xs text-gray-500 font-normal">(<%= content_list.count %>)</span>
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100"><%= content_type.pluralize %></h4>
+                      <span class="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">(<%= content_list.count %>)</span>
                     </div>
                     <i class="material-icons text-sm text-gray-400 transition-transform duration-200" 
                        :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
@@ -1223,14 +1223,14 @@
                     <% content_list.first(20).each do |content| %>
                       <% content_name = content.name.presence || "Untitled #{content_type}" %>
                       <button type="button"
-                              class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 border border-gray-200 hover:border-gray-300 transition-colors flex items-center justify-between group"
+                              class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors flex items-center justify-between group"
                               data-id="<%= content.id %>"
                               data-type="<%= content_type %>"
                               data-name="<%= j(content_name) %>"
                               x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
                         <div class="flex items-center min-w-0">
                           <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
-                          <span class="text-sm text-gray-700 group-hover:text-gray-900 truncate">
+                          <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 truncate">
                             <%= content_name %>
                           </span>
                         </div>
@@ -1254,7 +1254,7 @@
         <div class="mt-6 flex justify-end">
           <button type="button" 
                   @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
-                  class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
             <span>Close</span>
             <span class="ml-2 text-xs text-gray-400">(ESC)</span>
           </button>
@@ -1278,26 +1278,26 @@
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"></div>
       
       <!-- Modal -->
-      <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
         <div class="sm:flex sm:items-start">
           <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
             <i class="material-icons text-green-600">share</i>
           </div>
           <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Share Timeline</h3>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">Share Timeline</h3>
             
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Shareable URL</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Shareable URL</label>
                 <div class="flex rounded-lg shadow-sm">
                   <input type="text" 
                          readonly
                          value="<%= timeline_url(@timeline) %>"
-                         class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-lg border border-gray-300 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50"
+                         class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-lg border border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                          onclick="this.focus(); this.select();">
                   <button type="button" 
                           @click="navigator.clipboard.writeText('<%= timeline_url(@timeline) %>'); $event.target.textContent = 'Copied!'; setTimeout(() => $event.target.textContent = 'Copy', 2000)"
-                          class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-lg bg-gray-50 text-gray-500 text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                          class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                     Copy
                   </button>
                 </div>
@@ -1373,8 +1373,8 @@
                 </div>
 
                 <% if @timeline.universe.present? %>
-                  <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                    <p class="text-xs text-gray-600">
+                  <div class="mt-4 bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                    <p class="text-xs text-gray-600 dark:text-gray-400">
                       <i class="material-icons text-gray-400 text-sm mr-1">info_outline</i>
                       This timeline belongs to the "<%= @timeline.universe.name %>" universe. 
                       Making the universe public will also make this timeline viewable to others.
@@ -1406,8 +1406,8 @@
                 </div>
               <% else %>
                 <!-- Non-owner view -->
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <p class="text-sm text-gray-700">
+                <div class="bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
                     This timeline is being shared by <%= link_to @timeline.user.name, @timeline.user, class: "font-medium text-green-600 hover:text-green-500" %>.
                   </p>
                 </div>
@@ -1419,7 +1419,7 @@
         <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
           <button type="button" 
                   @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"
-                  class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
+                  class="w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-gray-500 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
             Close
           </button>
         </div>

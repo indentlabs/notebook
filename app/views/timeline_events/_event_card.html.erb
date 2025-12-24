@@ -16,7 +16,7 @@
   </div>
 
   <!-- Event Card -->
-  <div class="ml-20 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card group cursor-pointer event-drop-zone"
+  <div class="ml-20 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 timeline-event-card group cursor-pointer event-drop-zone"
        data-event-id="<%= event.id %>"
        @click="$event.alpineProcessed = true; selectEvent(<%= event.id %>, {
          id: <%= event.id %>,
@@ -30,14 +30,14 @@
        })"
        :class="{ 'ring-2 ring-green-500 ring-opacity-50': selectedEventId === <%= event.id %> }">
     <!-- Card Header -->
-    <div class="px-6 py-4 border-b border-gray-100">
+    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
       <div class="flex items-start justify-between">
         <div class="flex-1 min-w-0">
           <div class="group relative">
             <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
               <%= f.text_field :title,
                   value: event.title.presence || "Untitled Event",
-                  class: "text-xl font-semibold text-gray-900 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400",
+                  class: "text-xl font-semibold text-gray-900 dark:text-gray-100 bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-green-500 focus:ring-0 w-full transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500",
                   placeholder: "Event title...",
                   '@focus': '$el.select()',
                   '@keydown.enter.prevent': '$el.blur()',
@@ -55,7 +55,7 @@
                     <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
                       <%= f.text_field :time_label,
                           value: event.time_label,
-                          class: "timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400",
+                          class: "timeline-duration-input text-sm text-gray-600 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-600",
                           placeholder: "Start time",
                           'x-model': 'startTime',
                           '@keydown.enter.prevent': '$el.blur()',
@@ -68,7 +68,7 @@
                 <div class="timeline-duration-end-section">
                   <!-- Duration Connector -->
                   <div class="timeline-duration-connector">
-                    <span class="timeline-duration-arrow">—</span>
+                    <span class="timeline-duration-arrow text-gray-400 dark:text-gray-500">—</span>
                   </div>
 
                   <!-- End Time Field -->
@@ -78,7 +78,7 @@
                       <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
                         <%= f.text_field :end_time_label,
                             value: event.end_time_label,
-                            class: "timeline-duration-input text-sm text-gray-600 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400",
+                            class: "timeline-duration-input text-sm text-gray-600 dark:text-gray-400 bg-transparent border-0 border-b border-transparent hover:border-gray-300 dark:hover:border-gray-600 focus:border-green-500 focus:ring-0 transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-600",
                             placeholder: "End time",
                             '@keydown.enter.prevent': '$el.blur()',
                             '@input.debounce.500ms': 'submitFormRemotely($el.form)' %>
@@ -114,26 +114,26 @@
             <div x-show="showMoveMenu"
                  x-transition
                  @click.away="showMoveMenu = false"
-                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                 class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-20">
               <div class="py-1">
-                <a href="#" class="js-move-event-to-top flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="#" class="js-move-event-to-top flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <i class="material-icons text-sm mr-3">vertical_align_top</i>
                   Move to Top
                 </a>
-                <a href="#" class="js-move-event-up flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="#" class="js-move-event-up flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <i class="material-icons text-sm mr-3">keyboard_arrow_up</i>
                   Move Up
                 </a>
-                <a href="#" class="js-move-event-down flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="#" class="js-move-event-down flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <i class="material-icons text-sm mr-3">keyboard_arrow_down</i>
                   Move Down
                 </a>
-                <a href="#" class="js-move-event-to-bottom flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <a href="#" class="js-move-event-to-bottom flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
                   <i class="material-icons text-sm mr-3">vertical_align_bottom</i>
                   Move to Bottom
                 </a>
-                <div class="border-t border-gray-100"></div>
-                <a href="#" onclick="deleteEvent(<%= event.id %>, this); return false;" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                <a href="#" onclick="deleteEvent(<%= event.id %>, this); return false;" class="flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30">
                   <i class="material-icons text-sm mr-3">delete</i>
                   Delete Event
                 </a>
@@ -151,7 +151,7 @@
         <%= form_for event, html: { class: 'autosave-form' }, remote: true, url: "/plan/timeline_events/#{event.id}" do |f| %>
           <%= f.text_area :description,
               rows: 4,
-              class: "w-full text-gray-700 bg-transparent border border-gray-200 rounded-lg px-3 py-2 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 transition-all duration-200 placeholder-gray-400 resize-none",
+              class: "w-full text-gray-700 dark:text-gray-300 bg-transparent border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 focus:border-green-500 focus:ring-2 focus:ring-green-500 focus:ring-opacity-20 transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 resize-none",
               placeholder: "What happens in this event?",
               'x-init': '$el.style.height = $el.scrollHeight + "px"',
               '@input': '$el.style.height = "auto"; $el.style.height = $el.scrollHeight + "px"',
@@ -163,7 +163,7 @@
       <% if event.page_tags.any? %>
         <div class="flex flex-wrap gap-1" id="event-tags-<%= event.id %>">
           <% event.page_tags.each do |tag| %>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
               <%= tag.tag %>
             </span>
           <% end %>
