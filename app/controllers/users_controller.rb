@@ -99,9 +99,15 @@ class UsersController < ApplicationController
   end
 
   def followers
+    @followers = @user.followed_by_users
+                      .includes(:avatar_attachment, :thredded_user_detail)
+                      .paginate(page: params[:page], per_page: 100)
   end
 
   def following
+    @following = @user.followed_users
+                      .includes(:avatar_attachment, :thredded_user_detail)
+                      .paginate(page: params[:page], per_page: 100)
   end
   
   def tag

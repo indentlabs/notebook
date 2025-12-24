@@ -35,17 +35,17 @@
                 <% else %>
                   <!-- Generate cover from collection content -->
                   <div class="w-full h-full bg-gradient-to-br from-blue-400 via-purple-500 to-indigo-600 relative">
-                    <div class="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20"></div>
+                    <div class="absolute inset-0" style="background: linear-gradient(to bottom right, transparent, transparent, rgba(0,0,0,0.2));"></div>
                     <div class="absolute inset-0 flex items-center justify-center">
                       <i class="material-icons text-white text-8xl opacity-30"><%= PageCollection.icon %></i>
                     </div>
                   </div>
                 <% end %>
                 
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0.2), transparent);"></div>
                 
                 <!-- Collection Stats Badge -->
-                <div class="absolute top-3 right-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full text-sm font-medium">
+                <div class="absolute top-3 right-3 backdrop-blur-sm text-gray-900 dark:text-gray-100 px-3 py-1 rounded-full text-sm font-medium" style="background: rgba(255,255,255,0.9);">
                   <% if collection.respond_to?(:page_collection_submissions) %>
                     <%= collection.page_collection_submissions.accepted.count %> items
                   <% else %>
@@ -59,7 +59,7 @@
                     <%= collection.title %>
                   </h3>
                   <% if collection.respond_to?(:description) && collection.description.present? %>
-                    <p class="text-white/90 text-sm line-clamp-2">
+                    <p class="text-white text-sm line-clamp-2" style="opacity: 0.9;">
                       <%= truncate(CGI.unescapeHTML(strip_tags(collection.description.to_s)), length: 100) %>
                     </p>
                   <% end %>
@@ -167,14 +167,14 @@
                   <%= image_tag collection.cover_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
                 <% else %>
                   <div class="w-full h-full bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 relative">
-                    <div class="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/20"></div>
+                    <div class="absolute inset-0" style="background: linear-gradient(to bottom right, transparent, transparent, rgba(0,0,0,0.2));"></div>
                     <div class="absolute inset-0 flex items-center justify-center">
                       <i class="material-icons text-white text-6xl opacity-30">featured_play_list</i>
                     </div>
                   </div>
                 <% end %>
                 
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent);"></div>
                 
                 <!-- Featured Badge -->
                 <div class="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
@@ -187,7 +187,7 @@
                   <h3 class="text-white font-semibold text-lg line-clamp-1">
                     <%= collection.title %>
                   </h3>
-                  <p class="text-white/80 text-sm">
+                  <p class="text-white text-sm" style="opacity: 0.8;">
                     by <%= collection.user.name rescue 'Unknown' %>
                   </p>
                 </div>

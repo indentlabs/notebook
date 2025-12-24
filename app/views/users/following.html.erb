@@ -16,48 +16,54 @@
 </script>
 
 <%= content_for :full_width_page_header do %>
-  <div class="user-profile-ui card">
-    <div class="card-image">
+  <div class="relative w-full bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+    <div class="h-48 w-full relative group overflow-hidden">
       <% if @user.favorite_page_type? %>
-        <div class="<%= @accent_color %> darken-4" style="height: 200px; width: 100%"></div>
+        <div class="<%= @user.favorite_page_type_color %> w-full h-full bg-opacity-90 dark:bg-opacity-80" style="background-color: <%= @user.favorite_page_type_color %>"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
       <% else %>
-        <%= image_tag "card-headers/users.png", style: 'height: 200px;' %>
+        <%= image_tag "card-headers/users.png", class: "w-full h-full object-cover", alt: "User profile header" %>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
       <% end %>
-      <span class="card-title">
-        <%= image_tag @user.image_url.html_safe, class: 'header-avatar materialboxed', data: { caption: "#{@user.display_name}'s avatar" } %>
-
-        <%= link_to @user.name, @user, class: 'white-text' %>
-        <span class="black-text">
-          <%= render partial: 'thredded/users/badge', locals: { user: @user } %>
-        </span>
-      </span>
+      
+      <div class="absolute bottom-0 left-0 p-4 md:p-6 w-full flex items-end">
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <%= image_tag @user.image_url.html_safe, class: "w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-white dark:border-gray-900 bg-white dark:bg-gray-900 shadow-lg object-cover", data: { caption: "#{@user.display_name}'s avatar" } %>
+          </div>
+          
+          <div class="mb-2">
+            <h1 class="text-2xl md:text-3xl font-bold text-white drop-shadow-md">
+              <%= link_to @user.name, @user, class: "text-white hover:text-gray-200 transition-colors" %>
+            </h1>
+            <div class="text-white/90 drop-shadow-sm font-medium">
+              <%= render partial: 'thredded/users/badge', locals: { user: @user } %>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 <% end %>
 
-<h5 class="grey-text">Following <%= pluralize @user.followed_users.count, 'worldbuilder' %></h5>
-<div class="row">
-  <% @user.followed_users.each do |user| %>
-    <div class="col s12 m12 l6">
-      <%= link_to user, class: 'black-text' do %>
-        <div class="hoverable card horizontal">
-          <div class="card-image">
-            <%= image_tag user.image_url.html_safe, class: 'following-avatar materialboxed' %>
-          </div>
-          <div class="card-content">
-            <div class="card-title">
-              <%= user.display_name %>
-              <br />
-              <span class="black-text">
-                <%= render partial: 'thredded/users/badge', locals: { user: user } %>
-              </span>
-            </div>
-            <p>
-              <%= truncate(user.bio, length: 140) %>
-            </p>
-          </div>
-        </div>
-      <% end %>
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+      <i class="material-icons text-gray-400">group</i>
+      <span>Following</span>
+      <span class="text-gray-400 text-lg font-normal ml-2">
+        <%= pluralize @user.followed_users.count, 'worldbuilder' %>
+      </span>
+    </h2>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <%= render partial: 'users/user_card', collection: @following, as: :user %>
+  </div>
+
+  <% if @following.respond_to?(:total_pages) && @following.total_pages > 1 %>
+    <div class="mt-8 flex justify-center">
+      <%= will_paginate @following %>
     </div>
   <% end %>
 </div>
