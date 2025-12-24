@@ -173,4 +173,22 @@ namespace :one_off do
       )
     end
   end
+
+  desc "Holiday 2025 notification with Discord invite"
+  task holiday_2025_notification: :environment do
+    reference_code = 'holiday-2025-beta'
+
+    User.find_each do |user|
+      next if user.notifications.where(reference_code: reference_code).any?
+
+      user.notifications.create!(
+        message_html: '<div>Happy new year!</div><div class="blue-text text-darken-3">Big things are coming to Notebook.ai in 2026. Join our Discord for early tester access.</div>',
+        icon:         'celebration',
+        icon_color:   'orange',
+        happened_at:  DateTime.current,
+        passthrough_link: 'https://discord.gg/8PD23GrBWc',
+        reference_code: reference_code
+      )
+    end
+  end
 end
