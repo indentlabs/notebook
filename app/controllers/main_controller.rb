@@ -126,15 +126,16 @@ class MainController < ApplicationController
     # Get base content with enhanced data
     cache_current_user_content
     all_content = @current_user_content.values.flatten
-    
+
+    # Fetch all edit counts in a single query (fixes N+1)
+    edit_counts = ContentChangeEvent.where(user_id: current_user.id)
+                                    .group(:content_type, :content_id)
+                                    .count
+
     # Add enhanced data to each content item
     @enhanced_content = all_content.map do |content_page|
-      edit_count = ContentChangeEvent.where(
-        content_type: content_page.page_type,
-        content_id: content_page.id,
-        user_id: current_user.id
-      ).count
-      
+      edit_count = edit_counts[[content_page.page_type, content_page.id]] || 0
+
       {
         page: content_page,
         edit_count: edit_count,

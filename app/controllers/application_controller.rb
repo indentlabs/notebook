@@ -164,15 +164,15 @@ class ApplicationController < ActionController::Base
     @most_edited_pages ||= if user_signed_in?
       # Get all user's content
       all_content = @current_user_content.values.flatten
-      
-      # Count edits for each content page using ContentChangeEvent
+
+      # Fetch all edit counts in a single query (fixes N+1)
+      edit_counts = ContentChangeEvent.where(user_id: current_user.id)
+                                      .group(:content_type, :content_id)
+                                      .count
+
+      # Map content to their edit counts using hash lookup
       content_with_edit_counts = all_content.map do |content_page|
-        edit_count = ContentChangeEvent.where(
-          content_type: content_page.page_type,
-          content_id: content_page.id,
-          user_id: current_user.id
-        ).count
-        
+        edit_count = edit_counts[[content_page.page_type, content_page.id]] || 0
         [content_page, edit_count]
       end
       

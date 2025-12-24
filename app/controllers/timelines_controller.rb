@@ -246,6 +246,7 @@ class TimelinesController < ApplicationController
   def collect_timeline_event_tags
     # Get all unique tags from timeline events with their usage counts
     tag_counts = @timeline.timeline_events
+                          .reorder('')
                           .joins(:page_tags)
                           .group('page_tags.tag')
                           .count
