@@ -30,16 +30,17 @@ class MainController < ApplicationController
   def dashboard
     @page_title = "My notebook"
 
+    # Trending = topics with most posts in the last 30 days
     messageboard_ids_to_exclude = [38, 26, 31, 32, 30, 33, 27]
-    most_recent_posts = Thredded::Post.where.not(messageboard_id: messageboard_ids_to_exclude)
-                                      .where(moderation_state: "approved")
-                                      .order('id DESC')
-                                      .limit(300)
-                                      .shuffle
-                                      .first(8)  # Increased from 3 to 8 for the ticker
-    @most_recent_threads = Thredded::Topic.where(id: most_recent_posts.pluck(:postable_id))
-                                          .where(moderation_state: "approved")
-                                          .includes(:posts, :messageboard)
+    @most_recent_threads = Thredded::Topic
+      .joins(:posts)
+      .where.not(messageboard_id: messageboard_ids_to_exclude)
+      .where(moderation_state: "approved")
+      .where('thredded_posts.created_at > ?', 30.days.ago)
+      .group('thredded_topics.id')
+      .order('COUNT(thredded_posts.id) DESC')
+      .includes(:messageboard)
+      .limit(6)
     
     # Check if user has any content for null state detection
     cache_current_user_content
