@@ -171,7 +171,7 @@ Rails.application.routes.draw do
 
   scope '/my' do
     get '/dashboard',       to: 'main#dashboard', as: :dashboard
-    get '/content',         to: 'main#table_of_contents', as: :table_of_contents
+    get '/content',         to: redirect('/my/dashboard')
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts',         to: 'main#prompts', as: :prompts
