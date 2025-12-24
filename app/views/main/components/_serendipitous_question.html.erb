@@ -112,29 +112,29 @@
         <!-- Include shared dropdown template -->
         <%= render partial: 'javascripts/content_linking_dropdown' %>
       </div>
-      
-      <!-- Card Footer with Submit Button - Full bleed, more prominent -->
-      <button type="submit" class="w-full px-5 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white transition-all duration-300 ease-out group cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset hover:shadow-md active:scale-[0.998] active:shadow-inner">
-        <div class="flex items-center justify-between">
-          <span class="flex items-center font-medium">
-            <svg class="w-5 h-5 mr-2 opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-            Save answer & get next question
-          </span>
-          <svg class="w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-          </svg>
-        </div>
-        <div class="flex items-center text-xs text-blue-100 mt-1">
-          <i class="material-icons text-xs mr-1 opacity-80 group-hover:opacity-100 transition-opacity duration-200"><%= @content.icon %></i>
-          <span class="opacity-90 group-hover:opacity-100 transition-opacity duration-200">
-            Your answer will be saved to your
-            <span class="text-white font-medium"><%= @content.name %></span>
-            <%= @content.page_type.downcase %> page
-          </span>
-        </div>
-      </button>
+
+      <!-- Autosave hint -->
+      <div class="flex items-center px-4 py-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <i class="material-icons text-xs mr-1 <%= @content.text_color %>"><%= @content.icon %></i>
+        <span>
+          What you type will autosave to your
+          <span class="<%= @content.text_color %> font-medium"><%= @content.name %></span>
+          <%= @content.page_type.downcase %> page
+        </span>
+      </div>
+
+    <% end %>
+
+    <!-- Card Footer with Link to Prompts -->
+    <%= link_to prompts_path, class: "block w-full px-5 py-3 bg-orange-400 hover:bg-orange-500 text-white transition-all duration-300 ease-out group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-inset hover:shadow-md active:scale-[0.998] active:shadow-inner" do %>
+      <div class="flex items-center justify-between">
+        <span class="flex items-center font-medium">
+          Answer more questions
+        </span>
+        <svg class="w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </div>
     <% end %>
   </div>
 <% end %>
