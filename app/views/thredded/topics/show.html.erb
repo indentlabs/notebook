@@ -4,107 +4,77 @@
 <% content_for :thredded_breadcrumbs, '' %>
 
 <%= thredded_page do %>
-  <!-- Creative Topic Header -->
-  <div class="thredded-topic-header relative bg-white rounded-b-xl overflow-hidden shadow-md border border-stone-200 mb-10 group">
-    <!-- Decorative Background Elements -->
-    <div class="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-notebook-blue/10 dark:bg-notebook-blue/20 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-    <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-    
-    <!-- Content Container -->
-    <div class="relative px-8 py-8 md:px-10 md:py-10 z-10">
-
-
-      <div class="flex flex-col md:flex-row md:items-start gap-8">
-        <!-- Main Content -->
+  <!-- Compact Topic Header -->
+  <div class="thredded-topic-header bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-stone-200 dark:border-gray-700 mb-4">
+    <div class="px-5 py-4">
+      <!-- Title Row -->
+      <div class="flex items-start justify-between gap-4">
         <div class="flex-1 min-w-0">
-          <!-- Title -->
-          <h1 class="font-serif font-black text-2xl md:text-4xl text-stone-900 dark:!text-white tracking-tight leading-tight mb-8 drop-shadow-sm dark:drop-shadow-lg">
+          <h1 class="font-bold text-xl md:text-2xl text-stone-900 dark:text-white leading-tight">
             <% if topic.locked? %>
-              <i class="material-icons text-yellow-500 align-middle mr-2" title="Locked topic">lock</i>
+              <i class="material-icons text-yellow-500 align-middle mr-1" style="font-size: 20px;" title="Locked">lock</i>
             <% end %>
             <%= topic.title %>
           </h1>
-          
-          <!-- Meta Data Grid -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-stone-600 dark:!text-gray-300">
-            <!-- Author Info -->
-            <div class="flex items-center gap-4 bg-stone-50 dark:!bg-white/5 rounded-xl p-4 backdrop-blur-md border border-stone-100 dark:!border-white/10 hover:bg-stone-100 dark:!hover:bg-white/10 transition-colors">
-              <%= image_tag topic.user.image_url(size: 80), class: "w-12 h-12 rounded-xl border border-white dark:border-white/20 shadow-sm" %>
-              <div>
-                <p class="text-[10px] text-stone-400 dark:text-gray-400 uppercase tracking-widest font-bold mb-1">Started By</p>
-                <div class="font-bold text-stone-900 dark:!text-white text-lg flex items-center gap-2">
-                  <%= user_link topic.user %>
-                </div>
-                <% if topic.user.forums_badge_text.present? %>
-                  <span class="inline-block mt-1 text-[10px] bg-notebook-blue/10 dark:!bg-notebook-blue/20 px-2 py-0.5 rounded text-notebook-blue dark:!text-blue-200 border border-notebook-blue/20 dark:!border-notebook-blue/30 font-medium uppercase tracking-wider"><%= topic.user.forums_badge_text %></span>
-                <% end %>
-              </div>
-            </div>
 
-            <!-- Stats Info -->
-            <div class="flex flex-col justify-center bg-stone-50 dark:!bg-white/5 rounded-xl p-4 backdrop-blur-md border border-stone-100 dark:!border-white/10 hover:bg-stone-100 dark:!hover:bg-white/10 transition-colors">
-              <p class="text-[10px] text-stone-400 dark:text-gray-400 uppercase tracking-widest font-bold mb-2">Activity</p>
-              <div class="flex items-center gap-6 text-stone-700 dark:text-gray-200 font-medium">
-                <span class="flex items-center gap-2" title="Posts">
-                  <i class="material-icons text-notebook-blue">forum</i>
-                  <span><%= topic.posts_count %> <%= 'comment'.pluralize(topic.posts_count) %></span>
-                </span>
-                <span class="flex items-center gap-2" title="Created">
-                  <i class="material-icons text-purple-400">schedule</i>
-                  <span><%= time_ago topic.created_at %></span>
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Categories -->
-          <% if topic.categories.any? %>
-            <div class="flex flex-wrap gap-2 mt-6">
-              <% topic.categories.each do |category| %>
-                <span class="px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-200 border border-stone-200 dark:border-white/10 hover:bg-stone-200 dark:hover:bg-white/10 transition-colors cursor-default">
-                  <%= category.name %>
-                </span>
+          <!-- Inline Meta -->
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-stone-500 dark:text-gray-400">
+            <span class="flex items-center gap-1.5">
+              <%= image_tag topic.user.image_url(size: 24), class: "w-5 h-5 rounded" %>
+              <%= user_link topic.user %>
+              <% if topic.user.forums_badge_text.present? %>
+                <span class="text-xs text-blue-600 dark:text-blue-400 font-medium"><%= topic.user.forums_badge_text %></span>
               <% end %>
-            </div>
-          <% end %>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="material-icons" style="font-size: 14px;">forum</i>
+              <%= topic.posts_count %> comments
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="material-icons" style="font-size: 14px;">schedule</i>
+              <%= time_ago topic.created_at %>
+            </span>
+            <% topic.categories.each do |category| %>
+              <span class="px-2 py-0.5 rounded text-xs bg-stone-100 dark:bg-gray-700 text-stone-600 dark:text-gray-300"><%= category.name %></span>
+            <% end %>
+          </div>
         </div>
 
-        <!-- Actions Sidebar (Desktop) / Bottom (Mobile) -->
-        <div class="flex flex-row md:flex-col gap-3 md:w-48 flex-shrink-0">
+        <!-- Compact Actions -->
+        <div class="flex items-center gap-2 flex-shrink-0">
           <% if thredded_current_user %>
             <% if topic.followed? %>
-              <%= button_to topic.unfollow_path, 
+              <%= button_to topic.unfollow_path,
                             method: :post,
-                            class: 'w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-notebook-blue text-white font-bold shadow-lg shadow-notebook-blue/20 hover:bg-blue-600 hover:shadow-notebook-blue/40 transition-all transform hover:-translate-y-0.5',
+                            class: 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors',
                             title: topic_follow_reason_text(topic.follow_reason) do %>
-                <i class="material-icons text-sm">notifications_active</i>
-                <span>Following</span>
+                <i class="material-icons" style="font-size: 16px;">notifications_active</i>
+                Following
               <% end %>
             <% else %>
               <%= button_to topic.follow_path,
                             method: :post,
-                            class: 'w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white dark:!bg-white/10 text-stone-700 dark:!text-white font-bold border border-stone-200 dark:!border-white/10 hover:bg-stone-50 dark:!hover:bg-white/20 transition-all backdrop-blur-sm',
-                            title: "Follow this topic to get notifications" do %>
-                <i class="material-icons text-sm">notifications_none</i>
-                <span>Follow</span>
+                            class: 'flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 dark:bg-gray-700 text-stone-700 dark:text-gray-200 text-sm font-medium border border-stone-200 dark:border-gray-600 hover:bg-stone-200 dark:hover:bg-gray-600 transition-colors',
+                            title: "Follow this topic" do %>
+                <i class="material-icons" style="font-size: 16px;">notifications_none</i>
+                Follow
               <% end %>
             <% end %>
           <% end %>
-          
+
           <% if topic.can_update? %>
-            <%= link_to topic.edit_path, rel: 'nofollow', class: 'w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-stone-100 dark:bg-white/5 text-stone-600 dark:text-gray-200 font-medium text-sm border border-stone-200 dark:border-white/5 hover:bg-stone-200 dark:hover:bg-white/10 hover:text-stone-900 dark:hover:text-white transition-all' do %>
-              <i class="material-icons text-sm">edit</i>
-              <span>Edit Topic</span>
+            <%= link_to topic.edit_path, rel: 'nofollow', class: 'flex items-center gap-1 px-2 py-1.5 rounded-lg text-stone-500 dark:text-gray-400 text-sm hover:bg-stone-100 dark:hover:bg-gray-700 transition-colors', title: 'Edit Topic' do %>
+              <i class="material-icons" style="font-size: 16px;">edit</i>
             <% end %>
           <% end %>
-          
+
           <% if topic.can_destroy? %>
             <%= button_to topic.destroy_path,
                           method: :delete,
                           data: { confirm: t('thredded.topics.delete_confirm') },
-                          class: 'w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-red-50 dark:!bg-red-500/10 text-red-600 dark:!text-red-200 font-medium text-sm border border-red-100 dark:!border-red-500/20 hover:bg-red-100 dark:!hover:bg-red-500/20 hover:text-red-700 dark:!hover:text-red-100 transition-all' do %>
-              <i class="material-icons text-sm">delete</i>
-              <span>Delete</span>
+                          class: 'flex items-center gap-1 px-2 py-1.5 rounded-lg text-red-500 dark:text-red-400 text-sm hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-20 transition-colors',
+                          title: 'Delete Topic' do %>
+              <i class="material-icons" style="font-size: 16px;">delete</i>
             <% end %>
           <% end %>
         </div>

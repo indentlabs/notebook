@@ -6,130 +6,107 @@
 <% unless blocked_post %>
   <%= render 'thredded/posts_common/before_first_unread_post', post: post if post.first_unread_in_page? %>
   
-  <%= content_tag :article, 
-                  id: dom_id(post), 
-                  class: ["thredded--post", "thredded--#{post.read_state}--post", "mb-6"] do %>
-    
-    <!-- Creative Worldbuilding Card Layout -->
-    <div class="thredded-post-card relative group mb-10">
+  <%= content_tag :article,
+                  id: dom_id(post),
+                  class: ["thredded--post", "thredded--#{post.read_state}--post", "mb-3"] do %>
+
+    <!-- Compact Post Card -->
+    <div class="thredded-post-card relative group">
       <!-- Message Card -->
-      <div class="bg-white rounded-xl shadow-md border border-stone-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5
-                  <%= post.user&.favorite_page_type? ? "border-l-[6px] #{content_class_from_name(post.user.favorite_page_type).text_color.gsub('text-', 'border-')}" : 'border-l-[6px] border-stone-300' %>">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-stone-200 dark:border-gray-700 overflow-hidden transition-shadow duration-200 hover:shadow
+                  <%= post.user&.favorite_page_type? ? "border-l-4 #{content_class_from_name(post.user.favorite_page_type).text_color.gsub('text-', 'border-')}" : 'border-l-4 border-stone-300 dark:border-gray-600' %>">
         
         <!-- Entry Header -->
-        <div class="px-7 py-5 border-b border-stone-100 dark:!border-gray-800 flex items-start justify-between bg-white/50 dark:!bg-white/5 backdrop-blur-sm">
-          <div class="flex items-center gap-5">
-            <!-- Avatar (Squircle with Offset Ring) -->
+        <div class="px-4 py-3 border-b border-stone-100 dark:border-gray-700 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <!-- Avatar -->
             <% if post.user %>
-              <div class="relative group-hover:scale-105 transition-transform duration-300">
-                <div class="absolute inset-0 bg-stone-200 dark:!bg-gray-700 rounded-2xl rotate-6 opacity-50 group-hover:rotate-12 transition-transform duration-300"></div>
-                <%= image_tag post.user.image_url(size: 80),
-                    class: 'relative h-14 w-14 rounded-2xl border-2 border-white dark:!border-gray-800 shadow-md object-cover z-10' %>
-                
+              <div class="relative flex-shrink-0">
+                <%= image_tag post.user.image_url(size: 40),
+                    class: 'h-10 w-10 rounded-xl border border-stone-200 dark:border-gray-600 object-cover' %>
                 <% if post.user.favorite_page_type? %>
-                  <%= link_to main_app.send("#{post.user.favorite_page_type.downcase.pluralize}_user_path", { id: post.user.id }) do %>
-                    <span class="absolute -bottom-2 -right-2 z-20 block">
-                      <span class="block h-6 w-6 rounded-lg rotate-3 text-center <%= content_class_from_name(post.user.favorite_page_type).color %> border-2 border-white dark:!border-gray-800 flex items-center justify-center shadow-sm transform group-hover:rotate-6 transition-transform">
-                        <i class="material-icons text-[12px] text-white"><%= content_class_from_name(post.user.favorite_page_type).icon %></i>
-                      </span>
-                    </span>
-                  <% end %>
+                  <span class="absolute -bottom-1 -right-1 block h-5 w-5 rounded-md <%= content_class_from_name(post.user.favorite_page_type).color %> border border-white dark:border-gray-800 flex items-center justify-center">
+                    <i class="material-icons text-white" style="font-size: 10px;"><%= content_class_from_name(post.user.favorite_page_type).icon %></i>
+                  </span>
                 <% end %>
               </div>
-              
-              <div class="ml-2">
-                <!-- Name -->
-                <div class="flex items-center">
-                  <span class="font-serif font-black text-2xl text-stone-900 dark:!text-gray-100 tracking-tight leading-none">
+
+              <div>
+                <!-- Name & Date inline -->
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-stone-900 dark:text-gray-100">
                     <%= user_link post.user %>
                   </span>
-                </div>
-                
-                <!-- Byline: Badges & Date -->
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs font-medium text-stone-500 dark:!text-gray-400">
-                  <span class="flex items-center uppercase tracking-wider text-[10px]">
+                  <span class="text-xs text-stone-400 dark:text-gray-500">
                     <%= time_ago post.created_at %>
                   </span>
-                  
-                  <% if post.user.forum_moderator? %>
-                    <span class="w-1 h-1 rounded-full bg-stone-300 dark:!bg-gray-600"></span>
-                    <span class="text-purple-600 dark:!text-purple-400 uppercase tracking-wider flex items-center text-[10px] font-bold">
-                      <i class="material-icons text-[10px] mr-1">verified_user</i>
-                      Moderator
-                    </span>
-                  <% end %>
-                  
-                  <% if post.user.on_premium_plan? && post.user.forums_badge_text.present? %>
-                    <span class="w-1 h-1 rounded-full bg-stone-300 dark:!bg-gray-600"></span>
-                    <span class="text-blue-600 dark:!text-blue-400 uppercase tracking-wider text-[10px] font-bold">
-                      <%= post.user.forums_badge_text %>
-                    </span>
-                  <% end %>
                 </div>
+
+                <!-- Badges -->
+                <% if post.user.forum_moderator? || (post.user.on_premium_plan? && post.user.forums_badge_text.present?) %>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <% if post.user.forum_moderator? %>
+                      <span class="text-purple-600 dark:text-purple-400 text-xs font-medium flex items-center">
+                        <i class="material-icons mr-0.5" style="font-size: 12px;">verified_user</i>
+                        Mod
+                      </span>
+                    <% end %>
+                    <% if post.user.on_premium_plan? && post.user.forums_badge_text.present? %>
+                      <span class="text-blue-600 dark:text-blue-400 text-xs font-medium">
+                        <%= post.user.forums_badge_text %>
+                      </span>
+                    <% end %>
+                  </div>
+                <% end %>
               </div>
             <% else %>
-              <!-- Deleted User Handling -->
-              <div class="h-14 w-14 rounded-2xl bg-stone-200 dark:!bg-gray-700 flex items-center justify-center border-2 border-white dark:!border-gray-800 shadow-sm">
-                <i class="material-icons text-stone-400 text-2xl">person_off</i>
+              <!-- Deleted User -->
+              <div class="h-10 w-10 rounded-xl bg-stone-200 dark:bg-gray-700 flex items-center justify-center">
+                <i class="material-icons text-stone-400 dark:text-gray-500">person_off</i>
               </div>
-              <div class="ml-2">
-                <span class="font-serif font-bold text-xl text-stone-500">Deleted User</span>
+              <div>
+                <span class="font-medium text-stone-500 dark:text-gray-400">Deleted user</span>
+                <span class="text-xs text-stone-400 dark:text-gray-500 ml-2"><%= time_ago post.created_at %></span>
               </div>
             <% end %>
           </div>
-          
-          <!-- Post Actions (Top Right) -->
-          <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white dark:!bg-gray-800 rounded-lg shadow-sm border border-stone-100 dark:!border-gray-700 px-2 py-1">
+
+          <!-- Post Actions -->
+          <div class="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
             <%= render 'thredded/posts_common/actions', post: post, actions: local_assigns[:actions] %>
           </div>
         </div>
 
         <!-- Message Content -->
-        <div class="px-8 py-6">
-          <div class="prose prose-lg prose-stone dark:!prose-invert max-w-none font-sans text-stone-800 dark:!text-gray-200 leading-relaxed">
+        <div class="px-4 py-3">
+          <div class="prose prose-stone dark:prose-invert max-w-none text-stone-700 dark:text-gray-300">
             <%= ForumReplacementService.replace_for(content, current_user) || render('thredded/posts/content', post: post) %>
           </div>
           
           <!-- Moderation Notices -->
           <% if post.pending_moderation? && !Thredded.content_visible_while_pending_moderation %>
-            <div class="mt-8 bg-yellow-50 dark:!bg-yellow-900/20 border border-yellow-200 dark:!border-yellow-700 rounded-lg p-4 shadow-sm">
-              <div class="flex">
-                <div class="flex-shrink-0">
-                  <i class="material-icons text-yellow-500 text-lg">pending</i>
-                </div>
-                <div class="ml-3">
-                  <p class="text-sm text-yellow-800 dark:!text-yellow-200 font-medium">
-                    <%= t 'thredded.posts.pending_moderation_notice' %>
-                  </p>
-                </div>
-              </div>
+            <div class="mt-3 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 border border-yellow-200 dark:border-yellow-700 rounded p-2 text-sm text-yellow-800 dark:text-yellow-200 flex items-center">
+              <i class="material-icons text-yellow-500 mr-2" style="font-size: 16px;">pending</i>
+              <%= t 'thredded.posts.pending_moderation_notice' %>
             </div>
           <% elsif post.blocked? && post.can_moderate? %>
-            <div class="mt-8 bg-red-50 dark:!bg-red-900/20 border border-red-200 dark:!border-red-700 rounded-lg p-4 shadow-sm">
-              <div class="flex">
-                <div class="flex-shrink-0">
-                  <i class="material-icons text-red-500 text-lg">block</i>
-                </div>
-                <div class="ml-3">
-                  <p class="text-sm text-red-800 dark:!text-red-200 font-medium">
-                    <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
-                  </p>
-                </div>
-              </div>
+            <div class="mt-3 bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-700 rounded p-2 text-sm text-red-800 dark:text-red-200 flex items-center">
+              <i class="material-icons text-red-500 mr-2" style="font-size: 16px;">block</i>
+              <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
             </div>
           <% end %>
         </div>
-        
-        <!-- Footer (Stats only, actions moved to top) -->
+
+        <!-- Footer (Stats for first post only) -->
         <% if defined?(post_counter) && post_counter == 0 %>
-          <div class="px-8 py-3 bg-stone-50 dark:!bg-black/20 border-t border-stone-100 dark:!border-gray-800">
-            <div class="flex items-center text-xs font-bold uppercase tracking-widest text-stone-400 dark:!text-gray-500 gap-6">
+          <div class="px-4 py-2 bg-stone-50 dark:bg-gray-900 border-t border-stone-100 dark:border-gray-700">
+            <div class="flex items-center text-xs text-stone-400 dark:text-gray-500 gap-4">
               <span class="flex items-center" title="Views">
-                <i class="material-icons text-sm mr-2 opacity-60">visibility</i>
+                <i class="material-icons mr-1" style="font-size: 14px;">visibility</i>
                 <%= number_with_delimiter(post.topic.views_count) %>
               </span>
               <span class="flex items-center" title="Replies">
-                <i class="material-icons text-sm mr-2 opacity-60">forum</i>
+                <i class="material-icons mr-1" style="font-size: 14px;">forum</i>
                 <%= post.topic.posts_count - 1 %>
               </span>
             </div>

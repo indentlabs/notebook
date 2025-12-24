@@ -9,6 +9,8 @@ module.exports = {
     'app/assets/javascripts/**/*.js'
   ],
   safelist: [
+    // Custom height utilities
+    'h-screen-minus-nav',
     // Toggle switch classes
     'toggle-switch',
     'toggle-dot',
