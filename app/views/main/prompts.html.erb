@@ -311,9 +311,12 @@ function writingPrompt() {
       });
       
       // Start with focus on the editor and adjust height
+      // Note: We use querySelector instead of $refs because the textarea is
+      // inside a nested Alpine component (contentLinking) and x-ref is scoped
       this.$nextTick(() => {
-        if (this.$refs.editor) {
-          this.$refs.editor.focus();
+        const editor = document.querySelector('.js-can-mention-pages');
+        if (editor) {
+          editor.focus();
           this.adjustTextareaHeight();
         }
       });
