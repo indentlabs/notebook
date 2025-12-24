@@ -192,3 +192,91 @@ svg {
     }
   }
 }
+
+// =============================================
+// User Autocomplete Dropdown
+// (Private messages participant selector, @mentions)
+// =============================================
+
+ul.thredded--textcomplete-dropdown {
+  position: absolute;
+  z-index: 100;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  list-style: none;
+  margin: 0.25rem 0 0 0;
+  padding: 0.25rem;
+  max-height: 300px;
+  overflow-y: auto;
+  min-width: 250px;
+
+  li.textcomplete-item {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    &:hover,
+    &.active {
+      background: #f3f4f6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+  }
+}
+
+.thredded--textcomplete-user-result {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  &__avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-weight: 500;
+    color: #111827;
+  }
+
+  &__display_name {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-left: 0.25rem;
+  }
+}
+
+// Dark mode for autocomplete dropdown
+.dark {
+  ul.thredded--textcomplete-dropdown {
+    background: #1f2937;
+    border-color: #374151;
+
+    li.textcomplete-item {
+      &:hover,
+      &.active {
+        background: #374151;
+      }
+    }
+  }
+
+  .thredded--textcomplete-user-result {
+    &__name {
+      color: #f3f4f6;
+    }
+
+    &__display_name {
+      color: #9ca3af;
+    }
+  }
+}

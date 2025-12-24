@@ -45,13 +45,7 @@
           <!-- Avatars -->
           <div class="flex -space-x-2 mr-3 flex-shrink-0">
             <% pt.users.reject { |u| u == current_user }.first(2).each do |user| %>
-              <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-                <%= image_tag user.avatar_url, class: "h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
-              <% else %>
-                <div class="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-900 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
-                  <%= user.thredded_display_name.first(1).upcase %>
-                </div>
-              <% end %>
+              <%= image_tag user.image_url(size: 32), class: "h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
             <% end %>
           </div>
 
@@ -93,13 +87,7 @@
         <!-- Participant Avatars -->
         <div class="flex -space-x-2 mr-3">
           <% topic.users.reject { |u| u == current_user }.first(3).each do |user| %>
-            <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-              <%= image_tag user.avatar_url, class: "h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
-            <% else %>
-              <div class="h-9 w-9 rounded-full bg-gray-300 dark:bg-gray-600 ring-2 ring-white dark:ring-gray-900 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300">
-                <%= user.thredded_display_name.first(1).upcase %>
-              </div>
-            <% end %>
+            <%= image_tag user.image_url(size: 36), class: "h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
           <% end %>
         </div>
 

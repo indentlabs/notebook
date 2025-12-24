@@ -7,11 +7,7 @@
     <% participants = [private_topic.last_user, *(private_topic.users - [private_topic.last_user])].compact.uniq.first(3) %>
     <% participants.each do |user| %>
       <div class="participant-avatar" title="<%= user.thredded_display_name %>">
-        <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-          <%= image_tag user.avatar_url, alt: user.thredded_display_name %>
-        <% else %>
-          <span class="initials"><%= user.thredded_display_name.first(2) %></span>
-        <% end %>
+        <%= image_tag user.image_url(size: 40), alt: user.thredded_display_name %>
       </div>
     <% end %>
     <% if private_topic.users.count > 3 %>

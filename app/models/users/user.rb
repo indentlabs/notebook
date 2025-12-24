@@ -229,6 +229,7 @@ class User < ApplicationRecord
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
 
+
   # TODO these (3) can probably all be scopes on the related object, no?
   def active_subscriptions
     subscriptions

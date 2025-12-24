@@ -41,13 +41,7 @@
           <div class="flex flex-wrap gap-2">
             <% @private_topic.users.each do |user| %>
               <div class="inline-flex items-center px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-full">
-                <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
-                  <%= image_tag user.avatar_url, class: "w-5 h-5 rounded-full mr-2" %>
-                <% else %>
-                  <div class="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-600 mr-2 flex items-center justify-center text-xs font-bold text-gray-600 dark:text-gray-300">
-                    <%= user.thredded_display_name.first(1).upcase %>
-                  </div>
-                <% end %>
+                <%= image_tag user.image_url(size: 20), class: "w-5 h-5 rounded-full mr-2" %>
                 <span class="text-sm text-gray-700 dark:text-gray-300"><%= user.thredded_display_name %></span>
               </div>
             <% end %>

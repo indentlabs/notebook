@@ -1,27 +1,27 @@
 <div class="h-full">
   <%= link_to user, class: "group block h-full" do %>
-    <div class="h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 overflow-hidden flex flex-row">
-      <div class="w-24 sm:w-32 flex-shrink-0 bg-gray-100 dark:bg-gray-900 relative">
-        <%= image_tag user.image_url(size: 200).html_safe, class: "w-full h-full object-cover absolute inset-0", loading: "lazy", alt: user.display_name %>
+    <div class="h-full bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 overflow-hidden flex flex-col">
+      <!-- Avatar centered at top -->
+      <div class="pt-6 pb-4 flex justify-center bg-gray-50 dark:bg-gray-900">
+        <%= image_tag user.image_url(size: 200).html_safe,
+            class: "w-24 h-24 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-md",
+            loading: "lazy",
+            alt: user.display_name %>
       </div>
-      <div class="flex-1 p-3 sm:p-4 flex flex-col justify-center min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-          <h3 class="font-bold text-lg text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-            <%= user.display_name %>
-          </h3>
-        </div>
-        
-        <div class="text-sm">
+
+      <!-- Content below avatar -->
+      <div class="flex-1 p-4 text-center flex flex-col">
+        <h3 class="font-bold text-lg text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+          @<%= user.username %>
+        </h3>
+
+        <div class="text-sm mt-1 flex justify-center">
           <%= render partial: 'thredded/users/badge', locals: { user: user } %>
         </div>
 
         <% if user.bio.present? %>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-3 line-clamp-2 flex-1">
             <%= user.bio %>
-          </p>
-        <% else %>
-          <p class="text-sm text-gray-500 dark:text-gray-500 mt-2 italic">
-            No bio available.
           </p>
         <% end %>
       </div>

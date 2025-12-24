@@ -6,11 +6,11 @@
     
     <!-- Avatar -->
     <div class="flex-shrink-0 self-end mb-1">
-      <% if private_post.user.respond_to?(:avatar_url) && private_post.user.avatar_url.present? %>
-        <%= image_tag private_post.user.avatar_url, class: "w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" %>
+      <% if private_post.user %>
+        <%= image_tag private_post.user.image_url(size: 32), class: "w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" %>
       <% else %>
         <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500">
-          <%= private_post.user.thredded_display_name.first(2).upcase %>
+          ??
         </div>
       <% end %>
     </div>
@@ -20,7 +20,7 @@
       <!-- Sender Name (only for others) -->
       <% unless is_current_user %>
         <span class="text-xs text-gray-500 dark:text-gray-400 ml-1 mb-1">
-          <%= private_post.user.thredded_display_name %>
+          <%= private_post.user&.thredded_display_name || 'Deleted User' %>
         </span>
       <% end %>
 
