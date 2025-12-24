@@ -1,0 +1,175 @@
+<%
+  field_uuid = SecureRandom.uuid
+
+  # Fall back on legacy link klass if we don't have any linkable types set on this link field
+  linkable_types = field.fetch(:migrated_link, false) \
+    ? field.dig(:options, 'linkable_types') || []       # New-style link
+    : [raw_model.send(field[:old_column_source]).klass] # Old-style link
+
+  # Constantize upfront so we can #icon, #color, etc
+  linkable_types.map! { |class_name| content_class_from_name(class_name) }
+%>
+
+<div x-data="alpineMultiSelectController()" x-init="loadOptions('<%= field_uuid %>')">
+  <select name="attribute_field[linked_pages][]" multiple class="hidden autosave-closest-form-on-change" id="<%= field_uuid %>">
+    <% linkable_types.each do |page_type| %>
+      <optgroup label="<%= page_type.name %>">
+        <% @linkables_raw.fetch(page_type.name, []).each do |linkable| %>
+          <option value="<%= page_type %>-<%= linkable.id %>"
+            data-image-url="<%= linkable.primary_image %>"
+            data-icon="<%= page_type.icon %>"
+            data-icon-color="<%= page_type.text_color %>"
+            <%= 'selected' if field[:value].include?("#{page_type}-#{linkable.id}") %>
+          >
+            <%= linkable.name %>
+          </option>
+        <% end %>
+      </optgroup>
+    <% end %>
+  </select>
+
+  <div class="w-full flex flex-col items-center mx-auto">
+    <div class="inline-block relative w-full">
+      <div class="flex flex-col items-center relative">
+        <%# Closed state %>
+        <div class="w-full">
+          <div @click="open()" class="flex border-0 border-l-4 border-r-4 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-md cursor-pointer hover:border-gray-400 dark:hover:border-gray-500 transition-colors shadow-sm">
+            <div class="flex flex-auto flex-wrap">
+              <%# Chips for all selected options %>
+              <template x-for="(option,index) in selected" :key="index">
+                <div class="flex justify-center items-center m-1 font-medium py-1 px-1 rounded bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-notebook-blue cursor-pointer">
+                  <div class="text-xs font-normal leading-none max-w-full flex-initial inline-flex items-center" x-model="options[option]">
+                    <span x-text="options[option].icon" class="material-icons text-xl leading-3" :class="`${options[option].icon_color}`"></span>
+                    <span x-text="options[option].text" class="mr-1 px-1"></span>
+                  </div>
+                  <div class="flex flex-auto flex-row-reverse">
+                    <div x-on:click.stop="remove(index,option)">
+                      <svg class="fill-current h-4 w-4 rounded-full hover:bg-red-500 hover:text-white" role="button" viewBox="0 0 20 20">
+                        <path d="M14.348,14.849c-0.469,0.469-1.229,0.469-1.697,0L10,11.819l-2.651,3.029c-0.469,0.469-1.229,0.469-1.697,0
+                                            c-0.469-0.469-0.469-1.229,0-1.697l2.758-3.15L5.651,6.849c-0.469-0.469-0.469-1.228,0-1.697s1.228-0.469,1.697,0L10,8.183
+                                            l2.651-3.031c0.469-0.469,1.228-0.469,1.697,0s0.469,1.229,0,1.697l-2.758,3.152l2.758,3.15
+                                            C14.817,13.62,14.817,14.38,14.348,14.849z" />
+                      </svg>
+
+                    </div>
+                  </div>
+                </div>
+              </template>
+              
+              <%# Placeholder component for when no options are selected %>
+              <div x-show="selected.length == 0" class="flex-1 pointer-events-none">
+                <input placeholder="Link your other pages"
+                       class="bg-transparent p-1 px-2 appearance-none outline-none border-none h-full w-full text-gray-800 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-0 focus:border-none"
+                       x-bind:value="selectedValues()"
+                       disabled
+                       readonly
+                />
+              </div>
+            </div>
+
+            <%# Dropdown arrow %>
+            <button type="button" @click.stop="isOpen() ? close() : open()" class="text-gray-300 w-8 py-1 pl-2 pr-1 border-l-2 flex items-center justify-center border-gray-300 cursor-pointer hover:bg-gray-50 focus:outline-none">
+              <svg x-show="isOpen() === false" class="fill-current h-4 w-4 pointer-events-none select-none" viewBox="0 0 20 20" style="pointer-events: none;">
+                <path d="M17.418,6.109c0.272-0.268,0.709-0.268,0.979,0s0.271,0.701,0,0.969l-7.908,7.83 c-0.27,0.268-0.707,0.268-0.979,0l-7.908-7.83c-0.27-0.268-0.27-0.701,0-0.969c0.271-0.268,0.709-0.268,0.979,0L10,13.25 L17.418,6.109z" style="pointer-events: none;" />
+              </svg>
+              <svg x-show="isOpen() === true" class="fill-current h-4 w-4 pointer-events-none select-none" viewBox="0 0 20 20" style="pointer-events: none;">
+                <path d="M2.582,13.891c-0.272,0.268-0.709,0.268-0.979,0s-0.271-0.701,0-0.969l7.908-7.83 c0.27-0.268,0.707-0.268,0.979,0l7.908,7.83c0.27,0.268,0.27,0.701,0,0.969c-0.271,0.268-0.709,0.268-0.978,0L10,6.75L2.582,13.891z" style="pointer-events: none;" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <%# Opened state %>
+        <div class="w-full">
+          <div x-show.transition.origin.top="isOpen()" class="absolute shadow-xl top-100 bg-white dark:bg-gray-800 z-40 w-full left-0 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden" x-on:click.away="close">
+
+            <%# Search box %>
+            <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+              <input type="text"
+                     x-model="searchQuery"
+                     @input="filterOptions()"
+                     placeholder="Search pages..."
+                     x-ref="searchInput"
+                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                     @click.stop>
+            </div>
+
+            <div class="overflow-y-auto max-h-80">
+              <template x-for="(optgroup,groupIndex) in optgroups" :key="groupIndex">
+                <div x-show="optgroup.filteredOptions && optgroup.filteredOptions.length > 0">
+                  <%# Colorful section header %>
+                  <div class="sticky top-0 px-3 py-2 border-b border-gray-200 z-10"
+                       x-bind:class="optgroup.color">
+                    <div class="flex items-center text-xs font-semibold uppercase tracking-wider text-white">
+                      <span x-text="optgroup.icon" class="material-icons text-sm mr-1.5"></span>
+                      <span x-text="optgroup.plural"></span>
+                    </div>
+                  </div>
+
+                  <%# Options list %>
+                  <div class="py-1">
+                    <template x-for="(option, optionIndex) in optgroup.filteredOptions" :key="optionIndex">
+                      <div class="cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors"
+                           @click="select(option.index,$event)"
+                           :class="option.selected ? 'bg-blue-50 dark:bg-blue-900' : ''">
+                        <div class="flex items-center px-3 py-2.5 gap-3">
+                          <%# Checkbox/checkmark %>
+                          <div class="flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
+                               :class="option.selected ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-600'">
+                            <svg x-show="option.selected" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                          </div>
+
+                          <%# Page name %>
+                          <div class="flex-1 min-w-0">
+                            <div class="text-sm font-medium text-gray-900 dark:text-white truncate" x-text="option.text"></div>
+                          </div>
+
+                          <%# Thumbnail %>
+                          <div class="flex-shrink-0">
+                            <img :src="option.imageUrl" class="h-8 w-8 rounded-full object-cover border border-gray-200 dark:border-gray-700" :alt="option.text">
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </template>
+
+              <%# No results message %>
+              <div x-show="searchQuery && !optgroups.some(g => g.filteredOptions && g.filteredOptions.length > 0)" class="px-4 py-8 text-center">
+                <i class="material-icons text-gray-300 text-4xl mb-2">search_off</i>
+                <p class="text-sm text-gray-500">No pages found matching "<span x-text="searchQuery"></span>"</p>
+              </div>
+
+              <%# Empty state %>
+              <div x-show="options.length == 0 && !searchQuery" class="px-4 py-8">
+                <div class="text-center">
+                  <i class="material-icons text-gray-300 text-4xl mb-2">link_off</i>
+                  <p class="text-sm text-gray-600">
+                    This field only accepts links to <%= linkable_types.to_sentence %> pages
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1">You haven't created any of those yet!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Help-text for which pages can be linked with this field %>
+  <%# TODO: maybe click one of these to open+filter the dropdown to just that type? %>
+  <div class="mt-2">
+    <small>
+      <i class="material-icons float-left">link</i>
+      <% linkable_types.each do |page_type| %>
+        <i class="material-icons <%= page_type.text_color %>">
+          <%= page_type.icon %>
+        </i>
+      <% end %>
+    </small>
+  </div>
+</div>

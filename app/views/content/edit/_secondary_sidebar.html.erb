@@ -1,0 +1,172 @@
+<!-- Secondary Sidebar - Edit Tools and Quick Actions -->
+<div class="h-full overflow-y-auto">
+  <div class="p-4 space-y-4">
+    
+    <!-- Tools -->
+  <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="w-full space-y-2">
+      <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+        <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
+                    target: "_blank",
+                    class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 bg-gray-50 dark:bg-gray-800" do %>
+          <div class="flex items-center">
+            <i class="material-icons text-xl text-gray-400 dark:text-gray-500 group-hover:text-purple-500 mr-3">visibility</i>
+            <div class="text-left">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">Visualize</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Generate images</div>
+            </div>
+          </div>
+          <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-purple-500 text-lg">open_in_new</i>
+        <% end %>
+      <% end %>
+
+      <%= link_to polymorphic_path(raw_content, action: :changelog),
+                  target: "_blank",
+                  class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 bg-gray-50 dark:bg-gray-800" do %>
+        <div class="flex items-center">
+          <i class="material-icons text-xl text-gray-400 dark:text-gray-500 group-hover:text-blue-500 mr-3">history</i>
+          <div class="text-left">
+            <div class="text-sm font-medium text-gray-900 dark:text-white">Changelog</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">View history</div>
+          </div>
+        </div>
+        <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-blue-500 text-lg">open_in_new</i>
+      <% end %>
+      
+      <% if forum_url = ForumsLinkbuilderService.worldbuilding_url(raw_content.class) %>
+        <%= link_to forum_url,
+                    target: "_blank",
+                    class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 bg-gray-50 dark:bg-gray-800" do %>
+          <div class="flex items-center">
+            <i class="material-icons text-xl text-gray-400 dark:text-gray-500 group-hover:text-green-500 mr-3">forum</i>
+            <div class="text-left">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">Community</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Discuss page</div>
+            </div>
+          </div>
+          <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-green-500 text-lg">open_in_new</i>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+    <!-- Save Status -->
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2 mb-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <div class="w-2 h-2 bg-green-400 rounded-full mr-2" id="save-indicator"></div>
+          <span class="text-sm text-gray-700 dark:text-gray-300">Saved</span>
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400" id="last-saved">
+          Auto-saving...
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stats -->
+  <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Page Stats</h3>
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-600 dark:text-gray-400">Word Count</span>
+        <span class="text-sm font-medium text-gray-900 dark:text-white"><%= number_with_delimiter(raw_content.cached_word_count) %></span>
+      </div>
+      
+      <%
+        total_fields = content.data[:categories].map { |cat| cat[:fields].count }.sum
+        completed_fields = content.data[:categories].map { |cat| cat[:fields].count { |field| field[:value].present? } }.sum
+        completion_percent = total_fields > 0 ? (completed_fields.to_f / total_fields * 100).round : 0
+      %>
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-sm text-gray-600 dark:text-gray-400">Completion</span>
+          <span class="text-sm font-medium text-gray-900 dark:text-white"><%= completion_percent %>%</span>
+        </div>
+        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+          <div class="bg-green-500 h-1.5 rounded-full transition-all duration-500" style="width: <%= completion_percent %>%"></div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+    <!-- Keyboard Shortcuts Help -->
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-xs text-gray-600 dark:text-gray-400">
+      <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Keyboard Shortcuts</h4>
+      <div class="space-y-1">
+        <div class="flex justify-between">
+          <span>Save current field</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded keyboard-shortcut-save">⌘S</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span>Exit editing</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded">Esc</kbd>
+        </div>
+        <div class="flex justify-between">
+          <span>Navigate fields</span>
+          <kbd class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 dark:text-gray-300 rounded">Tab</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Detect OS and update keyboard shortcuts
+document.addEventListener('DOMContentLoaded', function() {
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || 
+                navigator.userAgent.toUpperCase().indexOf('MAC') >= 0;
+  
+  // Update all save shortcut displays
+  document.querySelectorAll('.keyboard-shortcut-save').forEach(function(element) {
+    element.textContent = isMac ? '⌘S' : 'Ctrl+S';
+  });
+});
+
+// Update save status
+document.addEventListener('autosave:success', function() {
+  const lastSavedEl = document.getElementById('last-saved');
+  const saveIndicator = document.getElementById('save-indicator');
+  const saveText = saveIndicator?.parentElement.querySelector('span');
+  
+  if (lastSavedEl) {
+    lastSavedEl.textContent = new Date().toLocaleTimeString();
+  }
+  if (saveIndicator) {
+    saveIndicator.className = 'w-2 h-2 bg-green-400 rounded-full mr-2';
+  }
+  if (saveText) {
+    saveText.textContent = 'Saved';
+    saveText.className = 'text-sm text-gray-700 dark:text-gray-300';
+  }
+});
+
+// Show saving status when autosave starts
+document.addEventListener('autosave:start', function() {
+  const saveIndicator = document.getElementById('save-indicator');
+  const saveText = saveIndicator?.parentElement.querySelector('span');
+  
+  if (saveIndicator) {
+    saveIndicator.className = 'w-2 h-2 bg-yellow-400 rounded-full mr-2';
+  }
+  if (saveText) {
+    saveText.textContent = 'Saving...';
+    saveText.className = 'text-sm text-yellow-700 dark:text-yellow-400';
+  }
+});
+
+// Show unsaved changes when user starts typing
+document.addEventListener('input', function(e) {
+  if (e.target.matches('.autosave-closest-form-on-change')) {
+    const saveIndicator = document.getElementById('save-indicator');
+    const saveText = saveIndicator?.parentElement.querySelector('span');
+    
+    if (saveIndicator) {
+      saveIndicator.className = 'w-2 h-2 bg-amber-400 rounded-full mr-2';
+    }
+    if (saveText) {
+      saveText.textContent = 'Unsaved changes';
+      saveText.className = 'text-sm text-amber-700 dark:text-amber-400';
+    }
+  }
+});
+</script>

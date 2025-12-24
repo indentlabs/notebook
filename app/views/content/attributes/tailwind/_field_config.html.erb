@@ -1,0 +1,491 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Configure Field</h3>
+    <button @click="selectedField = null" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">
+      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Tab Navigation -->
+  <div x-data="{ activeTab: 'general' }">
+    <div class="border-b border-gray-200 dark:border-slate-700">
+      <nav class="-mb-px flex space-x-6">
+        <button @click="activeTab = 'general'" 
+                :style="activeTab === 'general' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'general' ? '' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          General
+        </button>
+        <button @click="activeTab = 'appearance'" 
+                :style="activeTab === 'appearance' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'appearance' ? '' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Appearance
+        </button>
+        <button @click="activeTab = 'advanced'" 
+                :style="activeTab === 'advanced' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'advanced' ? '' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Advanced
+        </button>
+      </nav>
+    </div>
+    
+    <!-- General Tab -->
+    <div x-show="activeTab === 'general'" class="py-4 space-y-4">
+      <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field Label</label>
+          <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Field Type</label>
+          <div class="flex items-center space-x-2">
+            <div class="w-6 h-6 rounded bg-gray-100 dark:bg-slate-700 flex items-center justify-center">
+              <% if field.field_type == 'text_area' %>
+                <i class="material-icons text-gray-600 dark:text-gray-400 text-sm">text_fields</i>
+              <% elsif field.field_type == 'link' %>
+                <i class="material-icons text-blue-600 dark:text-blue-400 text-sm">link</i>
+              <% elsif field.field_type == 'name' %>
+                <i class="material-icons text-purple-600 dark:text-purple-400 text-sm">label</i>
+              <% elsif field.field_type == 'universe' %>
+                <i class="material-icons text-indigo-600 dark:text-indigo-400 text-sm">language</i>
+              <% elsif field.field_type == 'tags' %>
+                <i class="material-icons text-green-600 dark:text-green-400 text-sm">local_offer</i>
+              <% else %>
+                <i class="material-icons text-gray-600 dark:text-gray-400 text-sm">subject</i>
+              <% end %>
+            </div>
+            <span class="text-sm text-gray-700 dark:text-gray-300">
+              <%= field.field_type.humanize %>
+              <% if field.name_field? || field.universe_field? || field.tags_field? %>
+                (Cannot be changed)
+              <% end %>
+            </span>
+          </div>
+        </div>
+        
+        <% if field.field_type == 'link' %>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Linkable Types</label>
+              <div class="flex space-x-2">
+                <button type="button" 
+                        onclick="selectAllLinkableTypes()" 
+                        class="px-2 py-1 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
+                  Select All
+                </button>
+                <button type="button" 
+                        onclick="selectNoneLinkableTypes()" 
+                        class="px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 rounded transition-colors">
+                  Select None
+                </button>
+              </div>
+            </div>
+
+            <!-- Hidden field to ensure linkable_types parameter is always sent -->
+            <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="" />
+            
+            <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-200 dark:border-slate-600 rounded-md p-3 bg-gray-50 dark:bg-slate-900">
+              <% Rails.application.config.content_types[:all].each do |content_type| %>
+                <label class="flex items-center p-2 bg-white dark:bg-slate-800 rounded-md border border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700 cursor-pointer transition-colors">
+                  <input type="checkbox" 
+                         name="attribute_field[field_options][linkable_types][]"
+                         value="<%= content_type.name %>"
+                         <%= 'checked' if field.field_options&.dig('linkable_types')&.include?(content_type.name) %>
+                         class="h-4 w-4 border-gray-300 dark:border-slate-500 dark:bg-slate-700 rounded focus:ring-2 focus:ring-offset-2 mr-3"
+                         style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                  
+                  <div class="flex items-center flex-grow">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center mr-2"
+                         style="background-color: <%= content_type.hex_color %>20; color: <%= content_type.hex_color %>;">
+                      <i class="material-icons text-xs"><%= content_type.icon %></i>
+                    </div>
+                    
+                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <%= content_type.name.pluralize %>
+                    </div>
+                  </div>
+                </label>
+              <% end %>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Select which page types users can link to from this field.</p>
+
+          </div>
+        <% end %>
+        
+        <div class="pt-2">
+          <%= f.submit 'Save Changes', class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Appearance Tab -->
+    <div x-show="activeTab === 'appearance'" class="py-4 space-y-4">
+      <div class="space-y-4">
+        <% if field.field_type == 'text_area' %>
+          <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
+            <div x-data="{ selectedSize: '<%= field.field_options&.dig('input_size') || 'medium' %>' }">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Input Size</label>
+              <select x-model="selectedSize" 
+                      name="attribute_field[field_options][input_size]"
+                      class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm rounded-md" 
+                      style="--tw-ring-color: <%= content_type_class.hex_color %>; border-color: <%= content_type_class.hex_color %>;">
+                <option value="small">Small (one line)</option>
+                <option value="medium">Medium (multiple lines)</option>
+                <option value="large">Large (rich text)</option>
+              </select>
+              
+              <!-- Preview Section -->
+              <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview</label>
+                <div class="border border-gray-200 dark:border-slate-600 rounded-md p-3 bg-gray-50 dark:bg-slate-900">
+                  <!-- Small input preview -->
+                  <input x-show="selectedSize === 'small'" 
+                         type="text" 
+                         placeholder="This is how the small input will look..."
+                         disabled
+                         class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-sm bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 cursor-not-allowed">
+                  
+                  <!-- Medium textarea preview -->
+                  <textarea x-show="selectedSize === 'medium'"
+                            placeholder="This is how the medium textarea will look...&#10;It spans multiple lines&#10;Perfect for longer descriptions"
+                            disabled
+                            rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-sm bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 cursor-not-allowed resize-none"></textarea>
+                  
+                  <!-- Large textarea preview -->
+                  <textarea x-show="selectedSize === 'large'"
+                            placeholder="This is how the large textarea will look...&#10;It has more vertical space&#10;Ideal for rich text content&#10;Longer descriptions&#10;Multiple paragraphs&#10;And more detailed information"
+                            disabled
+                            rows="6"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-sm bg-white dark:bg-slate-800 text-gray-500 dark:text-gray-400 cursor-not-allowed resize-none"></textarea>
+                </div>
+              </div>
+              
+              <div class="pt-4">
+                <%= f.submit 'Save Changes', class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+              </div>
+            </div>
+          <% end %>
+        <% elsif field.field_type == 'link' %>
+          <div class="space-y-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Choose how linked content appears on your pages.
+            </p>
+            
+            <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
+              <div x-data="{ displayStyle: '<%= field.field_options&.dig('display_style') || 'list' %>' }">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Display Style</label>
+                
+                <!-- Display Style Options -->
+                <div class="space-y-3">
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                         :class="displayStyle === 'list' ? 'border-blue-300 dark:border-blue-600' : 'border-gray-200 dark:border-slate-700'"
+                         :style="displayStyle === 'list' ? (document.documentElement.classList.contains('dark') ? 'background-color: rgb(51, 65, 85)' : 'background-color: rgb(239, 246, 255)') : ''">
+                    <input type="radio"
+                           x-model="displayStyle"
+                           name="attribute_field[field_options][display_style]"
+                           value="list"
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">Text</div>
+                    </div>
+                  </label>
+
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                         :class="displayStyle === 'tags' ? 'border-blue-300 dark:border-blue-600' : 'border-gray-200 dark:border-slate-700'"
+                         :style="displayStyle === 'tags' ? (document.documentElement.classList.contains('dark') ? 'background-color: rgb(51, 65, 85)' : 'background-color: rgb(239, 246, 255)') : ''">
+                    <input type="radio"
+                           x-model="displayStyle"
+                           name="attribute_field[field_options][display_style]"
+                           value="tags"
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">Tags</div>
+                    </div>
+                  </label>
+
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                         :class="displayStyle === 'cards' ? 'border-blue-300 dark:border-blue-600' : 'border-gray-200 dark:border-slate-700'"
+                         :style="displayStyle === 'cards' ? (document.documentElement.classList.contains('dark') ? 'background-color: rgb(51, 65, 85)' : 'background-color: rgb(239, 246, 255)') : ''">
+                    <input type="radio"
+                           x-model="displayStyle"
+                           name="attribute_field[field_options][display_style]"
+                           value="cards"
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">Cards</div>
+                    </div>
+                  </label>
+                </div>
+                
+                <!-- Preview -->
+                <div class="mt-4">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview</label>
+                  <div class="border border-gray-200 dark:border-slate-600 rounded-md p-3 bg-gray-50 dark:bg-slate-900">
+                    <!-- Simple List Preview -->
+                    <div x-show="displayStyle === 'list'" class="text-sm text-gray-600 dark:text-gray-400">
+                      <div>• Alice Johnson</div>
+                      <div>• The Rusty Tavern</div>
+                      <div>• Magic Sword</div>
+                    </div>
+                    
+                    <!-- Tags Preview -->
+                    <div x-show="displayStyle === 'tags'" class="text-sm text-gray-600 dark:text-gray-400">
+                      <div class="flex flex-wrap gap-2">
+                        <span class="inline-flex items-center px-2 py-1 bg-white dark:bg-slate-800 rounded border dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-500 transition-colors duration-150 ease-in-out cursor-pointer">
+                          <i class="material-icons text-xs <%= defined?(Character) ? Character.text_color : 'text-purple-600' %> mr-1"><%= defined?(Character) ? Character.icon : 'person' %></i>
+                          Alice Johnson
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 bg-white dark:bg-slate-800 rounded border dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-500 transition-colors duration-150 ease-in-out cursor-pointer">
+                          <i class="material-icons text-xs <%= defined?(Location) ? Location.text_color : 'text-green-600' %> mr-1"><%= defined?(Location) ? Location.icon : 'place' %></i>
+                          The Rusty Tavern
+                        </span>
+                        <span class="inline-flex items-center px-2 py-1 bg-white dark:bg-slate-800 rounded border dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700 hover:border-gray-300 dark:hover:border-slate-500 transition-colors duration-150 ease-in-out cursor-pointer">
+                          <i class="material-icons text-xs <%= defined?(Item) ? Item.text_color : 'text-orange-600' %> mr-1"><%= defined?(Item) ? Item.icon : 'category' %></i>
+                          Magic Sword
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Cards Preview -->
+                    <div x-show="displayStyle === 'cards'" class="text-sm text-gray-600 dark:text-gray-400">
+                      <div class="w-full max-w-md overflow-x-auto overflow-y-hidden">
+                        <div class="flex flex-row flex-nowrap space-x-3 pb-2" style="width: max-content;">
+                        <!-- Character Card -->
+                        <div class="flex-shrink-0 w-40 bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/characters.jpg', class: 'w-full h-full object-cover', alt: 'Character image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">Alice Johnson</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Character) ? Character.text_color : 'text-purple-600' %> mr-1"><%= defined?(Character) ? Character.icon : 'person' %></i>
+                              Character
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Location Card -->
+                        <div class="flex-shrink-0 w-40 bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/locations.jpg', class: 'w-full h-full object-cover', alt: 'Location image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">The Rusty Tavern</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Location) ? Location.text_color : 'text-green-600' %> mr-1"><%= defined?(Location) ? Location.icon : 'place' %></i>
+                              Location
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Item Card -->
+                        <div class="flex-shrink-0 w-40 bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/items.jpg', class: 'w-full h-full object-cover', alt: 'Item image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">Magic Sword</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Item) ? Item.text_color : 'text-orange-600' %> mr-1"><%= defined?(Item) ? Item.icon : 'category' %></i>
+                              Item
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- Additional cards to show scrolling -->
+                        <div class="flex-shrink-0 w-40 bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/characters.jpg', class: 'w-full h-full object-cover', alt: 'Character image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">Sir Marcus</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Character) ? Character.text_color : 'text-purple-600' %> mr-1"><%= defined?(Character) ? Character.icon : 'person' %></i>
+                              Character
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="flex-shrink-0 w-40 bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-600 shadow-sm hover:shadow-lg hover:scale-105 transition-all duration-200 ease-in-out cursor-pointer">
+                          <div class="h-16 bg-gray-200 rounded-t-lg overflow-hidden">
+                            <%= image_tag 'card-headers/locations.jpg', class: 'w-full h-full object-cover', alt: 'Location image' %>
+                          </div>
+                          <div class="h-12 p-2 flex flex-col justify-center">
+                            <div class="text-xs font-medium text-gray-900 dark:text-gray-100 truncate leading-tight">Ancient Library</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate flex items-center">
+                              <i class="material-icons text-xs <%= defined?(Location) ? Location.text_color : 'text-green-600' %> mr-1"><%= defined?(Location) ? Location.icon : 'place' %></i>
+                              Location
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="pt-4">
+                  <%= f.submit 'Save Changes', class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8">
+            <div class="text-gray-400 dark:text-gray-500 mb-2">
+              <i class="material-icons text-3xl">palette</i>
+            </div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              No appearance options available for this field type.
+            </p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- Advanced Tab -->
+    <div x-show="activeTab === 'advanced'" class="py-4 space-y-4">
+      <div class="space-y-6">
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Display Order</h6>
+          <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-md border border-gray-200 dark:border-slate-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Fields are displayed in order within their category. Lower numbers appear first.
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <strong>Tip:</strong> Use drag & drop in the template editor for easier reordering. This manual control is for fine-tuning.
+            </p>
+            <%= form_for(field, method: :put, html: {class: 'space-y-3', 'data-type': 'json'}, remote: true) do |f| %>
+              <div class="flex items-center space-x-3">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Position:</label>
+                <%= f.number_field :position, class: "w-20 shadow-sm border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+                <%= f.submit 'Update', class: "px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sharing Restrictions</h6>
+          <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-md border border-gray-200 dark:border-slate-700">
+            <div class="mb-3 p-3 bg-purple-50 dark:bg-slate-700 border border-purple-200 dark:border-slate-600 rounded-md">
+              <div class="text-xs text-purple-800 dark:text-purple-300">
+                <strong>Note:</strong> All <%= content_type.downcase %> pages are private by default, but these settings affect any page that is public.
+              </div>
+            </div>
+            <div class="flex items-center space-x-2 mb-3">
+              <input type="checkbox" 
+                     <%= "checked" if field.label.start_with?('Private') %>
+                     id="field_private"
+                     class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
+                     style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+              <label for="field_private" class="text-sm text-gray-700 dark:text-gray-300">Private: For my eyes only</label>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Private fields (and their answers) are only visible to you, even when your pages are shared publicly.</p>
+          </div>
+        </div>
+        
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Archives</h6>
+          <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-md border border-gray-200 dark:border-slate-700">
+            <%= form_for(field, method: :put, html: {class: 'inline', 'data-type': 'json'}, remote: true) do |f| %>
+              <%= f.hidden_field :hidden, value: !field.hidden %>
+              <% if field.hidden? %>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-amber-600">archive</i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">This field is currently archived</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">It's hidden from your workspace but can be restored anytime.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Restore this field', class: "px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% else %>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-green-600">check_circle</i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">This field is currently active</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">It appears in your template and content pages.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Archive this field', class: "px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        
+        <% unless field.name_field? || field.universe_field? || field.tags_field? %>
+          <div>
+            <h6 class="text-sm font-medium text-red-700 dark:text-red-400 mb-2 flex items-center">
+              <i class="material-icons text-red-600 text-sm mr-1">warning</i>
+              Danger Zone
+            </h6>
+            <div class="bg-red-50 dark:bg-red-900 p-4 rounded-md border border-red-200 dark:border-red-700" x-data="fieldDeletionComponent()">
+              <div x-show="!showConfirmation">
+                <p class="text-sm text-red-700 dark:text-red-200 mb-3">
+                  Deleting a field will permanently remove it and all its data from all <%= content_type.pluralize.downcase %>.
+                </p>
+                
+                <button @click="showConfirmation = true" 
+                        class="w-full px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                  Delete Field
+                </button>
+              </div>
+              
+              <!-- Confirmation Step -->
+              <div x-show="showConfirmation" 
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 transform scale-95"
+                   x-transition:enter-end="opacity-100 transform scale-100">
+                <div class="bg-red-100 dark:bg-red-900 rounded-md p-3 border border-red-300 dark:border-red-700 mb-4">
+                  <h4 class="font-medium text-red-900 dark:text-red-100 mb-2 flex items-center">
+                    <i class="material-icons text-red-600 mr-2">warning</i>
+                    Confirm Field Deletion
+                  </h4>
+                  <p class="text-sm text-red-800 dark:text-red-200 mb-3">
+                    This will permanently delete "<strong><%= field.label %></strong>" and all answers you've written to this field across all of your <%= content_type.pluralize.downcase %> pages.
+                  </p>
+                  <p class="text-xs text-red-700 dark:text-red-300 font-medium">
+                    This action cannot be undone!
+                  </p>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                  <button @click="showConfirmation = false" 
+                          class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none">
+                    Cancel
+                  </button>
+                  <button @click="deleteField()" 
+                          :disabled="deleting"
+                          :class="deleting ? 'opacity-50 cursor-not-allowed' : ''"
+                          class="px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                    <span x-show="!deleting">Yes, Delete Field</span>
+                    <span x-show="deleting" class="flex items-center">
+                      <svg class="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Deleting...
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

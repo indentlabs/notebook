@@ -1,0 +1,33 @@
+<%# locals: post, content_label, button_text, button_submitting_text. %>
+<%= form_for post,
+             url: post.submit_path,
+             as: :post,
+             html: {
+                 class: 'thredded--form thredded--post-form',
+                 'data-thredded-post-form' => true,
+                 'data-autocomplete-url' => autocomplete_users_path,
+                 'data-autocomplete-min-length' => Thredded.autocomplete_min_length,
+                 'data-thredded-submit-hotkey' => true,
+             } do |form| %>
+  <div class="space-y-4">
+    <div>
+      <%= render 'thredded/posts_common/form/content_field',
+                 form: form, content_label: content_label %>
+    </div>
+    
+    <%= render 'thredded/posts_common/form/preview_area',
+               form: form, preview_url: post.preview_path %>
+    <div class="flex items-center justify-between">
+      <% button_submitting_text ||=
+             post.persisted? ? t('thredded.form.update_btn_submitting') : t('thredded.form.create_btn_submitting') %>
+      <button type="submit" 
+              class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors" 
+              data-disable-with="<%= button_submitting_text %>">
+        <%= button_text %>
+      </button>
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        <kbd class="px-2 py-1 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">Ctrl</kbd> + <kbd class="px-2 py-1 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg">Enter</kbd> to submit
+      </div>
+    </div>
+  </div>
+<% end %>

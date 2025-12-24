@@ -1,0 +1,64 @@
+<% if timeline_event.timeline_event_entities.any? %>
+  <div class="border-t border-gray-100 dark:border-gray-700 pt-4" id="linked-content-<%= timeline_event.id %>">
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+      <i class="material-icons text-sm mr-2">link</i>
+      Linked Content
+    </h4>
+    
+    <!-- Horizontal Scrolling Cards - Contained within parent -->
+    <div class="overflow-x-auto pb-2 linked-content-scroll linked-content-breakout">
+      <div class="flex space-x-4" style="width: max-content;">
+        <% timeline_event.timeline_event_entities.includes(:entity).order(:entity_type).each do |te_entity| %>
+          <% next if te_entity.entity.nil? %>
+          <% entity = te_entity.entity %>
+          <% klass = content_class_from_name(te_entity.entity_type) %>
+          
+          <div class="group/card flex-shrink-0 w-40 h-24 rounded-lg overflow-hidden linked-content-card relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <!-- Background Image -->
+            <div class="absolute inset-0">
+              <% if entity.respond_to?(:pinned_or_random_image_including_private) %>
+                <% preview_image = entity.pinned_or_random_image_including_private(format: :medium) %>
+                <% if preview_image.present? && !preview_image.include?('card-headers') %>
+                  <img src="<%= preview_image %>" 
+                       alt="<%= entity.name %>" 
+                       class="w-full h-full object-cover"
+                       loading="lazy">
+                <% else %>
+                  <!-- Fallback Icon Background -->
+                  <div class="w-full h-full image-placeholder bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                    <i class="material-icons text-4xl <%= klass.text_color %> opacity-20"><%= klass.icon %></i>
+                  </div>
+                <% end %>
+              <% else %>
+                <!-- Fallback Icon Background -->
+                <div class="w-full h-full image-placeholder bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <i class="material-icons text-4xl <%= klass.text_color %> opacity-20"><%= klass.icon %></i>
+                </div>
+              <% end %>
+              
+              <!-- Gradient Overlay for Text Readability -->
+              <div class="absolute inset-0 gradient-overlay"></div>
+            </div>
+            
+            <!-- Name Badge -->
+            <div class="absolute top-2 left-2">
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium type-badge bg-white bg-opacity-90 dark:bg-gray-800 dark:bg-opacity-90 backdrop-blur-sm text-gray-900 dark:text-gray-100">
+                <i class="material-icons text-xs mr-1 <%= klass.text_color %>"><%= klass.icon %></i>
+                <%= link_to entity.name.presence || "Untitled #{te_entity.entity_type}", entity %>
+              </span>
+            </div>
+            
+            <!-- Remove Button -->
+            <%= link_to unlink_entity_timeline_event_path(id: timeline_event.id, entity_id: te_entity.id), 
+                method: :post, 
+                remote: true,
+                class: "absolute top-2 right-2 p-1 rounded-full remove-btn bg-white bg-opacity-90 dark:bg-gray-800 dark:bg-opacity-90 backdrop-blur-sm text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30 opacity-0 group-hover/card:opacity-100 transition-all duration-200",
+                data: { confirm: "Remove this link?" } do %>
+              <i class="material-icons text-sm">close</i>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

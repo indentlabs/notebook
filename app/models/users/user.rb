@@ -51,19 +51,19 @@ class User < ApplicationRecord
   has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
   # has_many :followed_by_users,            through: :user_followings, source: :user # todo unsure how to actually write this, so we do it manually below
   def followed_by_users
-    User.where(id: UserFollowing.where(followed_user_id: self.id).pluck(:user_id)) 
+    User.joins(:user_followings).where(user_followings: { followed_user_id: self.id })
   end
   def followed_by?(user)
-    followed_by_users.pluck(:id).include?(user.id)
+    UserFollowing.exists?(user_id: user.id, followed_user_id: self.id)
   end
 
   has_many :user_blockings,               dependent: :destroy
   has_many :blocked_users,                through: :user_blockings, source: :blocked_user
   def blocked_by_users
-    @cached_blocked_by_users ||= User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))
+    @cached_blocked_by_users ||= User.joins(:user_blockings).where(user_blockings: { blocked_user_id: self.id })
   end
   def blocked_by?(user)
-    blocked_by_users.pluck(:id).include?(user.id)
+    UserBlocking.exists?(user_id: user.id, blocked_user_id: self.id)
   end
 
   has_many :content_page_shares,           dependent: :destroy
@@ -92,6 +92,8 @@ class User < ApplicationRecord
 
   has_many :notifications,                 dependent: :destroy
   has_many :notice_dismissals,             dependent: :destroy
+
+  has_many :word_count_updates,            dependent: :destroy
 
   has_many :page_settings_overrides,       dependent: :destroy
   has_one_attached :avatar
@@ -182,6 +184,10 @@ class User < ApplicationRecord
     Rails.application.config.content_types[:all].select { |c| can_create? c }
   end
 
+  def words_written_today
+    word_count_updates.where(created_at: Time.current.beginning_of_day..Time.current.end_of_day).sum(:word_count)
+  end
+
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
   # which is undesireable in a case like this, when we want to modify it
@@ -205,26 +211,24 @@ class User < ApplicationRecord
     self[:name].blank? && self.persisted? ? 'Anonymous author' : self[:name]
   end
 
-  def image_url(size=80)
-    @cached_user_image_url ||= if avatar.attached? # manually-uploaded avatar
+  def image_url(size: 80)
+    if avatar.attached? # manually-uploaded avatar
       Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
-
     else # otherwise, grab the default from Gravatar for this email address
-      gravatar_fallback_url(size)
+      gravatar_fallback_url(size: size)
     end
-
   rescue ActiveStorage::FileNotFoundError
-    gravatar_fallback_url(size)
-
+    gravatar_fallback_url(size: size)
   rescue ImageProcessing::Error
-    gravatar_fallback_url(size)
+    gravatar_fallback_url(size: size)
   end
 
-  def gravatar_fallback_url(size=80)
+  def gravatar_fallback_url(size: 80)
     require 'digest/md5' # todo do we actually need to require this all the time?
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
+
 
   # TODO these (3) can probably all be scopes on the related object, no?
   def active_subscriptions
@@ -355,11 +359,11 @@ class User < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-600'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-600'
   end
 
   def favorite_page_type_color

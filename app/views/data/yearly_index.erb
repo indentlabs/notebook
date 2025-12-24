@@ -1,25 +1,32 @@
-<h4>
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons">arrow_back</i>
-  <% end %>
-  Your years in review
-</h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <%= link_to data_vault_path, class: 'inline-flex items-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mb-4', title: "Back to your Data Vault" do %>
+      <i class="material-icons mr-2">arrow_back</i>
+      <span>Back to Data Vault</span>
+    <% end %>
+    
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-lg p-8 text-white">
+      <h1 class="text-4xl font-bold mb-2">Your Year in Review</h1>
+      <p class="text-blue-100 text-lg max-w-2xl">
+        Take a look back at your worldbuilding journey. Explore your activity, achievements, and the worlds you've built over the years.
+      </p>
+    </div>
+  </div>
 
-<div class="row">
-  <% @years.each do |year| %>
-    <div class="col s12 m6 l4">
-      <%= link_to review_year_path(year) do %>
-        <div class="hoverable card-panel center" style="border-top: 5px solid #2196F3">
-          <h1 class="blue-text"><%= year %></h1>
-          <p class="grey-text">
-            Click to see your Notebook.ai activity for <%= year %>.
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <% @years.each do |year| %>
+      <%= link_to review_year_path(year), class: "block group" do %>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 border-t-4 border-blue-500 p-6 text-center transform group-hover:-translate-y-1">
+          <h2 class="text-5xl font-bold text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors mb-2"><%= year %></h2>
+          <p class="text-gray-500 dark:text-gray-400">
+            View your activity report
           </p>
+          <div class="mt-4 inline-flex items-center text-blue-600 dark:text-blue-400 font-medium group-hover:underline">
+            <span>Explore <%= year %></span>
+            <i class="material-icons text-sm ml-1">arrow_forward</i>
+          </div>
         </div>
       <% end %>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </div>

@@ -1,479 +1,2646 @@
-<%= render partial: 'notice_dismissal/messages/13' %>
-<br />
-<%= form_for @timeline, html: { class: 'autosave-form timeline-meta-form' }, remote: true do |f| %>
-  <div class="row">
-    <div class="col s12 m7 l9">
-      <div class="input-field">
-        <%= f.text_field :name, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-        <%= f.label :name, 'Timeline name' %>
-      </div>
-    </div>
-    <div class="col s12 m4 l3 right">
-      <!--
-      <%= link_to '#', class: 'hoverable btn right ' + Timeline.color do %>
-        <i class="material-icons small">star</i>
-      <% end %>
-      <%= link_to '#', class: 'hoverable btn right ' + Timeline.color do %>
-        <i class="material-icons small"><%= Universe.icon %></i>
-      <% end %>
-      -->
-      <%= link_to '#', class: 'share hoverable btn right ' + Timeline.color do %>
-        <i class="material-icons small">share</i>
-      <% end %>
-    </div>
-    <div class="col s12">
-      <ul class="collapsible">
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons <%= Timeline.text_color %>"><%= Timeline.icon %></i>
-            About this timeline
-          </div>
-          <div class="collapsible-body">
-            <div class="input-field">
-              <%= f.text_area :subtitle, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label :subtitle, 'Subtitle' %>
-            </div>
-            <div class="input-field">
-              <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label :description, 'Description' %>
-            </div>
-            <div class="input-field">
-              <%= f.select :universe_id, current_user.universes.pluck(:name, :id), { include_blank: true }, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label 'Universe' %>
-            </div>
-            <!--
-            <div class="input-field">
-              <%= f.select :privacy, [['Private', 'private'], ['Public', 'public']], class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label :privacy %>
-            </div>
-            -->
+<div x-data="timelineEditor()" class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+
+  <!-- Timeline Header - Modern Application Style -->
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-40 flex-shrink-0">
+    <div class="px-6 py-4">
+      <!-- Compact Header -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4 flex-1 min-w-0">
+          <!-- Back Button -->
+          <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700", title: "Back to all Timelines" do %>
+            <i class="material-icons text-lg">arrow_back</i>
+          <% end %>
+          
+          <!-- Inline Timeline Title and Subtitle -->
+          <div class="flex-1 min-w-0">
             
-            <div class="input-field">
-              <div class="input-field">
-                <small><%= f.label :tags %></small>
-                <div class="chips chips-autocomplete chips-initial"></div>
-                <%= f.hidden_field :page_tags, value: @timeline.page_tags.join(PageTag::SUBMISSION_DELIMITER), 
-                                               id: 'hidden_page_tags_value'
-                %>
+            <!-- View Mode -->
+            <div x-show="!editingTitle && !editingSubtitle" class="flex items-center min-w-0">
+              <!-- Title -->
+              <h1 @click="editingTitle = true; tempTitle = timelineName; $nextTick(() => { const input = document.querySelector('[x-ref=titleInput]'); input?.focus(); input?.select(); })"
+                  class="text-xl font-semibold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300 dark:hover:border-gray-600 transition-all truncate">
+                <span x-text="timelineName || 'Untitled Timeline'"></span>
+              </h1>
+              
+              <!-- Subtitle (only shown if exists) -->
+              <template x-if="timelineSubtitle && timelineSubtitle.trim()">
+                <div class="flex items-center ml-2 min-w-0">
+                  <span class="text-gray-400 mx-2 flex-shrink-0">•</span>
+                  <span @click="editingSubtitle = true; tempSubtitle = timelineSubtitle; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
+                        class="text-sm text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-500 dark:hover:text-gray-300 transition-colors truncate"
+                        x-text="timelineSubtitle"></span>
+                </div>
+              </template>
 
-                <div class="help-text show-when-focused">
-                  <i class="material-icons tiny"><%= PageTag.icon %></i>
-                  Type and press enter to create a new tag.
-                </div>
-                <div class="tags-container show-when-focused">
-                  <% @suggested_page_tags.each do |tag| %>
-                    <%=
-                      link_to '#', class: 'js-add-tag' do
-                    %>
-                      <span class="new badge grey left hoverable" data-badge-caption="<%= tag %>"></span>
-                    <% end %>
-                  <% end %>
-                </div>
-                <div class="clearfix"></div>
-              </div>
+              <!-- Add Subtitle Link (only shown if no subtitle exists) -->
+              <template x-if="!timelineSubtitle || !timelineSubtitle.trim()">
+                <button @click="editingSubtitle = true; tempSubtitle = ''; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
+                        class="ml-3 text-xs text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
+                  + Add subtitle
+                </button>
+              </template>
             </div>
-            <%= content_for :javascript do %>
-              function update_hidden_page_tag_value(e) {
-                var chips = M.Chips.getInstance($('.chips')).chipsData.map(function (c) {
-                  return c['tag'];
-                });
-
-                var hidden_input = $('#hidden_page_tags_value').first();
-                hidden_input.val(chips.join('<%= PageTag::SUBMISSION_DELIMITER %>'));
-                $('form.timeline-meta-form').submit();
-
-                M.toast({ html: 'Saving changes...' });
-              }
-
-              var chips = $('.chips-autocomplete').chips({
-                placeholder: 'Tag this page',
-                secondaryPlaceholder: '+ Tag',
-                autocompleteOptions: {
-                  data: {
-                    <% @timeline.page_tags.pluck(:tag).each do |tag| %>
-                      '<%= tag %>': null,
-                    <% end %>
-                  },
-                  limit: 100,
-                  minLength: 1
-                },
-                data: [
-                  <% @timeline.page_tags.pluck(:tag).each do |tag| %>
-                    {tag: '<%= tag %>'},
-                  <% end %>
-                ],
-                onChipAdd:    update_hidden_page_tag_value,
-                onChipDelete: update_hidden_page_tag_value
-              });
+            
+            <!-- Title Edit Mode -->
+            <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit.prevent': 'console.log("Title form submission prevented")', 'x-ref': 'titleForm' }, remote: true do |f| %>
+              <div x-show="editingTitle" class="flex items-center space-x-2">
+                <%= f.text_field :name, 
+                    class: "text-xl font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
+                    placeholder: "Timeline title...",
+                    'x-model': 'tempTitle',
+                    'x-ref': 'titleInput',
+                    '@keydown.enter.prevent': 'saveTitle()',
+                    '@keydown.escape': 'editingTitle = false; tempTitle = timelineName' %>
+                <button @click="saveTitle()" 
+                        type="button" class="text-green-600 hover:text-green-700 p-1">
+                  <i class="material-icons text-sm">check</i>
+                </button>
+                <button @click="editingTitle = false; tempTitle = timelineName" 
+                        type="button" class="text-gray-400 hover:text-gray-600 p-1">
+                  <i class="material-icons text-sm">close</i>
+                </button>
+              </div>
             <% end %>
             
-            <div class="input-field">
-              <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label :notes %>
+            <!-- Subtitle Edit Mode -->
+            <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit.prevent': 'console.log("Subtitle form submission prevented")', 'x-ref': 'subtitleForm' }, remote: true do |f| %>
+              <div x-show="editingSubtitle" class="flex items-center space-x-2 mt-2">
+                <%= f.text_field :subtitle, 
+                    class: "text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
+                    placeholder: "Brief description of this timeline...",
+                    'x-model': 'tempSubtitle',
+                    'x-ref': 'subtitleInput',
+                    '@keydown.enter.prevent': 'saveSubtitle()',
+                    '@keydown.escape': 'editingSubtitle = false; tempSubtitle = timelineSubtitle' %>
+                <button @click="saveSubtitle()" 
+                        type="button" class="text-green-600 hover:text-green-700 p-1">
+                  <i class="material-icons text-sm">check</i>
+                </button>
+                <button @click="editingSubtitle = false; tempSubtitle = timelineSubtitle" 
+                        type="button" class="text-gray-400 hover:text-gray-600 p-1">
+                  <i class="material-icons text-sm">close</i>
+                </button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3 ml-4">
+          <!-- Auto-save Status -->
+          <div class="flex items-center space-x-2 text-sm">
+            <div x-show="autoSaveStatus === 'saving'" class="flex items-center text-yellow-600">
+              <div class="animate-spin rounded-full h-3 w-3 border-b-2 border-yellow-600 mr-2"></div>
+              <span class="hidden sm:inline">Saving...</span>
             </div>
-            <div class="input-field">
-              <%= f.text_area :private_notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label :private_notes %>
+            <div x-show="autoSaveStatus === 'saved'" class="flex items-center text-green-600">
+              <i class="material-icons text-sm mr-1">check_circle</i>
+              <span class="hidden sm:inline">Saved</span>
             </div>
-            <!--
-            <div>
-              Relevant links (view, edit, wiki view)
+            <div x-show="autoSaveStatus === 'error'" class="flex items-center text-red-600">
+              <i class="material-icons text-sm mr-1">error</i>
+              <span class="hidden sm:inline">Error</span>
             </div>
-            -->
+          </div>
 
-            <div class="right">
-              <%= link_to timeline_path(@timeline), method: :delete, data: { confirm: "Are you sure you want to delete this timeline? This cannot be undone!" } do %>
-                <i class="material-icons left red-text">delete</i>
-                <span class="red-text">Delete this timeline</span>
+          <!-- Action Buttons -->
+          <button @click="showMetaPanel = !showMetaPanel"
+                  class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                  :class="{ 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white': showMetaPanel }">
+            <i class="material-icons text-lg mr-2">settings</i>
+            <span class="hidden sm:inline">Settings</span>
+          </button>
+
+          <%= link_to timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors" do %>
+            <i class="material-icons text-lg mr-2">visibility</i>
+            <span class="hidden sm:inline">View</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Three-Column Layout -->
+  <div class="flex-1 flex min-h-0">
+    <!-- Left Sidebar - Tools & Filters -->
+    <aside class="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 hidden lg:block sticky top-0 max-h-screen">
+      <div class="h-full flex flex-col overflow-hidden">
+        <!-- Sidebar Header -->
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Tools</h3>
+        </div>
+        
+        <!-- Sidebar Content -->
+        <div class="flex-1 overflow-y-auto">
+          <!-- Quick Actions -->
+          <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <button id="js-create-timeline-event"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+              <i class="material-icons text-lg mr-2">add</i>
+              Add Event
+            </button>
+          </div>
+
+          <!-- Filter Events Section -->
+          <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+            <button @click="showFilterSection = !showFilterSection" 
+                    class="w-full flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors">
+              <div class="flex items-center">
+                <i class="material-icons text-sm mr-2 text-gray-600 transition-transform duration-200"
+                   :class="showFilterSection ? 'rotate-90' : ''">chevron_right</i>
+                <h4 class="text-sm font-medium text-gray-900 dark:text-gray-200">Filter Events</h4>
+              </div>
+              <span x-show="selectedTagFilters.length > 0" 
+                    class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">
+                Active
+              </span>
+            </button>
+            
+            <!-- Collapsible Filter Content -->
+            <div x-show="showFilterSection"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2"
+                 class="mt-4">
+
+              <!-- Search Box -->
+              <div class="relative mb-4">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="material-icons text-gray-400 text-lg">search</i>
+                </div>
+                <input type="text"
+                       x-model="searchQuery"
+                       @input="applyEventFilters()"
+                       @keydown.escape="searchQuery = ''; applyEventFilters()"
+                       placeholder="Search timeline..."
+                       class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+              </div>
+
+              <!-- Filter Mode Toggle -->
+              <div class="mb-4">
+                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
+                  <button @click="changeTagFilterMode('filter')"
+                          :class="tagFilterMode === 'filter' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+                          class="flex-1 px-3 py-1 text-sm font-medium rounded-md transition-colors">
+                    Filter
+                  </button>
+                  <button @click="changeTagFilterMode('highlight')"
+                          :class="tagFilterMode === 'highlight' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+                          class="flex-1 px-3 py-1 text-sm font-medium rounded-md transition-colors">
+                    Highlight
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <span x-show="tagFilterMode === 'filter'">Show only events with selected tags</span>
+                  <span x-show="tagFilterMode === 'highlight'">Show all events, highlight selected tags</span>
+                </p>
+              </div>
+              
+              <!-- Tag Selection List -->
+              <% if @timeline_event_tags.any? %>
+                <div class="space-y-2 max-h-48 overflow-y-auto">
+                  <% @timeline_event_tags.each do |tag_data| %>
+                    <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 py-1 transition-colors">
+                      <input type="checkbox"
+                             x-model="selectedTagFilters"
+                             value="<%= tag_data[:name] %>"
+                             @change="applyEventFilters()"
+                             class="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-offset-0">
+                      <span class="flex-1 text-gray-700 dark:text-gray-300"><%= tag_data[:name] %></span>
+                      <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full"><%= tag_data[:count] %></span>
+                    </label>
+                  <% end %>
+                </div>
+                
+                <!-- Clear Filters -->
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                  <button @click="clearTagFilters()"
+                          x-show="selectedTagFilters.length > 0"
+                          class="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                    <i class="material-icons text-sm mr-1">clear</i>
+                    Clear all filters
+                  </button>
+                </div>
+              <% else %>
+                <div class="text-center py-4 text-gray-500">
+                  <i class="material-icons text-2xl mb-2 text-gray-300">label_outline</i>
+                  <p class="text-sm">No tags found</p>
+                  <p class="text-xs text-gray-400">Add tags to events to enable filtering</p>
+                </div>
               <% end %>
             </div>
-            <div class="clearfix"></div>
           </div>
-        </li>
-      </ul>
-        
-    </div>
-  </div>
-<% end %>
-
-<div class="timeline-editor" data-timeline-id="<%= @timeline.id %>">
-  <!--
-  <div class="filter-bar">
-    (filter events by character, location, etc)
-  </div>
-  -->
-
-  <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
-    <% @timeline.timeline_events.includes(:timeline_event_entities).each do |event| %>
-      <div class="timeline-event-container" data-event-id="<%= event.id %>"  data-timeline-id="<%= @timeline.id %>">
-        <%= form_for event, html: { class: 'autosave-form' }, remote: true do |f| %>
-          <%= f.hidden_field :timeline_id %>
-          <div class="row">
-            <div class="col l2">
-              <div class="input-field align-right">
-                <%= f.text_area :time_label, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-                <%= f.label :time_label, 'Time label' %>
-              </div>
-              <div class="clearfix"></div>
-              <ul>
-                <li class="grey-text">Move this...</li>
-                <li>
-                  <%= link_to '#', class: 'js-move-event-to-top' do %>
-                    <i class="material-icons tiny left">arrow_upward</i>
-                    top
-                  <% end %>
-                </li>
-                <li>
-                  <%= link_to '#', class: 'js-move-event-up' do %>
-                    <i class="material-icons tiny left">keyboard_arrow_up</i>
-                    up
-                  <% end %>
-                </li>
-                <li>
-                  <%= link_to '#', class: 'js-move-event-down' do %>
-                    <i class="material-icons tiny left">keyboard_arrow_down</i>
-                    down
-                  <% end %>
-                </li>
-                <li>
-                  <%= link_to '#', class: 'js-move-event-to-bottom' do %>
-                    <i class="material-icons tiny left">arrow_downward</i>
-                    bottom
-                  <% end %>
-                </li>
-              </ul>
-            </div>
-            <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
-              <%= image_tag 'graphics/timeline-line.webp' %>
-            </div>
-            <div class="col l6">
-              <!--
-              <div class="grey-text center">
-                #<%= event.position %>
-              </div>
-              -->
-              <div class="hoverable clearfix card <%# Timeline.color %>" style="border-top: 5px solid <%= Timeline.hex_color %>">
-                <div class="card-content white-text">
-                  <span class="card-title">
-                    <div class="input-field">
-                      <%= f.text_field :title, class: 'materialize-textarea js-trigger-autosave-on-change', id: "timeline-event-title-#{event.id}" %>
-                      <%= f.label :title, 'Event Title', for: "timeline-event-title-#{event.id}" %>
-                    </div>
-                  </span>
-                  <div class="input-field">
-                    <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change', id: "timeline-event-description-#{event.id}" %>
-                    <%= f.label :description, for: "timeline-event-description-#{event.id}" %>
-                  </div>
-                  <div class="input-field">
-                    <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change', id: "timeline-event-notes-#{event.id}" %>
-                    <%= f.label :notes, for: "timeline-event-notes-#{event.id}" %>
-                  </div>
-                </div>
-                <!--
-                <div class="card-action">
-                  <a href="#" class="left">Manage changes</a>
-                  <a href="#" class="right">This is a link</a>
-                  <div class="clearfix"></div>
-                </div>
-                -->
-              </div>
-              <div class="right">
-                <%= link_to timeline_event_path(event), class: 'red-text', method: :delete, data: { confirm: "Are you sure you want to delete this event? It cannot be recovered!" } do %>
-                  <small>Delete this event</small>
-                <% end %>
-              </div>
-            </div>
-            <div class="col l3">
-              <div class="grey-text uppercase">
-                In this event
-              </div>
-              <ul class="collapsible">
-                <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
-                  <% entity_list.reject! { |te_entity| te_entity.entity.nil? } %>
-                  <li>
-                    <% klass = content_class_from_name(entity_type) %>
-                    <div class="collapsible-header">
-                      <i class="material-icons <%= klass.text_color %>"><%= klass.icon %></i>
-                      <%= entity_type.pluralize %>
-                      <span class="badge"><%= entity_list.count %></span>
-                    </div>
-                    <div class="collapsible-body">
-                      <% entity_list.each do |te_entity| %>
-                        <div class="chip">
-                          <%= link_to(te_entity.entity.name.presence || "Untitled #{te_entity.entity_type}", te_entity.entity) %>
-                          <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
-                            <i class="close material-icons">close</i>
-                          <% end %>
+          
+          <!-- Linked Content Summary -->
+          <div class="p-6">
+            <h4 class="text-sm font-medium text-gray-900 mb-3">Linked Content</h4>
+            
+            <% if @timeline_content_summary.any? %>
+              <div class="space-y-2">
+                <% @timeline_content_summary.each do |content_type, summary_data| %>
+                  <% content_class = summary_data[:content_class] %>
+                  
+                  <!-- Content Type Header -->
+                  <div class="group">
+                    <button type="button"
+                            @click="toggleContentSummarySection('<%= content_type.downcase %>')"
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                      <div class="flex items-center min-w-0 flex-1">
+                        <i class="material-icons text-sm mr-2 <%= content_class.text_color %> transition-transform duration-200"
+                           :class="isContentSummaryCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90'">
+                          chevron_right
+                        </i>
+                        <i class="material-icons text-sm mr-2 <%= content_class.text_color %> flex-shrink-0">
+                          <%= content_class.icon %>
+                        </i>
+                        <span class="text-sm font-medium text-gray-700 truncate">
+                          <%= content_type.pluralize %>
+                        </span>
+                      </div>
+                      <span class="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full ml-2 flex-shrink-0">
+                        <%= summary_data[:count] %>
+                      </span>
+                    </button>
+                    
+                    <!-- Expandable Content List -->
+                    <div x-show="!isContentSummaryCollapsed('<%= content_type.downcase %>')"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         class="ml-6 mt-2 space-y-1">
+                      
+                      <% summary_data[:items].each do |item| %>
+                        <% item_name = item.name.presence || "Untitled #{content_type}" %>
+                        <div class="flex items-center py-1 draggable-content-item cursor-move hover:bg-gray-50 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                             draggable="true"
+                             data-content-type="<%= content_type %>"
+                             data-content-id="<%= item.id %>"
+                             data-content-name="<%= j(item_name) %>">
+                          <i class="material-icons text-xs mr-2 text-gray-400 drag-handle">drag_indicator</i>
+                          <%= link_to item_name, item, 
+                              target: '_blank',
+                              class: 'text-sm text-gray-600 hover:text-gray-900 hover:underline transition-colors truncate',
+                              draggable: false,
+                              onclick: 'event.stopPropagation()' %>
+                        </div>
+                      <% end %>
+                      
+                      <% if summary_data[:total_items] > 10 %>
+                        <div class="text-xs text-gray-500 py-1 pl-5">
+                          <i class="material-icons text-xs mr-1">more_horiz</i>
+                          <%= summary_data[:total_items] - 10 %> more <%= content_type.pluralize.downcase %>
                         </div>
                       <% end %>
                     </div>
-                  </li>
-                <% end %>
-              </ul>
-              <p class="center">
-                <small>
-                  <%= link_to 'Link a page', '#', class: 'js-link-entity' %>
-                </small>
-              </p>
-
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-  </div>
-
-  <div class="timeline-event-template">
-  
-    <% event = TimelineEvent.new %>
-    <div class="timeline-event-container" data-event-id="-1" data-timeline-id="<%= @timeline.id %>">
-      <%# we have to do method: :patch in the template since event isn't persisted; we don't want it to POST instead %>
-      <%= form_for event, html: { class: 'autosave-form' }, remote: true, method: :patch do |f| %>
-        <%= f.hidden_field :timeline_id, value: @timeline.id %>
-        <div class="row">
-          <div class="col l2">
-            <div class="input-field align-right">
-              <%= f.text_area :time_label, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-              <%= f.label :time_label, 'Time label' %>
-            </div>
-            <div class="clearfix"></div>
-            <ul>
-              <li class="grey-text">Move this...</li>
-              <li>
-                <%= link_to '#', class: 'js-move-event-to-top' do %>
-                  <i class="material-icons tiny left">arrow_upward</i>
-                  top
-                <% end %>
-              </li>
-              <li>
-                <%= link_to '#', class: 'js-move-event-up' do %>
-                  <i class="material-icons tiny left">keyboard_arrow_up</i>
-                  up
-                <% end %>
-              </li>
-              <li>
-                <%= link_to '#', class: 'js-move-event-down' do %>
-                  <i class="material-icons tiny left">keyboard_arrow_down</i>
-                  down
-                <% end %>
-              </li>
-              <li>
-                <%= link_to '#', class: 'js-move-event-to-bottom' do %>
-                  <i class="material-icons tiny left">arrow_downward</i>
-                  bottom
-                <% end %>
-              </li>
-            </ul>
-          </div>
-          <div class="col l1 cfenter" style="margin-bottom: -60px; margin-left: -7px; margin-right: -40px;">
-            <%= image_tag 'graphics/timeline-line.webp' %>
-          </div>
-          <div class="col l6">
-            <div class="hoverable clearfix card" style="border-top: 5px solid <%= Timeline.hex_color %>">
-              <div class="card-content white-text">
-                <span class="card-title">
-                  <div class="input-field ref-title">
-                    <%= f.text_field :title, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-                    <%= f.label :title, 'Event Title', for: "timeline-event-title-[[tid]]" %>
                   </div>
-                </span>
-                <div class="input-field ref-description">
-                  <%= f.text_area :description, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-                  <%= f.label :description %>
+                <% end %>
+              </div>
+            <% else %>
+              <!-- Empty State -->
+              <div class="text-center py-6">
+                <div class="w-12 h-12 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                  <i class="material-icons text-gray-400 dark:text-gray-500">link_off</i>
                 </div>
-                <div class="input-field ref-notes">
-                  <%= f.text_area :notes, class: 'materialize-textarea js-trigger-autosave-on-change' %>
-                  <%= f.label :notes %>
+                <p class="text-sm text-gray-500">
+                  No linked content yet
+                </p>
+                <p class="text-xs text-gray-400 mt-1">
+                  Content will appear here when you link pages to events
+                </p>
+              </div>
+            <% end %>
+
+            <!-- Drag & Drop Tip -->
+            <% if @timeline_content_summary.any? %>
+              <div class="mt-4 px-3 py-2 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-20 border border-blue-100 dark:border-blue-800 rounded-lg">
+                <div class="flex items-start">
+                  <i class="material-icons text-sm text-blue-600 dark:text-blue-400 mr-2 mt-0.5">lightbulb</i>
+                  <p class="text-xs text-blue-700 dark:text-blue-300">
+                    <strong>Tip:</strong> You can drag and drop these pages onto events to quickly link them!
+                  </p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          
+          <!-- Timeline Stats -->
+          <div class="p-6 border-t border-gray-100 dark:border-gray-700">
+            <h4 class="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Timeline Stats</h4>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Total Events</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-200"><%= @timeline.timeline_events.count %></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Word Count</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-200"><%= number_with_delimiter(@timeline.cached_word_count) %></span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600 dark:text-gray-400">Total Linked Pages</span>
+                <span class="text-sm font-medium text-gray-900 dark:text-gray-200"><%= @timeline.timeline_events.joins(:timeline_event_entities).count %></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Timeline Area -->
+    <main class="flex-1 flex flex-col min-w-0">
+      <!-- Timeline Container -->
+      <div class="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <div class="max-w-4xl mx-auto py-8 px-6">
+          <!-- Timeline Events Container -->
+          <div class="timeline-events-container relative" data-timeline-id="<%= @timeline.id %>">
+            <!-- Timeline Rail - Extended to Header -->
+            <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700 timeline-spine rounded-full"></div>
+            
+            <!-- Timeline Header -->
+            <div class="timeline-header-container relative mb-8" 
+                 x-data="{ 
+                   showDescription: false, 
+                   hasContent: <%= (@timeline.description.present? || @timeline.notes.present? || @timeline.private_notes.present?) ? 'true' : 'false' %>,
+                   descriptionPreview: '<%= j(@timeline.description.to_s.truncate(60)) %>',
+                   description: '<%= j(@timeline.description) %>',
+                   notes: '<%= j(@timeline.notes) %>',
+                   private_notes: '<%= j(@timeline.private_notes) %>',
+                   updateOverviewState(field, value) {
+                     // Update the local field value
+                     this[field] = value;
+                     
+                     const hasDesc = this.description && this.description.trim().length > 0;
+                     const hasNotes = this.notes && this.notes.trim().length > 0;
+                     const hasPrivateNotes = this.private_notes && this.private_notes.trim().length > 0;
+                     
+                     this.hasContent = hasDesc || hasNotes || hasPrivateNotes;
+                     
+                     // Update preview based on description field (primary preview)
+                     if (hasDesc) {
+                       this.descriptionPreview = this.description.length > 60 ? 
+                         this.description.substring(0, 60) + '...' : 
+                         this.description;
+                     } else if (hasNotes) {
+                       this.descriptionPreview = this.notes.length > 60 ? 
+                         this.notes.substring(0, 60) + '...' : 
+                         this.notes;
+                     } else if (hasPrivateNotes) {
+                       this.descriptionPreview = this.private_notes.length > 60 ? 
+                         this.private_notes.substring(0, 60) + '...' : 
+                         this.private_notes;
+                     } else {
+                       this.descriptionPreview = '';
+                     }
+                   },
+                   getTotalWords() {
+                     const descWords = (this.description || '').split(/\s+/).filter(w => w.length > 0).length;
+                     const notesWords = (this.notes || '').split(/\s+/).filter(w => w.length > 0).length;
+                     const privateWords = (this.private_notes || '').split(/\s+/).filter(w => w.length > 0).length;
+                     const totalWords = descWords + notesWords + privateWords;
+                     return totalWords + (totalWords === 1 ? ' word' : ' words');
+                   }
+                 }">
+              <!-- Header Dot - Now Connected to Main Spine -->
+              <div class="absolute w-12 h-12 bg-blue-600 rounded-full z-10 timeline-header-dot shadow-sm flex items-center justify-center"
+                   style="left: 16px; top: 16px;"
+                   title="Timeline Overview">
+                <i class="material-icons text-white text-base">description</i>
+              </div>
+
+              <!-- Header Card -->
+              <div class="ml-20 timeline-header-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200">
+                <!-- Clickable Header Toggle -->
+                <div @click="showDescription = !showDescription"
+                     class="timeline-header-toggle px-6 py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Overview</h3>
+
+                    <!-- Expand/Collapse Chevron -->
+                    <i class="material-icons text-gray-400 transition-transform duration-200"
+                       :class="showDescription ? 'rotate-180' : ''">expand_more</i>
+                  </div>
+
+                  <!-- Description Preview (when collapsed and has content) -->
+                  <template x-if="hasContent && !showDescription">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 truncate" x-text="descriptionPreview"></p>
+                  </template>
+
+                  <!-- Add Description Prompt (when collapsed and no content) -->
+                  <template x-if="!hasContent && !showDescription">
+                    <p class="text-sm text-gray-400 mt-2">Add a description to provide context for this timeline...</p>
+                  </template>
+                </div>
+                
+                <!-- Collapsible Description Area -->
+                <div x-show="showDescription" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 -translate-y-4"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-4"
+                     class="timeline-header-description px-6 py-4">
+                  
+                  <%= form_for @timeline, html: { class: 'timeline-meta-form' }, remote: true do |f| %>
+                    <div class="space-y-6">
+                      <!-- Description Field -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                        <%= f.text_area :description, 
+                            rows: 4,
+                            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
+                            placeholder: "Describe what this timeline covers, its purpose, key themes, or important context that helps understand the events below...",
+                            'x-model': 'description',
+                            '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("description", $el.value)' %>
+                        
+                        <!-- Character Count and Helper Text -->
+                        <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
+                          <span>This description helps provide context for anyone viewing your timeline</span>
+                          <span x-show="description" 
+                                x-text="description.split(/\s+/).filter(w => w.length > 0).length + ' words'"></span>
+                        </div>
+                      </div>
+
+                      <!-- Notes Field -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+                        <%= f.text_area :notes, 
+                            rows: 3,
+                            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
+                            placeholder: "Public notes about this timeline...",
+                            'x-model': 'notes',
+                            '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("notes", $el.value)' %>
+                        
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          <span>These notes are visible to anyone who can view your timeline</span>
+                        </div>
+                      </div>
+
+                      <!-- Private Notes Field -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Private Notes</label>
+                        <%= f.text_area :private_notes, 
+                            rows: 3,
+                            class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
+                            placeholder: "Private notes (only visible to you)...",
+                            'x-model': 'private_notes',
+                            '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("private_notes", $el.value)' %>
+                        
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          <span>These notes are private and only visible to you</span>
+                        </div>
+                      </div>
+
+                      <!-- Tags Field -->
+                      <div x-data="{ 
+                        currentTags: <%= @timeline.page_tags.map(&:tag).to_json %>,
+                        timelineId: <%= @timeline.id %>,
+                        availableTags: [],
+                        showSuggestions: false,
+                        tagInput: '',
+                        init() {
+                          console.log('Initialized timeline tags:', this.currentTags);
+                          this.loadTagSuggestions();
+                        },
+                        async loadTagSuggestions() {
+                          try {
+                            const response = await fetch(`/plan/timelines/${this.timelineId}/tag_suggestions`);
+                            const data = await response.json();
+                            this.availableTags = data.suggestions || [];
+                          } catch (error) {
+                            console.error('Failed to load tag suggestions:', error);
+                            this.availableTags = [];
+                          }
+                        },
+                        get filteredSuggestions() {
+                          if (!this.tagInput || this.tagInput.length < 1) return this.availableTags.slice(0, 10);
+                          const input = this.tagInput.toLowerCase();
+                          return this.availableTags
+                            .filter(tag => 
+                              tag.toLowerCase().includes(input) && 
+                              !this.currentTags.includes(tag)
+                            )
+                            .slice(0, 10);
+                        },
+                        addTag(tagName) {
+                          if (!tagName || !tagName.trim()) return;
+                          const cleanTag = tagName.trim();
+                          if (this.currentTags.includes(cleanTag)) return;
+                          this.currentTags.push(cleanTag);
+                          updateTimelineTags(this.timelineId, this.currentTags);
+                          this.tagInput = '';
+                          this.showSuggestions = false;
+                        },
+                        removeTag(tagName) {
+                          this.currentTags = this.currentTags.filter(tag => tag !== tagName);
+                          updateTimelineTags(this.timelineId, this.currentTags);
+                        },
+                        selectSuggestion(tag) {
+                          this.addTag(tag);
+                        },
+                        handleKeydown(event) {
+                          if (event.key === 'Escape') {
+                            this.showSuggestions = false;
+                            this.tagInput = '';
+                          }
+                        }
+                      }">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+                        <div class="space-y-2">
+                          <div class="flex flex-wrap gap-2">
+                            <template x-for="tag in currentTags" :key="tag">
+                              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
+                                <span x-text="tag"></span>
+                                <button type="button" 
+                                        @click="removeTag(tag)"
+                                        class="ml-2 hover:text-blue-600 transition-colors">
+                                  <i class="material-icons text-sm">close</i>
+                                </button>
+                              </span>
+                            </template>
+                          </div>
+                          <div class="relative">
+                            <input type="text" 
+                                   placeholder="Add tags..." 
+                                   class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                                   x-model="tagInput"
+                                   @focus="showSuggestions = true"
+                                   @input="showSuggestions = true"
+                                   @keydown="handleKeydown($event)"
+                                   @keydown.enter.prevent="addTag(tagInput)"
+                                   @keydown.comma.prevent="addTag(tagInput)"
+                                   @click.away="showSuggestions = false">
+                            
+                            <!-- Autocomplete Dropdown -->
+                            <div x-show="showSuggestions && (filteredSuggestions.length > 0 || availableTags.length > 0)" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 scale-95"
+                                 x-transition:enter-end="opacity-100 scale-100"
+                                 x-transition:leave="transition ease-in duration-150"
+                                 x-transition:leave-start="opacity-100 scale-100"
+                                 x-transition:leave-end="opacity-0 scale-95"
+                                 class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
+                              <div class="py-1">
+                                <template x-for="tag in filteredSuggestions" :key="tag">
+                                  <button type="button"
+                                          @click="selectSuggestion(tag)"
+                                          class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center text-gray-700 dark:text-gray-300">
+                                    <i class="material-icons text-xs mr-2 text-gray-400">label</i>
+                                    <span x-text="tag"></span>
+                                  </button>
+                                </template>
+                                <div x-show="filteredSuggestions.length === 0 && tagInput.length > 0" 
+                                     class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">
+                                  Press Enter to create "<span x-text="tagInput"></span>"
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="text-xs text-gray-500">
+                            <span>Start typing for suggestions, or press Enter/comma to add tags. These help organize and categorize your timeline.</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Universe Field -->
+                      <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Universe</label>
+                        <%= f.select :universe_id, 
+                            options_from_collection_for_select(current_user.universes, :id, :name, @timeline.universe_id),
+                            { include_blank: "No universe" },
+                            { class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
+                              '@change': 'submitFormRemotely($el.form)' } %>
+                        <div class="text-xs text-gray-500 mt-2">
+                          <span>Organize this timeline within a universe to group related content together</span>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
                 </div>
               </div>
             </div>
-            <div class="right">
-              <%= link_to timeline_event_path(id: event.id || 0), class: 'js-delete-timeline-event red-text', method: :delete, data: { confirm: "Are you sure you want to delete this event? It cannot be recovered!" } do %>
-                <small>Delete this event</small>
+            
+            <!-- Timeline Events -->
+            <% if @timeline.timeline_events.any? %>
+              <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
+                <%= render 'timeline_events/event_card', event: event, timeline: @timeline, index: index %>
               <% end %>
-            </div>
-          </div>
-          <div class="col l3">
-            <div class="grey-text uppercase">
-              In this event
-            </div>
-            <ul class="collapsible">
-              <% event.timeline_event_entities.order('entity_type').preload(:entity).group_by(&:entity_type).each do |entity_type, entity_list| %>
-                <li>
-                  <% klass = content_class_from_name(entity_type) %>
-                  <div class="collapsible-header">
-                    <i class="material-icons <%= klass.text_color %>"><%= klass.icon %></i>
-                    <%= entity_type.pluralize %>
-                    <span class="badge"><%= entity_list.count %></span>
-                  </div>
-                  <div class="collapsible-body">
-                    <% entity_list.each do |te_entity| %>
-                      <div class="chip">
-                        <%= link_to("test", te_entity.entity) %>
-                        <%= link_to unlink_entity_timeline_event_path(id: event.id, entity_id: te_entity.id), method: :POST, remote: true do %>
-                          <i class="close material-icons">close</i>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                </li>
-              <% end %>
-            </ul>
-            <p class="center">
-              <small>
-                <%= link_to 'Link a page', '#', class: 'js-link-entity' %>
-              </small>
-            </p>
-
+            <% else %>
+              <!-- Empty State -->
+              <div class="text-center py-16">
+                <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
+                  <i class="material-icons text-4xl text-green-600">timeline</i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3">Your timeline is empty</h3>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto">
+                  Start building your timeline by adding your first event. Track important moments, plot points, and key developments in chronological order.
+                </p>
+                <button id="js-create-first-event"
+                        class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+                  <i class="material-icons text-lg mr-2">add</i>
+                  Add Your First Event
+                </button>
+              </div>
+            <% end %>
           </div>
         </div>
-      <% end %>
-    </div>
-
-
-
-  </div>
+      </div>
+    </main>
     
-  <div class="row">
-    <div class="col s12 center">
-      <div class="loading-indicator">
-        <div class="preloader-wrapper small active">
-          <div class="spinner-layer spinner-green-only">
-            <div class="circle-clipper left">
-              <div class="circle"></div>
-            </div><div class="gap-patch">
-              <div class="circle"></div>
-            </div><div class="circle-clipper right">
-              <div class="circle"></div>
+    <!-- Right Inspector Panel -->
+    <aside class="w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 hidden xl:block sticky top-0 max-h-screen">
+      <div class="h-full flex flex-col overflow-hidden">
+        <!-- Inspector Header -->
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Event Details</h3>
+        </div>
+        
+        <!-- Inspector Content -->
+        <div class="flex-1 overflow-y-auto">
+          <!-- Empty State -->
+          <div x-show="!selectedEventId" class="p-6">
+            <div class="text-center text-gray-500 py-8">
+              <i class="material-icons text-4xl mb-4 text-gray-300">click</i>
+              <p class="text-sm">Select an event to view details and manage linked content</p>
+            </div>
+          </div>
+          
+          <!-- Event Details Panel -->
+          <div x-show="selectedEventId" class="p-6 space-y-6">
+            <!-- Event Title Section -->
+            <div class="border-b border-gray-100 dark:border-gray-700 pb-4">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2" x-text="selectedEventTitle || 'Untitled Event'"></h4>
+              
+              <!-- Time Information -->
+              <div class="space-y-1">
+                <div x-show="selectedEventTimeLabel" class="flex items-center text-sm text-gray-600">
+                  <i class="material-icons text-sm mr-2 text-green-600">schedule</i>
+                  <span class="font-medium mr-1">Starts:</span>
+                  <span x-text="selectedEventTimeLabel"></span>
+                </div>
+                <div x-show="selectedEventEndTimeLabel" class="flex items-center text-sm text-gray-600">
+                  <i class="material-icons text-sm mr-2 text-red-600">schedule</i>
+                  <span class="font-medium mr-1">Ends:</span>
+                  <span x-text="selectedEventEndTimeLabel"></span>
+                </div>
+                <div x-show="!selectedEventTimeLabel && !selectedEventEndTimeLabel" class="text-sm text-gray-500 italic">
+                  No time specified
+                </div>
+              </div>
+              
+            </div>
+            
+            <!-- Event Type Selector -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Event Type</label>
+              <div class="relative" x-data="{ showEventTypeDropdown: false }">
+                <button @click="showEventTypeDropdown = !showEventTypeDropdown"
+                        class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm text-gray-700 dark:text-gray-200"
+                        type="button">
+                  <div class="flex items-center">
+                    <i class="material-icons text-sm mr-2 text-green-600" x-text="getEventTypeIcon(selectedEventId)"></i>
+                    <span class="capitalize" x-text="getEventTypeName(selectedEventId)"></span>
+                  </div>
+                  <i class="material-icons text-sm text-gray-400 transition-transform duration-200"
+                     :class="showEventTypeDropdown ? 'rotate-180' : ''">expand_more</i>
+                </button>
+                
+                <!-- Event Type Dropdown -->
+                <div x-show="showEventTypeDropdown"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     @click.away="showEventTypeDropdown = false"
+                     class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                  
+                  <% TimelineEvent::EVENT_TYPES.each do |type_key, type_info| %>
+                    <button type="button"
+                            @click="updateEventType('<%= type_key %>'); showEventTypeDropdown = false"
+                            class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-gray-700 dark:text-gray-200">
+                      <i class="material-icons text-sm mr-3 text-green-600"><%= type_info[:icon] %></i>
+                      <span class="text-sm"><%= type_info[:name] %></span>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Event Tags -->
+            <div>
+              <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+              
+              <!-- Existing Tags Display -->
+              <div x-show="selectedEventId && getEventTags(selectedEventId).length > 0" class="mb-3">
+                <div class="flex flex-wrap gap-2">
+                  <template x-for="tag in getEventTags(selectedEventId)" :key="tag">
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-200"
+                          :class="isTagLoading(selectedEventId, tag) ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300'">
+                      <!-- Loading spinner for tags being processed -->
+                      <div x-show="isTagLoading(selectedEventId, tag)" class="animate-spin rounded-full h-3 w-3 border-b border-gray-400 mr-1"></div>
+                      <span x-text="tag"></span>
+                      <button @click="removeEventTag(tag)" 
+                              type="button"
+                              :disabled="isTagLoading(selectedEventId, tag)"
+                              class="ml-1 p-0.5 rounded-full transition-colors"
+                              :class="isTagLoading(selectedEventId, tag) ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-blue-200'">
+                        <i class="material-icons text-xs">close</i>
+                      </button>
+                    </span>
+                  </template>
+                </div>
+              </div>
+              
+              <!-- Tag Input with Suggestions -->
+              <div class="relative" x-data="{ 
+                showTagSuggestions: false, 
+                tagInput: '',
+                get timelineTagSuggestions() {
+                  const input = this.tagInput.toLowerCase();
+                  return timelineTagSuggestions
+                    .filter(tag => 
+                      (tag.toLowerCase().includes(input) || !input) && 
+                      !getEventTags(selectedEventId).includes(tag)
+                    )
+                    .slice(0, 8);
+                }
+              }">
+                <input type="text"
+                       x-model="tagInput"
+                       @input="showTagSuggestions = true"
+                       @focus="showTagSuggestions = true"
+                       @click.stop="showTagSuggestions = true"
+                       @keydown.enter.prevent="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
+                       @keydown.escape="tagInput = ''; showTagSuggestions = false"
+                       placeholder="Add tag..."
+                       class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+                
+                <!-- Tag Suggestions Dropdown -->
+                <div x-show="showTagSuggestions"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     @click.away="showTagSuggestions = false"
+                     class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
+                  
+                  <div class="py-1">
+                    <!-- Your Timeline Tags -->
+                    <div x-show="timelineTagSuggestions.length > 0">
+                      <div class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border-b border-blue-100">Your Timeline Tags</div>
+                      <template x-for="tag in timelineTagSuggestions" :key="'timeline-' + tag">
+                        <button type="button"
+                                @click="addEventTag(tag); tagInput = ''; showTagSuggestions = false"
+                                class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 transition-colors flex items-center">
+                          <i class="material-icons text-xs mr-2 text-blue-500">label</i>
+                          <span x-text="tag"></span>
+                        </button>
+                      </template>
+                    </div>
+                  
+                    <!-- Default Suggested Tags -->
+                    <div x-show="timelineTagSuggestions.length > 0" class="border-t border-gray-100"></div>
+                    <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">Suggested Tags</div>
+                    <% %w[Character\ Development Character\ Introduction Worldbuilding Flashback Foreshadowing Action Discovery Plot\ Twist Turning\ Point Relationship Tonal\ Shift POV\ Shift].each do |suggested_tag| %>
+                      <button type="button"
+                              x-show="'<%= suggested_tag %>'.toLowerCase().includes(tagInput.toLowerCase()) || tagInput === ''"
+                              @click="addEventTag('<%= suggested_tag %>'); tagInput = ''; showTagSuggestions = false"
+                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors">
+                        <%= suggested_tag %>
+                      </button>
+                    <% end %>
+                    
+                    <!-- Custom Tag Option -->
+                    <div x-show="tagInput && tagInput.length > 1" class="border-t border-gray-100">
+                      <button type="button"
+                              @click="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
+                              class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-green-600 dark:text-green-400 font-medium">
+                        <i class="material-icons text-xs mr-1">add</i>
+                        <span>Add "</span><span x-text="tagInput"></span><span>"</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Empty State -->
+              <div x-show="selectedEventId && getEventTags(selectedEventId).length === 0" 
+                   class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mt-2">
+                <i class="material-icons text-xs mr-1">label_outline</i>
+                No tags yet. Add tags to categorize this event.
+              </div>
+            </div>
+            
+            <!-- Linked Content Section -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">Linked Content</h5>
+                <button @click="typeof openLinkModal !== 'undefined' ? openLinkModal(selectedEventId) : console.error('openLinkModal not available')"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+                  <i class="material-icons text-sm mr-2">add</i>
+                  Add Link
+                </button>
+              </div>
+              
+              <!-- Dynamic Linked Content List -->
+              <div id="sidebar-linked-content" class="space-y-2">
+                <!-- Content will be populated by JavaScript -->
+                <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+                  <i class="material-icons text-xs mr-1">info</i>
+                  Linked content will appear here when you connect pages to this event
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </aside>
+  </div>
+  <!-- Settings Panel (Floating Card) -->
+  <div x-show="showMetaPanel" 
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 scale-95 -translate-y-4"
+       x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+       x-transition:leave-end="opacity-0 scale-95 -translate-y-4"
+       class="fixed inset-0 z-40 overflow-y-auto bg-black bg-opacity-25 backdrop-blur-sm"
+       style="display: none;"
+       @click.self="showMetaPanel = false">
+    <div class="flex items-start justify-center min-h-screen pt-16 px-4">
+      <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full mx-auto border border-gray-100 dark:border-gray-700">
+        <!-- Close Button -->
+        <button @click="showMetaPanel = false" 
+                class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10">
+          <i class="material-icons text-lg">close</i>
+        </button>
+        
+        <!-- Panel Header -->
+        <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100 dark:bg-green-900">
+              <i class="material-icons text-green-600 text-lg">settings</i>
+            </div>
+            <div class="ml-4">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Settings</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Configure your timeline details and metadata</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel Content -->
+        <div class="px-8 py-6 space-y-8">
+          <!-- Timeline Actions -->
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+              <i class="material-icons text-gray-600 dark:text-gray-400 mr-2">manage_history</i>
+              Timeline Actions
+            </h3>
+            
+            <div class="space-y-4">
+              <!-- Archive/Unarchive Action -->
+              <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center mb-2">
+                      <i class="material-icons text-blue-600 mr-2"><%= @timeline.archived? ? 'unarchive' : 'archive' %></i>
+                      <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                        <%= @timeline.archived? ? 'Unarchive Timeline' : 'Archive Timeline' %>
+                      </h4>
+                    </div>
+                    <% if @timeline.archived? %>
+                      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                        This timeline is currently archived and hidden from your main timeline list. 
+                        Unarchive it to make it active again.
+                      </p>
+                      <p class="text-xs text-blue-700 dark:text-blue-300">
+                        <i class="material-icons text-xs mr-1">info</i>
+                        Archived timeline content is preserved and can be restored at any time.
+                      </p>
+                    <% else %>
+                      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                        Archive this timeline to hide it from your main timeline list while preserving all content and events. 
+                        You can unarchive it at any time.
+                      </p>
+                      <p class="text-xs text-blue-700 dark:text-blue-300">
+                        <i class="material-icons text-xs mr-1">info</i>
+                        Archiving is reversible and keeps all your timeline data intact.
+                      </p>
+                    <% end %>
+                  </div>
+                  <div class="ml-6">
+                    <%= link_to toggle_archive_timeline_path(@timeline), 
+                        method: :get,
+                        data: { confirm: @timeline.archived? ? 
+                          "Are you sure you want to unarchive this timeline?" : 
+                          "Are you sure you want to archive this timeline?" },
+                        class: "inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-700 text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
+                      <i class="material-icons text-lg mr-2"><%= @timeline.archived? ? 'unarchive' : 'archive' %></i>
+                      <%= @timeline.archived? ? 'Unarchive' : 'Archive' %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-      <%= link_to 'Add an event', '#', class: 'btn black white-text', id: 'js-create-timeline-event' %>
+          <!-- Danger Zone -->
+          <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-red-900 mb-4 flex items-center">
+              <i class="material-icons text-red-600 mr-2">warning</i>
+              Danger Zone
+            </h3>
+            
+            <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-800 dark:border-opacity-50 rounded-lg p-6">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2">
+                    <i class="material-icons text-red-600 mr-2">delete_forever</i>
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">Delete Timeline</h4>
+                  </div>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    Permanently delete this timeline and all its events. This action cannot be undone.
+                  </p>
+                  <p class="text-xs text-red-700 dark:text-red-400">
+                    <i class="material-icons text-xs mr-1">warning</i>
+                    This will permanently remove all timeline events, linked content, and metadata.
+                  </p>
+                </div>
+                <div class="ml-6">
+                  <%= link_to timeline_path(@timeline), 
+                      method: :delete,
+                      data: { confirm: "Are you sure you want to permanently delete this timeline?\n\nThis will delete:\n• All timeline events\n• All linked content connections\n• All timeline metadata\n\nThis action cannot be undone!" },
+                      class: "inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-700 text-sm font-medium rounded-lg text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
+                    <i class="material-icons text-lg mr-2">delete_forever</i>
+                    Delete Timeline
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-</div>
-
-<div id="entity-link-modal" class="modal">
-  <input type="hidden" id="linking-event-id" value="-1" />
-  <div class="modal-content">
-    <h4>Link a page to this event</h4>
-    <p>
-      Select from your pages below.
-    </p>
-    <%= form_with url: '#', method: :post do |f| %>
-      <%= f.hidden_field :timeline_id,          value: @timeline.id %>
-      <%= f.hidden_field :entity_type,          value: nil %>
-      <%= f.hidden_field :entity_id,            value: nil %>
-
-      <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_class_from_name(content_type) %>
-        <h5><%= content_type.pluralize %></h5>
-        <ul class="collection">
-          <% content_list.each do |content| %>
-            <a href="#" 
-               class="<%= content_type_class.text_color %> js-link-entity-selection modal-close" 
-               data-id="<%= content.id %>"
-               data-type="<%= content_type %>">
-              <li class="collection-item hoverable">
-                <i class="material-icons left"><%= content_type_class.icon %></i>
-                <%= content.name.presence || "Untitled #{content_type}" %>
-                <span class="secondary-content">
-                  <i class="material-icons">link</i>
+  <!-- Link Content Modal -->
+  <div x-show="typeof showLinkModal !== 'undefined' ? showLinkModal : false" 
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 overflow-y-auto"
+       style="display: none;">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"></div>
+      
+      <!-- Modal -->
+      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
+        <!-- Modal Header -->
+        <div class="flex items-center mb-6">
+          <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+            <i class="material-icons text-green-600">link</i>
+          </div>
+          <h3 class="ml-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Link Content to Event</h3>
+        </div>
+        
+        <!-- Two-Column Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6" style="height: 32rem;">
+          <!-- Left Sidebar - Filters (Hidden on mobile) -->
+          <div class="hidden md:block col-span-1 bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50 rounded-lg p-4 overflow-y-auto">
+            <div class="space-y-3">
+              <!-- All Pages Filter -->
+              <button type="button"
+                      @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'all' ? '' : 'all') : console.error('selectedFilter not available')"
+                      :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? (selectedFilter === 'all' || !selectedFilter) : true }"
+                      class="w-full text-left px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center">
+                <i class="material-icons text-sm mr-2 text-gray-600">view_list</i>
+                <span class="text-sm font-medium">All Pages</span>
+              </button>
+              
+              <!-- Timeline Content Filter (if exists) -->
+              <% if @timeline_linked_content&.any? { |_, content| content.any? } %>
+                <button type="button"
+                        @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'timeline' ? '' : 'timeline') : console.error('selectedFilter not available')"
+                        :class="{ 'bg-blue-100 text-blue-800 border-blue-300': typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false }"
+                        class="w-full text-left px-3 py-2 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors flex items-center">
+                  <i class="material-icons text-sm mr-2">timeline</i>
+                  <span class="text-sm font-medium">Timeline Content</span>
+                </button>
+              <% end %>
+              
+              <!-- Divider -->
+              <div class="border-t border-gray-300 dark:border-gray-600 my-3"></div>
+              <div class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">By Type</div>
+              
+              <!-- Content Type Filters -->
+              <div class="space-y-1">
+                <% @current_user_content.keys.sort.each do |content_type| %>
+                  <% next if @current_user_content[content_type].empty? %>
+                  <% content_type_class = content_class_from_name(content_type) %>
+                  <button type="button"
+                          @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === '<%= content_type.downcase %>' ? '' : '<%= content_type.downcase %>') : console.error('selectedFilter not available')"
+                          :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
+                          class="w-full text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between group">
+                    <div class="flex items-center min-w-0">
+                      <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
+                      <span class="text-sm truncate"><%= content_type.pluralize %></span>
+                    </div>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">(<%= @current_user_content[content_type].count %>)</span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Content Area -->
+          <div class="col-span-1 md:col-span-3 flex flex-col min-h-0">
+            <!-- Mobile Filter Toggle (Visible on mobile only) -->
+            <div class="md:hidden mb-4">
+              <button type="button"
+                      @click="typeof showMobileFilters !== 'undefined' ? (showMobileFilters = !showMobileFilters) : console.error('showMobileFilters not available')"
+                      class="w-full flex items-center justify-between px-4 py-2 bg-gray-50 rounded-lg border border-gray-300 text-gray-700">
+                <span class="flex items-center">
+                  <i class="material-icons text-sm mr-2">filter_list</i>
+                  <span class="text-sm font-medium">Filters</span>
                 </span>
-              </li>
-            </a>
-          <% end %>
-        </ul>
-      <% end %>
-    <% end %>
+                <i class="material-icons text-sm" :class="typeof showMobileFilters !== 'undefined' ? (showMobileFilters ? 'rotate-180' : '') : ''">expand_more</i>
+              </button>
+              
+              <!-- Mobile Filter Panel -->
+              <div x-show="typeof showMobileFilters !== 'undefined' ? showMobileFilters : false" 
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 -translate-y-2"
+                   x-transition:enter-end="opacity-100 translate-y-0"
+                   class="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="grid grid-cols-2 gap-2">
+                  <button type="button"
+                          @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = '', showMobileFilters = false) : console.error('variables not available')"
+                          :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? !selectedFilter : true }"
+                          class="px-3 py-2 rounded border border-gray-300 text-gray-700 text-sm">
+                    All Pages
+                  </button>
+                  <% if @timeline_linked_content&.any? { |_, content| content.any? } %>
+                    <button type="button"
+                            @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = 'timeline', showMobileFilters = false) : console.error('variables not available')"
+                            :class="{ 'bg-blue-100 text-blue-800 border-blue-300': typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false }"
+                            class="px-3 py-2 rounded border border-blue-300 text-blue-700 text-sm">
+                      Timeline
+                    </button>
+                  <% end %>
+                  <% @current_user_content.keys.sort.first(6).each do |content_type| %>
+                    <% next if @current_user_content[content_type].empty? %>
+                    <button type="button"
+                            @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = '<%= content_type.downcase %>', showMobileFilters = false) : console.error('variables not available')"
+                            :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
+                            class="px-2 py-2 rounded border border-gray-300 text-gray-700 text-xs truncate">
+                      <%= content_type.pluralize %>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="relative mb-4">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="material-icons text-gray-400 text-lg">search</i>
+              </div>
+              <input type="text" 
+                     :value="typeof linkModalSearchQuery !== 'undefined' ? linkModalSearchQuery : ''"
+                     @input="typeof linkModalSearchQuery !== 'undefined' ? (linkModalSearchQuery = $event.target.value) : null"
+                     placeholder="Search your content..." 
+                     class="link-modal-search block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                     @keydown.escape="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
+                     @keydown.enter.prevent="typeof linkFirstResult !== 'undefined' ? linkFirstResult() : console.error('linkFirstResult not available')">
+            </div>
+            
+            <!-- Content Lists -->
+            <div class="flex-1 overflow-y-auto space-y-4 min-h-0 pr-2">
+              <!-- Timeline Linked Content Section -->
+              <% if @timeline_linked_content&.any? { |_, content| content.any? } %>
+                <div x-show="typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <button type="button"
+                          @click="typeof toggleSection !== 'undefined' ? toggleSection('timeline-overview') : console.error('toggleSection not available')"
+                          class="w-full text-left mb-3 flex items-center justify-between hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors">
+                    <div class="flex items-center">
+                      <i class="material-icons text-sm mr-2 text-blue-600">timeline</i>
+                      <h4 class="text-sm font-semibold text-blue-900">Already Used in This Timeline</h4>
+                    </div>
+                    <i class="material-icons text-sm text-blue-600 transition-transform duration-200" 
+                       :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('timeline-overview') ? '' : 'rotate-90') : ''">chevron_right</i>
+                  </button>
+                  
+                  <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('timeline-overview') : true"
+                       x-transition:enter="transition ease-out duration-200"
+                       x-transition:enter-start="opacity-0 -translate-y-2"
+                       x-transition:enter-end="opacity-100 translate-y-0"
+                       x-transition:leave="transition ease-in duration-150"
+                       x-transition:leave-start="opacity-100 translate-y-0"
+                       x-transition:leave-end="opacity-0 -translate-y-2">
+                    <p class="text-xs text-blue-700 mb-3">Content linked to other events in this timeline:</p>
+                    
+                    <div class="space-y-4">
+                      <% @timeline_linked_content.each do |content_type, content_list| %>
+                        <% next if content_list.empty? %>
+                        <% content_type_class = content_class_from_name(content_type) %>
+                        
+                        <div>
+                          <button type="button"
+                                  @click="typeof toggleSection !== 'undefined' ? toggleSection('timeline-<%= content_type.downcase %>') : console.error('toggleSection not available')"
+                                  class="w-full text-left mb-3 flex items-center justify-between hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors">
+                            <div class="flex items-center">
+                              <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                              <h5 class="text-sm font-semibold text-blue-900"><%= content_type.pluralize %></h5>
+                              <span class="ml-2 text-xs text-blue-700 font-normal">(<%= content_list.count %>)</span>
+                            </div>
+                            <i class="material-icons text-xs text-blue-600 transition-transform duration-200" 
+                               :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('timeline-<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
+                          </button>
+                          
+                          <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('timeline-<%= content_type.downcase %>') : true"
+                               x-transition:enter="transition ease-out duration-200"
+                               x-transition:enter-start="opacity-0 -translate-y-2"
+                               x-transition:enter-end="opacity-100 translate-y-0"
+                               class="space-y-2">
+                            <% content_list.each do |content| %>
+                              <% content_name = content.name.presence || "Untitled #{content_type}" %>
+                              <button type="button"
+                                      class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 flex items-center justify-between group"
+                                      data-id="<%= content.id %>"
+                                      data-type="<%= content_type %>"
+                                      data-name="<%= j(content_name) %>"
+                                      x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
+                                <div class="flex items-center">
+                                  <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                                  <span class="text-sm font-medium text-blue-900"><%= content_name %></span>
+                                </div>
+                                <i class="material-icons text-sm text-blue-400 group-hover:text-blue-600 transition-colors">add_circle</i>
+                              </button>
+                            <% end %>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+              
+              <!-- Regular Content Lists -->
+              <% @current_user_content.each do |content_type, content_list| %>
+                <% next if content_list.empty? %>
+                <% content_type_class = content_class_from_name(content_type) %>
+                
+                <div x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_type) %>', '<%= j(content_type) %>') : true">
+                  <button type="button"
+                          @click="typeof toggleSection !== 'undefined' ? toggleSection('<%= content_type.downcase %>') : console.error('toggleSection not available')"
+                          class="w-full text-left mb-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors">
+                    <div class="flex items-center">
+                      <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                      <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100"><%= content_type.pluralize %></h4>
+                      <span class="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">(<%= content_list.count %>)</span>
+                    </div>
+                    <i class="material-icons text-sm text-gray-400 transition-transform duration-200" 
+                       :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
+                  </button>
+                  
+                  <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('<%= content_type.downcase %>') : true"
+                       x-transition:enter="transition ease-out duration-200"
+                       x-transition:enter-start="opacity-0 -translate-y-2"
+                       x-transition:enter-end="opacity-100 translate-y-0"
+                       x-transition:leave="transition ease-in duration-150"
+                       x-transition:leave-start="opacity-100 translate-y-0"
+                       x-transition:leave-end="opacity-0 -translate-y-2"
+                       class="space-y-2">
+                    <% content_list.first(20).each do |content| %>
+                      <% content_name = content.name.presence || "Untitled #{content_type}" %>
+                      <button type="button"
+                              class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors flex items-center justify-between group"
+                              data-id="<%= content.id %>"
+                              data-type="<%= content_type %>"
+                              data-name="<%= j(content_name) %>"
+                              x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
+                        <div class="flex items-center min-w-0">
+                          <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
+                          <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 truncate">
+                            <%= content_name %>
+                          </span>
+                        </div>
+                        <i class="material-icons text-sm text-gray-400 group-hover:text-green-600 transition-colors flex-shrink-0">add_circle_outline</i>
+                      </button>
+                    <% end %>
+                    <% if content_list.count > 20 %>
+                      <div class="text-xs text-gray-500 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                        <i class="material-icons text-xs mr-1">info</i>
+                        Showing first 20 of <%= content_list.count %> <%= content_type.pluralize.downcase %>. Use search to find more.
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div class="mt-6 flex justify-end">
+          <button type="button" 
+                  @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
+                  class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            <span>Close</span>
+            <span class="ml-2 text-xs text-gray-400">(ESC)</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+
+  <!-- Share Modal -->
+  <div x-show="typeof showShareModal !== 'undefined' ? showShareModal : false" 
+       x-transition:enter="transition ease-out duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 z-50 overflow-y-auto"
+       style="display: none;">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+      <!-- Backdrop -->
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"></div>
+      
+      <!-- Modal -->
+      <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+            <i class="material-icons text-green-600">share</i>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">Share Timeline</h3>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Shareable URL</label>
+                <div class="flex rounded-lg shadow-sm">
+                  <input type="text" 
+                         readonly
+                         value="<%= timeline_url(@timeline) %>"
+                         class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-lg border border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                         onclick="this.focus(); this.select();">
+                  <button type="button" 
+                          @click="navigator.clipboard.writeText('<%= timeline_url(@timeline) %>'); $event.target.textContent = 'Copied!'; setTimeout(() => $event.target.textContent = 'Copy', 2000)"
+                          class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    Copy
+                  </button>
+                </div>
+              </div>
+              
+              <% if current_user && @timeline.user == current_user %>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <i class="material-icons text-blue-400">info</i>
+                    </div>
+                    <div class="ml-3">
+                      <h3 class="text-sm font-medium text-blue-800">Sharing Settings</h3>
+                      <p class="mt-1 text-sm text-blue-700">
+                        To be shared, content must either be public <strong>or</strong> in a public Universe.
+                        <%= link_to 'Learn more about privacy', 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', 
+                            class: 'font-medium underline hover:text-blue-600', target: '_blank' %>
+                      </p>
+                      <p class="mt-1 text-xs text-blue-600">
+                        Changes are saved automatically and can be changed at any time.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Privacy Toggle Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <% if @timeline.universe.present? %>
+                    <!-- Universe Privacy Toggle -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <div class="mb-3">
+                        <h4 class="text-sm font-medium text-purple-900 flex items-center">
+                          <i class="material-icons text-purple-600 text-sm mr-2">public</i>
+                          Universe-wide sharing
+                        </h4>
+                        <p class="text-xs text-purple-700 mt-1">
+                          Controls visibility for the entire "<%= @timeline.universe.name %>" universe
+                        </p>
+                      </div>
+                      <%= 
+                        react_component("PrivacyToggle", {
+                          content:       @timeline.universe.attributes.slice('id', 'name', 'page_type', 'privacy'),
+                          content_icon:  Universe.icon,
+                          content_color: Universe.color,
+                          submit_path:   polymorphic_path(@timeline.universe),
+                          csrf_token:    form_authenticity_token
+                        })
+                      %>
+                    </div>
+                  <% end %>
+
+                  <!-- Timeline Privacy Toggle -->
+                  <div class="<%= @timeline.universe.present? ? '' : 'md:col-span-2' %> bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="mb-3">
+                      <h4 class="text-sm font-medium text-green-900 flex items-center">
+                        <i class="material-icons text-green-600 text-sm mr-2">timeline</i>
+                        Timeline-specific sharing
+                      </h4>
+                      <p class="text-xs text-green-700 mt-1">
+                        Controls visibility for this specific timeline
+                      </p>
+                    </div>
+                    <%= 
+                      react_component("PrivacyToggle", {
+                        content:       @timeline.attributes.slice('id', 'name', 'page_type', 'privacy'),
+                        content_icon:  Timeline.icon,
+                        content_color: Timeline.color,
+                        submit_path:   polymorphic_path(@timeline),
+                        csrf_token:    form_authenticity_token
+                      })
+                    %>
+                  </div>
+                </div>
+
+                <% if @timeline.universe.present? %>
+                  <div class="mt-4 bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                      <i class="material-icons text-gray-400 text-sm mr-1">info_outline</i>
+                      This timeline belongs to the "<%= @timeline.universe.name %>" universe. 
+                      Making the universe public will also make this timeline viewable to others.
+                    </p>
+                  </div>
+                <% end %>
+
+                <!-- Social Sharing Buttons -->
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <a href="<%= [
+                    'http://twitter.com/share?',
+                    'url=' + CGI.escape(timeline_url(@timeline)),
+                    '&text=' + CGI.escape("Check out my timeline '#{@timeline.name}' on Notebook.ai:")
+                  ].join %>" 
+                     target="_blank"
+                     class="inline-flex items-center justify-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+                     style="background: #1DA1F2;">
+                    <i class="fa fa-twitter mr-2"></i>
+                    Share on Twitter
+                  </a>
+                  <a href="https://www.facebook.com/sharer/sharer.php?u=<%= CGI.escape(timeline_url(@timeline)) %>" 
+                     target="_blank"
+                     onclick="return !window.open(this.href, 'Facebook', 'width=640,height=580')"
+                     class="inline-flex items-center justify-center px-4 py-2 text-white rounded-lg text-sm font-medium transition-colors"
+                     style="background: #4267B2;">
+                    <i class="fa fa-facebook mr-2"></i>
+                    Share on Facebook
+                  </a>
+                </div>
+              <% else %>
+                <!-- Non-owner view -->
+                <div class="bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                  <p class="text-sm text-gray-700 dark:text-gray-300">
+                    This timeline is being shared by <%= link_to @timeline.user.name, @timeline.user, class: "font-medium text-green-600 hover:text-green-500" %>.
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        
+        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+          <button type="button" 
+                  @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"
+                  class="w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-gray-500 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<%= render partial: 'content/share', locals: { shared_content: @timeline } %>
-
-<%= content_for :javascript do %>
-  $('.js-link-entity').click(function () {
-    // Store the linking event ID for reference
-    var event_id = $(this).closest('.timeline-event-container').data('event-id');
-    $('#linking-event-id').val(event_id);
-
-    // Open the modal
-    $('#entity-link-modal').modal('open');
-    return false;
-  });
-
-  $('.js-link-entity-selection').click(function () {
-    var entity      = $(this);
-    var entity_type = entity.data('type');
-    var entity_id   = entity.data('id');
-
-    var event_id = $('#linking-event-id').val();
+<!-- JavaScript for Timeline Editor -->
+<script>
+// Create a direct Alpine.js component using object literal syntax
+function timelineEditor() {
+  return {
+    showMetaPanel: false,
+    showLinkModal: false,
+    showShareModal: false,
+    showFilters: false,
+    showMobileFilters: false,
+    linkingEventId: null,
+    draggedEvent: null,
+    searchQuery: '',
+    linkModalSearchQuery: '',
+    selectedFilter: 'all',
+    collapsedSections: {},
+    contentSummaryCollapsed: {},
+    selectedEvents: [],
+    selectedEventId: null,
+    selectedEventData: null,
+    autoSaveStatus: 'saved',
+    eventSections: {},
+    eventTypeFilters: [],
+    importanceFilters: [],
+    statusFilters: [],
+    eventTags: {}, // Store tags for each event: { eventId: [tag1, tag2, ...] }
+    loadingTags: new Set(), // Track which tags are currently being processed
+    timelineTagSuggestions: [], // Available timeline tags for autocomplete
     
-    $.post(
-      "/plan/timeline_events/" + event_id + "/link",
-      {
-        "entity_type": entity_type,
-        "entity_id":   entity_id
-      }
-    ).done(function () {
-      // todo update the UI somehow
-      M.toast({
-        html: 'Your ' + entity_type + ' was added successfully and will be visible the next time you reload this page.'
+    // Tag filtering state
+    showTagFilters: false,
+    showFilterSection: false, // For the new dedicated filter section
+    selectedTagFilters: [],
+    tagFilterMode: 'filter', // 'filter' or 'highlight'
+    
+    // Reactive properties for real-time inspector panel updates
+    liveTitle: '',
+    liveTimeLabel: '',
+    liveEndTimeLabel: '',
+    liveDescription: '',
+    activeInputListeners: new Map(), // Track active listeners for cleanup
+    // Timeline form data
+    timelineName: '<%= j(@timeline.name) %>',
+    timelineSubtitle: '<%= j(@timeline.subtitle) %>',
+    
+    // Inline edit states
+    editingTitle: false,
+    editingSubtitle: false,
+    tempTitle: '<%= j(@timeline.name) %>',
+    tempSubtitle: '<%= j(@timeline.subtitle) %>',
+    
+    // Initialize method
+    init() {
+      // Initialize eventTags from server-rendered DOM data
+      this.initializeEventTagsFromDOM();
+      
+      // Load timeline tag suggestions for autocomplete
+      this.loadTimelineTagSuggestions();
+      
+      // Add fallback click handlers for server-rendered events in case Alpine.js @click isn't working
+      setTimeout(() => {
+        const serverEventCards = document.querySelectorAll('.timeline-event-card:not(.js-template-event-card)');
+        
+        serverEventCards.forEach((card) => {
+          const eventContainer = card.closest('[data-event-id]');
+          if (eventContainer) {
+            const eventId = parseInt(eventContainer.getAttribute('data-event-id'));
+            
+            // Add a JavaScript click listener as fallback
+            card.addEventListener('click', (e) => {
+              // Check if Alpine.js handler already processed this
+              if (e.alpineProcessed) {
+                return;
+              }
+              
+              // Get event data from the card
+              const titleEl = card.querySelector('input[name*="[title]"]');
+              const timeEl = card.querySelector('input[name*="[time_label]"]');
+              const descEl = card.querySelector('textarea[name*="[description]"]');
+              
+              const eventData = {
+                id: eventId,
+                title: titleEl ? titleEl.value : 'Untitled Event',
+                time_label: timeEl ? timeEl.value : '',
+                description: descEl ? descEl.value : '',
+                event_type: 'general',
+                importance_level: 'minor',
+                status: 'completed',
+                tags: []
+              };
+              
+              this.selectEvent(eventId, eventData);
+            });
+          }
+        });
+      }, 500);
+    },
+    
+    // Initialize eventTags object from server-rendered DOM
+    initializeEventTagsFromDOM() {
+      const eventContainers = document.querySelectorAll('.timeline-event-container:not(.timeline-event-template)');
+      
+      eventContainers.forEach(container => {
+        const eventId = container.getAttribute('data-event-id');
+        if (!eventId) return;
+        
+        // Find the tags container for this event
+        const tagContainer = container.querySelector(`#event-tags-${eventId}`);
+        if (!tagContainer) {
+          this.eventTags[eventId] = [];
+          return;
+        }
+        
+        // Extract tag names from server-rendered spans
+        const tagSpans = tagContainer.querySelectorAll('span');
+        const tags = Array.from(tagSpans).map(span => span.textContent.trim());
+        
+        this.eventTags[eventId] = tags;
       });
+    },
+    
+    // Load timeline tag suggestions for autocomplete
+    async loadTimelineTagSuggestions() {
+      try {
+        const response = await fetch(`/plan/timelines/<%= @timeline.id %>/tag_suggestions`);
+        const data = await response.json();
+        this.timelineTagSuggestions = data.suggestions || [];
+      } catch (error) {
+        console.error('Failed to load timeline tag suggestions:', error);
+        this.timelineTagSuggestions = [];
+      }
+    },
+    
+    // Filter helper methods
+    clearAllFilters() {
+      this.eventTypeFilters = [];
+      this.importanceFilters = [];
+      this.statusFilters = [];
+    },
+    
+    getFilteredEventCount() {
+      const events = document.querySelectorAll('.timeline-event-container:not(.timeline-event-template)');
+      let count = 0;
+      events.forEach(event => {
+        if (this.shouldShowEvent(event)) count++;
+      });
+      return count;
+    },
+    
+    shouldShowEvent(eventElement) {
+      const eventData = this.getEventDataFromElement(eventElement);
+      
+      // Search filter
+      if (this.searchQuery && !this.matchesSearch(eventData)) {
+        return false;
+      }
+      
+      // Tag filter - only apply in filter mode, not highlight mode
+      if (this.tagFilterMode === 'filter' && this.selectedTagFilters.length > 0) {
+        const eventId = eventElement.getAttribute('data-event-id');
+        const eventTags = this.getEventTags(eventId);
+        
+        // Check if event has any of the selected tags
+        const hasSelectedTag = this.selectedTagFilters.some(selectedTag => 
+          eventTags.includes(selectedTag)
+        );
+        
+        if (!hasSelectedTag) {
+          return false;
+        }
+      }
+      
+      // Type filter
+      if (this.eventTypeFilters.length > 0 && !this.eventTypeFilters.includes(eventData.type)) {
+        return false;
+      }
+      
+      // Importance filter
+      if (this.importanceFilters.length > 0 && !this.importanceFilters.includes(eventData.importance)) {
+        return false;
+      }
+      
+      // Status filter
+      if (this.statusFilters.length > 0 && !this.statusFilters.includes(eventData.status)) {
+        return false;
+      }
+      
+      return true;
+    },
+    
+    getEventDataFromElement(eventElement) {
+      const title = eventElement.querySelector('input[name*="[title]"]')?.value || '';
+      const description = eventElement.querySelector('textarea[name*="[description]"]')?.value || '';
+      
+      // Use data attributes instead of form elements for reliable filtering
+      const type = eventElement.dataset.eventType || eventElement.getAttribute('data-event-type') || 'general';
+      const importance = eventElement.dataset.importance || eventElement.getAttribute('data-importance') || 'minor'; 
+      const status = eventElement.dataset.status || eventElement.getAttribute('data-status') || 'completed';
+      
+      return {
+        title: title.toLowerCase(),
+        description: description.toLowerCase(),
+        type: type || 'general',
+        importance: importance || 'minor',
+        status: status || 'completed'
+      };
+    },
+    
+    matchesSearch(eventData) {
+      const query = this.searchQuery.toLowerCase();
+      return eventData.title.includes(query) || eventData.description.includes(query);
+    },
+    
+    // Apply real-time filtering to timeline events
+    applyEventFilters() {
+      const events = document.querySelectorAll('.timeline-event-container:not(.timeline-event-template)');
+      let visibleCount = 0;
+      
+      events.forEach(eventElement => {
+        const shouldShow = this.shouldShowEvent(eventElement);
+        const eventId = eventElement.getAttribute('data-event-id');
+        
+        if (shouldShow) {
+          eventElement.style.display = 'block';
+          eventElement.style.opacity = '1';
+          eventElement.style.transform = 'translateY(0)';
+          visibleCount++;
+        } else {
+          eventElement.style.opacity = '0';
+          eventElement.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+            if (!this.shouldShowEvent(eventElement)) {
+              eventElement.style.display = 'none';
+            }
+          }, 200);
+        }
+        
+        // Update tag display for highlight mode (only when needed)
+        if (eventId && shouldShow && this.tagFilterMode === 'highlight' && this.selectedTagFilters.length > 0) {
+          this.updateMainPanelTags(eventId);
+        }
+      });
+      
+      // Update empty state
+      this.updateEmptyState(visibleCount);
+      
+      return visibleCount;
+    },
+    
+    updateEmptyState(visibleCount) {
+      const eventsContainer = document.querySelector('.timeline-events-container');
+      let emptyState = eventsContainer.querySelector('.search-empty-state');
+      
+      if (visibleCount === 0 && this.searchQuery.length > 0) {
+        // Show search empty state
+        if (!emptyState) {
+          emptyState = document.createElement('div');
+          emptyState.className = 'search-empty-state text-center py-16';
+          emptyState.innerHTML = `
+            <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <i class="material-icons text-2xl text-gray-400">search_off</i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">No events found</h3>
+            <p class="text-gray-600 text-sm">
+              Try adjusting your search terms or clear the search to see all events.
+            </p>
+            <button @click="searchQuery = ''; applyEventFilters()" 
+                    class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+              <i class="material-icons text-sm mr-2">clear</i>
+              Clear Search
+            </button>
+          `;
+          eventsContainer.appendChild(emptyState);
+        }
+        emptyState.style.display = 'block';
+      } else {
+        // Hide search empty state
+        if (emptyState) {
+          emptyState.style.display = 'none';
+        }
+      }
+    },
+    
+    // Link modal methods
+    openLinkModal(eventId) {
+      this.linkingEventId = eventId;
+      this.showLinkModal = true;
+      this.linkModalSearchQuery = '';
+      this.selectedFilter = 'all';
+      this.showMobileFilters = false;
+      // Focus the search input after modal opens
+      setTimeout(() => {
+        const searchInput = document.querySelector('.link-modal-search');
+        if (searchInput) searchInput.focus();
+      }, 100);
+    },
+    
+    closeLinkModal() {
+      this.showLinkModal = false;
+      this.linkingEventId = null;
+      this.linkModalSearchQuery = '';
+      this.selectedFilter = 'all';
+      this.showMobileFilters = false;
+      this.collapsedSections = {};
+    },
+    
+    toggleSection(sectionKey) {
+      this.collapsedSections[sectionKey] = !this.collapsedSections[sectionKey];
+    },
+    
+    isSectionCollapsed(sectionKey) {
+      return this.collapsedSections[sectionKey] || false;
+    },
+    
+    // Content summary section management
+    toggleContentSummarySection(contentType) {
+      this.contentSummaryCollapsed[contentType] = !this.contentSummaryCollapsed[contentType];
+    },
+    
+    isContentSummaryCollapsed(contentType) {
+      // Default to collapsed (true) on first load to handle lots of content
+      return this.contentSummaryCollapsed[contentType] ?? true;
+    },
+    
+    linkableContentMatches(contentName, contentType) {
+      
+      // First check filter selection
+      if (this.selectedFilter && this.selectedFilter !== 'all') {
+        // Special case for timeline filter
+        if (this.selectedFilter === 'timeline') {
+          if (contentName !== 'timeline' && contentType !== 'timeline') {
+            return false;
+          }
+        } else {
+          // Regular content type filter
+          if (this.selectedFilter !== contentType.toLowerCase()) {
+            return false;
+          }
+        }
+      }
+      
+      // Then apply search query if present
+      if (this.linkModalSearchQuery) {
+        const query = this.linkModalSearchQuery.toLowerCase();
+        return contentName.toLowerCase().includes(query);
+      }
+      
+      // If no search query and filter matches (or is 'all'), show the content
+      return true;
+    },
+    
+    linkFirstResult() {
+      const visibleButtons = document.querySelectorAll('.js-link-entity-selection');
+      let firstVisibleButton = null;
+      
+      for (let button of visibleButtons) {
+        if (button.offsetParent !== null && !button.style.display.includes('none')) {
+          firstVisibleButton = button;
+          break;
+        }
+      }
+      
+      if (firstVisibleButton) {
+        firstVisibleButton.click();
+      }
+    },
+    
+    // Event section management
+    toggleEventSection(eventId, section) {
+      const key = `${eventId}_${section}`;
+      this.eventSections[key] = !this.eventSections[key];
+    },
+    
+    isEventSectionOpen(eventId, section) {
+      const key = `${eventId}_${section}`;
+      return this.eventSections[key] || false;
+    },
+    
+    // Event selection for inspector panel
+    selectEvent(eventId, eventData) {
+      this.selectedEventId = eventId;
+      this.selectedEventData = eventData;
+      
+      // Set up live form listeners for real-time inspector panel updates
+      this.setupLiveFormListeners(eventId);
+      
+      // Update sidebar linked content
+      this.updateSidebarLinkedContent(eventId);
+      
+      // Load tags for this event - use provided tags or ensure they're cached
+      if (eventData && eventData.tags) {
+        this.eventTags[eventId] = eventData.tags;
+        // Only update tag display if tags were actually provided
+        if (eventData.tags.length > 0) {
+          this.updateMainPanelTags(eventId);
+        }
+      } else {
+        // getEventTags() will handle caching from DOM if needed
+        this.getEventTags(eventId);
+      }
+      
+      // Scroll inspector panel to top
+      const inspectorContent = document.querySelector('.w-96 .overflow-y-auto');
+      if (inspectorContent) {
+        inspectorContent.scrollTop = 0;
+      }
+    },
+    
+    clearEventSelection() {
+      this.selectedEventId = null;
+      this.selectedEventData = null;
+      this.clearInputListeners();
+    },
+    
+    // Set up real-time input listeners for inspector panel updates
+    setupLiveFormListeners(eventId) {
+      // Clear any existing listeners first
+      this.clearInputListeners();
+      
+      // Find form inputs for this event
+      const eventContainer = document.querySelector(`[data-event-id="${eventId}"]`);
+      if (!eventContainer) {
+        return;
+      }
+      
+      const titleInput = eventContainer.querySelector('input[name*="[title]"]');
+      const timeLabelInput = eventContainer.querySelector('input[name*="[time_label]"]');
+      const endTimeLabelInput = eventContainer.querySelector('input[name*="[end_time_label]"]');
+      const descriptionTextarea = eventContainer.querySelector('textarea[name*="[description]"]');
+      
+      // Set initial values
+      this.liveTitle = titleInput?.value || 'Untitled Event';
+      this.liveTimeLabel = timeLabelInput?.value || '';
+      this.liveEndTimeLabel = endTimeLabelInput?.value || '';
+      this.liveDescription = descriptionTextarea?.value || '';
+      
+      // Create and store event listeners
+      const listeners = [];
+      
+      if (titleInput) {
+        const titleListener = (e) => {
+          this.liveTitle = e.target.value || 'Untitled Event';
+        };
+        titleInput.addEventListener('input', titleListener);
+        listeners.push({ element: titleInput, type: 'input', listener: titleListener });
+      }
+      
+      if (timeLabelInput) {
+        const timeLabelListener = (e) => {
+          this.liveTimeLabel = e.target.value || '';
+        };
+        timeLabelInput.addEventListener('input', timeLabelListener);
+        listeners.push({ element: timeLabelInput, type: 'input', listener: timeLabelListener });
+      }
+      
+      if (endTimeLabelInput) {
+        const endTimeLabelListener = (e) => {
+          this.liveEndTimeLabel = e.target.value || '';
+        };
+        endTimeLabelInput.addEventListener('input', endTimeLabelListener);
+        listeners.push({ element: endTimeLabelInput, type: 'input', listener: endTimeLabelListener });
+      }
+      
+      if (descriptionTextarea) {
+        const descriptionListener = (e) => {
+          this.liveDescription = e.target.value || '';
+        };
+        descriptionTextarea.addEventListener('input', descriptionListener);
+        listeners.push({ element: descriptionTextarea, type: 'input', listener: descriptionListener });
+      }
+      
+      // Store listeners for cleanup
+      this.activeInputListeners.set(eventId, listeners);
+    },
+    
+    // Clear all active input listeners
+    clearInputListeners() {
+      this.activeInputListeners.forEach((listeners, eventId) => {
+        listeners.forEach(({ element, type, listener }) => {
+          element.removeEventListener(type, listener);
+        });
+      });
+      
+      this.activeInputListeners.clear();
+      
+      // Reset live data
+      this.liveTitle = '';
+      this.liveTimeLabel = '';
+      this.liveEndTimeLabel = '';
+      this.liveDescription = '';
+    },
+    
+    // Update sidebar linked content
+    updateSidebarLinkedContent(eventId) {
+      const sidebarContainer = document.getElementById('sidebar-linked-content');
+      if (!sidebarContainer) {
+        return;
+      }
+      
+      // Find the main timeline linked content for this event
+      const mainLinkedContent = document.querySelector(`#linked-content-${eventId}`);
+      if (!mainLinkedContent) {
+        // Show empty state
+        sidebarContainer.innerHTML = `
+          <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+            <i class="material-icons text-xs mr-1">info</i>
+            Linked content will appear here when you connect pages to this event
+          </div>
+        `;
+        return;
+      }
+      
+      // Extract linked entities from the main content
+      const linkedCards = mainLinkedContent.querySelectorAll('.linked-content-card');
+      
+      if (linkedCards.length === 0) {
+        // Show empty state
+        sidebarContainer.innerHTML = `
+          <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+            <i class="material-icons text-xs mr-1">info</i>
+            Linked content will appear here when you connect pages to this event
+          </div>
+        `;
+        return;
+      }
+      
+      // Build compact vertical list
+      let sidebarHTML = '';
+      linkedCards.forEach(card => {
+        const nameLink = card.querySelector('.type-badge a');
+        const icon = card.querySelector('.type-badge i');
+        const removeButton = card.querySelector('.remove-btn');
+        
+        if (nameLink && icon) {
+          const name = nameLink.textContent.trim();
+          const href = nameLink.getAttribute('href');
+          const iconClass = icon.className;
+          const iconText = icon.textContent;
+          const removeHref = removeButton ? removeButton.getAttribute('href') : '';
+          
+          sidebarHTML += `
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+              <div class="flex items-center min-w-0 flex-1">
+                <i class="${iconClass} text-sm mr-2 flex-shrink-0">${iconText}</i>
+                <a href="${href}" class="text-sm text-gray-700 hover:text-gray-900 font-medium truncate" target="_blank">
+                  ${name}
+                </a>
+              </div>
+              ${removeButton ? `
+                <button onclick="unlinkFromSidebar('${removeHref}', this)" 
+                        class="ml-2 p-1 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-200 flex-shrink-0"
+                        title="Remove link">
+                  <i class="material-icons text-xs">close</i>
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }
+      });
+      
+      sidebarContainer.innerHTML = sidebarHTML;
+    },
+    
+    // Computed properties for live form data reading (now using reactive data with DOM fallback)
+    get selectedEventTitle() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveTitle) {
+        return this.liveTitle;
+      }
+      
+      // Fallback to DOM query for initial load
+      const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[title]"]`);
+      return input?.value || 'Untitled Event';
+    },
+    
+    get selectedEventTimeLabel() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveTimeLabel !== '') {
+        return this.liveTimeLabel;
+      }
+      
+      // Fallback to DOM query for initial load
+      const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[time_label]"]`);
+      return input?.value || '';
+    },
+    
+    get selectedEventEndTimeLabel() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveEndTimeLabel !== '') {
+        return this.liveEndTimeLabel;
+      }
+      
+      // Fallback to DOM query for initial load
+      const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[end_time_label]"]`);
+      return input?.value || '';
+    },
+    
+    get selectedEventDescription() {
+      if (!this.selectedEventId) return '';
+      
+      // Use reactive data if available (updated by input listeners)
+      if (this.liveDescription !== '') {
+        return this.liveDescription;
+      }
+      
+      // Fallback to DOM query for initial load
+      const textarea = document.querySelector(`[data-event-id="${this.selectedEventId}"] textarea[name*="[description]"]`);
+      return textarea?.value || '';
+    },
+    
+    get selectedEventType() {
+      if (!this.selectedEventId) return 'general';
+      return this.selectedEventData?.event_type || 'general';
+    },
+    
+    // Event type helper methods
+    getEventTypeIcon(eventId) {
+      if (!eventId) return 'radio_button_checked';
+      const eventType = this.selectedEventData?.event_type || 'general';
+      const eventTypeMap = {
+        'general': 'radio_button_checked',
+        'setup': 'foundation',
+        'exposition': 'info',
+        'inciting_incident': 'flash_on',
+        'complication': 'warning',
+        'obstacle': 'block',
+        'conflict': 'gavel',
+        'progress': 'trending_up',
+        'revelation': 'visibility',
+        'transformation': 'autorenew',
+        'climax': 'whatshot',
+        'resolution': 'check_circle',
+        'aftermath': 'restore'
+      };
+      return eventTypeMap[eventType] || 'radio_button_checked';
+    },
+    
+    getEventTypeName(eventId) {
+      if (!eventId) return 'General';
+      const eventType = this.selectedEventData?.event_type || 'general';
+      const eventTypeMap = {
+        'general': 'General',
+        'setup': 'Setup',
+        'exposition': 'Exposition',
+        'inciting_incident': 'Inciting Incident',
+        'complication': 'Complication',
+        'obstacle': 'Obstacle',
+        'conflict': 'Conflict',
+        'progress': 'Progress',
+        'revelation': 'Revelation',
+        'transformation': 'Transformation',
+        'climax': 'Climax',
+        'resolution': 'Resolution',
+        'aftermath': 'Aftermath'
+      };
+      return eventTypeMap[eventType] || 'General';
+    },
+    
+    // Update event type and refresh timeline dot
+    updateEventType(newType) {
+      if (!this.selectedEventId) return;
+      
+      // Update the selected event data
+      if (this.selectedEventData) {
+        this.selectedEventData.event_type = newType;
+      }
+      
+      // Find the event form and submit the update
+      const eventContainer = document.querySelector(`[data-event-id="${this.selectedEventId}"]`);
+      if (eventContainer) {
+        // Create a form to submit the event type update
+        const form = document.createElement('form');
+        form.setAttribute('method', 'POST');
+        form.setAttribute('action', `/plan/timeline_events/${this.selectedEventId}`);
+        form.classList.add('autosave-form');
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+          const csrfInput = document.createElement('input');
+          csrfInput.type = 'hidden';
+          csrfInput.name = 'authenticity_token';
+          csrfInput.value = csrfToken;
+          form.appendChild(csrfInput);
+        }
+        
+        // Add method override
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'patch';
+        form.appendChild(methodInput);
+        
+        // Add event type
+        const eventTypeInput = document.createElement('input');
+        eventTypeInput.type = 'hidden';
+        eventTypeInput.name = 'timeline_event[event_type]';
+        eventTypeInput.value = newType;
+        form.appendChild(eventTypeInput);
+        
+        // Submit via our existing auto-save mechanism
+        submitFormWithFetch(form);
+        
+        // Update the timeline dot icon and tooltip immediately
+        const timelineDotContainer = eventContainer.querySelector('.timeline-dot');
+        const timelineDot = timelineDotContainer?.querySelector('i');
+        if (timelineDot && timelineDotContainer) {
+          const iconMap = {
+            'general': 'radio_button_checked',
+            'setup': 'foundation',
+            'exposition': 'info',
+            'inciting_incident': 'flash_on',
+            'complication': 'warning',
+            'obstacle': 'block',
+            'conflict': 'gavel',
+            'progress': 'trending_up',
+            'revelation': 'visibility',
+            'transformation': 'autorenew',
+            'climax': 'whatshot',
+            'resolution': 'check_circle',
+            'aftermath': 'restore'
+          };
+          const nameMap = {
+            'general': 'General',
+            'setup': 'Setup',
+            'exposition': 'Exposition',
+            'inciting_incident': 'Inciting Incident',
+            'complication': 'Complication',
+            'obstacle': 'Obstacle',
+            'conflict': 'Conflict',
+            'progress': 'Progress',
+            'revelation': 'Revelation',
+            'transformation': 'Transformation',
+            'climax': 'Climax',
+            'resolution': 'Resolution',
+            'aftermath': 'Aftermath'
+          };
+          timelineDot.textContent = iconMap[newType] || 'radio_button_checked';
+          timelineDotContainer.title = nameMap[newType] || 'General';
+        }
+      }
+    },
+    
+    // Tag management methods
+    getEventTags(eventId) {
+      if (!eventId) return [];
+      
+      // If we have cached tags, return them
+      if (this.eventTags[eventId]) {
+        return this.eventTags[eventId];
+      }
+      
+      // Fallback: scrape tags from DOM if not in cache
+      const tagContainer = document.querySelector(`#event-tags-${eventId}`);
+      if (!tagContainer) {
+        this.eventTags[eventId] = [];
+        return [];
+      }
+      
+      const tagSpans = tagContainer.querySelectorAll('span');
+      const tags = Array.from(tagSpans).map(span => span.textContent.trim());
+      
+      // Cache the scraped tags
+      this.eventTags[eventId] = tags;
+      return tags;
+    },
+    
+    loadEventTags(eventId) {
+      if (!eventId) return;
+      
+      // Find the event's existing tags from the server-rendered data
+      const eventContainer = document.querySelector(`[data-event-id="${eventId}"]`);
+      if (!eventContainer) {
+        this.eventTags[eventId] = [];
+        return;
+      }
+      
+      // For now, initialize empty array - in future could fetch from API
+      // The tags will be loaded when the page renders with existing data
+      this.eventTags[eventId] = [];
+    },
+    
+    addEventTag(tagName) {
+      if (!this.selectedEventId || !tagName.trim()) return;
+      
+      const cleanTagName = tagName.trim();
+      
+      // Check if tag already exists
+      const existingTags = this.getEventTags(this.selectedEventId);
+      if (existingTags.includes(cleanTagName)) {
+        return; // Tag already exists
+      }
+      
+      // Optimistically add tag to local state immediately
+      if (!this.eventTags[this.selectedEventId]) {
+        this.eventTags[this.selectedEventId] = [];
+      }
+      this.eventTags[this.selectedEventId].push(cleanTagName);
+      
+      // Clear tag container cache for this event
+      if (this._tagContainerCache) {
+        this._tagContainerCache.delete(this.selectedEventId);
+      }
+      
+      // Update the main panel tag display
+      this.updateMainPanelTags(this.selectedEventId);
+      
+      // Mark this tag as loading
+      this.loadingTags.add(`${this.selectedEventId}-${cleanTagName}`);
+      
+      // Set loading state
+      this.autoSaveStatus = 'saving';
+      
+      // Make API call to add tag
+      fetch(`/plan/timeline_events/${this.selectedEventId}/tags`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          tag_name: cleanTagName
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Remove loading state for this tag
+          this.loadingTags.delete(`${this.selectedEventId}-${cleanTagName}`);
+          
+          // Tag was already added optimistically, just update save status
+          this.autoSaveStatus = 'saved';
+          setTimeout(() => {
+            if (this.autoSaveStatus === 'saved') {
+              this.autoSaveStatus = 'saved'; // Keep it visible for a moment
+            }
+          }, 1000);
+        } else {
+          throw new Error(data.message || 'Failed to add tag');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding tag:', error);
+        this.autoSaveStatus = 'error';
+        
+        // Remove loading state for this tag
+        this.loadingTags.delete(`${this.selectedEventId}-${cleanTagName}`);
+        
+        // Remove the optimistically added tag since the request failed
+        if (this.eventTags[this.selectedEventId]) {
+          this.eventTags[this.selectedEventId] = this.eventTags[this.selectedEventId].filter(tag => tag !== cleanTagName);
+        }
+        
+        // Clear tag container cache for this event
+        if (this._tagContainerCache) {
+          this._tagContainerCache.delete(this.selectedEventId);
+        }
+        
+        // Update the main panel tag display
+        this.updateMainPanelTags(this.selectedEventId);
+        
+        // Show error for a few seconds, then revert
+        setTimeout(() => {
+          if (this.autoSaveStatus === 'error') {
+            this.autoSaveStatus = 'saved';
+          }
+        }, 3000);
+      });
+    },
+    
+    removeEventTag(tagName) {
+      if (!this.selectedEventId || !tagName) return;
+      
+      // Store the original tags for rollback if needed
+      const originalTags = [...(this.eventTags[this.selectedEventId] || [])];
+      
+      // Mark this tag as loading before removal
+      this.loadingTags.add(`${this.selectedEventId}-${tagName}`);
+      
+      // Optimistically remove tag from local state immediately
+      if (this.eventTags[this.selectedEventId]) {
+        this.eventTags[this.selectedEventId] = this.eventTags[this.selectedEventId].filter(tag => tag !== tagName);
+      }
+      
+      // Clear tag container cache for this event
+      if (this._tagContainerCache) {
+        this._tagContainerCache.delete(this.selectedEventId);
+      }
+      
+      // Update the main panel tag display
+      this.updateMainPanelTags(this.selectedEventId);
+      
+      // Set loading state
+      this.autoSaveStatus = 'saving';
+      
+      // Make API call to remove tag
+      fetch(`/plan/timeline_events/${this.selectedEventId}/tags/${encodeURIComponent(tagName)}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          // Remove loading state for this tag
+          this.loadingTags.delete(`${this.selectedEventId}-${tagName}`);
+          
+          // Tag was already removed optimistically, just update save status
+          this.autoSaveStatus = 'saved';
+          setTimeout(() => {
+            if (this.autoSaveStatus === 'saved') {
+              this.autoSaveStatus = 'saved'; // Keep it visible for a moment
+            }
+          }, 1000);
+        } else {
+          throw new Error(data.message || 'Failed to remove tag');
+        }
+      })
+      .catch(error => {
+        console.error('Error removing tag:', error);
+        this.autoSaveStatus = 'error';
+        
+        // Remove loading state for this tag
+        this.loadingTags.delete(`${this.selectedEventId}-${tagName}`);
+        
+        // Restore the original tags since the request failed
+        this.eventTags[this.selectedEventId] = originalTags;
+        
+        // Clear tag container cache for this event
+        if (this._tagContainerCache) {
+          this._tagContainerCache.delete(this.selectedEventId);
+        }
+        
+        // Update the main panel tag display
+        this.updateMainPanelTags(this.selectedEventId);
+        
+        // Show error for a few seconds, then revert
+        setTimeout(() => {
+          if (this.autoSaveStatus === 'error') {
+            this.autoSaveStatus = 'saved';
+          }
+        }, 3000);
+      });
+    },
+    
+    // Helper method to check if a tag is currently loading
+    isTagLoading(eventId, tagName) {
+      return this.loadingTags.has(`${eventId}-${tagName}`);
+    },
+    
+    // Update the main panel tag display for an event
+    updateMainPanelTags(eventId) {
+      // Cache DOM query
+      if (!this._tagContainerCache) {
+        this._tagContainerCache = new Map();
+      }
+      
+      let tagContainer = this._tagContainerCache.get(eventId);
+      if (!tagContainer) {
+        tagContainer = document.querySelector(`#event-tags-${eventId}`);
+        if (!tagContainer) return;
+        this._tagContainerCache.set(eventId, tagContainer);
+      }
+      
+      const eventTags = this.getEventTags(eventId);
+      
+      if (eventTags.length === 0) {
+        // Batch DOM updates
+        if (!tagContainer.classList.contains('hidden')) {
+          tagContainer.classList.add('hidden');
+          tagContainer.innerHTML = '';
+        }
+      } else {
+        // Check if we need to update highlighting
+        const needsHighlightUpdate = this.tagFilterMode === 'highlight' && this.selectedTagFilters.length > 0;
+        const currentContent = tagContainer.innerHTML;
+        
+        const newContent = eventTags.map(tag => {
+          const isHighlighted = needsHighlightUpdate && this.selectedTagFilters.includes(tag);
+          return `
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium transition-colors ${
+              isHighlighted 
+                ? 'bg-yellow-200 text-yellow-800 border border-yellow-300' 
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }">
+              ${tag}
+            </span>
+          `;
+        }).join('');
+        
+        // Only update DOM if content actually changed
+        if (currentContent !== newContent) {
+          tagContainer.classList.remove('hidden');
+          tagContainer.innerHTML = newContent;
+        }
+      }
+    },
+    
+    // Clear all tag filters
+    clearTagFilters() {
+      this.selectedTagFilters = [];
+      this.applyEventFilters();
+      
+      // Only update tag displays if we were in highlight mode
+      if (this.tagFilterMode === 'highlight') {
+        Object.keys(this.eventTags).forEach(eventId => {
+          this.updateMainPanelTags(eventId);
+        });
+      }
+    },
+    
+    // Handle tag filter mode change
+    changeTagFilterMode(newMode) {
+      this.tagFilterMode = newMode;
+      this.applyEventFilters();
+    },
+    
+    // Inline edit methods
+    saveTitle() {
+      this.timelineName = this.tempTitle;
+      const form = document.querySelector('[x-ref="titleForm"]');
+      if (form) {
+        const input = form.querySelector('input[name="timeline[name]"]');
+        if (input) {
+          input.value = this.tempTitle;
+        }
+        this.editingTitle = false;
+        submitFormWithFetch(form);
+      }
+    },
+    
+    saveSubtitle() {
+      this.timelineSubtitle = this.tempSubtitle;
+      const form = document.querySelector('[x-ref="subtitleForm"]');
+      if (form) {
+        const input = form.querySelector('input[name="timeline[subtitle]"]');
+        if (input) {
+          input.value = this.tempSubtitle;
+        }
+        this.editingSubtitle = false;
+        submitFormWithFetch(form);
+      }
+    }
+  };
+}
 
-      $('.modal').close();
 
-      return false;
-    }).fail(function() {
-      alert("Something went wrong and your change didn't save. Please try again.");
-    });
-
-    // todo close the modal
+// Global function for updating timeline tags
+function updateTimelineTags(timelineId, tags) {
+  const tagString = tags.join(',,,|||,,,');
+  console.log('Sending tags:', tagString, 'from array:', tags);
+  
+  // Create a temporary form to submit the tag update
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = `/plan/timelines/${timelineId}`;
+  form.style.display = 'none';
+  
+  // Add CSRF token
+  const csrfInput = document.createElement('input');
+  csrfInput.type = 'hidden';
+  csrfInput.name = 'authenticity_token';
+  csrfInput.value = document.querySelector('meta[name=csrf-token]').content;
+  form.appendChild(csrfInput);
+  
+  // Add method override for PATCH
+  const methodInput = document.createElement('input');
+  methodInput.type = 'hidden';
+  methodInput.name = '_method';
+  methodInput.value = 'patch';
+  form.appendChild(methodInput);
+  
+  // Add tags field - send all current tags
+  const tagsInput = document.createElement('input');
+  tagsInput.type = 'hidden';
+  tagsInput.name = 'timeline[page_tags]';
+  tagsInput.value = tagString;
+  form.appendChild(tagsInput);
+  
+  // Submit form
+  document.body.appendChild(form);
+  return fetch(form.action, {
+    method: 'PATCH',
+    body: new FormData(form),
+    headers: {
+      'X-CSRF-Token': csrfInput.value,
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    console.log('Tags update successful:', data);
+    // Set status to indicate successful save
+    const alpineEl = document.querySelector('[x-data*="timelineEditor"]');
+    if (alpineEl && window.Alpine) {
+      Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+      setTimeout(() => {
+        if (Alpine.$data(alpineEl).autoSaveStatus === 'saved') {
+          Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+        }
+      }, 2000);
+    }
+  })
+  .catch(error => {
+    console.error('Error updating tags:', error);
+    // Revert to server state on error by reloading
+    location.reload();
+  })
+  .finally(() => {
+    document.body.removeChild(form);
   });
-<% end %>
+}
+
+// Helper function to submit forms remotely
+function submitFormRemotely(form) {
+  
+  if (form.getAttribute('data-remote') !== 'true') {
+    form.setAttribute('data-remote', 'true');
+  }
+  
+  
+  // Use Rails UJS to submit the form remotely
+  if (typeof Rails !== 'undefined' && Rails.fire) {
+    Rails.fire(form, 'submit');
+  } else {
+    // Manual AJAX implementation since Rails UJS is not working
+    submitFormWithFetch(form);
+  }
+}
+
+// Manual AJAX form submission function
+function submitFormWithFetch(form) {
+  
+  // Set auto-save status to saving
+  const alpineEl = document.querySelector('[x-data]');
+  if (alpineEl) {
+    Alpine.$data(alpineEl).autoSaveStatus = 'saving';
+  }
+  
+  const formData = new FormData(form);
+  const url = form.action;
+  const method = form.method.toUpperCase();
+  
+  // Add Rails authenticity token if not present
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+  if (csrfToken && !formData.has('authenticity_token')) {
+    formData.append('authenticity_token', csrfToken);
+  }
+  
+  
+  fetch(url, {
+    method: method,
+    body: formData,
+    headers: {
+      'X-CSRF-Token': csrfToken,
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  })
+  .then(data => {
+    
+    // Trigger success event manually
+    const successEvent = new CustomEvent('ajax:success', {
+      detail: [data],
+      bubbles: true,
+      cancelable: true
+    });
+    form.dispatchEvent(successEvent);
+    
+    // Update auto-save status
+    if (alpineEl) {
+      Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+      setTimeout(() => {
+        Alpine.$data(alpineEl).autoSaveStatus = 'saved';
+      }, 2000);
+    }
+  })
+  .catch(error => {
+    
+    // Trigger error event manually
+    const errorEvent = new CustomEvent('ajax:error', {
+      detail: [null, { status: 'error', message: error.message }],
+      bubbles: true,
+      cancelable: true
+    });
+    form.dispatchEvent(errorEvent);
+    
+    // Update auto-save status
+    if (alpineEl) {
+      Alpine.$data(alpineEl).autoSaveStatus = 'error';
+    }
+  });
+}
+</script>

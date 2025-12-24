@@ -1,56 +1,435 @@
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_header', locals: { content_type: 'PageCollection', content_class: PageCollection, image_only: true } %>
+<% content_for :head do %>
+  <meta name="description" content="Discover curated collections of creative pages from our community. Submit your work to public collections or create your own editorial space on Notebook.ai.">
+  <meta name="keywords" content="collections, creative writing, worldbuilding, community, curation, editorial">
+  <meta property="og:title" content="Collections - Community Curated Creative Work">
+  <meta property="og:description" content="Explore curated collections of creative pages. Join our editorial community of writers and creators.">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="<%= page_collections_url %>">
 <% end %>
 
-<%= render partial: 'notice_dismissal/messages/15' %>
-
-<% unless current_user.can_create?(PageCollection) %>
-  <div class="card-panel">
-    Although anyone can submit their notebook pages to any public collection, creating <em>new</em> Collections is currently limited to Premium subscribers.
-    A more widespread release for users without a Premium subscription is coming soon.
-    <%= link_to 'Upgrade to create your own Collection', subscription_path %>.
+<!-- Streamlined Editorial Header -->
+<section class="relative bg-gradient-to-b from-amber-50 to-white dark:from-gray-900 dark:to-gray-900 border-b-4 border-amber-600 dark:border-amber-700 overflow-hidden">
+  <!-- Subtle background image -->
+  <div class="absolute inset-0 opacity-5">
+    <%= image_tag "card-headers/pagecollections.webp", class: "w-full h-full object-cover" %>
   </div>
-<% end %>
-
-<% if @collections_with_pending.any? %>
-  <div class="row">
-    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @collections_with_pending, title: "Your collections with pending submissions" } %>
+  
+  <div class="relative max-w-7xl mx-auto px-6 py-12">
+    <div class="text-center">
+      <!-- Masthead -->
+      <div class="flex items-center justify-center mb-6">
+        <div class="h-px bg-amber-600 flex-1 max-w-32"></div>
+        <div class="px-6">
+          <i class="material-icons text-amber-600 dark:text-amber-500 text-3xl">auto_stories</i>
+        </div>
+        <div class="h-px bg-amber-600 flex-1 max-w-32"></div>
+      </div>
+      
+      <h1 class="text-4xl md:text-5xl font-serif font-bold text-gray-900 dark:text-white mb-4">
+        Collections
+      </h1>
+      
+      <p class="text-xl text-gray-700 dark:text-gray-300 font-light max-w-3xl mx-auto mb-4">
+        Curated pages from our community. Submit your work to public collections or create your own editorial space.
+      </p>
+      
+      <div class="flex items-center justify-center text-sm text-amber-700 dark:text-amber-500 font-medium">
+        <i class="material-icons text-xs mr-1">groups</i>
+        <span>Community Curated</span>
+        <span class="mx-3">•</span>
+        <i class="material-icons text-xs mr-1">verified</i>
+        <span>Editor Approved</span>
+        <span class="mx-3">•</span>
+        <i class="material-icons text-xs mr-1">public</i>
+        <span>Share & Discover</span>
+      </div>
+    </div>
   </div>
-<% end %>
+</section>
 
-<% if @my_collections.any? || current_user.on_premium_plan? || Date.current < 'October 21, 2020'.to_date %>
-  <div class="row">
-    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @my_collections, title: "Your collections" } %>
+<!-- Spacer for breathing room -->
+<div class="py-8"></div>
 
-    <% if current_user.on_premium_plan? || Date.current < 'October 21, 2020'.to_date %>
-      <div class="col s12 m6 l4">
-        <%= link_to new_page_collection_path do %>
-          <div class="card-panel <%= PageCollection.color %> white-text hoverable center" style="height: 246px;">
-            <br /><br />
-
-            <i class="material-icons large">add</i><br />
-            Create a collection
-          </div>
+<section class="max-w-7xl mx-auto px-6 mb-12">
+  <!-- Editorial Navigation -->
+  <div class="border-b border-gray-200 mb-12">
+    <!-- Desktop Navigation -->
+    <div class="hidden md:flex items-center justify-between pb-6">
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-10">
+        <button class="tab-nav border-amber-600 dark:border-amber-500 text-amber-700 dark:text-amber-500 whitespace-nowrap px-2 py-1 border-b-2 font-medium text-base transition-colors duration-200" data-tab="public" aria-current="page">
+          <i class="material-icons text-sm mr-2">public</i>
+          Featured Collections
+        </button>
+        <% if user_signed_in? %>
+          <button class="tab-nav border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap px-2 py-1 border-b-2 font-medium text-base transition-colors duration-200" data-tab="my">
+            <i class="material-icons text-sm mr-2">folder</i>
+            My Collections
+          </button>
+          <button class="tab-nav border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap px-2 py-1 border-b-2 font-medium text-base transition-colors duration-200" data-tab="following">
+            <i class="material-icons text-sm mr-2">favorite</i>
+            Following
+          </button>
         <% end %>
+        <button class="tab-nav border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 whitespace-nowrap px-2 py-1 border-b-2 font-medium text-base transition-colors duration-200" data-tab="submissions">
+          <i class="material-icons text-sm mr-2">inbox</i>
+          Open for Submissions
+        </button>
+      </nav>
+      
+      <!-- Action Button -->
+      <div class="flex items-center">
+        <% if user_signed_in? && current_user.can_create?(PageCollection) %>
+          <%= link_to new_page_collection_path, class: "inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors duration-200" do %>
+            <i class="material-icons text-sm mr-2">add</i>
+            Create Collection
+          <% end %>
+        <% else %>
+          <% if user_signed_in? %>
+            <%= link_to subscription_path, class: "inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" do %>
+              <i class="material-icons text-sm mr-2">workspace_premium</i>
+              Upgrade to Create a Collection
+            <% end %>
+          <% else %>
+            <%= link_to new_user_session_path, class: "inline-flex items-center px-6 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" do %>
+              <i class="material-icons text-sm mr-2">login</i>
+              Sign In to Create a Collection
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="md:hidden">
+      <!-- Action Button (moved to top on mobile) -->
+      <div class="flex justify-center pb-4">
+        <% if user_signed_in? && current_user.can_create?(PageCollection) %>
+          <%= link_to new_page_collection_path, class: "inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors duration-200" do %>
+            <i class="material-icons text-sm mr-2">add</i>
+            Create Collection
+          <% end %>
+        <% else %>
+          <% if user_signed_in? %>
+            <%= link_to subscription_path, class: "inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" do %>
+              <i class="material-icons text-sm mr-2">workspace_premium</i>
+              Upgrade
+            <% end %>
+          <% else %>
+            <%= link_to new_user_session_path, class: "inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-200" do %>
+              <i class="material-icons text-sm mr-2">login</i>
+              Sign In
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Mobile Tab Navigation (horizontal scroll) -->
+      <div class="relative overflow-x-auto pb-6">
+        <nav class="flex space-x-2 sm:space-x-4 px-1">
+          <button class="tab-nav border-amber-600 dark:border-amber-500 text-amber-700 dark:text-amber-500 px-3 py-2 border-b-2 font-medium text-sm transition-colors duration-200" data-tab="public" aria-current="page">
+            <i class="material-icons text-sm mr-1">public</i>
+            <span class="hidden sm:inline">Featured Collections</span>
+            <span class="sm:hidden">Featured</span>
+          </button>
+          <% if user_signed_in? %>
+            <button class="tab-nav border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 px-3 py-2 border-b-2 font-medium text-sm transition-colors duration-200" data-tab="my">
+              <i class="material-icons text-sm mr-1">folder</i>
+              <span class="hidden sm:inline">My Collections</span>
+              <span class="sm:hidden">Mine</span>
+            </button>
+            <button class="tab-nav border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 px-3 py-2 border-b-2 font-medium text-sm transition-colors duration-200" data-tab="following">
+              <i class="material-icons text-sm mr-1">favorite</i>
+              <span>Following</span>
+            </button>
+          <% end %>
+          <button class="tab-nav border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 px-3 py-2 border-b-2 font-medium text-sm transition-colors duration-200" data-tab="submissions">
+            <i class="material-icons text-sm mr-1">inbox</i>
+            <span class="hidden sm:inline">Open for Submissions</span>
+            <span class="sm:hidden">Submissions</span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- Public Collections Tab -->
+  <div id="public-tab" class="tab-content">
+    <% if @random_collections.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% @random_collections.each do |collection| %>
+          <%= render partial: "collection_card", locals: { collection: collection } %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-16">
+        <div class="mx-auto w-24 h-24 bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-900 dark:to-amber-800 rounded-full flex items-center justify-center mb-6">
+          <i class="material-icons text-amber-600 dark:text-amber-400 text-4xl">auto_stories</i>
+        </div>
+        <h3 class="text-2xl font-serif font-semibold text-gray-900 dark:text-white mb-3">The Editorial Board Awaits</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto text-lg">
+          Be among the first to create a public collection and establish your editorial presence in our community.
+        </p>
+        <div class="inline-flex items-center px-4 py-2 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-full text-sm text-amber-700 dark:text-amber-400">
+          <i class="material-icons text-xs mr-2">schedule</i>
+          New collections launching soon
+        </div>
       </div>
     <% end %>
   </div>
-<% end %>
 
-<% if @followed_collections.any? %>
-  <div class="row">
-    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @followed_collections, title: "Collections you follow" } %>
-  </div>
-<% end %>
+  <% if user_signed_in? %>
+    <!-- My Collections Tab -->
+    <div id="my-tab" class="tab-content hidden">
+      <% if @my_collections.any? %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% @my_collections.each do |collection| %>
+            <%= render partial: "collection_card", locals: { collection: collection } %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+            <i class="material-icons text-gray-400 dark:text-gray-500 text-4xl">add_circle_outline</i>
+          </div>
+          <h3 class="text-xl font-serif font-semibold text-gray-900 dark:text-white mb-2">Create Your First Collection</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            Collections help you organize and share your favorite pages with others.
+          </p>
+          <% if current_user.can_create?(PageCollection) %>
+            <%= link_to new_page_collection_path, class: "inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-amber-600 hover:bg-amber-700 transition-colors duration-200" do %>
+              <i class="material-icons mr-2">add</i>
+              Create Collection
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
 
-<% if @network_collections.any? %>
-  <div class="row">
-    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @network_collections, title: "Collections from your network" } %>
-  </div>
-<% end %>
+    <!-- Following Tab -->
+    <div id="following-tab" class="tab-content hidden">
+      <% if @followed_collections.any? %>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% @followed_collections.each do |collection| %>
+            <%= render partial: "collection_card", locals: { collection: collection } %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center py-12">
+          <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+            <i class="material-icons text-gray-400 dark:text-gray-500 text-4xl">favorite_border</i>
+          </div>
+          <h3 class="text-xl font-serif font-semibold text-gray-900 dark:text-white mb-2">No Collections Followed</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+            Follow collections you're interested in to get updates when new content is added.
+          </p>
+          <button onclick="showTab('public')" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-amber-600 hover:bg-amber-700 transition-colors duration-200">
+            <i class="material-icons mr-2">explore</i>
+            Browse Featured Collections
+          </button>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 
-<% if @random_collections.any? %>
-  <div class="row">
-    <%= render partial: 'page_collections/collection_grid', locals: { collection_list: @random_collections, title: "Discover more collections" } %>
+  <!-- Accepting Submissions Tab -->
+  <div id="submissions-tab" class="tab-content hidden">
+    <% accepting_submissions = PageCollection.where(allow_submissions: true, privacy: 'public').limit(12) %>
+    <% if accepting_submissions.any? %>
+      <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div class="flex items-center">
+          <i class="material-icons text-green-600 dark:text-green-400 mr-3">info</i>
+          <span class="text-green-800 dark:text-green-200 text-sm">These collections are actively accepting submissions from the community.</span>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <% accepting_submissions.each do |collection| %>
+          <%= render partial: "collection_card", locals: { collection: collection, show_submission_badge: true } %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-12">
+        <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+          <i class="material-icons text-gray-400 dark:text-gray-500 text-4xl">inbox</i>
+        </div>
+        <h3 class="text-xl font-serif font-semibold text-gray-900 dark:text-white mb-2">No Collections Accepting Submissions</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+          Check back later or create your own collection to start accepting submissions.
+        </p>
+      </div>
+    <% end %>
   </div>
-<% end %>
+</section>
+
+<!-- Tab Navigation JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Initialize tab functionality
+  const tabNavs = document.querySelectorAll('.tab-nav');
+  const tabContents = document.querySelectorAll('.tab-content');
+  
+  // Tab switching function with loading state
+  window.showTab = function(tabName) {
+    // Define the active and inactive classes
+    const activeClasses = ['border-amber-600', 'dark:border-amber-500', 'text-amber-700', 'dark:text-amber-500'];
+    const inactiveClasses = ['border-transparent', 'text-gray-500', 'dark:text-gray-400'];
+    
+    // Brief loading state for polish
+    const activeContent = document.getElementById(`${tabName}-tab`);
+    if (activeContent) {
+      activeContent.style.opacity = '0.5';
+      activeContent.style.transform = 'translateY(10px)';
+    }
+    
+    // Update navigation appearance
+    tabNavs.forEach(nav => {
+      // Remove active classes
+      activeClasses.forEach(cls => nav.classList.remove(cls));
+      // Add inactive classes
+      inactiveClasses.forEach(cls => nav.classList.add(cls));
+      nav.removeAttribute('aria-current');
+    });
+    
+    // Show active tab navigation
+    const activeNav = document.querySelector(`[data-tab="${tabName}"]`);
+    if (activeNav) {
+      // Remove inactive classes
+      inactiveClasses.forEach(cls => activeNav.classList.remove(cls));
+      // Add active classes
+      activeClasses.forEach(cls => activeNav.classList.add(cls));
+      activeNav.setAttribute('aria-current', 'page');
+    }
+    
+    // Hide all tab contents
+    tabContents.forEach(content => {
+      content.classList.add('hidden');
+    });
+    
+    // Show selected tab content with smooth transition
+    if (activeContent) {
+      activeContent.classList.remove('hidden');
+      setTimeout(() => {
+        activeContent.style.opacity = '1';
+        activeContent.style.transform = 'translateY(0)';
+      }, 150);
+    }
+  };
+  
+  // Add click listeners to tab navigation
+  tabNavs.forEach(nav => {
+    nav.addEventListener('click', function() {
+      const tabName = this.dataset.tab;
+      showTab(tabName);
+    });
+  });
+  
+  // Enhanced hover effects for collection cards
+  const collectionCards = document.querySelectorAll('.bg-white.rounded-lg.shadow-sm');
+  collectionCards.forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+    });
+  });
+});
+</script>
+
+<!-- Additional Styles -->
+<style>
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Tab transition effects */
+.tab-content {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Collection card hover effects */
+.bg-white.rounded-lg.shadow-sm {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.tab-nav:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Enhanced button hover states */
+.bg-amber-600:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.4);
+}
+
+/* Subtle animation for empty states */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.mx-auto.w-24.h-24 {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Mobile horizontal scroll improvements */
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile tab improvements */
+@media (max-width: 768px) {
+  .tab-nav {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Scroll fade indicators */
+  .overflow-x-auto::before,
+  .overflow-x-auto::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 20px;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .overflow-x-auto::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(255,255,255,1), rgba(255,255,255,0));
+  }
+  
+  .overflow-x-auto::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));
+  }
+}
+</style>

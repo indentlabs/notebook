@@ -1,0 +1,155 @@
+<%
+  # Collect all images for this content
+  content_images = []
+  basil_images = []
+  
+  # Get regular uploaded images if available
+  if raw_content.respond_to?(:image_uploads)
+    content_images = raw_content.image_uploads.where(privacy: 'public').ordered rescue []
+    
+    # If user can see private images, include those too
+    if current_user && raw_content.updatable_by?(current_user)
+      content_images = raw_content.image_uploads.ordered rescue []
+    end
+  end
+  
+  # Get Basil AI generated images if available
+  if raw_content.respond_to?(:basil_commissions)
+    basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered rescue []
+  end
+  
+  total_images = content_images.count + basil_images.count
+%>
+
+<% if total_images > 0 %>
+  <!-- Image Grid -->
+  <div class="gallery-grid">
+    
+    <!-- Regular uploaded images -->
+    <% content_images.each do |image| %>
+      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= image.src.url if image.src.present? %>', '<%= escape_javascript(image.src_file_name || 'Image') %>')">
+        <div class="relative">
+          <% if image.src.present? %>
+            <%= image_tag image.src.url, 
+                          class: "w-full h-64 object-cover",
+                          loading: "lazy" %>
+          <% end %>
+          
+          <!-- Image overlay on hover -->
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-200 flex items-center justify-center">
+            <i class="material-icons text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-200">zoom_in</i>
+          </div>
+          
+          <!-- Pinned indicator -->
+          <% if image.respond_to?(:pinned) && image.pinned %>
+            <div class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 rounded-full p-1">
+              <i class="material-icons text-sm">push_pin</i>
+            </div>
+          <% end %>
+        </div>
+        
+      </div>
+    <% end %>
+    
+    <!-- Basil AI generated images -->
+    <% basil_images.each do |basil| %>
+      <% 
+        basil_url = if basil.image.attached?
+                      rails_blob_path(basil.image, disposition: "attachment")
+                    else
+                      asset_path("missing-image.jpg")
+                    end
+      %>
+      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= basil_url %>', 'Generated with Basil')">
+        <div class="relative">
+          <% if basil.image.attached? %>
+            <%= image_tag basil_url, 
+                          class: "w-full h-64 object-cover",
+                          loading: "lazy" %>
+          <% end %>
+          
+          <!-- Image overlay on hover -->
+          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-200 flex items-center justify-center">
+            <i class="material-icons text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-200">zoom_in</i>
+          </div>
+          
+          <!-- AI indicator -->
+          <div class="absolute top-2 left-2 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center shadow-md">
+            <span class="text-xs font-medium">AI</span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    
+  </div>
+
+<% else %>
+  <!-- Empty gallery state -->
+  <div class="text-center py-12">
+    <div class="mx-auto h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4">
+      <i class="material-icons text-2xl text-gray-400 dark:text-gray-500">photo_library</i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No images yet</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-6">
+      This <%= content.class_name.downcase %> doesn't have any images uploaded yet.
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <% if raw_content.updatable_by?(current_user) %>
+        <%= link_to polymorphic_path(raw_content, action: :edit), 
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white #{content.class_color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons text-lg mr-2">add_photo_alternate</i>
+          Upload Images
+        <% end %>
+        
+        <!-- AI generation link if available -->
+        <% if defined?(basil_content_path) %>
+          <%= link_to basil_content_path(content_type: raw_content.class.name.downcase, id: raw_content.id), 
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <i class="material-icons text-lg mr-2">auto_fix_high</i>
+            Visualize
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<!-- Image Modal (for full-size viewing) -->
+<div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+  <div class="relative max-w-4xl max-h-full">
+    <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white hover:text-gray-300 z-10">
+      <i class="material-icons text-3xl">close</i>
+    </button>
+    <img id="modalImage" src="" alt="" class="max-w-full max-h-full object-contain rounded-lg">
+    <div id="modalCaption" class="absolute bottom-2 right-2 text-white text-xxs px-1.5 py-0.5 bg-black bg-opacity-40 rounded"></div>
+  </div>
+</div>
+
+<script>
+function openImageModal(src, caption) {
+  document.getElementById('modalImage').src = src;
+  document.getElementById('modalCaption').textContent = caption;
+  document.getElementById('imageModal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+  document.getElementById('imageModal').classList.add('hidden');
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeImageModal();
+  }
+});
+
+// Close modal on click outside image
+document.getElementById('imageModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeImageModal();
+  }
+});
+</script>

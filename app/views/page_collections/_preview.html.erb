@@ -1,0 +1,290 @@
+<!-- Collection Preview -->
+<div id="preview-container" class="space-y-4">
+  
+  <!-- Header Preview -->
+  <div class="relative h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg overflow-hidden" id="preview-header">
+    <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+    <div class="absolute bottom-4 left-4 right-4 text-white">
+      <h1 id="preview-title" class="text-xl font-bold mb-1">
+        <%= page_collection.title.present? ? page_collection.title : "Collection Title" %>
+      </h1>
+      <p id="preview-subtitle" class="text-sm text-white/90">
+        <%= page_collection.subtitle.present? ? page_collection.subtitle : "Collection subtitle will appear here" %>
+      </p>
+    </div>
+  </div>
+  
+  <!-- Collection Info -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <div class="flex items-start justify-between mb-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+          <i class="material-icons text-gray-400">collections</i>
+        </div>
+        <div>
+          <h2 id="preview-title-secondary" class="font-semibold text-gray-900 dark:text-white">
+            <%= page_collection.title.present? ? page_collection.title : "My Collection" %>
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">by <%= current_user.display_name %></p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-2">
+        <span id="preview-privacy" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+          <i class="material-icons text-xs mr-1">public</i>
+          Public
+        </span>
+      </div>
+    </div>
+    
+    <div id="preview-description" class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+      <%= page_collection.description.present? ? simple_format(page_collection.description) : "Your collection description will appear here. This is where you can explain what makes your collection special and what visitors can expect to find." %>
+    </div>
+    
+    <!-- Stats -->
+    <div class="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-3">
+      <div class="flex items-center">
+        <i class="material-icons text-xs mr-1">library_books</i>
+        <span>0 items</span>
+      </div>
+      <div class="flex items-center">
+        <i class="material-icons text-xs mr-1">visibility</i>
+        <span>0 views</span>
+      </div>
+      <div class="flex items-center">
+        <i class="material-icons text-xs mr-1">schedule</i>
+        <span>Just created</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Content Types Preview -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <h3 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+      <i class="material-icons text-sm mr-2">category</i>
+      Accepted Content Types
+    </h3>
+    
+    <div id="preview-content-types" class="grid grid-cols-2 gap-2">
+      <!-- Default content types shown when none selected -->
+      <div class="content-type-preview flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+        <i class="material-icons text-blue-600 text-sm mr-2">person</i>
+        <span class="dark:text-gray-200">Characters</span>
+      </div>
+      <div class="content-type-preview flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+        <i class="material-icons text-green-600 text-sm mr-2">place</i>
+        <span class="dark:text-gray-200">Locations</span>
+      </div>
+      <div class="content-type-preview flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+        <i class="material-icons text-purple-600 text-sm mr-2">category</i>
+        <span class="dark:text-gray-200">Items</span>
+      </div>
+      <div class="content-type-preview flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+        <i class="material-icons text-indigo-600 text-sm mr-2">public</i>
+        <span class="dark:text-gray-200">Universes</span>
+      </div>
+    </div>
+    
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+      <i class="material-icons text-xs mr-1">info</i>
+      Users can submit these types of content to your collection
+    </p>
+  </div>
+  
+  <!-- Submission Status -->
+  <div id="preview-submissions" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <i class="material-icons text-gray-400 text-sm mr-2">inbox</i>
+        <span class="font-medium text-gray-900 dark:text-white">Community Contributions</span>
+      </div>
+      <span id="submissions-status" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+        <i class="material-icons text-xs mr-1">block</i>
+        Disabled
+      </span>
+    </div>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+      <span id="submissions-description">This collection is not accepting submissions from other users.</span>
+    </p>
+  </div>
+  
+  <!-- Sample Content Preview -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+    <h3 class="font-medium text-gray-900 dark:text-white mb-3 flex items-center">
+      <i class="material-icons text-sm mr-2">grid_view</i>
+      Collection Content
+    </h3>
+    
+    <div class="space-y-3">
+      <!-- Empty state -->
+      <div class="text-center py-6 text-gray-500 dark:text-gray-400">
+        <i class="material-icons text-2xl mb-2">add_circle_outline</i>
+        <p class="text-sm">Content will appear here once you start adding items to your collection</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mobile Preview Toggle -->
+  <div class="mobile-preview-note hidden text-xs text-gray-500 dark:text-gray-400 text-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+    <i class="material-icons text-xs mr-1">smartphone</i>
+    Mobile preview - Collection will adapt to smaller screens
+  </div>
+</div>
+
+<!-- Preview JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Preview update functions
+  window.updateCollectionPreview = function() {
+    // Update title
+    const titleInput = document.querySelector('input[name="page_collection[title]"]');
+    const previewTitle = document.getElementById('preview-title');
+    const previewTitleSecondary = document.getElementById('preview-title-secondary');
+    
+    if (titleInput && previewTitle && previewTitleSecondary) {
+      const title = titleInput.value || 'Collection Title';
+      previewTitle.textContent = title;
+      previewTitleSecondary.textContent = title;
+    }
+    
+    // Update subtitle
+    const subtitleInput = document.querySelector('input[name="page_collection[subtitle]"]');
+    const previewSubtitle = document.getElementById('preview-subtitle');
+    
+    if (subtitleInput && previewSubtitle) {
+      const subtitle = subtitleInput.value || 'Collection subtitle will appear here';
+      previewSubtitle.textContent = subtitle;
+    }
+    
+    // Update description
+    const descriptionInput = document.querySelector('textarea[name="page_collection[description]"]');
+    const previewDescription = document.getElementById('preview-description');
+    
+    if (descriptionInput && previewDescription) {
+      const description = descriptionInput.value || 'Your collection description will appear here. This is where you can explain what makes your collection special and what visitors can expect to find.';
+      previewDescription.textContent = description;
+    }
+    
+    // Update privacy
+    const privacyRadios = document.querySelectorAll('input[name="page_collection[privacy]"]');
+    const previewPrivacy = document.getElementById('preview-privacy');
+    
+    if (previewPrivacy) {
+      let selectedPrivacy = 'public';
+      privacyRadios.forEach(radio => {
+        if (radio.checked) {
+          selectedPrivacy = radio.value;
+        }
+      });
+      
+      if (selectedPrivacy === 'public') {
+        previewPrivacy.innerHTML = '<i class="material-icons text-xs mr-1">public</i>Public';
+        previewPrivacy.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      } else {
+        previewPrivacy.innerHTML = '<i class="material-icons text-xs mr-1">lock</i>Private';
+        previewPrivacy.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+      }
+    }
+    
+    // Update content types
+    updateContentTypesPreview();
+    
+    // Update submissions status
+    updateSubmissionsPreview();
+  };
+  
+  function updateContentTypesPreview() {
+    const checkboxes = document.querySelectorAll('.content-type-checkbox');
+    const previewContainer = document.getElementById('preview-content-types');
+    
+    if (!previewContainer) return;
+    
+    const selectedTypes = [];
+    checkboxes.forEach(checkbox => {
+      if (checkbox && checkbox.checked) {
+        const label = checkbox.closest('label');
+        if (label) {
+          const iconElement = label.querySelector('.material-icons');
+          const spanElement = label.querySelector('span');
+          
+          if (iconElement && spanElement) {
+            const icon = iconElement.textContent;
+            const colorClass = iconElement.className;
+            const name = spanElement.textContent;
+            
+            selectedTypes.push({
+              icon: icon,
+              colorClass: colorClass,
+              name: name
+            });
+          }
+        }
+      }
+    });
+    
+    if (selectedTypes.length === 0) {
+      // Show default types
+      previewContainer.innerHTML = `
+        <div class="content-type-preview flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+          <i class="material-icons text-gray-400 text-sm mr-2">category</i>
+          <span class="text-gray-500 dark:text-gray-400">No content types selected</span>
+        </div>
+      `;
+    } else {
+      previewContainer.innerHTML = selectedTypes.map(type => `
+        <div class="content-type-preview flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm">
+          <i class="material-icons ${type.colorClass} text-sm mr-2">${type.icon}</i>
+          <span class="dark:text-gray-200">${type.name}</span>
+        </div>
+      `).join('');
+    }
+  }
+  
+  function updateSubmissionsPreview() {
+    const submissionToggle = document.querySelector('.submission-toggle');
+    const submissionsStatus = document.getElementById('submissions-status');
+    const submissionsDescription = document.getElementById('submissions-description');
+    
+    if (submissionToggle && submissionsStatus && submissionsDescription) {
+      if (submissionToggle.checked) {
+        submissionsStatus.innerHTML = '<i class="material-icons text-xs mr-1">inbox</i>Enabled';
+        submissionsStatus.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        submissionsDescription.textContent = 'Other users can submit content for you to review and add to this collection.';
+      } else {
+        submissionsStatus.innerHTML = '<i class="material-icons text-xs mr-1">block</i>Disabled';
+        submissionsStatus.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        submissionsDescription.textContent = 'This collection is not accepting submissions from other users.';
+      }
+    }
+  }
+  
+  // Mobile/Desktop preview toggle
+  const previewDesktop = document.getElementById('preview-desktop');
+  const previewMobile = document.getElementById('preview-mobile');
+  const previewContainer = document.getElementById('preview-container');
+  const mobileNote = document.querySelector('.mobile-preview-note');
+  
+  if (previewDesktop && previewMobile && previewContainer) {
+    previewDesktop.addEventListener('click', function() {
+      previewDesktop.classList.add('active', 'bg-blue-100', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+      previewMobile.classList.remove('active', 'bg-blue-100', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+      previewMobile.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-gray-700', 'dark:text-gray-400');
+      
+      previewContainer.classList.remove('mobile-preview');
+      if (mobileNote) mobileNote.classList.add('hidden');
+    });
+    
+    previewMobile.addEventListener('click', function() {
+      previewMobile.classList.add('active', 'bg-blue-100', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+      previewDesktop.classList.remove('active', 'bg-blue-100', 'text-blue-600', 'dark:bg-blue-900/30', 'dark:text-blue-400');
+      previewDesktop.classList.add('bg-gray-100', 'text-gray-600', 'dark:bg-gray-700', 'dark:text-gray-400');
+      
+      previewContainer.classList.add('mobile-preview');
+      if (mobileNote) mobileNote.classList.remove('hidden');
+    });
+  }
+  
+  // Initialize preview
+  updateCollectionPreview();
+});
+</script>

@@ -1,18 +1,25 @@
 <% if analysis.document_categories.relevant.any? %>
-  <div class="row">
-    <div class="col s12 m6">
-      <h5 class="grey-text">Audience keywords</h5>
+  <div>
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+        <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M5.5,7A1.5,1.5 0 0,1 4,5.5A1.5,1.5 0 0,1 5.5,4A1.5,1.5 0 0,1 7,5.5A1.5,1.5 0 0,1 5.5,7M21.41,11.58L12.41,2.58C12.05,2.22 11.55,2 11,2H4C2.89,2 2,2.89 2,4V11C2,11.55 2.22,12.05 2.59,12.41L11.58,21.41C11.95,21.77 12.45,22 13,22C13.55,22 14.05,21.77 14.41,21.41L21.41,14.41C21.78,14.05 22,13.55 22,13C22,12.44 21.77,11.94 21.41,11.58Z" />
+        </svg>
+        Audience Keywords
+      </h3>
+      <span class="text-xs text-gray-500 dark:text-gray-400"><%= analysis.document_categories.relevant.count %> detected</span>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
       <% analysis.document_categories.relevant.each do |category| %>
-        <span class="badge <%= Document.color %> lighten-4 black-text left">
+        <span class="inline-flex items-center px-3 py-1.5 bg-purple-50 dark:bg-purple-900 text-purple-700 dark:text-purple-300 rounded-lg text-sm">
           <%= category.terminal_category %>
         </span>
       <% end %>
     </div>
-    <div class="col s12 m6">
-      <p class="help-text">
-        Our AI is currently learning how to predict what audiences would enjoy your writing. 
-        This is our best guess so far.
-      </p>
-    </div>
+
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+      Keywords that may help readers discover your writing.
+    </p>
   </div>
 <% end %>

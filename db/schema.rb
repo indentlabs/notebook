@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_06_26_212529) do
+ActiveRecord::Schema.define(version: 2025_09_22_002741) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -214,6 +214,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["user_id", "entity_type", "entity_id", "saved_at"], name: "basil_commissions_uees"
     t.index ["user_id", "entity_type", "entity_id", "style"], name: "basil_commissions_uees2"
     t.index ["user_id", "entity_type", "entity_id"], name: "basil_commissions_uee"
+    t.index ["user_id", "saved_at"], name: "index_basil_commissions_on_user_and_saved"
     t.index ["user_id"], name: "index_basil_commissions_on_user_id"
   end
 
@@ -491,7 +492,9 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["deleted_at"], name: "index_characters_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_characters_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_characters_on_universe_id"
+    t.index ["user_id", "privacy", "deleted_at"], name: "index_characters_on_user_privacy_deleted"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_characters_on_user_id_and_universe_id_and_deleted_at"
+    t.index ["user_id", "updated_at"], name: "index_characters_on_user_updated"
     t.index ["user_id"], name: "index_characters_on_user_id"
   end
 
@@ -564,6 +567,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.integer "secondary_content_page_id"
     t.index ["content_page_type", "content_page_id"], name: "cps_index"
     t.index ["secondary_content_page_type", "secondary_content_page_id"], name: "index_secondary_content_page_share"
+    t.index ["user_id", "created_at", "privacy"], name: "index_content_page_shares_on_user_created_privacy"
     t.index ["user_id"], name: "index_content_page_shares_on_user_id"
   end
 
@@ -1265,6 +1269,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
     t.index ["user_id", "deleted_at"], name: "index_documents_on_user_id_and_deleted_at"
+    t.index ["user_id", "privacy", "deleted_at"], name: "index_documents_on_user_privacy_deleted"
     t.index ["user_id"], name: "index_documents_on_user_id"
   end
 
@@ -1684,6 +1689,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["content_type", "content_id", "pinned"], name: "index_image_uploads_on_content_pinned"
     t.index ["content_type", "content_id", "position"], name: "index_image_uploads_on_content_type_and_content_id_and_position"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
+    t.index ["user_id", "content_type", "content_id"], name: "index_image_uploads_on_user_content_type_id"
     t.index ["user_id"], name: "index_image_uploads_on_user_id"
   end
 
@@ -1743,7 +1749,9 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["deleted_at"], name: "index_items_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_items_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_items_on_universe_id"
+    t.index ["user_id", "privacy", "deleted_at"], name: "index_items_on_user_privacy_deleted"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_items_on_user_id_and_universe_id_and_deleted_at"
+    t.index ["user_id", "updated_at"], name: "index_items_on_user_updated"
     t.index ["user_id"], name: "index_items_on_user_id"
   end
 
@@ -1987,7 +1995,9 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["deleted_at"], name: "index_locations_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_locations_on_id_and_deleted_at"
     t.index ["universe_id"], name: "index_locations_on_universe_id"
+    t.index ["user_id", "privacy", "deleted_at"], name: "index_locations_on_user_privacy_deleted"
     t.index ["user_id", "universe_id", "deleted_at"], name: "index_locations_on_user_id_and_universe_id_and_deleted_at"
+    t.index ["user_id", "updated_at"], name: "index_locations_on_user_updated"
     t.index ["user_id"], name: "index_locations_on_user_id"
   end
 
@@ -2455,8 +2465,11 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.string "explanation"
     t.string "cached_content_name"
     t.datetime "deleted_at"
+    t.integer "editor_pick_position"
     t.index ["content_type", "content_id"], name: "polycontent_collection_index"
+    t.index ["page_collection_id", "editor_pick_position"], name: "index_page_collection_submissions_on_editor_pick_position", unique: true, where: "editor_pick_position IS NOT NULL"
     t.index ["page_collection_id"], name: "index_page_collection_submissions_on_page_collection_id"
+    t.index ["user_id", "accepted_at"], name: "index_page_collection_submissions_on_user_accepted"
     t.index ["user_id"], name: "index_page_collection_submissions_on_user_id"
   end
 
@@ -2475,6 +2488,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.boolean "allow_submissions", default: false
     t.string "slug"
     t.datetime "deleted_at"
+    t.index ["user_id", "updated_at"], name: "index_page_collections_on_user_updated"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
   end
 
@@ -2515,6 +2529,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.datetime "updated_at", null: false
     t.index ["page_type", "page_id"], name: "index_page_tags_on_page_type_and_page_id"
     t.index ["user_id", "page_type"], name: "index_page_tags_on_user_id_and_page_type"
+    t.index ["user_id", "slug"], name: "index_page_tags_on_user_and_slug"
     t.index ["user_id"], name: "index_page_tags_on_user_id"
   end
 
@@ -3274,6 +3289,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["moderation_state", "updated_at"], name: "index_thredded_posts_for_display"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id"
     t.index ["postable_id"], name: "index_thredded_posts_on_postable_id_and_postable_type"
+    t.index ["user_id", "created_at", "moderation_state"], name: "index_thredded_posts_on_user_created_moderation"
     t.index ["user_id"], name: "index_thredded_posts_on_user_id"
   end
 
@@ -3435,6 +3451,14 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.datetime "deleted_at"
+    t.string "event_type", default: "general"
+    t.string "importance_level", default: "minor"
+    t.string "end_time_label"
+    t.string "status", default: "completed"
+    t.text "private_notes"
+    t.index ["event_type"], name: "index_timeline_events_on_event_type"
+    t.index ["importance_level"], name: "index_timeline_events_on_importance_level"
+    t.index ["status"], name: "index_timeline_events_on_status"
     t.index ["timeline_id"], name: "index_timeline_events_on_timeline_id"
   end
 
@@ -3453,7 +3477,9 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.string "notes"
     t.string "private_notes"
     t.boolean "favorite", default: false
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
+    t.index ["user_id", "privacy", "deleted_at"], name: "index_timelines_on_user_privacy_deleted"
     t.index ["user_id"], name: "index_timelines_on_user_id"
   end
 
@@ -3605,6 +3631,8 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.index ["deleted_at", "user_id"], name: "index_universes_on_deleted_at_and_user_id"
     t.index ["deleted_at"], name: "index_universes_on_deleted_at"
     t.index ["id", "deleted_at"], name: "index_universes_on_id_and_deleted_at"
+    t.index ["user_id", "privacy", "deleted_at"], name: "index_universes_on_user_privacy_deleted"
+    t.index ["user_id", "updated_at"], name: "index_universes_on_user_updated"
     t.index ["user_id"], name: "index_universes_on_user_id"
   end
 
@@ -3613,6 +3641,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.integer "blocked_user_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["blocked_user_id", "user_id"], name: "index_user_blockings_on_blocked_and_user"
     t.index ["blocked_user_id"], name: "index_user_blockings_on_blocked_user_id"
     t.index ["user_id"], name: "index_user_blockings_on_user_id"
   end
@@ -3630,6 +3659,7 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.integer "followed_user_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["followed_user_id", "user_id"], name: "index_user_followings_on_followed_and_user"
     t.index ["followed_user_id"], name: "index_user_followings_on_followed_user_id"
     t.index ["user_id"], name: "index_user_followings_on_user_id"
   end
@@ -3682,8 +3712,12 @@ ActiveRecord::Schema.define(version: 2025_06_26_212529) do
     t.boolean "community_features_enabled", default: true
     t.boolean "private_profile", default: false
     t.boolean "enabled_april_fools"
+    t.integer "followers_count", default: 0, null: false
+    t.integer "following_count", default: 0, null: false
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
+    t.index ["followers_count"], name: "index_users_on_followers_count"
+    t.index ["following_count"], name: "index_users_on_following_count"
     t.index ["id", "deleted_at"], name: "index_users_on_id_and_deleted_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end

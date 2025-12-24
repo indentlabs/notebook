@@ -1,0 +1,446 @@
+<header class="flex fixed top-0 z-50 w-full h-14 shadow" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
+  <%= link_to main_app.root_path, class: 'flex items-center mr-2 px-3 sm:px-6 py-4 border-b border-gray-300 dark:border-slate-700 shadow hover:shadow-md transition bg-white dark:bg-slate-800 rounded-br-lg' do %>
+    <%= image_tag 'logos/book-small.webp', class: 'h-6 sm:h-8 mr-2 sm:mr-3' %>
+    <span class="text-lg sm:text-2xl font-bold text-notebook-blue dark:text-blue-300 tracking-wide">
+      <span>Notebook.ai</span>
+    </span>
+  <% end %>
+
+
+  <div class="flex-grow"></div>
+
+  <!-- right-hand side of navbar -->
+  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false, mobileSearchOpen: false }">
+    <% if user_signed_in? %>
+      <!-- Mobile Search Toggle -->
+      <button @click.stop="mobileSearchOpen = true; $nextTick(() => document.getElementById('navbar-search-input').focus())" 
+              x-show="!mobileSearchOpen"
+              class="md:hidden w-10 h-10 flex items-center justify-center bg-white bg-opacity-20 border-white border-opacity-30 border-2 hover:bg-opacity-30 rounded-full transition-all duration-200 focus:outline-none text-white">
+        <i class="material-icons">search</i>
+      </button>
+
+      <!-- Dynamic Autocomplete Search -->
+      <div class="items-center relative"
+           :class="{ 'hidden md:inline-flex': !mobileSearchOpen, 'flex fixed top-0 left-0 w-full h-14 z-50 bg-white dark:bg-gray-800 px-2 items-center': mobileSearchOpen }"
+           @keydown.escape.window="mobileSearchOpen = false"
+           x-data="searchAutocomplete()"
+           x-init="init()"
+           @click.away="closeDropdown(); mobileSearchOpen = false">
+
+
+
+        <!-- Wrap in form to isolate autocomplete context -->
+        <form onsubmit="return false;" autocomplete="off" class="w-full md:w-auto">
+          <input class="border-2 border-blue-400 dark:border-blue-500 text-notebook-blue dark:text-blue-400 focus:border-notebook-blue dark:focus:border-blue-400 bg-white dark:bg-gray-800 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                 :class="{ 'w-full h-10': mobileSearchOpen, 'w-64 lg:w-80 xl:w-96 h-9': !mobileSearchOpen }"
+                 type="search"
+                 id="navbar-search-input"
+                 name="navbar_search_query"
+                 x-model="query"
+                 @input="handleInput()"
+                 @keydown="handleKeydown($event)"
+                 @focus="handleFocus()"
+                 placeholder="Search your notebook"
+                 autocomplete="new-password"
+                 autocorrect="off"
+                 autocapitalize="off"
+                 spellcheck="false"
+                 aria-label="Search your notebook"
+                 role="searchbox">
+        </form>
+        
+        <!-- Autocomplete Dropdown -->
+        <div x-cloak
+             x-show="showDropdown"
+             x-transition:enter="transition ease-out duration-100"
+             x-transition:enter-start="transform opacity-0 scale-95"
+             x-transition:enter-end="transform opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-75"
+             x-transition:leave-start="transform opacity-100 scale-100"
+             x-transition:leave-end="transform opacity-0 scale-95"
+             class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-80 overflow-y-auto">
+          
+          <!-- Help text when input is focused but empty -->
+          <div x-show="query.length === 0" class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300 bg-blue-50 dark:bg-slate-700 border-b border-blue-100 dark:border-slate-600">
+            <div class="flex items-start space-x-3">
+              <i class="material-icons text-blue-500 dark:text-blue-400 text-lg">info</i>
+              <div class="space-y-2">
+                <div class="font-medium text-gray-800 dark:text-white">Quick Search Tips:</div>
+                <ul class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                  <li class="flex items-center">
+                    <i class="material-icons text-xs mr-2 text-gray-400 dark:text-gray-400">keyboard</i>
+                    Start typing to see your pages as suggestions
+                  </li>
+                  <li class="flex items-center">
+                    <i class="material-icons text-xs mr-2 text-gray-400 dark:text-gray-400">mouse</i>
+                    Click on any result to quickly navigate to it
+                  </li>
+                  <li class="flex items-center">
+                    <i class="material-icons text-xs mr-2 text-gray-400 dark:text-gray-400">search</i>
+                    Press Enter to search all content in your notebook
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Loading state -->
+          <div x-show="loading && query.length >= 2" class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+            <i class="material-icons text-sm animate-spin">refresh</i>
+            Searching...
+          </div>
+          
+          <!-- Results -->
+          <template x-for="(result, index) in results" :key="result.id + '_' + result.type">
+            <a :href="result.url"
+               class="flex items-center px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0 transition-colors"
+               :class="{ 'bg-blue-50 dark:bg-blue-900/20': selectedIndex === index }"
+               @mouseenter="selectedIndex = index"
+               @mouseleave="selectedIndex = -1">
+
+              <i class="material-icons text-sm mr-3 rounded-full p-1 w-8 h-8 text-white flex items-center justify-center"
+                 :style="`background-color: ${result.color}`"
+                 x-text="result.icon"></i>
+
+              <div class="flex-grow min-w-0">
+                <div class="font-medium text-gray-900 dark:text-gray-100 truncate" x-text="result.name"></div>
+                <div class="text-xs text-gray-500 dark:text-gray-400" x-text="result.type"></div>
+              </div>
+
+              <i class="material-icons text-gray-400 dark:text-gray-500 text-sm">arrow_forward</i>
+            </a>
+          </template>
+
+          <!-- No results message -->
+          <div x-show="!loading && results.length === 0 && query.length >= 2"
+               class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+            No pages found matching "<span x-text="query"></span>"
+          </div>
+          
+          <!-- Full search link -->
+          <div x-show="query.length >= 2"
+               class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <a :href="`<%= main_app.search_path %>?q=${encodeURIComponent(query)}`"
+               class="flex items-center px-4 py-3 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium">
+              <i class="material-icons text-sm mr-2">search</i>
+              Search my notebook for "<span x-text="query"></span>"
+            </a>
+            <a :href="`/forum/?q=${encodeURIComponent(query)}`"
+               class="flex items-center px-4 py-3 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-medium border-t border-gray-200 dark:border-gray-700">
+              <i class="material-icons text-sm mr-2">forum</i>
+              Search the forums for "<span x-text="query"></span>"
+            </a>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- Paper-Style Notification Dropdown -->
+      <div class="inline-flex items-center">
+        <!-- Notification Button -->
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen; accountDropdownOpen = false" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
+          <svg class="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+          </svg>
+        </button>
+        
+        <!-- Backdrop -->
+        <div x-cloak x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <!-- Notebook.ai Style Notification Panel -->
+        <div x-cloak x-show="notificationsDropdownOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="transform opacity-0 scale-95 translate-y-1"
+             x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="transform opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="transform opacity-0 scale-95 translate-y-1"
+             class="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 overflow-hidden">
+          
+          <!-- Header -->
+          <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                <i class="material-icons mr-2 text-blue-600 dark:text-blue-400 text-base">notifications</i>
+                Recent Activity
+              </h3>
+              <% if @user_notifications.reject { |n| n.viewed_at? }.any? %>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                  <%= @user_notifications.reject { |n| n.viewed_at? }.count %> new
+                </span>
+              <% end %>
+            </div>
+          </div>
+
+          <!-- Notifications List -->
+          <div class="max-h-[75vh] overflow-y-auto">
+            <% if @user_notifications.any? %>
+              <div class="space-y-1 p-2">
+                <% @user_notifications.first(6).each_with_index do |notification, index| %>
+                  <% is_unread = !notification.viewed_at? %>
+                  <%= link_to main_app.notification_path(notification),
+                      class: "block group" do %>
+                    <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-sm transition-all duration-200 <%= is_unread ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-700' : '' %>">
+                      <div class="flex items-start space-x-3">
+                        <!-- Icon -->
+                        <div class="flex-shrink-0">
+                          <div class="w-8 h-8 bg-<%= notification.icon_color %>-500 rounded-lg flex items-center justify-center">
+                            <i class="material-icons text-white text-sm"><%= notification.icon %></i>
+                          </div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm text-gray-900 dark:text-gray-100 <%= is_unread ? 'font-medium' : '' %> leading-relaxed group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <%= notification.message_html.html_safe %>
+                          </div>
+                          <div class="flex items-center justify-between mt-1">
+                            <div class="flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400">
+                              <i class="material-icons text-xs">schedule</i>
+                              <span><%= time_ago_in_words(notification.happened_at) %> ago</span>
+                            </div>
+                            <% if is_unread %>
+                              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                New
+                              </span>
+                            <% end %>
+                          </div>
+                        </div>
+                        
+                        <!-- Arrow -->
+                        <div class="flex-shrink-0">
+                          <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors text-sm">arrow_forward</i>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            <% else %>
+              <!-- Empty State -->
+              <div class="px-4 py-8 text-center">
+                <div class="w-12 h-12 mx-auto mb-3 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <i class="material-icons text-gray-400 dark:text-gray-500 text-lg">notifications_none</i>
+                </div>
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-1">All caught up!</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">No new notifications to show</p>
+                <%= link_to main_app.notifications_path,
+                    class: "inline-flex items-center text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium" do %>
+                  View all notifications
+                  <i class="material-icons text-xs ml-1">arrow_forward</i>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Footer -->
+          <% if @user_notifications.any? %>
+            <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-4 py-3">
+              <div class="flex space-x-2">
+                <%= link_to main_app.mark_all_read_path,
+                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" do %>
+                  <i class="material-icons text-xs mr-1">done_all</i>
+                  Mark all read
+                <% end %>
+                <%= link_to main_app.notifications_path,
+                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-200" do %>
+                  View all
+                  <i class="material-icons text-xs ml-1">arrow_forward</i>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="inline-flex items-center">
+        <button @click="accountDropdownOpen = !accountDropdownOpen; notificationsDropdownOpen = false" class="z-10 block p-1 <%= unread_inbox_count > 0 ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 <%= unread_inbox_count > 0 ? 'hover:border-yellow-500' : 'hover:border-opacity-50' %> rounded-full transition-all duration-200">
+          <%= image_tag current_user.image_url, class: 'rounded-full h-6 w-6 sm:h-8 sm:w-8' %>
+        </button>
+        <div x-cloak x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+
+        <div x-cloak x-show="accountDropdownOpen" class="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 w-64 border border-gray-200 dark:border-gray-700">
+          <%= link_to current_user.profile_url, class: 'flex border-t border-gray-300 dark:border-gray-700 p-2 border-b shadow group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <%= image_tag current_user.image_url(size: 32), class: 'rounded-full h-12 w-12 sm:h-16 sm:w-16 mr-2 p-1 border-2 border-notebook-blue dark:border-blue-400 group-hover:border-green-500' %>
+            <div class="m-auto ml-1">
+              <div class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-white">You're signed in as</div>
+              <div class="text-sm <%= User.text_color %> dark:text-blue-400 group-hover:text-white font-bold">
+                <%= current_user.display_name %>
+              </div>
+            </div>
+          <% end %>
+
+          <!--
+          <%= link_to current_user.profile_url, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue hover:text-white' do %>
+            <i class="material-icons <%= User.text_color %> shrink-0 w-8 h-8 mr-2 bg-white rounded-full p-1"><%= User.icon %></i>
+            <span class="flex-grow text-sm">Profile</span>
+          <% end %>
+          -->
+          <%= link_to main_app.subscription_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <i class="material-icons text-notebook-blue dark:text-blue-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">credit_card</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Billing</span>
+            <span class="bg-notebook-blue dark:bg-blue-500 text-white rounded px-1 text-xs group-hover:bg-orange-500">
+              PREMIUM
+            </span>
+          <% end %>
+          <%= link_to thredded.private_topics_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <i class="material-icons text-purple-600 dark:text-purple-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">inbox</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Inbox</span>
+            <% if unread_inbox_count > 0 %>
+              <span class="bg-red-500 text-white rounded-full px-1.5 py-0.5 text-xs font-bold group-hover:bg-red-600">
+                <%= unread_inbox_count %>
+              </span>
+            <% end %>
+          <% end %>
+          <%= link_to main_app.edit_user_registration_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <i class="material-icons text-black dark:text-gray-300 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">settings</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Settings</span>
+          <% end %>
+          <%= link_to '#', class: 'dark-toggle flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white border-b border-gray-300 dark:border-gray-700' do %>
+            <i class="material-icons text-yellow-500 dark:text-yellow-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1"><%= current_user.dark_mode_enabled? ? 'brightness_high' : 'brightness_4' %></i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Toggle Dark Mode</span>
+          <% end %>
+          <%= link_to main_app.data_vault_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <i class="material-icons text-brown-600 dark:text-brown-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">lock</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Data Vault</span>
+          <% end %>
+          <%= link_to main_app.help_center_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <i class="material-icons text-pink-400 dark:text-pink-300 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">help</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Help Center</span>
+          <% end %>
+          <a href="#" onclick="switchToOldLayout(); return false;" class="flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white border-b border-gray-300 dark:border-gray-700">
+            <i class="material-icons text-gray-500 dark:text-gray-400 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">undo</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Back to old layout</span>
+          </a>
+          <%= link_to main_app.destroy_user_session_path, class: 'flex items-center px-4 py-2 cursor-pointer group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
+            <i class="material-icons text-black dark:text-gray-300 shrink-0 w-8 h-8 mr-2 bg-white dark:bg-gray-700 rounded-full p-1">power_settings_new</i>
+            <span class="flex-grow text-sm text-gray-900 dark:text-gray-100 group-hover:text-white">Sign Out</span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</header>
+
+<script>
+function searchAutocomplete() {
+  return {
+    query: '',
+    results: [],
+    loading: false,
+    showDropdown: false,
+    selectedIndex: -1,
+    debounceTimer: null,
+    
+    init() {
+      // Initialize with any existing query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const q = urlParams.get('q');
+      if (q) {
+        this.query = q;
+      }
+    },
+    
+    handleInput() {
+      clearTimeout(this.debounceTimer);
+      
+      if (this.query.length < 2) {
+        this.results = [];
+        this.showDropdown = false;
+        return;
+      }
+      
+      this.debounceTimer = setTimeout(() => {
+        this.fetchResults();
+      }, 300); // 300ms debounce
+    },
+    
+    handleFocus() {
+      this.showDropdown = true;
+      if (this.query.length >= 2 && this.results.length === 0) {
+        this.fetchResults();
+      }
+    },
+    
+    handleKeydown(event) {
+      if (!this.showDropdown) return;
+      
+      switch(event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          this.selectedIndex = Math.min(this.selectedIndex + 1, this.results.length - 1);
+          break;
+          
+        case 'ArrowUp':
+          event.preventDefault();
+          this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+          break;
+          
+        case 'Enter':
+          event.preventDefault();
+          if (this.selectedIndex >= 0 && this.results[this.selectedIndex]) {
+            // Navigate to selected result
+            window.location.href = this.results[this.selectedIndex].url;
+          } else {
+            // Fall back to full search results page
+            window.location.href = `<%= main_app.search_path %>?q=${encodeURIComponent(this.query)}`;
+          }
+          break;
+          
+        case 'Escape':
+          this.closeDropdown();
+          event.target.blur();
+          break;
+      }
+    },
+    
+    closeDropdown() {
+      this.showDropdown = false;
+      this.selectedIndex = -1;
+    },
+    
+    async fetchResults() {
+      if (this.query.length < 2) return;
+      
+      this.loading = true;
+      this.showDropdown = true;
+      
+      try {
+        const response = await fetch(`<%= main_app.search_autocomplete_path %>?q=${encodeURIComponent(this.query)}`, {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+        
+        if (response.ok) {
+          this.results = await response.json();
+          this.selectedIndex = -1; // Reset selection when new results arrive
+        } else {
+          console.error('Autocomplete request failed:', response.status);
+          this.results = [];
+        }
+      } catch (error) {
+        console.error('Autocomplete error:', error);
+        this.results = [];
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
+}
+
+function switchToOldLayout() {
+  const currentUrl = new URL(window.location.href);
+  if (currentUrl.hostname.includes('new.notebook.ai')) {
+    // Production: swap new -> www
+    currentUrl.hostname = currentUrl.hostname.replace('new.', 'www.');
+  } else {
+    // Localhost or other environments: redirect to www.notebook.ai with current path
+    currentUrl.hostname = 'www.notebook.ai';
+    currentUrl.port = '';
+    currentUrl.protocol = 'https:';
+  }
+  window.location.href = currentUrl.href;
+}
+</script>

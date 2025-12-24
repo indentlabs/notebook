@@ -1,0 +1,247 @@
+/* =========================
+   TIMELINE LINKED CONTENT
+   Paper-Style Card Integration
+   ========================= */
+
+/* Horizontal Scrolling Container */
+.linked-content-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+}
+
+/* Contained scrolling for linked content */
+.linked-content-breakout {
+  /* Stay within parent container bounds */
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.linked-content-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.linked-content-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.linked-content-scroll::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.linked-content-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Text Truncation Utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Linked Content Card Styling */
+.linked-content-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.linked-content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    #10b981 0%, 
+    #059669 50%, 
+    #10b981 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.linked-content-card:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow:
+    0 10px 25px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.linked-content-card:hover::before {
+  opacity: 1;
+}
+
+/* Image Placeholder Gradient - uses Tailwind classes for dark mode */
+
+/* Modern Badge Styles */
+.type-badge {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.linked-content-card:hover .type-badge {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Modern Remove Button */
+.remove-btn {
+  transition: all 0.2s ease-in-out;
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+}
+
+.remove-btn:hover {
+  transform: scale(1.1) translateY(-1px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Clean Name Card Overlay */
+.name-card-overlay {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Refined Gradient Overlay */
+.gradient-overlay {
+  background: linear-gradient(to top, 
+    rgba(0, 0, 0, 0.7) 0%, 
+    rgba(0, 0, 0, 0.4) 30%, 
+    rgba(0, 0, 0, 0.1) 60%,
+    transparent 80%
+  );
+  border-radius: 0 0 12px 12px;
+}
+
+/* Enhanced Animation for new cards */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  50% {
+    transform: translateX(-2px) scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.new-linked-card {
+  animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Card Hover States */
+.linked-content-card:hover .name-card-overlay {
+  transform: translateY(-2px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.linked-content-card:hover .type-badge {
+  transform: scale(1.05) translateY(-1px);
+}
+
+/* Paper texture for linked content */
+.linked-content-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(45deg, transparent 48%, rgba(255,255,255,0.05) 49%, rgba(255,255,255,0.05) 51%, transparent 52%),
+    linear-gradient(-45deg, transparent 48%, rgba(255,255,255,0.03) 49%, rgba(255,255,255,0.03) 51%, transparent 52%);
+  background-size: 2px 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.linked-content-card:hover::after {
+  opacity: 1;
+}
+
+/* Text Selection Prevention */
+.linked-content-card {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.linked-content-card a {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .linked-content-card {
+    width: 144px;
+    height: 80px;
+  }
+  
+  .type-badge {
+    padding: 4px 8px;
+    font-size: 0.625rem;
+  }
+  
+  .type-badge .material-icons {
+    font-size: 0.625rem;
+  }
+}
+
+/* Enhanced Focus states for accessibility */
+.linked-content-card:focus-within {
+  outline: 2px solid #10B981;
+  outline-offset: 2px;
+  transform: translateY(-2px);
+  box-shadow: 
+    0 0 0 4px rgba(16, 185, 129, 0.1),
+    0 10px 25px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.linked-content-card a:focus {
+  outline: none;
+  text-decoration: underline;
+}

@@ -1,130 +1,605 @@
-<%# react_component("PageCollectionCreationForm", {
-  all_content_types: Rails.application.config.content_types[:all].map(&:name),
-  active_content_types: page_collection.page_types
-}) %>
-
-<%= form_with(model: page_collection, local: true) do |f| %>
+<%= form_with(model: page_collection, local: true, class: 'space-y-8') do |f| %>
+  
+  <!-- Error Messages -->
   <% if page_collection.errors.any? %>
-    <div id="error_explanation">
-      <h2 style="font-size: 1.5em"><%= pluralize(page_collection.errors.count, "error") %> prohibited this Collection from being saved:</h2>
-
-      <ul class="browser-default">
-        <% page_collection.errors.full_messages.each do |message| %>
-          <li class="red-text"><%= message %></li>
-        <% end %>
-      </ul>
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 dark:bg-red-900/20 dark:border-red-900/50">
+      <div class="flex items-start">
+        <i class="material-icons text-red-400 mr-3 mt-0.5">error</i>
+        <div>
+          <h3 class="text-sm font-medium text-red-800 mb-2 dark:text-red-200">
+            <%= pluralize(page_collection.errors.count, "error") %> prevented this collection from being saved:
+          </h3>
+          <ul class="text-sm text-red-700 space-y-1 dark:text-red-300">
+            <% page_collection.errors.full_messages.each do |message| %>
+              <li class="flex items-start">
+                <span class="inline-block w-1 h-1 bg-red-400 rounded-full mt-2 mr-2 flex-shrink-0"></span>
+                <%= message %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
     </div>
   <% end %>
 
-  <div class="card">
-    <div class="card-content">
-      <div class="card-title">Basic information</div>
-
-      <div class="input-field">
-        <%= f.label :title %>
-        <%= f.text_field :title %>
-      </div>
-
-      <div class="input-field">
-        <%= f.label :subtitle %>
-        <%= f.text_field :subtitle %>
-      </div>
-
-      <div class="input-field">
-        <%= f.label :description %>
-        <%= f.text_field :description %>
+  <!-- Basic Information Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-700">
+      <div class="flex items-center">
+        <div class="p-2 bg-amber-100 rounded-lg mr-3 dark:bg-amber-900">
+          <i class="material-icons text-amber-600 dark:text-amber-400">edit</i>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Basic Information</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Set up the core details for your collection</p>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="card">
-    <div class="card-content">
-      <div class="card-title">Header image</div>
-
+    
+    <div class="p-6 space-y-6">
+      <!-- Title -->
       <div>
-        <label>This image will be used as a header for the page.</label>
-        <div class="file-field input-field">
-          <div class="blue btn">
-            <span>Upload</span>
-            <%= f.file_field :header_image %>
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Upload an image">
-          </div>
-        </div>
-        <div class="help-text">
-          Supported file types: .png, .jpg, .jpeg, .gif
-        </div>
-        <div class="help-text">
-          Don't forget to save your changes below for any new upload to take effect.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-content">
-      <div class="card-title">Acceptable pages</div>
-
-      <p class="grey-text">
-        Please check the types of pages you'll allow to be submitted or added to this in this collection. A small number of page types is recommended.
-        You can change this at any time.
-      </p>
-      <br />
-
-      <div class="row">
-        <% Rails.application.config.content_types[:all].each do |content_type| %>
-          <p class="col s12 m6 l4">
-            <label>
-              <%= f.check_box "page_types[#{content_type.name}]", checked: page_collection.page_types.include?(content_type.name) %>
-              <span class="<%= content_type.text_color %>">
-                <i class="material-icons left"><%= content_type.icon %></i>
-                <%= content_type.name.pluralize %>
-              </span>
-            </label>
-          </p>
+        <%= f.label :title, class: 'block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200' do %>
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">title</i>
+            Collection Title *
+          </span>
         <% end %>
+        <%= f.text_field :title, 
+            placeholder: 'My Awesome Collection', 
+            class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400',
+            required: true %>
+        <p class="mt-1 text-xs text-gray-500">Choose a descriptive name that captures what your collection is about</p>
+      </div>
+
+      <!-- Subtitle -->  
+      <div>
+        <%= f.label :subtitle, class: 'block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200' do %>
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">subtitles</i>
+            Subtitle
+          </span>
+        <% end %>
+        <%= f.text_field :subtitle, 
+            placeholder: 'A curated selection of my favorite pages', 
+            class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400' %>
+        <p class="mt-1 text-xs text-gray-500">Optional tagline to give more context about your collection</p>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <%= f.label :description, class: 'block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200' do %>
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">description</i>
+            Description
+          </span>
+        <% end %>
+        <%= f.text_area :description, 
+            placeholder: "Write as little or as much as you'd like! Describe what makes this collection special...", 
+            rows: 4,
+            class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200 text-sm resize-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400' %>
+        <p class="mt-1 text-xs text-gray-500">
+          <span class="flex items-center justify-between">
+            <span>Brief description for your collection. <code class="bg-gray-100 px-1 rounded text-xs dark:bg-gray-700 dark:text-gray-300">&lt;strong&gt;</code> and <code class="bg-gray-100 px-1 rounded text-xs dark:bg-gray-700 dark:text-gray-300">&lt;em&gt;</code> tags are supported.</span>
+            <span class="text-gray-400" id="char-count">0 / 500</span>
+          </span>
+        </p>
       </div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-content">
-      <div class="card-title">Privacy & collaboration</div>
-
-      <div>
-        <label>
-          Make this collection...
-          <%= f.select :privacy, [["Private", "private"], ["Public", "public"]] %>
+  <!-- Visual Settings Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-700">
+      <div class="flex items-center">
+        <div class="p-2 bg-blue-100 rounded-lg mr-3 dark:bg-blue-900">
+          <i class="material-icons text-blue-600 dark:text-blue-400">palette</i>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Visual Settings</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Customize how your collection looks</p>
+        </div>
       </div>
-
-      <br />
+    </div>
+    
+    <div class="p-6">
+      <!-- Header Image -->
       <div>
-        If you choose to make this collection public, you can also use the following controls:
-      </div>
-      <br />
-
-      <div>
-        <label>
-          <%= f.check_box :allow_submissions %>
-          <span class="black-text">
-            Allow other users to submit pages to this collection. You can then choose to approve or deny those submissions.
+        <label class="block text-sm font-medium text-gray-900 mb-4 dark:text-gray-200">
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">image</i>
+            Header Image
           </span>
         </label>
-      </div>
-
-      <div>
-        <label>
-          <%= f.check_box :auto_accept %>
-          <span class="black-text">
-            Automatically approve all incoming submissions.
-          </span>
-        </label>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Current Image Preview -->
+          <% if @page_collection.persisted? && @page_collection.header_image.attached? %>
+            <div class="md:col-span-1">
+              <div class="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700">
+                <%= link_to url_for(@page_collection.header_image), target: '_blank', class: "block w-full h-full" do %>
+                  <%= image_tag @page_collection.first_public_image, class: 'w-full h-full object-cover hover:scale-105 transition-transform duration-200' %>
+                <% end %>
+              </div>
+              <p class="text-xs text-gray-500 mt-2 text-center dark:text-gray-400">Current image</p>
+            </div>
+          <% end %>
+          
+          <!-- Upload Area -->
+          <div class="<%= @page_collection.persisted? && @page_collection.header_image.attached? ? 'md:col-span-2' : 'md:col-span-3' %>">
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors duration-200 dark:border-gray-600 dark:hover:border-gray-500">
+              <div class="space-y-4">
+                <div class="mx-auto w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center dark:bg-gray-700">
+                  <i class="material-icons text-gray-400 text-2xl">cloud_upload</i>
+                </div>
+                
+                <div>
+                  <%= f.label :header_image, class: 'cursor-pointer' do %>
+                    <span class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-amber-500 transition-colors duration-200 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600">
+                      <i class="material-icons text-sm mr-2">add_photo_alternate</i>
+                      Choose Image
+                    </span>
+                    <%= f.file_field :header_image, class: 'sr-only', accept: 'image/*' %>
+                  <% end %>
+                  <p class="text-sm text-gray-500 mt-2 dark:text-gray-400">or drag and drop</p>
+                </div>
+                
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  <p>PNG, JPG, GIF up to 10MB</p>
+                  <p>Recommended: 1200×400px for best results</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="actions">
-    <%= f.submit nil, class: "btn #{PageCollection.color} white-text" %>
+  <!-- Content Settings Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-700">
+      <div class="flex items-center">
+        <div class="p-2 bg-purple-100 rounded-lg mr-3 dark:bg-purple-900">
+          <i class="material-icons text-purple-600 dark:text-purple-400">category</i>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Content Settings</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Choose what types of content can be added to this collection</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <fieldset>
+        <legend class="block text-sm font-medium text-gray-900 mb-4 dark:text-gray-200">
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">checklist</i>
+            Allowed Page Types *
+          </span>
+        </legend>
+        
+        <!-- Select All/None Controls -->
+        <div class="flex items-center space-x-4 mb-4 p-3 bg-gray-50 rounded-lg dark:bg-gray-700">
+          <button type="button" id="select-all-types" class="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 dark:text-blue-400 dark:hover:text-blue-300">
+            Select All
+          </button>
+          <span class="text-gray-300 dark:text-gray-600">|</span>
+          <button type="button" id="select-none-types" class="text-sm font-medium text-gray-600 hover:text-gray-700 transition-colors duration-200 dark:text-gray-400 dark:hover:text-gray-300">
+            Select None
+          </button>
+          <span class="text-gray-300 dark:text-gray-600">|</span>
+          <button type="button" id="select-common-types" class="text-sm font-medium text-green-600 hover:text-green-700 transition-colors duration-200 dark:text-green-400 dark:hover:text-green-300">
+            Common Types
+          </button>
+        </div>
+        
+        <!-- Content Type Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <% Rails.application.config.content_types[:all].each do |content_type| %>
+            <div class="content-type-option">
+              <%= f.label "page_types[#{content_type.name}]", class: 'content-type-label flex items-start p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:border-gray-600' do %>
+                <%= f.check_box "page_types[#{content_type.name}]", 
+                    checked: page_collection.page_types.include?(content_type.name), 
+                    class: 'sr-only content-type-checkbox',
+                    data: { 
+                      type: content_type.name.downcase,
+                      common: %w[character location item universe].include?(content_type.name.downcase) 
+                    } %>
+                
+                <!-- Custom Checkbox -->
+                <div class="checkbox-custom w-5 h-5 border-2 border-gray-300 rounded flex items-center justify-center mr-3 flex-shrink-0 group-hover:border-gray-400 transition-colors duration-200 dark:border-gray-600 dark:group-hover:border-gray-500">
+                  <i class="material-icons text-white text-sm opacity-0 check-icon">check</i>
+                </div>
+                
+                <!-- Content Type Info -->
+                <div class="flex items-center flex-1 min-w-0">
+                  <div class="p-2 <%= content_type.color %> bg-opacity-10 rounded-lg mr-3 flex-shrink-0">
+                    <i class="material-icons <%= content_type.text_color %> text-sm">
+                      <%= content_type.icon %>
+                    </i>
+                  </div>
+                  <span class="text-sm font-medium text-gray-900 truncate dark:text-gray-200">
+                    <%= content_type.name.pluralize %>
+                  </span>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <p class="mt-4 text-xs text-gray-500">
+          <i class="material-icons text-xs mr-1">info</i>
+          Select the types of content that can be submitted to this collection. You can change this later.
+        </p>
+      </fieldset>
+    </div>
+  </div>
+
+  <!-- Privacy & Submissions Card -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 dark:border-gray-700 dark:from-gray-700 dark:to-gray-700">
+      <div class="flex items-center">
+        <div class="p-2 bg-green-100 rounded-lg mr-3 dark:bg-green-900">
+          <i class="material-icons text-green-600 dark:text-green-400">security</i>
+        </div>
+        <div>
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Privacy & Submissions</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Control who can see and contribute to your collection</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6 space-y-8">
+      <!-- Privacy Settings -->
+      <fieldset>
+        <legend class="block text-sm font-medium text-gray-900 mb-4 dark:text-gray-200">
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">visibility</i>
+            Visibility *
+          </span>
+        </legend>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Public Option -->
+          <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
+            <%= f.radio_button :privacy, 'public', class: 'peer sr-only' %>
+            <div class="flex flex-1">
+              <div class="flex flex-col">
+                <span class="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-1 flex items-center">
+                  <i class="material-icons text-sm mr-2 text-gray-400 peer-checked:text-green-600 transition-colors">public</i>
+                  Public
+                </span>
+                <span class="block text-sm text-gray-500 dark:text-gray-400">Anyone can discover and view this collection</span>
+              </div>
+            </div>
+            <!-- Active Ring -->
+            <div class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-green-500 peer-checked:bg-green-50/10 dark:peer-checked:bg-green-900/10 transition-all duration-200" aria-hidden="true"></div>
+            <!-- Checkmark -->
+            <div class="absolute top-4 right-4 text-green-600 opacity-0 peer-checked:opacity-100 transition-opacity duration-200">
+              <i class="material-icons">check_circle</i>
+            </div>
+          </label>
+
+          <!-- Private Option -->
+          <label class="relative flex cursor-pointer rounded-lg border bg-white p-4 shadow-sm focus:outline-none dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all duration-200">
+            <%= f.radio_button :privacy, 'private', class: 'peer sr-only' %>
+            <div class="flex flex-1">
+              <div class="flex flex-col">
+                <span class="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-1 flex items-center">
+                  <i class="material-icons text-sm mr-2 text-gray-400 peer-checked:text-gray-600 dark:peer-checked:text-gray-300 transition-colors">lock</i>
+                  Private
+                </span>
+                <span class="block text-sm text-gray-500 dark:text-gray-400">Only you can see this collection</span>
+              </div>
+            </div>
+            <!-- Active Ring -->
+            <div class="pointer-events-none absolute -inset-px rounded-lg border-2 border-transparent peer-checked:border-gray-500 peer-checked:bg-gray-50/10 dark:peer-checked:bg-gray-700/30 transition-all duration-200" aria-hidden="true"></div>
+            <!-- Checkmark -->
+            <div class="absolute top-4 right-4 text-gray-600 dark:text-gray-400 opacity-0 peer-checked:opacity-100 transition-opacity duration-200">
+              <i class="material-icons">check_circle</i>
+            </div>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- Submission Settings -->
+      <fieldset>
+        <legend class="block text-sm font-medium text-gray-900 mb-4 dark:text-gray-200">
+          <span class="flex items-center">
+            <i class="material-icons text-gray-400 text-sm mr-2">inbox</i>
+            Community Contributions
+          </span>
+        </legend>
+        
+        <!-- Allow Submissions Toggle -->
+        <div class="border border-gray-200 rounded-lg p-4 space-y-4 dark:border-gray-700">
+          <%= f.label :allow_submissions, class: 'flex items-start cursor-pointer' do %>
+            <%= f.check_box :allow_submissions, class: 'sr-only submission-toggle' %>
+            <div class="toggle-switch mr-3 mt-0.5"></div>
+            <div class="flex-1">
+              <div class="font-medium text-gray-900 mb-1 dark:text-gray-200">Allow submissions from other users</div>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Let the community suggest content for your collection</p>
+            </div>
+          <% end %>
+          
+          <!-- Submission Options (Initially Hidden) -->
+          <div id="submission-options" class="hidden pl-10 space-y-4 border-l-2 border-gray-200 ml-2 dark:border-gray-700">
+            <!-- Submission Guidelines -->
+            <div>
+              <label for="submission_guidelines" class="block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200">
+                Submission Guidelines
+              </label>
+              <%= f.text_area :submission_guidelines, 
+                  id: 'submission_guidelines',
+                  placeholder: "What kinds of pages are you looking for? Any specific themes or requirements?", 
+                  rows: 3,
+                  class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200 text-sm resize-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400' %>
+              <p class="mt-1 text-xs text-gray-500">
+                These guidelines will be shown to users when they submit content to your collection
+              </p>
+            </div>
+            
+            <!-- Auto Accept -->
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 dark:bg-gray-700 dark:border-amber-800">
+              <%= f.label :auto_accept, class: 'flex items-start cursor-pointer' do %>
+                <%= f.check_box :auto_accept, class: 'peer sr-only' %>
+                <div class="w-5 h-5 rounded border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 flex items-center justify-center mr-3 mt-0.5 peer-checked:bg-amber-500 peer-checked:border-amber-500 transition-all duration-200 text-white">
+                  <i class="material-icons text-sm opacity-0 peer-checked:opacity-100">check</i>
+                </div>
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900 mb-1 flex items-center dark:text-amber-400">
+                    Auto-accept all submissions
+                    <i class="material-icons text-amber-500 text-sm ml-2">bolt</i>
+                  </div>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Submissions will be automatically added without review. 
+                    <strong class="text-amber-700 dark:text-amber-400">Use with caution!</strong>
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6 bg-white rounded-xl shadow-sm border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+    <div class="text-sm text-gray-600 dark:text-gray-400">
+      <i class="material-icons text-xs mr-1">info</i>
+      You can edit all of these settings later from your collection's settings page.
+    </div>
+    
+    <div class="flex items-center space-x-3">
+      <%= link_to page_collections_path, class: "px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700" do %>
+        Cancel
+      <% end %>
+      
+      <%= f.submit 'Create Collection', class: "px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 inline-flex items-center" do %>
+        <i class="material-icons text-sm mr-2">add</i>
+        Create Collection
+      <% end %>
+    </div>
   </div>
 <% end %>
+
+<!-- Custom Styles and JavaScript -->
+<style>
+/* Custom Checkbox Styles */
+.content-type-option input[type="checkbox"]:checked + label .checkbox-custom {
+  @apply bg-blue-500 border-blue-500;
+}
+
+.content-type-option input[type="checkbox"]:checked + label .check-icon {
+  @apply opacity-100;
+}
+
+/* Toggle Switch Styles */
+.toggle-switch {
+  width: 48px;
+  height: 24px;
+  background-color: #e5e7eb;
+  @apply dark:bg-gray-700;
+  border-radius: 12px;
+  position: relative;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+  @apply dark:bg-gray-200;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+}
+
+.submission-toggle:checked + .toggle-switch,
+.privacy-toggle:checked + .toggle-switch {
+  background-color: #10b981;
+}
+
+.submission-toggle:checked + .toggle-switch::after,
+.privacy-toggle:checked + .toggle-switch::after {
+  transform: translateX(24px);
+}
+
+/* Radio Button Custom Styles */
+/* Removed to prevent conflict with Tailwind Forms */
+
+/* Character Counter */
+.char-counter {
+  transition: color 0.2s;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Content Type Selection Controls
+  const selectAllBtn = document.getElementById('select-all-types');
+  const selectNoneBtn = document.getElementById('select-none-types');
+  const selectCommonBtn = document.getElementById('select-common-types');
+  const checkboxes = document.querySelectorAll('.content-type-checkbox');
+  
+  if (selectAllBtn) {
+    selectAllBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+        updateCheckboxUI(checkbox);
+      });
+    });
+  }
+  
+  if (selectNoneBtn) {
+    selectNoneBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+        updateCheckboxUI(checkbox);
+      });
+    });
+  }
+  
+  if (selectCommonBtn) {
+    selectCommonBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = checkbox.dataset.common === 'true';
+        updateCheckboxUI(checkbox);
+      });
+    });
+  }
+  
+  // Update checkbox UI when changed
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      updateCheckboxUI(this);
+    });
+    // Initialize UI
+    updateCheckboxUI(checkbox);
+  });
+  
+  function updateCheckboxUI(checkbox) {
+    const label = checkbox.closest('label');
+    const customCheckbox = label.querySelector('.checkbox-custom');
+    const checkIcon = label.querySelector('.check-icon');
+    
+    if (checkbox.checked) {
+      customCheckbox.classList.add('bg-blue-500', 'border-blue-500');
+      customCheckbox.classList.remove('border-gray-300');
+      checkIcon.classList.remove('opacity-0');
+      checkIcon.classList.add('opacity-100');
+      label.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-20');
+    } else {
+      customCheckbox.classList.remove('bg-blue-500', 'border-blue-500');
+      customCheckbox.classList.add('border-gray-300');
+      checkIcon.classList.add('opacity-0');
+      checkIcon.classList.remove('opacity-100');
+      label.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-20');
+    }
+  }
+  
+  // Privacy Toggle
+  const privacyToggle = document.getElementById('privacy_toggle');
+
+
+  // Submission Toggle
+  const submissionToggle = document.querySelector('.submission-toggle');
+  const submissionOptions = document.getElementById('submission-options');
+
+  if (submissionToggle && submissionOptions) {
+    submissionToggle.addEventListener('change', function() {
+      if (this.checked) {
+        submissionOptions.classList.remove('hidden');
+      } else {
+        submissionOptions.classList.add('hidden');
+      }
+    });
+
+    // Initialize state
+    if (submissionToggle.checked) {
+      submissionOptions.classList.remove('hidden');
+    }
+  }
+  
+  // Character Counter for Description
+  const descriptionField = document.querySelector('textarea[name="page_collection[description]"]');
+  const charCounter = document.getElementById('char-count');
+  
+  if (descriptionField && charCounter) {
+    function updateCharCount() {
+      const count = descriptionField.value.length;
+      charCounter.textContent = `${count} / 500`;
+      
+      if (count > 400) {
+        charCounter.classList.add('text-amber-600');
+      } else if (count > 450) {
+        charCounter.classList.add('text-red-600');
+        charCounter.classList.remove('text-amber-600');
+      } else {
+        charCounter.classList.remove('text-amber-600', 'text-red-600');
+      }
+    }
+    
+    descriptionField.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initialize
+  }
+  
+  // File Upload Enhancement
+  const fileInput = document.querySelector('input[type="file"]');
+  const uploadArea = fileInput?.closest('.border-dashed');
+  
+  if (fileInput && uploadArea) {
+    // Drag and Drop
+    uploadArea.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      this.classList.add('border-blue-400', 'bg-blue-50');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+      e.preventDefault();
+      this.classList.remove('border-blue-400', 'bg-blue-50');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+      e.preventDefault();
+      this.classList.remove('border-blue-400', 'bg-blue-50');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        // Optionally show preview
+        showImagePreview(files[0]);
+      }
+    });
+    
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        showImagePreview(this.files[0]);
+      }
+    });
+  }
+  
+  function showImagePreview(file) {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        // You could add preview functionality here
+        console.log('Image selected:', file.name);
+      };
+      reader.readAsDataURL(file);
+    }
+    }
+  }
+
+
+});
+</script>

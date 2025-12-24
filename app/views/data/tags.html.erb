@@ -2,104 +2,289 @@
   showed_any_tags = false
 %>
 
-<h2 class="grey-text" style="font-size: 2rem">Your Notebook.ai tags</h2>
-<ul class="collapsible">
-  <% (Rails.application.config.content_types[:all] + [Document, Timeline]).each do |content_type| %>
-    <%
-      grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).order('tag ASC').group_by(&:tag)
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Your Tags</h1>
+  </div>
 
-      next if grouped_tags.values.length == 0
-
-      showed_any_tags = true
-    %>
-
-    <li>
-      <div class="collapsible-header">
-        <i class="material-icons <%= content_type.text_color %>"><%= content_type.icon %></i>
-        <%= content_type.name %> tags
-        <span class="badge"><%= grouped_tags.values.length %></span>
-      </div>
-      <div class="collapsible-body">
-        <% grouped_tags.each do |tag, page_list| %>
-          <div class="row" style="border-bottom: 1px solid #ccc; padding-bottom: 2em; margin-bottom: 2em">
-            <div class="col s12 m6 l4">
-              <div>
-                <%=
-                  link_to send(
-                    "#{content_type.name.downcase.pluralize}_path",
-                    slug: PageTagService.slug_for(tag)
-                  ) do
-                %>
-                  <span class="<%= content_type.color %> white-text" style="padding: 0.3em 0.4em; font-size: 1em">
-                    <%= tag %>
-                  </span>
-                <% end %>
-              </div>
-              <br />
-              <div>
-                <%= form_for tag, url: rename_tag_path(tag: tag) do |f| %>
-                  <div class="row">
-                    <div class="input-field col s12 m12 l12">
-                      <%= f.text_field :label, class: '', value: tag %>
-                      <%= f.label :label, 'Rename tag' %>
-                    </div>
-                    <div class="col s12 m12 l12">
-                      <%= f.submit 'Mass-rename', class: 'btn white blue-text', onclick: "javascript: M.toast({ html: 'Saving changes...' });" %>
-                    </div>
-                  </div>
-                <% end %>
-              </div>
-              <div style="text-align: right">
-                <%=
-                  link_to 'Delete this tag', tag_remove_path(
-                    page_type: content_type.name,
-                    slug: PageTagService.slug_for(tag)
-                  ), data: {
-                    confirm: "Are you sure? This will delete this tag and remove it from all pages."
-                  }, class: 'red-text btn red white-text'
-                %>
-              </div>
-            </div>
-            <div class="col s12 m6 l8">
-              <div class="grey-text" style="padding-top: 1em">
-                Used by <%= pluralize page_list.length, 'page' %>
-              </div>
-              <% page_list.each do |page_tag| %>
-                <div class="chip js-load-page-name" data-klass="<%= page_tag.page_type %>" data-id="<%= page_tag.page_id %>">
-                  <%= link_to send("#{page_tag.page_type.downcase}_path", page_tag.page_id) do %>
-                    <span class="<%= content_type.text_color %>">
-                      <i class="material-icons left">
-                        <%= content_type.icon %>
-                      </i>
-                    </span>
-                    <span class="name-container">
-                      <em>Loading <%= content_type.name %> name...</em>
-                    </span>
-                  <% end %>
-                  <%= link_to destroy_specific_tag_path(page_tag), method: :delete, class: 'tooltipped', data: { tooltip: 'Remove this tag from this page' }, remote: true do %>
-                    <i class="close material-icons">close</i>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
+  <!-- Header Section -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden mb-8">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Organize Your Notebook with Tags</h2>
+      <div class="prose prose-blue max-w-none">
+        <p class="text-gray-600 dark:text-gray-300">
+          Tags help you organize and find related content across your notebook. Add tags to any page and then filter your content by those tags.
+        </p>
+        
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="bg-blue-50 dark:bg-blue-900 rounded-lg p-4">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-blue-100 mb-2">How to Add Tags</h3>
+            <ul class="text-gray-600 dark:text-blue-200 space-y-2">
+              <li class="flex items-start">
+                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-200 mr-2 mt-0.5">1</span>
+                <span>Open any page in your notebook</span>
+              </li>
+              <li class="flex items-start">
+                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-200 mr-2 mt-0.5">2</span>
+                <span>Find the "Tags" field in the page's attributes</span>
+              </li>
+              <li class="flex items-start">
+                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-200 mr-2 mt-0.5">3</span>
+                <span>Type your tags separated by commas</span>
+              </li>
+            </ul>
           </div>
-        <% end %>
-
-        <div class="right-align" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">
-          <%= link_to "Delete all #{content_type.name.downcase} tags",
-            tag_remove_all_path(page_type: content_type.name),
-            data: {
-              confirm: "Are you sure? This will permanently delete ALL #{grouped_tags.values.length} tags from your #{content_type.name.pluralize.downcase}. This cannot be undone."
-            },
-            class: 'btn red white-text' %>
+          
+          <div class="bg-green-50 dark:bg-green-900 rounded-lg p-4">
+            <h3 class="text-lg font-medium text-gray-800 dark:text-green-100 mb-2">How to Use Tags</h3>
+            <ul class="text-gray-600 dark:text-green-200 space-y-2">
+              <li class="flex items-start">
+                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-200 mr-2 mt-0.5">1</span>
+                <span>Click on any tag to filter your notebook</span>
+              </li>
+              <li class="flex items-start">
+                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-200 mr-2 mt-0.5">2</span>
+                <span>Use this page to manage all your tags</span>
+              </li>
+              <li class="flex items-start">
+                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-200 mr-2 mt-0.5">3</span>
+                <span>Rename or delete tags as needed</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-    </li>
-  <% end %>
-</ul>
-
-<% if !showed_any_tags %>
-  <div class="card-panel">
-    When you create tags for your pages, they'll appear here. Come back later when you've added some!
+    </div>
   </div>
-<% end %>
+
+  <div class="space-y-6">
+    <% (Rails.application.config.content_types[:all] + [Document]).each do |content_type| %>
+      <%
+        grouped_tags = PageTag.where(page_type: content_type.name, user_id: current_user).order('tag ASC').group_by(&:tag)
+
+        next if grouped_tags.values.length == 0
+
+        showed_any_tags = true
+      %>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden" x-data="{ open: false }">
+        <div class="flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-700 cursor-pointer"
+             @click="open = !open">
+          <div class="flex items-center">
+            <div class="w-8 h-8 rounded-full bg-<%= content_type.text_color %> flex items-center justify-center mr-3">
+              <i class="material-icons text-white text-sm"><%= content_type.icon %></i>
+            </div>
+            <span class="font-medium text-gray-800 dark:text-white"><%= content_type.name %> tags</span>
+          </div>
+          <div class="flex items-center">
+            <span class="bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm rounded-full px-3 py-1"><%= grouped_tags.values.length %></span>
+            <svg :class="{'rotate-180': open}" class="w-5 h-5 ml-2 transform transition-transform duration-200 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        
+        <div x-show="open" x-cloak class="divide-y divide-gray-200 dark:divide-gray-700">
+          <% grouped_tags.each do |tag, page_list| %>
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="md:col-span-1">
+                  <div class="mb-4">
+                    <%=
+                      link_to send(
+                        "#{content_type.name.downcase.pluralize}_path",
+                        slug: PageTagService.slug_for(tag)
+                      ) do
+                    %>
+                      <span class="inline-block px-3 py-1 rounded-full text-white bg-<%= content_type.text_color %>">
+                        <%= tag %>
+                      </span>
+                    <% end %>
+                  </div>
+                  
+                  <div class="mb-6">
+                    <%= form_for tag, url: rename_tag_path(tag: tag), html: { class: "space-y-4" } do |f| %>
+                      <div class="relative">
+                        <%= f.text_field :label, class: 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white', value: tag %>
+                        <%= f.label :label, 'Rename tag', class: 'absolute -top-2 left-2 px-1 bg-white dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300' %>
+                      </div>
+                      <div>
+                        <%= f.submit 'Mass-rename', class: 'px-4 py-2 bg-white dark:bg-gray-700 border border-blue-500 dark:border-blue-400 text-blue-500 dark:text-blue-400 rounded-md hover:bg-blue-50 dark:hover:bg-gray-600 transition-colors' %>
+                      </div>
+                    <% end %>
+                  </div>
+                  
+                  <div class="text-right">
+                    <%=
+                      link_to 'Delete this tag', tag_remove_path(
+                        page_type: content_type.name,
+                        slug: PageTagService.slug_for(tag)
+                      ), data: {
+                        confirm: "Are you sure? This will delete this tag and remove it from all pages."
+                      }, class: 'px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors'
+                    %>
+                  </div>
+                </div>
+                
+                <div class="md:col-span-2">
+                  <div class="text-gray-500 dark:text-gray-400 mb-4">
+                    Used by <%= pluralize page_list.length, 'page' %>
+                  </div>
+                  
+                  <div class="flex flex-wrap gap-2">
+                    <% page_list.each do |page_tag| %>
+                      <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full pl-2 pr-1 py-1 js-load-page-name" data-klass="<%= page_tag.page_type %>" data-id="<%= page_tag.page_id %>">
+                        <%= link_to send("#{page_tag.page_type.downcase}_path", page_tag.page_id), class: "flex items-center" do %>
+                          <span class="text-<%= content_type.text_color %> mr-1">
+                            <i class="material-icons text-sm">
+                              <%= content_type.icon %>
+                            </i>
+                          </span>
+                          <span class="name-container text-gray-800 dark:text-gray-200 mr-1">
+                            <em class="text-sm">Loading <%= content_type.name %> name...</em>
+                          </span>
+                        <% end %>
+                        <%= link_to destroy_specific_tag_path(page_tag), method: :delete, class: 'ml-1 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600', data: { tooltip: 'Remove this tag from this page' }, remote: true do %>
+                          <i class="material-icons text-sm">close</i>
+                        <% end %>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Delete All Tags Button -->
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-right">
+            <%= link_to "Delete all #{content_type.name.downcase} tags",
+                tag_remove_all_path(page_type: content_type.name),
+                data: {
+                  confirm: "Are you sure? This will permanently delete ALL #{grouped_tags.values.length} tags from your #{content_type.name.pluralize.downcase}. This cannot be undone."
+                },
+                class: 'inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-800 transition-colors' %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if !showed_any_tags %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center">
+      <div class="inline-block p-4 rounded-full bg-gray-100 dark:bg-gray-700 mb-4">
+        <i class="material-icons text-gray-400 dark:text-gray-500 text-4xl">sell</i>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Tags Yet</h3>
+      <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+        When you create tags for your pages, they'll appear here. Add tags to any page to help organize your content.
+      </p>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Alpine.js components for collapsible sections
+    if (window.Alpine) {
+      // If Alpine is already initialized, we're good
+      if (!window.Alpine.initialized) {
+        window.Alpine.start();
+      }
+    } else {
+      console.warn('Alpine.js is not loaded. Collapsible sections may not work properly.');
+      
+      // Fallback for collapsible sections if Alpine.js is not available
+      document.querySelectorAll('[x-data="{ open: false }"]').forEach(function(section) {
+        const header = section.querySelector('[x-data="{ open: false }"] > div');
+        const content = section.querySelector('[x-show="open"]');
+        
+        if (header && content) {
+          content.style.display = 'none';
+          
+          header.addEventListener('click', function() {
+            if (content.style.display === 'none') {
+              content.style.display = 'block';
+              header.querySelector('svg').classList.add('rotate-180');
+            } else {
+              content.style.display = 'none';
+              header.querySelector('svg').classList.remove('rotate-180');
+            }
+          });
+        }
+      });
+    }
+    
+    // Load page names for tagged items
+    function loadPageNames() {
+      document.querySelectorAll('.js-load-page-name').forEach(function(element) {
+        const pageType = element.getAttribute('data-klass');
+        const pageId = element.getAttribute('data-id');
+        const nameContainer = element.querySelector('.name-container');
+        
+        if (!pageType || !pageId || !nameContainer) return;
+        
+        fetch(`/api/v1/page_name?type=${pageType}&id=${pageId}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data && data.name) {
+              nameContainer.textContent = data.name;
+            } else {
+              nameContainer.textContent = 'Unnamed page';
+            }
+          })
+          .catch(error => {
+            console.error('Error loading page name:', error);
+            nameContainer.textContent = 'Error loading name';
+          });
+      });
+    }
+    
+    // Load page names on page load
+    loadPageNames();
+    
+    // Set up tooltips
+    document.querySelectorAll('[data-tooltip]').forEach(element => {
+      const tooltipText = element.getAttribute('data-tooltip');
+      
+      element.addEventListener('mouseenter', function(e) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'absolute z-10 px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm tooltip';
+        tooltip.textContent = tooltipText;
+        tooltip.style.top = `${e.target.offsetTop - 40}px`;
+        tooltip.style.left = `${e.target.offsetLeft + (e.target.offsetWidth / 2) - 80}px`;
+        
+        document.body.appendChild(tooltip);
+        
+        // Position tooltip
+        const rect = tooltip.getBoundingClientRect();
+        if (rect.left < 0) {
+          tooltip.style.left = '0px';
+        } else if (rect.right > window.innerWidth) {
+          tooltip.style.left = `${window.innerWidth - rect.width - 10}px`;
+        }
+        
+        // Add arrow
+        const arrow = document.createElement('div');
+        arrow.className = 'tooltip-arrow';
+        arrow.style.position = 'absolute';
+        arrow.style.width = '10px';
+        arrow.style.height = '10px';
+        arrow.style.background = '#1F2937';
+        arrow.style.transform = 'rotate(45deg)';
+        arrow.style.bottom = '-5px';
+        arrow.style.left = 'calc(50% - 5px)';
+        tooltip.appendChild(arrow);
+      });
+      
+      element.addEventListener('mouseleave', function() {
+        const tooltip = document.querySelector('.tooltip');
+        if (tooltip) {
+          document.body.removeChild(tooltip);
+        }
+      });
+    });
+  });
+</script>

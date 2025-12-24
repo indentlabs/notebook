@@ -15,8 +15,6 @@
 //= require Chart.bundle
 //= require chartkick
 //= require autocomplete-rails
-//= require tribute
+// require tribute - Replaced with Alpine.js implementation
 //= require d3
 //= require_tree .
-
-

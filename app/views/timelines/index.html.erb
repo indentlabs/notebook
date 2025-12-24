@@ -1,188 +1,643 @@
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_header', locals: { content_type: 'Timeline', content_class: Timeline } %>
-<% end %>
+<%
+  # Timeline-specific content counts
+  content_counts_per_type = { 'Timeline' => @content.count }
+  
+  # Calculate timeline event statistics
+  timeline_event_counts = {}
+  total_events = 0
+  @content.each do |timeline|
+    event_count = timeline.timeline_events.count
+    timeline_event_counts[timeline.id] = event_count
+    total_events += event_count
+  end
+%>
 
-<% if @timelines.any? %>
-
-  <div class="row">
-
-    <div class="col s12">
-      <%= render partial: 'content/components/list_filter_bar', locals: { content_type: Timeline } %>
+<div x-data="{ 
+  showNewFolderModal: false, 
+  sidebarOpen: false,
+  showContentSidebar: <%= @folders.any? ? 'true' : 'false' %>,
+  viewMode: 'grid',
+  selectedItems: [],
+  searchQuery: '',
+  isLoading: false
+}" class="min-h-screen flex bg-gray-50 dark:bg-gray-900">
+  
+  <!-- Content Sidebar -->
+  <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+    <!-- Sidebar Header -->
+    <div class="px-6 py-6 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-lg <%= @content_type_class.color %> flex items-center justify-center">
+            <i class="material-icons text-white"><%= @content_type_class.icon %></i>
+          </div>
+        </div>
+        <div class="ml-4">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Your <%= @content_type_name.pluralize %></h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400"><%= pluralize @content.count, 'timeline' %></p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="js-content-cards-list row">
-    <% @timelines.each do |timeline| %>
-      <div class="col s12 js-content-card-container">
+    <!-- Quick Stats - Timeline specific -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= @content.count %></div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Timelines</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(total_events) %></div>
+          <div class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">Events</div>
+        </div>
+      </div>
+    </div>
 
-        <%= link_to edit_timeline_path(timeline) do %>
-          <div class="hoverable card">
-            <div class="card-image green"  style="height: 80px; overflow: hidden;">
-              <span class="card-title">
-                <i class="material-icons left" style="margin-top: 5px"><%= Timeline.icon %></i>
-                <%= timeline.name.presence || 'Untitled Timeline' %>
-              </span>
-              <!--
-              <a class="btn-floating halfway-fab waves-effect waves-light red">
-                <i class="material-icons">search</i>
-              </a>
-              -->
-            </div>
-            <div class="card-content black-text js-content-name">
-              <% if timeline.universe %>
-                <p class="right">
-                  <%= link_to timeline.universe, class: "#{Universe.text_color}" do %>
-                    <i class="material-icons left"><%= Universe.icon %></i>
-                    <%= timeline.universe.name %>
-                  <% end %>
-                </p>
+    <!-- Folders Section -->
+    <div class="flex-1 overflow-y-auto">
+      <% if @folders.any? %>
+        <div class="px-6 py-4">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white">Folders</h3>
+            <button 
+              @click="showNewFolderModal = true"
+              class="inline-flex items-center p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+            >
+              <i class="material-icons text-lg">add</i>
+            </button>
+          </div>
+          
+          <div class="space-y-1">
+            <% @folders.each do |folder| %>
+              <%= link_to folder, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" do %>
+                <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"><%= Folder.icon %></i>
+                <span class="truncate"><%= folder.title %></span>
               <% end %>
-              <p>
-                <strong><%= timeline.subtitle %></strong>
-              </p>
-              <p>
-                <%= timeline.description %>
-              </p>
-              <p class="grey-text">
-                Last edited <%= time_ago_in_words timeline.updated_at %> ago
-              </p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
 
-              <div>
-                <% timeline.page_tags.each do |page_tag| %>
-                  <%= link_to params.permit(:tag).merge({ tag: PageTagService.slug_for(page_tag.tag) }) do %>
-                    <span class="new badge <%= params[:tag] == page_tag.slug ? Timeline.color : 'grey' %> right" data-badge-caption="<%= page_tag.tag %>"></span>
-                  <% end %>
-                <% end %>
-              </div>
-
-              <div class="clearfix"></div>
-
-            </div>
-            <div class="card-action">
-              <% if timeline.readable_by?(current_user) %>
-                <%= link_to timeline_path(timeline), class: 'blue-text left' do %>
-                  <i class="material-icons left"><%= Timeline.icon %></i>
-                  View
-                <% end %>
+      <!-- Recently Edited Timelines -->
+      <% if @content.any? %>
+        <% recent_timelines = @content.sort_by(&:updated_at).reverse.first(5) %>
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Recently Edited</h3>
+          <div class="space-y-1">
+            <% recent_timelines.each do |timeline| %>
+              <%= link_to timeline, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" do %>
+                <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-notebook-blue <%= timeline.text_color %>"><%= timeline.icon %></i>
+                <div class="flex-1 min-w-0">
+                  <span class="truncate block"><%= timeline.name %></span>
+                  <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span class="truncate"><%= distance_of_time_in_words(timeline.updated_at, Time.current) %> ago</span>
+                    <% if timeline_event_counts[timeline.id] > 0 %>
+                      <span class="mx-1">•</span>
+                      <span><%= pluralize timeline_event_counts[timeline.id], 'event' %></span>
+                    <% end %>
+                  </div>
+                </div>
               <% end %>
-              <% if timeline.updatable_by?(current_user) %>
-                <%= link_to edit_timeline_path(timeline), class: 'green-text right' do %>
-                  <i class="material-icons left">edit</i>
-                  Edit
-                <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Timeline Event Type Breakdown -->
+      <% if @content.any? && total_events > 0 %>
+        <%
+          event_type_counts = Hash.new(0)
+          @content.each do |timeline|
+            timeline.timeline_events.each do |event|
+              type = event.respond_to?(:event_type) ? (event.event_type || 'Unspecified') : 'Unspecified'
+              event_type_counts[type] += 1
+            end
+          end
+        %>
+        <% if event_type_counts.any? %>
+          <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Event Types</h3>
+            <div class="space-y-2">
+              <% event_type_counts.sort_by { |_, count| -count }.first(5).each do |event_type, count| %>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-gray-700 dark:text-gray-300 truncate"><%= event_type.humanize %></span>
+                  <span class="text-gray-900 dark:text-white font-medium"><%= count %></span>
+                </div>
               <% end %>
-              <div class="clearfix"></div>
+              <% if event_type_counts.size > 5 %>
+                <div class="text-xs text-gray-500 dark:text-gray-400 italic">And <%= event_type_counts.size - 5 %> more types...</div>
+              <% end %>
             </div>
           </div>
         <% end %>
+      <% end %>
 
-      </div>
-    <% end %>
-  </div>
-  
-  <% if @show_scope_notice %>
-    <p class="center help-text">
-      Only showing timelines
-      in the <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %> universe.
-      <%= link_to(
-        "See timelines from all universes.", 
-        '?universe=all', 
-        class: Timeline.color + '-text')
-      %>
-    </p>
-  <% end %>
-
-  <br />
-  <br />
-  <br />
-  <br />
-
-<% elsif @timelines.empty? %>
-
-  <div class="row">
-    <% if false && @current_user_content.fetch('Timeline', []).count > 0 %>
-      <div class="col s12 center">
-        <%# render partial: 'content/components/list_filter_bar', locals: { content_type: Timeline } %>
-      </div>
-    <% end %>
-
-    <div class="col s12 m8 offset-m2">
-      <div class="hoverable card center" style="margin: 20px 0 0 0; padding: 50px 0; border-bottom: 10px solid <%= Timeline.hex_color %>">
-        <h4>
-          You haven't created any timelines
-          <% if @universe_scope %>
-            in the <%= link_to @universe_scope.name, @universe_scope %> universe
-          <% end %>
-          <% if params.key?(:favorite_only) || params.key?(:slug) %>
-            that match these filters
-          <% end %>
-          yet!
-        </h4>
-        <h1>
-          <i class="material-icons <%= Timeline.text_color %>" style="font-size: 200%">
-            <%= Timeline.icon %>
-          </i>
-        </h1>
-        <p>
-          <%= t("content_descriptions.timeline") %>
-        </p>
-
-        <% if current_user.can_create?(Timeline) || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: 'Timeline') %>
-          <%= link_to "Create your first timeline", new_timeline_path(), class: "btn-large #{Timeline.color} darken-1" %>
-        <% else %>
-          <%= link_to "Upgrade to Premium to create your first timeline", subscription_path %>
-        <% end %>
-
-        <p class="grey-text text-lighten-2" style="padding-top: 20px;">
-          <% 5.times { %><i class="material-icons"><%= Timeline.icon %></i>&nbsp;&nbsp;&nbsp;&nbsp;<%}%>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <% if @universe_scope %>
-      <div class="col s12 m4 offset-m4">
-        <div class="hoverable card">
-          <div class="card-content">
-            <div class="card-title">
-              Focus on another universe
+      <!-- Additional Stats -->
+      <% if @content.any? %>
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+          <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Activity</h3>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">Total events</span>
+              <span class="text-gray-900 dark:text-white"><%= number_with_delimiter(total_events) %></span>
             </div>
-            <p>
-              You're currently focused on the 
-              <%= link_to @universe_scope.name, @universe_scope, class: Universe.color + '-text' %>
-              universe and only seeing timelines in that
-              universe.
-            </p>
-            <br />
-            <p>
-              You can change what universe you're focused on by selecting a different one in the sidebar.
-            </p>
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">Avg events/timeline</span>
+              <span class="text-gray-900 dark:text-white"><%= total_events > 0 ? (total_events.to_f / @content.count).round(1) : 0 %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600 dark:text-gray-400">Last edited</span>
+              <span class="text-gray-900 dark:text-white">
+                <%= distance_of_time_in_words(@content.map(&:updated_at).max, Time.current) %> ago
+              </span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col lg:pt-0 pt-16" :class="{ 'lg:ml-0': !showContentSidebar }">
+    <!-- Hero Header -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm">
+      <div class="relative">
+        <%= image_tag asset_path("card-headers/timelines.webp"), class: 'h-32 w-full object-cover lg:h-48' %>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20"></div>
+      </div>
+      
+      <div class="px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-5">
+            <!-- Content Sidebar Toggle Button -->
+            <button 
+              @click="showContentSidebar = !showContentSidebar"
+              class="hidden lg:inline-flex items-center p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              title="Toggle content sidebar"
+            >
+              <i class="material-icons text-xl" x-text="showContentSidebar ? 'menu_open' : 'menu'"></i>
+            </button>
+            
+            <div class="flex-shrink-0">
+              <% if @universe_scope %>
+                <%= link_to @universe_scope do %>
+                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-16 w-24 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-32 object-cover' %>
+                <% end %>
+              <% else %>
+                <%= image_tag current_user.image_url, class: 'h-16 w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
+              <% end %>
+            </div>
+            
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
+                <%= @content_type_name.pluralize %>
+              </h1>
+              <p class="text-gray-600 dark:text-gray-400 mt-1">
+                <% if @universe_scope %>
+                  in <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color} font-medium hover:underline" %>
+                <% else %>
+                  by <%= link_to current_user.display_name, current_user, class: "#{User.text_color} font-medium hover:underline" %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-3">
+            <!-- Timeline-specific options (no template customization) -->
+
+
+            <% if current_user.can_create?(@content_type_class) %>
+              <%= link_to new_polymorphic_path(@content_type_class) do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= @content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <i class="material-icons text-lg mr-2">add</i>
+                  <span class="hidden sm:inline">New <%= @content_type_name %></span>
+                  <span class="sm:hidden">New</span>
+                </button>
+              <% end %>
+            <% else %>
+              <%= link_to subscription_path do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <span class="hidden sm:inline">Upgrade to create <%= @content_type_name.pluralize %></span>
+                  <span class="sm:hidden">Upgrade</span>
+                </button>
+              <% end %>
+            <% end %>
           </div>
         </div>
       </div>
-    <% end %>
-  </div>
-<% end %>
-
-<div class="row">
-  <div class="col s12">
-    <h4 class="grey-text center">About the timeline editor</h4>
-    <div class="card">
-      <div class="card-image">
-        <img src="https://i.imgur.com/cCb5RBB.png">
-      </div>
-      <div class="card-content">
-        <p>
-          Create and manage timelines for your worlds and stories in the new Notebook.ai Timeline Editor. When you get started, you'll have a blank timeline that you can
-          add an unlimited number of events to. Each event can have a title, description, and notes &mdash; and you can link any of your worldbuilding pages to specific events.
-        </p>
-        <br />
-        <p>
-          Events can be reordered however you'd like and you can add custom time labels on each event, meaning you can be as specific or as vague as you'd like when creating your
-          timeline. Perfect for getting a general timeline built and then coming back to make things more specific afterwards!
-        </p>
-      </div>
     </div>
-  </div>
+
+    <!-- Filters & Controls -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Search Input -->
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="material-icons text-gray-400 text-lg">search</i>
+            </div>
+            <input 
+              x-model="searchQuery"
+              type="text" 
+              placeholder="Search timelines..."
+              class="block w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+            />
+            <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                <i class="material-icons text-lg">clear</i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Sort Dropdown -->
+          <div data-controller="dropdown" class="relative">
+            <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-lg mr-2">sort</i>
+              <% 
+                sort_labels = {
+                  'updated_at' => 'Recently edited',
+                  'alphabetical' => 'Alphabetical',
+                  'created_at' => 'Date created',
+                  'events' => 'Most events'
+                }
+                current_sort = params[:sort] || 'updated_at'
+              %>
+              <%= sort_labels[current_sort] || 'Sort' %>
+              <%= chevron_down %>
+            </button>
+            <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+              <div class="py-1">
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
+                  Recently edited
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'alphabetical'}" do %>
+                  Alphabetical
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'created_at'}" do %>
+                  Date created
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'events' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'events'}" do %>
+                  Most events
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tag Filter -->
+          <% if true # Always show tag filter so users can start tagging %>
+            <div data-controller="dropdown" class="relative">
+              <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
+                <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+                <button 
+                  data-action="dropdown#toggle click@window->dropdown#hide" 
+                  type="button"
+                  class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' %>"
+                >
+                  <i class="material-icons text-lg mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : @content_type_class.text_color %>">label</i>
+                  Tags
+                  <% if @filtered_page_tags && @filtered_page_tags.any? %>
+                    <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
+                      <%= @filtered_page_tags.count %>
+                    </span>
+                  <% end %>
+                  <%= chevron_down %>
+                </button>
+                <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                  <div class="p-4">
+                    <div class="space-y-3">
+                      <% if @page_tags && @page_tags.any? %>
+                        <% @page_tags.each do |page_tag| %>
+                          <div class="flex items-center">
+                            <input 
+                              id="filter-tag-<%= page_tag.id %>" 
+                              name="slug[]" 
+                              <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %> 
+                              value="<%= page_tag.slug %>" 
+                              type="checkbox" 
+                              class="h-4 w-4 border-gray-300 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
+                            >
+                            <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                              <%= page_tag.tag %>
+                            </label>
+                          </div>
+                        <% end %>
+                        <div class="pt-2">
+                          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                            Apply filters
+                          </button>
+                        </div>
+                      <% else %>
+                        <div class="text-center text-gray-500 py-4">
+                          <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
+                          <p class="text-sm">No tags yet</p>
+                          <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <!-- View Mode Toggle -->
+          <div class="hidden sm:flex border border-gray-300 dark:border-gray-600 rounded-lg">
+            <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg focus:outline-none">
+              <i class="material-icons text-lg">grid_view</i>
+            </button>
+            <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-r-lg focus:outline-none">
+              <i class="material-icons text-lg">view_list</i>
+            </button>
+          </div>
+          
+          <span class="text-sm text-gray-500">
+            <% if (@total_content_count || 0) > 0 %>
+              <span x-text="searchQuery === '' ? 'Showing <%= @content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
+              <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
+            <% else %>
+              <span>No items</span>
+            <% end %>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Active Filters -->
+      <% if @filtered_page_tags && @filtered_page_tags.any? %>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-sm text-gray-500 dark:text-gray-400">Filtered by:</span>
+          <% @filtered_page_tags.each do |page_tag| %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
+              <%= page_tag.tag %>
+              <%= link_to(polymorphic_path(@content_type_class, params.permit(:sort, :favorite_only).merge({ slug: Array(params.fetch(:slug, [])) - [page_tag.slug] }))) do %>
+                <button class="ml-1 hover:text-blue-600 dark:hover:text-blue-400">
+                  <i class="material-icons text-sm">close</i>
+                </button>
+              <% end %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="flex-1 bg-gray-50 dark:bg-gray-900">
+      <% if @content.any? %>
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="p-6 lg:p-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            <% @content.each do |timeline| %>
+              <div
+                class="group relative"
+                x-show="searchQuery === '' || '<%= timeline.name.downcase %>'.includes(searchQuery.toLowerCase())"
+                x-data="{
+                  isFavorite: <%= timeline.favorite? %>,
+                  isLoading: false
+                }"
+              >
+                <%= link_to timeline, class: "block" do %>
+                  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+                    <%
+                      timeline_image = timeline.random_image_including_private(format: :medium) || asset_path("card-headers/timelines.jpg")
+                    %>
+                    <%= image_tag timeline_image, class: 'h-48 w-full object-cover' %>
+                    <div class="p-4">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1 min-w-0 pr-8">
+                          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide <%= timeline.text_color %> truncate">
+                            Timeline • <%= pluralize timeline_event_counts[timeline.id], 'event' %>
+                          </h3>
+                          <h2 class="mt-1 text-lg font-semibold text-gray-900 dark:text-white line-clamp-2" title="<%= timeline.name %>">
+                            <%= timeline.name %>
+                          </h2>
+                          <% if timeline.description.present? %>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                              <%= timeline.description %>
+                            </p>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+                <% if timeline.respond_to?(:favorite?) %>
+                  <button
+                    @click.prevent="async function() {
+                      isLoading = true;
+                      try {
+                        const result = await window.toggleItemFavorite('<%= timeline.id %>', 'timelines');
+                        if (result.success) {
+                          isFavorite = !isFavorite;
+                        }
+                      } catch (error) {
+                        console.error('Error:', error);
+                      } finally {
+                        isLoading = false;
+                      }
+                    }()"
+                    :disabled="isLoading"
+                    class="absolute top-4 right-4 group p-1 text-xl rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-notebook-blue dark:hover:bg-blue-900 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
+                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                    title="Toggle favorite"
+                  >
+                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 group-hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                  </button>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" style="display: none;" class="p-6 lg:p-8">
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <% @content.each_with_index do |timeline, index| %>
+              <div
+                class="<%= 'border-t border-gray-200 dark:border-gray-700' if index > 0 %> hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative"
+                x-show="searchQuery === '' || '<%= timeline.name.downcase %>'.includes(searchQuery.toLowerCase())"
+                x-data="{
+                  isFavorite: <%= timeline.favorite? %>,
+                  isLoading: false
+                }"
+              >
+                <%= link_to timeline, class: "flex items-center p-4 space-x-4 pr-16" do %>
+                  <div class="flex-shrink-0">
+                    <%
+                      timeline_image = timeline.random_image_including_private(format: :small) || asset_path("card-headers/timelines.jpg")
+                    %>
+                    <%= image_tag timeline_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate" title="<%= timeline.name %>"><%= timeline.name %></h3>
+                    <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
+                      <span class="<%= timeline.text_color %>">Timeline</span>
+                      <span>•</span>
+                      <span><%= pluralize timeline_event_counts[timeline.id], 'event' %></span>
+                      <% if timeline.description.present? %>
+                        <span>•</span>
+                        <span class="truncate"><%= timeline.description %></span>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
+                  </div>
+                <% end %>
+                <% if timeline.respond_to?(:favorite?) %>
+                  <button
+                    @click.prevent="async function() {
+                      isLoading = true;
+                      try {
+                        const result = await window.toggleItemFavorite('<%= timeline.id %>', 'timelines');
+                        if (result.success) {
+                          isFavorite = !isFavorite;
+                        }
+                      } catch (error) {
+                        console.error('Error:', error);
+                      } finally {
+                        isLoading = false;
+                      }
+                    }()"
+                    :disabled="isLoading"
+                    class="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 text-lg rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                    title="Toggle favorite"
+                  >
+                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 hover:text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                  </button>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="flex-1 flex items-center justify-center p-8 min-h-96">
+          <div class="max-w-4xl w-full">
+            <!-- Header -->
+            <div class="text-center mb-8">
+              <div class="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center mb-4 shadow-sm">
+                <i class="material-icons text-3xl text-gray-500 dark:text-gray-400"><%= @content_type_class.icon %></i>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to your <%= @content_type_name.pluralize %></h2>
+              <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Timelines help you organize the events in your world chronologically. Create your first timeline to start mapping out your story's progression.
+              </p>
+            </div>
+
+            <!-- Action Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl mx-auto mb-8">
+              <!-- Create Timeline Card -->
+              <% if current_user.can_create?(@content_type_class) %>
+                <div class="group relative">
+                  <%= link_to new_polymorphic_path(@content_type_class), class: "block h-full" do %>
+                    <div class="bg-gradient-to-br from-gray-50 to-<%= @content_type_class.color.split('-')[1] %>-50 dark:bg-gray-800 hover:from-<%= @content_type_class.color.split('-')[1] %>-50 hover:to-<%= @content_type_class.color.split('-')[1] %>-100 dark:hover:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-<%= @content_type_class.color.split('-')[1] %>-400 dark:hover:border-<%= @content_type_class.color.split('-')[1] %>-500 rounded-lg transition-all duration-200 overflow-hidden">
+                      <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-<%= @content_type_class.color.split('-')[1] %>-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="text-center relative z-10">
+                          <div class="bg-white/90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
+                            <i class="material-icons text-3xl text-gray-600 dark:text-<%= @content_type_class.color.split('-')[1] %>-300 group-hover:<%= @content_type_class.text_color %> transition-colors"><%= @content_type_class.icon %></i>
+                          </div>
+                          <div class="text-xs font-medium text-gray-500 dark:text-<%= @content_type_class.color.split('-')[1] %>-300 uppercase tracking-wider">Create</div>
+                        </div>
+                      </div>
+                      <div class="p-4 dark:bg-gray-800">
+                        <div class="text-center">
+                          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wide mb-1">
+                            New
+                          </h3>
+                          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <%= @content_type_name %>
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="group relative">
+                  <%= link_to subscription_path, class: "block h-full" do %>
+                    <div class="bg-gradient-to-br from-gray-50 to-blue-50 dark:bg-gray-800 hover:from-blue-50 hover:to-blue-100 dark:hover:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 rounded-lg transition-all duration-200 overflow-hidden">
+                      <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-blue-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="text-center relative z-10">
+                          <div class="bg-white/90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
+                            <i class="material-icons text-3xl text-gray-600 dark:text-blue-300 group-hover:text-blue-600 dark:group-hover:text-blue-200 transition-colors">lock</i>
+                          </div>
+                          <div class="text-xs font-medium text-gray-500 dark:text-blue-300 uppercase tracking-wider">Premium</div>
+                        </div>
+                      </div>
+                      <div class="p-4 dark:bg-gray-800">
+                        <div class="text-center">
+                          <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wide mb-1">
+                            Upgrade to create
+                          </h3>
+                          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <%= @content_type_name.pluralize %>
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+
+              <!-- Learn About Timelines Card -->
+              <div class="group relative">
+                <%= link_to "#", class: "block h-full" do %>
+                  <div class="bg-gradient-to-br from-gray-50 to-purple-50 dark:bg-gray-800 hover:from-purple-50 hover:to-purple-100 dark:hover:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500 rounded-lg transition-all duration-200 overflow-hidden">
+                    <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-purple-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center relative overflow-hidden">
+                      <div class="text-center relative z-10">
+                        <div class="bg-white/90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
+                          <i class="material-icons text-3xl text-gray-600 dark:text-purple-300 group-hover:text-purple-600 dark:group-hover:text-purple-200 transition-colors">help_outline</i>
+                        </div>
+                        <div class="text-xs font-medium text-gray-500 dark:text-purple-300 uppercase tracking-wider">Guide</div>
+                      </div>
+                    </div>
+                    <div class="p-4 dark:bg-gray-800">
+                      <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wide mb-1">
+                          Learn about
+                        </h3>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                          Timelines
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </main>
 </div>
+
+<script>
+  // Toggle favorite function if not already defined
+  if (typeof window.toggleItemFavorite === 'undefined') {
+    window.toggleItemFavorite = async function(itemId, itemType) {
+      try {
+        const response = await fetch(`/${itemType}/${itemId}/toggle_favorite`, {
+          method: 'PATCH',
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return { success: true, data };
+      } catch (error) {
+        console.error('Error toggling favorite:', error);
+        return { success: false, error };
+      }
+    };
+  }
+</script>

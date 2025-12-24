@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# Script to cleanly restart the Rails development server
+# This helps resolve "removed from module tree" errors
+
+echo "Stopping Spring..."
+spring stop 2>/dev/null || true
+
+echo "Clearing Rails cache..."
+rails tmp:clear 2>/dev/null || true
+
+echo "Clearing bootsnap cache..."
+rm -rf tmp/cache/bootsnap* 2>/dev/null || true
+
+echo "Development environment reset complete!"
+echo "You can now restart your Rails server with: rails s"

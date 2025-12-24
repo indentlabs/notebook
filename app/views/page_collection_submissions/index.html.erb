@@ -1,63 +1,343 @@
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          You have <%= pluralize @page_collection_submissions.count, 'pending submission' %>
-          to
-          <%= link_to @page_collection.name, @page_collection, class: "#{PageCollection.text_color}" %>.
+<!-- Main Container -->
+<div class="min-h-screen bg-gray-50">
+  
+  <!-- Hero Section -->
+  <div class="<%= PageCollection.color %> text-white relative">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="mb-6">
+        <div class="flex items-center space-x-2 text-white/80 text-sm">
+          <%= link_to "Collections", page_collections_path, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <%= link_to @page_collection.title, @page_collection, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <span class="text-white font-medium">Submission Manager</span>
         </div>
-        <p>
-          Submitters will be notified if you accept their content.
-        </p>
+      </nav>
+      
+      <!-- Header Content -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 bg-white/20 rounded-lg backdrop-blur-sm flex items-center justify-center">
+            <i class="material-icons text-white text-2xl">assignment</i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white mb-1">Submission Manager</h1>
+            <p class="text-white/90">
+              <% if @page_collection_submissions.count > 0 %>
+                <%= pluralize @page_collection_submissions.count, 'submission' %> waiting for review
+              <% else %>
+                All submissions reviewed
+              <% end %>
+            </p>
+          </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="hidden lg:flex items-center space-x-6 bg-white/15 backdrop-blur-sm rounded-lg px-6 py-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-white"><%= @page_collection_submissions.count %></div>
+            <div class="text-white/70 text-sm">Pending</div>
+          </div>
+          <div class="w-px h-8 bg-white/30"></div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-white"><%= @page_collection.accepted_submissions.count %></div>
+            <div class="text-white/70 text-sm">Published</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  <% @page_collection_submissions.each do |page_collection_submission| %>
-    <div class="col s12 m12 l12">
-      <% content = page_collection_submission.content %>
-      <div class="horizontal card <%= content.class.color %> lighten-5 black-text">
-        <div class="card-image">
-          <%= link_to content do %>
-            <%= image_tag content.first_public_image %>
-          <% end %>
-        </div>
-        <div class="card-stacked">
-          <div class="card-content">
-            <div class="card-title black-text">
-              <i class="material-icons left <%= content.class.text_color %>"><%= content.class.icon %></i>
-              <%= content.name %>
-            </div>
-            <blockquote>
-              <%= simple_format page_collection_submission.explanation, class: 'black-text' %>
-            </blockquote>
-            <div>
-              Submitted by
-              <%= link_to content.user, class: "#{User.text_color} text-lighten-3" do %>
-                <%= content.user.display_name %>
-              <% end %>
-              <%= time_ago_in_words page_collection_submission.submitted_at %> ago
+  
+  <!-- Content Section -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    
+    <% if @page_collection_submissions.any? %>
+      <!-- Submission Carousel -->
+      <div class="relative">
+        <!-- Progress Indicator -->
+        <div class="mb-8 flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <span class="text-sm font-medium text-gray-700">
+              Page <span id="current-submission">1</span> of <%= @page_collection_submissions.count %>
+            </span>
+            <div class="bg-gray-200 rounded-full h-2 w-48">
+              <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: <%= (1.0 / @page_collection_submissions.count * 100).round(1) %>%"></div>
             </div>
           </div>
-          <div class="card-action">
-            <%= link_to approve_page_collection_submission_path(page_collection_submission), class: 'btn green white-text' do %>
-              <i class="material-icons left">check</i>
-              Approve
-            <% end %>
-            <%= link_to pass_page_collection_submission_path(page_collection_submission), class: 'btn red white-text right' do %>
-              <i class="material-icons left">close</i>
-              Pass
+          
+          <!-- Navigation Controls -->
+          <div class="flex items-center space-x-2">
+            <button id="prev-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200" disabled>
+              <i class="material-icons">chevron_left</i>
+            </button>
+            <button id="next-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+              <i class="material-icons">chevron_right</i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Carousel Container -->
+        <div class="relative overflow-hidden rounded-2xl shadow-lg">
+          <div id="carousel-track" class="flex transition-transform duration-500 ease-in-out">
+            <% @page_collection_submissions.each_with_index do |submission, index| %>
+              <% content = submission.content %>
+              <div class="carousel-slide w-full flex-shrink-0 <%= 'hidden' unless index == 0 %>" data-slide="<%= index %>" data-submission-id="<%= submission.id %>">
+                
+                <!-- Large Submission Card -->
+                <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                    
+                    <!-- Content Preview -->
+                    <div class="relative h-96 lg:h-auto bg-gray-50 overflow-hidden">
+                      <%= link_to content, class: "block w-full h-full group", target: "_blank" do %>
+                        <% if content.respond_to?(:first_public_image) && content.first_public_image.present? %>
+                          <%= image_tag content.first_public_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+                        <% else %>
+                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                            <i class="material-icons <%= content.class.text_color %> text-8xl opacity-40">
+                              <%= content.class.icon %>
+                            </i>
+                          </div>
+                        <% end %>
+                      <% end %>
+                      
+                      <!-- Content Type Badge -->
+                      <div class="absolute top-6 left-6">
+                        <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-white shadow-sm <%= content.class.text_color %>">
+                          <i class="material-icons text-sm mr-2"><%= content.class.icon %></i>
+                          <%= content.class.name %>
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <!-- Content Details -->
+                    <div class="p-8 lg:p-12">
+                      <!-- Header -->
+                      <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                          <span class="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                            Submission <%= index + 1 %> of <%= @page_collection_submissions.count %>
+                          </span>
+                          <span class="text-sm text-gray-500">
+                            <%= time_ago_in_words submission.submitted_at %> ago
+                          </span>
+                        </div>
+                        
+                        <h2 class="text-3xl font-serif font-bold text-gray-900 leading-tight mb-4">
+                          <%= link_to content.name, content, target: "_blank", class: "hover:text-blue-600 transition-colors duration-200" %>
+                        </h2>
+                        
+                        <!-- Author -->
+                        <div class="flex items-center mb-6">
+                          <%= link_to content.user, target: "_blank", class: "flex items-center space-x-3 hover:opacity-75 transition-opacity duration-200" do %>
+                            <%= image_tag content.user.image_url(size: 48), class: "w-12 h-12 rounded-full border border-gray-300" %>
+                            <div>
+                              <div class="text-lg font-medium text-gray-900">by <%= content.user.display_name %></div>
+                              <div class="text-sm text-gray-600">Author</div>
+                            </div>
+                          <% end %>
+                        </div>
+                      </div>
+                      
+                      <!-- Content Preview -->
+                      <% if content.respond_to?(:description) && content.description.present? %>
+                        <div class="mb-8">
+                          <h4 class="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">Content Preview</h4>
+                          <p class="text-gray-700 leading-relaxed line-clamp-4">
+                            <%= truncate(content.description, length: 300, separator: ' ') %>
+                          </p>
+                        </div>
+                      <% end %>
+                      
+                      <!-- Submission Message -->
+                      <% if submission.explanation.present? %>
+                        <div class="mb-8 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg">
+                          <h4 class="text-sm font-semibold text-orange-900 mb-2">Submission Note</h4>
+                          <blockquote class="text-orange-800 italic leading-relaxed">
+                            "<%= submission.explanation %>"
+                          </blockquote>
+                        </div>
+                      <% end %>
+                      
+                      <!-- Action Buttons -->
+                      <div class="border-t border-gray-200 pt-6">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                          <%= link_to approve_page_collection_submission_path(submission), 
+                              method: :get,
+                              class: "flex-1 inline-flex items-center justify-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white text-lg font-semibold rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md approve-btn",
+                              data: { submission_id: submission.id } do %>
+                            <i class="material-icons mr-2">check_circle</i>
+                            Publish this page
+                          <% end %>
+                          
+                          <%= link_to pass_page_collection_submission_path(submission), 
+                              method: :get,
+                              class: "flex-1 inline-flex items-center justify-center px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white text-lg font-semibold rounded-lg transition-colors duration-200",
+                              data: { confirm: "Pass on this submission?" } do %>
+                            <i class="material-icons mr-2">close</i>
+                            Decline
+                          <% end %>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                          <%= link_to content, 
+                              target: "_blank",
+                              class: "inline-flex items-center text-blue-600 hover:text-blue-800 font-medium" do %>
+                            <i class="material-icons text-sm mr-1">open_in_new</i>
+                            Review full content
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             <% end %>
           </div>
         </div>
       </div>
-    </div>
-  <% end %>
-
-  <div class="col s12">
-    <p class="center">
-      <%= link_to "Back to #{@page_collection.title}", @page_collection, class: "#{PageCollection.text_color}" %>
-    </p>
+      
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-16">
+        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
+          <i class="material-icons text-gray-400 text-4xl">assignment_turned_in</i>
+        </div>
+        <h3 class="text-2xl font-serif font-bold text-gray-900 mb-2">All Submissions Reviewed</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+          You're all caught up! There are no submissions waiting for review at this time.
+        </p>
+        <%= link_to @page_collection, 
+            class: "inline-flex items-center px-6 py-3 #{PageCollection.color} hover:opacity-90 text-white font-medium rounded-lg transition-opacity duration-200" do %>
+          <i class="material-icons text-sm mr-2">arrow_back</i>
+          Back to Collection
+        <% end %>
+      </div>
+    <% end %>
+    
+    <!-- Navigation Footer -->
+    <% if @page_collection_submissions.any? %>
+      <div class="mt-12 pt-8 border-t border-gray-200 text-center">
+        <%= link_to @page_collection, 
+            class: "inline-flex items-center px-6 py-3 #{PageCollection.color} hover:opacity-90 text-white font-medium rounded-lg transition-opacity duration-200" do %>
+          <i class="material-icons text-sm mr-2">arrow_back</i>
+          Back to <%= @page_collection.title %>
+        <% end %>
+      </div>
+    <% end %>
+    
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const slides = document.querySelectorAll('.carousel-slide');
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+  
+  const currentSubmissionSpan = document.getElementById('current-submission');
+  const progressBar = document.getElementById('progress-bar');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const approveBtns = document.querySelectorAll('.approve-btn');
+  
+  if (totalSlides === 0) return;
+  
+  // Update navigation state
+  function updateNavigation() {
+    currentSubmissionSpan.textContent = currentSlide + 1;
+    progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+    
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === totalSlides - 1;
+    
+    prevBtn.classList.toggle('text-gray-400', currentSlide === 0);
+    prevBtn.classList.toggle('text-gray-600', currentSlide > 0);
+    nextBtn.classList.toggle('text-gray-400', currentSlide === totalSlides - 1);
+    nextBtn.classList.toggle('text-gray-600', currentSlide < totalSlides - 1);
+  }
+  
+  // Show specific slide
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('hidden', i !== index);
+    });
+    currentSlide = index;
+    updateNavigation();
+  }
+  
+  // Next slide
+  function nextSlide() {
+    if (currentSlide < totalSlides - 1) {
+      showSlide(currentSlide + 1);
+    }
+  }
+  
+  // Previous slide
+  function prevSlide() {
+    if (currentSlide > 0) {
+      showSlide(currentSlide - 1);
+    }
+  }
+  
+  // Event listeners
+  nextBtn.addEventListener('click', nextSlide);
+  prevBtn.addEventListener('click', prevSlide);
+  
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      nextSlide();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      prevSlide();
+    }
+  });
+  
+  // Auto-advance after approval
+  approveBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Add loading state
+      this.innerHTML = '<i class="material-icons mr-2 animate-spin">autorenew</i>Publishing...';
+      this.classList.add('opacity-75', 'cursor-not-allowed');
+      
+      // Auto-advance to next slide after a brief delay (before page reload)
+      setTimeout(() => {
+        if (currentSlide < totalSlides - 1) {
+          nextSlide();
+        }
+      }, 500);
+    });
+  });
+  
+  // Initialize
+  updateNavigation();
+});
+</script>
+
+<style>
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .carousel-slide {
+    min-height: 500px;
+  }
+  
+  /* Smooth transitions */
+  .carousel-slide {
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  /* Button disabled state */
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+</style>

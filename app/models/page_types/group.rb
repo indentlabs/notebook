@@ -37,11 +37,11 @@ class Group < ApplicationRecord
   end
 
   def self.color
-    'cyan'
+    'cyan bg-cyan-500'
   end
 
   def self.text_color
-    'cyan-text'
+    'cyan-text text-cyan-500'
   end
 
   def self.hex_color

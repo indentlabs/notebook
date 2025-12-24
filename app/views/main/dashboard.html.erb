@@ -1,244 +1,1047 @@
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'content/components/parallax_universe_header' %>
-<% end %>
-
-<%= content_for :full_width_page_content do %>
-  <div class="row">  
-    <%= render partial: 'main/dashboard_header_links' %>
-  </div>
-<% end %>
-<div class="row">
-  <% if @current_user_content.values.flatten.count.zero? %>
-    <div class="col s12 m7 l8">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">Welcome to Notebook.ai!</div>
-          <p>
-            Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
-          </p>
-          <br />
-          <p>
-            Start your worldbuilding journey by creating a universe with the button below (or jump straight to the good stuff!).
-            All of the worldbuildings pages you create can be assigned to a universe, which contains your world.
-            Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
-          </p> 
-        </div>
-      </div>
-
-      <%= link_to new_universe_path do %>
-        <div class="hoverable card-panel <%= Universe.color %> white-text">
-          <i class="material-icons left"><%= Universe.icon %></i>
-          <i class="material-icons right">add</i>
-          Create a Universe
-        </div>
-      <% end %>
-
-      <% (@activated_content_types - ['Universe']).each do |type| %>
-        <%= link_to send("new_#{type.downcase}_path") do %>
-          <div class="hoverable card-panel <%= content_class_from_name(type).color %> white-text">
-            <i class="material-icons left"><%= content_class_from_name(type).icon %></i>
-            <i class="material-icons right">add</i>
-            Create a <%= type %>
-          </div>
-        <% end %>
-      <% end %>
-
-      <div class="card-panel">
-        <p>
-          The free tier of Notebook.ai was intentionally designed to be enough for most beginner worldbuilders. Your noun trifecta
-          (people, places, and things) can be created with Character, Location, and Item pages.
-        </p>
-        <p>
-          For more advanced worlds, the site is supported by an optional Premium subscription that unlocks
-          <%= pluralize Rails.application.config.content_types[:premium].count, 'other page type' %> for you to use!
-        </p>
-      </div>
-
-      <%= link_to customization_content_types_path do %>
-        <div class="card-panel hoverable blue white-text">
-          <i class="material-icons left">add</i>
-          Browse all page types
-        </div>
-      <% end %>
+<!-- Main Dashboard Container -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+  
+  <!-- Hero Section -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         
-    </div>
-  <% else %>
-    <div class="col s12 m7 l8">
-      <div class="grey-text uppercase center">
-        Expand
-        <% if @universe_scope.present? %>
-          <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color}" %>
-        <% else %>
-          your worlds
-        <% end %>
-      </div>
-      <%=
-        if @content
-          render partial: 'cards/serendipitous/content_question', locals: { 
-            content: @content, 
-            field: @attribute_field_to_question,
-            expand_by_default: true,
-            include_quick_reference: false
-          }
-        end
-      %>
-
-      <%= link_to prompts_path do %>
-        <div class="hoverable card-panel orange white-text" style="margin: 0; margin-bottom: 2em">
-          <i class="material-icons left">lightbulb_outline</i>
-          <i class="material-icons right">arrow_right</i>
-          View more prompts
-          <% if @universe_scope.present? %>
-            in this universe
+        <!-- User Welcome -->
+        <div class="flex items-center space-x-4">
+          <%= link_to current_user, class: "group relative" do %>
+            <div class="relative">
+              <%= image_tag current_user.image_url, class: "h-14 w-14 rounded-full #{User.color} ring-3 ring-white shadow-md group-hover:ring-blue-100 transition-all duration-200" %>
+              <div class="absolute -bottom-1 -right-1 h-4 w-4 bg-green-400 rounded-full ring-2 ring-white"></div>
+            </div>
+          <% end %>
+          
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+              Hello, <%= link_to current_user.display_name, current_user, class: "#{User.text_color} hover:opacity-80 transition-opacity" %>
+            </h1>
+                
+            <div class="max-w-3xl mx-auto">
+              <!-- Quote of the Day -->
+              <%= render partial: 'main/components/quote_of_the_day', locals: { } %>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Primary Action Buttons -->
+        <div class="hidden sm:flex space-x-3">
+          <% random_enabled_page_type = (current_user.createable_content_types - [Character]).sample %>
+          <%= link_to new_polymorphic_path(random_enabled_page_type), 
+              class: "casino-create-button group inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white #{random_enabled_page_type.color} hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200",
+              data: { turbo: false } do %>
+            <i class="material-icons mr-2 text-lg casino-icon-rotate">casino</i>
+            Create <%= random_enabled_page_type.name %>
           <% end %>
         </div>
-      <% end %>
+      </div>
+    </div>
+  </div>
 
-      <% if @universe_scope.present? || @current_user_content.fetch('Universe', []).count == 1 %>
-        <% if @current_user_content.except('Universe').values.flatten.any? %>
-          <div class="grey-text uppercase">
-            <%= pluralize @current_user_content.except('Universe').values.flatten.count, 'page' %>
-            in
-            <span class="<%= Universe.text_color %>">
-              <%= @universe_scope.try(:name) || @current_user_content.fetch('Universe').first.name %>
-            </span>
-            <%= link_to({ universe: 'all' }, class: 'right grey-text') do %>
-              See all universes instead
-              <i class="material-icons right" style="margin: 0">arrow_right</i>
-            <% end %>
+
+
+  <!-- Null State Dashboard for New Users -->
+  <% unless @user_has_content %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Two-Column Layout: 2/3 | 1/3 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column: Welcome Content & Activity (2/3) -->
+        <div class="lg:col-span-2">
+          
+          <!-- Section header to align with right column -->
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">&nbsp;</h3>
+          
+          <!-- Welcome Hero Card -->
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-notebook-blue dark:bg-blue-900 p-8 flex items-center">
+              <h2 class="text-3xl font-bold text-white">Welcome to Notebook.ai!</h2>
+            </div>
+            <div class="p-8">
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+                Notebook.ai is designed to feel like a specialized notebook for of all your worldbuilding ideas.
+              </p>
+              <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                Start your worldbuilding journey by creating a universe (or jump straight to the good stuff!). All of the worldbuildings pages you create can be assigned to a universe, which contains your world. Once you've created a few worlds, they make it easy to focus on just the world you want to work on!
+              </p>
+            </div>
           </div>
-          <% @current_user_content.except('Universe').values.flatten.sort_by { |p| p.name.downcase }.each do |content_page| %>
-            <div class="col s12 m12 l6">
-              <%= link_to send("edit_#{content_page.page_type.downcase}_path", content_page.id) do %>
-                <div class="hoverable card <%= content_page.color %>" style="margin-bottom: 2px">
-                  <div class="card-image">
-                    <%= image_tag content_page.random_image_including_private, style: 'height: 245px' %>
-                    <div class="card-title bordered-text">
-                      <i class="material-icons left <%= content_page.text_color %>" style="position: relative; top: 4px">
-                        <%= content_page.icon %>
-                      </i>
-                      <%= content_page.name %>
-                    </div>
-                  </div>
-                </div>
+          
+          <!-- Free Tier Information -->
+          <div class="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl p-8 border border-green-200 dark:border-green-800 mt-8">
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+              The free tier of Notebook.ai was intentionally designed to be enough for most beginner worldbuilders. Your noun trifecta (people, places, and things) can be created with Character, Location, and Item pages.
+            </p>
+            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+              For more advanced worlds, the site is supported by an optional Premium subscription that unlocks 25 other page types for you to use!
+            </p>
+            <div class="mt-6">
+              <%= link_to customization_content_types_path, class: "inline-flex items-center px-4 py-2 border border-green-600 text-green-700 dark:border-green-500 dark:text-green-400 font-medium rounded-lg hover:bg-green-100 dark:hover:bg-green-900/50 transition-colors duration-200" do %>
+                <i class="material-icons mr-2">explore</i>
+                Browse All Page Types
               <% end %>
             </div>
-          <% end %>
-        <% end %>
-      <% else %>
-        <%
-          accessible_universes = (@current_user_content.fetch('Universe', []) + current_user.contributable_universes).uniq(&:id)
-          if accessible_universes.count > 1
-        %>
-          <div class="grey-text uppercase center">
-            Focus on one universe at a time
           </div>
+          
+          <!-- Activity Charts (Empty state) -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            
+            <!-- 30-Day Activity Chart -->
+            <div class="bg-gradient-to-br from-purple-50 via-white to-purple-25 dark:from-notebook-blue dark:to-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <i class="material-icons mr-1 text-purple-600 dark:text-purple-400 text-base">show_chart</i>
+                30-Day Activity
+              </h4>
+              <div class="relative mb-6">
+                <div class="flex items-end justify-between h-10 space-x-0.5">
+                  <% 30.times do %>
+                    <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-t" style="height: 1px;"></div>
+                  <% end %>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>30 days ago</span>
+                <span>Today</span>
+              </div>
+            </div>
 
-          <%= render partial: 'notice_dismissal/messages/16' %>
-
-          <% accessible_universes.sort_by { |u| u.name.downcase }.each do |universe| %>
-            <div class="col s12 m6 l4">
-              <%= link_to "?universe=#{universe.id}" do %>
-                <div class="hoverable card" style="margin-bottom: 2px">
-                  <div class="card-image">
-                    <%= image_tag universe.random_image_including_private, style: 'height: 162px' %>
-                    <div class="card-title">
-                      <%= universe.name %>
+            <!-- Editing Streak -->
+            <div class="bg-gradient-to-br from-orange-50 via-white to-orange-25 dark:from-notebook-blue dark:to-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+              <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                <i class="material-icons mr-1 text-orange-600 dark:text-orange-400 text-base">local_fire_department</i>
+                Editing Streak
+              </h4>
+              <div class="flex flex-row items-center space-x-4">
+                <div class="flex items-center justify-center space-x-1 flex-1">
+                  <% 7.times do |i| %>
+                    <div class="flex flex-col items-center">
+                      <div class="w-4 h-4 rounded-full bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600"></div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><%= Date::ABBR_DAYNAMES[(Date.current - (6-i).days).wday][0] %></div>
                     </div>
+                  <% end %>
+                </div>
+                <div class="text-center flex-1">
+                  <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-0.5">0</div>
+                  <div class="text-xs text-gray-600 dark:text-gray-400">days in a row</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Right Column: Quick Start Actions (1/3) -->
+        <div class="lg:col-span-1 space-y-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create Something New</h3>
+          
+          <!-- Create Universe Button (Most Prominent) -->
+          <%= link_to new_universe_path, class: "block" do %>
+            <div class="<%= Universe.color %> text-white rounded-lg p-5 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-3xl"><%= Universe.icon %></i>
+                  <div>
+                    <h4 class="text-lg font-bold">Create Universe</h4>
+                    <p class="text-sm opacity-90">Start your world here</p>
                   </div>
                 </div>
-              <% end %>
+                <i class="material-icons text-2xl opacity-70">add</i>
+              </div>
             </div>
           <% end %>
-        <% end %>
+          
+          <!-- Create Character Button -->
+          <%= link_to new_character_path, class: "block" do %>
+            <div class="<%= Character.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Character.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Character</h4>
+                    <p class="text-xs opacity-90">People in your world</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Location Button -->
+          <%= link_to new_location_path, class: "block" do %>
+            <div class="<%= Location.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Location.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Location</h4>
+                    <p class="text-xs opacity-90">Places in your world</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Item Button -->
+          <%= link_to new_item_path, class: "block" do %>
+            <div class="<%= Item.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Item.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Item</h4>
+                    <p class="text-xs opacity-90">Things in your world</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+          
+          <!-- Create Document Button -->
+          <%= link_to new_document_path, class: "block" do %>
+            <div class="<%= Document.color %> text-white rounded-lg p-4 hover:opacity-90 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <i class="material-icons text-2xl"><%= Document.icon %></i>
+                  <div>
+                    <h4 class="font-semibold">Create Document</h4>
+                    <p class="text-xs opacity-90">Write your stories</p>
+                  </div>
+                </div>
+                <i class="material-icons text-xl opacity-70">add</i>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+      </div>
+      
+      <!-- Community Discussions Section -->
+      <% if @most_recent_threads && @most_recent_threads.any? %>
+        <div class="mt-12">
+          <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+              <i class="material-icons mr-2 text-gray-600 dark:text-gray-400">forum</i>
+              Recent Community Discussions
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <% @most_recent_threads.each do |thread| %>
+                <%= link_to thredded.messageboard_topic_path(thread.messageboard, thread), class: "block" do %>
+                  <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
+                    <h4 class="font-medium text-gray-900 dark:text-white mb-2 line-clamp-2"><%= thread.title %></h4>
+                    <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">folder</i>
+                        <%= thread.messageboard.name %>
+                      </span>
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">chat_bubble</i>
+                        <%= thread.posts.count %> <%= 'post'.pluralize(thread.posts.count) %>
+                      </span>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+            <div class="mt-4 text-center">
+              <%= link_to thredded.messageboards_path, class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm" do %>
+                Join the conversation →
+              <% end %>
+            </div>
+          </div>
+        </div>
       <% end %>
+      
     </div>
   <% end %>
 
-  <%= render partial: 'notice_dismissal/messages/25' if show_notice?(id: 25) %>
+  <!-- Two-Column Hero Section: Expand Your Worlds (for users with content) -->
+  <% if @content && @user_has_content %>
+    <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Two-Column Layout: 2/3 and 1/3 split -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          <!-- Left Column: Serendipitous Question & Charts (2/3) -->
+          <div class="lg:col-span-2 space-y-6">
 
-  <div class="col s12 m5 l4">
-    <% if @recently_edited_pages.any? %>
-      <div class="grey-text uppercase center">
-        Pick up where you left off
-      </div>
-      <ul style="margin: 0;">
-        <% @recently_edited_pages.first(5).each do |page| %>
-          <% next if page.page_type === 'Document' && page.user != current_user %>
+            <!-- Serendipitous Question -->
+            <%= render partial: 'main/components/serendipitous_question', locals: { } %>
 
-          <% klass = content_class_from_name(page.page_type) %>
-          <%= link_to main_app.send("edit_#{page.page_type.downcase}_path", page.id), class: "#{klass.text_color}" do %>
-            <li class="card-panel hoverable" style="margin-bottom: 0.5em; border-left: 5px solid <%= klass.hex_color %>">
-              <i class="material-icons left <%= klass.text_color %>" style="font-size: 3em;"><%= klass.icon %></i>
-              <%= page.name %>
-              <div class="grey-text">
-                last edited
-                <%= time_ago_in_words page.updated_at %>
-                ago
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+              <!-- 30-Day Activity Chart -->
+              <div class="bg-gradient-to-br from-purple-50 via-white to-purple-25 dark:from-notebook-blue dark:to-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                  <i class="material-icons mr-1 text-purple-600 dark:text-purple-400 text-base">show_chart</i>
+                  30-Day Activity
+                </h4>
+                <div class="relative mb-6">
+                  <!-- Chart Container -->
+                  <div id="dashboard-activity-chart" class="flex items-end justify-between h-10 space-x-0.5 relative overflow-hidden">
+                    <% if @dashboard_daily_activity %>
+                      <%
+                        # Extract counts from array of [date, count] pairs and find max
+                        max_count = @dashboard_daily_activity.map { |_, count| count }.max || 1
+                        max_height = 40 # h-10 = 40px
+                      %>
+                      <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
+                        <%
+                          # Scale bar height proportionally to fit within container
+                          bar_height = count > 0 ? [(count.to_f / max_count * max_height).round, 2].max : 1
+                        %>
+                        <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer"
+                             style="height: <%= bar_height %>px;"
+                             data-date="<%= date %>"
+                             data-count="<%= count %>"
+                             data-index="<%= index %>">
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <!-- Custom Tooltip -->
+                  <div id="dashboard-chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
+                    <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
+                      <div class="font-semibold" id="dashboard-tooltip-date"></div>
+                      <div id="dashboard-tooltip-count"></div>
+                      <!-- Tooltip arrow -->
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Chart Legend -->
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span>30 days ago</span>
+                  <span>Today</span>
+                </div>
               </div>
-            </li>
+
+              <!-- Editing Streak -->
+              <div class="bg-gradient-to-br from-orange-50 via-white to-orange-25 dark:from-notebook-blue dark:to-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                  <i class="material-icons mr-1 text-orange-600 dark:text-orange-400 text-base">local_fire_department</i>
+                  Editing Streak
+                </h4>
+
+                <!-- Streak Visualization -->
+                <div class="flex flex-row items-center space-x-4">
+                  <div class="flex items-center justify-center space-x-1 flex-1">
+                    <% if @streak_days %>
+                      <% @streak_days.each_with_index do |day, index| %>
+                        <div class="flex flex-col items-center">
+                          <!-- Day dot -->
+                          <div class="streak-day w-4 h-4 rounded-full border transition-all duration-200 <%= day[:has_activity] ? 'bg-orange-500 border-orange-500 cursor-pointer' : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600' %>
+                              <%= index < 6 ? 'relative' : '' %>"
+                              data-date="<%= day[:date].strftime('%B %d, %Y') %>"
+                              data-has-activity="<%= day[:has_activity] %>"
+                              data-edit-count="<%= day[:edit_count] %>"
+                              data-day-index="<%= index %>">
+                            <!-- Connection line to next dot -->
+                            <% if index < 6 %>
+                              <div class="absolute top-1/2 left-full w-1 h-0.5 transform -translate-y-1/2 <%= day[:has_activity] && @streak_days[index + 1][:has_activity] ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600' %>"></div>
+                            <% end %>
+                          </div>
+                          <!-- Day label -->
+                          <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><%= day[:day_name] %></div>
+                        </div>
+                      <% end %>
+
+                      <!-- Streak extension for 7+ days -->
+                      <% if (@current_streak || 0) > 7 %>
+                        <div class="flex items-center ml-1">
+                          <div class="w-1 h-1 bg-orange-500 rounded-full mx-0.5"></div>
+                          <div class="w-1 h-1 bg-orange-500 rounded-full mx-0.5"></div>
+                          <div class="w-1 h-1 bg-orange-500 rounded-full mx-0.5"></div>
+                          <div class="w-6 h-6 rounded-full bg-orange-500 border border-orange-600 flex items-center justify-center ml-1">
+                            <span class="text-white text-xs font-bold"><%= @current_streak %></span>
+                          </div>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <div class="text-center mb-3 flex-1 relative">
+                    <div class="streak-counter-bg absolute inset-0 opacity-10"></div>
+                    <% if (@current_streak || 0) > 0 %>
+                      <!-- Flame icon behind streak counter -->
+                      <div class="absolute top-0 left-1/2 transform -translate-x-1/2 opacity-15 pointer-events-none" style="top: -20px;">
+                        <i class="material-icons text-orange-500 flame-icon-bg" style="font-size: 6rem;">local_fire_department</i>
+                      </div>
+                    <% end %>
+                    <div class="relative z-10">
+                      <div class="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-0.5">
+                        <%= @current_streak || 0 %>
+                      </div>
+                      <div class="streak-info text-xs text-gray-600 dark:text-gray-400 cursor-help transition-colors duration-200 hover:text-orange-600 dark:hover:text-orange-400"
+                           data-total-edits="<%= @streak_total_edits || 0 %>"
+                           data-streak-days="<%= @current_streak || 0 %>">
+                        <%= (@current_streak || 0) == 1 ? 'day' : 'days' %> in a row
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Streak Day Tooltip -->
+                <div id="streak-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-30">
+                  <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
+                    <div class="font-semibold" id="streak-tooltip-date"></div>
+                    <div id="streak-tooltip-activity"></div>
+                    <!-- Tooltip arrow -->
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                  </div>
+                </div>
+
+                <!-- Streak Info Tooltip -->
+                <div id="streak-info-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-200 z-30">
+                  <div class="relative">
+                    <!-- Tooltip glow effect -->
+                    <div class="absolute -inset-1 bg-gradient-to-r from-orange-400 via-red-400 to-orange-400 rounded-xl blur opacity-30 animate-pulse"></div>
+                    <!-- Main tooltip content -->
+                    <div class="relative bg-gradient-to-br from-orange-800 via-orange-900 to-red-900 text-white text-sm rounded-xl px-5 py-3 shadow-2xl border border-orange-600">
+                      <div class="flex items-center space-x-2 mb-1">
+                        <div class="text-orange-300 text-lg">🔥</div>
+                        <div class="font-bold text-orange-100 text-base tracking-wide" id="streak-info-title"></div>
+                      </div>
+                      <div class="text-orange-200 font-medium text-sm" id="streak-info-details"></div>
+                      <!-- Clean tooltip arrow -->
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
+                        <div class="w-0 h-0" style="border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #9a3412;"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            
+          </div>
+          
+          <!-- Right Column: What's New & Recently Edited Pages (1/3) -->
+          <% if @recently_edited_pages %>
+            <div class="lg:col-span-1 space-y-6">
+              
+              <!-- What's New Card -->
+              <!--
+              <div>
+                <%= link_to '#' do %>
+                  <div class="bg-blue-50 border border-blue-200 rounded-md shadow-sm hover:shadow-lg transition-all duration-300">
+                    <div class="p-6">
+                      <h4 class="text-base font-semibold text-blue-900 mb-2 items-center">
+                        <i class="material-icons mr-1 float-left text-sm text-blue-600 text-lg">new_releases</i>
+                        <span class="align-middle">New Something</span>
+                      </h4>
+                      <p class="text-sm text-blue-700 leading-relaxed">This is a little notice box about what's new. I can fit about 2 lines before I feel bad. Although... with three lines it's the same height as these other cards...</p>
+                    </div>
+                  </div>
+                <% end %>
+                <div class="text-right">
+                  <%= link_to 'Dismiss this notice', '#', class: 'text-gray-400 hover:text-notebook-blue font-medium text-xs' %>
+                </div>
+              </div>
+              -->
+              
+              <!-- Recently Edited Pages -->
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                    <i class="material-icons mr-2 text-blue-600 dark:text-blue-400">history</i>
+                    Recently Edited
+                  </h3>
+                  <%= link_to recent_content_path, class: "text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" do %>
+                    View all →
+                  <% end %>
+                </div>
+                
+                <!-- Recently Edited Pages Component -->
+                <div class="dashboard-card">
+                  <div class="dashboard-card-content">
+                    <%= render partial: 'main/components/recently_edited_pages', locals: { } %>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          <% end %>
+          
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% unless @user_has_content %>
+    <!-- Hide quick-create ribbon for null state users -->
+  <% else %>
+    <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 mb-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Create Something New...</h3>
+        <%= render partial: 'main/components/create_new_page_list', locals: { } %>
+      </div>
+    </div>
+  <% end %>
+
+
+  <% if @most_edited_pages && @most_edited_pages.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center">
+            <i class="material-icons mr-2 text-gray-500 dark:text-gray-400 text-lg">library_books</i>
+            Most-Edited Pages
+          </h2>
+        </div>
+        
+        <!-- Horizontal Scrolling Content Grid -->
+        <div class="overflow-x-auto pb-4">
+          <div class="flex space-x-4 min-w-max">
+            <% @most_edited_pages.first(20).each do |content_page, edit_count| %>
+              <div class="w-64 flex-shrink-0">
+                <%= render partial: 'content/display/card', locals: { content_page: content_page } %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Trending Conversations -->
+  <% if @most_recent_threads && @most_recent_threads.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-24">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center">
+          <i class="material-icons mr-2 text-gray-500 dark:text-gray-400 text-lg">forum</i>
+          Trending Conversations
+        </h2>
+        <%= link_to thredded.messageboards_path, class: "text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" do %>
+          View all →
+        <% end %>
+      </div>
+      
+      <!-- Single Row Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+        <% @most_recent_threads.first(6).each do |thread| %>
+          <%= link_to thredded.messageboard_topic_path(thread.messageboard, thread), 
+              class: "group bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 p-2.5 transition-all duration-150",
+              data: { turbo: false } do %>
+            
+            <!-- Title -->
+            <h4 class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 mb-1.5 leading-tight">
+              <%= thread.title %>
+            </h4>
+            
+            <!-- Just reply count -->
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              <%= thread.posts.count %> <%= thread.posts.count == 1 ? 'reply' : 'replies' %>
+            </div>
           <% end %>
         <% end %>
-      </ul>
-      <% if @recently_edited_pages.count > 5 %>
-        <div style="margin-bottom: 2em;">
-          <%= link_to 'view more', '#', class: 'sidenav-trigger right', data: { target: 'recent-edits-sidenav' } %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <div class="grey-text uppercase center">Create something new</div>
-    <% @activated_content_types.sample(3).each do |type| %>
-      <% klass = content_class_from_name(type) %>
-      <div>
-        <%= link_to send("new_#{type.downcase}_path"), class: "white-text", style: 'width: 100%' do %>
-          <div class="hoverable card-panel <%= klass.color %>" style="margin-bottom: 4px">
-            <div class="valign-wrapper">
-              <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;"><%= klass.icon %></i>
-              <span style="font-size: 1.1em; margin-left: 1em">
-                New
-                <%= type %><br />
-                <small>
-                  You've created
-                  <%= pluralize @current_user_content.fetch(type, []).count, type.downcase %>
-                  <% if @universe_scope %>
-                    in this universe
-                  <% end %>
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
       </div>
-    <% end %>
-
-    <div class="grey-text uppercase center" style="margin-top: 2em">Join discussions</div>
-    <% @most_recent_threads.each do |topic| %>
-      <div>
-        <%= link_to topic, class: "white-text", style: 'width: 100%' do %>
-          <div class="hoverable card-panel blue" style="margin-bottom: 4px">
-            <div class="valign-wrapper">
-              <i class="material-icons grey-bordered-text" class="left" style="font-size: 3em;">forum</i>
-              <span style="font-size: 1em; margin-left: 1em">
-                <%= topic.title %>
-                <small>
-                  <%= pluralize topic.posts.count, 'post' %>
-                </small>
-                <br />
-                <small>
-                  in <strong><%= topic.messageboard.name %></strong>
-                </small>
-              </span>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-    <div style="margin-bottom: 2em;">
-      <%= link_to 'see all', thredded_path, class: 'right' %>
     </div>
-
-  </div>
+  <% end %>
+  
 </div>
 
-<%= render partial: 'javascripts/content_linking' %>
+<style>
+/* Dashboard Card Styles */
+.dashboard-card {
+  @apply bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300;
+}
+
+.dashboard-card-content {
+  @apply p-8;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .dashboard-card-content {
+    @apply p-6;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-card-content {
+    @apply p-4;
+  }
+}
+
+/* Smooth scrollbar for horizontal content */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Forum Cards - Fade in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trending-card {
+  animation: fadeInUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Glass morphism enhancements */
+.backdrop-blur-sm {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate sections on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '50px'
+  });
+  
+  // Observe dashboard sections
+  document.querySelectorAll('section, .dashboard-card').forEach(element => {
+    element.style.opacity = '0';
+    element.style.transform = 'translateY(30px)';
+    element.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    observer.observe(element);
+  });
+  
+
+});
+</script>
+
+<%= render partial: 'javascripts/content_linking_alpine' %>
+
+<!-- Dashboard Analytics Styles -->
+<style>
+  /* Dashboard Activity Chart Styling */
+  .dashboard-activity-bar {
+    background: linear-gradient(to top, #a855f7, #c084fc);
+    min-height: 2px;
+    position: relative;
+  }
+  
+  .dashboard-activity-bar:hover {
+    background: linear-gradient(to top, #7c3aed, #a855f7);
+    transform: scaleY(1.1);
+    box-shadow: 0 4px 8px rgba(168, 85, 247, 0.3);
+  }
+  
+  .dashboard-activity-bar[data-count="0"] {
+    background: #e5e7eb;
+    opacity: 0.5;
+  }
+  
+  .dashboard-activity-bar[data-count="0"]:hover {
+    background: #d1d5db;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Custom gradient backgrounds for dashboard cards */
+  .purple-25 {
+    --tw-gradient-to: #faf5ff;
+  }
+  
+  .orange-25 {
+    --tw-gradient-to: #fffbf5;
+  }
+
+  /* Fun streak day hover effects */
+  .streak-day[data-has-activity="true"]:hover {
+    transform: scale(1.3);
+    box-shadow: 0 0 12px rgba(249, 115, 22, 0.6);
+    background: linear-gradient(45deg, #f97316, #fb923c) !important;
+    border-color: #ea580c !important;
+    z-index: 10;
+    position: relative;
+  }
+  
+  .streak-day[data-has-activity="true"]:hover::before {
+    content: '🔥';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    animation: flame-dance 0.6s ease-in-out infinite alternate;
+  }
+  
+  @keyframes flame-dance {
+    0% { transform: translateX(-50%) translateY(0px) rotate(-2deg); }
+    100% { transform: translateX(-50%) translateY(-2px) rotate(2deg); }
+  }
+  
+  /* Pulse effect for active streak days */
+  .streak-day[data-has-activity="true"] {
+    animation: subtle-pulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes subtle-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1); }
+  }
+
+  /* Fire background for streak counter */
+  .streak-counter-bg {
+    background-image: 
+      radial-gradient(circle at 20% 80%, rgba(249, 115, 22, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(251, 146, 60, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(254, 215, 170, 0.2) 0%, transparent 50%);
+    background-size: 60px 60px, 40px 40px, 80px 80px;
+    background-position: 10px 10px, 30px 5px, 0px 20px;
+    animation: fire-flicker 3s ease-in-out infinite alternate;
+    border-radius: 50%;
+  }
+  
+  @keyframes fire-flicker {
+    0% { 
+      transform: scale(1) rotate(0deg);
+      opacity: 0.05;
+    }
+    50% {
+      transform: scale(1.05) rotate(1deg);
+      opacity: 0.15;
+    }
+    100% { 
+      transform: scale(1.02) rotate(-1deg);
+      opacity: 0.1;
+    }
+  }
+  
+  /* Streak info hover effect */
+  .streak-info:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+  }
+  
+  /* Enhanced streak info tooltip styling */
+  #streak-info-tooltip {
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
+  }
+  
+  #streak-info-tooltip .relative {
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Smooth tooltip animations */
+  #streak-info-tooltip {
+    transform-origin: bottom center;
+  }
+  
+  /* Enhanced fire emoji animation on hover */
+  .streak-info:hover + #streak-info-tooltip .text-orange-300 {
+    animation: flame-pulse 0.8s ease-in-out infinite alternate;
+  }
+  
+  @keyframes flame-pulse {
+    0% { transform: scale(1) rotate(-1deg); }
+    100% { transform: scale(1.1) rotate(1deg); }
+  }
+  
+  /* Background flame icon styling */
+  .flame-icon-bg {
+    animation: flame-background-dance 4s ease-in-out infinite alternate;
+    filter: blur(1px);
+  }
+  
+  @keyframes flame-background-dance {
+    0% { 
+      transform: scale(1) rotate(-2deg);
+      opacity: 0.12;
+    }
+    50% {
+      transform: scale(1.05) rotate(0deg);
+      opacity: 0.18;
+    }
+    100% { 
+      transform: scale(1.02) rotate(2deg);
+      opacity: 0.15;
+    }
+  }
+  
+  /* Enhanced flame effect on streak hover */
+  .streak-info:hover ~ .flame-icon-bg {
+    animation: flame-background-dance 1.5s ease-in-out infinite alternate;
+    opacity: 0.25 !important;
+    filter: blur(0.5px);
+  }
+</style>
+
+<!-- Dashboard Analytics JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Dashboard activity chart with custom tooltips
+  const dashboardChartContainer = document.getElementById('dashboard-activity-chart');
+  const dashboardTooltip = document.getElementById('dashboard-chart-tooltip');
+  const dashboardTooltipDate = document.getElementById('dashboard-tooltip-date');
+  const dashboardTooltipCount = document.getElementById('dashboard-tooltip-count');
+  
+  if (dashboardChartContainer && dashboardTooltip) {
+    const dashboardChartBars = dashboardChartContainer.querySelectorAll('.dashboard-activity-bar');
+    
+    dashboardChartBars.forEach(bar => {
+      // Mouse enter - show tooltip
+      bar.addEventListener('mouseenter', function(e) {
+        const date = this.dataset.date;
+        const count = parseInt(this.dataset.count);
+        
+        // Update tooltip content
+        dashboardTooltipDate.textContent = date;
+        dashboardTooltipCount.textContent = count === 0 ? 'No activity' : 
+          count === 1 ? '1 edit' : `${count} edits`;
+        
+        // Position tooltip
+        const rect = this.getBoundingClientRect();
+        const chartRect = dashboardChartContainer.getBoundingClientRect();
+        const tooltipLeft = rect.left - chartRect.left + (rect.width / 2);
+        
+        dashboardTooltip.style.left = `${tooltipLeft}px`;
+        dashboardTooltip.style.bottom = `${dashboardChartContainer.offsetHeight + 10}px`;
+        dashboardTooltip.style.opacity = '1';
+        dashboardTooltip.style.transform = 'translateX(-50%) translateY(0)';
+      });
+      
+      // Mouse leave - hide tooltip
+      bar.addEventListener('mouseleave', function() {
+        dashboardTooltip.style.opacity = '0';
+        dashboardTooltip.style.transform = 'translateX(-50%) translateY(-4px)';
+      });
+    });
+  }
+  
+  // Streak day tooltips and hover effects
+  const streakTooltip = document.getElementById('streak-tooltip');
+  const streakTooltipDate = document.getElementById('streak-tooltip-date');
+  const streakTooltipActivity = document.getElementById('streak-tooltip-activity');
+  
+  if (streakTooltip) {
+    const streakDays = document.querySelectorAll('.streak-day[data-has-activity="true"]');
+    
+    streakDays.forEach(day => {
+      // Mouse enter - show tooltip and fun effects
+      day.addEventListener('mouseenter', function(e) {
+        const date = this.dataset.date;
+        const editCount = parseInt(this.dataset.editCount);
+        
+        // Update tooltip content
+        streakTooltipDate.textContent = date;
+        streakTooltipActivity.textContent = editCount === 1 ? 
+          '1 edit made' : `${editCount} edits made`;
+        
+        // Position tooltip relative to the hovered element
+        const rect = this.getBoundingClientRect();
+        const tooltipRect = streakTooltip.getBoundingClientRect();
+        
+        // Position above the dot, centered horizontally
+        const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+        const top = rect.top - tooltipRect.height - 10; // 10px gap above the dot
+        
+        streakTooltip.style.position = 'fixed';
+        streakTooltip.style.left = `${left}px`;
+        streakTooltip.style.top = `${top}px`;
+        streakTooltip.style.opacity = '1';
+        streakTooltip.style.transform = 'translateY(0)';
+      });
+      
+      // Mouse leave - hide tooltip
+      day.addEventListener('mouseleave', function() {
+        streakTooltip.style.opacity = '0';
+        streakTooltip.style.transform = 'translateY(-4px)';
+      });
+      
+      // Click for extra fun (optional)
+      day.addEventListener('click', function() {
+        // Create a little celebration burst
+        const burst = document.createElement('div');
+        burst.innerHTML = '🎉';
+        burst.style.position = 'fixed';
+        burst.style.fontSize = '12px';
+        burst.style.pointerEvents = 'none';
+        burst.style.zIndex = '50';
+        burst.style.animation = 'celebration-burst 0.8s ease-out forwards';
+        
+        const rect = this.getBoundingClientRect();
+        burst.style.left = (rect.left + rect.width / 2) + 'px';
+        burst.style.top = rect.top + 'px';
+        
+        document.body.appendChild(burst);
+        setTimeout(() => burst.remove(), 800);
+      });
+    });
+  }
+  
+  // Streak info tooltip (for "N days in a row" text)
+  const streakInfoTooltip = document.getElementById('streak-info-tooltip');
+  const streakInfoTitle = document.getElementById('streak-info-title');
+  const streakInfoDetails = document.getElementById('streak-info-details');
+  const streakInfoElement = document.querySelector('.streak-info');
+  
+  if (streakInfoTooltip && streakInfoElement) {
+    // Mouse enter - show streak info tooltip
+    streakInfoElement.addEventListener('mouseenter', function(e) {
+      const totalEdits = parseInt(this.dataset.totalEdits) || 0;
+      const streakDays = parseInt(this.dataset.streakDays) || 0;
+      
+      // Update tooltip content
+      streakInfoTitle.textContent = `${streakDays}-Day Streak`;
+      streakInfoDetails.textContent = totalEdits === 1 ? 
+        '1 total edit made' : `${totalEdits} total edits made`;
+      
+      // Position tooltip relative to the hovered element
+      const rect = this.getBoundingClientRect();
+      const tooltipRect = streakInfoTooltip.getBoundingClientRect();
+      
+      // Position above the text, centered horizontally
+      const left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+      const top = rect.top - tooltipRect.height - 12; // 12px gap above the text
+      
+      streakInfoTooltip.style.position = 'fixed';
+      streakInfoTooltip.style.left = `${left}px`;
+      streakInfoTooltip.style.top = `${top}px`;
+      streakInfoTooltip.style.opacity = '1';
+      streakInfoTooltip.style.transform = 'translateY(0)';
+    });
+    
+    // Mouse leave - hide streak info tooltip
+    streakInfoElement.addEventListener('mouseleave', function() {
+      streakInfoTooltip.style.opacity = '0';
+      streakInfoTooltip.style.transform = 'translateY(-4px)';
+    });
+  }
+});
+
+// Add celebration burst animation
+const celebrationStyle = document.createElement('style');
+celebrationStyle.textContent = `
+  @keyframes celebration-burst {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    50% { transform: translateY(-20px) scale(1.2); opacity: 0.8; }
+    100% { transform: translateY(-40px) scale(0.8); opacity: 0; }
+  }
+`;
+document.head.appendChild(celebrationStyle);
+
+// Casino button click animation
+document.addEventListener('DOMContentLoaded', function() {
+  const casinoButton = document.querySelector('.casino-create-button');
+  
+  if (casinoButton) {
+    casinoButton.addEventListener('click', function(e) {
+      // Don't prevent default - let the navigation happen
+      
+      // Add clicking class for animation
+      this.classList.add('casino-button-clicking');
+      
+      // Create ripple effect at click position
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      
+      // Calculate position relative to button
+      const rect = this.getBoundingClientRect();
+      const size = 20;
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      
+      // Add ripple to button
+      this.appendChild(ripple);
+      
+      // Clean up ripple after animation (but don't remove clicking class since page will navigate)
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  }
+  
+  // Forum Ticker Enhancement
+  const ticker = document.getElementById('forum-ticker');
+  if (ticker) {
+    // Calculate the actual width of content for seamless looping
+    const tickerItems = ticker.querySelectorAll('.ticker-item');
+    let totalWidth = 0;
+    tickerItems.forEach(item => {
+      totalWidth += item.offsetWidth + 24; // 24px is the space-x-6 gap
+    });
+    
+    // Adjust animation duration based on content width
+    // Slower for more content, faster for less
+    const baseSpeed = 30; // pixels per second
+    const duration = totalWidth / baseSpeed;
+    ticker.style.animationDuration = `${duration}s`;
+    
+    // Pause animation on hover for better UX
+    ticker.addEventListener('mouseenter', () => {
+      ticker.style.animationPlayState = 'paused';
+    });
+    
+    ticker.addEventListener('mouseleave', () => {
+      ticker.style.animationPlayState = 'running';
+    });
+    
+    // Add smooth restart when animation ends
+    ticker.addEventListener('animationend', () => {
+      ticker.style.animation = 'none';
+      ticker.offsetHeight; // Trigger reflow
+      ticker.style.animation = null;
+    });
+  }
+});
+</script>

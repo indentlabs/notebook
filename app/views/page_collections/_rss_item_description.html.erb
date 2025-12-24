@@ -1,0 +1,45 @@
+<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+  <!-- Article metadata -->
+  <div style="margin-bottom: 16px; padding: 12px; background-color: #f8f9fa; border-left: 4px solid #007bff; border-radius: 4px;">
+    <strong>Published by <%= submission.user.display_name %></strong>
+    <br>
+    <em><%= submission.content_type %> from <%= @page_collection.title %></em>
+    <% if submission.content.respond_to?(:universe) && submission.content.universe %>
+      <br>
+      <small>Universe: <%= submission.content.universe.name %></small>
+    <% end %>
+  </div>
+
+  <!-- Article image -->
+  <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+    <div style="margin-bottom: 16px; text-align: center;">
+      <%= image_tag submission.content.random_image_including_private, 
+          style: "max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" %>
+    </div>
+  <% end %>
+
+  <!-- Article description -->
+  <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
+    <div style="margin-bottom: 16px;">
+      <%= simple_format(truncate(submission.content.description, length: 500, separator: ' ')) %>
+    </div>
+  <% end %>
+
+  <!-- Submission explanation -->
+  <% if submission.explanation.present? %>
+    <div style="margin-top: 16px; padding: 12px; background-color: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+      <strong>Editor's Note:</strong>
+      <br>
+      <em>"<%= submission.explanation %>"</em>
+      <br>
+      <small style="color: #666;">— <%= submission.user.display_name %></small>
+    </div>
+  <% end %>
+
+  <!-- Call to action -->
+  <div style="margin-top: 20px; padding: 16px; background-color: #f0f8ff; text-align: center; border-radius: 8px;">
+    <a href="<%= url_for(submission.content) %>" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+      Read Full Article →
+    </a>
+  </div>
+</div>

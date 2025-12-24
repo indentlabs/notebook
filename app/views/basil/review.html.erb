@@ -1,84 +1,107 @@
-<div class="row">
-  <div class="col s3">
-    <br />
-    <div><strong>Most-active creators over 48h</strong></div>
-    <ol>
-      <% @commissions_per_user_id.each do |user_id, count| %>
-        <%# This is an N+1 query, but we can deal with it later %>
-        <% user = User.find(user_id.to_i) %>
-        <li><%= link_to user.display_name, user %>: <%= pluralize count, 'image' %></li>
-      <% end %>
-    </ol>
-
+<div class="grid grid-cols-12 gap-6">
+  <div class="col-span-12 md:col-span-3 space-y-6">
     <div>
-      <%= pluralize @unique_users_generating_count.count, 'unique user' %> over 48h
+      <div class="font-bold text-lg mb-2 text-gray-900 dark:text-gray-100">Most-active creators over 48h</div>
+      <ol class="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300">
+        <% @commissions_per_user_id.each do |user_id, count| %>
+          <%# This is an N+1 query, but we can deal with it later %>
+          <% user = User.find(user_id.to_i) %>
+          <li>
+            <%= link_to user.display_name, user, class: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" %>: 
+            <%= pluralize count, 'image' %>
+          </li>
+        <% end %>
+      </ol>
+
+      <div class="mt-2 text-gray-600 dark:text-gray-400">
+        <%= pluralize @unique_users_generating_count.count, 'unique user' %> over 48h
+      </div>
     </div>
 
-    <br /><br />
-    <div><strong>Queue</strong></div>
-    <ol>
-      <% @current_queue_items.each do |commission| %>
-        <li>
-          <%= commission.entity_type %>-<%= commission.entity_id %> (<%= commission.style %>)
-          for U-<%= commission.user_id %> (#<%= commission.id %>)
-        </li>
-      <% end %>
-    </ol>
+    <div>
+      <div class="font-bold text-lg mb-2 text-gray-900 dark:text-gray-100">Queue</div>
+      <ol class="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300 text-sm">
+        <% @current_queue_items.each do |commission| %>
+          <li>
+            <%= commission.entity_type %>-<%= commission.entity_id %> (<%= commission.style %>)
+            for U-<%= commission.user_id %> (#<%= commission.id %>)
+          </li>
+        <% end %>
+      </ol>
+    </div>
   </div>
-  <div class="col s9">
+
+  <div class="col-span-12 md:col-span-9 space-y-6">
     <% @recent_commissions.each do |commission| %>
       <div>
         <% if commission.complete? %>
-          <div class="card horizontal">
-            <div class="card-image">
-              <%= link_to commission.image do %>
-                <%= image_tag commission.image %>
+          <div class="flex flex-col md:flex-row bg-white dark:bg-slate-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700">
+            <div class="md:w-1/3 bg-gray-100 dark:bg-slate-900">
+              <%= link_to commission.image, class: "block h-full" do %>
+                <%= image_tag commission.image, class: "w-full h-full object-cover" %>
               <% end %>
             </div>
-            <div class="card-stacked">
-              <div class="card-content">
-                <div>
-                  <%= commission.id %>.
+            <div class="flex-1 p-4 flex flex-col justify-between">
+              <div>
+                <div class="mb-2 text-gray-900 dark:text-gray-100">
+                  <span class="font-mono text-gray-500 mr-2"><%= commission.id %>.</span>
                   <% if commission.entity.present? %>
-                    <i class="material-icons right <%= content_class_from_name(commission.entity_type).text_color %>"><%= content_class_from_name(commission.entity_type).icon %></i>
-                    <strong><%= link_to commission.entity.name, commission.entity %></strong>
+                    <div class="inline-flex items-center gap-1">
+                      <i class="material-icons text-sm <%= content_class_from_name(commission.entity_type).text_color %>">
+                        <%= content_class_from_name(commission.entity_type).icon %>
+                      </i>
+                      <strong><%= link_to commission.entity.name, commission.entity, class: "hover:underline hover:text-blue-600 dark:hover:text-blue-400" %></strong>
+                    </div>
                   <% end %>
+                  
                   <% if commission.style? %>
-                    <em>(<%= commission.style.humanize %>)</em>
+                    <em class="text-gray-500 text-sm ml-2">(<%= commission.style.humanize %>)</em>
                   <% end %>
-                  <% if commission.user_id %>
-                    by <%= link_to commission.user.name, commission.user %>
-                  <% else %>
-                    anonymous generation
-                  <% end %>
-                  <div style="font-size: 0.5em"><%= commission.job_id %></div>
+
+                  <div class="text-sm mt-1">
+                    <% if commission.user_id %>
+                      by <%= link_to commission.user.name, commission.user, class: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" %>
+                    <% else %>
+                      <span class="italic text-gray-500">anonymous generation</span>
+                    <% end %>
+                  </div>
+                  <div class="text-xs text-gray-400 mt-1 font-mono"><%= commission.job_id %></div>
                 </div>
-                <ul>
-                  <li>
-                    Completed <%= time_ago_in_words commission.completed_at %> ago
-                  </li>
-                  <li>
-                    Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
-                  </li>
-                  <hr />
-                  <li>
-                    <div>Preprompt:</div>
+
+                <hr class="my-3 border-gray-200 dark:border-slate-700" />
+                
+                <div class="text-sm">
+                  <div class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Preprompt:</div>
+                  <div class="bg-gray-50 dark:bg-slate-900 p-2 rounded text-gray-600 dark:text-gray-400 font-mono text-xs break-words">
                     <%= commission.prompt.inspect %>
-                  </li>
-                </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-gray-400 flex flex-col sm:flex-row sm:gap-4">
+                <span>
+                  Completed <%= time_ago_in_words commission.completed_at %> ago
+                </span>
+                <span>
+                  Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
+                </span>
               </div>
             </div>
           </div>
         <% else %>
-          <div class="card-panel green white-text darken-4">
-            Basil is still working on this commission...
-            <div style="font-size: 0.8em">
-              (Requested <%= time_ago_in_words(commission.created_at) %> ago)
-            </div>
+          <div class="p-4 rounded-lg bg-green-700 text-white shadow-md relative overflow-hidden">
+             <div class="flex items-center gap-3">
+               <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+               <div>
+                  <div class="font-semibold">Basil is still working on this commission...</div>
+                  <div class="text-green-100 text-sm mt-1">
+                    (Requested <%= time_ago_in_words(commission.created_at) %> ago)
+                  </div>
+               </div>
+             </div>
           </div>
         <% end %>
       </div>
     <% end %>
-
   </div>
 </div>

@@ -3,22 +3,19 @@
     <% user_path = user_path(user) %>
     <% if user_path.blank? %>
       <span class='thredded--username'>
-        <%= user.thredded_display_name %>
+        <%= user.respond_to?(:display_name) ? user.display_name : user.thredded_display_name %>
       </span>
     <% else %>
-    
-      <a href="<%= user_path %>">
-        <%= user.thredded_display_name %>
-        <% if user.forum_moderator? %>
-          <i class="material-icons tooltipped tiny blue-text" data-tooltip="Forum Moderator" style="position: relative; top: 2px">
-            health_and_safety
-          </i>
-        <% end %>
-      </a>
-      <%= render partial: 'thredded/users/badge', locals: { user: user } %>
+
+      <span class="inline-flex items-center">
+        <a href="<%= user_path %>">
+          <%= user.respond_to?(:display_name) ? user.display_name : user.thredded_display_name %>
+        </a>
+        <%= render partial: 'thredded/users/badge', locals: { user: user } %>
+      </span>
     <% end %>
   <% else %>
-    <%= user.thredded_display_name %>
+    <%= user.respond_to?(:display_name) ? user.display_name : user.thredded_display_name %>
   <% end %>
 <% else %>
   <em><%= t 'thredded.null_user_name' %></em>

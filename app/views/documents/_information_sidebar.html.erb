@@ -1,0 +1,110 @@
+<%# Information sidebar content - actions and tools for the document %>
+
+<div class="flex flex-col h-full">
+  <!-- Document Stats Section -->
+  <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+    <!-- Word Count - Hero Stat -->
+    <div class="text-center mb-4">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 shadow-lg mb-2">
+        <span id="sidebar-word-count" class="text-2xl font-bold text-white">0</span>
+      </div>
+      <p class="text-sm font-medium text-gray-600 dark:text-gray-400">words written</p>
+    </div>
+
+    <!-- Secondary Stats Grid -->
+    <div class="grid grid-cols-2 gap-3">
+      <!-- Character Count -->
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-center">
+        <div class="flex items-center justify-center mb-1">
+          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1">text_format</i>
+          <span id="sidebar-char-count" class="text-lg font-semibold text-gray-900 dark:text-gray-100">0</span>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400">characters</p>
+      </div>
+
+      <!-- Reading Time -->
+      <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-center">
+        <div class="flex items-center justify-center mb-1">
+          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1">schedule</i>
+          <span id="sidebar-reading-time" class="text-lg font-semibold text-gray-900 dark:text-gray-100">&lt;1</span>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400">min read</p>
+      </div>
+    </div>
+
+    <!-- Privacy Status -->
+    <div class="mt-4">
+      <button @click="$dispatch('open-modal', 'document-privacy-modal')"
+              class="w-full flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors group">
+        <div class="flex items-center">
+          <div id="sidebar-privacy-badge" class="w-8 h-8 rounded-full <%= @document.privacy == 'private' ? 'bg-gray-200 dark:bg-gray-600' : 'bg-green-100 dark:bg-green-900/30' %> flex items-center justify-center mr-3">
+            <i id="sidebar-privacy-icon" class="material-icons text-sm <%= @document.privacy == 'private' ? 'text-gray-500 dark:text-gray-400' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+          </div>
+          <div class="text-left">
+            <p id="sidebar-privacy-text" class="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize"><%= @document.privacy || 'private' %></p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Click to change</p>
+          </div>
+        </div>
+        <i class="material-icons text-gray-400 group-hover:text-gray-500 dark:group-hover:text-gray-300 text-sm">chevron_right</i>
+      </button>
+    </div>
+  </div>
+
+  <!-- About This Document Section -->
+  <div class="p-4">
+    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">About This Document</h3>
+
+    <!-- 3-column button grid for modal actions (Universe, Notes, Synopsis) -->
+    <div class="grid grid-cols-3 gap-3 mb-4">
+      <!-- Universe Button -->
+      <button @click="$dispatch('open-modal', 'document-universe-modal')"
+              class="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+        <i class="material-icons <%= @document.universe_id.present? ? Universe.text_color : 'text-gray-500 dark:text-gray-400' %> mb-2">public</i>
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Universe</span>
+      </button>
+
+      <!-- Notes Button -->
+      <button @click="$dispatch('open-modal', 'document-notes-modal')"
+              class="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+        <i class="material-icons text-gray-500 dark:text-gray-400 mb-2">notes</i>
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Notes</span>
+      </button>
+
+      <!-- Synopsis Button -->
+      <button @click="$dispatch('open-modal', 'document-synopsis-modal')"
+              class="flex flex-col items-center justify-center p-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+        <i class="material-icons text-gray-500 dark:text-gray-400 mb-2">short_text</i>
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Synopsis</span>
+      </button>
+    </div>
+
+    <!-- Document Actions -->
+    <nav class="space-y-1">
+      <% if @document.document_analysis.where.not(completed_at: nil).any? %>
+        <%= link_to analysis_document_path(@document),
+                    class: "w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+          <span class="flex items-center">
+            <i class="material-icons text-blue-500 mr-3">analytics</i>
+            View Analysis
+          </span>
+          <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+        <% end %>
+      <% else %>
+        <%= link_to queue_analysis_document_path(@document),
+                    class: "w-full flex items-center px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+          <i class="material-icons text-blue-500 mr-3">analytics</i>
+          Run Analysis
+        <% end %>
+      <% end %>
+
+      <%= link_to document_document_revisions_path(@document),
+                  class: "w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <span class="flex items-center">
+          <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">history</i>
+          Revision Log
+        </span>
+        <i class="material-icons text-gray-400 text-sm">chevron_right</i>
+      <% end %>
+    </nav>
+  </div>
+</div>

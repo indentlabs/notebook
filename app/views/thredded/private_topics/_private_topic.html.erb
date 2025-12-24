@@ -1,0 +1,51 @@
+<%= content_tag :article,
+                id: dom_id(private_topic),
+                class: ['thredded--topics--topic', *topic_css_classes(private_topic)] do %>
+  
+  <!-- Participants Avatars -->
+  <div class="message-participants">
+    <% participants = [private_topic.last_user, *(private_topic.users - [private_topic.last_user])].compact.reject(&:thredded_anonymous?).uniq.first(3) %>
+    <% participants.each do |user| %>
+      <div class="participant-avatar" title="<%= user.thredded_display_name %>">
+        <% if user.respond_to?(:image_url) %>
+          <%= image_tag user.image_url(size: 40), alt: user.thredded_display_name %>
+        <% else %>
+          <div class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-500 dark:text-gray-400 text-sm font-medium"><%= user.thredded_display_name.first.upcase %></div>
+        <% end %>
+      </div>
+    <% end %>
+    <% if private_topic.users.count > 3 %>
+      <span class="more-participants">+<%= private_topic.users.count - 3 %></span>
+    <% end %>
+  </div>
+  
+  <!-- Message Content -->
+  <div class="message-content">
+    <h1 class="thredded--topics--title">
+      <%= link_to private_topic.title, private_topic.path %>
+    </h1>
+    
+    <% if private_topic.to_model.last_post %>
+      <div class="message-preview">
+        <%= truncate(private_topic.to_model.last_post.content.to_s.gsub(/<[^>]*>/, ''), length: 100) %>
+      </div>
+    <% end %>
+  </div>
+  
+  <!-- Posts Count Badge -->
+  <div class="thredded--topics--posts-count">
+    <%= private_topic.posts_count %>
+  </div>
+  
+  <!-- Timestamp and Metadata -->
+  <cite class="thredded--topics--updated-by">
+    <%= time_ago private_topic.last_post_at %>
+    <div class="thredded--topics--participants">
+      <% if private_topic.last_user && !private_topic.last_user.thredded_anonymous? %>
+        <%= link_to private_topic.last_user.thredded_display_name, user_path(private_topic.last_user) %>
+      <% elsif private_topic.last_user %>
+        <span><%= private_topic.last_user.thredded_display_name %></span>
+      <% end %>
+    </div>
+  </cite>
+<% end %>

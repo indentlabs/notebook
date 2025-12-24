@@ -1,4 +1,6 @@
 class Timeline < ApplicationRecord
+  include Rails.application.routes.url_helpers
+
   acts_as_paranoid
 
   include IsContentPage
@@ -22,11 +24,11 @@ class Timeline < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-500'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-500'
   end
 
   # Needed because we sometimes munge Timelines in with ContentPages :(
@@ -52,6 +54,14 @@ class Timeline < ApplicationRecord
 
   def page_type
     'Timeline'
+  end
+
+  def view_path
+    timeline_path(self.id)
+  end
+
+  def edit_path
+    edit_timeline_path(self.id)
   end
 
   def initialize_first_event

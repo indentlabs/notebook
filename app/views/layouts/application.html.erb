@@ -1,44 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="<%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>">
 <head>
-  <%= render 'layouts/common_head' %>
-  <%= Sentry.get_trace_propagation_meta.html_safe %>
-  </head>
-<body data-in-app="true"
-      class="<%= controller_name %> <%= action_name %> <%= 'has-fixed-sidenav' if user_signed_in? %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
->
-  <%= render 'layouts/sidenav' if user_signed_in? %>
-  <%= render 'layouts/recent_edits_sidenav' if user_signed_in? %>
-  <%= render 'layouts/navbar' %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <%= csrf_meta_tags %>
 
-  <main>
-    <%= yield :full_width_page_header %>
-    <%= yield :full_width_page_content %>
-    <div class="container<% if (user_signed_in? && current_user.fluid_preference) || request.env.fetch('REQUEST_PATH', '').start_with?('/forum/') || @full_width_page_override %>-fluid<% end %>">
-      <%= render 'cards/ui/alert' %>
-      <%= render 'cards/ui/notice' %>
-      <div class="row">
-        <div class="col s12">
-          <%= yield %>
-        </div>
-      </div>
-    </div>
+  <%= stylesheet_link_tag 'application', media: 'all' %>
+  <%= stylesheet_pack_tag 'application', media: 'all' %>
+  <!--
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <%= render 'layouts/favicon' %>
+  <%= javascript_include_tag 'application' %>
+  <%= javascript_pack_tag 'application' %>
+  <%= render 'layouts/seo' %>
+  <script defer type="text/javascript" src="https://js.stripe.com/v2/"></script>
+  
+  <!-- Simplified stylesheet and script section for debugging -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>
+    /* Prevent transition on initial page load */
+    .no-transition {
+      transition: none !important;
+    }
+  </style>
+</head>
+<body data-in-app="true"
+      class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+      :class="{ 'overflow-hidden': showSidebar && !isDesktop }"
+      x-data="{
+        isDesktop: window.innerWidth >= 1024,
+        showSidebar: (() => {
+          <% if user_signed_in? %>
+            try {
+              const saved = localStorage.getItem('site_navigation_sidebar_visible');
+              const isDesktop = window.innerWidth >= 1024;
+              // On desktop, use saved preference (default true), on mobile default false
+              return isDesktop ? (saved === null ? true : saved === 'true') : false;
+            } catch (e) {
+              return window.innerWidth >= 1024;
+            }
+          <% else %>
+            return false;
+          <% end %>
+        })()
+      }"
+      x-init="
+        <% if user_signed_in? %>
+          // Save sidebar state to localStorage when it changes
+          $watch('showSidebar', value => {
+            try {
+              localStorage.setItem('site_navigation_sidebar_visible', value.toString());
+            } catch (e) {
+              // Silently fail is localstorage is not available
+            }
+
+            // Lock scroll on mobile
+            if (!isDesktop) {
+              if (value) {
+                document.documentElement.classList.add('overflow-hidden');
+                document.body.classList.add('overflow-hidden');
+              } else {
+                document.documentElement.classList.remove('overflow-hidden');
+                document.body.classList.remove('overflow-hidden');
+              }
+            } else {
+              // Ensure no scroll lock on desktop
+              document.documentElement.classList.remove('overflow-hidden');
+              document.body.classList.remove('overflow-hidden');
+            }
+          });
+
+          // Handle window resize
+          window.addEventListener('resize', () => {
+            isDesktop = window.innerWidth >= 1024;
+            if (!isDesktop) {
+              showSidebar = false;
+            } else {
+              // Restore saved state when going back to desktop
+              try {
+                const saved = localStorage.getItem('site_navigation_sidebar_visible');
+                showSidebar = saved === null ? true : saved === 'true';
+              } catch (e) {
+                showSidebar = true;
+              }
+              // Ensure lock is cleared
+              document.documentElement.classList.remove('overflow-hidden');
+              document.body.classList.remove('overflow-hidden');
+            }
+          });
+        <% end %>
+      "
+>
+  <%= render 'layouts/tailwind/navbar' %>
+
+  <%= render 'layouts/tailwind/sidebar' %>
+
+  <!-- main content -->
+  <main class="no-transition transition-all duration-300 pt-14"
+        <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-60 lg:ml-56': showSidebar, 'ml-0': !showSidebar }"<% end %>
+        x-init="setTimeout(() => { $el.classList.remove('no-transition') }, 100)">
+    <%= yield %>
   </main>
 
-  <%= react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
-  <%= render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
+  <%= render 'layouts/footer' %>
 
   <script type="text/javascript">
     <% if user_signed_in? %>
       DISABLE_KEYBOARD_SHORTCUTS = <%= !current_user.keyboard_shortcuts_preference %>;
     <% end %>
 
-    $(document).ready(function() {
+    // Global notification function
+    function showNotification(message, type) {
+      // Remove any existing notifications
+      var existingNotifications = document.querySelectorAll('.global-notification');
+      existingNotifications.forEach(function(notif) {
+        notif.remove();
+      });
+
+      // Create notification element
+      var notification = document.createElement('div');
+      var bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-blue-600';
+      notification.className = 'global-notification fixed bottom-4 right-4 ' + bgColor + ' text-white px-4 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 transform';
+      
+      // Add icon based on type
+      var icon = type === 'success' ? 
+        '<svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
+        type === 'error' ?
+        '<svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' :
+        '<svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+      
+      notification.innerHTML = icon + message;
+      notification.style.transform = 'translateY(100%)';
+      notification.style.opacity = '0';
+      document.body.appendChild(notification);
+      
+      // Animate in (slide up from bottom)
+      setTimeout(function() {
+        notification.style.transform = 'translateY(0)';
+        notification.style.opacity = '1';
+      }, 10);
+      
+      // Remove after 4 seconds
+      setTimeout(function() {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(100%)';
+        setTimeout(function() {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 4000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Display Rails flash messages as notifications
+      <% if flash[:notice].present? %>
+        showNotification('<%= j flash[:notice] %>', 'success');
+      <% end %>
+      <% if flash[:alert].present? %>
+        showNotification('<%= j flash[:alert] %>', 'error');
+      <% end %>
+      <% if flash[:error].present? %>
+        showNotification('<%= j flash[:error] %>', 'error');
+      <% end %>
+      <% if flash[:info].present? %>
+        showNotification('<%= j flash[:info] %>', 'info');
+      <% end %>
+
       <%= yield :javascript %>
     });
   </script>
 
-  <%= render partial: 'content/keyboard_controls_help_modal' %>
   <%= render 'layouts/ganalytics' %>
 </body>
 </html>

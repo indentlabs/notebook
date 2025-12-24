@@ -1,147 +1,147 @@
-<h4>
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons">arrow_back</i>
-  <% end %>
-  Document statistics
-</h4>
-
-<div class="row">
-  <div class="col s12 m4 l4">
-    <div class="card-panel center <%= Document.color %> white-text">
-      <h1 style="margin: 0">
-        <%= number_with_delimiter @documents.sum { |doc| doc.cached_word_count || 0 } %>
-      </h1>
-      total words written
-    </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
+    <% end %>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Document statistics</h1>
   </div>
-  <div class="col s12 m4 l4">
-    <%= link_to documents_path do %>
-      <div class="card-panel center <%= Document.color %> white-text hoverable">
-        <h1 style="margin: 0">
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-indigo-600 rounded-lg shadow-md p-6 text-center text-white">
+      <h2 class="text-4xl font-bold mb-2">
+        <%= number_with_delimiter @documents.sum { |doc| doc.cached_word_count || 0 } %>
+      </h2>
+      <p class="text-indigo-100">total words written</p>
+    </div>
+    
+    <%= link_to documents_path, class: "block" do %>
+      <div class="bg-indigo-600 rounded-lg shadow-md p-6 text-center text-white hover:bg-indigo-700 transition-colors">
+        <h2 class="text-4xl font-bold mb-2">
           <%= number_with_delimiter @documents.count %>
-        </h1>
-        total documents
+        </h2>
+        <p class="text-indigo-100">total documents</p>
       </div>
     <% end %>
-  </div>
-  <div class="col s12 m4 l4">
-    <div class="card-panel center <%= Document.color %> white-text">
-      <h1 style="margin: 0">
+    
+    <div class="bg-indigo-600 rounded-lg shadow-md p-6 text-center text-white">
+      <h2 class="text-4xl font-bold mb-2">
         <%= number_with_delimiter @revisions.count %>
-      </h1>
-      document versions
+      </h2>
+      <p class="text-indigo-100">document versions</p>
     </div>
   </div>
 
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">You've written <%= pluralize @documents.count, 'document' %> on Notebook.ai</div>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-8 overflow-hidden">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white">You've written <%= pluralize @documents.count, 'document' %> on Notebook.ai</h2>
+    </div>
 
-        <table class="striped">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Word count</th>
-              <th>History</th>
-              <th>Analyzed?</th>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Title</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Word count</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">History</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Analyzed?</th>
+          </tr>
+        </thead>
+
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <% @documents.each do |document| %>
+            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <i class="material-icons <%= Document.text_color %> mr-2"><%= Document.icon %></i>
+                  <%= link_to document.title, document, class: "#{Document.text_color} hover:underline" %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
+                <%= number_with_delimiter(document.cached_word_count || 0) %>
+                <%= 'word'.pluralize(document.cached_word_count || 0) %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-700 dark:text-gray-300">
+                  Created <%= time_ago_in_words document.created_at %> ago
+                  <span class="text-gray-500 dark:text-gray-400">
+                    (<%= document.created_at.strftime("%m/%d/%Y") %>)
+                  </span>
+                </div>
+                <div class="text-sm text-gray-700 dark:text-gray-300">
+                  Last updated <%= time_ago_in_words document.updated_at %> ago
+                  <span class="text-gray-500 dark:text-gray-400">
+                    (<%= document.updated_at.strftime("%m/%d/%Y") %>)
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if document.document_analysis.where.not(completed_at: nil).any? %>
+                  <span class="font-medium">
+                    <%= link_to 'Yes', analysis_document_path(document), class: 'text-orange-500 hover:text-orange-600 hover:underline' %>
+                  </span>
+                <% else %>
+                  <%= link_to 'No', analysis_document_path(document), class: 'text-gray-600 hover:text-gray-800 hover:underline' %>
+                <% end %>
+              </td>
             </tr>
-          </thead>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-          <tbody>
-            <% @documents.each do |document| %>
-              <tr>
-                <td>
-                  <i class="material-icons left <%= Document.text_color %>"><%= Document.icon %></i>
-                  <%= link_to document.title, document, class: "#{Document.text_color}" %>
-                </td>
-                <td>
-                  <%= number_with_delimiter(document.cached_word_count || 0) %>
-                  <%= 'word'.pluralize(document.cached_word_count || 0) %>
-                </td>
-                <td>
-                  <div>
-                    Created <%= time_ago_in_words document.created_at %> ago
-                    <span class="grey-text">
-                      (<%= document.created_at.strftime("%m/%d/%Y") %>)
-                    </span>
-                  </div>
-                  <div>
-                    Last updated <% time_ago_in_words document.updated_at %> ago
-                    <span class="grey-text">
-                      (<%= document.updated_at.strftime("%m/%d/%Y") %>)
-                    </span>
-                  </div>
-                </td>
-                <td>
-                  <% if document.document_analysis.where.not(completed_at: nil).any? %>
-                    <strong>
-                      <%= link_to 'Yes', analysis_document_path(document), class: 'orange-text' %>
-                    </strong>                
-                  <% else %>
-                    <%= link_to 'No', analysis_document_path(document) %>
-                  <% end %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-8">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Writing activity over time</h2>
+      <p class="text-gray-600 dark:text-gray-400">
+        Notebook.ai automatically creates backups of your documents as often as every five minutes as you're writing.
+        The following charts estimate approximately how much time you spend writing in Notebook.ai each day
+        based on how many of those automatic backups were created.
+      </p>
+    </div>
+    
+    <div class="p-6">
+      <%=
+        line_chart @revisions.where('created_at > ?', Date.current - 30.days).group_by_day(:created_at).map { |ts, c|
+          [ts.split(' ').first, c * 5]
+        },
+        title: "Last 30 days",
+        ytitle: "minutes",
+        colors: [Document.color],
+        suffix: " minutes",
+        download: true
+      %>
+      
+      <div class="my-8"></div>
+      
+      <%=
+        line_chart @revisions.group_by_day(:created_at).map { |ts, c|
+          [ts.split(' ').first, c * 5]
+        },
+        title: "All time",
+        ytitle: "minutes",
+        colors: [Document.color],
+        suffix: " minutes",
+        download: true
+      %>
+      
+      <div class="text-center mt-8 text-gray-700 dark:text-gray-300">
+        You have written something in a Notebook.ai document on
+        <span class="font-bold">
+          <%= @revisions.group_by_day(:created_at).keys.count %>
+          different days!
+        </span>
       </div>
     </div>
   </div>
 
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Writing activity over time</div>
-        <p>
-          Notebook.ai automatically creates backups of your documents as often as every five minutes as you're writing.
-          The following charts estimate approximately how much time you spend writing in Notebook.ai each day
-          based on how many of those automatic backups were created.
-        </p>
-        <br />
-        <%=
-          line_chart @revisions.where('created_at > ?', Date.current - 30.days).group_by_day(:created_at).map { |ts, c|
-            [ts.split(' ').first, c * 5]
-          },
-          title: "Last 30 days",
-          ytitle: "minutes",
-          colors: [Document.color],
-          suffix: " minutes",
-          download: true
-        %>
-        <br />
-        <%=
-          line_chart @revisions.group_by_day(:created_at).map { |ts, c|
-            [ts.split(' ').first, c * 5]
-          },
-          title: "All time",
-          ytitle: "minutes",
-          colors: [Document.color],
-          suffix: " minutes",
-          download: true
-        %>
-        <br />
-        <div class="center">
-          You have written something in a Notebook.ai document on
-          <strong>
-            <%= @revisions.group_by_day(:created_at).keys.count %>
-            different days!
-          </strong>
-        </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 text-center">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Words-written distribution per document</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">(for your 10 longest documents)</p>
       </div>
-    </div>
-  </div>
-
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content center">
-        <div class="card-title">Words-written distribution per document</div>
-        <div class="grey-text">(for your 10 longest documents)</div>
+      <div class="p-6">
         <%=
           pie_chart current_user.documents.where.not(cached_word_count: [0, nil]).order('cached_word_count DESC').limit(10).pluck(:title, :cached_word_count),
             suffix: ' words',
@@ -150,12 +150,13 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content center">
-        <div class="card-title">Words-written distribution per document</div>
-        <div class="grey-text">(for your 10 most recent documents)</div>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+      <div class="p-6 border-b border-gray-200 dark:border-gray-700 text-center">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Words-written distribution per document</h2>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">(for your 10 most recent documents)</p>
+      </div>
+      <div class="p-6">
         <%=
           pie_chart current_user.documents.where.not(cached_word_count: [0, nil]).order('documents.updated_at DESC').limit(10).pluck(:title, :cached_word_count),
             suffix: ' words',
@@ -166,17 +167,17 @@
     </div>
   </div>
 
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Revisions per document</div>
-        <%=
-          bar_chart @revisions_per_document_data,
-            suffix: ' revisions',
-            colors: [Document.color],
-            download: true
-        %>
-      </div>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Revisions per document</h2>
+    </div>
+    <div class="p-6">
+      <%=
+        bar_chart @revisions_per_document_data,
+          suffix: ' revisions',
+          colors: [Document.color],
+          download: true
+      %>
     </div>
   </div>
 </div>

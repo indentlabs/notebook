@@ -1,32 +1,241 @@
-<br />
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900" data-in-app="true">
+  <!-- Clean Header -->
+  <header class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Left: Navigation -->
+        <div class="flex items-center space-x-1">
+          <%= link_to stream_path, class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors #{'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' if request.path == stream_path} #{'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800' unless request.path == stream_path}" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            Following
+          <% end %>
+          <%= link_to stream_world_path, class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors #{'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' if request.path == stream_world_path} #{'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800' unless request.path == stream_world_path}" do %>
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Everyone
+          <% end %>
+        </div>
 
-<%= render partial: 'notice_dismissal/messages/12' %>
+        <!-- Right: Empty for balance -->
+        <div class="w-24"></div>
+      </div>
+    </div>
+  </header>
 
-<div class="row">
-  <div class="col s12">
-    <%= render partial: 'content_page_shares/form' %>
-  </div>
-</div>
-
-<%= render partial: 'stream/share', collection: @feed %>
-
-<% if @feed.empty? %>
-  <div class="row">
-    <div class='col s12'>
-      <div class="hoverable card">
-        <div class="card-content">
-          <p class="card-title">
-            There are no posts here yet!
+  <!-- Main Content Area -->
+  <div class="py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="lg:grid lg:grid-cols-12 lg:gap-8">
+        <!-- Main Stream Content -->
+        <div class="lg:col-span-8">
+      
+      <!-- Collapsible Share CTA -->
+      <div class="mb-6">
+        <div id="share-cta-collapsed" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 cursor-pointer hover:shadow-md transition-shadow">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <%= image_tag current_user.image_url(size: 40), class: "h-10 w-10 rounded-full" %>
+              <div>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">Want to share a page with the world?</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Share your work and get feedback from the community</p>
+              </div>
+            </div>
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+        
+        <div id="share-form-expanded" class="hidden bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <%= form_for [current_user, ContentPageShare.new(user: current_user)], local: true, class: "tailwind-styled-form" do |f| %>
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+              <div class="flex items-start space-x-4">
+                <%= image_tag current_user.image_url(size: 48), class: "h-12 w-12 rounded-full" %>
+                <div class="flex-1">
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">Share a page</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">Choose one of your pages to share with the community</p>
+                </div>
+                <button type="button" id="close-share-form" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <div class="p-6 space-y-4">
+              <div>
+                <%= f.select :content_page, 
+                    options_for_select([['Select a page to share...', '']] + 
+                      @current_user_content.flat_map do |content_type, content_list|
+                        content_list.sort_by(&:name).map { |content| ["#{content.name} (#{content_type})", "#{content_type}-#{content.id}"] }
+                      end), 
+                    {}, 
+                    { class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" } %>
+              </div>
+              
+              <div>
+                <%= f.text_area :message, 
+                    placeholder: "Add a message about your page (optional)", 
+                    rows: 3,
+                    class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white" %>
+              </div>
+              
+              <div class="flex items-center justify-between pt-2">
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <svg class="w-4 h-4 mr-1.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  Page will be made public
+                </div>
+                <%= f.submit "Share", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <!-- Feed Header -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center space-x-3">
+          <div class="h-8 w-1 bg-blue-600 rounded-full"></div>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+            <%= request.path == stream_path ? "Following" : "Everyone" %>
+          </h2>
+          <span class="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
+            <%= @feed.length %> posts
+          </span>
+        </div>
+      </div>
+      
+      <!-- Feed Content -->
+      <% if @feed.empty? %>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+          <div class="mb-6">
+            <div class="mx-auto h-16 w-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+              <svg class="h-8 w-8 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No posts here yet!</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto leading-relaxed">
+            <%= request.path == stream_path ? 
+                "Follow other worldbuilders to see their amazing creations appear here." : 
+                "Be the first to share something amazing with the community!" %>
           </p>
-          <p>
-            You can follow other worldbuilders from their profiles.
-            Whenever a user you follow shares one of their public pages,
-            it will appear here for you to comment on!
-          </p>
+          <%= link_to "Discover Creators", users_path, class: "inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors" %>
+        </div>
+      <% else %>
+        <div class="space-y-6">
+          <% @feed.each_with_index do |share, index| %>
+            <%= render partial: 'stream/feed_item', locals: { share: share, is_last: index == @feed.length - 1 } %>
+          <% end %>
+        </div>
+      <% end %>
+        </div>
+        
+        <!-- Right Sidebar -->
+        <div class="hidden lg:block lg:col-span-4">
+          <div class="sticky top-24">
+            <!-- Recent Forum Conversations -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div class="flex items-center space-x-2 mb-4">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Conversations Happening Now</h3>
+              </div>
+              
+              <% if @recent_forum_topics.present? %>
+                <div class="space-y-3">
+                  <% @recent_forum_topics.each do |topic| %>
+                    <div class="group">
+                      <%= link_to thredded.topic_path(topic), class: "block p-3 rounded-lg border border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" do %>
+                        <div class="flex items-start space-x-3">
+                          <div class="flex-shrink-0">
+                            <div class="w-2 h-2 bg-blue-600 dark:bg-blue-500 rounded-full mt-2"></div>
+                          </div>
+                          <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-medium text-gray-900 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                              <%= topic.title %>
+                            </h4>
+                            <div class="flex items-center space-x-2 mt-1">
+                              <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <%= time_ago_in_words(topic.last_post_at || topic.created_at) %> ago
+                              </span>
+                              <span class="text-xs text-gray-400 dark:text-gray-600">&bull;</span>
+                              <span class="text-xs text-gray-500 dark:text-gray-400">
+                                <%= pluralize(topic.posts_count || 0, 'reply', 'replies') %>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                  <%= link_to thredded.root_path, class: "inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" do %>
+                    View all conversations
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="text-center py-4">
+                  <svg class="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                  </svg>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">No recent conversations</p>
+                </div>
+              <% end %>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-<% end %>
+</div>
 
-<%= render partial: 'javascripts/content_linking' %>
+<script>
+// Disable MaterializeCSS initialization for Tailwind-styled forms
+document.addEventListener('DOMContentLoaded', function() {
+  // Prevent MaterializeCSS from initializing on Tailwind select elements
+  if (window.M && window.M.FormSelect) {
+    document.querySelectorAll('.tailwind-styled-form select').forEach(function(select) {
+      select.classList.add('no-autoinit');
+    });
+  }
+  
+  // Handle collapsible share form
+  const shareCtaCollapsed = document.getElementById('share-cta-collapsed');
+  const shareFormExpanded = document.getElementById('share-form-expanded');
+  const closeShareForm = document.getElementById('close-share-form');
+  
+  if (shareCtaCollapsed) {
+    shareCtaCollapsed.addEventListener('click', function() {
+      shareCtaCollapsed.classList.add('hidden');
+      shareFormExpanded.classList.remove('hidden');
+    });
+  }
+  
+  if (closeShareForm) {
+    closeShareForm.addEventListener('click', function() {
+      shareFormExpanded.classList.add('hidden');
+      shareCtaCollapsed.classList.remove('hidden');
+    });
+  }
+});
+</script>
+
+
+
+
+
+
+

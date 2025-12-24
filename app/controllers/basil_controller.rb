@@ -1,5 +1,6 @@
 class BasilController < ApplicationController
   before_action :authenticate_user!, except: [:complete_commission, :about, :stats, :jam, :queue_jam_job, :commission_info]
+  before_action :cache_basil_user_content, if: :user_signed_in?
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -23,7 +24,14 @@ class BasilController < ApplicationController
   def content
     # Fetch the content page from our already-queried cache of current user content
     @content_type = params[:content_type].humanize
-    @content      = @current_user_content[@content_type].detect do |page|
+    
+    # Debug: Let's see what's actually in the cache
+    Rails.logger.debug "=== BASIL DEBUG ==="
+    Rails.logger.debug "Looking for #{@content_type} with ID #{params[:id]}"
+    Rails.logger.debug "Available content types: #{@current_user_content&.keys}"
+    Rails.logger.debug "#{@content_type} content: #{@current_user_content[@content_type]&.map { |p| "#{p.class.name}##{p.id}:#{p.name}" }}"
+    
+    @content      = @current_user_content[@content_type]&.detect do |page|
       page.id == params[:id].to_i
     end
     raise "No content found for #{params[:content_type]} with ID #{params[:id]} for user #{current_user.id}" if @content.nil?
@@ -208,6 +216,113 @@ class BasilController < ApplicationController
       exclude_field_ids: included_field_ids
     )
 
+    # Identify suggested fields for helpful empty state guidance
+    @suggested_fields = []
+    if @relevant_fields.empty?
+      case @content_type
+      when 'Character'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Role', 'Overview section'],
+          ['Age', 'Overview section'],
+          ['Gender', 'Overview section'],
+          ['Looks fields', 'Looks section (hair color, eye color, etc.)']
+        ]
+      when 'Location'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Type', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Area or Climate', 'Geography section']
+        ]
+      when 'Item'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Item Type', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Appearance details', 'Looks or Appearance section'],
+          ['Magical effects', 'Abilities section (optional)']
+        ]
+      when 'Building'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Type of building', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Design details', 'Design section']
+        ]
+      when 'Creature'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Physical details', 'Looks section']
+        ]
+      when 'Flora'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Appearance details', 'Looks section']
+        ]
+      when 'Food'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Type of food', 'Overview section'],
+          ['Taste', 'Overview section'],
+          ['Description', 'Overview section']
+        ]
+      when 'Landmark'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Type of landmark', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Appearance details', 'Appearance section']
+        ]
+      when 'Planet'
+        @suggested_fields = [
+          ['Geography details', 'Geography section'],
+          ['Moons', 'Astral section']
+        ]
+      when 'Town'
+        @suggested_fields = [
+          ['Description', 'Overview section'],
+          ['Layout details', 'Layout section']
+        ]
+      when 'Vehicle'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Type of vehicle', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Appearance details', 'Looks section']
+        ]
+      when 'Deity'
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Physical form', 'Appearance section'],
+          ['Symbols', 'Symbols section']
+        ]
+      when 'Technology'
+        @suggested_fields = [
+          ['Description', 'Overview section'],
+          ['Materials', 'Production section'],
+          ['Appearance details', 'Appearance section']
+        ]
+      when 'Tradition'
+        @suggested_fields = [
+          ['Type of tradition', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Activities', 'Celebrations section'],
+          ['Symbolism', 'Celebrations section']
+        ]
+      else
+        # Generic fallback for other content types
+        @suggested_fields = [
+          ['Name', 'Overview section'],
+          ['Description', 'Overview section'],
+          ['Key details', 'Main sections of the page']
+        ]
+      end
+    end
+
     # Finally, cache some state we can reference in the view
     @commissions = BasilCommission.where(entity_type: @content.page_type, entity_id: @content.id)
                                   .where(saved_at: nil)
@@ -365,6 +480,15 @@ class BasilController < ApplicationController
                                                   .group(:entity_type)
                                                   .average(:score_adjustment)
                                                   .map { |k, v| [k, v.round(1)] }.to_h
+
+    # Today's average rating (convert from -2..+3 scale to 1..5 stars)
+    today_feedback = BasilFeedback.joins(:basil_commission)
+                                  .where(basil_commissions: { basil_version: @version })
+                                  .where('basil_feedbacks.updated_at > ?', 24.hours.ago)
+    @total_ratings_today = today_feedback.count
+    raw_average = today_feedback.average(:score_adjustment)
+    # Map -2..+3 to 1..5: (score + 2) / 5 * 4 + 1
+    @average_rating_today = raw_average ? ((raw_average + 2) / 5.0 * 4 + 1).round(1) : nil
 
     # queue size (total commissions - completed commissions)
     # average time to complete today / this week
@@ -666,6 +790,23 @@ class BasilController < ApplicationController
   end
 
   private
+
+  # Cache user content for Basil without universe filtering
+  # since Basil should be able to generate images for any user content
+  def cache_basil_user_content
+    return if @current_user_content
+    @current_user_content = {}
+    return unless user_signed_in?
+    
+    # Get all enabled content types for Basil
+    enabled_types = BasilService::ENABLED_PAGE_TYPES
+    
+    # Cache content without universe filtering
+    @current_user_content = current_user.content(
+      content_types: enabled_types,
+      universe_id: nil  # No universe filtering for Basil
+    )
+  end
 
   def commission_params
     params.require(:basil_commission).permit(:style, :entity_type, :entity_id, field: {})

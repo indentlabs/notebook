@@ -1,0 +1,303 @@
+<!-- Tags Tab - Popular Tags and Tag Cloud -->
+<div class="space-y-6">
+  
+  <!-- Header with Search -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Content Tags</h2>
+      <p class="text-gray-600 dark:text-gray-400 mt-1">
+        <%= pluralize(@popular_tags.length, 'unique tag') %> across public content
+      </p>
+    </div>
+    
+    <!-- Search Tags -->
+    <div class="mt-4 sm:mt-0">
+      <div class="relative">
+        <input type="text" 
+               placeholder="Search tags..." 
+               class="w-64 px-4 py-2 pl-10 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:!bg-slate-800 text-gray-900 dark:text-gray-100 dark:placeholder-gray-500"
+               id="tag-search">
+        <i class="material-icons absolute left-3 top-2.5 text-gray-400 text-sm">search</i>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tags Display -->
+  <% if @popular_tags.any? %>
+    
+    <!-- Sort Options -->
+    <div class="bg-white dark:!bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Sort by:</span>
+        
+        <button class="tag-sort-btn active px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800" data-sort="popularity">
+          Most Popular
+        </button>
+        
+        <button class="tag-sort-btn px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600" data-sort="alphabetical">
+          Alphabetical
+        </button>
+        
+        <button class="tag-sort-btn px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600" data-sort="recent">
+          Recently Used
+        </button>
+      </div>
+    </div>
+    
+    <!-- Tag Cloud View -->
+    <div id="tag-cloud" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-8">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+        <i class="material-icons mr-2 text-amber-600 dark:text-amber-500">local_offer</i>
+        Tag Cloud
+      </h3>
+      
+      <div class="flex flex-wrap gap-3 justify-center">
+        <% @popular_tags.each do |tag| %>
+          <div class="tag-item" data-name="<%= tag.tag.downcase %>" data-usage="<%= tag.usage_count %>">
+            <% tag_path = @user.username.present? ? user_tag_path(username: @user.username, tag_slug: tag.slug) : user_id_tag_path(id: @user.id, tag_slug: tag.slug) %>
+            <%= link_to tag_path, {
+                       class: "inline-flex items-center px-4 py-2 rounded-full font-medium transition-all duration-200 hover:scale-105 hover:shadow-md tag-link",
+                       style: "font-size: #{[12 + (tag.usage_count * 2), 24].min}px;",
+                       data: { usage: tag.usage_count }
+                     } do %>
+              
+              <i class="material-icons mr-1" style="font-size: inherit;">tag</i>
+              <%= tag.tag %>
+              
+              <span class="ml-2 px-2 py-0.5 bg-white bg-opacity-70 rounded-full text-xs font-bold">
+                <%= tag.usage_count %>
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- List View -->
+    <div id="tag-list" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <i class="material-icons mr-2 text-blue-600 dark:text-blue-400">list</i>
+          All Tags
+        </h3>
+      </div>
+      
+      <div class="divide-y divide-gray-200">
+        <% @popular_tags.each do |tag| %>
+          <div class="tag-list-item" data-name="<%= tag.tag.downcase %>" data-usage="<%= tag.usage_count %>">
+            <% tag_path = @user.username.present? ? user_tag_path(username: @user.username, tag_slug: tag.slug) : user_id_tag_path(id: @user.id, tag_slug: tag.slug) %>
+            <%= link_to tag_path, 
+                       { class: "block px-6 py-4 hover:bg-gray-50 transition-colors duration-200" } do %>
+              
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="material-icons text-blue-600">tag</i>
+                  </div>
+                  
+                  <div>
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100"><%= tag.tag %></h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Used in <%= pluralize(tag.usage_count, 'page') %>
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-center space-x-3">
+                  <!-- Usage bar visualization -->
+                  <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 rounded-full" 
+                         style="width: <%= [(tag.usage_count.to_f / @popular_tags.first.usage_count * 100), 100].min %>%"></div>
+                  </div>
+                  
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    <%= tag.usage_count %>
+                  </span>
+                  
+                  <i class="material-icons text-gray-400">chevron_right</i>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- No Results -->
+    <div id="no-tag-results" class="hidden text-center py-12">
+      <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No tags found</h3>
+      <p class="text-gray-500 dark:text-gray-400">Try adjusting your search terms.</p>
+    </div>
+    
+  <% else %>
+    
+    <!-- Empty State -->
+    <div class="text-center py-16">
+      <div class="mx-auto w-24 h-24 bg-amber-100 dark:bg-amber-900/40 rounded-full flex items-center justify-center mb-6">
+        <i class="material-icons text-amber-600 dark:text-amber-500 text-4xl">local_offer</i>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <% if user_signed_in? && @user == current_user %>
+          No tags yet
+        <% else %>
+          <%= @user.name || @user.display_name %> hasn't used any tags yet
+        <% end %>
+      </h3>
+      
+      <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+        <% if user_signed_in? && @user == current_user %>
+          Tags help organize and categorize your content. Add tags to your pages to help others discover related content.
+        <% else %>
+          Tags help organize content by theme, genre, or other categories. Check back later to see how they organize their worlds!
+        <% end %>
+      </p>
+      
+      <% if user_signed_in? && @user == current_user %>
+        <%= link_to characters_path, class: "bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+          <i class="material-icons mr-2 text-sm">tag</i>
+          Add Tags to Content
+        <% end %>
+      <% end %>
+    </div>
+    
+  <% end %>
+</div>
+
+<!-- JavaScript for Tag Filtering and Sorting -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('tag-search');
+  const tagCloud = document.getElementById('tag-cloud');
+  const tagList = document.getElementById('tag-list');
+  const noResults = document.getElementById('no-tag-results');
+  const sortButtons = document.querySelectorAll('.tag-sort-btn');
+  
+  // Get all tag items
+  const allTagItems = Array.from(document.querySelectorAll('.tag-item'));
+  const allTagListItems = Array.from(document.querySelectorAll('.tag-list-item'));
+  
+  let currentSort = 'popularity';
+  let currentSearch = '';
+  
+  // Tag color generator based on usage
+  function getTagColor(usage, maxUsage) {
+    const intensity = Math.min(usage / maxUsage, 1);
+    const hue = Math.floor(200 + (intensity * 60)); // Blue to purple range
+    const saturation = Math.floor(50 + (intensity * 30));
+    const lightness = Math.floor(85 - (intensity * 30));
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+  
+  // Apply colors to tag links in cloud
+  if (allTagItems.length > 0) {
+    const maxUsage = Math.max(...allTagItems.map(item => parseInt(item.dataset.usage)));
+    
+    allTagItems.forEach(item => {
+      const usage = parseInt(item.dataset.usage);
+      const tagLink = item.querySelector('.tag-link');
+      if (tagLink) {
+        const color = getTagColor(usage, maxUsage);
+        tagLink.style.backgroundColor = color;
+        tagLink.style.color = usage > (maxUsage * 0.7) ? 'white' : '#374151';
+      }
+    });
+  }
+  
+  function updateDisplay() {
+    let filteredItems = allTagItems;
+    let filteredListItems = allTagListItems;
+    
+    // Apply search filter
+    if (currentSearch) {
+      filteredItems = filteredItems.filter(item => 
+        item.dataset.name.includes(currentSearch.toLowerCase())
+      );
+      filteredListItems = filteredListItems.filter(item => 
+        item.dataset.name.includes(currentSearch.toLowerCase())
+      );
+    }
+    
+    // Apply sorting
+    const sortFunction = (a, b) => {
+      switch(currentSort) {
+        case 'popularity':
+          return parseInt(b.dataset.usage) - parseInt(a.dataset.usage);
+        case 'alphabetical':
+          return a.dataset.name.localeCompare(b.dataset.name);
+        case 'recent':
+          // For now, same as popularity - could be enhanced with actual timestamp data
+          return parseInt(b.dataset.usage) - parseInt(a.dataset.usage);
+        default:
+          return 0;
+      }
+    };
+    
+    filteredItems.sort(sortFunction);
+    filteredListItems.sort(sortFunction);
+    
+    // Hide all items first
+    allTagItems.forEach(item => item.style.display = 'none');
+    allTagListItems.forEach(item => item.style.display = 'none');
+    
+    // Show filtered items
+    if (filteredItems.length > 0) {
+      // Re-append items in sorted order for cloud
+      const cloudContainer = tagCloud.querySelector('.flex.flex-wrap');
+      if (cloudContainer) {
+        filteredItems.forEach(item => {
+          item.style.display = 'block';
+          cloudContainer.appendChild(item);
+        });
+      }
+      
+      // Re-append items in sorted order for list
+      const listContainer = tagList.querySelector('.divide-y');
+      if (listContainer) {
+        filteredListItems.forEach(item => {
+          item.style.display = 'block';
+          listContainer.appendChild(item);
+        });
+      }
+      
+      tagCloud.style.display = 'block';
+      tagList.style.display = 'block';
+      noResults.classList.add('hidden');
+    } else {
+      tagCloud.style.display = 'none';
+      tagList.style.display = 'none';
+      noResults.classList.remove('hidden');
+    }
+  }
+  
+  // Search functionality
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      currentSearch = this.value;
+      updateDisplay();
+    });
+  }
+  
+  // Sort functionality
+  sortButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      currentSort = this.dataset.sort;
+      
+      // Update active state
+      sortButtons.forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-800', 'dark:text-blue-200', 'border-blue-200', 'dark:border-blue-800');
+        btn.classList.add('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-slate-600');
+      });
+      
+      this.classList.add('active', 'bg-blue-100', 'dark:bg-blue-900/40', 'text-blue-800', 'dark:text-blue-200', 'border-blue-200', 'dark:border-blue-800');
+      this.classList.remove('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-slate-600');
+      
+      updateDisplay();
+    });
+  });
+  
+  // Initialize display
+  updateDisplay();
+});
+</script>

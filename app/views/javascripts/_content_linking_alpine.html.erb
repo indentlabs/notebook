@@ -1,0 +1,547 @@
+<%# Alpine.js-based content linking system %>
+<% if @linkables_cache %>
+  <script>
+    // Global linkables data for Alpine components
+    window.notebookLinkables = [
+      <% @linkables_cache.each do |class_name, collection| %>
+        <% linkable_class = content_class_from_name(class_name) %>
+        <% collection.each do |page_name, page_id| %>
+          {
+            name: <%= page_name.to_s.strip.to_json.html_safe %>,
+            value: '[[<%= class_name %>-<%= page_id %>]]',
+            type: '<%= class_name %>',
+            color: '<%= linkable_class.color %>',
+            icon: '<%= linkable_class.icon %>',
+            textColor: '<%= linkable_class.text_color %>'
+          },
+        <% end %>
+      <% end %>
+    ];
+
+    // Alpine.js component for content linking
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('contentLinking', () => ({
+        showDropdown: false,
+        searchTerm: '',
+        selectedIndex: 0,
+        caretPosition: 0,
+        triggerPosition: null,
+        textElement: null,
+        filteredResults: [],
+        groupedResults: [],
+        maxResults: 50,
+        maxResultsPerSection: 6,
+        expandedSections: [],
+        dropdownPosition: { top: 0, left: 0 },
+        // Progressive caching for search performance
+        cachedSearchTerm: '',
+        cachedResults: null,
+        cachedTriggerPosition: null,
+
+        init() {
+          // Find the text element (textarea or contenteditable with the mention class)
+          this.textElement = this.$el.querySelector('.js-can-mention-pages, textarea, [contenteditable="true"]');
+          if (!this.textElement) return;
+
+          // Add event listeners with custom names to avoid conflicts
+          // Use keyup for contenteditable (Medium Editor doesn't fire native input reliably)
+          // Keep input as fallback for textarea elements
+          this.textElement.addEventListener('keyup', (e) => this.handleMentionInput(e));
+          this.textElement.addEventListener('input', (e) => this.handleMentionInput(e));
+          this.textElement.addEventListener('keydown', (e) => this.handleMentionKeydown(e));
+          this.textElement.addEventListener('blur', (e) => this.handleMentionBlur(e));
+          this.textElement.addEventListener('click', (e) => this.handleMentionClick(e));
+        },
+
+        handleMentionInput(event) {
+          // Use textContent (not innerText) to match how getCursorPosition() counts characters
+          // innerText inserts \n between <p> elements, but Range.toString() does not
+          const text = this.textElement.value || this.textElement.textContent;
+          const cursorPos = this.getCursorPosition();
+          
+          // Look for @ symbol before cursor
+          const beforeCursor = text.substring(0, cursorPos);
+          const lastAtIndex = beforeCursor.lastIndexOf('@');
+          
+          if (lastAtIndex !== -1) {
+            const afterAt = beforeCursor.substring(lastAtIndex + 1);
+            
+            // Check if we're still in a mention (no spaces, brackets, etc.)
+            if (!/[\s\[\]]/.test(afterAt)) {
+              this.searchTerm = afterAt.toLowerCase();
+              this.triggerPosition = lastAtIndex;
+              this.updateFilteredResults();
+              
+              if (this.filteredResults.length > 0) {
+                this.calculateDropdownPosition();
+                // Only reset selectedIndex when dropdown is newly opening
+                if (!this.showDropdown) {
+                  this.selectedIndex = 0;
+                }
+                this.showDropdown = true;
+                this.$dispatch('dropdown-open');
+              } else {
+                this.hideDropdown();
+              }
+            } else {
+              this.hideDropdown();
+            }
+          } else {
+            this.hideDropdown();
+          }
+        },
+
+        handleMentionKeydown(event) {
+          if (!this.showDropdown) return;
+
+          switch(event.key) {
+            case 'ArrowDown':
+              event.preventDefault();
+              this.selectedIndex = Math.min(this.selectedIndex + 1, this.filteredResults.length - 1);
+              this.scrollToSelected();
+              break;
+            case 'ArrowUp':
+              event.preventDefault();
+              this.selectedIndex = Math.max(this.selectedIndex - 1, 0);
+              this.scrollToSelected();
+              break;
+            case 'Enter':
+              event.preventDefault();
+              if (this.filteredResults[this.selectedIndex]) {
+                this.selectItem(this.filteredResults[this.selectedIndex]);
+              }
+              break;
+            case 'Escape':
+              event.preventDefault();
+              this.hideDropdown();
+              this.triggerAutosave();
+              break;
+            case 'Tab':
+              if (this.filteredResults[this.selectedIndex]) {
+                event.preventDefault();
+                this.selectItem(this.filteredResults[this.selectedIndex]);
+              }
+              break;
+          }
+        },
+
+        handleMentionBlur(event) {
+          // Delay to allow click events on dropdown items
+          setTimeout(() => {
+            // Only hide if the focus has moved completely away from our component
+            if (!this.$el.contains(document.activeElement) && !this.showDropdown) {
+              this.hideDropdown();
+            }
+          }, 150);
+        },
+
+        handleMentionClick(event) {
+          // Re-check for @ mentions at cursor position
+          this.handleMentionInput(event);
+        },
+
+        updateFilteredResults() {
+          // Ensure linkables exist
+          const allLinkables = window.notebookLinkables || [];
+          if (allLinkables.length === 0) {
+            this.filteredResults = [];
+            this.groupedResults = [];
+            return;
+          }
+
+          // Progressive caching: if new search extends previous, filter cached results only
+          // This is 7x faster than re-searching all linkables every keystroke
+          let itemsToSearch;
+          if (this.cachedResults &&
+              this.cachedResults.length > 0 &&
+              this.searchTerm.startsWith(this.cachedSearchTerm) &&
+              this.cachedSearchTerm.length > 0) {
+            // Progressive filter: search only within previous results
+            itemsToSearch = this.cachedResults;
+          } else {
+            // New search or backspace: search all linkables
+            itemsToSearch = allLinkables;
+          }
+
+          // Perform the search
+          let itemsToGroup;
+          if (this.searchTerm && this.searchTerm.length > 0) {
+            const search = this.searchTerm.toLowerCase();
+            const scored = itemsToSearch.map(item => {
+              const nameMatch = item.name.toLowerCase();
+
+              let score = 0;
+              if (nameMatch.startsWith(search)) {
+                score = 100 - (nameMatch.length - search.length);
+              } else if (nameMatch.includes(search)) {
+                score = 50 - nameMatch.indexOf(search);
+              }
+
+              return { ...item, score };
+            });
+
+            itemsToGroup = scored
+              .filter(item => item.score > 0)
+              .sort((a, b) => b.score - a.score);
+          } else {
+            // No search term - show all linkables
+            itemsToGroup = itemsToSearch.slice();
+          }
+
+          // Cache results for next keystroke (progressive filtering)
+          this.cachedSearchTerm = this.searchTerm;
+          this.cachedResults = itemsToGroup.slice(); // Clone to avoid mutation
+
+          // Group items by content type
+          const grouped = {};
+          itemsToGroup.forEach(item => {
+            if (!grouped[item.type]) {
+              grouped[item.type] = [];
+            }
+            grouped[item.type].push(item);
+          });
+
+          // Convert to array format for template rendering
+          this.groupedResults = Object.keys(grouped).map(contentType => {
+            const isExpanded = this.expandedSections.includes(contentType);
+            const itemsToShow = isExpanded ? grouped[contentType].length : this.maxResultsPerSection;
+            return {
+              type: contentType,
+              items: grouped[contentType].slice(0, itemsToShow),
+              allItems: grouped[contentType], // Keep all items for expansion
+              totalCount: grouped[contentType].length,
+              hasMore: grouped[contentType].length > this.maxResultsPerSection,
+              isExpanded: isExpanded
+            };
+          });
+
+          // Also maintain flat filteredResults for keyboard navigation compatibility
+          this.filteredResults = [];
+          this.groupedResults.forEach(group => {
+            this.filteredResults.push(...group.items);
+          });
+        },
+
+        selectItem(item) {
+          if (this.textElement.tagName === 'TEXTAREA') {
+            // Textarea path: direct value manipulation (clean, simple)
+            const text = this.textElement.value;
+            const beforeTrigger = text.substring(0, this.triggerPosition);
+            const afterCursor = text.substring(this.getCursorPosition());
+            const newText = beforeTrigger + item.value + ' ' + afterCursor;
+
+            this.textElement.value = newText;
+            const newCursorPos = this.triggerPosition + item.value.length + 1;
+            this.textElement.focus();
+            this.textElement.setSelectionRange(newCursorPos, newCursorPos);
+          } else {
+            // Contenteditable path: use surgical range replacement
+            // This preserves all paragraph structure and formatting
+            this.textElement.focus();
+
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0) return;
+
+            // Find the range containing just the @mention text
+            const mentionRange = this.findMentionRange();
+            if (!mentionRange) return;
+
+            // Select only the @mention text
+            selection.removeAllRanges();
+            selection.addRange(mentionRange);
+
+            // Delete just the @mention and insert the token using native API
+            // execCommand maintains undo/redo and preserves surrounding structure
+            document.execCommand('insertText', false, item.value + ' ');
+
+            // Trigger Medium Editor's input event if applicable
+            if (window.editor && window.editor.trigger) {
+              window.editor.trigger('editableInput', {}, this.textElement);
+            }
+          }
+
+          // Trigger input event for any listeners
+          this.textElement.dispatchEvent(new Event('input', { bubbles: true }));
+
+          this.hideDropdown();
+
+          // Trigger autosave after inserting a link
+          setTimeout(() => {
+            this.triggerAutosave();
+          }, 100);
+
+          // Auto-link to document's Linked Pages if we're in a document editor
+          // Parse entity ID from token format [[Type-ID]]
+          const tokenMatch = item.value.match(/\[\[(\w+)-(\d+)\]\]/);
+          if (tokenMatch && typeof window.autoLinkEntityToDocument === 'function') {
+            const entityType = tokenMatch[1];
+            const entityId = tokenMatch[2];
+            // Call global function (only exists on document edit page)
+            window.autoLinkEntityToDocument({
+              type: entityType,
+              id: entityId,
+              name: item.name
+            });
+          }
+        },
+
+        // Find the exact DOM range containing the @mention text (from @ to cursor)
+        findMentionRange() {
+          const selection = window.getSelection();
+          if (selection.rangeCount === 0) return null;
+
+          // Get current cursor position
+          const cursorRange = selection.getRangeAt(0);
+
+          // Walk through text nodes to find the @ trigger position
+          const treeWalker = document.createTreeWalker(
+            this.textElement,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+          );
+
+          let charCount = 0;
+          let startNode = null;
+          let startOffset = 0;
+          let endNode = cursorRange.endContainer;
+          let endOffset = cursorRange.endOffset;
+
+          // Find the text node and offset where @ is located
+          let node;
+          while (node = treeWalker.nextNode()) {
+            const nodeLength = node.textContent.length;
+
+            if (charCount + nodeLength > this.triggerPosition) {
+              // Found the node containing @
+              startNode = node;
+              startOffset = this.triggerPosition - charCount;
+              break;
+            }
+            charCount += nodeLength;
+          }
+
+          if (!startNode) return null;
+
+          // Create range from @ to cursor
+          const range = document.createRange();
+          try {
+            range.setStart(startNode, startOffset);
+            range.setEnd(endNode, endOffset);
+          } catch (e) {
+            // If range creation fails, fall back to selecting from current position
+            console.warn('Could not create precise mention range:', e);
+            return null;
+          }
+
+          return range;
+        },
+
+        hideDropdown() {
+          this.showDropdown = false;
+          this.searchTerm = '';
+          this.selectedIndex = 0;
+          this.triggerPosition = null;
+          this.expandedSections = []; // Reset expanded sections
+          // Clear search cache
+          this.cachedSearchTerm = '';
+          this.cachedResults = null;
+          this.cachedTriggerPosition = null;
+          this.$dispatch('dropdown-close');
+        },
+        
+        toggleSection(contentType) {
+          if (this.expandedSections.includes(contentType)) {
+            this.expandedSections = this.expandedSections.filter(t => t !== contentType);
+          } else {
+            this.expandedSections.push(contentType);
+          }
+          this.updateFilteredResults(); // Re-render with expanded items
+        },
+
+        getCursorPosition() {
+          if (this.textElement.tagName === 'TEXTAREA') {
+            return this.textElement.selectionStart;
+          } else {
+            // For contenteditable
+            const selection = window.getSelection();
+            if (selection.rangeCount === 0) return 0;
+            
+            const range = selection.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(this.textElement);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            return preCaretRange.toString().length;
+          }
+        },
+
+        scrollToSelected() {
+          this.$nextTick(() => {
+            const dropdown = this.$el.querySelector('.linkables-dropdown');
+            // Find the selected item by looking for the element with bg-blue-50 class
+            const selected = dropdown?.querySelector('.bg-blue-50');
+            if (selected) {
+              selected.scrollIntoView({ block: 'nearest' });
+            }
+          });
+        },
+
+        getIconColorClass(color) {
+          // The color is already in Tailwind format like 'bg-red-500'
+          // Convert bg-* to text-* for icon colors
+          if (color && color.startsWith('bg-')) {
+            const colorName = color.match(/bg-(\w+)-/)?.[1];
+            const shade = color.match(/-(\d+)$/)?.[1] || '500';
+            
+            if (colorName) {
+              return `text-${colorName}-${shade} dark:text-${colorName}-400`;
+            }
+            return color.replace('bg-', 'text-');
+          }
+          return color || 'text-gray-500 dark:text-gray-400';
+        },
+        
+        getBackgroundColor(color) {
+          // Extract the color name from bg-*-500 format
+          if (color && color.startsWith('bg-')) {
+            const colorName = color.match(/bg-(\w+)-/)?.[1];
+            if (colorName) {
+              return `bg-${colorName}-100 dark:bg-${colorName}-900/30`;
+            }
+          }
+          return 'bg-gray-100 dark:bg-gray-700';
+        },
+        
+        calculateDropdownPosition() {
+          // Cache: skip expensive calculation if trigger position unchanged
+          if (this.cachedTriggerPosition === this.triggerPosition && this.dropdownPosition.top > 0) {
+            return; // Use cached position
+          }
+          this.cachedTriggerPosition = this.triggerPosition;
+
+          // Get the text before the @ symbol to calculate position
+          const text = this.textElement.value || this.textElement.innerText || '';
+          const textBeforeTrigger = text.substring(0, this.triggerPosition);
+          
+          // Get computed styles
+          const styles = window.getComputedStyle(this.textElement);
+          const fontSize = parseFloat(styles.fontSize);
+          const lineHeight = parseFloat(styles.lineHeight) || fontSize * 1.5;
+          const paddingTop = parseFloat(styles.paddingTop);
+          const paddingLeft = parseFloat(styles.paddingLeft);
+          
+          // Create a mirror element to measure text
+          const mirror = document.createElement('div');
+          mirror.style.position = 'absolute';
+          mirror.style.visibility = 'hidden';
+          mirror.style.whiteSpace = 'pre-wrap';
+          mirror.style.wordWrap = 'break-word';
+          mirror.style.fontSize = styles.fontSize;
+          mirror.style.fontFamily = styles.fontFamily;
+          mirror.style.fontWeight = styles.fontWeight;
+          mirror.style.lineHeight = styles.lineHeight;
+          mirror.style.padding = styles.padding;
+          mirror.style.width = (this.textElement.offsetWidth - paddingLeft * 2) + 'px';
+          
+          // Add text up to the @ symbol
+          mirror.textContent = textBeforeTrigger + '@';
+          document.body.appendChild(mirror);
+          
+          // Get the height of all text to find vertical position
+          const totalHeight = mirror.offsetHeight;
+          
+          // Get the position of the @ symbol
+          const atSpan = document.createElement('span');
+          atSpan.textContent = '@';
+          mirror.innerHTML = '';
+          
+          // Add text before @ and then the @ in a span
+          const beforeText = document.createTextNode(textBeforeTrigger);
+          mirror.appendChild(beforeText);
+          mirror.appendChild(atSpan);
+          
+          // Get position of the @ symbol
+          const atRect = atSpan.getBoundingClientRect();
+          const mirrorRect = mirror.getBoundingClientRect();
+          
+          // Calculate relative positions
+          const relativeTop = atRect.top - mirrorRect.top;
+          const relativeLeft = atRect.left - mirrorRect.left;
+          
+          // Account for textarea scroll
+          const scrollTop = this.textElement.scrollTop;
+          
+          // Calculate final position relative to textarea
+          this.dropdownPosition = {
+            top: paddingTop + relativeTop - scrollTop + lineHeight,
+            left: paddingLeft + relativeLeft
+          };
+          
+          // Ensure dropdown doesn't go off-screen
+          const textareaRect = this.textElement.getBoundingClientRect();
+          const maxLeft = textareaRect.width - 400; // 400px is dropdown width
+          if (this.dropdownPosition.left > maxLeft) {
+            this.dropdownPosition.left = maxLeft;
+          }
+          
+          // Clean up
+          document.body.removeChild(mirror);
+        },
+        
+        triggerAutosave() {
+          // Check if this is a document editor with Medium Editor
+          if (this.textElement.id === 'editor' && typeof queueAutosave === 'function') {
+            // For documents with Medium Editor, use the document's autosave system
+            queueAutosave();
+            // Also trigger Medium Editor's input event
+            if (window.editor && window.editor.trigger) {
+              window.editor.trigger('editableInput', {}, this.textElement);
+            }
+          }
+          // The existing autosave system listens for 'change' events on elements with 'autosave-closest-form-on-change' class
+          else if (this.textElement.classList.contains('autosave-closest-form-on-change')) {
+            // Dispatch a change event to trigger the existing autosave system
+            const changeEvent = new Event('change', { 
+              bubbles: true, 
+              cancelable: true 
+            });
+            this.textElement.dispatchEvent(changeEvent);
+            
+            // Also try jQuery trigger as a fallback
+            if (window.$ && window.$(this.textElement).length) {
+              window.$(this.textElement).trigger('change');
+            }
+          } 
+          // Also check for enhanced autosave system
+          else if (this.textElement.classList.contains('js-enhanced-autosave')) {
+            // For enhanced autosave, trigger a blur event which immediately saves
+            const blurEvent = new Event('blur', { 
+              bubbles: true, 
+              cancelable: true 
+            });
+            this.textElement.dispatchEvent(blurEvent);
+          }
+          // Fallback: try to find and trigger jQuery change event
+          else {
+            // Try jQuery if available (for backward compatibility)
+            if (window.$ && window.$(this.textElement).length) {
+              window.$(this.textElement).trigger('change');
+            }
+          }
+        }
+      }));
+    });
+  </script>
+
+  <style>
+    /* Ensure dropdown appears above other elements and isn't clipped */
+    .linkables-dropdown-container {
+      z-index: 9999;
+    }
+    
+    /* Ensure parent containers don't clip the dropdown */
+    [x-data*="contentLinking"] {
+      overflow: visible !important;
+    }
+  </style>
+<% end %>

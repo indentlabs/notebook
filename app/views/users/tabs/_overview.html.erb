@@ -1,0 +1,265 @@
+<!-- Overview Tab - Landing Experience -->
+<div class="space-y-8">
+  
+  <!-- Check for blocked user -->
+  <% if user_signed_in? && @user.respond_to?(:blocked_by?) && @user.blocked_by?(current_user) %>
+    <div class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
+      <i class="material-icons text-red-500 dark:text-red-300 text-4xl mb-2">block</i>
+      <h3 class="text-lg font-medium text-red-800 dark:text-red-100 mb-1">User Blocked</h3>
+      <p class="text-red-600 dark:text-red-200">You've blocked this user and cannot view their content.</p>
+    </div>
+  <% else %>
+    
+    <!-- Welcome Message for New/Empty Profiles -->
+    <% if @total_public_pages == 0 %>
+      <div class="bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-blue-900 rounded-lg p-8 text-center">
+        <i class="material-icons text-blue-500 dark:text-blue-400 text-5xl mb-4"><%= User.icon %></i>
+        <h3 class="text-xl font-semibold text-blue-900 dark:text-blue-100 mb-2">
+          <% if user_signed_in? && @user == current_user %>
+            Welcome to your profile!
+          <% else %>
+            <%= @user.name || @user.display_name %> is just getting started
+          <% end %>
+        </h3>
+        <p class="text-blue-700 dark:text-blue-300 max-w-md mx-auto">
+          <% if user_signed_in? && @user == current_user %>
+            Your worlds are private by default. When you're ready, share them here for others to discover.
+          <% else %>
+            This user hasn't made any content public yet. Check back later!
+          <% end %>
+        </p>
+        <% if user_signed_in? && @user == current_user %>
+          <div class="mt-6">
+            <%= link_to new_character_path, class: "#{Character.color} hover:opacity-90 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+              <i class="material-icons mr-2 text-sm">add</i>
+              Create Your First Character
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      
+      <!-- Recently Updated Universes Section -->
+      <% if @featured_universes.any? %>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+              <i class="material-icons mr-3 text-purple-600 text-3xl"><%= Universe.icon %></i>
+              Recently Updated Universes
+            </h2>
+            <% if @featured_universes.length < (@user.universes.is_public.count rescue 0) %>
+              <%= link_to "#", class: "text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" do %>
+                View all <%= @user.universes.is_public.count %> universes →
+              <% end %>
+            <% end %>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% @featured_universes.each do |universe| %>
+                <%= render partial: 'content/display/card', locals: { content_page: universe } %>
+
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Quick Stats Grid -->
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+          <i class="material-icons mr-3 bg-notebook-blue text-white rounded p-1 text-3xl">analytics</i>
+          At a Glance
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Activity Streak -->
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div class="flex items-center">
+              <div class="p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
+                <i class="material-icons text-orange-600 dark:text-orange-200 text-2xl">local_fire_department</i>
+              </div>
+              <div class="ml-4">
+                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @activity_streak %></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Day streak</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Last Active -->
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div class="flex items-center">
+              <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <i class="material-icons text-blue-600 dark:text-blue-200 text-2xl">access_time</i>
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  <% if @last_active %>
+                    <%= time_ago_in_words(@last_active) %> ago
+                  <% else %>
+                    Unknown
+                  <% end %>
+                </div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Last active</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Content Types -->
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div class="flex items-center">
+              <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <i class="material-icons text-purple-600 dark:text-purple-200 text-2xl">category</i>
+              </div>
+              <div class="ml-4">
+                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @content.keys.length %></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Content types</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Popular Tags -->
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div class="flex items-center">
+              <div class="p-3 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+                <i class="material-icons text-indigo-600 dark:text-indigo-200 text-2xl">tag</i>
+              </div>
+              <div class="ml-4">
+                <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @popular_tags.length %></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">Unique tags</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Content Highlights -->
+      <% if @content.any? %>
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+            <i class="material-icons mr-3 text-blue-600 text-3xl">library_books</i>
+            Content Highlights
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <% @content.keys.first(6).each do |content_type| %>
+              <% content_type_klass = User.new.send(content_type).klass %>
+              <% content_list = @content[content_type] %>
+              
+              <%= link_to send("#{content_type}_user_path", { id: @user.id }), class: "group" do %>
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                  <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 <%= content_type_klass.color %> bg-opacity-10 rounded-lg">
+                      <i class="material-icons <%= content_type_klass.text_color %> text-2xl"><%= content_type_klass.icon %></i>
+                    </div>
+                    <div class="text-right">
+                      <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= content_list.length %></div>
+                      <div class="text-sm text-gray-500 dark:text-gray-400">items</div>
+                    </div>
+                  </div>
+                  
+                  <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-2"><%= content_type.to_s.humanize.pluralize %></h3>
+                  
+                  <% if content_list.any? %>
+                    <div class="space-y-1">
+                      <% content_list.first(3).each do |item| %>
+                        <div class="text-sm text-gray-600 dark:text-gray-400 truncate flex items-center">
+                          <i class="material-icons text-xs mr-2 <%= content_type_klass.text_color %>"><%= content_type_klass.icon %></i>
+                          <%= item.name %>
+                        </div>
+                      <% end %>
+                      <% if content_list.length > 3 %>
+                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                          and <%= content_list.length - 3 %> more...
+                        </div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Recent Activity Preview -->
+      <% if @unified_activity.any? %>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+              <i class="material-icons mr-3 bg-notebook-blue text-white rounded p-1 text-3xl">timeline</i>
+              Recent Activity
+            </h2>
+            <button class="profile-tab text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" data-tab="activity">
+              View all activity →
+            </button>
+          </div>
+          
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div class="space-y-4">
+              <% @unified_activity.first(5).each do |activity| %>
+                <div class="flex items-start space-x-3 pb-4 border-b border-gray-100 dark:border-slate-700 last:border-b-0 last:pb-0">
+                  <div class="flex-shrink-0 mt-1">
+                    <% case activity[:type] %>
+                    <% when 'share' %>
+                      <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="material-icons text-blue-600 text-sm">share</i>
+                      </div>
+                    <% when 'forum_post' %>
+                      <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="material-icons text-purple-600 text-sm">forum</i>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm text-gray-900 dark:text-gray-100">
+                      <% case activity[:type] %>
+                      <% when 'share' %>
+                        Shared content to the stream
+                      <% when 'forum_post' %>
+                        Posted in the forums
+                      <% end %>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-1">
+                      <%= time_ago_in_words(activity[:created_at]) %> ago
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Popular Tags Preview -->
+      <% if @popular_tags.any? %>
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+              <i class="material-icons mr-3 text-amber-600 text-3xl">tag</i>
+              Popular Tags
+            </h2>
+            <button class="profile-tab text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" data-tab="tags">
+              View all tags →
+            </button>
+          </div>
+          
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+            <div class="flex flex-wrap gap-2">
+              <% @popular_tags.first(10).each do |tag| %>
+                <% tag_path = @user.username.present? ? user_tag_path(username: @user.username, tag_slug: tag.slug) : user_id_tag_path(id: @user.id, tag_slug: tag.slug) %>
+                <%= link_to tag_path, 
+                           class: "inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors duration-200" do %>
+                  <i class="material-icons text-xs mr-1">tag</i>
+                  <%= tag.tag %>
+                  <span class="ml-2 px-2 py-0.5 bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 rounded-full text-xs">
+                    <%= tag.usage_count %>
+                  </span>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+    <% end %>
+  <% end %>
+</div>

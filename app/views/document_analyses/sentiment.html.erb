@@ -1,330 +1,400 @@
-<h5 class="grey-text">Sentiment</h5>
-<div class="row">
-  <div class="col s12 m6">
-    <div class="card">
-      <div class="card-content <%= @document_sentiment_color %> lighten-4">
-        <div class="card-title black-text">
-          Overall <%= @analysis.sentiment_label %>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <%= render partial: 'document_analyses/header', locals: { page_title: 'Sentiment' } %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <%
+      # Map emotion to Tailwind colors
+      def tw_emotion_color(emotion)
+        case emotion.to_s.downcase.to_sym
+        when :joy then 'yellow'
+        when :sadness then 'blue'
+        when :fear then 'purple'
+        when :disgust then 'green'
+        when :anger then 'red'
+        else 'gray'
+        end
+      end
+
+      # Get sentiment background color
+      sentiment_bg = case @analysis.sentiment_label.to_s.downcase
+        when 'positive' then 'bg-green-500 dark:bg-green-600'
+        when 'negative' then 'bg-red-500 dark:bg-red-600'
+        else 'bg-gray-500 dark:bg-gray-600'
+      end
+
+      sentiment_icon = case @analysis.sentiment_label.to_s.downcase
+        when 'positive' then 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,17.23C9.97,17.23 8.16,16.5 6.76,15.36L8.67,13.45C9.66,14.13 10.81,14.54 12,14.54C13.19,14.54 14.34,14.13 15.33,13.45L17.24,15.36C15.84,16.5 14.03,17.23 12,17.23M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z'
+        when 'negative' then 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,14C9.67,14 7.69,15.46 6.89,17.5H17.11C16.31,15.46 14.33,14 12,14M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z'
+        else 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11M12,17.5C10,17.5 8.23,16.5 7.15,15H16.85C15.77,16.5 14,17.5 12,17.5Z'
+      end
+
+      modifier = case (@analysis.sentiment_score.abs * 100).round
+        when 0..25 then 'somewhat'
+        when 26..50 then 'mostly'
+        when 51..100 then 'very'
+        else 'generally'
+      end
+    %>
+
+    <!-- Overall Sentiment Card -->
+    <div class="<%= sentiment_bg %> rounded-xl shadow-sm overflow-hidden mb-6">
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <div class="text-center">
+            <svg class="w-20 h-20 text-white mx-auto" fill="currentColor" viewBox="0 0 24 24">
+              <path d="<%= sentiment_icon %>" />
+            </svg>
+            <div class="text-4xl font-bold text-white mt-2"><%= (@analysis.sentiment_score * 100).round.abs %></div>
+          </div>
+          <div class="flex-1 text-white">
+            <h3 class="text-2xl font-bold mb-2">Overall <%= @analysis.sentiment_label.to_s.capitalize %></h3>
+            <p class="text-white text-opacity-90 mb-4">
+              This document expresses a <%= modifier %> <strong><%= @analysis.sentiment_label %></strong> sentiment throughout.
+            </p>
+            <p class="text-white text-opacity-80 text-sm mb-4">
+              The emotion's intensity is scored on a scale from 1 to 100, where 100 is most intense.
+            </p>
+            <div class="w-full bg-white bg-opacity-30 rounded-full h-3">
+              <div class="bg-white h-3 rounded-full" style="width: <%= (@analysis.sentiment_score.abs * 100).round %>%"></div>
+            </div>
+          </div>
         </div>
-        <span style="font-size: 32px; margin-right: 10px;" class="<%= @document_sentiment_color %>-text left center">
-          <i class="material-icons large">face</i><br />
-          <span style="position: relative; top: -25px;">
-            <%= (@analysis.sentiment_score * 100).round.abs %>
-          </span>
-        </span>
-        <p class="black-text">
-          <% 
-            modifier = case @analysis.sentiment_score.abs * 100
-            when 0..25
-              'somewhat'
-            when 26..50
-              'mostly'
-            when 51..100
-              'very'
-            else
-              'generally'
-            end
-          %>
-          This document expresses a <%= modifier %> <strong><%= @analysis.sentiment_label %></strong> sentiment throughout. 
-        </p>
-        <br />
-        <p class="black-text">
-          The emotion's intensity is scored on a scale from 1 to 100, where 100 is most intense.
-        </p>
-        <div class="progress teal lighten-5">
-          <div class="determinate <%= @document_sentiment_color %>" style="width: <%= @analysis.sentiment_score.abs * 100 %>%"></div>
-        </div>
-        <div class="clearfix"></div>
       </div>
     </div>
-  </div>
 
-  <% if @analysis.has_sentiment_scores? %>
-    <div class="col s12 m12 l12">
-      <div class="card">
-        <div class="card-content" style="overflow: hidden;">
-          <div class="card-title">
+    <% if @analysis.has_sentiment_scores? %>
+      <!-- Dominant Emotions Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
             Dominant emotions:
-            <span class="<%= emotion_color(@document_dominant_emotion) %>-text">
+            <span class="text-<%= tw_emotion_color(@document_dominant_emotion) %>-600 dark:text-<%= tw_emotion_color(@document_dominant_emotion) %>-400">
               <%= @document_dominant_emotion %>
             </span>
             &
-            <span class="<%= emotion_color(@document_secondary_emotion) %>-text">
+            <span class="text-<%= tw_emotion_color(@document_secondary_emotion) %>-600 dark:text-<%= tw_emotion_color(@document_secondary_emotion) %>-400">
               <%= @document_secondary_emotion %>
             </span>
-          </div>
+          </h3>
 
-          <div class="row">
-            <div class="col s12 m12 l6">
-              The primary emotion evoked in this document is
-              <strong class="<%= emotion_color(@document_dominant_emotion) %>-text">
-                <%= @document_dominant_emotion %>.
-              </strong>
-
-              <blockquote>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+            <div class="text-gray-600 dark:text-gray-400 space-y-4">
+              <p>
+                The primary emotion evoked in this document is
+                <strong class="text-<%= tw_emotion_color(@document_dominant_emotion) %>-600 dark:text-<%= tw_emotion_color(@document_dominant_emotion) %>-400">
+                  <%= @document_dominant_emotion %>.
+                </strong>
+              </p>
+              <blockquote class="border-l-4 border-<%= tw_emotion_color(@document_dominant_emotion) %>-500 pl-4 italic text-gray-700 dark:text-gray-300">
                 <%= render partial: 'document_analyses/sentiment/emotion_explanation', locals: { emotion: @document_dominant_emotion } %>
               </blockquote>
 
-              The secondary emotion evoked in this document is
-              <strong class="<%= emotion_color(@document_secondary_emotion) %>-text">
-                <%= @document_secondary_emotion %>.
-              </strong>
-
-              <blockquote>
+              <p>
+                The secondary emotion evoked in this document is
+                <strong class="text-<%= tw_emotion_color(@document_secondary_emotion) %>-600 dark:text-<%= tw_emotion_color(@document_secondary_emotion) %>-400">
+                  <%= @document_secondary_emotion %>.
+                </strong>
+              </p>
+              <blockquote class="border-l-4 border-<%= tw_emotion_color(@document_secondary_emotion) %>-500 pl-4 italic text-gray-700 dark:text-gray-300">
                 <%= render partial: 'document_analyses/sentiment/emotion_explanation', locals: { emotion: @document_secondary_emotion } %>
               </blockquote>
-
             </div>
-            <div class="col s12 m12 l6">
-              <div class="center">Evoked emotion intensities</div>
-              <%= bar_chart(@document_emotion_data, colors: [Document.color], min: 0, max: 100) %>
+
+            <div>
+              <div class="text-center text-sm text-gray-500 dark:text-gray-400 mb-2">Evoked emotion intensities</div>
+              <%= bar_chart(@document_emotion_data, colors: [Document.hex_color], min: 0, max: 100) %>
             </div>
           </div>
         </div>
       </div>
+    <% end %>
+
+    <!-- Entities Section -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Entities</h2>
+      <button type="button" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-500 hover:bg-teal-600 rounded-lg transition" onclick="openEntityLinkModal(-1)">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+        </svg>
+        Link another page
+      </button>
     </div>
-  <% end %>
-</div>
 
-<h5 class="grey-text">
-  <%= link_to '#', class: "white-text js-link-entity right hoverable btn #{Document.color}", data: { id: -1 } do %>
-      <i class="material-icons left">add</i>
-      Link another page
-  <% end %>
-  Entities
-</h5>
-
-<script type="text/javascript">
-  var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
-  var radarChartOptions = {
-    h: 300,
-    margin: {
-      top: 10, 
-      right: 0, 
-      bottom: 10, 
-      left: 0
-    },
-    levels: 4,
-    maxValue: 100,
-    roundStrokes: true,
-    color: color,
-    dotRadius: 2
-  };
-</script>
-
-<div class="row">
-  <% @analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
-    <% entity_class = content_class_from_name(entity.entity_type) %>
-    <div class="col s12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title <%= entity_class.text_color %>">
-            <i class="material-icons left"><%= entity_class.icon %></i>
-            <%= entity.text %>
-          </div>
-
-          <p class="right">
-            Document relevance score: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%
-            <div class="progress <%= entity_class.color %> lighten-5">
-              <div class="determinate <%= entity_class.color %>" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%"></div>
-            </div>
-          </p>
-          <div class="row">
-            <div class="col s12 m12 l6">
-              <div class="center">Emotion intensities</div>
-              <ul class="help-text">
-                <% [:joy, :sadness, :fear, :disgust, :anger].each do |emotion| %>
-                  <% emotion_score = entity.send("#{emotion}_score") %>
-                  <li>
-                    <%= emotion.to_s.titleize %>: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %>
-                    <div class="progress">
-                      <div class="determinate <%= EmotionService.color_for_emotion(emotion) %>" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
-                    </div>
-                  </li>
-                <% end %>
-                <li>
-                  Overall sentiment: <%= entity.sentiment_label %> (<%= (entity.sentiment_score.present? ? (100 * entity.sentiment_score).round(1) : 'Calculating...') %>)
-                </li>
-              </ul>
-            </div>
-            <div class="col s12 m12 l6">
-              <div class="center">Emotional range</div>
-              <div id="graph-character-emotions-<%= entity.id %>"></div>
-              <div class="clearfix"></div>
-            </div>
-          </div>
-        </div>
-        <div class="card-action">
-          <% if entity.entity_id %>
-            <% linked_entity_class = entity.entity.class %>
-            <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'blue-text left' do %>
-              <i class="material-icons left"><%= linked_entity_class.icon %></i>
-              View page
-            <% end %>
-            <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'green-text left' do %>
-              <i class="material-icons left"><%= linked_entity_class.icon %></i>
-              Edit page
-            <% end %>
-            <%= link_to "Unlink page", destroy_entity_document_path(entity), class: "#{entity_class.text_color} right" %>
-            <div class="clearfix"></div>
-          <% else %>
-            <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: entity_class.color + '-text' do %>
-              <i class="material-icons left">add</i>
-              New <%= entity_class.name %>
-            <% end %>
-            <%= link_to '#', class: entity_class.color + '-text right js-link-entity', data: { id: entity.id } do %>
-              <i class="material-icons left">link</i>
-              Link existing
-            <% end %>
-          <% end %>
-        </div>
-      </div>
-    </div>
+    <style>
+      .radar-chart { max-width: 100%; }
+      .radar-chart .axis { font-size: 11px; fill: #6b7280; }
+      .dark .radar-chart .axis { fill: #9ca3af; }
+    </style>
 
     <script type="text/javascript">
-      $(document).ready(function () {
-        var data = [
-          [
-            { axis: "Joy",     value: <%= (100 * (entity.joy_score.presence || 0)).round(1) %> },
-            { axis: "Sadness", value: <%= (100 * (entity.sadness_score.presence || 0)).round(1) %> },
-            { axis: "Fear",    value: <%= (100 * (entity.fear_score.presence || 0)).round(1) %> },
-            { axis: "Disgust", value: <%= (100 * (entity.disgust_score.presence || 0)).round(1) %> },
-            { axis: "Anger",   value: <%= (100 * (entity.anger_score.presence || 0)).round(1) %> }
-          ]
-        ];
-
-        RadarChart("#graph-character-emotions-<%= entity.id %>", data, radarChartOptions);
-      });
+      var color = d3.scalePoint().range(["#EDC951","#CC333F","#00A0B0"]);
+      var radarChartOptions = {
+        h: 300,
+        margin: { top: 10, right: 0, bottom: 10, left: 0 },
+        levels: 4,
+        maxValue: 100,
+        roundStrokes: true,
+        color: color,
+        dotRadius: 2
+      };
     </script>
-  <% end %>
-</div>
 
-<div class="row">
-  <%
-    entities_in_table = @analysis.document_entities
-      .order('relevance desc')
-      .where(entity_type: 'Character')
-      .reject { |e| e.dominant_emotion.first.second.nil? }
-      .reject { |e| e.recessive_emotion.first.second.nil? }
-  %>
-  <% if entities_in_table.any? %>
-    <div class="col s12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">Character emotions</div>
-            <table class="highlight">
-              <tr>
-                <th>Character</th>
-                <th>Dominant emotion</th>
-                <th>Recessive emotion</th>
-              </tr>
-              <% entities_in_table.each do |character| %>
-                <tr>
-                  <td><%= character.text %></td>
-                  <td>
-                    <div class="chip <%= EmotionService.color_for_emotion(character.dominant_emotion.first.first) %> lighten-3">
-                      <%= character.dominant_emotion.first.first.to_s.titleize %>
-                      (<%= (character.dominant_emotion.first.second * 100).round %>%)
+    <div class="space-y-6">
+      <% @analysis.document_entities.includes(:entity, entity: [:image_uploads]).order('entity_type asc, relevance desc').each do |entity| %>
+        <% entity_class = content_class_from_name(entity.entity_type) %>
+        <%
+          entity_color = case entity.entity_type.to_s.downcase
+            when 'character' then 'teal'
+            when 'location' then 'blue'
+            when 'item' then 'orange'
+            else 'gray'
+          end
+        %>
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+          <div class="p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-lg bg-<%= entity_color %>-100 dark:bg-<%= entity_color %>-900 flex items-center justify-center">
+                <svg class="w-5 h-5 text-<%= entity_color %>-600 dark:text-<%= entity_color %>-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-<%= entity_color %>-600 dark:text-<%= entity_color %>-400"><%= entity.text %></h3>
+            </div>
+
+            <div class="mb-4">
+              <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                <span>Document relevance score</span>
+                <span><%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 'Calculating...' %>%</span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div class="bg-<%= entity_color %>-500 h-2 rounded-full" style="width: <%= entity.relevance.present? ? (entity.relevance * 100).round(1) : 0 %>%"></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Emotion intensities</div>
+                <div class="space-y-3">
+                  <% [:joy, :sadness, :fear, :disgust, :anger].each do |emotion| %>
+                    <% emotion_score = entity.send("#{emotion}_score") %>
+                    <%
+                      emotion_color = case emotion
+                        when :joy then 'yellow'
+                        when :sadness then 'blue'
+                        when :fear then 'purple'
+                        when :disgust then 'green'
+                        when :anger then 'red'
+                      end
+                    %>
+                    <div>
+                      <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        <span><%= emotion.to_s.titleize %></span>
+                        <span><%= emotion_score.present? ? (100 * emotion_score).round(1) : 'Calculating...' %></span>
+                      </div>
+                      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-<%= emotion_color %>-500 h-2 rounded-full" style="width: <%= emotion_score.present? ? (100 * emotion_score).round(1) : 0 %>%"></div>
+                      </div>
                     </div>
-                  </td>
-                  <td>
-                    <div class="chip <%= EmotionService.color_for_emotion(character.recessive_emotion.first.first) %> lighten-3">
-                      <%= character.recessive_emotion.first.first.to_s.titleize %>
-                      (<%= (character.recessive_emotion.first.second * 100).round %>%)
-                    </div>
-                  </td>
-                </tr>
+                  <% end %>
+                  <div class="text-sm text-gray-600 dark:text-gray-400 pt-2">
+                    Overall sentiment: <span class="font-medium"><%= entity.sentiment_label %></span>
+                    (<%= entity.sentiment_score.present? ? (100 * entity.sentiment_score).round(1) : 'Calculating...' %>)
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-sm text-gray-500 dark:text-gray-400 mb-2 text-center">Emotional range</div>
+                <div id="graph-character-emotions-<%= entity.id %>" class="radar-chart"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex flex-wrap gap-3">
+            <% if entity.entity_id %>
+              <% linked_entity_class = entity.entity.class %>
+              <%= link_to polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline' do %>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                </svg>
+                View page
               <% end %>
+              <%= link_to edit_polymorphic_path(linked_entity_class.name.downcase, id: entity.entity_id), class: 'inline-flex items-center gap-2 text-sm text-green-600 dark:text-green-400 hover:underline' do %>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z" />
+                </svg>
+                Edit page
+              <% end %>
+              <%= link_to "Unlink page", destroy_entity_document_path(entity), class: "inline-flex items-center gap-2 text-sm text-red-600 dark:text-red-400 hover:underline ml-auto" %>
+            <% else %>
+              <%= link_to new_polymorphic_path(entity_class, document_entity: entity.id), class: "inline-flex items-center gap-2 text-sm text-#{entity_color}-600 dark:text-#{entity_color}-400 hover:underline" do %>
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+                </svg>
+                New <%= entity_class.name %>
+              <% end %>
+              <button type="button" onclick="openEntityLinkModal(<%= entity.id %>)" class="inline-flex items-center gap-2 text-sm text-<%= entity_color %>-600 dark:text-<%= entity_color %>-400 hover:underline ml-auto">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C6.22,11.88 6.22,7.11 9.17,4.17C12.12,1.22 16.88,1.22 19.83,4.17C22.78,7.12 22.78,11.88 19.83,14.83C19.44,15.22 18.8,15.22 18.41,14.83C18.02,14.44 18.02,13.8 18.41,13.41C20.55,11.27 20.55,7.73 18.41,5.59C16.27,3.45 12.73,3.45 10.59,5.59C8.45,7.73 8.45,11.27 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C17.78,12.12 17.78,16.88 14.83,19.83C11.88,22.78 7.12,22.78 4.17,19.83C1.22,16.88 1.22,12.12 4.17,9.17C4.56,8.78 5.2,8.78 5.59,9.17C5.98,9.56 5.98,10.2 5.59,10.59C3.45,12.73 3.45,16.27 5.59,18.41C7.73,20.55 11.27,20.55 13.41,18.41C15.55,16.27 15.55,12.73 13.41,10.59C13.02,10.2 13.02,9.56 13.41,9.17Z" />
+                </svg>
+                Link existing
+              </button>
+            <% end %>
+          </div>
+        </div>
+
+        <script type="text/javascript">
+          document.addEventListener('DOMContentLoaded', function () {
+            var data = [
+              [
+                { axis: "Joy",     value: <%= (100 * (entity.joy_score.presence || 0)).round(1) %> },
+                { axis: "Sadness", value: <%= (100 * (entity.sadness_score.presence || 0)).round(1) %> },
+                { axis: "Fear",    value: <%= (100 * (entity.fear_score.presence || 0)).round(1) %> },
+                { axis: "Disgust", value: <%= (100 * (entity.disgust_score.presence || 0)).round(1) %> },
+                { axis: "Anger",   value: <%= (100 * (entity.anger_score.presence || 0)).round(1) %> }
+              ]
+            ];
+            RadarChart("#graph-character-emotions-<%= entity.id %>", data, radarChartOptions);
+          });
+        </script>
+      <% end %>
+    </div>
+
+    <!-- Character Emotions Table -->
+    <%
+      entities_in_table = @analysis.document_entities
+        .order('relevance desc')
+        .where(entity_type: 'Character')
+        .reject { |e| e.dominant_emotion.first.second.nil? }
+        .reject { |e| e.recessive_emotion.first.second.nil? }
+    %>
+    <% if entities_in_table.any? %>
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mt-6">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Character Emotions</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead>
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Character</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Dominant emotion</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recessive emotion</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <% entities_in_table.each do |character| %>
+                  <%
+                    dom_emotion = character.dominant_emotion.first.first
+                    dom_score = character.dominant_emotion.first.second
+                    rec_emotion = character.recessive_emotion.first.first
+                    rec_score = character.recessive_emotion.first.second
+                    dom_color = tw_emotion_color(dom_emotion)
+                    rec_color = tw_emotion_color(rec_emotion)
+                  %>
+                  <tr>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100"><%= character.text %></td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block px-3 py-1 text-sm font-medium bg-<%= dom_color %>-100 dark:bg-<%= dom_color %>-900 text-<%= dom_color %>-800 dark:text-<%= dom_color %>-200 rounded-full">
+                        <%= dom_emotion.to_s.titleize %> (<%= (dom_score * 100).round %>%)
+                      </span>
+                    </td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block px-3 py-1 text-sm font-medium bg-<%= rec_color %>-100 dark:bg-<%= rec_color %>-900 text-<%= rec_color %>-800 dark:text-<%= rec_color %>-200 rounded-full">
+                        <%= rec_emotion.to_s.titleize %> (<%= (rec_score * 100).round %>%)
+                      </span>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
             </table>
           </div>
         </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
+
+  </div>
 </div>
 
-<div id="entity-link-modal" class="modal">
-  <div class="modal-content">
-    <h4>Link an existing page you've created</h4>
-    <p>
-      You can link a detected entity to one of your already-created pages by selecting it below.
-    </p>
-    <%= form_with url: link_entity_documents_path do |f| %>
-      <%= f.hidden_field :document_id,          value: @analysis.document_id %>
-      <%= f.hidden_field :document_analysis_id, value: @analysis.id %>
-      <%= f.hidden_field :entity_type,          value: nil %>
-      <%= f.hidden_field :entity_id,            value: nil %>
-      <%= f.hidden_field :document_entity_id,   value: nil %>
+<!-- Entity Link Modal -->
+<div id="entity-link-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity" onclick="closeEntityLinkModal()"></div>
 
-      <% @current_user_content.each do |content_type, content_list| %>
-        <% content_type_class = content_class_from_name(content_type) %>
-        <% next if content_type == 'Document' %>
-        <h5><%= content_type.pluralize %></h5>
-        <ul class="collection">
-          <% content_list.each do |content| %>
-            <a href="#" 
-               class="<%= content_type_class.text_color %> js-link-entity-selection" 
-               data-id="<%= content.id %>"
-               data-type="<%= content_type %>">
-              <li class="collection-item">
-                <i class="material-icons left"><%= content_type_class.icon %></i>
-                <%= content.name %>
-                <span class="secondary-content">
-                  <i class="material-icons">link</i>
-                </span>
-              </li>
-            </a>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+
+    <div class="relative inline-block align-bottom bg-white dark:bg-gray-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100" id="modal-title">Link an existing page you've created</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          You can link a detected entity to one of your already-created pages by selecting it below.
+        </p>
+      </div>
+
+      <%= form_with url: link_entity_documents_path, id: 'entity-link-form' do |f| %>
+        <%= f.hidden_field :document_id, value: @analysis.document_id %>
+        <%= f.hidden_field :document_analysis_id, value: @analysis.id %>
+        <%= f.hidden_field :entity_type, value: nil, id: 'link-entity-type' %>
+        <%= f.hidden_field :entity_id, value: nil, id: 'link-entity-id' %>
+        <%= f.hidden_field :document_entity_id, value: nil, id: 'link-document-entity-id' %>
+
+        <div class="px-6 py-4 max-h-96 overflow-y-auto">
+          <% @current_user_content.each do |content_type, content_list| %>
+            <% content_type_class = content_class_from_name(content_type) %>
+            <% next if content_type == 'Document' %>
+            <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-4 first:mt-0 mb-2"><%= content_type.pluralize %></h4>
+            <div class="space-y-1">
+              <% content_list.each do |content| %>
+                <button type="button"
+                        onclick="selectEntityToLink('<%= content.id %>', '<%= content_type %>')"
+                        class="w-full flex items-center justify-between px-4 py-3 text-left rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition group">
+                  <span class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-teal-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" />
+                    </svg>
+                    <span class="text-gray-900 dark:text-gray-100"><%= content.name %></span>
+                  </span>
+                  <svg class="w-5 h-5 text-gray-300 dark:text-gray-600 group-hover:text-teal-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C6.22,11.88 6.22,7.11 9.17,4.17C12.12,1.22 16.88,1.22 19.83,4.17C22.78,7.12 22.78,11.88 19.83,14.83C19.44,15.22 18.8,15.22 18.41,14.83C18.02,14.44 18.02,13.8 18.41,13.41C20.55,11.27 20.55,7.73 18.41,5.59C16.27,3.45 12.73,3.45 10.59,5.59C8.45,7.73 8.45,11.27 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C17.78,12.12 17.78,16.88 14.83,19.83C11.88,22.78 7.12,22.78 4.17,19.83C1.22,16.88 1.22,12.12 4.17,9.17C4.56,8.78 5.2,8.78 5.59,9.17C5.98,9.56 5.98,10.2 5.59,10.59C3.45,12.73 3.45,16.27 5.59,18.41C7.73,20.55 11.27,20.55 13.41,18.41C15.55,16.27 15.55,12.73 13.41,10.59C13.02,10.2 13.02,9.56 13.41,9.17Z" />
+                  </svg>
+                </button>
+              <% end %>
+            </div>
           <% end %>
-        </ul>
+        </div>
       <% end %>
-    <% end %>
-  </div>
-  <div class="modal-footer">
-    <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
+
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+        <button type="button" onclick="closeEntityLinkModal()" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition">
+          Cancel
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
 <script type="text/javascript">
-  $(document).ready(function () {
+  function openEntityLinkModal(documentEntityId) {
+    document.getElementById('link-document-entity-id').value = documentEntityId;
+    document.getElementById('entity-link-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
 
-    $('.js-link-entity').click(function () {
-      $('#entity-link-modal').find('input[name=document_entity_id]').val($(this).data('id'));
+  function closeEntityLinkModal() {
+    document.getElementById('entity-link-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
 
-      $('#entity-link-modal').modal('open');
+  function selectEntityToLink(entityId, entityType) {
+    document.getElementById('link-entity-id').value = entityId;
+    document.getElementById('link-entity-type').value = entityType;
+    document.getElementById('entity-link-form').submit();
+  }
 
-      return false;
-    });
-
-    $('.js-link-entity-selection').click(function () {
-      var entity = $(this);
-      var form   = $(this).closest('form');
-
-      form.find('input[name=entity_id]').val(entity.data('id'));
-      form.find('input[name=entity_type]').val(entity.data('type'));
-      
-      form.submit();
-      return false;
-    });
+  // Close modal on escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeEntityLinkModal();
+    }
   });
-
 </script>
-
-
-<style>
-.bar {
-  fill: <%= Document.hex_color %>;
-}
-
-.axis {
-  font-size: 13px;
-}
-.label {
-  font-size: 11px;
-}
-
-.axis path,
-.axis line {
-  fill: none;
-  display: none;
-}
-</style>

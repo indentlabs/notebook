@@ -1,4 +1,5 @@
 class Document < ApplicationRecord
+  include Rails.application.routes.url_helpers
   acts_as_paranoid
 
   belongs_to :user,     optional: true
@@ -16,6 +17,7 @@ class Document < ApplicationRecord
   include HasImageUploads
   include HasPageTags
   include BelongsToUniverse
+  include HasPrivacy
 
   belongs_to :folder, optional: true
 
@@ -35,11 +37,11 @@ class Document < ApplicationRecord
   KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
 
   def self.color
-    'teal'
+    'teal bg-teal-500'
   end
 
   def self.text_color
-    'teal-text'
+    'teal-text text-teal-500'
   end
 
   def color
@@ -78,6 +80,14 @@ class Document < ApplicationRecord
     # TODO: populate value from cache when documents belong to a universe
   end
 
+  def view_path
+    document_path(self.id)
+  end
+
+  def edit_path
+    edit_document_path(self.id)
+  end
+
   def analyze!
     # Create an analysis placeholder to show the user one is queued,
     # then process it async.
@@ -90,7 +100,12 @@ class Document < ApplicationRecord
 
   def save_document_revision!
     if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
-      SaveDocumentRevisionJob.perform_later(self.id)
+      begin
+        SaveDocumentRevisionJob.perform_later(self.id)
+      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+        # Log the error but don't fail the save - document revisions are not critical
+        Rails.logger.warn "Could not save document revision due to Redis connection error: #{e.message}"
+      end
     end
   end
 

@@ -1,0 +1,164 @@
+.mega-menu {
+  display: none;
+  left: 0;
+  position: absolute;
+  text-align: left;
+  width: 100%;
+}
+
+.hoverable {
+  position: static;
+}
+
+.hoverable>a:after {
+  content: "\25BC";
+  font-size: 10px;
+  padding-left: 6px;
+  position: relative;
+  top: -1px;
+}
+
+.hoverable:hover .mega-menu {
+  display: block;
+}
+
+.toggleable>label:after {
+  content: "\25BC";
+  font-size: 10px;
+  padding-left: 6px;
+  position: relative;
+  top: -1px;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-input:not(checked)~.mega-menu {
+  display: none;
+}
+
+.toggle-input:checked~.mega-menu {
+  display: block;
+}
+
+.toggle-input:checked+label {
+  color: white;
+  background: #2c5282;
+  /*@apply bg-blue-800 */
+}
+
+.toggle-input:checked~label:after {
+  content: "\25B2";
+  font-size: 10px;
+  padding-left: 6px;
+  position: relative;
+  top: -1px;
+}
+
+/* Casino icon rotation animation */
+.casino-icon-rotate {
+  transition: transform 200ms ease;
+}
+
+.group:hover .casino-icon-rotate {
+  transform: rotate(90deg);
+}
+
+/* Casino button click animations */
+.casino-button-clicking {
+  animation: quickPress 0.2s ease-out;
+  position: relative;
+  overflow: visible !important;
+}
+
+.casino-button-clicking .casino-icon-rotate {
+  animation: quickSpin 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    slowSpin 2s linear 0.3s infinite;
+}
+
+/* Ripple effect from click point */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: rippleExpand 0.6s ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes quickPress {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(0.96);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes quickSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes slowSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rippleExpand {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Custom Sidebar Dark Mode Support */
+
+
+.sidebar-item-hover:hover {
+  background-color: #eff6ff;
+  /* blue-50 */
+}
+
+.dark .sidebar-item-hover:hover {
+  background-color: rgba(59, 130, 246, 0.2); // blue-500 with opacity 0.2
+}
+
+.sidebar-item-hover-purple:hover {
+  background-color: #faf5ff;
+  /* purple-50 */
+}
+
+.dark .sidebar-item-hover-purple:hover {
+  background-color: rgba(168, 85, 247, 0.2); // purple-500 with opacity 0.2
+}
+
+.sidebar-item-active {
+  background-color: #eff6ff;
+  /* blue-50 */
+  color: #1e40af;
+  /* blue-800 */
+}
+
+.dark .sidebar-item-active {
+  background-color: rgba(30, 58, 138, 0.5); // blue-900 with opacity
+  color: #bfdbfe;
+  /* blue-200 */
+}

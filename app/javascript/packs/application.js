@@ -15,6 +15,20 @@
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
 
+import "../application.css";
+import 'controllers'
+import '../page_name_loader'
+import '../settings'
+
+// Import Rails UJS for remote forms and CSRF tokens
+// Check if jQuery UJS is already loaded via asset pipeline before loading @rails/ujs
+import Rails from '@rails/ujs'
+if (typeof $ === 'undefined' || typeof $.rails === 'undefined') {
+  Rails.start()
+} else {
+  console.log('jQuery UJS already loaded via asset pipeline, skipping @rails/ujs')
+}
+
 // Support component names relative to this directory:
 var componentRequireContext = require.context("components", true);
 var ReactRailsUJS = require("react_ujs");

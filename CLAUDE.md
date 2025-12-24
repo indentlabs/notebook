@@ -129,3 +129,16 @@ The application uses a content type system with these types of pages:
 - Many premium content types like Creature, Planet, Religion, etc.
 
 Creating a new content type requires following the process in `docs/content_types.md`.
+
+## Tailwind CSS Conventions
+
+This project uses Tailwind CSS for styling. **Do not use the following Tailwind features** as they are not supported in our configuration:
+
+1. **Arbitrary values** - Do not use bracket syntax like `text-[10px]`, `w-[200px]`, `mt-[17px]`, etc. Use only standard Tailwind classes or add custom values to `tailwind.config.js` if needed.
+
+2. **Opacity shorthand** - Do not use slash syntax like `text-white/80`, `bg-black/40`, `border-gray-500/50`, etc. Instead, use separate opacity utilities:
+   - For backgrounds: `bg-black bg-opacity-40`
+   - For text: `text-white` with a wrapper using `opacity-80` if needed
+   - For borders: `border-gray-500 border-opacity-50`
+
+3. **Custom sizes** - If you need a size that doesn't exist (e.g., smaller than `text-xs`), add it to the `extend` section in `tailwind.config.js`. For example, `text-xxs` is available for 10px text.

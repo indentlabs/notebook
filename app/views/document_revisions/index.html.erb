@@ -1,40 +1,391 @@
-<br />
-<div class="grey-text uppercase">
-  <%= link_to @document.title, edit_document_path(@document) %>
-</div>
-<div class="card">
-  <div class="card-content">
-    <div class="card-title">Revision log</div>
-    <table>
-      <thead>
-        <tr>
-            <th>Title</th>
-            <th>Backed up</th>
-            <th>Word Count</th>
-            <th>Actions</th>
-        </tr>
-      </thead>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center text-sm mb-4">
+          <%= link_to "Documents", documents_path, class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" %>
+          <i class="material-icons text-gray-400 text-sm mx-2 dark:text-gray-600">chevron_right</i>
+          <%= link_to @document.title, edit_document_path(@document), class: "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" %>
+          <i class="material-icons text-gray-400 text-sm mx-2 dark:text-gray-600">chevron_right</i>
+          <span class="text-gray-900 font-medium dark:text-white">Revision History</span>
+        </nav>
+        
+        <!-- Page Title and Actions -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 flex items-center dark:text-white">
+              <i class="material-icons text-gray-600 mr-3 dark:text-gray-400">history</i>
+              Revision History
+            </h1>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              Tracking changes for "<%= @document.title %>"
+            </p>
+          </div>
+          
+          <div class="flex items-center space-x-3">
+            <%= link_to edit_document_path(@document), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600" do %>
+              <i class="material-icons text-sm mr-2">edit</i>
+              Back to Editor
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Stats Bar -->
+        <div class="mt-6 flex items-center space-x-6 text-sm">
+          <div class="flex items-center">
+            <i class="material-icons text-xs text-gray-400 mr-1 dark:text-gray-500">layers</i>
+            <span class="text-gray-600 dark:text-gray-400">
+              <span class="font-semibold text-gray-900 dark:text-white"><%= @document.document_revisions.count + 1 %></span> 
+              total <%= 'version'.pluralize(@document.document_revisions.count + 1) %>
+            </span>
+          </div>
+          <% if @document.document_revisions.any? %>
+            <div class="flex items-center">
+              <i class="material-icons text-xs text-gray-400 mr-1 dark:text-gray-500">schedule</i>
+              <span class="text-gray-600 dark:text-gray-400">
+                First backup: 
+                <span class="font-semibold text-gray-900 dark:text-white">
+                  <%= @document.document_revisions.last.created_at.strftime("%b %d, %Y") %>
+                </span>
+              </span>
+            </div>
+            <div class="flex items-center">
+              <i class="material-icons text-xs text-gray-400 mr-1 dark:text-gray-500">update</i>
+              <span class="text-gray-600 dark:text-gray-400">
+                Latest change: 
+                <span class="font-semibold text-gray-900 dark:text-white">
+                  <%= time_ago_in_words(@document.updated_at) %> ago
+                </span>
+              </span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      <tbody>
-        <tr>
-          <td><%= @document.title %></td>
-          <td>Latest version</td>
-          <td><%= @document.cached_word_count %></td>
-          <td><%= link_to 'Edit document', edit_document_path(@document), class: 'btn' %></td>
-        </tr>
-        <% @document_revisions.each do |document_revision| %>
-          <tr>
-            <td><%= document_revision.title %></td>
-            <td><span class="tooltipped" data-tooltip="Backed up at <%= document_revision.created_at %>"><%= time_ago_in_words document_revision.created_at %> ago</span></td>
-            <td><%= document_revision.cached_word_count %></td>
-            <td>
-              <%= link_to 'View', document_document_revision_path(id: document_revision.id), class: 'btn' %>
-              <%= link_to 'Delete', document_document_revision_path(document: @document, id: document_revision.id), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn red lighten-5 red-text' %>
-            </td>
-          </tr>
+  <!-- Main Content -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+      <!-- Current Version Card -->
+      <div class="current-version-card border-b border-gray-200 bg-gradient-to-r from-teal-50 to-green-50 p-6 dark:border-gray-700">
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center dark:bg-green-600">
+                  <i class="material-icons text-white text-sm">check</i>
+                </div>
+              </div>
+              <div class="ml-4 flex-1">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                  <%= @document.title %>
+                </h3>
+                <div class="flex items-center mt-1 space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">schedule</i>
+                    Current Version
+                  </span>
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">description</i>
+                    <%= number_with_delimiter(@document.cached_word_count || 0) %> words
+                  </span>
+                  <span class="flex items-center">
+                    <i class="material-icons text-xs mr-1">update</i>
+                    Last edited <%= time_ago_in_words(@document.updated_at) %> ago
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <% if @document.synopsis.present? %>
+              <div class="mt-3 ml-14 text-sm text-gray-600 dark:text-gray-400">
+                <%= truncate(@document.synopsis, length: 200) %>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="ml-4 flex-shrink-0">
+            <%= link_to edit_document_path(@document), class: "inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" do %>
+              <i class="material-icons text-xs mr-1">edit</i>
+              Edit
+            <% end %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Revisions Timeline -->
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% @document_revisions.each_with_index do |revision, index| %>
+          <div class="p-6 hover:bg-gray-50 transition-colors dark:hover:bg-gray-700 dark:hover:bg-opacity-50" 
+               x-data="{ 
+                 expanded: false, 
+                 showingDiff: false,
+                 diffContent: '',
+                 loadingDiff: false,
+                 async loadDiff() {
+                   if (this.diffContent) {
+                     this.showingDiff = true;
+                     return;
+                   }
+                   this.loadingDiff = true;
+                   try {
+                     const response = await fetch('<%= diff_document_document_revision_path(@document, revision) %>');
+                     if (response.ok) {
+                       this.diffContent = await response.text();
+                       this.showingDiff = true;
+                     } else {
+                       alert('Failed to load diff');
+                     }
+                   } catch (error) {
+                     console.error('Error loading diff:', error);
+                     alert('Error loading diff');
+                   } finally {
+                     this.loadingDiff = false;
+                   }
+                 }
+               }">
+            <div class="flex items-start">
+              <!-- Timeline Indicator -->
+              <div class="flex-shrink-0">
+                <div class="relative">
+                  <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center dark:bg-gray-700">
+                    <i class="material-icons text-gray-600 text-sm dark:text-gray-300">history</i>
+                  </div>
+                  <% if index < @document_revisions.count - 1 %>
+                    <div class="absolute top-10 left-1/2 transform -translate-x-1/2 w-0.5 h-24 bg-gray-200 dark:bg-gray-700"></div>
+                  <% end %>
+                </div>
+              </div>
+              
+              <!-- Revision Content -->
+              <div class="ml-4 flex-1">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
+                      <%= revision.title || "Untitled Revision" %>
+                    </h4>
+                    <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                      <span class="flex items-center" title="<%= revision.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
+                        <i class="material-icons text-xs mr-1">schedule</i>
+                        <%= time_ago_in_words(revision.created_at) %> ago
+                      </span>
+                      <span class="flex items-center">
+                        <i class="material-icons text-xs mr-1">description</i>
+                        <%= number_with_delimiter(revision.cached_word_count || 0) %> words
+                      </span>
+                      <% 
+                        # Calculate word diff with previous revision
+                        prev_revision = index < @document_revisions.count - 1 ? @document_revisions[index + 1] : nil
+                        word_diff = prev_revision ? (revision.cached_word_count || 0) - (prev_revision.cached_word_count || 0) : (revision.cached_word_count || 0)
+                      %>
+                      <% if word_diff != 0 %>
+                        <span class="flex items-center <%= word_diff > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+                          <i class="material-icons text-xs mr-1"><%= word_diff > 0 ? 'add' : 'remove' %></i>
+                          <%= number_with_delimiter(word_diff.abs) %> words
+                        </span>
+                      <% end %>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                      <div class="mt-3 flex items-center space-x-3">
+                        <button @click="expanded = !expanded" 
+                                class="text-xs text-teal-600 hover:text-teal-700 font-medium flex items-center dark:text-teal-400 dark:hover:text-teal-300">
+                          <i class="material-icons text-xs mr-1" x-text="expanded ? 'expand_less' : 'expand_more'"></i>
+                          <span x-text="expanded ? 'Hide Preview' : 'Show Preview'"></span>
+                        </button>
+                        
+                        <% if prev_revision %>
+                          <button @click="loadDiff()" 
+                                  x-show="!showingDiff"
+                                  :disabled="loadingDiff"
+                                  class="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300">
+                          <i class="material-icons text-xs mr-1" x-text="loadingDiff ? 'hourglass_empty' : 'compare_arrows'"></i>
+                          <span x-text="loadingDiff ? 'Loading...' : 'Show Changes'"></span>
+                        </button>
+                                                <button @click="showingDiff = false" 
+                                  x-show="showingDiff"
+                                  class="text-xs text-gray-600 hover:text-gray-700 font-medium flex items-center dark:text-gray-400 dark:hover:text-gray-300">
+                            <i class="material-icons text-xs mr-1">close</i>
+                            Hide Changes
+                          </button>
+                        <% end %>
+                      </div>
+                      
+                      <!-- Expandable Preview -->
+                      <div x-show="expanded" x-collapse class="mt-3">
+                        <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 prose prose-sm max-w-none dark:bg-gray-900 dark:bg-opacity-50 dark:text-gray-300 dark:prose-invert">
+                          <%= truncate(strip_tags(revision.body), length: 500) %>
+                        </div>
+                      </div>
+                    
+                    <!-- Diff Display -->
+                    <div x-show="showingDiff" x-collapse class="mt-3">
+                      <div class="bg-gray-50 rounded-lg p-4 overflow-x-auto dark:bg-gray-900 dark:bg-opacity-50">
+                        <div class="text-xs font-mono" x-html="diffContent"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Actions -->
+                  <div class="ml-4 flex-shrink-0 flex items-center space-x-2">
+                    <%= link_to document_document_revision_path(@document, revision), 
+                        class: "p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors dark:text-gray-500 dark:hover:text-gray-300 dark:hover:bg-gray-600", 
+                        title: "View full revision" do %>
+                      <i class="material-icons text-sm">visibility</i>
+                    <% end %>
+                    
+                    <button onclick="restoreRevision(<%= revision.id %>)"
+                            class="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-colors dark:text-gray-500 dark:hover:text-teal-400 dark:hover:bg-teal-900" 
+                            title="Restore this version">
+                      <i class="material-icons text-sm">restore</i>
+                    </button>
+                    
+                    <%= button_to document_document_revision_path(@document, revision), 
+                        method: :delete,
+                        form: { 
+                          class: "inline-block",
+                          data: { 
+                            turbo_confirm: 'Are you sure you want to delete this revision? This cannot be undone.' 
+                          },
+                          onsubmit: "return confirm('Are you sure you want to delete this revision? This cannot be undone.');"
+                        },
+                        class: "p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900",
+                        title: "Delete revision" do %>
+                      <i class="material-icons text-sm">delete</i>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         <% end %>
-      </tbody>
-    </table>
-    <%= will_paginate @document_revisions %>
+      </div>
+      
+      <!-- Pagination -->
+      <% if @document_revisions.respond_to?(:total_pages) && @document_revisions.total_pages > 1 %>
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-700 dark:text-gray-300">
+              Showing <span class="font-medium"><%= @document_revisions.offset + 1 %></span> to 
+              <span class="font-medium"><%= [@document_revisions.offset + @document_revisions.length, @document_revisions.total_entries].min %></span> of 
+              <span class="font-medium"><%= @document_revisions.total_entries %></span> revisions
+            </div>
+            <div class="flex items-center space-x-1">
+              <%= will_paginate @document_revisions, 
+                  previous_label: '‹ Previous',
+                  next_label: 'Next ›',
+                  inner_window: 1,
+                  outer_window: 0,
+                  class: 'pagination flex items-center space-x-1',
+                  link_separator: '',
+                  page_links: true %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Empty State -->
+      <% if @document_revisions.empty? %>
+        <div class="p-12 text-center">
+          <i class="material-icons text-gray-400 text-5xl mb-4 dark:text-gray-600">history_toggle_off</i>
+          <h3 class="text-lg font-medium text-gray-900 mb-2 dark:text-white">No revision history yet</h3>
+          <p class="text-sm text-gray-500 max-w-md mx-auto dark:text-gray-400">
+            Document revisions are automatically created as you make changes. 
+            Keep editing your document and revisions will appear here.
+          </p>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>
+
+<!-- Alpine.js for expandable previews -->
+<script>
+  // Restore a specific revision
+  function restoreRevision(revisionId) {
+    if (confirm('Are you sure you want to restore this version? Your current version will be saved as a new revision.')) {
+      // Create a form to submit the restore request
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = `/documents/<%= @document.id %>/revisions/${revisionId}/restore`;
+      form.style.display = 'none';
+      
+      // Add CSRF token
+      const csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'authenticity_token';
+        csrfInput.value = csrfToken.getAttribute('content');
+        form.appendChild(csrfInput);
+      }
+      
+      // Add to page and submit
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+</script>
+
+<style>
+  [x-cloak] { display: none !important; }
+
+  /* Current version card dark mode gradient */
+  .dark .current-version-card {
+    background: linear-gradient(to right, rgba(19, 78, 74, 0.2), rgba(20, 83, 45, 0.2));
+  }
+
+  /* Pagination styles */
+  .pagination {
+    @apply flex items-center space-x-1;
+  }
+  
+  .pagination a, .pagination span.current, .pagination span.gap {
+    @apply px-3 py-1 text-sm rounded-lg;
+  }
+  
+  .pagination a {
+    @apply text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600;
+  }
+  
+  .pagination span.current {
+    @apply text-white bg-teal-600 border border-teal-600 font-medium;
+  }
+  
+  .pagination span.gap {
+    @apply text-gray-400 dark:text-gray-500;
+  }
+  
+  .pagination .previous_page, .pagination .next_page {
+    @apply font-medium;
+  }
+  
+  .pagination .disabled {
+    @apply text-gray-400 bg-gray-100 border-gray-200 cursor-not-allowed hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-500 dark:hover:bg-gray-800;
+  }
+  
+  /* Diff styles */
+  .diff-addition {
+    @apply bg-green-100 text-green-800 dark:text-green-300;
+  }
+  .dark .diff-addition {
+    background-color: rgba(20, 83, 45, 0.3);
+  }
+
+  .diff-deletion {
+    @apply bg-red-100 text-red-800 line-through dark:text-red-300;
+  }
+  .dark .diff-deletion {
+    background-color: rgba(127, 29, 29, 0.3);
+  }
+  
+  .diff-context {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+  
+  .diff-line-number {
+    @apply text-gray-400 select-none pr-2 dark:text-gray-500;
+  }
+</style>

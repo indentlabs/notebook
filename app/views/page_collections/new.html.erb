@@ -1,3 +1,230 @@
-<h1 style="font-size: 2em">Create a Collection</h1>
+<!-- Main Container -->
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  
+  <!-- Hero Section -->
+  <div class="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 text-white">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+      
+      <!-- Breadcrumb -->
+      <nav class="mb-6">
+        <div class="flex items-center space-x-2 text-white/80 text-sm">
+          <%= link_to "Collections", page_collections_path, class: "hover:text-white transition-colors duration-200" %>
+          <i class="material-icons text-xs">chevron_right</i>
+          <span class="text-white font-medium">Create New Collection</span>
+        </div>
+      </nav>
+      
+      <!-- Header Content -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <div class="w-16 h-16 bg-white/20 rounded-full backdrop-blur-sm flex items-center justify-center">
+            <i class="material-icons text-white text-2xl">collections</i>
+          </div>
+          <div>
+            <h1 class="text-3xl font-bold text-white">Create a Collection</h1>
+            <p class="text-white/90">Curate and organize your favorite content</p>
+          </div>
+        </div>
+        
+        <!-- Progress Indicator -->
+        <div class="hidden lg:flex items-center space-x-2">
+          <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2">
+            <span class="text-white/80 text-sm">Progress:</span>
+            <div class="w-24 h-2 bg-white/20 rounded-full overflow-hidden">
+              <div id="progress-bar" class="h-full bg-white rounded-full transition-all duration-300" style="width: 25%"></div>
+            </div>
+            <span id="progress-text" class="text-white text-sm font-medium">Step 1 of 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Form Panel -->
+      <div class="space-y-6">
+        
+        <!-- Step Navigation -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+          <div class="flex items-center justify-between">
+            <div class="flex space-x-2">
+              <button class="step-nav active" data-step="1">
+                <span class="step-number">1</span>
+                <span class="step-title">Basics</span>
+              </button>
+              <button class="step-nav" data-step="2">
+                <span class="step-number">2</span>
+                <span class="step-title">Visual</span>
+              </button>
+              <button class="step-nav" data-step="3">
+                <span class="step-number">3</span>
+                <span class="step-title">Content</span>
+              </button>
+              <button class="step-nav" data-step="4">
+                <span class="step-number">4</span>
+                <span class="step-title">Settings</span>
+              </button>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- Form Content -->
+        <%= render 'wizard_form', page_collection: @page_collection %>
+      </div>
+      
+      <!-- Live Preview Panel -->
+      <div class="lg:sticky lg:top-8 lg:h-fit">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg mr-3">
+                  <i class="material-icons text-blue-600 dark:text-blue-400">visibility</i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Live Preview</h3>
+                  <p class="text-sm text-gray-600 dark:text-gray-400">See how your collection will look</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-2">
+                <button id="preview-desktop" class="preview-toggle active p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                  <i class="material-icons text-sm">desktop_mac</i>
+                </button>
+                <button id="preview-mobile" class="preview-toggle p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <i class="material-icons text-sm">phone_iphone</i>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Preview Content -->
+          <div id="collection-preview" class="p-6">
+            <%= render 'preview', page_collection: @page_collection %>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
 
-<%= render 'form', page_collection: @page_collection %>
+<!-- Custom Styles -->
+<style>
+/* Step Navigation Styles */
+.step-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: none;
+}
+
+.step-nav:not(.active):not(.completed) {
+  color: #9ca3af;
+}
+
+.dark .step-nav:not(.active):not(.completed) {
+  color: #6b7280;
+}
+
+.step-nav:not(.active):not(.completed):hover {
+  color: #6b7280;
+  background-color: #f9fafb;
+}
+
+.dark .step-nav:not(.active):not(.completed):hover {
+  color: #e5e7eb;
+  background-color: #374151;
+}
+
+.step-nav.active {
+  color: #2563eb;
+  background-color: #eff6ff;
+}
+
+.dark .step-nav.active {
+  color: #60a5fa;
+  background-color: rgba(37, 99, 235, 0.1);
+}
+
+.step-nav.completed {
+  color: #059669;
+  background-color: #ecfdf5;
+}
+
+.dark .step-nav.completed {
+  color: #34d399;
+  background-color: rgba(5, 150, 105, 0.1);
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  transition: all 0.2s ease;
+}
+
+.step-nav.active .step-number {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.step-nav.completed .step-number {
+  background-color: #059669;
+  color: white;
+  border-color: #059669;
+  font-size: 0; /* Hide the number */
+}
+
+.step-nav.completed .step-number::after {
+  content: '✓';
+  font-size: 10px;
+  color: white;
+}
+
+.step-title {
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* Preview Toggle Styles */
+.preview-toggle.active {
+  @apply bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400;
+}
+
+/* Mobile Preview Styles */
+.mobile-preview {
+  max-width: 375px;
+  margin: 0 auto;
+}
+
+/* Form Step Styles */
+.form-step {
+  @apply hidden;
+}
+
+.form-step.active {
+  @apply block;
+}
+
+</style>

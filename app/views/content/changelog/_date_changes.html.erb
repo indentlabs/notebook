@@ -1,0 +1,129 @@
+<!-- Changes for a specific date -->
+<%
+  # Process the events to get organized change data
+  changed_attributes = Attribute.where(id: events.select { |event| event.content_type == 'Attribute' }.map(&:content_id))
+  changed_fields = AttributeField.where(id: changed_attributes.pluck(:attribute_field_id)).includes([:attribute_category])
+%>
+
+<div class="space-y-4">
+  <% events.reverse.each_with_index do |change_event, event_index| %>
+    <% 
+      # Skip events without users (old data)
+      next if change_event.user.nil?
+    %>
+
+    <!-- Event Time Header -->
+    <div class="flex items-center justify-between mb-3 <%= event_index > 0 ? 'pt-4 border-t border-gray-100 dark:border-gray-700' : '' %>">
+      <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+        <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-3">
+          <% if change_event.user.avatar.attached? %>
+            <%= image_tag change_event.user.avatar, class: "w-full h-full rounded-full object-cover" %>
+          <% else %>
+            <i class="material-icons text-gray-500 dark:text-gray-400 text-sm">person</i>
+          <% end %>
+        </div>
+        <span class="font-medium text-gray-900 dark:text-white"><%= change_event.user.display_name %></span>
+        <span class="mx-2">•</span>
+        <span><%= change_event.created_at.strftime('%I:%M %p') %></span>
+      </div>
+      <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+        <%= pluralize(change_event.changed_fields.keys.length, 'change') %>
+      </span>
+    </div>
+
+    <!-- Field Changes -->
+    <div class="space-y-3">
+      <% change_event.changed_fields.each do |field_key, change| %>
+        <% 
+          related_attribute = changed_attributes.detect { |attribute| attribute.id == change_event.content_id }
+          next unless related_attribute
+          
+          related_field = changed_fields.detect { |field| field.id == related_attribute.attribute_field_id }
+          next unless related_field
+          
+          related_category = related_field.attribute_category
+          
+          # Skip if value didn't actually change
+          next if change.first == change.second
+          next if change.first.blank? && change.second.blank?
+          next if ContentChangeEvent::FIELD_IDS_TO_EXCLUDE.include?(field_key)
+          
+          # Handle privacy and blank values
+          old_value = change.first.blank? ? ContentChangeEvent::BLANK_PLACEHOLDER : change.first.to_s
+          new_value = change.second.blank? ? ContentChangeEvent::BLANK_PLACEHOLDER : change.second.to_s
+          
+          # Privacy check
+          visible_change = true
+          if related_field.label.start_with?('Private')
+            visible_change = user_signed_in? && (
+              (content.raw_model.is_a?(Universe) && content.user == current_user) ||
+              (content.respond_to?(:universe) && content.universe && content.universe.user == current_user) ||
+              (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
+            )
+          end
+          
+          unless visible_change
+            old_value = ContentChangeEvent::PRIVATE_PLACEHOLDER
+            new_value = ContentChangeEvent::PRIVATE_PLACEHOLDER
+          end
+          
+          # Special handling for privacy field
+          if related_field.label.downcase == 'privacy'
+            old_value = 'private' if old_value == ContentChangeEvent::BLANK_PLACEHOLDER
+            new_value = 'private' if new_value == ContentChangeEvent::BLANK_PLACEHOLDER
+          end
+        %>
+
+        <!-- Individual Field Change Card -->
+        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <!-- Field Header -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-600 flex items-center justify-center mr-3">
+                <i class="material-icons text-gray-600 dark:text-gray-300 text-sm"><%= related_category.icon %></i>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-900 dark:text-white"><%= related_field.label %></h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400"><%= related_category.label %></p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full font-medium">
+              <%= change_event.action %>
+            </span>
+          </div>
+
+          <!-- Field Change Content -->
+          <div class="space-y-3">
+            <%= render partial: "content/changelog/field_change/#{related_field.field_type}", 
+                       locals: { 
+                         old_value: old_value, 
+                         new_value: new_value,
+                         field: related_field,
+                         change_type: change_event.action
+                       } %>
+          </div>
+
+          <!-- Change Actions -->
+          <div class="flex items-center justify-end mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 space-x-2">
+            <% unless old_value == ContentChangeEvent::BLANK_PLACEHOLDER || old_value == ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+              <button class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                      onclick="navigator.clipboard.writeText('<%= escape_javascript(old_value) %>')"
+                      title="Copy previous value">
+                <i class="material-icons text-xs mr-1">content_copy</i>
+                Copy Previous
+              </button>
+            <% end %>
+            <% unless new_value == ContentChangeEvent::BLANK_PLACEHOLDER || new_value == ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+              <button class="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center px-2 py-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+                      onclick="navigator.clipboard.writeText('<%= escape_javascript(new_value) %>')"
+                      title="Copy current value">
+                <i class="material-icons text-xs mr-1">content_copy</i>
+                Copy Current
+              </button>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

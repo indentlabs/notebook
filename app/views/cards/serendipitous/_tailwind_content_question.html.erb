@@ -1,0 +1,167 @@
+<%
+  # DEPRECATED: This partial has been merged into app/views/main/components/_serendipitous_question.html.erb
+  # and is no longer used. It's kept here temporarily for reference.
+  #
+  # Partial locals: `content` to ask a question about, and `field` for the field being questioned
+  include_quick_reference = defined?(include_quick_reference) && !!include_quick_reference
+%>
+
+<style>
+  /* Enhanced autosave visual feedback styles */
+  .js-enhanced-autosave.border-yellow-400 {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 1px #fbbf24 !important;
+  }
+  .js-enhanced-autosave.border-green-400 {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 1px #34d399 !important;
+  }
+  .js-enhanced-autosave.border-red-400 {
+    border-color: #f87171 !important;
+    box-shadow: 0 0 0 1px #f87171 !important;
+  }
+  .js-enhanced-autosave:focus.border-yellow-400 {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+  }
+  .js-enhanced-autosave:focus.border-green-400 {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2) !important;
+  }
+  .js-enhanced-autosave:focus.border-red-400 {
+    border-color: #f87171 !important;
+    box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
+  }
+</style>
+
+<p class="text-4xl text-gray-900">
+  <%=
+    t(
+      "serendipitous_questions.attributes.#{content.page_type.downcase}.#{field.label.downcase}",
+      name:    content.name,
+      default: "What is #{content.name}'s #{field.label.downcase}?"
+    )
+  %>
+</p>
+
+<div class="mt-4">
+  <div class="flex items-center justify-between">
+    <label class="text-sm text-gray-500">
+      <span class="<%= @content.text_color %>"><%= link_to @content.name, @content.view_path %></span>
+      <span class="mx-1">&rsaquo;</span>
+      <%= field.label %>
+    </label>
+    <div class="js-autosave-status text-xs text-gray-400 hidden">
+      <span class="js-status-text"></span>
+    </div>
+  </div>
+
+  <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(field), method: :patch, html: { class: "serendipitous-question-form" } do |f| %>
+    <%= hidden_field(:override, :redirect_path, value: request.fullpath) %>
+    <%= hidden_field_tag "entity[entity_id]",   content.id %>
+    <%= hidden_field_tag "entity[entity_type]", content.page_type %>
+    <%= hidden_field_tag "field[name]", field[:id] %>
+    
+    <%
+      field_value = field.attribute_values.find_by(
+        user:        content.user,
+        entity_type: content.page_type,
+        entity_id:   content.id
+      ).try(:value)
+      
+      placeholder = I18n.translate "attributes.#{content.page_type.downcase}.#{field.label.downcase.gsub(/\s/, '_')}",
+        scope: :serendipitous_questions,
+        name: content.name || "this #{content.page_type.downcase}",
+        default: 'Write as little or as much as you want!'
+    %>
+    
+    <div class="relative mt-1">
+      <%=
+        text_area_tag "field[value]",
+                      field_value,
+                      class: "w-full rounded-t-lg focus:border-notebook-blue h-48 border-gray-300 js-enhanced-autosave js-can-mention-pages resize-none transition-all duration-200",
+                      placeholder: placeholder
+      %>
+      
+    </div>
+  <% end %>
+</div>
+
+
+
+<% if defined?(field) && field.present? && false %>
+  <ul class="hoverable collapsible white">
+    <li class="<%= 'active' if defined?(expand_by_default) && !!expand_by_default %>">
+      <div class="collapsible-header <%= content.color %> white-text">
+        <i class="material-icons tooltipped" data-tooltip="Answer this randomly-generated question to have it automatically saved to your <%= content.name %> <%= content.page_type.downcase %> page.">help</i>
+        
+      </div>
+      <div class="collapsible-body">
+        <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(field), method: :patch do |f| %>
+          <%= hidden_field(:override, :redirect_path, value: redirect_path) if defined?(redirect_path) %>
+
+          <%= hidden_field_tag "entity[entity_id]",   content.id %>
+          <%= hidden_field_tag "entity[entity_type]", content.page_type %>
+
+          <%=
+            render 'content/form/text_input_for_content_page',
+              f: f,
+              content: content,
+              field: field
+          %>
+
+          <%= button_tag(type: 'submit', class: "js-content-question-submit waves-effect waves-light btn blue white-text right") do %>
+            Save answer
+          <% end %>
+
+          <% if include_quick_reference %>
+            <%= link_to content.view_path, class: 'entity-trigger sidenav-trigger orange white-text btn tooltipped', data: { target: "quick-reference-#{content.page_type}-#{content.id}", tooltip: "View this #{content.page_type.downcase} without leaving this page" } do %>
+              <i class="material-icons right">vertical_split</i>
+              Quick-reference
+            <% end %>
+          <% end %>
+          <% if !defined?(show_view_button) || !!show_view_button %>
+            <%= link_to content.view_path, class: "btn #{content.color} white-text tooltipped", target: '_new', data: { tooltip: "View this #{content.name.downcase} in a new tab" } do %>
+              <i class="material-icons left white-text"><%= content.icon %></i>
+              View
+            <% end %>
+          <% end %>
+          <div style="clear: both;"></div>
+        <% end %>
+      </div>
+    </li>
+  </ul>
+
+  <% if include_quick_reference %>
+    <%= render partial: 'prompts/smart_sidebar', locals: { content: content } %>
+  <% end %>
+
+<% elsif defined?(show_empty_prompt) && show_empty_prompt %>
+  <div class="row">
+    <div class="col s12 m9">
+      <h5>Hey! It looks like I don't have any more prompts for you right now. I'll get to work coming up with some!</h5>
+      <p>In the meantime, I'll get a big boost of prompts if you create more pages I can think about! You can also check back later and I might have more prompts for your current pages.</p>
+      <% new_content_types = (current_user.createable_content_types - [Universe]) %>
+      <% new_content_types.each do |content_type| %>
+        <%= link_to new_polymorphic_path(content_type), class: "btn #{content_type.color} black-text", style: 'margin: 14px;' do %>
+          create
+          <% if current_user.send(content_type.name.downcase.pluralize).any? %>
+            another
+          <% else %>
+            <%= %w(a e i o).include?(content_type.name.downcase[0]) ? 'an' : 'a' %>
+          <% end %>
+          <%= content_type.name.downcase %>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="col hide-on-small-only m3">
+      <%= image_tag 'tristan/small.webp',
+        class: 'tooltipped tristan',
+        data: {
+          position: 'right',
+          enterDelay: '500',
+          tooltip: "Hey, I'm Tristan! I'm here to help you around the site!"
+        } %>
+    </div>
+  </div>
+<% end %>

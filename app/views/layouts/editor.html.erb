@@ -1,49 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <%= render 'layouts/common_head' %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <%= csrf_meta_tags %>
+
+  <%= stylesheet_link_tag 'application', media: 'all' %>
+  <%= stylesheet_pack_tag 'application', media: 'all' %>
+  <!--
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <%= render 'layouts/favicon' %>
+  <%= javascript_include_tag 'application' %>
+  <%= javascript_pack_tag 'application' %>
+  <%= render 'layouts/seo' %>
+  <script defer type="text/javascript" src="https://js.stripe.com/v2/"></script>
+
+  <!-- todo mirror this in-repo? -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body data-in-app="true" class="<%= controller_name %> <%= action_name %>  <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>">
-  <%= render 'layouts/sidenav', locals: { fixed: false } if user_signed_in? %>
-  <%= render 'layouts/document_sidenav', locals: { fixed: false } if user_signed_in? %>
-  <%# render 'layouts/document_entities_sidenav', locals: { fixed: false } if user_signed_in? %>
-  <%= 
-    react_component("DocumentEntitiesSidebar", { 
-      linked_entities: @linked_entities, 
-      link_form_path:  link_entity_documents_path, 
-      user_content:    @current_user_content,
-      document_id:     @document.id
-    })
-  %>
-  <%= render 'layouts/document_navbar' %>
+<body data-in-app="true"
+      class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+      x-data="{ showSidebar: false }"
+>
+  <%= render 'layouts/tailwind/navbar' %>
+  <%= render 'layouts/tailwind/sidebar' %>
 
-  <main>
-    <div class="mobile-navbar-spacer hide-on-med-and-up">&nbsp;</div>
-    <%= yield :full_width_page_header %>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col s12">
-          <%= yield %>
-        </div>
-      </div>
-    </div>
-
-    <%= render 'layouts/ganalytics' %>
+  <!-- main content -->
+  <main class="<%= user_signed_in? ? 'lg:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-60 lg:ml-56': showSidebar, 'ml-0': !showSidebar }"<% end %>>
+    <%= yield %>
   </main>
 
-  <%= render 'layouts/footer' unless defined?(@show_footer) && !@show_footer %>
-  <%= render 'cards/ui/alert' %>
-  <%= render 'cards/ui/notice' %>
+  <%= render 'layouts/footer' %>
+    
+  <%# react_component("Footer")      unless defined?(@show_footer) && !@show_footer %>
+  <%# render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
 
   <script type="text/javascript">
-    DISABLE_KEYBOARD_SHORTCUTS = true;
-    
-    document.addEventListener("DOMContentLoaded", function(event) { 
-      setTimeout(function() {
-        <%= yield :javascript %>
-      }, 1000);
+    <% if user_signed_in? %>
+      DISABLE_KEYBOARD_SHORTCUTS = <%= !current_user.keyboard_shortcuts_preference %>;
+    <% end %>
+
+    $(document).ready(function() {
+      <%= yield :javascript %>
     });
   </script>
 
+  <%# render partial: 'content/keyboard_controls_help_modal' %>
+  <%= render 'layouts/ganalytics' %>
 </body>
 </html>

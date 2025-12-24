@@ -1,14 +1,74 @@
-<div class="row card">
-  <div class="col s12 m6 l6 red lighten-4">
-    <%= simple_format ContentFormatterService.show(
-      text:         old_value,
-      viewing_user: current_user
-    ) %>
+<!-- Modern side-by-side text area diff -->
+<div class="grid md:grid-cols-2 gap-4">
+  <!-- Previous Value -->
+  <div class="space-y-2">
+    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+      <div class="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
+      <span class="font-medium">Previous</span>
+      <% if old_value != ContentChangeEvent::BLANK_PLACEHOLDER && old_value != ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+        <span class="ml-2 text-xs bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 px-2 py-0.5 rounded-full">
+          <%= old_value.to_s.split.length %> words
+        </span>
+      <% end %>
+    </div>
+    <div class="bg-red-50 dark:bg-gray-800 border border-red-200 dark:border-red-900 rounded-lg p-4 min-h-24">
+      <% if old_value == ContentChangeEvent::BLANK_PLACEHOLDER %>
+        <span class="text-red-400 italic text-sm">Empty</span>
+      <% elsif old_value == ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+        <span class="text-red-400 italic text-sm">Private field</span>
+      <% else %>
+        <div class="prose prose-sm max-w-none prose-red dark:prose-invert">
+          <%= simple_format ContentFormatterService.show(
+            text: old_value,
+            viewing_user: current_user
+          ) %>
+        </div>
+      <% end %>
+    </div>
   </div>
-  <div class="col s12 m6 l6 green lighten-4">
-    <%= simple_format ContentFormatterService.show(
-      text:         new_value,
-      viewing_user: current_user
-    ) %>
+
+  <!-- Current Value -->
+  <div class="space-y-2">
+    <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+      <div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+      <span class="font-medium">Current</span>
+      <% if new_value != ContentChangeEvent::BLANK_PLACEHOLDER && new_value != ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+        <span class="ml-2 text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 px-2 py-0.5 rounded-full">
+          <%= new_value.to_s.split.length %> words
+        </span>
+      <% end %>
+    </div>
+    <div class="bg-green-50 dark:bg-gray-800 border border-green-200 dark:border-green-900 rounded-lg p-4 min-h-24">
+      <% if new_value == ContentChangeEvent::BLANK_PLACEHOLDER %>
+        <span class="text-green-400 italic text-sm">Empty</span>
+      <% elsif new_value == ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+        <span class="text-green-400 italic text-sm">Private field</span>
+      <% else %>
+        <div class="prose prose-sm max-w-none prose-green dark:prose-invert">
+          <%= simple_format ContentFormatterService.show(
+            text: new_value,
+            viewing_user: current_user
+          ) %>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>
+
+<!-- Word Count Change Indicator -->
+<% if old_value != ContentChangeEvent::BLANK_PLACEHOLDER && old_value != ContentChangeEvent::PRIVATE_PLACEHOLDER && 
+      new_value != ContentChangeEvent::BLANK_PLACEHOLDER && new_value != ContentChangeEvent::PRIVATE_PLACEHOLDER %>
+  <% 
+    old_word_count = old_value.to_s.split.length
+    new_word_count = new_value.to_s.split.length
+    word_diff = new_word_count - old_word_count
+  %>
+  <% if word_diff != 0 %>
+    <div class="mt-3 flex items-center justify-center">
+      <span class="text-xs px-3 py-1 rounded-full <%= word_diff > 0 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' %>">
+        <i class="material-icons text-xs mr-1"><%= word_diff > 0 ? 'add' : 'remove' %></i>
+        <%= word_diff.abs %> <%= 'word'.pluralize(word_diff.abs) %> <%= word_diff > 0 ? 'added' : 'removed' %>
+      </span>
+    </div>
+  <% end %>
+<% end %>

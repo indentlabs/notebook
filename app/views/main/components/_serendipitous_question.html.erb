@@ -1,0 +1,140 @@
+<% if @content && @attribute_field_to_question %>
+  <style>
+    /* Enhanced autosave visual feedback styles */
+    .js-enhanced-autosave.border-yellow-400 {
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 0 1px #fbbf24 !important;
+    }
+    .js-enhanced-autosave.border-green-400 {
+      border-color: #34d399 !important;
+      box-shadow: 0 0 0 1px #34d399 !important;
+    }
+    .js-enhanced-autosave.border-red-400 {
+      border-color: #f87171 !important;
+      box-shadow: 0 0 0 1px #f87171 !important;
+    }
+    .js-enhanced-autosave:focus.border-yellow-400 {
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+    }
+    .js-enhanced-autosave:focus.border-green-400 {
+      border-color: #34d399 !important;
+      box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2) !important;
+    }
+    .js-enhanced-autosave:focus.border-red-400 {
+      border-color: #f87171 !important;
+      box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2) !important;
+    }
+  </style>
+
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 transform transition-all duration-300 hover:shadow-lg"
+       x-data="{ dropdownOpen: false }"
+       :class="{ 'overflow-hidden': !dropdownOpen, 'overflow-visible': dropdownOpen }">
+    <!-- Hero Image - Reduced height -->
+    <div class="relative h-36 overflow-hidden">
+      <%= image_tag @content.random_image_including_private(format: :original), class: 'w-full h-full object-cover' %>
+      <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3), transparent);"></div>
+      
+      <!-- Content Type Badge -->
+      <div class="absolute top-3 right-3">
+        <div class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @content.color %> text-white backdrop-blur-sm shadow-sm">
+          <i class="material-icons text-sm mr-1"><%= @content.icon %></i>
+          <%= @content.page_type %>
+        </div>
+      </div>
+      
+      <!-- Content Title -->
+      <div class="absolute bottom-3 left-4 right-4">
+        <h3 class="text-lg font-bold text-white">
+          <%= link_to @content.name, send("#{@content.page_type.downcase}_path", @content.id), class: "hover:text-blue-200 transition-colors" %>
+        </h3>
+        <% if @content.respond_to?(:universe) && @content.universe.present? %>
+          <p class="text-xs text-gray-200">from <%= @content.universe.name %></p>
+        <% end %>
+      </div>
+    </div>
+    
+    <%= form_for @content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), method: :patch, html: { class: "serendipitous-question-form" } do |f| %>
+      <%= hidden_field(:override, :redirect_path, value: request.fullpath) %>
+      <%= hidden_field_tag "entity[entity_id]", @content.id %>
+      <%= hidden_field_tag "entity[entity_type]", @content.page_type %>
+      <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
+      
+      <!-- Question Content - More compact -->
+      <div class="px-5 pt-4 pb-3">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+          <%=
+            t(
+              "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
+              name: @content.name,
+              default: "What is #{@content.name}'s #{@attribute_field_to_question.label.downcase}?"
+            )
+          %>
+        </h2>
+
+        <div class="mt-2 flex items-center justify-between">
+          <label class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
+            <span class="<%= @content.text_color %> font-medium"><%= link_to @content.name, @content.view_path %></span>
+            <span class="mx-1">&rsaquo;</span>
+            <span class="text-gray-600 dark:text-gray-300"><%= @attribute_field_to_question.label %></span>
+          </label>
+          <div class="js-autosave-status text-xs text-gray-400 dark:text-gray-500 hidden">
+            <span class="js-status-text"></span>
+          </div>
+        </div>
+      </div>
+      
+      <%
+        field_value = @attribute_field_to_question.attribute_values.find_by(
+          user: @content.user,
+          entity_type: @content.page_type,
+          entity_id: @content.id
+        ).try(:value)
+        
+        placeholder = I18n.translate "attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase.gsub(/\s/, '_')}",
+          scope: :serendipitous_questions,
+          name: @content.name || "this #{@content.page_type.downcase}",
+          default: 'Write as little or as much as you want!'
+      %>
+      
+      <!-- Text Area with Alpine content linking wrapper -->
+      <div x-data="contentLinking()" 
+           class="relative"
+           @dropdown-open="dropdownOpen = true"
+           @dropdown-close="dropdownOpen = false">
+        <%=
+          text_area_tag "field[value]",
+                      field_value,
+                      class: "w-full border-x-0 focus:border-notebook-blue h-40 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white js-enhanced-autosave js-can-mention-pages resize-none transition-all duration-200 focus:ring-blue-500 focus:ring-opacity-50",
+                      placeholder: placeholder
+        %>
+        
+        <!-- Include shared dropdown template -->
+        <%= render partial: 'javascripts/content_linking_dropdown' %>
+      </div>
+
+      <!-- Autosave hint -->
+      <div class="flex items-center px-4 py-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <i class="material-icons text-xs mr-1 <%= @content.text_color %>"><%= @content.icon %></i>
+        <span>
+          What you type will autosave to your
+          <span class="<%= @content.text_color %> font-medium"><%= @content.name %></span>
+          <%= @content.page_type.downcase %> page
+        </span>
+      </div>
+
+    <% end %>
+
+    <!-- Card Footer with Link to Prompts -->
+    <%= link_to prompts_path, class: "block w-full px-5 py-3 bg-orange-400 hover:bg-orange-500 text-white transition-all duration-300 ease-out group focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-inset hover:shadow-md active:scale-[0.998] active:shadow-inner" do %>
+      <div class="flex items-center justify-between">
+        <span class="flex items-center font-medium">
+          Answer more questions
+        </span>
+        <svg class="w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 ease-out" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -55,7 +55,7 @@ gem 'react-rails'
 # Form enhancements
 gem 'redcarpet' #markdown formatting
 gem 'acts_as_list' #sortables
-gem 'tribute' # @mentions
+# gem 'tribute' # @mentions - Replaced with Alpine.js implementation
 
 # SEO
 gem 'meta-tags'
@@ -106,6 +106,9 @@ gem 'redis', '~> 5.1.0'
 # Exports
 gem 'csv'
 
+# Diff generation for document revisions
+gem 'diffy'
+
 # Admin
 gem 'rails_admin'
 
@@ -132,12 +135,9 @@ end
 
 group :test, :production do
   gem 'pg', '~> 1.5'
-
-  gem "mini_racer", "~> 0.6.3" # TODO: audit whether we can remove this
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', require: false # TODO: remove this
   gem 'database_cleaner'
   gem 'selenium-webdriver'
   gem 'rspec-rails', '~> 5.0'
@@ -148,7 +148,7 @@ end
 
 group :development do
   gem 'web-console'
-  gem 'listen'
+  # gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
@@ -163,7 +163,8 @@ group :worker do
   # Document understanding
   gem 'htmlentities'
   gem 'birch', git: 'https://github.com/billthompson/birch.git', branch: 'birch-ruby22'
-  gem 'engtagger', github: 'yohasebe/engtagger', ref: 'master' # we might want this in more groups...?
+  gem 'engtagger', '~> 0.4.2' # we might want this in more groups...?
   gem 'ibm_watson'
   gem 'textstat'
 end
+

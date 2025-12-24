@@ -43,7 +43,22 @@ class PageCollection < ApplicationRecord
     User.where(id: accepted_submissions.pluck(:user_id) - [user.id])
   end
 
+  def editor_picks_ordered
+    accepted_submissions.editor_picks.order(:editor_pick_position).limit(6)
+  end
+
   def random_public_image
+    return cover_image if cover_image.present?
+
+    if header_image.attachment.present?
+      return header_image
+    end
+
+    # If all else fails, fall back on default header
+    ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
+  end
+
+  def random_image_including_private(format)
     return cover_image if cover_image.present?
 
     if header_image.attachment.present?
@@ -71,11 +86,15 @@ class PageCollection < ApplicationRecord
   serialize :page_types, Array
 
   def self.color
-    'brown'
+    'brown bg-brown-800'
+  end
+
+  def text_color
+    PageCollection.text_color
   end
 
   def self.text_color
-    'brown-text'
+    'text-brown-800 brown-text'
   end
 
   def self.hex_color
@@ -83,6 +102,10 @@ class PageCollection < ApplicationRecord
   end
 
   def self.icon
-    'layers'
+    'auto_stories'
+  end
+
+  def page_type
+    'Collection'
   end
 end

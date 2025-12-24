@@ -1,6 +1,8 @@
 class TimelinesController < ApplicationController
+  include ApplicationHelper
+
   before_action :authenticate_user!, except: [:show]
-  before_action :set_timeline, only: [:show, :edit, :update, :destroy]
+  before_action :set_timeline, only: [:show, :edit, :update, :destroy, :toggle_archive]
 
   before_action :set_navbar_color
   before_action :set_sidenav_expansion
@@ -27,8 +29,10 @@ class TimelinesController < ApplicationController
     else
       # Add in all timelines from shared universes also
       @timelines += Timeline.where(universe_id: current_user.contributable_universe_ids)
+                            .where.not(id: @timelines.pluck(:id))
     end
 
+    @filtered_page_tags = []
     @page_tags = PageTag.where(
       page_type: Timeline.name,
       page_id:   @timelines.pluck(:id)
@@ -41,6 +45,20 @@ class TimelinesController < ApplicationController
     # if params.key?(:favorite_only)
     #   @timelines.select!(&:favorite?)
     # end
+
+
+    # New style, using content#index view (we can wipe unused stuff from above once this is finalized)
+    @content_type_class = Timeline
+    @content_type_name = @content_type_class.name
+    @content = @timelines
+    @total_content_count = @timelines.count
+    
+    # Set up pagination variables (no actual pagination for now, but template expects them)
+    @current_page = 1
+    @total_pages = 1
+    
+    @folders = []
+    render 'timelines/index'
   end
 
   def show
@@ -57,6 +75,41 @@ class TimelinesController < ApplicationController
   def edit
     @page_title = "Editing #{@timeline.name}"
     @suggested_page_tags = []
+    cache_linkable_content_for_each_content_type
+    
+    # Collect all unique tags from timeline events for filtering
+    @timeline_event_tags = collect_timeline_event_tags
+    
+    # Get content already linked to other events in this timeline
+    @timeline_linked_content = {}
+    @timeline_content_summary = {}
+    timeline_entity_ids = @timeline.timeline_events
+                                   .joins(:timeline_event_entities)
+                                   .pluck('timeline_event_entities.entity_type', 'timeline_event_entities.entity_id')
+                                   .uniq
+    
+    timeline_entity_ids.group_by(&:first).each do |entity_type, entity_pairs|
+      entity_ids = entity_pairs.map(&:last).uniq
+      content_class = content_class_from_name(entity_type)
+      next unless content_class
+      
+      # Original data for link modal
+      @timeline_linked_content[entity_type] = content_class.where(id: entity_ids)
+                                                          .where(user: current_user)
+                                                          .limit(20)
+      
+      # Enhanced data for content summary sidebar
+      all_content = content_class.where(id: entity_ids)
+                                .where(user: current_user)
+                                .order(:name)
+      
+      @timeline_content_summary[entity_type] = {
+        count: all_content.count,
+        items: all_content.limit(10), # Show first 10, with expansion option
+        total_items: all_content.count,
+        content_class: content_class
+      }
+    end
   end
 
   # POST /timelines
@@ -88,6 +141,53 @@ class TimelinesController < ApplicationController
   def destroy
     @timeline.destroy
     redirect_to timelines_url, notice: 'Timeline was successfully destroyed.'
+  end
+
+  # GET /timelines/1/toggle_archive
+  def toggle_archive
+    unless @timeline.updatable_by?(current_user)
+      flash[:notice] = "You don't have permission to edit that!"
+      return redirect_back fallback_location: @timeline
+    end
+
+    verb = nil
+    success = if @timeline.archived?
+      verb = "unarchived"
+      @timeline.unarchive!
+    else
+      verb = "archived"
+      @timeline.archive!
+    end
+
+    if success
+      flash[:notice] = "Timeline #{verb} successfully!"
+    else
+      flash[:alert] = "Failed to #{verb.sub('ed', '')} timeline."
+    end
+
+    redirect_back fallback_location: edit_timeline_path(@timeline)
+  end
+
+  # GET /timelines/1/tag_suggestions
+  def tag_suggestions
+    # Get all unique tags from both Timeline objects and TimelineEvent objects
+    # This includes tags from the timeline itself AND all its events
+    timeline_tags = PageTag.where(
+      user: current_user,
+      page_type: 'Timeline'
+    ).distinct.pluck(:tag)
+
+    event_tags = PageTag.where(
+      user: current_user,
+      page_type: 'TimelineEvent'
+    ).distinct.pluck(:tag)
+
+    # Combine and sort all unique tags
+    all_tags = (timeline_tags + event_tags).uniq.sort
+
+    render json: {
+      suggestions: all_tags
+    }
   end
 
   private
@@ -141,5 +241,18 @@ class TimelinesController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'writing'
+  end
+
+  def collect_timeline_event_tags
+    # Get all unique tags from timeline events with their usage counts
+    tag_counts = @timeline.timeline_events
+                          .reorder('')
+                          .joins(:page_tags)
+                          .group('page_tags.tag')
+                          .count
+    
+    # Return array of hashes with tag name and count for easy access in view
+    tag_counts.map { |tag, count| { name: tag, count: count } }
+              .sort_by { |tag_data| tag_data[:name].downcase }
   end
 end

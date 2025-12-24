@@ -1,0 +1,65 @@
+<% content_for :thredded_page_title, t('thredded.messageboard.index.page_title') %>
+<% content_for :thredded_page_id, 'thredded--messageboards-index' %>
+<% content_for :thredded_breadcrumbs, render('thredded/shared/breadcrumbs') %>
+
+<%= thredded_page do %>
+  <%= define_svg_icons('thredded/follow.svg', 'thredded/lock.svg') %>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+    <!-- Page Header -->
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+      <i class="material-icons text-purple-600 dark:text-purple-400">forum</i>
+      Community Forums
+    </h1>
+    <p class="text-stone-500 dark:text-stone-400 mt-2 mb-6">
+      Join discussions about worldbuilding, writing, and everything Notebook.ai
+    </p>
+
+    <%= view_hooks.messageboards_index.container.render self, groups: @groups do %>
+      <%= view_hooks.messageboards_index.list.render self, groups: @groups do %>
+        <% @groups.each do |group| %>
+          <% if group.name.present? %>
+            <!-- Group Title -->
+            <h2 class="messageboard-group-title">
+              <%= link_to_if Thredded.show_messageboard_group_page,
+                            group.name,
+                            show_messageboard_group_path(group.id),
+                            class: 'hover:text-purple-600 transition-colors' %>
+            </h2>
+          <% end %>
+          
+          <!-- Messageboards Grid -->
+          <div class="messageboards-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+            <%= view_hooks.messageboards_index.group.render self, group: group do %>
+              <%= render partial: 'thredded/messageboards/messageboard',
+                         collection: group.messageboards %>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <!-- Admin Actions -->
+      <% if policy(Thredded::Messageboard.new).create? || policy(Thredded::MessageboardGroup.new).create? %>
+        <div class="mt-8 pt-8 border-t border-gray-200">
+          <div class="flex flex-wrap gap-4">
+            <% if policy(Thredded::Messageboard.new).create? %>
+              <%= link_to new_messageboard_path, 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors" do %>
+                <i class="material-icons mr-2 text-lg">add</i>
+                <%= t('thredded.messageboard.create') %>
+              <% end %>
+            <% end %>
+            
+            <% if policy(Thredded::MessageboardGroup.new).create? %>
+              <%= link_to new_messageboard_group_path,
+                  class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors" do %>
+                <i class="material-icons mr-2 text-lg">folder</i>
+                <%= t('thredded.messageboard_group.create') %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

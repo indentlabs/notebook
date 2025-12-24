@@ -1,0 +1,133 @@
+<% content_for :thredded_page_title, t('thredded.nav.moderation') %>
+<% content_for :thredded_page_id, 'thredded--moderation-users' %>
+<%= render 'nav' %>
+
+<%= thredded_page do %>
+  <div class="thredded--main-section">
+    <!-- Users Header -->
+    <div class="users-header">
+      <div class="users-title">
+        <i class="material-icons">group</i>
+        <h2>User Management</h2>
+      </div>
+      
+      <!-- Search Form -->
+      <div class="users-search">
+        <%= form_tag users_moderation_path,
+                     method: 'get',
+                     class: 'search-form',
+                     'data-thredded-turboform' => true do %>
+          <div class="search-input-wrapper">
+            <i class="material-icons">search</i>
+            <%= text_field_tag :q, @query,
+                               type: 'search',
+                               class: 'search-input',
+                               autofocus: @query.presence && !@users.presence,
+                               placeholder: t('thredded.moderation.search_users.form_placeholder') %>
+            <button type="submit" class="search-button">
+              Search
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <% if @users.present? %>
+      <% if @query.present? %>
+        <div class="search-results-notice">
+          <i class="material-icons">info</i>
+          <span>Showing results for "<%= @query %>"</span>
+        </div>
+      <% end %>
+      
+      <!-- Users Table -->
+      <div class="users-table-container">
+        <table class="users-table">
+          <caption class="table-caption">
+            <%= page_entries_info @users %>
+          </caption>
+          <thead>
+            <tr>
+              <th class="user-column">
+                <i class="material-icons">person</i>
+                <%= t 'thredded.moderation.user.name' %>
+              </th>
+              <th class="status-column">
+                <i class="material-icons">security</i>
+                <%= t 'thredded.moderation.moderation_state.name' %>
+              </th>
+              <th class="updated-column">
+                <i class="material-icons">update</i>
+                Last Updated
+              </th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @users.each do |user| %>
+              <% user_detail = user.thredded_user_detail %>
+              <tr class="user-row">
+                <td class="user-cell">
+                  <div class="user-info">
+                    <%= image_tag user.image_url(size: 40), class: 'user-avatar' %>
+                    <div class="user-details">
+                      <%= link_to user.thredded_display_name, 
+                                  user_moderation_path(user.id), 
+                                  class: 'user-name' %>
+                      <span class="user-meta">
+                        Member since <%= user.created_at.strftime('%b %Y') %>
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td class="status-cell">
+                  <span class="moderation-badge <%= user_detail.moderation_state %>">
+                    <% case user_detail.moderation_state.to_s %>
+                    <% when 'approved' %>
+                      <i class="material-icons">check_circle</i>
+                    <% when 'blocked' %>
+                      <i class="material-icons">block</i>
+                    <% when 'pending_moderation' %>
+                      <i class="material-icons">schedule</i>
+                    <% else %>
+                      <i class="material-icons">help</i>
+                    <% end %>
+                    <%= user_detail.moderation_state.to_s.humanize %>
+                  </span>
+                </td>
+                <td class="updated-cell">
+                  <%= time_ago user_detail.moderation_state_changed_at, default: 'Never' %>
+                </td>
+                <td class="actions-cell">
+                  <%= link_to user_moderation_path(user.id), 
+                              class: 'action-button view' do %>
+                    <i class="material-icons">visibility</i>
+                    View
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        
+        <%= paginate @users %>
+      </div>
+    <% else %>
+      <div class="no-results">
+        <div class="no-results-icon">
+          <i class="material-icons">search_off</i>
+        </div>
+        <h3>No users found</h3>
+        <% if @query.present? %>
+          <p>No users match your search for "<%= @query %>"</p>
+          <%= link_to users_moderation_path, class: 'clear-search-btn' do %>
+            <i class="material-icons">clear</i>
+            Clear search
+          <% end %>
+        <% else %>
+          <p>There are no users to display.</p>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

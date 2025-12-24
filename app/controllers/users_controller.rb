@@ -8,19 +8,12 @@ class UsersController < ApplicationController
   def show
     @sidenav_expansion = 'community'
 
-    @feed = ContentPageShare.where(user_id: @user.id)
-      .order('created_at DESC')
-      .includes([:content_page, :secondary_content_page, :user, :share_comments])
-      .limit(100)
-
-    @content = @user.public_content.select { |type, list| list.any? }
-    @tabs    = @content.keys
-    
-    # Get popular tags for this user's public content
-    @popular_tags = get_popular_public_tags_for_user(@user)
-  
-    @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
-    @stream           = @user.recent_content_list(limit: 20)
+    # Load all profile data
+    load_user_content
+    load_user_activity
+    load_user_social_data
+    load_user_collections
+    load_user_statistics
   end
 
   Rails.application.config.content_types[:all].each do |content_type|
@@ -32,18 +25,26 @@ class UsersController < ApplicationController
       return if @user.nil?
       return if @user.private_profile?
 
-      @random_image_including_private_pool_cache = ImageUpload.where(
-        user_id: @user.id,
-      ).group_by { |image| [image.content_type, image.content_id] }
-      
+      # Optimized: Only load images for content that will be displayed
       @content_type = content_type
-      @content_list = @user.send(content_type_name).is_public.order(:name)
+      @content_list = @user.send(content_type_name)
+                           .includes(:page_tags, :image_uploads)
+                           .is_public
+                           .order(:name)
+                           .paginate(page: params[:page], per_page: 20)
+      
+      # Only load public images for the content being displayed
+      content_ids = @content_list.pluck(:id)
+      @random_image_including_private_pool_cache = ImageUpload
+        .where(user_id: @user.id, content_type: content_type.name, content_id: content_ids)
+        .where(privacy: 'public')
+        .group_by { |image| [image.content_type, image.content_id] }
 
-      @saved_basil_commissions = BasilCommission.where(
-        entity_type: content_type_name,
-        entity_id:   @content_list.pluck(:id)
-      ).where.not(saved_at: nil)
-      .group_by { |commission| [commission.entity_type, commission.entity_id] }
+      # Optimized: Use content_ids we already have
+      @saved_basil_commissions = BasilCommission
+        .where(entity_type: content_type.name, entity_id: content_ids)
+        .where.not(saved_at: nil)
+        .group_by { |commission| [commission.entity_type, commission.entity_id] }
 
       render :content_list
     end
@@ -98,9 +99,15 @@ class UsersController < ApplicationController
   end
 
   def followers
+    @followers = @user.followed_by_users
+                      .includes(:avatar_attachment, :thredded_user_detail)
+                      .paginate(page: params[:page], per_page: 100)
   end
 
   def following
+    @following = @user.followed_users
+                      .includes(:avatar_attachment, :thredded_user_detail)
+                      .paginate(page: params[:page], per_page: 100)
   end
   
   def tag
@@ -204,6 +211,153 @@ class UsersController < ApplicationController
     params.permit(:id, :username)
   end
   
+  # Data loading methods for profile sections
+  
+  def load_user_content
+    @content = @user.public_content.select { |type, list| list.any? }
+    @tabs = @content.keys
+    @popular_tags = get_popular_public_tags_for_user(@user)
+    @favorite_content = @user.favorite_page_type? ? @user.send(@user.favorite_page_type.downcase.pluralize).is_public : []
+    
+    # Get featured universes (top 3 most recently updated)
+    @featured_universes = @user.universes.is_public.order(updated_at: :desc).limit(3) if @user.respond_to?(:universes)
+    @featured_universes ||= []
+  end
+  
+  def load_user_activity
+    # Optimized: Use joins to filter at database level
+    @feed = ContentPageShare
+      .includes(:content_page, :share_comments)
+      .where(user_id: @user.id)
+      .where(privacy: 'public')
+      .order('created_at DESC')
+      .limit(100)
+    
+    # Optimized: Get public content directly
+    @stream = @user.recent_public_content_list(limit: 20)
+    
+    # Skip recent edits - we don't want to show "made an edit" activities
+    @recent_edits = []
+    
+    # Forum activity (if Thredded is available)
+    if defined?(Thredded::Post)
+      @recent_forum_posts = Thredded::Post
+        .includes(:postable, :messageboard)
+        .where(user_id: @user.id, moderation_state: 'approved')
+        .order(created_at: :desc)
+        .limit(10)
+    else
+      @recent_forum_posts = []
+    end
+    
+    # Combine all activities for unified timeline (excluding edits)
+    @unified_activity = build_unified_activity_timeline
+  end
+  
+  def load_user_social_data
+    # Optimized: Use counter caches if available, fallback to count
+    @followers_count = @user.respond_to?(:followers_count) ? @user.followers_count : @user.followed_by_users.count
+    @following_count = @user.respond_to?(:following_count) ? @user.following_count : @user.followed_users.count
+    
+    # Optimized: Use includes to prevent N+1
+    @followers = User.joins(:user_followings)
+                     .where(user_followings: { followed_user_id: @user.id })
+                     .includes(:avatar_attachment)
+                     .limit(12)
+    @following = @user.followed_users.includes(:avatar_attachment).limit(12)
+    
+    # Optimized: Check follows and blocks efficiently
+    if user_signed_in?
+      @is_following = UserFollowing.exists?(user_id: current_user.id, followed_user_id: @user.id)
+      @is_blocked = UserBlocking.exists?(user_id: current_user.id, blocked_user_id: @user.id)
+    else
+      @is_following = false
+      @is_blocked = false
+    end
+  end
+  
+  def load_user_collections
+    # Collections user maintains (only public ones visible on profile)
+    @maintained_collections = @user.page_collections.where(privacy: 'public').order(updated_at: :desc)
+    
+    # Collections user is published in
+    @published_in_collections = @user.published_in_page_collections.limit(20)
+  end
+  
+  def load_user_statistics
+    # Calculate user statistics
+    @total_public_pages = @content.values.map(&:count).sum
+    @total_words = calculate_total_word_count
+    @join_date = @user.created_at
+    @last_active = [@user.updated_at, @user.current_sign_in_at].compact.max
+    
+    # Activity streak
+    @activity_streak = calculate_activity_streak
+  end
+  
+  def calculate_total_word_count
+    total = 0
+    @content.each do |content_type, pages|
+      pages.each do |page|
+        total += page.cached_word_count if page.respond_to?(:cached_word_count) && page.cached_word_count
+      end
+    end
+    total
+  end
+  
+  def calculate_activity_streak
+    # Calculate consecutive days of activity (only from content shares since edits are excluded)
+    activity_dates = @feed.map(&:created_at).map(&:to_date).uniq.sort.reverse
+    
+    streak = 0
+    current_date = Date.current
+    
+    activity_dates.each do |date|
+      if date == current_date
+        streak += 1
+        current_date -= 1.day
+      else
+        break
+      end
+    end
+    
+    streak
+  end
+  
+  def build_unified_activity_timeline
+    activities = []
+    
+    # Add content shares
+    @feed.each do |share|
+      activities << {
+        type: 'share',
+        created_at: share.created_at,
+        data: share
+      }
+    end
+    
+    # Add recent edits
+    @recent_edits.each do |edit|
+      activities << {
+        type: 'edit',
+        created_at: edit.created_at,
+        data: edit
+      }
+    end
+    
+    # Add forum posts
+    @recent_forum_posts.each do |post|
+      activities << {
+        type: 'forum_post',
+        created_at: post.created_at,
+        data: post
+      }
+    end
+    
+    # Sort by most recent first
+    activities.sort_by { |activity| activity[:created_at] }.reverse.first(20)
+  end
+
   # Get most popular tags for a user's public content
   def get_popular_public_tags_for_user(user, limit: 10)
     # Find page tags attached to public content

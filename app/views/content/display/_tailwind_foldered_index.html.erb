@@ -1,0 +1,936 @@
+<%
+  if mixed_content_types
+    content_counts_per_type = { content_type_name: content.count }
+  else
+    content_counts_per_type = Hash.new(0)
+    content.each { |page| content_counts_per_type[page.is_a?(ContentPage) ? page['page_type'] : page.class.name] += 1 }
+  end
+%>
+
+<div x-data="{
+  viewMode: 'grid',
+  selectedItems: [],
+  searchQuery: '',
+  showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>,
+  isLoading: false
+}" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+  <main class="flex-1 flex flex-col">
+    <!-- Hero Header -->
+    <div class="bg-white dark:bg-gray-800 shadow-sm">
+      <div class="relative">
+        <%= image_tag asset_path(header_image), class: 'h-32 w-full object-cover lg:h-48' %>
+        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20"></div>
+      </div>
+      
+      <div class="px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-5">
+            <div class="flex-shrink-0">
+              <% if @universe_scope %>
+                <%= link_to @universe_scope do %>
+                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-16 w-24 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-32 object-cover' %>
+                <% end %>
+              <% else %>
+                <div class="h-16 w-16 lg:h-20 lg:w-20 rounded-xl ring-4 ring-white shadow-lg flex items-center justify-center <%= content_type_class.color %>">
+                  <i class="material-icons text-3xl lg:text-4xl text-white"><%= content_type_class.icon %></i>
+                </div>
+              <% end %>
+            </div>
+            
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
+                <%= content_type_name.pluralize %>
+              </h1>
+              <p class="text-gray-600 dark:text-gray-400 mt-1">
+                <% if @universe_scope %>
+                  in <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color} font-medium hover:underline" %>
+                <% else %>
+                  by <%= link_to current_user.display_name, current_user, class: "#{User.text_color} font-medium hover:underline" %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-3">
+            <% if @current_user_content.fetch(content_type_name, []).any? %>
+              <% if content.any? %>
+                <!-- Dropdown menu when user has content -->
+                <div data-controller="dropdown" class="relative">
+                  <button data-action="dropdown#toggle click@window->dropdown#hide" class="hidden lg:inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="material-icons text-lg mr-2">tune</i>
+                    Options
+                    <%= chevron_down %>
+                  </button>
+                  <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                    <div class="py-1">
+                      <%= link_to attribute_customization_path(content_type_name.downcase), class: "group flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white" do %>
+                        <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-gray-600">tune</i>
+                        Customize template
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% else %>
+                <!-- Full expanded button when user has no content -->
+                <%= link_to attribute_customization_path(content_type_name.downcase) do %>
+                  <button class="hidden lg:inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="material-icons text-lg mr-2">tune</i>
+                    Customize template
+                  </button>
+                <% end %>
+              <% end %>
+            <% end %>
+
+            <% if current_user.can_create?(content_type_class) %>
+              <%= link_to new_polymorphic_path(content_type_class) do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <i class="material-icons text-lg mr-2">add</i>
+                  <span class="hidden sm:inline">New <%= content_type_name %></span>
+                  <span class="sm:hidden">New</span>
+                </button>
+              <% end %>
+            <% else %>
+              <%= link_to subscription_path do %>
+                <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm">
+                  <span class="hidden sm:inline">Upgrade to create <%= content_type_name.pluralize %></span>
+                  <span class="sm:hidden">Upgrade</span>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Serendipitous Question - Compact Expandable Header -->
+    <% if @questioned_content && @attribute_field_to_question %>
+      <% serendipitous_category = @attribute_field_to_question.attribute_category %>
+      
+      <style>
+        .js-enhanced-autosave.border-yellow-400 { border-color: #fbbf24 !important; box-shadow: 0 0 0 1px #fbbf24 !important; }
+        .js-enhanced-autosave.border-green-400 { border-color: #34d399 !important; box-shadow: 0 0 0 1px #34d399 !important; }
+        .js-enhanced-autosave.border-red-400 { border-color: #f87171 !important; box-shadow: 0 0 0 1px #f87171 !important; }
+        .js-autosave-toast { display: none !important; }
+      </style>
+
+      <div x-data="{ questionExpanded: false }" class="border-b border-gray-200 dark:border-gray-700">
+        <!-- Compact Question Header -->
+        <button
+          @click="questionExpanded = !questionExpanded; if(questionExpanded) $nextTick(() => $refs.questionInput.focus())"
+          class="w-full px-6 lg:px-8 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-gray-700 dark:hover:to-gray-700 transition-all duration-200 focus:outline-none"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0">
+                <div class="w-8 h-8 rounded-lg <%= @questioned_content.color %> flex items-center justify-center shadow-sm">
+                  <i class="material-icons text-white text-sm"><%= serendipitous_category.icon %></i>
+                </div>
+              </div>
+              <div class="text-left">
+                <h3 class="text-sm font-medium text-gray-900 dark:text-white">
+                  <%=
+                    t(
+                      "serendipitous_questions.attributes.#{@questioned_content.page_type.downcase}.#{@attribute_field_to_question.label.parameterize.underscore}",
+                      name: @questioned_content.name,
+                      default: "What is #{@questioned_content.name}'s #{@attribute_field_to_question.label.downcase}?"
+                    )
+                  %>
+                </h3>
+                <p class="text-xs text-gray-600 dark:text-gray-400">Click to answer this question</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">Answer question</span>
+              <i class="material-icons text-gray-400 dark:text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': questionExpanded }">
+                expand_more
+              </i>
+            </div>
+          </div>
+        </button>
+        
+        <!-- Expanded Question Form -->
+        <div
+          x-show="questionExpanded"
+          x-transition:enter="transition ease-out duration-300"
+          x-transition:enter-start="opacity-0 -translate-y-2"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          x-transition:leave="transition ease-in duration-200"
+          x-transition:leave-start="opacity-100 translate-y-0"
+          x-transition:leave-end="opacity-0 -translate-y-2"
+          class="px-6 lg:px-8 pb-6 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700"
+          style="display: none;"
+        >
+          <%= form_for content, url: FieldTypeService.form_path_from_attribute_field(@attribute_field_to_question), method: :patch, class: "space-y-4", html: { class: "serendipitous-question-form" } do |f| %>
+            <%= hidden_field_tag "entity[entity_id]", @questioned_content.id %>
+            <%= hidden_field_tag "entity[entity_type]", @questioned_content.page_type %>
+            <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
+
+            <div class="mt-4">
+              <div class="flex items-center justify-between mb-2">
+                <label for="field_value" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Your answer will be saved to 
+                  <%= link_to @questioned_content.name, @questioned_content.view_path, class: "#{@questioned_content.text_color} hover:underline font-medium" %>
+                  → <%= @attribute_field_to_question.label %>
+                </label>
+                <div class="flex items-center space-x-2 text-sm">
+                  <span class="js-autosave-indicator text-green-600 opacity-0 transition-opacity duration-200">
+                    <i class="material-icons text-sm mr-1">check_circle</i>
+                    Saved!
+                  </span>
+                </div>
+              </div>
+              <%=
+                text_area_tag "field[value]",
+                              @attribute_field_to_question[:value],
+                              id: "field_value",
+                              "x-ref": "questionInput",
+                              class: "w-full px-4 py-3 text-base dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none placeholder-gray-500 dark:placeholder-gray-400 js-enhanced-autosave js-can-mention-pages",
+                              rows: 3,
+                              placeholder: "Share your thoughts..."
+              %>
+            </div>
+            
+            <div class="flex items-center justify-between">
+              <button
+                type="submit"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white <%= @questioned_content.color %> rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-150"
+              >
+                <i class="material-icons text-sm mr-2">save</i>
+                Save & get another question
+              </button>
+              <button
+                type="button"
+                @click="questionExpanded = false"
+                class="text-sm text-gray-500 hover:text-gray-700"
+              >
+                Collapse
+              </button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Filters & Controls -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Search Input -->
+          <div class="relative group">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="material-icons text-gray-400 text-lg">search</i>
+            </div>
+            <input 
+              x-model="searchQuery"
+              type="text" 
+              placeholder="Search <%= content_type_name.pluralize.downcase %>..."
+              class="block w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+              <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                <i class="material-icons text-lg">clear</i>
+              </button>
+            </div>
+            
+            <!-- Keyboard shortcut hint -->
+            <div class="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+              Press <kbd class="px-1 py-0.5 bg-gray-700 rounded">⌘K</kbd> to focus search
+            </div>
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div data-controller="dropdown" class="relative">
+            <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="material-icons text-lg mr-2">sort</i>
+              <% 
+                sort_labels = {
+                  'updated_at' => 'Recently edited',
+                  'alphabetical' => 'Alphabetical',
+                  'created_at' => 'Date created'
+                }
+                current_sort = params[:sort] || 'updated_at'
+              %>
+              <%= sort_labels[current_sort] || 'Sort' %>
+              <%= chevron_down %>
+            </button>
+            <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+              <div class="py-1">
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 #{'bg-gray-100 dark:bg-gray-600 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
+                  Recently edited
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 #{'bg-gray-100 dark:bg-gray-600 font-medium' if params[:sort] == 'alphabetical'}" do %>
+                  Alphabetical
+                <% end %>
+                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 #{'bg-gray-100 dark:bg-gray-600 font-medium' if params[:sort] == 'created_at'}" do %>
+                  Date created
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tag Filter -->
+          <% if true # Always show tag filter so users can start tagging %>
+            <div data-controller="dropdown" class="relative">
+              <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
+                <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+                <button 
+                  data-action="dropdown#toggle click@window->dropdown#hide" 
+                  type="button"
+                  class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 bg-blue-50 text-blue-900 hover:bg-blue-100' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600' %>"
+                >
+                  <i class="material-icons text-lg mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : content_type_class.text_color %>">label</i>
+                  Tags
+                  <% if @filtered_page_tags && @filtered_page_tags.any? %>
+                    <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
+                      <%= @filtered_page_tags.count %>
+                    </span>
+                  <% end %>
+                  <%= chevron_down %>
+                </button>
+                <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                  <div class="p-4">
+                    <div class="space-y-3">
+                      <% if @page_tags && @page_tags.any? %>
+                        <% @page_tags.each do |page_tag| %>
+                          <div class="flex items-center">
+                            <input 
+                              id="filter-tag-<%= page_tag.id %>" 
+                              name="slug[]" 
+                              <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %> 
+                              value="<%= page_tag.slug %>" 
+                              type="checkbox" 
+                              class="h-4 w-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                            >
+                            <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                              <%= page_tag.tag %>
+                            </label>
+                          </div>
+                        <% end %>
+                        <div class="pt-2">
+                          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                            Apply filters
+                          </button>
+                        </div>
+                      <% else %>
+                        <div class="text-center text-gray-500 py-4">
+                          <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
+                          <p class="text-sm">No tags yet</p>
+                          <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        
+        <div class="flex items-center space-x-2">
+          <!-- View Mode Toggle -->
+          <div class="hidden sm:flex border border-gray-300 dark:border-gray-600 rounded-lg">
+            <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'" class="p-2 rounded-l-lg focus:outline-none">
+              <i class="material-icons text-lg">grid_view</i>
+            </button>
+            <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'" class="p-2 rounded-r-lg focus:outline-none">
+              <i class="material-icons text-lg">view_list</i>
+            </button>
+          </div>
+          
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            <% if (@total_content_count || 0) > 0 %>
+              <span x-text="searchQuery === '' ? 'Showing <%= content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
+              <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
+            <% else %>
+              <span>No items</span>
+            <% end %>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Active Filters -->
+      <% if @filtered_page_tags && @filtered_page_tags.any? %>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <span class="text-sm text-gray-500">Filtered by:</span>
+          <% @filtered_page_tags.each do |page_tag| %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+              <%= page_tag.tag %>
+              <%= link_to(polymorphic_path(content_type_class, params.permit(:sort, :favorite_only).merge({ slug: Array(params.fetch(:slug, [])) - [page_tag.slug] }))) do %>
+                <button class="ml-1 hover:text-blue-600">
+                  <i class="material-icons text-sm">close</i>
+                </button>
+              <% end %>
+            </span>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="flex-1 bg-gray-50 dark:bg-gray-900">
+      <% if content.any? %>
+        <!-- Search Empty State -->
+        <div x-show="searchQuery !== ''" x-transition class="hidden" id="search-empty-state">
+          <div class="flex-1 flex items-center justify-center p-12 min-h-96">
+            <div class="text-center max-w-lg">
+              <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-6 shadow-sm">
+                <i class="material-icons text-4xl text-gray-400">search_off</i>
+              </div>
+              <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">No matching <%= content_type_name.pluralize.downcase %> found</h3>
+              <p class="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed" x-text="`We couldn't find any <%= content_type_name.pluralize.downcase %> matching '${searchQuery}'. Try adjusting your search terms or create a new one.`"></p>
+              
+              <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button @click="searchQuery = ''" class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors shadow-sm">
+                  <i class="material-icons text-lg mr-2">clear</i>
+                  Clear search
+                </button>
+                
+                <% if current_user.can_create?(content_type_class) %>
+                  <%= link_to new_polymorphic_path(content_type_class) do %>
+                    <button class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-white <%= content_type_class.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all">
+                      <i class="material-icons text-lg mr-2">add</i>
+                      Create new <%= content_type_name.downcase %>
+                    </button>
+                  <% end %>
+                <% else %>
+                  <%= link_to subscription_path do %>
+                    <button class="inline-flex items-center px-6 py-3 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all">
+                      <i class="material-icons text-lg mr-2">upgrade</i>
+                      Upgrade to create <%= content_type_name.pluralize.downcase %>
+                    </button>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid View -->
+        <div x-show="viewMode === 'grid'" class="p-6 lg:p-8">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+            <% content.each do |item| %>
+              <div
+                class="group relative"
+                x-show="searchQuery === '' || '<%= item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= item.page_type.downcase %>'.includes(searchQuery.toLowerCase())"
+                x-data="{
+                  isFavorite: <%= item.favorite? %>,
+                  isLoading: false,
+                  async toggleFavorite(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.isLoading = true;
+                    try {
+                      const result = await window.toggleItemFavorite('<%= item.id %>', '<%= item.page_type.downcase.pluralize %>');
+                      if (result.success) {
+                        this.isFavorite = !this.isFavorite;
+                      } else {
+                        alert('Error toggling favorite. Please try again.');
+                      }
+                    } catch (error) {
+                      console.error('Error:', error);
+                      alert('An unexpected error occurred. Please check the console.');
+                    } finally {
+                      this.isLoading = false;
+                    }
+                  }
+                }"
+              >
+                <div class="bg-white dark:bg-gray-800 hover:shadow-xl rounded-lg transition-shadow duration-200 overflow-hidden">
+                  <!-- Image - clickable to View -->
+                  <%= link_to (item.is_a?(ContentPage) ? item.view_path : item), class: "block" do %>
+                    <%
+                      item_image = nil
+                      if item.respond_to?(:random_image_including_private)
+                        item_image = item.random_image_including_private(format: :medium)
+                      end
+                      item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
+                    %>
+                    <%= image_tag item_image, class: 'h-48 w-full object-cover' %>
+                  <% end %>
+
+                  <!-- Content -->
+                  <div class="p-4">
+                    <div class="flex items-start justify-between mb-3">
+                      <div class="flex-1 min-w-0 pr-8">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide <%= item.text_color %> truncate">
+                          <%= item.page_type %>
+                        </h3>
+                        <h2 class="mt-1 text-lg font-semibold text-gray-900 dark:text-white line-clamp-2" title="<%= item.name %>">
+                          <%= item.name %>
+                        </h2>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons Footer -->
+                    <div class="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <%= link_to (item.respond_to?(:view_path) ? item.view_path : item), class: "flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-white #{item.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                        <i class="material-icons text-sm mr-1.5">visibility</i>
+                        View
+                      <% end %>
+                      <%= link_to (item.respond_to?(:edit_path) ? item.edit_path : edit_polymorphic_path(item)), class: "flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                        <i class="material-icons text-sm mr-1.5">edit</i>
+                        Edit
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Favorite Star -->
+                <% if item.respond_to?(:favorite?) %>
+                  <button
+                    @click="toggleFavorite"
+                    :disabled="isLoading"
+                    class="absolute top-4 right-4 group p-1 text-xl rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm hover:bg-notebook-blue hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
+                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                    title="Toggle favorite"
+                  >
+                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 group-hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                  </button>
+                <% end %>
+              </div>
+            <% end %>
+            
+            <!-- Template Customization Card -->
+            <% if @current_user_content.fetch(content_type_name, []).any? %>
+              <div class="group relative" x-show="searchQuery === ''">
+                <%= link_to attribute_customization_path(content_type_name.downcase), class: "block" do %>
+                  <div class="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 hover:from-blue-50 hover:to-indigo-50 dark:hover:from-slate-700 dark:hover:to-slate-600 border-2 border-dashed border-gray-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400 rounded-lg transition-all duration-200 overflow-hidden">
+                    <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-blue-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center relative overflow-hidden">
+                      <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent dark:hidden"></div>
+                      <div class="text-center relative z-10">
+                        <div class="bg-white/90 dark:bg-slate-800 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm dark:shadow-slate-900/50 mx-auto">
+                          <i class="material-icons text-3xl text-gray-600 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">tune</i>
+                        </div>
+                        <div class="text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Template</div>
+                      </div>
+                    </div>
+                    <div class="p-4 dark:bg-slate-800/80">
+                      <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wide mb-1">
+                          Customize
+                        </h3>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                          Template
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- List View -->
+        <div x-show="viewMode === 'list'" style="display: none;" class="p-6 lg:p-8">
+          <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <% content.each_with_index do |item, index| %>
+              <div
+                class="<%= 'border-t border-gray-200 dark:border-gray-700' if index > 0 %> hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors relative"
+                x-show="searchQuery === '' || '<%= item.name.downcase %>'.includes(searchQuery.toLowerCase()) || '<%= item.page_type.downcase %>'.includes(searchQuery.toLowerCase())"
+                x-data="{
+                  isFavorite: <%= item.favorite? %>,
+                  isLoading: false,
+                  async toggleFavorite(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.isLoading = true;
+                    try {
+                      const result = await window.toggleItemFavorite('<%= item.id %>', '<%= item.page_type.downcase.pluralize %>');
+                      if (result.success) {
+                        this.isFavorite = !this.isFavorite;
+                      } else {
+                        alert('Error toggling favorite. Please try again.');
+                      }
+                    } catch (error) {
+                      console.error('Error:', error);
+                      alert('An unexpected error occurred. Please check the console.');
+                    } finally {
+                      this.isLoading = false;
+                    }
+                  }
+                }"
+              >
+                <div class="flex items-center p-4 space-x-4">
+                  <!-- Image + Content (clickable to View) -->
+                  <%= link_to (item.respond_to?(:view_path) ? item.view_path : item), class: "flex items-center space-x-4 flex-1 min-w-0" do %>
+                    <div class="flex-shrink-0">
+                      <%
+                        item_image = nil
+                        if item.respond_to?(:random_image_including_private)
+                          item_image = item.random_image_including_private(format: :small)
+                        end
+                        item_image ||= asset_path("card-headers/#{item.page_type.downcase.pluralize}.jpg")
+                      %>
+                      <%= image_tag item_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate" title="<%= item.name %>"><%= item.name %></h3>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 <%= item.text_color %> truncate"><%= item.page_type %></p>
+                    </div>
+                  <% end %>
+
+                  <!-- Action Buttons -->
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <%= link_to (item.respond_to?(:view_path) ? item.view_path : item), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white #{item.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                      <i class="material-icons text-sm mr-1.5">visibility</i>
+                      View
+                    <% end %>
+                    <%= link_to (item.respond_to?(:edit_path) ? item.edit_path : edit_polymorphic_path(item)), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+                      <i class="material-icons text-sm mr-1.5">edit</i>
+                      Edit
+                    <% end %>
+                  </div>
+
+                  <!-- Favorite Star -->
+                  <% if item.respond_to?(:favorite?) %>
+                    <button
+                      @click="toggleFavorite"
+                      :disabled="isLoading"
+                      class="flex-shrink-0 p-1 text-lg rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors"
+                      :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                      title="Toggle favorite"
+                    >
+                      <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600 hover:text-gray-400 dark:hover:text-gray-500'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="flex-1 flex items-center justify-center p-8 min-h-96">
+          <div class="max-w-4xl w-full">
+            <!-- Header -->
+            <div class="text-center mb-8">
+              <div class="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mb-4 shadow-sm">
+                <i class="material-icons text-3xl text-gray-500"><%= content_type_class.icon %></i>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to your <%= content_type_name.pluralize %></h2>
+              <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Ready to start building your world? Choose how you'd like to begin your <%= content_type_name.downcase %> collection.
+              </p>
+            </div>
+
+            <!-- Action Cards -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl mx-auto mb-8">
+              <!-- Template Customization Card - Always show, using existing card design -->
+              <div class="group relative">
+                <%= link_to attribute_customization_path(content_type_name.downcase), class: "block h-full" do %>
+                  <div class="bg-gradient-to-br from-gray-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 hover:from-blue-50 hover:to-indigo-50 dark:hover:from-slate-700 dark:hover:to-slate-600 border-2 border-dashed border-gray-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400 rounded-lg transition-all duration-200 overflow-hidden">
+                    <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-blue-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center relative overflow-hidden">
+                      <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent dark:hidden"></div>
+                      <div class="text-center relative z-10">
+                        <div class="bg-white/90 dark:bg-slate-800 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm dark:shadow-slate-900/50 mx-auto">
+                          <i class="material-icons text-3xl text-gray-600 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">tune</i>
+                        </div>
+                        <div class="text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Template</div>
+                      </div>
+                    </div>
+                    <div class="p-4 dark:bg-slate-800/80">
+                      <div class="text-center">
+                        <h3 class="text-sm font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wide mb-1">
+                          Customize
+                        </h3>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                          Template
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+
+              <!-- Create Content Card or Upgrade Card - Matching the template card style -->
+              <% if current_user.can_create?(content_type_class) %>
+                <div class="group relative">
+                  <%= link_to new_polymorphic_path(content_type_class), class: "block h-full" do %>
+                    <div class="bg-gradient-to-br from-gray-50 to-<%= content_type_class.color.split('-')[1] %>-50 dark:from-slate-800 dark:to-slate-700 hover:from-<%= content_type_class.color.split('-')[1] %>-50 hover:to-<%= content_type_class.color.split('-')[1] %>-100 dark:hover:from-slate-700 dark:hover:to-slate-600 border-2 border-dashed border-gray-300 dark:border-slate-500 hover:border-<%= content_type_class.color.split('-')[1] %>-400 dark:hover:border-<%= content_type_class.color.split('-')[1] %>-400 rounded-lg transition-all duration-200 overflow-hidden">
+                      <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-<%= content_type_class.color.split('-')[1] %>-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent dark:hidden"></div>
+                        <div class="text-center relative z-10">
+                          <div class="bg-white/90 dark:bg-slate-800 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm dark:shadow-slate-900/50 mx-auto">
+                            <i class="material-icons text-3xl text-gray-600 dark:text-white group-hover:<%= content_type_class.text_color %> transition-colors"><%= content_type_class.icon %></i>
+                          </div>
+                          <div class="text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Create</div>
+                        </div>
+                      </div>
+                      <div class="p-4 dark:bg-slate-800/80">
+                        <div class="text-center">
+                          <h3 class="text-sm font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wide mb-1">
+                            New
+                          </h3>
+                          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            <%= content_type_name %>
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="group relative">
+                  <%= link_to subscription_path, class: "block h-full" do %>
+                    <div class="bg-gradient-to-br from-gray-50 to-purple-50 dark:from-slate-800 dark:to-slate-700 hover:from-purple-50 hover:to-purple-100 dark:hover:from-slate-700 dark:hover:to-slate-600 border-2 border-dashed border-gray-300 dark:border-slate-500 hover:border-purple-400 dark:hover:border-purple-400 rounded-lg transition-all duration-200 overflow-hidden">
+                      <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-purple-100 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent dark:hidden"></div>
+                        <div class="text-center relative z-10">
+                          <div class="bg-white/90 dark:bg-slate-800 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm dark:shadow-slate-900/50 mx-auto">
+                            <i class="material-icons text-3xl text-gray-600 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">star</i>
+                          </div>
+                          <div class="text-xs font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wider">Premium</div>
+                        </div>
+                      </div>
+                      <div class="p-4 dark:bg-slate-800/80">
+                        <div class="text-center">
+                          <h3 class="text-sm font-medium text-gray-500 dark:text-slate-300 uppercase tracking-wide mb-1">
+                            Upgrade
+                          </h3>
+                          <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Premium
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+      
+      <!-- Pagination -->
+      <% if (@total_pages || 1) > 1 %>
+        <div class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
+          <div class="flex items-center justify-between">
+            <div class="flex-1 flex justify-between sm:hidden">
+              <!-- Mobile pagination -->
+              <% if (@current_page || 1) > 1 %>
+                <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) - 1 })), class: "relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+                  Previous
+                <% end %>
+              <% else %>
+                <span class="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
+                  Previous
+                </span>
+              <% end %>
+              
+              <% if (@current_page || 1) < (@total_pages || 1) %>
+                <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) + 1 })), class: "ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+                  Next
+                <% end %>
+              <% else %>
+                <span class="ml-3 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 cursor-not-allowed">
+                  Next
+                </span>
+              <% end %>
+            </div>
+            
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+              <div>
+                <p class="text-sm text-gray-700 dark:text-gray-300">
+                  Showing
+                  <span class="font-medium"><%= ((@current_page || 1) - 1) * 50 + 1 %></span>
+                  to
+                  <span class="font-medium"><%= [(@current_page || 1) * 50, (@total_content_count || 0)].min %></span>
+                  of
+                  <span class="font-medium"><%= @total_content_count %></span>
+                  results
+                </p>
+              </div>
+              <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                  <!-- Previous button -->
+                  <% if (@current_page || 1) > 1 %>
+                    <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) - 1 })), class: "relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+                      <span class="sr-only">Previous</span>
+                      <i class="material-icons text-lg">chevron_left</i>
+                    <% end %>
+                  <% else %>
+                    <span class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+                      <span class="sr-only">Previous</span>
+                      <i class="material-icons text-lg">chevron_left</i>
+                    </span>
+                  <% end %>
+                  
+                  <!-- Page numbers -->
+                  <% 
+                    start_page = [(@current_page || 1) - 2, 1].max
+                    end_page = [start_page + 4, (@total_pages || 1)].min
+                    start_page = [end_page - 4, 1].max
+                  %>
+                  
+                  <% (start_page..end_page).each do |page_num| %>
+                    <% if page_num == (@current_page || 1) %>
+                      <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-blue-50 dark:bg-blue-900/50 text-sm font-medium text-blue-600 dark:text-blue-400">
+                        <%= page_num %>
+                      </span>
+                    <% else %>
+                      <%= link_to page_num, url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: page_num })), class: "relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600" %>
+                    <% end %>
+                  <% end %>
+                  
+                  <!-- Next button -->
+                  <% if (@current_page || 1) < (@total_pages || 1) %>
+                    <%= link_to url_for(params.permit(:sort, :slug, :favorite_only).merge({ page: (@current_page || 1) + 1 })), class: "relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+                      <span class="sr-only">Next</span>
+                      <i class="material-icons text-lg">chevron_right</i>
+                    <% end %>
+                  <% else %>
+                    <span class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
+                      <span class="sr-only">Next</span>
+                      <i class="material-icons text-lg">chevron_right</i>
+                    </span>
+                  <% end %>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </main>
+
+  <!-- Enhanced Autosave JavaScript -->
+  <script>
+    // Global function for toggling favorites
+    window.toggleItemFavorite = async function(contentId, contentClass) {
+      const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+      let postUrl = contentClass === 'documents'
+        ? `/documents/${contentId}/toggle_favorite`
+        : `/plan/${contentClass}/${contentId}/toggle_favorite`;
+      
+      try {
+        let response = await fetch(postUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          },
+          body: JSON.stringify({ id: contentId })
+        });
+        
+        if (!response.ok && postUrl.startsWith('/plan/')) {
+          postUrl = `/${contentClass}/${contentId}/toggle_favorite`;
+          response = await fetch(postUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken
+            },
+            body: JSON.stringify({ id: contentId })
+          });
+        }
+        
+        return { success: response.ok };
+      } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const autosaveFields = document.querySelectorAll('.js-enhanced-autosave');
+      
+      autosaveFields.forEach(field => {
+        const indicator = document.querySelector('.js-autosave-indicator');
+        
+        field.addEventListener('input', function() {
+          // Show saving state
+          field.classList.remove('border-green-400', 'border-red-400');
+          field.classList.add('border-yellow-400');
+          if (indicator) {
+            indicator.classList.remove('opacity-100');
+            indicator.classList.add('opacity-0');
+          }
+        });
+
+        field.addEventListener('autosave:success', function() {
+          // Show saved state
+          field.classList.remove('border-yellow-400', 'border-red-400');
+          field.classList.add('border-green-400');
+          if (indicator) {
+            indicator.classList.remove('opacity-0');
+            indicator.classList.add('opacity-100');
+            setTimeout(() => {
+              indicator.classList.remove('opacity-100');
+              indicator.classList.add('opacity-0');
+            }, 2000);
+          }
+        });
+
+        field.addEventListener('autosave:error', function() {
+          // Show error state
+          field.classList.remove('border-yellow-400', 'border-green-400');
+          field.classList.add('border-red-400');
+          if (indicator) {
+            indicator.classList.remove('opacity-100');
+            indicator.classList.add('opacity-0');
+          }
+        });
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function(e) {
+        // Only if not typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        // CMD/Ctrl + K to focus search
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          const searchInput = document.querySelector('input[x-model="searchQuery"]');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+        
+        // CMD/Ctrl + \ to toggle content sidebar
+        if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+          e.preventDefault();
+          const toggleButton = document.querySelector('[\\@click="showContentSidebar = !showContentSidebar"]');
+          if (toggleButton) toggleButton.click();
+        }
+        
+        // 1 for grid view, 2 for list view
+        if (e.key === '1') {
+          e.preventDefault();
+          window.Alpine && window.Alpine.evaluate(document.querySelector('[x-data]'), 'viewMode = "grid"');
+        }
+        if (e.key === '2') {
+          e.preventDefault();
+          window.Alpine && window.Alpine.evaluate(document.querySelector('[x-data]'), 'viewMode = "list"');
+        }
+      });
+
+      // Search empty state management
+      function updateSearchEmptyState() {
+        const searchInput = document.querySelector('input[x-model="searchQuery"]');
+        const searchEmptyState = document.getElementById('search-empty-state');
+        
+        if (!searchInput || !searchEmptyState) return;
+        
+        const searchQuery = searchInput.value.trim();
+        const visibleItems = document.querySelectorAll('[x-show*="searchQuery"]:not([style*="display: none"])');
+        
+        if (searchQuery && visibleItems.length === 0) {
+          searchEmptyState.style.display = 'block';
+        } else {
+          searchEmptyState.style.display = 'none';
+        }
+      }
+      
+      // Watch for search input changes
+      const searchInput = document.querySelector('input[x-model="searchQuery"]');
+      if (searchInput) {
+        searchInput.addEventListener('input', () => {
+          setTimeout(updateSearchEmptyState, 100); // Small delay to let Alpine.js update visibility
+        });
+      }
+    });
+  </script>
+</div>

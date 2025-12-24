@@ -1,0 +1,522 @@
+<%
+  # Get both image types with ordering
+  regular_images = raw_content.image_uploads.ordered.to_a rescue []
+  basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered.to_a rescue []
+  
+  unless user_signed_in? && raw_content.user_id == current_user.id
+    regular_images = regular_images.select { |img| img.privacy == 'public' } rescue []
+  end
+  
+  # Calculate total images for display purposes
+  total_images = regular_images.count + basil_images.count
+  
+  # Combine and sort images
+  combined_images = []
+  regular_images.each do |img|
+    combined_images << {
+      id: img.id,
+      type: 'image_upload',
+      data: img,
+      position: img.position || 999,
+      pinned: img.pinned == true
+    }
+  end
+  
+  basil_images.each do |img|
+    combined_images << {
+      id: img.id,
+      type: 'basil_commission',
+      data: img,
+      position: img.position || 999,
+      pinned: img.pinned == true
+    }
+  end
+  
+  combined_images.sort_by! { |img| img[:position] }
+%>
+
+<div class="space-y-8">
+  <% if combined_images.any? %>
+    <!-- Gallery preview section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+          Current Images (<%= total_images %>)
+        </h3>
+        <p class="text-sm text-gray-500 reordering-instructions hidden">
+          <i class="material-icons text-sm align-middle mr-1">touch_app</i>
+          Drag images to reorder
+        </p>
+      </div>
+      
+      <div class="sortable-gallery" data-content-type="<%= raw_content.class.name %>" data-content-id="<%= raw_content.id %>">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 js-sortable-gallery-items">
+          <% combined_images.each do |image_item| %>
+            <%
+              image_data = image_item[:data]
+              image_type = image_item[:type]
+              image_id = image_item[:id]
+              is_pinned = image_data.pinned == true
+            %>
+            <div class="gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
+              <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow <%= is_pinned ? 'ring-2 ring-yellow-400' : '' %>">
+                <% if image_type == 'image_upload' %>
+                  <div class="aspect-w-16 aspect-h-9 bg-gray-100 dark:bg-gray-900">
+                    <%= link_to image_data.src(:original), target: '_blank', class: 'block w-full h-full' do %>
+                      <%= image_tag image_data.src(:medium), class: "w-full h-full object-cover" %>
+                    <% end %>
+                  </div>
+                  <div class="p-3 border-t border-gray-100 dark:border-gray-700">
+                    <span class="text-xs text-gray-500">
+                      <%= Filesize.from("#{image_data.src_file_size}B").to_f('KB').round(2) %> KB
+                    </span>
+                  </div>
+                  
+                  <!-- Pin button -->
+                  <%= link_to toggle_image_pin_path(image_type: 'image_upload', image_id: image_data.id),
+                    class: "absolute top-2 right-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-300'}",
+                    method: :post,
+                    title: 'Pin this image to always use it in previews of this page',
+                    data: { type: 'json' } do %>
+                    <i class="material-icons text-sm">push_pin</i>
+                  <% end %>
+                  
+                  <!-- Delete button -->
+                  <%= link_to image_deletion_path(image_data.id),
+                    class: 'absolute top-2 left-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-remove-image text-red-500',
+                    method: 'delete',
+                    remote: true,
+                    title: 'Delete this image',
+                    data: { confirm: "Are you sure? This can't be undone." } do %>
+                    <i class="material-icons text-sm">delete</i>
+                  <% end %>
+                  
+                  <% if is_pinned %>
+                    <div class="absolute bottom-12 left-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                      <i class="material-icons text-xs mr-1">push_pin</i> Pinned
+                    </div>
+                  <% end %>
+                  
+                  <div class="sortable-handle-overlay absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md opacity-0 hover:opacity-100 transition-opacity cursor-move">
+                    <i class="material-icons text-gray-400">drag_handle</i>
+                  </div>
+                <% else %>
+                  <div class="aspect-w-16 aspect-h-9 bg-purple-50 dark:bg-purple-900">
+                    <% if image_data.image.attached? %>
+                      <%= link_to rails_blob_path(image_data.image, disposition: "attachment"), target: '_blank', class: 'block w-full h-full' do %>
+                        <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "w-full h-full object-cover" %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                  <div class="p-3 border-t border-gray-100 dark:border-gray-700">
+                    <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Generated with Basil</span>
+                  </div>
+                  
+                  <!-- Pin button -->
+                  <%= link_to toggle_image_pin_path(image_type: 'basil_commission', image_id: image_data.id),
+                    class: "absolute top-2 right-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-toggle-pin #{is_pinned ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-300'}",
+                    method: :post,
+                    title: 'Pin this image to always use it in previews of this page',
+                    data: { type: 'json' } do %>
+                    <i class="material-icons text-sm">push_pin</i>
+                  <% end %>
+                  
+                  <!-- Delete button -->
+                  <%= link_to basil_delete_path(image_data),
+                    class: 'absolute top-2 left-2 p-2 bg-white dark:bg-gray-700 rounded-full shadow-md hover:shadow-lg transition-all js-remove-image text-red-500',
+                    method: 'delete',
+                    remote: true,
+                    title: 'Delete this image',
+                    data: { confirm: "Are you sure? This can't be undone." } do %>
+                    <i class="material-icons text-sm">delete</i>
+                  <% end %>
+                  
+                  <% if is_pinned %>
+                    <div class="absolute bottom-12 left-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                      <i class="material-icons text-xs mr-1">push_pin</i> Pinned
+                    </div>
+                  <% end %>
+                  
+                  <div class="sortable-handle-overlay absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-2 bg-white rounded-full shadow-md opacity-0 hover:opacity-100 transition-opacity cursor-move">
+                    <i class="material-icons text-gray-400">drag_handle</i>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  
+  <!-- Upload section -->
+  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+      <i class="material-icons text-sm align-middle mr-2">file_upload</i>
+      Upload Images
+    </h3>
+    
+    <% if current_user.upload_bandwidth_kb > 0 %>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        You have <%= Filesize.from("#{current_user.upload_bandwidth_kb}KB").pretty %> of bandwidth remaining.
+      </p>
+    <% else %>
+      <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 mb-4">
+        <p class="text-sm text-yellow-800 dark:text-yellow-200">
+          <i class="material-icons text-xs align-middle mr-1">warning</i>
+          You have no upload bandwidth remaining. Upgrade to Premium or delete some existing images for more.
+        </p>
+      </div>
+    <% end %>
+    
+    <div class="space-y-4">
+      <%= render partial: 'content/form/images/upload', locals: { f: f, content: content } %>
+      
+      <div class="flex items-center justify-between">
+        <%= link_to_add_association f,
+          :image_uploads,
+          class: 'inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+          partial: 'content/form/images/upload',
+          render_options: { locals: { f: f, content: content }} do %>
+          <i class='material-icons text-sm mr-2'>add_photo_alternate</i>
+          Add another image
+        <% end %>
+        
+        <%= f.button :submit, 
+          class: 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500',
+          data: { disable_with: '<i class="material-icons text-sm mr-2">cloud_upload</i> Uploading...' } do %>
+          <i class="material-icons text-sm mr-2">cloud_upload</i>
+          <span>Upload images</span>
+        <% end %>
+      </div>
+      
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        Once you've selected your images, press the upload button above. This will reload the page.
+      </p>
+    </div>
+  </div>
+  
+  <!-- Generate with Basil section -->
+  <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
+    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <i class="material-icons text-sm align-middle mr-2 text-purple-600 dark:text-purple-400">auto_awesome</i>
+        Generate with Basil
+      </h3>
+
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Let Basil create unique images for your <%= raw_content.page_type.downcase %> based on the details you've added.
+      </p>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-4 mb-4 border border-purple-100 dark:border-purple-900">
+        <div class="flex items-start space-x-3">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+              <i class="material-icons text-purple-600 dark:text-purple-300 text-sm">tips_and_updates</i>
+            </div>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">
+              Basil uses the information from your <%= raw_content.page_type.downcase %> page to generate images that match your vision.
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              The more details you've added about appearance and characteristics, the better the results will be.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <% if basil_images.any? %>
+        <div class="mb-4">
+          <p class="text-xs text-gray-500 mb-2">
+            <i class="material-icons text-xs align-middle mr-1">check_circle</i>
+            You've already generated <%= pluralize(basil_images.count, 'image') %> with Basil
+          </p>
+        </div>
+      <% end %>
+
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-3">
+        <%= link_to basil_content_path(raw_content.page_type.downcase, raw_content.id),
+            class: 'inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all group' do %>
+          <i class="material-icons text-sm mr-2 group-hover:scale-110 transition-transform">auto_awesome</i>
+          <span>Generate New Image</span>
+          <i class="material-icons text-sm ml-2 opacity-70 group-hover:translate-x-1 transition-transform">arrow_forward</i>
+        <% end %>
+
+        <% if current_user && !current_user.on_premium_plan? %>
+          <div class="flex items-center space-x-1">
+            <% generated_count = current_user.basil_commissions.with_deleted.count %>
+            <% free_limit = BasilService::FREE_IMAGE_LIMIT %>
+            <span class="text-xs text-gray-500">
+              <%= generated_count %> / <%= free_limit %> free images generated
+            </span>
+            <% if generated_count >= free_limit %>
+              <%= link_to "Upgrade", subscription_path, class: "text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 underline" %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<style>
+  .gallery-sortable-item:hover .sortable-handle-overlay {
+    opacity: 1;
+  }
+  
+  .ui-sortable-helper {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .gallery-sortable-item.ui-sortable-placeholder {
+    visibility: visible !important;
+    background-color: rgba(59, 130, 246, 0.1);
+    border: 2px dashed rgba(59, 130, 246, 0.3);
+    border-radius: 0.5rem;
+  }
+  
+  @media only screen and (max-width: 768px) {
+    .sortable-handle-overlay {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+// Function to initialize pin buttons (can be called multiple times safely)
+function initializePinButtons() {
+  // Only initialize buttons that haven't been initialized yet
+  document.querySelectorAll('.js-toggle-pin:not([data-initialized])').forEach(function(button) {
+    button.setAttribute('data-initialized', 'true');
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation(); // Stop ALL event handlers including jQuery UJS
+
+      if (this.classList.contains('processing')) return;
+      this.classList.add('processing');
+
+      var url = this.getAttribute('href');
+      var buttonElement = this;
+      var imageCard = buttonElement.closest('.gallery-sortable-item').querySelector('.relative');
+
+      // Safe CSRF token access
+      var csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (!csrfToken) {
+        console.error('CSRF token not found');
+        showNotification('Security error. Please refresh the page.', 'error');
+        buttonElement.classList.remove('processing');
+        return;
+      }
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': csrfToken.content,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (!response.ok) {
+          // Handle HTTP errors
+          if (response.status === 401) {
+            throw new Error('Please log in to pin images');
+          } else if (response.status === 403) {
+            throw new Error('You do not have permission to modify this image');
+          } else if (response.status === 404) {
+            throw new Error('Image not found');
+          } else if (response.status === 422) {
+            throw new Error('Content not found for this image');
+          } else {
+            throw new Error(`Error: ${response.status}`);
+          }
+        }
+        return response.json();
+      })
+      .then(data => {
+        buttonElement.classList.remove('processing');
+
+        // Check for error in response data
+        if (data.error) {
+          showNotification(data.error, 'error');
+          return;
+        }
+
+        if (data.pinned) {
+          buttonElement.classList.add('text-yellow-500');
+          buttonElement.classList.remove('text-gray-400');
+          imageCard.classList.add('ring-2', 'ring-yellow-400');
+
+          // Add pinned badge if not exists
+          if (!imageCard.querySelector('.bg-yellow-400')) {
+            var pinnedBadge = document.createElement('div');
+            pinnedBadge.className = 'absolute bottom-12 left-3 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-medium flex items-center';
+            pinnedBadge.innerHTML = '<i class="material-icons text-xs mr-1">push_pin</i> Pinned';
+            imageCard.appendChild(pinnedBadge);
+          }
+
+          // Remove pinned state from other images
+          document.querySelectorAll('.js-toggle-pin').forEach(function(btn) {
+            if (btn !== buttonElement) {
+              btn.classList.remove('text-yellow-500');
+              btn.classList.add('text-gray-400');
+              var otherCard = btn.closest('.gallery-sortable-item').querySelector('.relative');
+              if (otherCard) {
+                otherCard.classList.remove('ring-2', 'ring-yellow-400');
+                var badge = otherCard.querySelector('.bg-yellow-400');
+                if (badge) badge.remove();
+              }
+            }
+          });
+        } else {
+          buttonElement.classList.remove('text-yellow-500');
+          buttonElement.classList.add('text-gray-400');
+          imageCard.classList.remove('ring-2', 'ring-yellow-400');
+
+          var pinnedBadge = imageCard.querySelector('.bg-yellow-400');
+          if (pinnedBadge) pinnedBadge.remove();
+        }
+      })
+      .catch(error => {
+        console.error('Error toggling pin status:', error);
+        buttonElement.classList.remove('processing');
+        showNotification(error.message || 'Error toggling pin status', 'error');
+      });
+    });
+  });
+}
+
+// Initialize sortable functionality
+function initializeSortable() {
+  var galleryItems = document.querySelector('.js-sortable-gallery-items');
+  if (galleryItems && typeof $ !== 'undefined' && $.fn.sortable && !$(galleryItems).hasClass('ui-sortable')) {
+    var sortableGallery = $('.js-sortable-gallery-items');
+    var sortableContainer = sortableGallery.closest('.sortable-gallery');
+    var contentType = sortableContainer.data('content-type');
+    var contentId = sortableContainer.data('content-id');
+
+    sortableGallery.sortable({
+      items: '.gallery-sortable-item',
+      handle: '.sortable-handle-overlay',
+      placeholder: 'gallery-sortable-item ui-sortable-placeholder',
+      cursor: 'move',
+      opacity: 0.8,
+      tolerance: 'pointer',
+      start: function(e, ui) {
+        $('.reordering-instructions').removeClass('hidden');
+      },
+      stop: function(e, ui) {
+        $('.reordering-instructions').addClass('hidden');
+        
+        // Save the new order
+        var items = [];
+        $('.gallery-sortable-item').each(function(index) {
+          items.push({
+            id: $(this).data('image-id'),
+            type: $(this).data('image-type'),
+            position: index + 1
+          });
+        });
+        
+        $.ajax({
+          url: '/api/v1/gallery_images/sort',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            images: items,
+            content_type: contentType,
+            content_id: contentId
+          }),
+          success: function(response) {
+            // Show success indicator
+            showNotification('Image order saved', 'success');
+          },
+          error: function(error) {
+            console.error('Error saving image order:', error);
+            showNotification('Failed to save image order', 'error');
+          }
+        });
+      }
+    });
+  }
+}
+
+// Initialize delete button functionality
+function initializeDeleteButtons() {
+  // Handle delete buttons
+  document.querySelectorAll('.js-remove-image').forEach(function(button) {
+    button.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      if (!confirm("Are you sure? This can't be undone.")) return;
+      
+      var url = this.getAttribute('href');
+      var imageItem = this.closest('.gallery-sortable-item');
+      
+      fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (response.ok) {
+          imageItem.remove();
+          showNotification('Image deleted', 'success');
+        } else {
+          console.error('Error deleting image');
+          showNotification('Error deleting image', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting image:', error);
+        showNotification('Error deleting image', 'error');
+      });
+    });
+  });
+}
+
+// Helper function to show notifications
+function showNotification(message, type) {
+  // Create a simple notification if no toast library is available
+  var notification = document.createElement('div');
+  notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'} z-50`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(function() {
+    notification.remove();
+  }, 3000);
+}
+
+// Initialize everything on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  initializeSortable();
+  initializePinButtons();
+  initializeDeleteButtons();
+});
+
+// Watch for Alpine.js dynamic content changes
+// This ensures buttons work even when gallery tab is shown after page load
+var observer = new MutationObserver(function(mutations) {
+  // Re-initialize buttons when new content is added
+  initializePinButtons();
+  initializeDeleteButtons();
+  initializeSortable();
+});
+
+// Start observing the document for changes
+observer.observe(document.body, {
+  childList: true,
+  subtree: true,
+  attributes: true,
+  attributeFilter: ['x-show', 'style'] // Watch for Alpine.js visibility changes
+});
+</script>

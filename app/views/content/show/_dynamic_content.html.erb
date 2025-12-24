@@ -1,0 +1,221 @@
+<div id="dynamic-content" class="h-full overflow-y-auto">
+  
+  <!-- Overview View -->
+  <div x-show="currentView === 'overview'" class="p-8">
+    
+    <!-- Show All Categories (Expanded View) -->
+    <div x-show="expandAllCategories">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Complete Details</h2>
+        <p class="text-gray-600 dark:text-gray-400">All information about this <%= content.class_name.downcase %></p>
+      </div>
+      
+      <%= render partial: 'content/show/all_categories', locals: { content: content, raw_content: raw_content } %>
+    </div>
+
+    <!-- Single Category View -->
+    <div x-show="!expandAllCategories && currentCategory">
+      <% content.data[:categories].each do |category| %>
+        <% next if category[:label] == 'Gallery' %>
+        
+        <div x-show="currentCategory === '<%= category[:label] %>'">
+          <div class="mb-6">
+            <div class="flex items-center mb-4">
+              <div class="flex items-center">
+                <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
+                <div>
+                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white"><%= category[:label] %></h2>
+                  <p class="text-gray-600 dark:text-gray-400">Details about this <%= content.class_name.downcase %>'s <%= category[:label].downcase %></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <%= render partial: 'content/show/single_category', locals: { 
+            content: content, 
+            category: category,
+            raw_content: raw_content 
+          } %>
+        </div>
+      <% end %>
+    </div>
+
+  </div>
+
+  <!-- Gallery View -->
+  <div x-show="currentView === 'gallery'" class="p-8">
+    <div class="mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Gallery</h2>
+          <p class="text-gray-600 dark:text-gray-400">Images and visual content for this <%= content.class_name.downcase %></p>
+        </div>
+        <% if raw_content.updatable_by?(current_user) %>
+          <%= link_to polymorphic_path(raw_content, action: :edit, anchor: 'gallery'),
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+            <i class="material-icons text-lg mr-2">add_photo_alternate</i>
+            Add Images
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    
+    <%= render partial: 'content/show/gallery_content', locals: { 
+      content: content, 
+      raw_content: raw_content 
+    } %>
+  </div>
+
+  <!-- Associations View -->
+  <div x-show="currentView === 'associations'" class="p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Associations</h2>
+      <p class="text-gray-600 dark:text-gray-400">Other pages that reference or connect to this <%= content.class_name.downcase %></p>
+    </div>
+    
+    <%= render partial: 'content/show/associations_content', locals: { 
+      content: content, 
+      raw_content: raw_content 
+    } %>
+  </div>
+
+  <!-- Collections View -->
+  <div x-show="currentView === 'collections'" class="p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Collections</h2>
+      <p class="text-gray-600 dark:text-gray-400">Published collections that feature this <%= content.class_name.downcase %></p>
+    </div>
+    
+    <%= render partial: 'content/show/collections_content', locals: { 
+      content: content, 
+      raw_content: raw_content 
+    } %>
+  </div>
+
+  <!-- Timelines View -->
+  <div x-show="currentView === 'timelines'" class="p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Timelines</h2>
+      <p class="text-gray-600 dark:text-gray-400">Timelines that reference or include this <%= content.class_name.downcase %></p>
+    </div>
+    
+    <%= render partial: 'content/show/timelines_content', locals: { 
+      content: content, 
+      raw_content: raw_content 
+    } %>
+  </div>
+
+  <!-- Contributors View (Universe only) -->
+  <% if raw_content.class.name == 'Universe' %>
+    <div x-show="currentView === 'contributors'" class="p-8">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Universe Contributors</h2>
+        <p class="text-gray-600 dark:text-gray-400">People who collaborate on this universe</p>
+      </div>
+      
+      <%= render partial: 'content/shared/contributors_panel', locals: { 
+        content: content, 
+        raw_content: raw_content 
+      } %>
+    </div>
+  <% end %>
+
+  <!-- Feedback View (Hidden - unreleased feature) -->
+  <%# TODO: Unhide when ready to release feedback feature %>
+  <% if false %>
+    <div x-show="currentView === 'feedback'" class="p-8">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Feedback</h2>
+        <p class="text-gray-600">Comments and feedback from the community</p>
+      </div>
+
+      <%= render partial: 'content/show/feedback_placeholder', locals: {
+        content: content,
+        raw_content: raw_content
+      } %>
+    </div>
+  <% end %>
+
+  <!-- Privacy View -->
+  <div x-show="currentView === 'privacy'" class="p-8">
+    <div class="mb-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Privacy & Sharing</h2>
+          <p class="text-gray-600 dark:text-gray-400">Manage who can see and access this <%= content.class_name.downcase %></p>
+        </div>
+      </div>
+    </div>
+    
+    <%= render partial: 'content/show/privacy_view', locals: { 
+      content: content, 
+      raw_content: raw_content 
+    } %>
+  </div>
+
+</div>
+
+<!-- Print-friendly styles -->
+<style>
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  #dynamic-content {
+    overflow: visible !important;
+    height: auto !important;
+  }
+  
+  .field-display {
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  .category-section {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Enhanced content styling */
+.field-display {
+  @apply transition-colors duration-150;
+}
+
+.field-display:hover {
+  @apply bg-gray-50 dark:bg-gray-800 rounded-lg p-3 -m-3;
+}
+
+.category-section {
+  @apply pb-8 mb-8;
+}
+
+.category-section:not(:last-child) {
+  @apply border-b border-gray-200 dark:border-gray-700;
+}
+
+/* Gallery grid styles */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.gallery-item {
+  @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200;
+}
+
+.gallery-item img {
+  @apply w-full h-64 object-cover;
+}
+
+/* Associations list styling */
+.association-item {
+  @apply flex items-center p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+.association-item:not(:last-child) {
+  @apply mb-4;
+}
+</style>

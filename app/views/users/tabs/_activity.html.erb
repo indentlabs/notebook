@@ -1,0 +1,296 @@
+<!-- Activity Tab - Unified Activity Timeline -->
+<div class="space-y-6">
+  
+  <!-- Header with Activity Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-blue-100 rounded-lg">
+          <i class="material-icons text-blue-600 text-2xl">share</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @feed.length %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">Content shares</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-green-100 rounded-lg">
+          <i class="material-icons text-green-600 text-2xl">edit</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @recent_edits.length %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">Recent edits</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-purple-100 rounded-lg">
+          <i class="material-icons text-purple-600 text-2xl">forum</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @recent_forum_posts.length %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">Forum posts</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
+      <div class="flex items-center">
+        <div class="p-3 bg-orange-100 rounded-lg">
+          <i class="material-icons text-orange-600 text-2xl">local_fire_department</i>
+        </div>
+        <div class="ml-4">
+          <div class="text-2xl font-bold text-gray-900 dark:text-gray-100"><%= @activity_streak %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">Day streak</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Activity Filters -->
+  <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-4">
+    <div class="flex flex-wrap items-center gap-2">
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">Show activity:</span>
+      
+      <button class="activity-filter active px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800" data-type="all">
+        All Activity
+      </button>
+      
+      <button class="activity-filter px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600" data-type="share">
+        <i class="material-icons text-xs mr-1">share</i>
+        Content Shares
+      </button>
+      
+      
+      <button class="activity-filter px-3 py-1 rounded-full text-sm font-medium bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600" data-type="forum_post">
+        <i class="material-icons text-xs mr-1">forum</i>
+        Forum Posts
+      </button>
+    </div>
+  </div>
+  
+  <!-- Activity Timeline -->
+  <% if @unified_activity.any? %>
+    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <i class="material-icons mr-2 bg-notebook-blue text-white rounded p-1">timeline</i>
+          Activity Timeline
+        </h3>
+      </div>
+      
+      <div class="divide-y divide-gray-200 dark:divide-slate-700" id="activity-timeline">
+        <% @unified_activity.each_with_index do |activity, index| %>
+          <div class="activity-item px-6 py-6" data-type="<%= activity[:type] %>">
+            <div class="flex items-start space-x-4">
+              
+              <!-- Activity Icon -->
+              <div class="flex-shrink-0 mt-1">
+                <% case activity[:type] %>
+                <% when 'share' %>
+                  <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="material-icons text-blue-600">share</i>
+                  </div>
+                <% when 'forum_post' %>
+                  <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="material-icons text-purple-600">forum</i>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Activity Content -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <% case activity[:type] %>
+                    <% when 'share' %>
+                      <% share = activity[:data] %>
+                      <% # Skip shares where content is no longer publicly readable %>
+                      <% content_readable = share.content_page&.readable_by?(current_user || User.new) rescue false %>
+                      <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">Shared content to the stream</h4>
+                      <% if share.respond_to?(:content_page) && share.content_page && content_readable %>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Shared: <%= link_to share.content_page.name, share.content_page, class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" %>
+                          <% if share.content_page.respond_to?(:page_type) %>
+                            <span class="text-gray-400">(<%= share.content_page.page_type %>)</span>
+                          <% end %>
+                        </p>
+                      <% elsif share.content_page && !content_readable %>
+                        <p class="text-sm text-gray-500 dark:text-gray-500 mt-1 italic">
+                          Content is no longer public
+                        </p>
+                      <% end %>
+                      
+                      
+                    <% when 'forum_post' %>
+                      <% post = activity[:data] %>
+                      <h4 class="text-base font-medium text-gray-900 dark:text-gray-100">Posted in the forums</h4>
+                      <% if post.respond_to?(:postable) && post.postable %>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Topic: <%= link_to truncate(post.postable.title, length: 60), post.postable, class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium" %>
+                          <% if post.respond_to?(:messageboard) && post.messageboard %>
+                            in <%= post.messageboard.name %>
+                          <% end %>
+                        </p>
+                      <% end %>
+                      
+                      <% if post.respond_to?(:content) && post.content.present? %>
+                        <div class="mt-2 p-3 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                          <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                            <%= truncate(strip_tags(post.content), length: 200) %>
+                          </p>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                  
+                  <!-- Timestamp -->
+                  <div class="flex-shrink-0 text-right">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                      <%= time_ago_in_words(activity[:created_at]) %> ago
+                    </span>
+                    <div class="text-xs text-gray-400 mt-1">
+                      <%= activity[:created_at].strftime('%m/%d/%Y') %>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Additional Actions/Info -->
+                <div class="mt-3 flex items-center space-x-4 text-sm">
+                  <% case activity[:type] %>
+                  <% when 'share' %>
+                    <% share = activity[:data] %>
+                    <% if share.respond_to?(:share_comments) && share.share_comments.any? %>
+                      <span class="flex items-center text-gray-500 dark:text-gray-400">
+                        <i class="material-icons text-xs mr-1">comment</i>
+                        <%= pluralize(share.share_comments.count, 'comment') %>
+                      </span>
+                    <% end %>
+                    
+                  <% when 'forum_post' %>
+                    <% post = activity[:data] %>
+                    <% if post.respond_to?(:postable) && post.postable %>
+                      <%= link_to post.postable, class: "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center" do %>
+                        <i class="material-icons text-xs mr-1">forum</i>
+                        View Discussion
+                      <% end %>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    
+    <!-- No Results -->
+    <div id="no-activity-results" class="hidden text-center py-12">
+      <i class="material-icons text-gray-400 text-5xl mb-4">search_off</i>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No activity found</h3>
+      <p class="text-gray-500 dark:text-gray-400">Try adjusting your activity filter.</p>
+    </div>
+    
+  <% else %>
+    
+    <!-- Empty State -->
+    <div class="text-center py-16">
+      <div class="mx-auto w-24 h-24 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center mb-6">
+        <i class="material-icons bg-notebook-blue text-white rounded p-2 text-4xl">timeline</i>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <% if user_signed_in? && @user == current_user %>
+          No activity yet
+        <% else %>
+          <%= @user.name || @user.display_name %> doesn't have any public activity yet
+        <% end %>
+      </h3>
+      
+      <p class="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+        <% if user_signed_in? && @user == current_user %>
+          Your activity will appear here as you share content or participate in forum discussions.
+        <% else %>
+          Activity includes content shares and forum participation. Check back later to see their contributions!
+        <% end %>
+      </p>
+      
+      <% if user_signed_in? && @user == current_user %>
+        <div class="space-x-4">
+          <%= link_to characters_path, class: "#{Character.color} hover:opacity-90 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 inline-flex items-center" do %>
+            <i class="material-icons mr-2 text-sm">edit</i>
+            Edit Content
+          <% end %>
+          
+          <%= link_to thredded_path, class: "border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-200 inline-flex items-center" do %>
+            <i class="material-icons mr-2 text-sm">forum</i>
+            Join Discussions
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+  <% end %>
+</div>
+
+<!-- JavaScript for Activity Filtering -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const filterButtons = document.querySelectorAll('.activity-filter');
+  const activityItems = document.querySelectorAll('.activity-item');
+  const activityTimeline = document.getElementById('activity-timeline');
+  const noResults = document.getElementById('no-activity-results');
+  
+  let currentFilter = 'all';
+  
+  function updateActivityDisplay() {
+    let visibleCount = 0;
+    
+    activityItems.forEach(item => {
+      const itemType = item.dataset.type;
+      
+      if (currentFilter === 'all' || itemType === currentFilter) {
+        item.style.display = 'block';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+    
+    // Show/hide no results message
+    if (visibleCount === 0 && activityItems.length > 0) {
+      if (activityTimeline) activityTimeline.style.display = 'none';
+      if (noResults) noResults.classList.remove('hidden');
+    } else {
+      if (activityTimeline) activityTimeline.style.display = 'block';
+      if (noResults) noResults.classList.add('hidden');
+    }
+  }
+  
+  // Filter button functionality
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      currentFilter = this.dataset.type;
+      
+      // Update active state
+      filterButtons.forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-800', 'dark:text-blue-200', 'border-blue-200', 'dark:border-blue-800');
+        btn.classList.add('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-slate-600');
+      });
+      
+      this.classList.add('active', 'bg-blue-100', 'dark:bg-blue-900', 'text-blue-800', 'dark:text-blue-200', 'border-blue-200', 'dark:border-blue-800');
+      this.classList.remove('bg-gray-100', 'dark:bg-slate-700', 'text-gray-700', 'dark:text-gray-300', 'border-gray-200', 'dark:border-slate-600');
+      
+      updateActivityDisplay();
+    });
+  });
+  
+  // Initialize display
+  updateActivityDisplay();
+});
+</script>

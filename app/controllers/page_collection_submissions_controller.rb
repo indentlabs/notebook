@@ -24,17 +24,34 @@ class PageCollectionSubmissionsController < ApplicationController
 
   # POST /page_collection_submissions
   def create
-    @page_collection_submission = PageCollectionSubmission.new(page_collection_submission_params)
+    begin
+      @page_collection_submission = PageCollectionSubmission.new(page_collection_submission_params)
 
-    if @page_collection_submission.save
-      if @page_collection_submission.page_collection.try(:privacy) == 'public'
-        @page_collection_submission.content.update(privacy: 'public')
+      if @page_collection_submission.save
+        if @page_collection_submission.page_collection.try(:privacy) == 'public'
+          @page_collection_submission.content.update(privacy: 'public')
+        end
+
+        redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
+      else
+        page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id])
+        redirect_to page_collection, alert: 'There was a problem submitting your page. Please try again.'
       end
-
-      redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
-    else
-      raise "failed create"
-      # render :new
+    rescue ActionController::ParameterMissing => e
+      page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id]) rescue nil
+      if page_collection
+        redirect_to page_collection, alert: 'Please select content to submit.'
+      else
+        redirect_to page_collections_path, alert: 'Invalid submission.'
+      end
+    rescue => e
+      Rails.logger.error "PageCollectionSubmission creation failed: #{e.message}"
+      page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id]) rescue nil
+      if page_collection
+        redirect_to page_collection, alert: 'There was a problem submitting your page. Please try again.'
+      else
+        redirect_to page_collections_path, alert: 'Invalid submission.'
+      end
     end
   end
 
@@ -100,9 +117,20 @@ class PageCollectionSubmissionsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def page_collection_submission_params
+    content_param = params.require(:page_collection_submission).fetch(:content, '')
+    
+    if content_param.blank?
+      raise ActionController::ParameterMissing.new(:content)
+    end
+    
+    content_parts = content_param.split('-')
+    if content_parts.length != 2
+      raise ActionController::BadRequest.new("Invalid content format")
+    end
+    
     {
-      content_type: params.require(:page_collection_submission).require(:content).split('-').first,
-      content_id:   params.require(:page_collection_submission).require(:content).split('-').second,
+      content_type: content_parts.first,
+      content_id:   content_parts.second,
       explanation:  params.require(:page_collection_submission).fetch(:explanation, ''),
       user_id:      current_user.id,
       submitted_at: DateTime.current,

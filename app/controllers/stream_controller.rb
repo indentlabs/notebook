@@ -3,7 +3,8 @@ class StreamController < ApplicationController
   before_action :set_stream_navbar_actions, only: [:index, :global]
   before_action :set_stream_navbar_color, only: [:index, :global]
   before_action :set_sidenav_expansion
-  before_action :cache_linkable_content_for_each_content_type, only: [:index]
+  before_action :cache_linkable_content_for_each_content_type, only: [:index, :global]
+  before_action :load_recent_forum_topics, only: [:index, :global]
 
   def index
     @page_title = "What's happening"
@@ -16,7 +17,17 @@ class StreamController < ApplicationController
       .order('created_at DESC')
       .includes([:content_page, :secondary_content_page])
       .includes({ share_comments: [:user], user: [:avatar_attachment] })
-      .limit(25)
+    
+    # Apply search filter if present
+    if params[:search].present?
+      search_term = "%#{params[:search]}%"
+      @feed = @feed.joins(:user).where(
+        "content_page_shares.message ILIKE ? OR users.name ILIKE ? OR users.email ILIKE ?", 
+        search_term, search_term, search_term
+      )
+    end
+    
+    @feed = @feed.limit(25)
   end
 
   def community
@@ -33,7 +44,17 @@ class StreamController < ApplicationController
       .order('created_at DESC')
       .includes([:content_page, :secondary_content_page])
       .includes({ share_comments: [:user], user: [:avatar_attachment] })
-      .limit(25)
+    
+    # Apply search filter if present
+    if params[:search].present?
+      search_term = "%#{params[:search]}%"
+      @feed = @feed.joins(:user).where(
+        "content_page_shares.message ILIKE ? OR users.name ILIKE ? OR users.email ILIKE ?", 
+        search_term, search_term, search_term
+      )
+    end
+    
+    @feed = @feed.limit(25)
   end
 
   def set_stream_navbar_color
@@ -56,5 +77,24 @@ class StreamController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'community'
+  end
+
+  private
+
+  def load_recent_forum_topics
+    # Get the 5 most recent forum posts and their topics
+    recent_posts = Thredded::Post.joins(:topic)
+                                 .where(deleted_at: nil)
+                                 .order(created_at: :desc)
+                                 .limit(10)
+                                 .includes(:topic, :user)
+
+    # Get unique topics from recent posts, limited to 5
+    @recent_forum_topics = recent_posts.map(&:topic)
+                                      .uniq { |topic| topic.id }
+                                      .first(5)
+  rescue => e
+    Rails.logger.error "Error loading recent forum topics: #{e.message}"
+    @recent_forum_topics = []
   end
 end
