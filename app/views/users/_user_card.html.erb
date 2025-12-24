@@ -1,28 +1,30 @@
-<%= link_to user, class: "group block" do %>
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 overflow-hidden p-4">
-    <!-- Avatar -->
-    <div class="flex justify-center mb-3">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-200 overflow-hidden p-4 group">
+  <!-- Avatar (linked) -->
+  <div class="flex justify-center mb-3">
+    <%= link_to user do %>
       <%= image_tag user.image_url(size: 200).html_safe,
           class: "w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700",
           loading: "lazy",
           alt: user.display_name %>
-    </div>
+    <% end %>
+  </div>
 
-    <!-- Username -->
+  <!-- Username (linked) -->
+  <%= link_to user do %>
     <h3 class="font-bold text-base text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-center truncate">
       @<%= user.username %>
     </h3>
+  <% end %>
 
-    <!-- Badge -->
-    <div class="text-sm mt-1 flex justify-center">
-      <%= render partial: 'thredded/users/badge', locals: { user: user } %>
-    </div>
-
-    <!-- Bio (truncated) -->
-    <% if user.bio.present? %>
-      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center line-clamp-2">
-        <%= user.bio %>
-      </p>
-    <% end %>
+  <!-- Badge (may contain its own link - that's OK now) -->
+  <div class="text-sm mt-1 flex justify-center">
+    <%= render partial: 'thredded/users/badge', locals: { user: user } %>
   </div>
-<% end %>
+
+  <!-- Bio (truncated) -->
+  <% if user.bio.present? %>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center line-clamp-2">
+      <%= user.bio %>
+    </p>
+  <% end %>
+</div>
