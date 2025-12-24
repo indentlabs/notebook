@@ -447,6 +447,8 @@ function showNotificationToast(message, type = 'info') {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // Only run on timeline editor page
+  if (!document.querySelector('.timeline-events-container')) return;
 
   // Initialize timeline events drag and drop
   initTimelineEventsSortable();
