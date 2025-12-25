@@ -4,7 +4,8 @@
   
   <!-- Participants Avatars -->
   <div class="message-participants">
-    <% participants = [private_topic.last_user, *(private_topic.users - [private_topic.last_user])].compact.reject(&:thredded_anonymous?).uniq.first(3) %>
+    <% topic_users = private_topic.users.to_a %>
+    <% participants = [private_topic.last_user, *(topic_users - [private_topic.last_user])].compact.reject(&:thredded_anonymous?).uniq.first(3) %>
     <% participants.each do |user| %>
       <div class="participant-avatar" title="<%= user.thredded_display_name %>">
         <% if user.respond_to?(:image_url) %>
@@ -14,8 +15,8 @@
         <% end %>
       </div>
     <% end %>
-    <% if private_topic.users.count > 3 %>
-      <span class="more-participants">+<%= private_topic.users.count - 3 %></span>
+    <% if topic_users.size > 3 %>
+      <span class="more-participants">+<%= topic_users.size - 3 %></span>
     <% end %>
   </div>
   

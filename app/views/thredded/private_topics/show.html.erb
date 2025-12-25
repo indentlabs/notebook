@@ -39,14 +39,15 @@
 
     <!-- Conversation List -->
     <div class="flex-1 overflow-y-auto p-2 space-y-1">
-      <% sidebar_topics = @private_topics || Thredded::PrivateTopic.distinct.for_user(current_user).order(updated_at: :desc).limit(20) %>
+      <% sidebar_topics = @private_topics || Thredded::PrivateTopic.distinct.for_user(current_user).includes(:users, :last_user, :last_post).order(updated_at: :desc).limit(20) %>
 
       <% sidebar_topics.each do |pt| %>
         <% is_active = pt.to_model.id == topic.to_model.id %>
+        <% pt_users = pt.users.reject { |u| u == current_user } %>
         <%= link_to thredded.private_topic_path(pt), class: "flex items-center px-3 py-3 text-sm rounded-lg group transition-colors #{is_active ? 'bg-notebook-blue text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'}" do %>
           <!-- Avatars -->
           <div class="flex -space-x-2 mr-3 flex-shrink-0">
-            <% pt.users.reject { |u| u == current_user }.first(2).each do |user| %>
+            <% pt_users.first(2).each do |user| %>
               <%= image_tag user.image_url(size: 32), class: "h-8 w-8 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
             <% end %>
           </div>
@@ -55,7 +56,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex justify-between items-baseline">
               <p class="truncate font-medium <%= is_active ? 'text-white' : 'text-gray-900 dark:text-white' %>">
-                <%= pt.users.reject { |u| u == current_user }.map(&:thredded_display_name).join(', ').presence || 'You' %>
+                <%= pt_users.map(&:thredded_display_name).join(', ').presence || 'You' %>
               </p>
               <% if pt.last_post_at %>
                 <span class="text-xs ml-2 flex-shrink-0 <%= is_active ? 'text-blue-100' : 'text-gray-400 dark:text-gray-500' %>">
@@ -87,8 +88,10 @@
         </div>
 
         <!-- Participant Avatars -->
+        <% header_users = topic.users.to_a %>
+        <% other_users = header_users.reject { |u| u == current_user } %>
         <div class="flex -space-x-2 mr-3">
-          <% topic.users.reject { |u| u == current_user }.first(3).each do |user| %>
+          <% other_users.first(3).each do |user| %>
             <%= image_tag user.image_url(size: 36), class: "h-9 w-9 rounded-full ring-2 ring-white dark:ring-gray-900 object-cover" %>
           <% end %>
         </div>
@@ -99,7 +102,7 @@
             <%= topic.title %>
           </h1>
           <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-            <%= topic.users.map(&:thredded_display_name).join(', ') %>
+            <%= header_users.map(&:thredded_display_name).join(', ') %>
           </p>
         </div>
       </div>
