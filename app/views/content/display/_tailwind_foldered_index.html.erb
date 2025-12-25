@@ -13,7 +13,7 @@
   searchQuery: '',
   showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>,
   isLoading: false
-}" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+}" class="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
 
   <main class="flex-1 flex flex-col">
     <!-- Hero Header -->
@@ -213,11 +213,11 @@
     <% end %>
 
     <!-- Filters & Controls -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-2 sm:gap-4">
           <!-- Search Input -->
-          <div class="relative group">
+          <div class="relative group w-full sm:w-auto">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="material-icons text-gray-400 text-lg">search</i>
             </div>
@@ -225,7 +225,7 @@
               x-model="searchQuery"
               type="text" 
               placeholder="Search <%= content_type_name.pluralize.downcase %>..."
-              class="block w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              class="block w-full sm:w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             />
             <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
               <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
@@ -233,8 +233,8 @@
               </button>
             </div>
             
-            <!-- Keyboard shortcut hint -->
-            <div class="absolute top-full left-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+            <!-- Keyboard shortcut hint (hidden on mobile) -->
+            <div class="hidden sm:block absolute top-full left-0 mt-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
               Press <kbd class="px-1 py-0.5 bg-gray-700 rounded">⌘K</kbd> to focus search
             </div>
           </div>
@@ -338,7 +338,7 @@
             </button>
           </div>
           
-          <span class="text-sm text-gray-500 dark:text-gray-400">
+          <span class="hidden sm:inline text-sm text-gray-500 dark:text-gray-400">
             <% if (@total_content_count || 0) > 0 %>
               <span x-text="searchQuery === '' ? 'Showing <%= content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
               <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
