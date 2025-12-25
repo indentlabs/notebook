@@ -159,25 +159,67 @@
     <% if @paginated_events.total_pages > 1 %>
       <div class="mt-16 flex justify-center">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 px-6 py-4">
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-2">
             <% if @paginated_events.previous_page %>
               <%= link_to url_for(params.permit(:page).merge(page: @paginated_events.previous_page)),
-                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors text-gray-700 dark:text-gray-200" do %>
-                <i class="material-icons text-sm mr-1">chevron_left</i>
-                Previous
+                          class: "flex items-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors text-gray-700 dark:text-gray-200" do %>
+                <i class="material-icons text-sm">chevron_left</i>
               <% end %>
+            <% else %>
+              <span class="flex items-center px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                <i class="material-icons text-sm">chevron_left</i>
+              </span>
             <% end %>
-            
-            <div class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-              <span>Page <%= @paginated_events.current_page %> of <%= @paginated_events.total_pages %></span>
+
+            <!-- Page Numbers -->
+            <div class="flex items-center space-x-1">
+              <%
+                total = @paginated_events.total_pages
+                current = @paginated_events.current_page
+
+                # Determine which pages to show
+                if total <= 7
+                  pages_to_show = (1..total).to_a
+                else
+                  pages_to_show = [1]
+
+                  # Pages around current
+                  start_page = [current - 1, 2].max
+                  end_page = [current + 1, total - 1].min
+
+                  pages_to_show << :ellipsis if start_page > 2
+                  pages_to_show += (start_page..end_page).to_a
+                  pages_to_show << :ellipsis if end_page < total - 1
+                  pages_to_show << total
+
+                  pages_to_show.uniq!
+                end
+              %>
+
+              <% pages_to_show.each do |page_num| %>
+                <% if page_num == :ellipsis %>
+                  <span class="px-2 text-gray-400 dark:text-gray-500">...</span>
+                <% elsif page_num == current %>
+                  <span class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm font-medium">
+                    <%= page_num %>
+                  </span>
+                <% else %>
+                  <%= link_to page_num,
+                              url_for(params.permit(:page).merge(page: page_num)),
+                              class: "px-3 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-200 transition-colors" %>
+                <% end %>
+              <% end %>
             </div>
-            
+
             <% if @paginated_events.next_page %>
               <%= link_to url_for(params.permit(:page).merge(page: @paginated_events.next_page)),
-                          class: "flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors text-gray-700 dark:text-gray-200" do %>
-                Next
-                <i class="material-icons text-sm ml-1">chevron_right</i>
+                          class: "flex items-center px-3 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors text-gray-700 dark:text-gray-200" do %>
+                <i class="material-icons text-sm">chevron_right</i>
               <% end %>
+            <% else %>
+              <span class="flex items-center px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg text-gray-300 dark:text-gray-600 cursor-not-allowed">
+                <i class="material-icons text-sm">chevron_right</i>
+              </span>
             <% end %>
           </div>
         </div>
