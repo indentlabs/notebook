@@ -562,18 +562,16 @@
             Archiving will hide this page from your main lists and searches. You can restore it anytime from your archives.
           </p>
           <div class="flex items-center space-x-3">
-            <%= link_to polymorphic_path(raw_content), 
-                        method: :delete,
-                        data: { 
-                          confirm: "Are you sure you want to archive #{raw_content.name}? You can restore it later from your archives.",
-                          'soft-delete': true 
+            <%= link_to send("toggle_archive_#{raw_content.class.name.downcase}_path", raw_content),
+                        data: {
+                          confirm: "Are you sure you want to archive #{raw_content.name}? You can restore it later from your archives."
                         },
                         class: "inline-flex items-center px-4 py-2 border border-yellow-600 dark:border-yellow-500 text-sm font-medium rounded-md text-yellow-700 dark:text-yellow-300 bg-white dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" do %>
               <i class="material-icons text-sm mr-2">archive</i>
               Archive this page
             <% end %>
-            
-            <%= link_to recently_deleted_content_path, 
+
+            <%= link_to archive_path,
                         class: "inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200" do %>
               <i class="material-icons text-sm mr-1">restore</i>
               View archives
