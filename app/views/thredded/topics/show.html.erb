@@ -20,9 +20,11 @@
           <!-- Inline Meta -->
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-stone-500 dark:text-gray-400">
             <span class="flex items-center gap-1.5">
-              <%= image_tag topic.user.image_url(size: 24), class: "w-5 h-5 rounded" %>
+              <% if topic.user.respond_to?(:image_url) %>
+                <%= image_tag topic.user.image_url(size: 24), class: "w-5 h-5 rounded" %>
+              <% end %>
               <%= user_link topic.user %>
-              <% if topic.user.forums_badge_text.present? %>
+              <% if topic.user.respond_to?(:forums_badge_text) && topic.user.forums_badge_text.present? %>
                 <span class="text-xs text-blue-600 dark:text-blue-400 font-medium"><%= topic.user.forums_badge_text %></span>
               <% end %>
             </span>
