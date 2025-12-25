@@ -3,7 +3,7 @@ class CacheAttributeWordCountJob < ApplicationJob
 
   def perform(*args)
     attribute_id = args.shift
-    attribute    = Attribute.find_by(id: attribute_id)
+    attribute    = Attribute.includes(:attribute_field).find_by(id: attribute_id)
 
     # If the attribute has been deleted since this job was enqueued, just bail
     if attribute.nil?
@@ -11,7 +11,14 @@ class CacheAttributeWordCountJob < ApplicationJob
     end
 
     # If we have a blank/null value, ezpz 0 words
-    if attribute.nil? || attribute.value.nil? || attribute.value.blank?
+    if attribute.value.nil? || attribute.value.blank?
+      attribute.update_column(:word_count_cache, 0)
+      return
+    end
+
+    # Skip word counting for non-prose field types (links store JSON, not text)
+    field_type = attribute.attribute_field&.field_type
+    if %w[link universe tags].include?(field_type)
       attribute.update_column(:word_count_cache, 0)
       return
     end
