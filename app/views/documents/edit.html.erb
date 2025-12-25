@@ -7,13 +7,13 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+<div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col overflow-x-hidden">
 
   <!-- Main content area - Flex layout -->
   <main class="flex-1 pt-14">
     <div class="flex relative">
     <!-- Center column (editor) - seamless canvas -->
-    <div class="flex-1 pl-20 sm:pl-24 lg:pl-28 xl:pl-36 pr-4 py-12">
+    <div class="flex-1 pl-4 sm:pl-20 lg:pl-24 xl:pl-36 pr-4 py-12">
       <!-- Editor container with max width -->
       <div class="max-w-3xl">
         <!-- Document title input - Medium style: large, borderless -->
@@ -103,6 +103,7 @@
 
     <!-- Desktop Information Toggle Tab -->
     <div x-show="isDesktop"
+         x-cloak
          @click="togglePanel('information')"
          :class="{
            'right-80': showRightSidebar,
@@ -121,6 +122,7 @@
 
     <!-- Desktop Linked Pages Toggle Tab -->
     <div x-show="isDesktop"
+         x-cloak
          @click="togglePanel('linked_pages')"
          :class="{
            'right-80': showRightSidebar,
@@ -139,6 +141,7 @@
 
     <!-- Mobile/Tablet Information Toggle Tab -->
     <div x-show="!isDesktop"
+         x-cloak
          @click="togglePanel('information')"
          :class="{
            'right-80': showRightSidebar,
@@ -157,6 +160,7 @@
 
     <!-- Mobile/Tablet Linked Pages Toggle Tab -->
     <div x-show="!isDesktop"
+         x-cloak
          @click="togglePanel('linked_pages')"
          :class="{
            'right-80': showRightSidebar,
@@ -175,6 +179,7 @@
 
     <!-- Desktop Actions Toggle Tab -->
     <div x-show="isDesktop"
+         x-cloak
          @click="togglePanel('actions')"
          :class="{
            'right-80': showRightSidebar,
@@ -193,6 +198,7 @@
 
     <!-- Mobile/Tablet Actions Toggle Tab -->
     <div x-show="!isDesktop"
+         x-cloak
          @click="togglePanel('actions')"
          :class="{
            'right-80': showRightSidebar,
@@ -1278,6 +1284,8 @@
           transition: all 0.2s ease;
           transform-origin: center bottom;
           animation: toolbar-appear 0.2s ease;
+          max-width: calc(100vw - 2rem) !important;
+          overflow: hidden !important;
         }
 
         .dark .medium-editor-toolbar {
@@ -1307,6 +1315,7 @@
           display: flex !important;
           padding: 4px !important;
           gap: 2px;
+          flex-wrap: wrap;
         }
 
         .medium-editor-action {
