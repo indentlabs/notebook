@@ -10,8 +10,6 @@ class ContentController < ApplicationController
     :name_field_update, :text_field_update, :tags_field_update, :universe_field_update, :api_sort
   ]
 
-  before_action :migrate_old_style_field_values, only: [:show, :edit]
-
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
   before_action :set_attributes_content_type, only: [:attributes, :export_template, :reset_template]
@@ -890,12 +888,6 @@ class ContentController < ApplicationController
         }]
       }]
     })
-  end
-
-  # todo just do the migration for everyone so we can finally get rid of this
-  def migrate_old_style_field_values
-    content ||= content_type_from_controller(self.class).find_by(id: params[:id])
-    TemporaryFieldMigrationService.migrate_fields_for_content(content, current_user) if content.present?
   end
 
   def valid_content_types
