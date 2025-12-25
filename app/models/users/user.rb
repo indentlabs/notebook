@@ -49,6 +49,7 @@ class User < ApplicationRecord
 
   has_many :user_followings,              dependent: :destroy
   has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
+  has_many :inverse_user_followings, class_name: 'UserFollowing', foreign_key: :followed_user_id, dependent: :destroy
   # has_many :followed_by_users,            through: :user_followings, source: :user # todo unsure how to actually write this, so we do it manually below
   def followed_by_users
     User.joins(:user_followings).where(user_followings: { followed_user_id: self.id })
