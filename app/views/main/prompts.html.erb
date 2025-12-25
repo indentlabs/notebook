@@ -3,59 +3,62 @@
   <%= render partial: 'javascripts/content_linking_alpine' %>
   
   <!-- Main Content Area -->
-  <div class="py-12 px-6">
+  <div class="py-4 px-3 sm:py-8 sm:px-6 lg:py-12">
     <div class="max-w-4xl mx-auto">
       
       <!-- Top Stats Bar -->
-      <div class="mb-8 flex items-center justify-between">
+      <div class="mb-4 sm:mb-8 flex flex-row items-center justify-between gap-2 sm:gap-4">
         <!-- Left: Writing Stats -->
-        <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-          <div class="flex items-center space-x-1" x-show="hasStartedWriting">
+        <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <!-- Timer - hidden on mobile -->
+          <div class="hidden sm:flex items-center gap-1" x-show="hasStartedWriting">
             <i class="material-icons text-base" :class="{ 'text-orange-500': isPaused }">
               <span x-text="isPaused ? 'pause_circle' : 'schedule'"></span>
             </i>
             <span x-text="formattedTime" :class="{ 'text-orange-500': isPaused }"></span>
           </div>
-          <div class="text-gray-300 dark:text-gray-600" x-show="hasStartedWriting">•</div>
-          <div class="flex items-center space-x-1">
-            <i class="material-icons text-base">edit</i>
+          <div class="hidden sm:block text-gray-300 dark:text-gray-600" x-show="hasStartedWriting">•</div>
+          <!-- Word count - always visible -->
+          <div class="flex items-center gap-1">
+            <i class="material-icons text-sm sm:text-base">edit</i>
             <span><span x-text="wordCount"></span> words</span>
           </div>
-          <div class="text-gray-300 dark:text-gray-600" x-show="hasStartedWriting && wpm > 0">•</div>
-          <div class="flex items-center space-x-1" x-show="hasStartedWriting && wpm > 0">
+          <!-- WPM - hidden on mobile -->
+          <div class="hidden sm:block text-gray-300 dark:text-gray-600" x-show="hasStartedWriting && wpm > 0">•</div>
+          <div class="hidden sm:flex items-center gap-1" x-show="hasStartedWriting && wpm > 0">
             <i class="material-icons text-base">speed</i>
             <span><span x-text="wpm"></span> wpm</span>
           </div>
         </div>
-        
+
         <!-- Right: Actions -->
-        <div class="flex items-center space-x-2">
-          <button @click="getNewPrompt()" 
-                  class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center space-x-2 text-sm">
-            <i class="material-icons text-base">refresh</i>
-            <span>New Prompt</span>
+        <div class="flex items-center">
+          <button @click="getNewPrompt()"
+                  class="px-2 py-1.5 sm:px-3 sm:py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <i class="material-icons text-sm sm:text-base">refresh</i>
+            <span class="hidden sm:inline">New Prompt</span>
           </button>
         </div>
       </div>
       
       <!-- Prompt Section -->
-      <div class="mb-6 animate-fade-in">
+      <div class="mb-4 sm:mb-6 animate-fade-in">
         <!-- Content Context -->
-        <div class="mb-6 flex items-center space-x-3">
-          <div class="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-            <span class="uppercase tracking-wider text-xs">Expanding</span>
+        <div class="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            <span class="uppercase tracking-wider text-xxs sm:text-xs">Expanding</span>
             <span class="text-gray-300 dark:text-gray-600">•</span>
           </div>
-          <%= link_to @content.view_path, class: "flex items-center space-x-2 group" do %>
-            <i class="material-icons text-lg <%= @content.text_color %>"><%= @content.icon %></i>
-            <span class="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition-colors"><%= @content.name %></span>
-            <i class="material-icons text-base text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">open_in_new</i>
+          <%= link_to @content.view_path, class: "flex items-center gap-1.5 sm:gap-2 group" do %>
+            <i class="material-icons text-base sm:text-lg <%= @content.text_color %>"><%= @content.icon %></i>
+            <span class="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition-colors text-sm sm:text-base truncate max-w-48 sm:max-w-none"><%= @content.name %></span>
+            <i class="material-icons text-sm sm:text-base text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">open_in_new</i>
           <% end %>
         </div>
         
         <!-- The Prompt - Clean presentation -->
-        <div class="mb-8">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 leading-relaxed mb-3">
+        <div class="mb-4 sm:mb-8">
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug sm:leading-relaxed mb-2 sm:mb-3">
             <%=
               t(
                 "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
@@ -64,9 +67,9 @@
               )
             %>
           </h1>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            <span class="inline-flex items-center space-x-1">
-              <i class="material-icons text-base">label</i>
+          <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+            <span class="inline-flex items-center gap-1">
+              <i class="material-icons text-sm sm:text-base">label</i>
               <span><%= @attribute_field_to_question.label %></span>
             </span>
           </div>
@@ -82,46 +85,46 @@
         <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
         
         <!-- Beautiful Writing Box -->
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-xl">
           <!-- Editor Toolbar -->
-          <div class="border-b border-gray-100 dark:border-gray-700 px-6 py-3 flex items-center justify-between bg-gradient-to-b from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
-            <div class="flex items-center space-x-3">
-              <button type="button" @click="insertMarkdown('**', '**')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+          <div class="border-b border-gray-100 dark:border-gray-700 px-3 py-2 sm:px-6 sm:py-3 flex items-center justify-between bg-gradient-to-b from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
+            <div class="flex items-center gap-1 sm:gap-3">
+              <button type="button" @click="insertMarkdown('**', '**')"
+                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Bold (Cmd/Ctrl+B)">
-                <i class="material-icons text-lg">format_bold</i>
+                <i class="material-icons text-base sm:text-lg">format_bold</i>
               </button>
-              <button type="button" @click="insertMarkdown('*', '*')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+              <button type="button" @click="insertMarkdown('*', '*')"
+                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Italic (Cmd/Ctrl+I)">
-                <i class="material-icons text-lg">format_italic</i>
+                <i class="material-icons text-base sm:text-lg">format_italic</i>
               </button>
-              <div class="w-px h-6 bg-gray-200 dark:bg-gray-600"></div>
-              <button type="button" @click="insertMarkdown('# ', '')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+              <div class="w-px h-5 sm:h-6 bg-gray-200 dark:bg-gray-600"></div>
+              <button type="button" @click="insertMarkdown('# ', '')"
+                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Heading">
-                <i class="material-icons text-lg">title</i>
+                <i class="material-icons text-base sm:text-lg">title</i>
               </button>
-              <button type="button" @click="insertMarkdown('- ', '')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+              <button type="button" @click="insertMarkdown('- ', '')"
+                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="List">
-                <i class="material-icons text-lg">format_list_bulleted</i>
+                <i class="material-icons text-base sm:text-lg">format_list_bulleted</i>
               </button>
-              <button type="button" @click="insertMarkdown('> ', '')" 
-                      class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+              <button type="button" @click="insertMarkdown('> ', '')"
+                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                       title="Quote">
-                <i class="material-icons text-lg">format_quote</i>
+                <i class="material-icons text-base sm:text-lg">format_quote</i>
               </button>
             </div>
-            
-            <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
+
+            <div class="flex items-center text-gray-500 dark:text-gray-400">
               <!-- Desktop: show full status with keyboard hint -->
-              <span class="hidden lg:inline text-xs text-gray-400 dark:text-gray-500" x-text="autosaveStatus">
+              <span class="hidden sm:inline text-xs text-gray-400 dark:text-gray-500" x-text="autosaveStatus">
                 Auto-saves every 30 seconds
               </span>
-              <!-- Mobile: show simplified status without keyboard hint -->
-              <span class="lg:hidden text-xs text-gray-400 dark:text-gray-500" x-text="autosaveStatus.replace(' • Press Esc to save now', '')">
-                Auto-saves every 30 seconds
+              <!-- Mobile: show just checkmark icon when saved, or simplified text -->
+              <span class="sm:hidden text-xxs text-gray-400 dark:text-gray-500" x-text="autosaveStatus.includes('✓') ? '✓ Saved' : 'Auto-saves'">
+                Auto-saves
               </span>
             </div>
           </div>
@@ -131,9 +134,9 @@
             <%=
               text_area_tag "field[value]",
                             @attribute_field_to_question[:value],
-                            class: "js-can-mention-pages autosave-closest-form-on-change w-full p-8 text-lg leading-relaxed text-gray-800 dark:text-gray-200 
+                            class: "js-can-mention-pages autosave-closest-form-on-change w-full p-4 sm:p-8 text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-200
                                    placeholder-gray-400 dark:placeholder-gray-500 border-2 border-gray-200 dark:border-gray-600 focus:ring-0 focus:outline-none resize-none
-                                   transition-all duration-200 dark:bg-gray-800",
+                                   transition-all duration-200 dark:bg-gray-800 min-h-64 sm:min-h-96",
                             placeholder: "Start writing your thoughts here...\n\nYour response will be saved automatically as you type.",
                             "x-model": "content",
                             "@input": "handleInput",
@@ -147,64 +150,68 @@
                             "@keydown.ctrl.i.prevent": "() => insertMarkdown('*', '*')",
                             "@keydown.escape.prevent": "$event.target.blur()",
                             "x-ref": "editor",
-                            style: "min-height: 400px; overflow-y: hidden;"
+                            style: "overflow-y: hidden;"
             %>
-            
+
             <!-- Include shared dropdown template -->
             <%= render partial: 'javascripts/content_linking_dropdown' %>
-            
-            <!-- Mention Helper Tooltip -->
-            <div class="absolute bottom-4 right-4 text-xs text-gray-400 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm px-3 py-1 rounded-full">
+
+            <!-- Mention Helper Tooltip - hidden on mobile -->
+            <div class="hidden sm:block absolute bottom-4 right-4 text-xs text-gray-400 dark:text-gray-300 bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm px-3 py-1 rounded-full">
               Press @ to mention other pages
             </div>
           </div>
           
-          <!-- Footer Actions -->
-          <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 flex items-center justify-between">
-            <div class="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
-              <span class="flex items-center space-x-1">
-                <i class="material-icons text-base">subject</i>
-                <span><span x-text="characterCount"></span> characters</span>
-              </span>
-              <span class="text-gray-300 dark:text-gray-600">•</span>
-              <span class="flex items-center space-x-1">
-                <i class="material-icons text-base">timer</i>
-                <span>~<span x-text="readingTime"></span> min read</span>
-              </span>
-            </div>
-            
-            <div class="flex items-center space-x-3">
-              <button type="button" @click="handleSaveAndNext" 
-                      class="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center space-x-2 shadow-sm">
-                <span>Save & Next</span>
-                <i class="material-icons text-base">arrow_forward</i>
-              </button>
+          <!-- Footer Actions - Sticky on mobile -->
+          <div class="fixed bottom-0 left-0 right-0 z-20 sm:relative sm:z-auto border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6 sm:py-4 bg-white dark:bg-gray-800 sm:bg-gradient-to-b sm:from-white sm:to-gray-50 sm:dark:from-gray-800 sm:dark:to-gray-900">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 max-w-4xl mx-auto sm:max-w-none">
+              <!-- Stats - centered on mobile -->
+              <div class="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <span class="flex items-center gap-1">
+                  <i class="material-icons text-sm sm:text-base">subject</i>
+                  <span><span x-text="characterCount"></span> chars</span>
+                </span>
+                <span class="text-gray-300 dark:text-gray-600">•</span>
+                <span class="flex items-center gap-1">
+                  <i class="material-icons text-sm sm:text-base">timer</i>
+                  <span>~<span x-text="readingTime"></span> min</span>
+                </span>
+              </div>
+
+              <!-- Button - full width on mobile -->
+              <div class="flex items-center">
+                <button type="button" @click="handleSaveAndNext"
+                        class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm font-medium">
+                  <span>Save & Next</span>
+                  <i class="material-icons text-base">arrow_forward</i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       <% end %>
       
       <!-- Writing Tips Card -->
-      <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 rounded-xl p-6 shadow-sm">
-        <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-3 flex items-center space-x-2">
-          <i class="material-icons text-xl">lightbulb</i>
+      <div class="mt-4 sm:mt-8 mb-24 sm:mb-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
+        <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
+          <i class="material-icons text-lg sm:text-xl">lightbulb</i>
           <span>Writing Tips</span>
         </h3>
-        <ul class="space-y-2 text-sm text-blue-800 dark:text-blue-200">
-          <li class="flex items-start space-x-2">
+        <ul class="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
+          <li class="flex items-start gap-2">
             <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Take your time to explore the prompt deeply. Quality over speed.</span>
           </li>
-          <li class="flex items-start space-x-2">
+          <li class="flex items-start gap-2">
             <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Use @ to reference and create connections to other pages in your world.</span>
           </li>
           <!-- Keyboard shortcut tips (hidden on mobile and tablet) -->
-          <li class="hidden lg:flex items-start space-x-2">
+          <li class="hidden lg:flex items-start gap-2">
             <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Press Cmd/Ctrl + S to manually save, or let auto-save handle it.</span>
           </li>
-          <li class="hidden lg:flex items-start space-x-2">
+          <li class="hidden lg:flex items-start gap-2">
             <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
             <span>Press Esc to pause your writing and timer.</span>
           </li>
@@ -323,19 +330,23 @@ function writingPrompt() {
         const editor = document.querySelector('.js-can-mention-pages');
         if (editor) {
           editor.focus();
-          this.adjustTextareaHeight();
+          this.adjustTextareaHeight(editor);
         }
       });
     },
-    
+
+    getEditorElement() {
+      return this.$refs.editor || document.querySelector('.js-can-mention-pages');
+    },
+
     handleInput() {
       // Start the timer on first input if not already started
       if (!this.hasStartedWriting && this.content.trim().length > 0) {
         this.startWriting();
       }
-      
+
       this.updateWordCount();
-      this.adjustTextareaHeight();
+      this.adjustTextareaHeight(this.getEditorElement());
       this.calculateWPM();
     },
     
@@ -396,11 +407,14 @@ function writingPrompt() {
     adjustTextareaHeight(element) {
       const textarea = element || this.$refs.editor;
       if (!textarea) return; // Guard clause to prevent errors
-      
+
+      // Responsive min-height: 256px on mobile (< 640px), 384px on desktop
+      const minHeight = window.innerWidth < 640 ? 256 : 384;
+
       // Reset height to recalculate
       textarea.style.height = 'auto';
       // Set new height based on content
-      const newHeight = Math.max(400, textarea.scrollHeight);
+      const newHeight = Math.max(minHeight, textarea.scrollHeight);
       textarea.style.height = newHeight + 'px';
     },
     
@@ -428,22 +442,24 @@ function writingPrompt() {
     },
     
     insertMarkdown(before, after) {
-      const textarea = this.$refs.editor;
+      const textarea = this.getEditorElement();
+      if (!textarea) return;
+
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
       const selectedText = this.content.substring(start, end);
       const replacement = before + selectedText + after;
-      
+
       this.content = this.content.substring(0, start) + replacement + this.content.substring(end);
-      
+
       // Set cursor position
       this.$nextTick(() => {
         const newPosition = start + before.length + selectedText.length;
         textarea.setSelectionRange(newPosition, newPosition);
         textarea.focus();
-        this.adjustTextareaHeight();
+        this.adjustTextareaHeight(textarea);
       });
-      
+
       this.updateWordCount();
     },
     
