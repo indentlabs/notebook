@@ -286,6 +286,11 @@ class MainController < ApplicationController
     
     # Calculate Editing Streak
     calculate_editing_streak(all_content)
+
+    # Words written today (across all content types)
+    @words_written_today = WordCountUpdate
+      .where(user: current_user, for_date: Date.current)
+      .sum(:word_count)
   end
 
   def calculate_editing_streak(all_content)
