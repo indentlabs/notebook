@@ -68,7 +68,7 @@
     <div class="space-y-3">
       <div class="flex items-center justify-between">
         <span class="text-sm text-gray-600 dark:text-gray-400">Word Count</span>
-        <span class="text-sm font-medium text-gray-900 dark:text-white"><%= number_with_delimiter(raw_content.cached_word_count) %></span>
+        <span id="page-word-count" class="text-sm font-medium text-gray-900 dark:text-white"><%= number_with_delimiter(raw_content.cached_word_count) %></span>
       </div>
       
       <%
@@ -159,7 +159,7 @@ document.addEventListener('input', function(e) {
   if (e.target.matches('.autosave-closest-form-on-change')) {
     const saveIndicator = document.getElementById('save-indicator');
     const saveText = saveIndicator?.parentElement.querySelector('span');
-    
+
     if (saveIndicator) {
       saveIndicator.className = 'w-2 h-2 bg-amber-400 rounded-full mr-2';
     }
@@ -167,6 +167,55 @@ document.addEventListener('input', function(e) {
       saveText.textContent = 'Unsaved changes';
       saveText.className = 'text-sm text-amber-700 dark:text-amber-400';
     }
+
+    // Update word count (debounced)
+    debouncedWordCountUpdate();
   }
 });
+
+// Word count calculation - reuses optimized algorithm from document editor
+function countWordsInText(text) {
+  if (!text || text.length === 0) return 0;
+  let count = 0;
+  let inWord = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r';
+    if (!isSpace && !inWord) {
+      count++;
+      inWord = true;
+    } else if (isSpace) {
+      inWord = false;
+    }
+  }
+  return count;
+}
+
+// Aggregate word count from all text fields on the page
+function calculatePageWordCount() {
+  let totalWords = 0;
+  document.querySelectorAll('.autosave-closest-form-on-change').forEach(function(field) {
+    totalWords += countWordsInText(field.value || '');
+  });
+  return totalWords;
+}
+
+// Update display with number formatting
+function updatePageWordCount() {
+  const wordCountEl = document.getElementById('page-word-count');
+  if (wordCountEl) {
+    const count = calculatePageWordCount();
+    wordCountEl.textContent = count.toLocaleString();
+  }
+}
+
+// Debounced word count update (500ms, matches document editor)
+let wordCountTimeout = null;
+function debouncedWordCountUpdate() {
+  clearTimeout(wordCountTimeout);
+  wordCountTimeout = setTimeout(updatePageWordCount, 500);
+}
+
+// Initial word count calculation on page load
+document.addEventListener('DOMContentLoaded', updatePageWordCount);
 </script>
