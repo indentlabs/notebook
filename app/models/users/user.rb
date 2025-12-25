@@ -213,7 +213,7 @@ class User < ApplicationRecord
 
   def image_url(size: 80)
     if avatar.attached? # manually-uploaded avatar
-      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
+      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_fill: [size, size]).processed, only_path: true)
     else # otherwise, grab the default from Gravatar for this email address
       gravatar_fallback_url(size: size)
     end
