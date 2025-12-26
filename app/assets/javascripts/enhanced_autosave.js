@@ -3,31 +3,6 @@ $(document).ready(function() {
   var autosave_timers = {};
   var input_debounce_timers = {};
 
-  function showToast(message, type = 'success') {
-    // Remove any existing toasts
-    $('.js-autosave-toast').remove();
-    
-    var bgClass = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-yellow-500';
-    var toast = $(`
-      <div class="js-autosave-toast fixed top-4 right-4 z-50 px-4 py-2 text-white text-sm rounded-lg shadow-lg ${bgClass} transform transition-all duration-300 translate-x-full opacity-0">
-        ${message}
-      </div>
-    `);
-    
-    $('body').append(toast);
-    
-    // Animate in
-    setTimeout(() => {
-      toast.removeClass('translate-x-full opacity-0');
-    }, 100);
-    
-    // Animate out after delay
-    setTimeout(() => {
-      toast.addClass('translate-x-full opacity-0');
-      setTimeout(() => toast.remove(), 300);
-    }, type === 'error' ? 4000 : 2000);
-  }
-
   function updateFieldVisualState(field, state) {
     // Remove all autosave-related classes
     field.removeClass('border-gray-300 border-yellow-400 border-green-400 border-red-400 border-2 border-4');
@@ -78,7 +53,7 @@ $(document).ready(function() {
       // Update visual state to saving
       updateFieldVisualState(field, 'saving');
       saveIndicator.addClass('hidden');
-      showToast('Saving...', 'saving');
+      window.showToast('Saving...', 'info');
 
       $.ajax({
         url:  content_form.attr('action') + '.json',
@@ -90,7 +65,7 @@ $(document).ready(function() {
           
           // Show "Saved!" indicator
           saveIndicator.removeClass('hidden');
-          showToast('✓ Saved!', 'success');
+          window.showToast('Saved!', 'success');
 
           // Reset back to default coloring and hide indicator after 3 seconds
           setTimeout(function () {
@@ -106,7 +81,7 @@ $(document).ready(function() {
           saveIndicator.find('span').removeClass('bg-green-100 text-green-800').addClass('bg-red-100 text-red-800');
           saveIndicator.find('span').text('✗ Error saving');
           saveIndicator.removeClass('hidden');
-          showToast('✗ Error saving', 'error');
+          window.showToast('Error saving', 'error');
           
           // Reset error state after 5 seconds
           setTimeout(function() {
@@ -120,7 +95,7 @@ $(document).ready(function() {
       });
     } else {
       console.log('Error: no form found for autosave');
-      showToast('✗ Error: No form found', 'error');
+      window.showToast('Error: No form found', 'error');
     }
   }
 
