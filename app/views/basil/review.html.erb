@@ -1,107 +1,214 @@
-<div class="grid grid-cols-12 gap-6">
-  <div class="col-span-12 md:col-span-3 space-y-6">
-    <div>
-      <div class="font-bold text-lg mb-2 text-gray-900 dark:text-gray-100">Most-active creators over 48h</div>
-      <ol class="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300">
-        <% @commissions_per_user_id.each do |user_id, count| %>
-          <%# This is an N+1 query, but we can deal with it later %>
-          <% user = User.find(user_id.to_i) %>
-          <li>
-            <%= link_to user.display_name, user, class: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" %>: 
-            <%= pluralize count, 'image' %>
-          </li>
-        <% end %>
-      </ol>
-
-      <div class="mt-2 text-gray-600 dark:text-gray-400">
-        <%= pluralize @unique_users_generating_count.count, 'unique user' %> over 48h
-      </div>
-    </div>
-
-    <div>
-      <div class="font-bold text-lg mb-2 text-gray-900 dark:text-gray-100">Queue</div>
-      <ol class="list-decimal list-inside space-y-1 text-gray-700 dark:text-gray-300 text-sm">
-        <% @current_queue_items.each do |commission| %>
-          <li>
-            <%= commission.entity_type %>-<%= commission.entity_id %> (<%= commission.style %>)
-            for U-<%= commission.user_id %> (#<%= commission.id %>)
-          </li>
-        <% end %>
-      </ol>
-    </div>
-  </div>
-
-  <div class="col-span-12 md:col-span-9 space-y-6">
-    <% @recent_commissions.each do |commission| %>
-      <div>
-        <% if commission.complete? %>
-          <div class="flex flex-col md:flex-row bg-white dark:bg-slate-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700">
-            <div class="md:w-1/3 bg-gray-100 dark:bg-slate-900">
-              <%= link_to commission.image, class: "block h-full" do %>
-                <%= image_tag commission.image, class: "w-full h-full object-cover" %>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    
+    <!-- LEFT SIDEBAR: Stats & Queue -->
+    <div class="lg:col-span-3 space-y-8">
+      
+      <!-- Top Creators Card -->
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 class="font-bold text-lg mb-4 text-gray-900 dark:text-gray-100 border-b border-gray-100 dark:border-gray-700 pb-2">
+          Top Creators (48h)
+        </h3>
+        <ul class="space-y-3">
+          <% @commissions_per_user_id.each do |user_id, count| %>
+            <% user = User.find(user_id.to_i) %>
+            <li class="flex items-center justify-between group">
+              <%= link_to user, class: "flex items-center min-w-0" do %>
+                <!-- Avatar placeholder or actual avatar if available -->
+                <div class="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 flex items-center justify-center text-xs font-bold mr-2 uppercase">
+                  <%= user.name[0..1] %>
+                </div>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
+                  <%= user.display_name %>
+                </span>
               <% end %>
-            </div>
-            <div class="flex-1 p-4 flex flex-col justify-between">
-              <div>
-                <div class="mb-2 text-gray-900 dark:text-gray-100">
-                  <span class="font-mono text-gray-500 mr-2"><%= commission.id %>.</span>
-                  <% if commission.entity.present? %>
-                    <div class="inline-flex items-center gap-1">
-                      <i class="material-icons text-sm <%= content_class_from_name(commission.entity_type).text_color %>">
-                        <%= content_class_from_name(commission.entity_type).icon %>
-                      </i>
-                      <strong><%= link_to commission.entity.name, commission.entity, class: "hover:underline hover:text-blue-600 dark:hover:text-blue-400" %></strong>
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                <%= count %>
+              </span>
+            </li>
+          <% end %>
+        </ul>
+        <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-center text-gray-500 dark:text-gray-400">
+          <%= pluralize @unique_users_generating_count.count, 'unique user' %>
+        </div>
+      </div>
+
+      <!-- Queue Card -->
+      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
+          <h3 class="font-bold text-lg text-gray-900 dark:text-gray-100">
+            Queue
+          </h3>
+          <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
+            <%= @current_queue_items.count %>
+          </span>
+        </div>
+        
+        <% if @current_queue_items.any? %>
+          <ul class="space-y-3 max-h-[60vh] overflow-y-auto pr-1 custom-scrollbar">
+            <% @current_queue_items.each do |commission| %>
+              <li class="text-sm border-l-2 border-blue-500 pl-3 py-1">
+                <div class="font-medium text-gray-800 dark:text-gray-200">
+                  <%= commission.entity_type %> #<%= commission.entity_id %>
+                </div>
+                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex flex-col">
+                  <span>Style: <span class="text-gray-700 dark:text-gray-300"><%= commission.style %></span></span>
+                  <span>User: U-<%= commission.user_id %></span>
+                  <span class="font-mono text-[10px] mt-0.5 opacity-75">#<%= commission.id %></span>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <div class="text-center py-4 text-gray-500 dark:text-gray-400 italic text-sm">
+            Queue is empty
+          </div>
+        <% end %>
+      </div>
+      
+    </div>
+
+    <!-- RIGHT MAIN: Recent Commissions Feed -->
+    <div class="lg:col-span-9 space-y-6">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Recent Generations</h2>
+      </div>
+
+      <% @recent_commissions.each do |commission| %>
+        <div>
+          <% if commission.complete? %>
+            <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200">
+              <!-- Image Section -->
+              <div class="md:w-1/3 bg-gray-100 dark:bg-gray-900 relative group cursor-pointer">
+                <%= link_to commission.image, class: "block h-full relative" do %>
+                  <% if commission.image.attached? %>
+                    <%= image_tag commission.image, class: "w-full h-full object-cover min-h-[200px]" %>
+                  <% else %>
+                    <div class="w-full h-full min-h-[200px] flex items-center justify-center text-gray-400">
+                      <i class="material-icons">broken_image</i>
                     </div>
                   <% end %>
-                  
-                  <% if commission.style? %>
-                    <em class="text-gray-500 text-sm ml-2">(<%= commission.style.humanize %>)</em>
-                  <% end %>
+                  <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
+                    <i class="material-icons text-white opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all">zoom_in</i>
+                  </div>
+                <% end %>
+              </div>
 
-                  <div class="text-sm mt-1">
-                    <% if commission.user_id %>
-                      by <%= link_to commission.user.name, commission.user, class: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" %>
+              <!-- Details Section -->
+              <div class="flex-1 p-5 flex flex-col justify-between">
+                <div>
+                  <div class="flex justify-between items-start mb-2">
+                    <div class="text-gray-900 dark:text-gray-100">
+                      <% if commission.entity.present? %>
+                        <div class="inline-flex items-center gap-2">
+                          <span class="inline-flex items-center justify-center w-6 h-6 rounded bg-gray-100 dark:bg-gray-700">
+                            <i class="material-icons text-sm <%= content_class_from_name(commission.entity_type).text_color %>">
+                              <%= content_class_from_name(commission.entity_type).icon %>
+                            </i>
+                          </span>
+                          <strong><%= link_to commission.entity.name, commission.entity, class: "hover:underline hover:text-blue-600 dark:hover:text-blue-400 text-lg" %></strong>
+                        </div>
+                      <% else %>
+                        <span class="text-gray-500 italic">Deleted Content</span>
+                      <% end %>
+                    </div>
+                    <span class="font-mono text-xs text-gray-400">#<%= commission.id %></span>
+                  </div>
+                  
+                  <div class="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4 space-x-3">
+                    <% if commission.style? %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-100 dark:border-purple-800">
+                        <%= commission.style.humanize %>
+                      </span>
+                    <% end %>
+
+                    <span class="text-gray-300 dark:text-gray-600">|</span>
+
+                    <% if commission.user %>
+                      <span>
+                        by <%= link_to commission.user.name, commission.user, class: "font-medium text-gray-900 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400" %>
+                      </span>
                     <% else %>
-                      <span class="italic text-gray-500">anonymous generation</span>
+                      <span class="italic text-gray-500">Anonymous</span>
                     <% end %>
                   </div>
-                  <div class="text-xs text-gray-400 mt-1 font-mono"><%= commission.job_id %></div>
-                </div>
 
-                <hr class="my-3 border-gray-200 dark:border-slate-700" />
-                
-                <div class="text-sm">
-                  <div class="font-semibold text-gray-700 dark:text-gray-300 mb-1">Preprompt:</div>
-                  <div class="bg-gray-50 dark:bg-slate-900 p-2 rounded text-gray-600 dark:text-gray-400 font-mono text-xs break-words">
-                    <%= commission.prompt.inspect %>
+                  <div class="text-sm">
+                    <div class="font-semibold text-gray-700 dark:text-gray-300 mb-1.5 flex items-center">
+                      <i class="material-icons text-[16px] mr-1 text-gray-400">description</i>
+                      Prompt
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-md border border-gray-100 dark:border-gray-700/50 text-gray-600 dark:text-gray-400 font-mono text-xs break-words leading-relaxed">
+                      <%= commission.prompt %>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div class="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700 text-xs text-gray-500 dark:text-gray-400 flex flex-col sm:flex-row sm:gap-4">
-                <span>
-                  Completed <%= time_ago_in_words commission.completed_at %> ago
-                </span>
-                <span>
-                  Took <%= distance_of_time_in_words commission.completed_at - commission.created_at %>
-                </span>
+                <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-wrap gap-y-2 justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                  <div class="flex items-center gap-4">
+                    <span class="flex items-center" title="Time taken to generate">
+                      <i class="material-icons text-[14px] mr-1">timer</i>
+                      <%= distance_of_time_in_words(commission.completed_at - commission.created_at) rescue "?" %>
+                    </span>
+                    <span class="flex items-center" title="Job ID">
+                      <i class="material-icons text-[14px] mr-1">fingerprint</i>
+                      <span class="font-mono"><%= commission.job_id.first(8) %>...</span>
+                    </span>
+                  </div>
+                  <span class="flex items-center text-gray-400 dark:text-gray-500">
+                    <i class="material-icons text-[14px] mr-1">schedule</i>
+                    <%= time_ago_in_words commission.completed_at %> ago
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        <% else %>
-          <div class="p-4 rounded-lg bg-green-700 text-white shadow-md relative overflow-hidden">
-             <div class="flex items-center gap-3">
-               <div class="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-               <div>
-                  <div class="font-semibold">Basil is still working on this commission...</div>
-                  <div class="text-green-100 text-sm mt-1">
-                    (Requested <%= time_ago_in_words(commission.created_at) %> ago)
-                  </div>
+          <% else %>
+            <!-- Processing State -->
+            <div class="p-4 rounded-lg bg-white dark:bg-gray-800 shadow border-l-4 border-green-500 border-y border-r border-gray-200 dark:border-gray-700 relative overflow-hidden">
+               <div class="flex items-center gap-4">
+                 <div class="relative">
+                   <div class="animate-spin rounded-full h-8 w-8 border-2 border-green-500 border-t-transparent"></div>
+                 </div>
+                 <div>
+                    <div class="font-semibold text-gray-900 dark:text-gray-100">Generating Loop...</div>
+                    <div class="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
+                      Requested <%= time_ago_in_words(commission.created_at) %> ago • Position #<%= @current_queue_items.index(commission) + 1 rescue '?' %> in queue
+                    </div>
+                 </div>
                </div>
-             </div>
-          </div>
-        <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Pagination -->
+      <div class="mt-8 flex justify-center">
+        <%= will_paginate @recent_commissions,
+            previous_label: '‹ Previous',
+            next_label: 'Next ›',
+            inner_window: 1,
+            outer_window: 0,
+            class: 'pagination flex items-center space-x-1',
+            link_separator: '',
+            page_links: true %>
       </div>
-    <% end %>
+    </div>
   </div>
 </div>
+
+<style>
+  /* Custom thin scrollbar for the queue list */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 20px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 85, 99, 0.5);
+  }
+</style>
