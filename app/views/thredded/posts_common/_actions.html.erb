@@ -20,12 +20,13 @@
     </div>
     
     <%# Moderation/dangerous actions %>
-    <% if post.can_report? || (user_signed_in? && current_user.forum_moderator? && post.instance_variable_get(:@post).is_a?(Thredded::Post)) %>
+    <% can_moderate_post = user_signed_in? && current_user.forum_moderator? && post.to_model.is_a?(Thredded::Post) %>
+    <% if post.can_report? || can_moderate_post %>
       <div class="py-1 border-t border-gray-100 dark:border-gray-700">
         <% if post.can_report? %>
           <%= render 'thredded/posts_common/actions/report', post: post %>
         <% end %>
-        <% if user_signed_in? && current_user.forum_moderator? && post.instance_variable_get(:@post).is_a?(Thredded::Post) %>
+        <% if can_moderate_post %>
           <%= render 'thredded/moderation/post_moderation_actions', post: post %>
         <% end %>
       </div>
