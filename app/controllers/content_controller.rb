@@ -416,36 +416,37 @@ class ContentController < ApplicationController
   end
 
   def toggle_archive
-    # todo Since this method is triggered via a GET in floating_action_buttons, a malicious user could technically archive
-    # another user's content if they're able to send that user to a specifically-crafted URL or inject that URL somewhere on
-    # a page (e.g. img src="/characters/1234/toggle_archive"). Since archiving is reversible this seems fine for release, but
-    # is something that should be fixed asap before any abuse happens.
-
     content_type = content_type_from_controller(self.class)
     @content = content_type.with_deleted.find(params[:id])
 
     unless @content.updatable_by?(current_user)
-      flash[:notice] = "You don't have permission to edit that!"
-      return redirect_back fallback_location: @content
-    end
-
-    verb = nil
-    success = if @content.archived?
-      verb = "unarchived"
-      @content.unarchive!
-    else
-      verb = "archived"
-      @content.archive!
-    end
-
-    if success
-      if verb == "archived"
-        redirect_to '/data/archive', notice: "This page has been archived."
-      else
-        redirect_to @content, notice: "This page has been unarchived."
+      respond_to do |format|
+        format.html do
+          flash[:notice] = "You don't have permission to edit that!"
+          redirect_back fallback_location: @content
+        end
+        format.json { render json: { success: false, error: "Permission denied" }, status: :forbidden }
       end
-    else
-      redirect_back(fallback_location: root_path, notice: "Something went wrong while attempting to archive that page.")
+      return
+    end
+
+    verb = @content.archived? ? "unarchived" : "archived"
+    success = @content.archived? ? @content.unarchive! : @content.archive!
+
+    respond_to do |format|
+      if success
+        format.html do
+          if verb == "archived"
+            redirect_to '/data/archive', notice: "This page has been archived."
+          else
+            redirect_to @content, notice: "This page has been unarchived."
+          end
+        end
+        format.json { render json: { success: true, archived: @content.archived?, verb: verb } }
+      else
+        format.html { redirect_back(fallback_location: root_path, notice: "Something went wrong while attempting to archive that page.") }
+        format.json { render json: { success: false, error: "Failed to #{verb}" }, status: :unprocessable_entity }
+      end
     end
   end
 

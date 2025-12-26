@@ -71,7 +71,39 @@
               </thead>
               <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 <% archived_content.each do |content| %>
-                  <tr>
+                  <tr x-data="{
+                        isLoading: false,
+                        isHidden: false,
+                        async unarchive() {
+                          if (!confirm('This will un-archive this page.')) return;
+                          this.isLoading = true;
+                          try {
+                            const response = await fetch('<%= send("toggle_archive_#{content_type.name.downcase}_path", content) %>', {
+                              method: 'POST',
+                              headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                              }
+                            });
+                            const data = await response.json();
+                            if (data.success) {
+                              this.isHidden = true;
+                              if (window.showToast) window.showToast('Page un-archived', 'success');
+                            } else {
+                              if (window.showToast) window.showToast(data.error || 'Something went wrong', 'error');
+                            }
+                          } catch (error) {
+                            console.error('Error:', error);
+                            if (window.showToast) window.showToast('An error occurred', 'error');
+                          } finally {
+                            this.isLoading = false;
+                          }
+                        }
+                      }"
+                      x-show="!isHidden"
+                      x-transition:leave="transition ease-in duration-200"
+                      x-transition:leave-start="opacity-100"
+                      x-transition:leave-end="opacity-0">
                     <td class="px-6 py-4 whitespace-nowrap">
                       <%= link_to content, class: "flex items-center #{content_type.text_color} dark:text-gray-200 hover:underline" do %>
                         <i class="material-icons mr-2"><%= content_type.icon %></i>
@@ -82,10 +114,13 @@
                       <%= time_ago_in_words content.archived_at %> ago
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right">
-                      <%= link_to send("toggle_archive_#{content_type.name.downcase}_path", content), class: "inline-flex items-center px-4 py-2 bg-#{content_type.color} text-white rounded-md hover:bg-opacity-90 transition-colors" do %>
+                      <button @click="unarchive()"
+                              :disabled="isLoading"
+                              :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                              class="inline-flex items-center px-4 py-2 bg-<%= content_type.color %> text-white rounded-md hover:bg-opacity-90 transition-colors">
                         <i class="material-icons mr-1 text-sm">unarchive</i>
-                        <span>Un-archive</span>
-                      <% end %>
+                        <span x-text="isLoading ? 'Un-archiving...' : 'Un-archive'"></span>
+                      </button>
                     </td>
                   </tr>
                 <% end %>

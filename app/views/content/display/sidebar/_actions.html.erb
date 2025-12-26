@@ -61,16 +61,45 @@
       <% end %>
     </li>
 
-    <li class="collection-item fake-tab">
-      <%= 
-        link_to send("toggle_archive_#{raw_model.class.name.downcase}_path", raw_model), 
-                data: { 	
-                  confirm: raw_model.archived? ? "This will un-archive this page." : "Are you sure you want to archive this #{raw_model.class.name.downcase}?",	
-                } do
-        %>
-        <i class="material-icons left"><%= 'un' if raw_model.archived? %>archive</i>
-        <%= raw_model.archived? ? 'Un-archive' : 'Archive' %> this page
-      <% end %>
+    <li class="collection-item fake-tab"
+        x-data="{
+          isArchived: <%= raw_model.archived? %>,
+          isLoading: false,
+          async toggleArchive() {
+            const action = this.isArchived ? 'un-archive' : 'archive';
+            if (!confirm(this.isArchived ? 'This will un-archive this page.' : 'Are you sure you want to archive this <%= raw_model.class.name.downcase %>?')) {
+              return;
+            }
+            this.isLoading = true;
+            try {
+              const response = await fetch('<%= send("toggle_archive_#{raw_model.class.name.downcase}_path", raw_model) %>', {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                }
+              });
+              const data = await response.json();
+              if (data.success) {
+                this.isArchived = data.archived;
+                if (window.showToast) {
+                  window.showToast(this.isArchived ? 'Page archived' : 'Page un-archived', 'success');
+                }
+              } else {
+                if (window.showToast) window.showToast(data.error || 'Something went wrong', 'error');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              if (window.showToast) window.showToast('An error occurred', 'error');
+            } finally {
+              this.isLoading = false;
+            }
+          }
+        }">
+      <a href="#" @click.prevent="toggleArchive()" :class="{ 'opacity-50 pointer-events-none': isLoading }">
+        <i class="material-icons left" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+        <span x-text="isArchived ? 'Un-archive' : 'Archive'"></span> this page
+      </a>
     </li>
 
     <% if editing %>

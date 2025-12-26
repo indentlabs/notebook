@@ -315,14 +315,14 @@ Rails.application.routes.draw do
       get  :changelog,       on: :member
       # Redirect old gallery URLs to the show page with #gallery hash
       get  :gallery,         on: :member, to: redirect { |params, req| "/plan/#{params[:controller].split('/').last}/#{params[:id]}#gallery" }
-      get  :toggle_archive,  on: :member
+      post :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       # Skip Timeline since it has its own explicit routes below
       next if content_type.name == 'Timeline'
-      
+
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
 
@@ -334,7 +334,7 @@ Rails.application.routes.draw do
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
 
         # API endpoints
-        get  :toggle_archive,  on: :member
+        post :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
         # Already have these routes above, no need to duplicate
       end
@@ -342,7 +342,7 @@ Rails.application.routes.draw do
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
       get 'tag_suggestions', to: 'timelines#tag_suggestions', on: :member
-      get :toggle_archive, on: :member
+      post :toggle_archive, on: :member
     end
     resources :timeline_events do
       scope '/move', as: :move do

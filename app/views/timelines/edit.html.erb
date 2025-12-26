@@ -902,47 +902,77 @@
               Timeline Actions
             </h3>
             
-            <div class="space-y-4">
+            <div class="space-y-4"
+                 x-data="{
+                   isArchived: <%= @timeline.archived? %>,
+                   isLoading: false,
+                   async toggleArchive() {
+                     const confirmMsg = this.isArchived
+                       ? 'Are you sure you want to unarchive this timeline?'
+                       : 'Are you sure you want to archive this timeline?';
+                     if (!confirm(confirmMsg)) return;
+
+                     this.isLoading = true;
+                     try {
+                       const response = await fetch('<%= toggle_archive_timeline_path(@timeline) %>', {
+                         method: 'POST',
+                         headers: {
+                           'Accept': 'application/json',
+                           'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                         }
+                       });
+                       const data = await response.json();
+                       if (data.success) {
+                         this.isArchived = data.archived;
+                         if (window.showToast) {
+                           window.showToast(this.isArchived ? 'Timeline archived' : 'Timeline un-archived', 'success');
+                         }
+                       } else {
+                         if (window.showToast) window.showToast(data.error || 'Something went wrong', 'error');
+                       }
+                     } catch (error) {
+                       console.error('Error:', error);
+                       if (window.showToast) window.showToast('An error occurred', 'error');
+                     } finally {
+                       this.isLoading = false;
+                     }
+                   }
+                 }">
               <!-- Archive/Unarchive Action -->
               <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center mb-2">
-                      <i class="material-icons text-blue-600 mr-2"><%= @timeline.archived? ? 'unarchive' : 'archive' %></i>
+                      <i class="material-icons text-blue-600 mr-2" x-text="isArchived ? 'unarchive' : 'archive'"></i>
                       <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-                        <%= @timeline.archived? ? 'Unarchive Timeline' : 'Archive Timeline' %>
+                        <span x-text="isArchived ? 'Unarchive Timeline' : 'Archive Timeline'"></span>
                       </h4>
                     </div>
-                    <% if @timeline.archived? %>
-                      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                        This timeline is currently archived and hidden from your main timeline list. 
-                        Unarchive it to make it active again.
-                      </p>
-                      <p class="text-xs text-blue-700 dark:text-blue-300">
-                        <i class="material-icons text-xs mr-1">info</i>
-                        Archived timeline content is preserved and can be restored at any time.
-                      </p>
-                    <% else %>
-                      <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                        Archive this timeline to hide it from your main timeline list while preserving all content and events. 
-                        You can unarchive it at any time.
-                      </p>
-                      <p class="text-xs text-blue-700 dark:text-blue-300">
-                        <i class="material-icons text-xs mr-1">info</i>
-                        Archiving is reversible and keeps all your timeline data intact.
-                      </p>
-                    <% end %>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-3" x-show="isArchived">
+                      This timeline is currently archived and hidden from your main timeline list.
+                      Unarchive it to make it active again.
+                    </p>
+                    <p class="text-xs text-blue-700 dark:text-blue-300" x-show="isArchived">
+                      <i class="material-icons text-xs mr-1">info</i>
+                      Archived timeline content is preserved and can be restored at any time.
+                    </p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mb-3" x-show="!isArchived">
+                      Archive this timeline to hide it from your main timeline list while preserving all content and events.
+                      You can unarchive it at any time.
+                    </p>
+                    <p class="text-xs text-blue-700 dark:text-blue-300" x-show="!isArchived">
+                      <i class="material-icons text-xs mr-1">info</i>
+                      Archiving is reversible and keeps all your timeline data intact.
+                    </p>
                   </div>
                   <div class="ml-6">
-                    <%= link_to toggle_archive_timeline_path(@timeline), 
-                        method: :get,
-                        data: { confirm: @timeline.archived? ? 
-                          "Are you sure you want to unarchive this timeline?" : 
-                          "Are you sure you want to archive this timeline?" },
-                        class: "inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-700 text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors" do %>
-                      <i class="material-icons text-lg mr-2"><%= @timeline.archived? ? 'unarchive' : 'archive' %></i>
-                      <%= @timeline.archived? ? 'Unarchive' : 'Archive' %>
-                    <% end %>
+                    <button @click="toggleArchive()"
+                            :disabled="isLoading"
+                            :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                            class="inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-700 text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                      <i class="material-icons text-lg mr-2" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+                      <span x-text="isArchived ? 'Unarchive' : 'Archive'"></span>
+                    </button>
                   </div>
                 </div>
               </div>

@@ -553,23 +553,62 @@
     
     <div class="max-w-2xl space-y-6">
       <!-- Archive Section -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6"
+           x-data="{
+             isArchived: <%= raw_content.archived? %>,
+             isLoading: false,
+             async toggleArchive() {
+               const confirmMsg = this.isArchived
+                 ? 'This will un-archive this page.'
+                 : 'Are you sure you want to archive <%= raw_content.name.gsub("'", "\\\\'") %>? You can restore it later from your archives.';
+               if (!confirm(confirmMsg)) return;
+
+               this.isLoading = true;
+               try {
+                 const response = await fetch('<%= send("toggle_archive_#{raw_content.class.name.downcase}_path", raw_content) %>', {
+                   method: 'POST',
+                   headers: {
+                     'Accept': 'application/json',
+                     'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                   }
+                 });
+                 const data = await response.json();
+                 if (data.success) {
+                   this.isArchived = data.archived;
+                   if (window.showToast) {
+                     window.showToast(this.isArchived ? 'Page archived' : 'Page un-archived', 'success');
+                   }
+                 } else {
+                   if (window.showToast) window.showToast(data.error || 'Something went wrong', 'error');
+                 }
+               } catch (error) {
+                 console.error('Error:', error);
+                 if (window.showToast) window.showToast('An error occurred', 'error');
+               } finally {
+                 this.isLoading = false;
+               }
+             }
+           }">
         <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Archive Page</h3>
-        
+
         <div class="border border-yellow-300 dark:border-yellow-800 rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900">
-          <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">Archive this <%= content.class_name.downcase %></h4>
-          <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+          <h4 class="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+            <span x-text="isArchived ? 'Un-archive' : 'Archive'"></span> this <%= content.class_name.downcase %>
+          </h4>
+          <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4" x-show="!isArchived">
             Archiving will hide this page from your main lists and searches. You can restore it anytime from your archives.
           </p>
+          <p class="text-sm text-yellow-700 dark:text-yellow-300 mb-4" x-show="isArchived">
+            This page is currently archived. Un-archive it to make it visible again in your main lists and searches.
+          </p>
           <div class="flex items-center space-x-3">
-            <%= link_to send("toggle_archive_#{raw_content.class.name.downcase}_path", raw_content),
-                        data: {
-                          confirm: "Are you sure you want to archive #{raw_content.name}? You can restore it later from your archives."
-                        },
-                        class: "inline-flex items-center px-4 py-2 border border-yellow-600 dark:border-yellow-500 text-sm font-medium rounded-md text-yellow-700 dark:text-yellow-300 bg-white dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500" do %>
-              <i class="material-icons text-sm mr-2">archive</i>
-              Archive this page
-            <% end %>
+            <button @click="toggleArchive()"
+                    :disabled="isLoading"
+                    :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                    class="inline-flex items-center px-4 py-2 border border-yellow-600 dark:border-yellow-500 text-sm font-medium rounded-md text-yellow-700 dark:text-yellow-300 bg-white dark:bg-gray-700 hover:bg-yellow-50 dark:hover:bg-yellow-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+              <i class="material-icons text-sm mr-2" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+              <span x-text="isArchived ? 'Un-archive this page' : 'Archive this page'"></span>
+            </button>
 
             <%= link_to archive_path,
                         class: "inline-flex items-center px-4 py-2 text-sm font-medium text-yellow-700 dark:text-yellow-300 hover:text-yellow-800 dark:hover:text-yellow-200" do %>

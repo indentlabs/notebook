@@ -143,29 +143,37 @@ class TimelinesController < ApplicationController
     redirect_to timelines_url, notice: 'Timeline was successfully destroyed.'
   end
 
-  # GET /timelines/1/toggle_archive
+  # POST /timelines/1/toggle_archive
   def toggle_archive
     unless @timeline.updatable_by?(current_user)
-      flash[:notice] = "You don't have permission to edit that!"
-      return redirect_back fallback_location: @timeline
+      respond_to do |format|
+        format.html do
+          flash[:notice] = "You don't have permission to edit that!"
+          redirect_back fallback_location: @timeline
+        end
+        format.json { render json: { success: false, error: "Permission denied" }, status: :forbidden }
+      end
+      return
     end
 
-    verb = nil
-    success = if @timeline.archived?
-      verb = "unarchived"
-      @timeline.unarchive!
-    else
-      verb = "archived"
-      @timeline.archive!
-    end
+    verb = @timeline.archived? ? "unarchived" : "archived"
+    success = @timeline.archived? ? @timeline.unarchive! : @timeline.archive!
 
-    if success
-      flash[:notice] = "Timeline #{verb} successfully!"
-    else
-      flash[:alert] = "Failed to #{verb.sub('ed', '')} timeline."
+    respond_to do |format|
+      if success
+        format.html do
+          flash[:notice] = "Timeline #{verb} successfully!"
+          redirect_back fallback_location: edit_timeline_path(@timeline)
+        end
+        format.json { render json: { success: true, archived: @timeline.archived?, verb: verb } }
+      else
+        format.html do
+          flash[:alert] = "Failed to #{verb.sub('ed', '')} timeline."
+          redirect_back fallback_location: edit_timeline_path(@timeline)
+        end
+        format.json { render json: { success: false, error: "Failed to #{verb}" }, status: :unprocessable_entity }
+      end
     end
-
-    redirect_back fallback_location: edit_timeline_path(@timeline)
   end
 
   # GET /timelines/1/tag_suggestions
