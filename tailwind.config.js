@@ -9,6 +9,10 @@ module.exports = {
     'app/assets/javascripts/**/*.js'
   ],
   safelist: [
+    // Text shadow utilities
+    'text-shadow',
+    'text-shadow-lg',
+    'text-shadow-outline',
     // Custom height utilities
     'h-screen-minus-nav',
     // Toggle switch classes
@@ -95,5 +99,18 @@ module.exports = {
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/line-clamp'),
+    function({ addUtilities }) {
+      addUtilities({
+        '.text-shadow': {
+          'text-shadow': '0 2px 4px rgba(0, 0, 0, 0.5)',
+        },
+        '.text-shadow-lg': {
+          'text-shadow': '0 2px 8px rgba(0, 0, 0, 0.7), 0 1px 3px rgba(0, 0, 0, 0.5)',
+        },
+        '.text-shadow-outline': {
+          'text-shadow': '0 0 3px rgba(0, 0, 0, 0.8), 0 0 6px rgba(0, 0, 0, 0.5)',
+        },
+      })
+    },
   ],
 }
