@@ -439,7 +439,11 @@ class ContentController < ApplicationController
     end
 
     if success
-      redirect_back(fallback_location: archive_path, notice: "This page has been #{verb}.")
+      if verb == "archived"
+        redirect_to '/data/archive', notice: "This page has been archived."
+      else
+        redirect_to @content, notice: "This page has been unarchived."
+      end
     else
       redirect_back(fallback_location: root_path, notice: "Something went wrong while attempting to archive that page.")
     end
