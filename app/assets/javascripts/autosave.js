@@ -1,3 +1,15 @@
+/**
+ * Autosave System (Change-based)
+ *
+ * Use this for: Select dropdowns, checkboxes, radio buttons, and other inputs
+ * that fire a single 'change' event when their value is updated.
+ *
+ * How to use: Add the class 'autosave-closest-form-on-change' to the input element.
+ *
+ * For textareas where users type continuously, use the enhanced autosave system
+ * in enhanced_autosave.js with the 'js-enhanced-autosave' class instead - it
+ * provides input debouncing to avoid excessive saves while typing.
+ */
 $(document).ready(function() {
   var recent_autosave = false;
 

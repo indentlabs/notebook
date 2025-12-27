@@ -1,29 +1,44 @@
+/**
+ * Enhanced Autosave System (Input-based with debouncing)
+ *
+ * Use this for: Textareas and text inputs where users type continuously.
+ * Provides 300ms input debouncing and visual feedback (border colors, status text).
+ *
+ * How to use: Add the class 'js-enhanced-autosave' to the input element.
+ * Optionally add a status indicator element nearby:
+ *   <div class="js-autosave-status hidden"><span class="js-status-text"></span></div>
+ *
+ * For select dropdowns, checkboxes, and other inputs that fire a single 'change'
+ * event, use the simpler autosave system in autosave.js with the
+ * 'autosave-closest-form-on-change' class instead.
+ */
 $(document).ready(function() {
   var recent_autosave = false;
   var autosave_timers = {};
   var input_debounce_timers = {};
+  var fields_dirty = {}; // Track if field has changed since focus
 
   function updateFieldVisualState(field, state) {
     // Remove all autosave-related classes
-    field.removeClass('border-gray-300 border-yellow-400 border-green-400 border-red-400 border-2 border-4');
+    field.removeClass('border-gray-300 border-yellow-400 border-green-400 border-red-400');
     
-    // Find the status element in the same container
-    var statusElement = field.closest('.mt-4').find('.js-autosave-status');
+    // Find the status element in the same container (works with both dashboard and content edit pages)
+    var statusElement = field.closest('.relative').find('.js-autosave-status');
     var statusText = statusElement.find('.js-status-text');
     
     switch(state) {
       case 'saving':
-        field.addClass('border-yellow-400 border-2');
+        field.addClass('border-yellow-400');
         statusElement.removeClass('hidden text-gray-400 text-green-600 text-red-600').addClass('text-yellow-600');
         statusText.text('Saving...');
         break;
       case 'saved':
-        field.addClass('border-green-400 border-2');
+        field.addClass('border-green-400');
         statusElement.removeClass('hidden text-gray-400 text-yellow-600 text-red-600').addClass('text-green-600');
         statusText.text('✓ Saved');
         break;
       case 'error':
-        field.addClass('border-red-400 border-2');
+        field.addClass('border-red-400');
         statusElement.removeClass('hidden text-gray-400 text-yellow-600 text-green-600').addClass('text-red-600');
         statusText.text('✗ Error');
         break;
@@ -49,11 +64,15 @@ $(document).ready(function() {
       var saveIndicator = field.siblings('.js-save-indicator');
 
       console.log('Autosaving field...');
-      
+
       // Update visual state to saving
       updateFieldVisualState(field, 'saving');
       saveIndicator.addClass('hidden');
-      window.showToast('Saving...', 'info');
+
+      // Only show "Saving..." toast if the request takes longer than 200ms
+      var savingToastTimer = setTimeout(function() {
+        window.showToast('Saving...', 'info');
+      }, 200);
 
       $.ajax({
         url:  content_form.attr('action') + '.json',
@@ -61,8 +80,18 @@ $(document).ready(function() {
         data: form_data,
         success: function(response) {
           console.log('Autosave successful');
+          clearTimeout(savingToastTimer); // Cancel "Saving..." toast if save was fast
           updateFieldVisualState(field, 'saved');
-          
+
+          // Reset dirty flag so we don't re-save unchanged content
+          fields_dirty[fieldId] = false;
+
+          // Dispatch autosave:success event for other listeners (e.g., unsaved changes warning)
+          var event = new CustomEvent('autosave:success', {
+            detail: { field: field[0], response: response }
+          });
+          document.dispatchEvent(event);
+
           // Show "Saved!" indicator
           saveIndicator.removeClass('hidden');
           window.showToast('Saved!', 'success');
@@ -75,6 +104,7 @@ $(document).ready(function() {
         },
         error: function(xhr, status, error) {
           console.log('Autosave error:', error);
+          clearTimeout(savingToastTimer); // Cancel "Saving..." toast
           updateFieldVisualState(field, 'error');
           
           // Show error indicator with different styling
@@ -101,22 +131,19 @@ $(document).ready(function() {
 
   function setupAutosaveTimer(field) {
     var fieldId = field.attr('id') || field.attr('name') || Math.random().toString(36);
-    
+
     // Clear existing timer for this field
     if (autosave_timers[fieldId]) {
       clearTimeout(autosave_timers[fieldId]);
     }
-    
-    // Show that changes are pending
-    updateFieldVisualState(field, 'saving');
-    
+
+    // Don't show "Saving..." yet - we're just queuing the save for later.
+    // The visual feedback will be shown when performAutosave() actually starts.
+
     // Set new timer for 10 seconds
     autosave_timers[fieldId] = setTimeout(function() {
       if (field.is(':focus') && field.val().trim().length > 0) {
         performAutosave(field);
-      } else {
-        // Reset visual state if we're not going to save
-        updateFieldVisualState(field, 'default');
       }
       delete autosave_timers[fieldId];
     }, 10000);
@@ -135,10 +162,14 @@ $(document).ready(function() {
     }, delay);
   }
 
-  // Enhanced autosave for serendipitous questions
+  // Enhanced autosave for text fields
   $('.js-enhanced-autosave').on('input', function() {
     var field = $(this);
-    
+    var fieldId = field.attr('id') || field.attr('name') || 'unknown';
+
+    // Mark field as dirty (has changes)
+    fields_dirty[fieldId] = true;
+
     // Debounce input to avoid setting up too many timers during rapid typing
     debounceInput(field, function() {
       setupAutosaveTimer(field);
@@ -147,9 +178,9 @@ $(document).ready(function() {
 
   $('.js-enhanced-autosave').on('blur', function() {
     var field = $(this);
-    var fieldId = field.attr('id') || field.attr('name') || Math.random().toString(36);
-    
-    // Clear any pending timers since we're saving on blur
+    var fieldId = field.attr('id') || field.attr('name') || 'unknown';
+
+    // Clear any pending timers since we're handling blur
     if (autosave_timers[fieldId]) {
       clearTimeout(autosave_timers[fieldId]);
       delete autosave_timers[fieldId];
@@ -158,21 +189,25 @@ $(document).ready(function() {
       clearTimeout(input_debounce_timers[fieldId]);
       delete input_debounce_timers[fieldId];
     }
-    
-    // Only autosave if there's content
-    if (field.val().trim().length > 0) {
+
+    // Only autosave if field is dirty (user typed something) and there's content
+    if (fields_dirty[fieldId] && field.val().trim().length > 0) {
       performAutosave(field);
     } else {
-      // Reset visual state if no content to save
+      // Reset visual state if no changes to save
       updateFieldVisualState(field, 'default');
     }
   });
 
-  // Focus event to reset any error states
+  // Focus event to reset dirty flag and any error states
   $('.js-enhanced-autosave').on('focus', function() {
     var field = $(this);
+    var fieldId = field.attr('id') || field.attr('name') || 'unknown';
     var saveIndicator = field.siblings('.js-save-indicator');
-    
+
+    // Reset dirty flag on focus (will be set true by input event if user types)
+    fields_dirty[fieldId] = false;
+
     // Hide any existing save indicators when user starts editing again
     if (!saveIndicator.hasClass('hidden')) {
       setTimeout(function() {

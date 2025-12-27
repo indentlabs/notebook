@@ -33,12 +33,18 @@
                   class: "shadow-sm block w-full min-h-[3.5rem] focus:ring-notebook-blue focus:border-notebook-blue sm:text-sm border-0 border-l-4 border-r-4 border-gray-200 dark:border-gray-700 rounded-md resize-y bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100" \
                     + " js-can-mention-pages js-autosize-textarea" \
                     + "#{' autocomplete js-autocomplete-' + field[:id].to_s if should_autocomplete}" \
-                    + "#{' autosave-closest-form-on-change' if should_autosave}",
+                    + "#{' js-enhanced-autosave' if should_autosave}",
                   placeholder: placeholder,
                   rows: 2,
                   "data-enable-linking": "true"
   %>
-  
+
+  <% if should_autosave %>
+    <div class="js-autosave-status absolute top-2 right-2 text-xs text-gray-400 hidden">
+      <span class="js-status-text"></span>
+    </div>
+  <% end %>
+
   <!-- Include shared dropdown template -->
   <%= render partial: 'javascripts/content_linking_dropdown' %>
 </div>
