@@ -1,0 +1,19 @@
+<% # Navigation links for forum pages - appears above content %>
+<nav class="flex items-center gap-2 mb-6" aria-label="Forum navigation">
+  <%= link_to main_app.thredded_path,
+      class: "inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors #{current_page?(main_app.thredded_path) ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}" do %>
+    <i class="material-icons text-base mr-1">forum</i>
+    All Forums
+  <% end %>
+
+  <%= link_to unread_topics_path,
+      class: "inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors #{controller_name == 'topics' && action_name == 'unread' ? 'bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}" do %>
+    <i class="material-icons text-base mr-1">mark_email_unread</i>
+    Unread
+    <% if @unread_threads.to_i > 0 %>
+      <span class="ml-1.5 inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 dark:bg-amber-800 text-amber-700 dark:text-amber-200">
+        <%= @unread_threads %>
+      </span>
+    <% end %>
+  <% end %>
+</nav>
