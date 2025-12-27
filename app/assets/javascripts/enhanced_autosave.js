@@ -65,14 +65,9 @@ $(document).ready(function() {
 
       console.log('Autosaving field...');
 
-      // Update visual state to saving
+      // Update visual state to saving (textarea border turns yellow)
       updateFieldVisualState(field, 'saving');
       saveIndicator.addClass('hidden');
-
-      // Only show "Saving..." toast if the request takes longer than 200ms
-      var savingToastTimer = setTimeout(function() {
-        window.showToast('Saving...', 'info');
-      }, 200);
 
       $.ajax({
         url:  content_form.attr('action') + '.json',
@@ -80,7 +75,6 @@ $(document).ready(function() {
         data: form_data,
         success: function(response) {
           console.log('Autosave successful');
-          clearTimeout(savingToastTimer); // Cancel "Saving..." toast if save was fast
           updateFieldVisualState(field, 'saved');
 
           // Reset dirty flag so we don't re-save unchanged content
@@ -104,7 +98,6 @@ $(document).ready(function() {
         },
         error: function(xhr, status, error) {
           console.log('Autosave error:', error);
-          clearTimeout(savingToastTimer); // Cancel "Saving..." toast
           updateFieldVisualState(field, 'error');
           
           // Show error indicator with different styling

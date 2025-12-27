@@ -176,6 +176,13 @@ Rails.application.routes.draw do
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts',         to: 'main#prompts', as: :prompts
 
+    resources :writing_goals, path: 'writing-goals', only: [:index, :new, :create, :edit, :update, :destroy] do
+      member do
+        post :complete
+        post :activate
+      end
+    end
+
     get '/multiverse',      to: 'universes#hub', as: :multiverse
 
     get '/scratchpad',      to: 'main#notes', as: :notes

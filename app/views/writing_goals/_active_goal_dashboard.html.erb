@@ -1,0 +1,121 @@
+<!-- Main Progress Card -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden mb-8">
+  <!-- Goal Header with Progress -->
+  <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+      <div class="mb-4 md:mb-0">
+        <h2 class="text-xl font-bold text-white"><%= goal.title %></h2>
+        <p class="text-green-100 text-sm mt-1">
+          <%= goal.start_date.strftime('%B %d') %> - <%= goal.end_date.strftime('%B %d, %Y') %>
+        </p>
+      </div>
+      <div class="text-left md:text-right">
+        <div class="text-3xl font-bold text-white"><%= number_with_delimiter(@words_written_during_goal) %></div>
+        <div class="text-green-100 text-sm">of <%= number_with_delimiter(goal.target_word_count) %> words</div>
+      </div>
+    </div>
+
+    <!-- Large Progress Bar -->
+    <div class="mt-6">
+      <div class="w-full bg-green-900 bg-opacity-30 rounded-full h-4">
+        <div class="bg-white h-4 rounded-full transition-all duration-500"
+             style="width: <%= @progress_percentage %>%"></div>
+      </div>
+      <div class="flex justify-between text-xs text-green-100 mt-2">
+        <span><%= @progress_percentage.round(1) %>% complete</span>
+        <span><%= number_with_delimiter(goal.words_remaining) %> words remaining</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+    <!-- Today's Progress -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+      <i class="material-icons text-blue-500 mb-2">today</i>
+      <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@words_written_today) %></div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">Written Today</div>
+      <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">Goal: <%= number_with_delimiter(@daily_goal) %></div>
+    </div>
+
+    <!-- Daily Goal -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+      <i class="material-icons text-green-500 mb-2">flag</i>
+      <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@daily_goal) %></div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">Daily Goal</div>
+      <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">to finish on time</div>
+    </div>
+
+    <!-- Days Remaining -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+      <i class="material-icons text-orange-500 mb-2">schedule</i>
+      <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= @days_remaining %></div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">Days Left</div>
+      <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">of <%= goal.total_days %> total</div>
+    </div>
+
+    <!-- Ahead/Behind Pace -->
+    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 text-center">
+      <i class="material-icons <%= @ahead_or_behind >= 0 ? 'text-green-500' : 'text-red-500' %> mb-2">
+        <%= @ahead_or_behind >= 0 ? 'trending_up' : 'trending_down' %>
+      </i>
+      <div class="text-2xl font-bold <%= @ahead_or_behind >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+        <%= @ahead_or_behind >= 0 ? '+' : '' %><%= number_with_delimiter(@ahead_or_behind) %>
+      </div>
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        <%= @ahead_or_behind >= 0 ? 'Ahead of pace' : 'Behind pace' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Progress Chart -->
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-8">
+  <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+    <i class="material-icons mr-2 text-purple-500">show_chart</i>
+    Daily Progress
+  </h3>
+
+  <% if @daily_word_counts.any? %>
+    <div class="h-64">
+      <%= column_chart @daily_word_counts.transform_keys { |date| date.strftime('%m/%d') },
+                       colors: ['#10b981'],
+                       library: {
+                         plugins: { legend: { display: false } },
+                         scales: {
+                           y: { beginAtZero: true }
+                         }
+                       } %>
+    </div>
+
+    <!-- Goal line annotation -->
+    <div class="flex items-center justify-center mt-4 space-x-6 text-sm">
+      <span class="flex items-center">
+        <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+        Words Written
+      </span>
+      <span class="flex items-center text-gray-500 dark:text-gray-400">
+        Daily goal: <%= number_with_delimiter(@original_daily_goal) %> words
+      </span>
+    </div>
+  <% else %>
+    <div class="text-center py-12 text-gray-500 dark:text-gray-400">
+      <i class="material-icons text-4xl mb-2">edit</i>
+      <p>No words written yet during this goal period.</p>
+      <p class="text-sm mt-1">Start writing to see your progress chart!</p>
+    </div>
+  <% end %>
+</div>
+
+<!-- Action Buttons -->
+<div class="flex flex-wrap gap-3">
+  <%= link_to edit_writing_goal_path(goal), class: "inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors" do %>
+    <i class="material-icons mr-2 text-sm">edit</i>
+    Edit Goal
+  <% end %>
+
+  <%= button_to complete_writing_goal_path(goal), method: :post, class: "inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors" do %>
+    <i class="material-icons mr-2 text-sm">check_circle</i>
+    Mark Complete
+  <% end %>
+</div>

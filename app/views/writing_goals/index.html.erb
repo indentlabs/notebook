@@ -1,0 +1,36 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+
+  <!-- Page Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+            <i class="material-icons mr-3 text-green-600 dark:text-green-400">flag</i>
+            Writing Goals
+          </h1>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Track your writing progress NaNoWriMo-style</p>
+        </div>
+        <%= link_to new_writing_goal_path, class: "inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors" do %>
+          <i class="material-icons mr-2 text-sm">add</i>
+          New Goal
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <% if @active_goal %>
+      <!-- Active Goal Dashboard -->
+      <%= render partial: 'writing_goals/active_goal_dashboard', locals: { goal: @active_goal } %>
+    <% else %>
+      <!-- Empty State -->
+      <%= render partial: 'writing_goals/empty_state' %>
+    <% end %>
+
+    <!-- Past Goals Section -->
+    <% if @past_goals.any? %>
+      <%= render partial: 'writing_goals/past_goals', locals: { goals: @past_goals } %>
+    <% end %>
+  </div>
+</div>

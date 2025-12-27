@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_12_25_072121) do
+ActiveRecord::Schema.define(version: 2025_12_27_080743) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3775,7 +3775,23 @@ ActiveRecord::Schema.define(version: 2025_12_25_072121) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["entity_type", "entity_id"], name: "index_word_count_updates_on_entity_type_and_entity_id"
+    t.index ["user_id", "entity_type", "entity_id", "for_date"], name: "index_word_count_updates_unique_per_entity_per_date", unique: true
+    t.index ["user_id", "for_date"], name: "index_word_count_updates_on_user_id_and_for_date"
     t.index ["user_id"], name: "index_word_count_updates_on_user_id"
+  end
+
+  create_table "writing_goals", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "title", null: false
+    t.integer "target_word_count", null: false
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.boolean "active", default: true
+    t.datetime "completed_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["user_id", "active"], name: "index_writing_goals_on_user_id_and_active"
+    t.index ["user_id"], name: "index_writing_goals_on_user_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -4195,4 +4211,5 @@ ActiveRecord::Schema.define(version: 2025_12_25_072121) do
   add_foreign_key "votes", "users"
   add_foreign_key "votes", "votables"
   add_foreign_key "word_count_updates", "users"
+  add_foreign_key "writing_goals", "users"
 end

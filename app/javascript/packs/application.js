@@ -19,6 +19,7 @@ import "../application.css";
 import 'controllers'
 import '../page_name_loader'
 import '../settings'
+import '../content_edit_sidebar'
 
 // Import Rails UJS for remote forms and CSRF tokens
 // Check if jQuery UJS is already loaded via asset pipeline before loading @rails/ujs
