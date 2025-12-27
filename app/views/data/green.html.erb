@@ -7,51 +7,14 @@
   </div>
 
   <%
-    total_pages_equivalent = 0
-    total_trees_saved = 0
-    
-    # Calculate personal totals
-    @current_user_content.each do |content_type, content_list|
-      content_list_count = content_list.count
+    # Use pre-calculated stats from controller
+    total_pages_equivalent = @personal_stats[:pages_equivalent]
+    total_trees_saved = @personal_stats[:trees_saved]
+    community_pages_equivalent = @community_stats[:pages_equivalent]
+    community_trees_saved = @community_stats[:trees_saved]
 
-      physical_page_equivalent = case content_type
-      when 'Timeline'
-        GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
-      when 'Document'
-        [
-          content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
-          content_list_count
-        ].max
-      else
-        GreenService.physical_pages_equivalent_for(content_type) * content_list_count
-      end
-
-      total_pages_equivalent += physical_page_equivalent
-    end
-    
-    total_trees_saved = total_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
-    
-    # Calculate community totals
-    community_pages_equivalent = 0
-    (Rails.application.config.content_type_names[:all] + ["Timeline", "Document"]).each do |content_type|
-      content_list_count = content_class_from_name(content_type).last.try(:id) || 0
-
-      physical_page_equivalent = case content_type
-      when 'Timeline'
-        GreenService.total_timeline_pages_equivalent
-      when 'Document'
-        GreenService.total_document_pages_equivalent
-      else
-        GreenService.physical_pages_equivalent_for(content_type) * content_list_count
-      end
-
-      community_pages_equivalent += physical_page_equivalent
-    end
-    
-    community_trees_saved = community_pages_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
-    
     # Calculate user's contribution percentage
-    user_contribution_percentage = (total_trees_saved / community_trees_saved * 100).round(2)
+    user_contribution_percentage = community_trees_saved > 0 ? (total_trees_saved / community_trees_saved * 100).round(2) : 0
     user_contribution_percentage = [user_contribution_percentage, 100].min
   %>
 
@@ -147,35 +110,15 @@
           
           <div class="space-y-4">
             <%
-              top_content_types = @current_user_content.sort_by do |content_type, content_list|
-                case content_type
-                when 'Timeline'
-                  GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
-                when 'Document'
-                  [
-                    content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
-                    content_list.count
-                  ].max
-                else
-                  GreenService.physical_pages_equivalent_for(content_type) * content_list.count
-                end
-              end.reverse.first(5)
+              # Use pre-calculated stats, sorted by pages saved
+              top_content_types = @personal_stats[:by_type]
+                .sort_by { |_, stats| -stats[:pages] }
+                .first(5)
             %>
-            
-            <% top_content_types.each do |content_type, content_list| %>
+
+            <% top_content_types.each do |content_type, stats| %>
               <%
-                physical_page_equivalent = case content_type
-                when 'Timeline'
-                  GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
-                when 'Document'
-                  [
-                    content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
-                    content_list.count
-                  ].max
-                else
-                  GreenService.physical_pages_equivalent_for(content_type) * content_list.count
-                end
-                
+                physical_page_equivalent = stats[:pages]
                 percentage = total_pages_equivalent > 0 ? (physical_page_equivalent / total_pages_equivalent * 100).round : 0
               %>
               
@@ -371,25 +314,10 @@
         </thead>
 
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <% @current_user_content.sort_by { |content_type, content_list| -content_list.count }.each do |content_type, content_list| %>
+          <% @personal_stats[:by_type].sort_by { |_, stats| -stats[:count] }.each do |content_type, stats| %>
             <%
-              content_list_count = content_list.count
-              
-              # Skip if count is 0
-              next if content_list_count == 0
-
-              physical_page_equivalent = case content_type
-              when 'Timeline'
-                GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * TimelineEvent.where(timeline_id: content_list.map(&:id)).count
-              when 'Document'
-                [
-                  content_list.inject(0) { |sum, doc| sum + (doc.cached_word_count || 0) } / GreenService::AVERAGE_WORDS_PER_PAGE.to_f,
-                  content_list_count
-                ].max
-              else
-                GreenService.physical_pages_equivalent_for(content_type) * content_list_count
-              end
-
+              content_list_count = stats[:count]
+              physical_page_equivalent = stats[:pages]
               tree_equivalent = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
             %>
             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -424,7 +352,7 @@
           <tr class="bg-green-50 dark:bg-green-900">
             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-800 dark:text-white">Totals</td>
             <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300 font-medium">
-              <%= number_with_delimiter @current_user_content.sum { |_, content_list| content_list.count } %>
+              <%= number_with_delimiter @personal_stats[:by_type].sum { |_, stats| stats[:count] } %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center font-medium">

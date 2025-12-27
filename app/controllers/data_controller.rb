@@ -163,9 +163,61 @@ class DataController < ApplicationController
   end
 
   def green
+    # Timeline events - query ONCE
+    timeline_ids = @current_user_content['Timeline']&.map(&:id) || []
+    @timeline_event_count = timeline_ids.any? ? TimelineEvent.where(timeline_id: timeline_ids).count : 0
+
+    # Personal content stats (calculated once, reused throughout view)
+    @personal_stats = calculate_personal_green_stats
+
+    # Community stats - cache expensive calculation
+    @community_stats = calculate_community_green_stats
   end
 
   private
+
+  def calculate_personal_green_stats
+    stats = { pages_equivalent: 0, by_type: {} }
+
+    @current_user_content.each do |content_type, content_list|
+      count = content_list.count
+      next if count == 0
+
+      pages = case content_type
+      when 'Timeline'
+        GreenService::AVERAGE_TIMELINE_EVENTS_PER_PAGE * @timeline_event_count
+      when 'Document'
+        word_sum = content_list.sum { |d| d.cached_word_count || 0 }
+        [word_sum / GreenService::AVERAGE_WORDS_PER_PAGE.to_f, count].max
+      else
+        GreenService.physical_pages_equivalent_for(content_type) * count
+      end
+
+      stats[:by_type][content_type] = { count: count, pages: pages.round }
+      stats[:pages_equivalent] += pages
+    end
+
+    stats[:trees_saved] = stats[:pages_equivalent] / GreenService::SHEETS_OF_PAPER_PER_TREE.to_f
+    stats
+  end
+
+  def calculate_community_green_stats
+    Rails.cache.fetch('green_community_stats', expires_in: 1.hour) do
+      pages = 0
+      (Rails.application.config.content_type_names[:all] + ['Timeline', 'Document']).each do |type|
+        pages += case type
+        when 'Timeline'
+          GreenService.total_timeline_pages_equivalent
+        when 'Document'
+          GreenService.total_document_pages_equivalent
+        else
+          klass = type.constantize
+          GreenService.physical_pages_equivalent_for(type) * klass.unscoped.count
+        end
+      end
+      { pages_equivalent: pages, trees_saved: pages / GreenService::SHEETS_OF_PAPER_PER_TREE.to_f }
+    end
+  end
 
   def set_sidenav_expansion
     @sidenav_expansion = 'my account'
