@@ -1,11 +1,12 @@
+<% if @content && @attribute_field_to_question %>
 <div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" x-data="writingPrompt()">
   <!-- Include content linking functionality -->
   <%= render partial: 'javascripts/content_linking_alpine' %>
-  
+
   <!-- Main Content Area -->
   <div class="py-4 px-3 sm:py-8 sm:px-6 lg:py-12">
     <div class="max-w-4xl mx-auto">
-      
+
       <!-- Top Stats Bar -->
       <div class="mb-4 sm:mb-8 flex flex-row items-center justify-between gap-2 sm:gap-4">
         <!-- Left: Writing Stats -->
@@ -607,3 +608,36 @@ function writingPrompt() {
   }
 }
 </script>
+<% else %>
+<!-- Empty state: No prompts available -->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+  <div class="py-16 px-4 sm:py-24 sm:px-6 lg:py-32">
+    <div class="max-w-2xl mx-auto text-center">
+      <div class="mb-8">
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 dark:bg-green-900 mb-6">
+          <i class="material-icons text-5xl text-green-600 dark:text-green-400">celebration</i>
+        </div>
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          All caught up!
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+          You've answered all available prompts for your content.
+          <br class="hidden sm:block">
+          Create more pages to unlock new writing prompts!
+        </p>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <%= link_to dashboard_path, class: "inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors" do %>
+          <i class="material-icons">dashboard</i>
+          <span>Browse your content</span>
+        <% end %>
+        <%= link_to characters_path, class: "inline-flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors" do %>
+          <i class="material-icons">add</i>
+          <span>Create new content</span>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+<% end %>

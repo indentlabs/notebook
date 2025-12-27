@@ -352,8 +352,21 @@ class MainController < ApplicationController
   private
 
   def set_questionable_content
-    @content = @current_user_content.except(*%w(Timeline Document)).values.flatten.sample
-    @attribute_field_to_question = SerendipitousService.question_for(@content)
+    content_pool = @current_user_content.except(*%w(Timeline Document)).values.flatten.shuffle
+
+    # Try to find content with an unanswered question
+    content_pool.each do |content|
+      question = SerendipitousService.question_for(content)
+      if question.present?
+        @content = content
+        @attribute_field_to_question = question
+        return
+      end
+    end
+
+    # No unanswered questions found - set flags for empty state
+    @content = nil
+    @attribute_field_to_question = nil
   end
 
   def set_page_meta_tags
