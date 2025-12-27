@@ -47,6 +47,7 @@
       <div>
         <%= f.label :target_word_count, class: 'block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200' %>
         <%= f.number_field :target_word_count,
+            id: 'writing_goal_target_word_count',
             placeholder: '50000',
             min: 1,
             class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white',
@@ -59,12 +60,14 @@
         <div>
           <%= f.label :start_date, class: 'block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200' %>
           <%= f.date_field :start_date,
+              id: 'writing_goal_start_date',
               class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white',
               required: true %>
         </div>
         <div>
           <%= f.label :end_date, class: 'block text-sm font-medium text-gray-900 mb-2 dark:text-gray-200' %>
           <%= f.date_field :end_date,
+              id: 'writing_goal_end_date',
               class: 'block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white',
               required: true %>
         </div>
@@ -127,20 +130,27 @@ function setPreset(words, days) {
 }
 
 function updateDailyGoalPreview() {
-  const targetWords = parseInt(document.getElementById('writing_goal_target_word_count').value) || 0;
-  const startDate = new Date(document.getElementById('writing_goal_start_date').value);
-  const endDate = new Date(document.getElementById('writing_goal_end_date').value);
+  const wordCountEl = document.getElementById('writing_goal_target_word_count');
+  const startDateEl = document.getElementById('writing_goal_start_date');
+  const endDateEl = document.getElementById('writing_goal_end_date');
+  const previewEl = document.getElementById('daily-goal-preview');
+
+  if (!wordCountEl || !startDateEl || !endDateEl || !previewEl) return;
+
+  const targetWords = parseInt(wordCountEl.value) || 0;
+  const startDate = new Date(startDateEl.value);
+  const endDate = new Date(endDateEl.value);
 
   if (targetWords > 0 && !isNaN(startDate) && !isNaN(endDate)) {
     const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
     if (days > 0) {
       const dailyGoal = Math.ceil(targetWords / days);
-      document.getElementById('daily-goal-preview').textContent = dailyGoal.toLocaleString();
+      previewEl.textContent = dailyGoal.toLocaleString();
     } else {
-      document.getElementById('daily-goal-preview').textContent = '--';
+      previewEl.textContent = '--';
     }
   } else {
-    document.getElementById('daily-goal-preview').textContent = '--';
+    previewEl.textContent = '--';
   }
 }
 
