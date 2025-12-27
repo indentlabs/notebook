@@ -20,7 +20,7 @@ class CacheSumAttributeWordCountJob < ApplicationJob
 
     # Create or re-use an existing WordCountUpdate for today
     update = entity.word_count_updates.find_or_initialize_by(
-      for_date: DateTime.current,
+      for_date: Date.current,
     )
     update.word_count = sum_attribute_word_count
     update.user_id  ||= entity.user_id

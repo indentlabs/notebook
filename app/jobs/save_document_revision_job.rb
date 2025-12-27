@@ -30,7 +30,7 @@ class SaveDocumentRevisionJob < ApplicationJob
 
     # Save a WordCountUpdate for this document for today (always do this)
     update = document.word_count_updates.find_or_initialize_by(
-      for_date: DateTime.current,
+      for_date: Date.current,
     )
     update.word_count = new_word_count
     update.user_id  ||= document.user_id

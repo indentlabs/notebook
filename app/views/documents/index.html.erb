@@ -848,12 +848,12 @@
         <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
           <div class="grid grid-cols-7 gap-1 mb-2">
             <%
-              # Calculate words written for each of the last 7 days
-              (6.downto(0)).each do |days_ago|
-                date = Date.current - days_ago
-                words_for_day = WordCountUpdate
-                  .where(user: current_user, for_date: date)
-                  .sum(:word_count)
+              # Batch fetch words written for last 7 days in a single query
+              streak_dates = (0..6).map { |days_ago| Date.current - days_ago }
+              words_by_date = WordCountUpdate.words_written_on_dates(current_user, streak_dates)
+
+              streak_dates.reverse.each do |date|
+                words_for_day = words_by_date[date] || 0
 
                 # Determine opacity based on word count
                 opacity_class = if words_for_day >= 1000
@@ -868,7 +868,7 @@
                   "bg-gray-200 dark:bg-gray-600"
                 end
 
-                is_today = days_ago == 0
+                is_today = date == Date.current
             %>
               <div class="relative group">
                 <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400 dark:ring-gray-500' : '' %> transition-colors hover:opacity-80"
@@ -997,12 +997,12 @@
         <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700">
           <div class="grid grid-cols-7 gap-1 mb-2">
             <%
-              # Calculate words written for each of the last 7 days
-              (6.downto(0)).each do |days_ago|
-                date = Date.current - days_ago
-                words_for_day = WordCountUpdate
-                  .where(user: current_user, for_date: date)
-                  .sum(:word_count)
+              # Batch fetch words written for last 7 days in a single query
+              streak_dates = (0..6).map { |days_ago| Date.current - days_ago }
+              words_by_date = WordCountUpdate.words_written_on_dates(current_user, streak_dates)
+
+              streak_dates.reverse.each do |date|
+                words_for_day = words_by_date[date] || 0
 
                 # Determine opacity based on word count
                 opacity_class = if words_for_day >= 1000
@@ -1017,7 +1017,7 @@
                   "bg-gray-200 dark:bg-gray-600"
                 end
 
-                is_today = days_ago == 0
+                is_today = date == Date.current
             %>
               <div class="relative group">
                 <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400 dark:ring-gray-500' : '' %> transition-colors hover:opacity-80"

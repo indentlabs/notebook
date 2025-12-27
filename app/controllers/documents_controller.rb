@@ -477,15 +477,14 @@ class DocumentsController < ApplicationController
   private
 
   def calculate_writing_streak_data
-    # Today's word count
-    @words_written_today = WordCountUpdate
-      .where(user: current_user, for_date: Date.current)
-      .sum(:word_count)
+    # Today's word count (actual delta from yesterday)
+    @words_written_today = WordCountUpdate.words_written_on_date(current_user, Date.current)
 
-    # This week's word count
-    @words_written_this_week = WordCountUpdate
-      .where(user: current_user, for_date: Date.current.beginning_of_week..Date.current)
-      .sum(:word_count)
+    # This week's word count (actual delta from end of last week)
+    @words_written_this_week = WordCountUpdate.words_written_in_range(
+      current_user,
+      Date.current.beginning_of_week..Date.current
+    )
   end
 
   def update_page_tags(document)

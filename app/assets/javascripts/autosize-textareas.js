@@ -1,8 +1,8 @@
 $(document).ready(function() {
   const yPadding = 16;
   const lineHeight = 20; // 36
-  const minLines = 2; // Minimum number of lines to display
-  const minHeight = yPadding + (minLines * lineHeight); // Minimum height for 2 lines
+  const minLines = 3; // Minimum number of lines to display
+  const minHeight = yPadding + (minLines * lineHeight); // Minimum height for 3 lines
   
   const elements = document.getElementsByClassName('js-autosize-textarea');
   for (let i = 0; i < elements.length; i++) {

@@ -95,6 +95,7 @@ class User < ApplicationRecord
   has_many :notice_dismissals,             dependent: :destroy
 
   has_many :word_count_updates,            dependent: :destroy
+  has_many :writing_goals,                 dependent: :destroy
 
   has_many :page_settings_overrides,       dependent: :destroy
   has_one_attached :avatar
@@ -186,7 +187,11 @@ class User < ApplicationRecord
   end
 
   def words_written_today
-    word_count_updates.where(created_at: Time.current.beginning_of_day..Time.current.end_of_day).sum(:word_count)
+    WordCountUpdate.words_written_on_date(self, Date.current)
+  end
+
+  def current_writing_goal
+    writing_goals.current.first
   end
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.

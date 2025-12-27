@@ -287,15 +287,14 @@ class MainController < ApplicationController
     # Calculate Editing Streak
     calculate_editing_streak(all_content)
 
-    # Words written today (across all content types)
-    @words_written_today = WordCountUpdate
-      .where(user: current_user, for_date: Date.current)
-      .sum(:word_count)
+    # Words written today (actual delta from yesterday)
+    @words_written_today = WordCountUpdate.words_written_on_date(current_user, Date.current)
 
-    # Words written this week
-    @words_written_this_week = WordCountUpdate
-      .where(user: current_user, for_date: Date.current.beginning_of_week..Date.current)
-      .sum(:word_count)
+    # Words written this week (actual delta from end of last week)
+    @words_written_this_week = WordCountUpdate.words_written_in_range(
+      current_user,
+      Date.current.beginning_of_week..Date.current
+    )
   end
 
   def calculate_editing_streak(all_content)

@@ -18,17 +18,16 @@ class DataController < ApplicationController
 
     @created_content = {}
     @total_created_non_universe_content = 0
-    @words_written = 0
+
+    # Calculate words written during this year using delta calculation
+    year_range = comparable_year.beginning_of_year.to_date..comparable_year.end_of_year.to_date
+    @words_written = WordCountUpdate.words_written_in_range(current_user, year_range)
+
     Rails.application.config.content_types[:all].each do |klass|
       @created_content[klass.name] = klass.where(user_id: current_user.id)
                                           .where('created_at > ?', comparable_year.beginning_of_year)
                                           .where('created_at < ?', comparable_year.end_of_year)
                                           .order('created_at ASC')
-
-      @words_written += WordCountUpdate.where(
-        entity_type: klass.name, 
-        entity_id: @created_content[klass.name].map(&:id)
-      ).sum(:word_count)
 
       if klass.name != 'Universe'
         @total_created_non_universe_content += @created_content[klass.name].count
@@ -39,8 +38,6 @@ class DataController < ApplicationController
                                                .where('created_at > ?', comparable_year.beginning_of_year)
                                                .where('created_at < ?', comparable_year.end_of_year)
                                                .order('created_at ASC')
-
-    @words_written += @created_content['Document'].sum(:cached_word_count)
 
     earliest_page_date = DateTime.current
     @earliest_page = nil
