@@ -50,14 +50,14 @@
         </form>
         
         <!-- Autocomplete Dropdown -->
-        <div x-cloak
-             x-show="showDropdown"
+        <div x-show="showDropdown"
              x-transition:enter="transition ease-out duration-100"
              x-transition:enter-start="transform opacity-0 scale-95"
              x-transition:enter-end="transform opacity-100 scale-100"
              x-transition:leave="transition ease-in duration-75"
              x-transition:leave-start="transform opacity-100 scale-100"
              x-transition:leave-end="transform opacity-0 scale-95"
+             style="display: none;"
              class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50 max-h-80 overflow-y-auto">
           
           <!-- Help text when input is focused but empty (hidden on mobile/tablet) -->
@@ -145,10 +145,11 @@
         </button>
         
         <!-- Backdrop -->
-        <div x-cloak x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+        <div x-show="notificationsDropdownOpen" @click="notificationsDropdownOpen = false" style="display: none;" class="fixed inset-0 h-full w-full z-10"></div>
 
         <!-- Notebook.ai Style Notification Panel -->
-        <div x-cloak x-show="notificationsDropdownOpen"
+        <div x-show="notificationsDropdownOpen"
+             style="display: none;"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="transform opacity-0 scale-95 translate-y-1"
              x-transition:enter-end="transform opacity-100 scale-100 translate-y-0"
@@ -257,9 +258,9 @@
         <button @click="accountDropdownOpen = !accountDropdownOpen; notificationsDropdownOpen = false" class="z-10 block p-1 <%= unread_inbox_count > 0 ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 <%= unread_inbox_count > 0 ? 'hover:border-yellow-500' : 'hover:border-opacity-50' %> rounded-full transition-all duration-200">
           <%= image_tag current_user.image_url, class: 'rounded-full h-6 w-6 sm:h-8 sm:w-8' %>
         </button>
-        <div x-cloak x-show="accountDropdownOpen" @click="accountDropdownOpen = false" class="fixed inset-0 h-full w-full z-10"></div>
+        <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" style="display: none;" class="fixed inset-0 h-full w-full z-10"></div>
 
-        <div x-cloak x-show="accountDropdownOpen" class="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 w-64 border border-gray-200 dark:border-gray-700">
+        <div x-show="accountDropdownOpen" style="display: none;" class="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 w-64 border border-gray-200 dark:border-gray-700">
           <%= link_to current_user.profile_url, class: 'flex border-t border-gray-300 dark:border-gray-700 p-2 border-b shadow group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
             <%= image_tag current_user.image_url(size: 32), class: 'rounded-full h-12 w-12 sm:h-16 sm:w-16 mr-2 p-1 border-2 border-notebook-blue dark:border-blue-400 group-hover:border-green-500' %>
             <div class="m-auto ml-1">

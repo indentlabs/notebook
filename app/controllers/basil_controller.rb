@@ -580,7 +580,7 @@ class BasilController < ApplicationController
   def review
     @recent_commissions = BasilCommission.all.includes(:entity, :user)
                                          .order('id DESC')
-                                         .paginate(page: params[:page], per_page: 24)
+                                         .paginate(page: params[:page], per_page: 100)
 
     @commissions_per_user_id = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).order('count_all DESC').limit(5).count
     @unique_users_generating_count = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).count
