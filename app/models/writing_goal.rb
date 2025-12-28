@@ -9,7 +9,9 @@ class WritingGoal < ApplicationRecord
 
   scope :active, -> { where(active: true) }
   scope :completed, -> { where.not(completed_at: nil) }
-  scope :current, -> { active.where('end_date >= ?', Date.current) }
+  scope :archived, -> { where(archived: true) }
+  scope :not_archived, -> { where(archived: false) }
+  scope :current, -> { active.not_archived.where('end_date >= ?', Date.current) }
 
   def days_remaining
     return 0 if Date.current > end_date
@@ -70,6 +72,21 @@ class WritingGoal < ApplicationRecord
 
   def mark_completed!
     update(completed_at: Time.current, active: false) if completed?
+  end
+
+  def archive!
+    update(archived: true)
+  end
+
+  def unarchive!
+    update(archived: false)
+  end
+
+  def daily_word_counts
+    WordCountUpdate.where(user: user)
+                   .where(for_date: start_date..[Date.current, end_date].min)
+                   .group(:for_date)
+                   .sum(:word_count)
   end
 
   private

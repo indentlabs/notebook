@@ -177,9 +177,13 @@ Rails.application.routes.draw do
     get '/prompts',         to: 'main#prompts', as: :prompts
 
     resources :writing_goals, path: 'writing-goals', only: [:index, :new, :create, :edit, :update, :destroy] do
+      collection do
+        get :history
+      end
       member do
         post :complete
         post :activate
+        post :archive
       end
     end
 

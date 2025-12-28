@@ -190,6 +190,11 @@ class User < ApplicationRecord
     WordCountUpdate.words_written_on_date(self, Date.current)
   end
 
+  def current_writing_goals
+    writing_goals.current
+  end
+
+  # Deprecated: use current_writing_goals instead
   def current_writing_goal
     writing_goals.current.first
   end

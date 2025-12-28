@@ -1,18 +1,17 @@
 class WritingGoalsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_writing_goal, only: [:edit, :update, :destroy, :complete, :activate]
+  before_action :set_writing_goal, only: [:edit, :update, :destroy, :complete, :activate, :archive]
   before_action :set_sidenav_expansion
 
   def index
     @page_title = "Writing Goals"
-    @active_goal = current_user.writing_goals.current.first
-    @past_goals = current_user.writing_goals.where(active: false).order(end_date: :desc)
+    @active_goals = current_user.writing_goals.current.order(end_date: :asc)
+    @archived_goals_count = current_user.writing_goals.where('archived = ? OR completed_at IS NOT NULL', true).count
+  end
 
-    if @active_goal
-      calculate_goal_statistics(@active_goal)
-    end
-
-    @daily_word_counts = fetch_daily_word_counts
+  def history
+    @page_title = "Writing Goals History"
+    @archived_goals = current_user.writing_goals.where('archived = ? OR completed_at IS NOT NULL', true).order(end_date: :desc)
   end
 
   def new
@@ -61,10 +60,13 @@ class WritingGoalsController < ApplicationController
   end
 
   def activate
-    # Deactivate any other active goals
-    current_user.writing_goals.active.update_all(active: false)
-    @writing_goal.update(active: true, completed_at: nil)
+    @writing_goal.update(active: true, archived: false, completed_at: nil)
     redirect_to writing_goals_path, notice: 'Goal activated!'
+  end
+
+  def archive
+    @writing_goal.archive!
+    redirect_to writing_goals_path, notice: 'Goal archived.'
   end
 
   private
@@ -79,29 +81,5 @@ class WritingGoalsController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'writing'
-  end
-
-  def calculate_goal_statistics(goal)
-    @words_written_today = current_user.words_written_today
-    @words_written_this_week = WordCountUpdate
-      .where(user: current_user)
-      .where(for_date: Date.current.beginning_of_week..Date.current)
-      .sum(:word_count)
-
-    @words_written_during_goal = goal.words_written_during_goal
-    @daily_goal = goal.daily_goal
-    @original_daily_goal = goal.original_daily_goal
-    @progress_percentage = goal.progress_percentage
-    @ahead_or_behind = goal.ahead_or_behind
-    @days_remaining = goal.days_remaining
-  end
-
-  def fetch_daily_word_counts
-    return {} unless @active_goal
-
-    WordCountUpdate.where(user: current_user)
-                   .where(for_date: @active_goal.start_date..Date.current)
-                   .group(:for_date)
-                   .sum(:word_count)
   end
 end
