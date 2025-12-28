@@ -3775,8 +3775,6 @@ ActiveRecord::Schema.define(version: 2025_12_28_010216) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["entity_type", "entity_id"], name: "index_word_count_updates_on_entity_type_and_entity_id"
-    t.index ["user_id", "entity_type", "entity_id", "for_date"], name: "index_word_count_updates_unique_per_entity_per_date", unique: true
-    t.index ["user_id", "for_date"], name: "index_word_count_updates_on_user_id_and_for_date"
     t.index ["user_id"], name: "index_word_count_updates_on_user_id"
   end
 

@@ -18,7 +18,7 @@ class WritingGoalsController < ApplicationController
     @page_title = "New Writing Goal"
     @writing_goal = current_user.writing_goals.build
 
-    # Suggest NaNoWriMo-style defaults
+    # Suggest novel challenge defaults
     @writing_goal.title = "My Writing Goal"
     @writing_goal.target_word_count = 50000
     @writing_goal.start_date = Date.current
