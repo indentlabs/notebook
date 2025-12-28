@@ -385,7 +385,7 @@
         </div>
         
         <!-- Filter Bar -->
-        <div class="px-8 sm:px-16 pb-4 flex flex-wrap items-center gap-3">
+        <div class="px-4 sm:px-6 pb-4 flex flex-wrap items-center gap-3">
           <!-- Search -->
           <div class="relative flex-grow min-w-[140px]">
             <input
@@ -532,7 +532,7 @@
       </div>
       
       <!-- Content Area -->
-      <div class="px-8 sm:px-16 py-4 sm:py-6">
+      <div :class="(showLeftSidebar && showRightSidebar && isDesktop) ? 'px-4 py-4' : 'px-8 sm:px-16 py-4 sm:py-6'">
         <% if @folders.any? || @documents.any? %>
           <!-- Timeline View -->
           <div x-show="viewMode === 'timeline'" style="display: none;" class="space-y-8" x-transition>
@@ -724,18 +724,10 @@
                             
                             <!-- Document info -->
                             <div class="min-w-0 flex-1">
-                              <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <div class="flex items-center space-x-4 mb-1 sm:mb-0">
-                                  <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate"><%= document.title %></h3>
-                                </div>
-                                <div class="flex items-center space-x-3 sm:space-x-6 text-xs">
-                                  <span class="text-gray-600 dark:text-gray-400 font-medium flex items-center">
-                                    <i class="material-icons text-xs mr-0.5 <%= Document.text_color %> align-middle">description</i>
-                                    <%= number_with_delimiter(document.cached_word_count || 0) %> words
-                                  </span>
-                                  <span class="text-gray-500 dark:text-gray-400 font-medium"><%= time_ago_in_words(document.updated_at) %> ago</span>
-                                </div>
-                              </div>
+                              <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate"><%= document.title %></h3>
+                              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                <%= number_with_delimiter(document.cached_word_count || 0) %> words · edited <%= time_ago_in_words(document.updated_at) %> ago
+                              </p>
                             </div>
                             
                             <!-- Favorite Toggle Button -->
