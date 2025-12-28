@@ -137,7 +137,8 @@ class Document < ApplicationRecord
       ).count(self.body)
     else
       # For really long documents, use a faster approach to estimate word count
-      self.body.scan(/\b\w+\b/).count
+      # Strip HTML tags first to avoid counting tag names like <p> as words
+      ActionController::Base.helpers.strip_tags(self.body).scan(/\b\w+\b/).count
     end
   end
 
