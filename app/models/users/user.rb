@@ -199,6 +199,16 @@ class User < ApplicationRecord
     writing_goals.current.first
   end
 
+  # Returns the user's daily word goal: the maximum of all active writing goals,
+  # or a default of 1,000 words if no active goals exist
+  DEFAULT_DAILY_WORD_GOAL = 1000
+  def daily_word_goal
+    goals = current_writing_goals
+    return DEFAULT_DAILY_WORD_GOAL if goals.empty?
+
+    goals.map(&:daily_goal).max
+  end
+
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
   # This is different from to_json, which  converts it straight to an escaped JSON string,
   # which is undesireable in a case like this, when we want to modify it

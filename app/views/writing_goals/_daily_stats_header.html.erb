@@ -1,0 +1,106 @@
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8 overflow-hidden">
+  <div class="p-6">
+    <!-- Top row: Daily progress and countdown -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
+      <!-- Daily Goal Progress -->
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <i class="material-icons mr-2 text-green-500">today</i>
+            Today's Progress
+            <% unless @active_goals.any? %>
+              <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">(default goal)</span>
+            <% end %>
+          </h2>
+          <div class="text-right">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@words_today) %></span>
+            <span class="text-gray-500 dark:text-gray-400"> / <%= number_with_delimiter(@max_daily_goal) %> words</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div class="absolute inset-0 h-full rounded-full transition-all duration-500 ease-out <%= @daily_progress_percentage >= 100 ? 'bg-green-500' : 'bg-blue-500' %>"
+               style="width: <%= @daily_progress_percentage %>%">
+          </div>
+          <% if @daily_progress_percentage >= 100 %>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <i class="material-icons text-white text-sm">check</i>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex items-center justify-between mt-2 text-sm">
+          <% if @words_remaining_today > 0 %>
+            <span class="text-gray-600 dark:text-gray-400">
+              <span class="font-medium text-gray-900 dark:text-white"><%= number_with_delimiter(@words_remaining_today) %></span> words to go
+            </span>
+          <% else %>
+            <span class="text-green-600 dark:text-green-400 font-medium flex items-center">
+              <i class="material-icons text-sm mr-1">celebration</i>
+              Daily goal complete!
+            </span>
+          <% end %>
+          <span class="text-gray-500 dark:text-gray-400"><%= number_with_precision(@daily_progress_percentage, precision: 0) %>%</span>
+        </div>
+      </div>
+
+      <!-- Time Remaining Today -->
+      <div class="lg:w-48 flex-shrink-0">
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-4 text-center border border-indigo-100 dark:border-indigo-800">
+          <div class="text-xs uppercase tracking-wide text-indigo-600 dark:text-indigo-400 font-medium mb-1">Time Left Today</div>
+          <div class="text-2xl font-bold text-indigo-700 dark:text-indigo-300" data-controller="countdown" data-countdown-target="display">
+            --:--:--
+          </div>
+          <div class="text-xs text-indigo-500 dark:text-indigo-400 mt-1">until midnight UTC</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 30-Day Chart -->
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+      <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
+        <i class="material-icons text-sm mr-2 text-gray-400">show_chart</i>
+        Words Written (Last 30 Days)
+      </h3>
+      <div class="h-48">
+        <%= column_chart @daily_word_counts_30_days,
+                         library: {
+                           colors: ['#3B82F6'],
+                           chart: { background: 'transparent' },
+                           plotOptions: {
+                             bar: {
+                               borderRadius: 2,
+                               columnWidth: '70%'
+                             }
+                           },
+                           xaxis: {
+                             labels: {
+                               show: true,
+                               rotate: -45,
+                               rotateAlways: false,
+                               hideOverlappingLabels: true,
+                               style: { fontSize: '10px' }
+                             },
+                             tickAmount: 10
+                           },
+                           yaxis: {
+                             labels: {
+                               formatter: "function(val) { return val.toLocaleString(); }"
+                             }
+                           },
+                           tooltip: {
+                             y: {
+                               formatter: "function(val) { return val.toLocaleString() + ' words'; }"
+                             }
+                           },
+                           dataLabels: { enabled: false },
+                           grid: {
+                             borderColor: '#E5E7EB',
+                             strokeDashArray: 4
+                           }
+                         } %>
+      </div>
+    </div>
+  </div>
+</div>

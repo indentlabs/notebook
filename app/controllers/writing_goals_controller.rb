@@ -7,6 +7,23 @@ class WritingGoalsController < ApplicationController
     @page_title = "Writing Goals"
     @active_goals = current_user.writing_goals.current.order(end_date: :asc)
     @archived_goals_count = current_user.writing_goals.where('archived = ? OR completed_at IS NOT NULL', true).count
+
+    # Daily stats for header (always show, even without active goals)
+    # Uses User#daily_word_goal which defaults to 1,000 if no active goals
+    @max_daily_goal = current_user.daily_word_goal
+
+    # Words written today
+    @words_today = current_user.words_written_today
+
+    # Progress toward daily goal
+    @daily_progress_percentage = @max_daily_goal > 0 ? [(@words_today.to_f / @max_daily_goal * 100), 100.0].min : 0
+
+    # Words remaining today
+    @words_remaining_today = [@max_daily_goal - @words_today, 0].max
+
+    # 30-day word count history for chart
+    dates = (29.days.ago.to_date..Date.current).to_a
+    @daily_word_counts_30_days = WordCountUpdate.words_written_on_dates(current_user, dates)
   end
 
   def history
