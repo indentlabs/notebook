@@ -21,14 +21,9 @@ import '../page_name_loader'
 import '../settings'
 import '../content_edit_sidebar'
 
-// Import Rails UJS for remote forms and CSRF tokens
-// Check if jQuery UJS is already loaded via asset pipeline before loading @rails/ujs
+// Import Rails UJS for remote forms, CSRF tokens, and confirm dialogs
 import Rails from '@rails/ujs'
-if (typeof $ === 'undefined' || typeof $.rails === 'undefined') {
-  Rails.start()
-} else {
-  console.log('jQuery UJS already loaded via asset pipeline, skipping @rails/ujs')
-}
+Rails.start()
 
 // Support component names relative to this directory:
 var componentRequireContext = require.context("components", true);

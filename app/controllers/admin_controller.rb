@@ -1,6 +1,6 @@
 class AdminController < ApplicationController
   layout 'admin'
-  layout 'application', only: [:unsubscribe, :perform_unsubscribe]
+  layout 'application', only: [:unsubscribe, :perform_unsubscribe, :reported_shares, :destroy_share, :destroy_user, :dismiss_share_reports]
 
   before_action :authenticate_user!
   before_action :require_admin_access, unless: -> { Rails.env.development? }
@@ -52,8 +52,26 @@ class AdminController < ApplicationController
     reported_share_ids = ContentPageShareReport.where(approved_at: nil).pluck(:content_page_share_id)
     @feed = ContentPageShare.where(id: reported_share_ids)
       .order('created_at DESC')
-      .includes([:content_page, :user, :share_comments])
+      .includes([:content_page, :user, :share_comments, content_page_share_reports: :user])
       .limit(100)
+  end
+
+  def destroy_share
+    share = ContentPageShare.find(params[:id])
+    share.destroy
+    redirect_to '/admin/shares/reported', notice: 'Share deleted successfully.'
+  end
+
+  def destroy_user
+    user = User.find(params[:id])
+    user.destroy
+    redirect_to '/admin/shares/reported', notice: 'User and all their content deleted.'
+  end
+
+  def dismiss_share_reports
+    share = ContentPageShare.find(params[:id])
+    share.content_page_share_reports.update_all(approved_at: Time.current)
+    redirect_to '/admin/shares/reported', notice: 'Reports dismissed.'
   end
   
   def churn

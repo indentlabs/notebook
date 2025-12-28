@@ -410,7 +410,10 @@ Rails.application.routes.draw do
       get '/unsubscribe',          to: 'admin#unsubscribe', as: :mass_unsubscribe
       get '/images',               to: 'admin#images', as: :image_audit
       get '/promos',               to: 'admin#promos', as: :admin_promos
-      get '/shares/reported',      to: 'admin#reported_shares'
+      get '/shares/reported',             to: 'admin#reported_shares', as: :admin_reported_shares
+      delete '/shares/:id',               to: 'admin#destroy_share', as: :admin_destroy_share
+      delete '/users/:id',                to: 'admin#destroy_user', as: :admin_destroy_user
+      post '/shares/:id/dismiss_reports', to: 'admin#dismiss_share_reports', as: :admin_dismiss_share_reports
       get '/churn',                to: 'admin#churn'
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
