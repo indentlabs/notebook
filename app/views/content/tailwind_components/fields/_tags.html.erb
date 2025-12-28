@@ -1,11 +1,21 @@
+<%
+  raw_model = @content.is_a?(ContentSerializer) ? @content.raw_model : @content
+%>
 <% field[:value].each do |tag| %>
-  <span class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm <%= @content.class.color %> text-white">
-    <%= tag %>
-    <button type="button" class="flex-shrink-0 ml-2 h-4 w-4 rounded-full inline-flex items-center justify-center text-white hover:bg-white hover:text-red-500 focus:outline-none">
-      <span class="sr-only">Remove tag: <%= tag %></span>
-      <svg class="h-2 w-2" stroke="currentColor" fill="none" viewBox="0 0 8 8">
-        <path stroke-linecap="round" stroke-width="1.5" d="M1 1l6 6m0-6L1 7" />
-      </svg>
-    </button>
-  </span>
+  <%
+    if user_signed_in? && @content.user == current_user
+      path = send("page_tag_#{raw_model.class.name.downcase.pluralize}_path", slug: PageTagService.slug_for(tag))
+    elsif PageTagService.slug_for(tag).downcase == 'artfight2025'
+      path = browse_tag_path(tag_slug: 'artfight2025')
+    elsif @content.user.present? && @content.user.username.present?
+      path = user_tag_path(username: @content.user.username, tag_slug: PageTagService.slug_for(tag))
+    else
+      path = send("page_tag_#{raw_model.class.name.downcase.pluralize}_path", slug: PageTagService.slug_for(tag))
+    end
+  %>
+  <%= link_to path do %>
+    <span class="inline-flex rounded-full items-center py-0.5 px-2.5 text-sm <%= @content.class.color %> text-white hover:opacity-80">
+      <%= tag %>
+    </span>
+  <% end %>
 <% end %>
