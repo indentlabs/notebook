@@ -290,6 +290,9 @@ class MainController < ApplicationController
     # Words written today (actual delta from yesterday)
     @words_written_today = WordCountUpdate.words_written_on_date(current_user, Date.current)
 
+    # Daily word goal (max of active goals or default 1,000)
+    @daily_word_goal = current_user.daily_word_goal
+
     # Words written this week (actual delta from end of last week)
     @words_written_this_week = WordCountUpdate.words_written_in_range(
       current_user,
