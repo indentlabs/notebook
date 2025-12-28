@@ -56,7 +56,7 @@ function initializeAutosaveListeners() {
 
   // Show unsaved changes when user starts typing
   document.addEventListener('input', function(e) {
-    if (e.target.matches('.autosave-closest-form-on-change')) {
+    if (e.target.matches('.autosave-closest-form-on-change, .js-enhanced-autosave')) {
       const saveIndicator = document.getElementById('save-indicator');
       const saveText = saveIndicator?.parentElement.querySelector('span');
 
@@ -81,9 +81,13 @@ function initializeWordCount() {
   updatePageWordCount();
 }
 
-// Word count calculation - reuses optimized algorithm from document editor
+// Word count calculation - matches server-side WordCountAnalyzer behavior
 function countWordsInText(text) {
   if (!text || text.length === 0) return 0;
+
+  // Strip HTML tags (matches server's xhtml: 'remove' option)
+  text = text.replace(/<[^>]*>/g, ' ');
+
   let count = 0;
   let inWord = false;
   for (let i = 0; i < text.length; i++) {
@@ -102,7 +106,7 @@ function countWordsInText(text) {
 // Aggregate word count from all text fields on the page
 function calculatePageWordCount() {
   let totalWords = 0;
-  document.querySelectorAll('.autosave-closest-form-on-change').forEach(function(field) {
+  document.querySelectorAll('.autosave-closest-form-on-change, .js-enhanced-autosave').forEach(function(field) {
     totalWords += countWordsInText(field.value || '');
   });
   return totalWords;
