@@ -1,9 +1,10 @@
 class ContentPageSharesController < ApplicationController
   before_action :authenticate_user!, except: [:show]
   before_action :set_content_page_share, only: [
-    :show, :edit, :update, :destroy, 
+    :show, :edit, :update, :destroy,
     :follow, :unfollow, :report
   ]
+  before_action :authorize_destroy!, only: [:destroy]
   before_action :load_recent_forum_topics, only: [:show]
 
   # GET /content_page_shares
@@ -100,6 +101,12 @@ class ContentPageSharesController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_content_page_share
     @share = ContentPageShare.find(params[:id])
+  end
+
+  def authorize_destroy!
+    unless @share.user == current_user || current_user.site_administrator?
+      redirect_to [@share.user, @share], alert: 'You are not authorized to delete this share.'
+    end
   end
 
   # Only allow a trusted parameter "white list" through.

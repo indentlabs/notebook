@@ -58,9 +58,10 @@
         <!-- Dropdown Menu -->
         <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-10 border border-gray-200 dark:border-gray-700">
           <%= link_to "View details", [share.user, share], class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" %>
-          <% if current_user == share.user %>
+          <% if current_user == share.user || current_user.site_administrator? %>
             <%= link_to "Delete", [share.user, share], method: :delete, data: { confirm: "Are you sure?" }, class: "block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700" %>
-          <% else %>
+          <% end %>
+          <% if current_user != share.user %>
             <%= link_to "Report post", report_user_content_page_share_path(share.user, share), class: "block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700" %>
           <% end %>
         </div>

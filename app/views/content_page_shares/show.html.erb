@@ -108,7 +108,7 @@
 
                     <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
 
-                    <% if @share.user == current_user %>
+                    <% if @share.user == current_user || current_user.site_administrator? %>
                       <%= link_to user_content_page_share_path(user_id: @share.user.id, id: @share.id),
                           method: :DELETE,
                           data: { confirm: "Are you sure? This will delete this share and any comments!" },
@@ -118,7 +118,8 @@
                         </svg>
                         Delete share
                       <% end %>
-                    <% else %>
+                    <% end %>
+                    <% if @share.user != current_user %>
                       <%= link_to report_user_content_page_share_path(user_id: @share.user.id, id: @share.id),
                           class: "flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50" do %>
                         <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
