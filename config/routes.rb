@@ -122,6 +122,9 @@ Rails.application.routes.draw do
   resources :user_followings
   resources :user_blockings
 
+  # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)
+  patch 'users/update_timezone', to: 'users#update_timezone'
+
   # Username URL aliases
   get '/@:username', to: 'users#show', as: :profile_by_username
   get '/@:username/followers', to: 'users#followers'

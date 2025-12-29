@@ -2,6 +2,7 @@ import { Controller } from "stimulus"
 
 export default class extends Controller {
     static targets = ["display"]
+    static values = { timezone: String }
 
     connect() {
         this.updateCountdown()
@@ -15,28 +16,38 @@ export default class extends Controller {
     }
 
     updateCountdown() {
-        // Use UTC to match server-side Date.current (Rails defaults to UTC)
-        const now = new Date()
-        const utcHours = now.getUTCHours()
-        const utcMinutes = now.getUTCMinutes()
-        const utcSeconds = now.getUTCSeconds()
+        const timezone = this.hasTimezoneValue ? this.timezoneValue : 'UTC'
 
-        // Calculate time remaining until UTC midnight
-        const secondsUntilMidnight = (24 * 60 * 60) - (utcHours * 3600 + utcMinutes * 60 + utcSeconds)
+        // Get current time in user's timezone
+        const now = new Date()
+        const options = { timeZone: timezone, hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false }
+
+        let timeString
+        try {
+            timeString = now.toLocaleTimeString('en-US', options)
+        } catch (e) {
+            // Fallback to UTC if timezone is invalid
+            timeString = now.toLocaleTimeString('en-US', { timeZone: 'UTC', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false })
+        }
+
+        const [hours, minutes, seconds] = timeString.split(':').map(Number)
+
+        // Calculate time remaining until midnight in user's timezone
+        const secondsUntilMidnight = (24 * 60 * 60) - (hours * 3600 + minutes * 60 + seconds)
 
         if (secondsUntilMidnight <= 0) {
             this.displayTarget.textContent = "00:00:00"
             return
         }
 
-        const hours = Math.floor(secondsUntilMidnight / 3600)
-        const minutes = Math.floor((secondsUntilMidnight % 3600) / 60)
-        const seconds = secondsUntilMidnight % 60
+        const remainingHours = Math.floor(secondsUntilMidnight / 3600)
+        const remainingMinutes = Math.floor((secondsUntilMidnight % 3600) / 60)
+        const remainingSeconds = secondsUntilMidnight % 60
 
         const formatted = [
-            hours.toString().padStart(2, '0'),
-            minutes.toString().padStart(2, '0'),
-            seconds.toString().padStart(2, '0')
+            remainingHours.toString().padStart(2, '0'),
+            remainingMinutes.toString().padStart(2, '0'),
+            remainingSeconds.toString().padStart(2, '0')
         ].join(':')
 
         this.displayTarget.textContent = formatted

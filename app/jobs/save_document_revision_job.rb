@@ -29,8 +29,12 @@ class SaveDocumentRevisionJob < ApplicationJob
     document.update(cached_word_count: new_word_count)
 
     # Save a WordCountUpdate for this document for today (always do this)
+    # Use the user's timezone to determine "today"
+    user = document.user
+    user_date = user&.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
+
     update = document.word_count_updates.find_or_initialize_by(
-      for_date: Date.current,
+      for_date: user_date,
     )
     update.word_count = new_word_count
     update.user_id  ||= document.user_id

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_12_28_010216) do
+ActiveRecord::Schema.define(version: 2025_12_29_075958) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3716,6 +3716,7 @@ ActiveRecord::Schema.define(version: 2025_12_28_010216) do
     t.boolean "enabled_april_fools"
     t.integer "followers_count", default: 0, null: false
     t.integer "following_count", default: 0, null: false
+    t.string "time_zone", default: "UTC", null: false
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["followers_count"], name: "index_users_on_followers_count"

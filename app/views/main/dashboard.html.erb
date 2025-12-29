@@ -1,3 +1,12 @@
+<%# Silent timezone auto-update for legacy users - remove after Jan 31, 2026 %>
+<% if Date.current < Date.new(2026, 1, 31) && current_user.time_zone == 'UTC' %>
+  <div data-controller="timezone-auto-update"
+       data-timezone-auto-update-current-timezone-value="<%= current_user.time_zone %>"
+       data-timezone-auto-update-updated-at-value="<%= current_user.updated_at.to_i %>"
+       data-timezone-auto-update-update-url-value="<%= users_update_timezone_path %>">
+  </div>
+<% end %>
+
 <!-- Main Dashboard Container -->
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
   

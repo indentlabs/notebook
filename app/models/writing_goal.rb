@@ -1,6 +1,11 @@
 class WritingGoal < ApplicationRecord
   belongs_to :user
 
+  # Returns the current date in the user's configured timezone
+  def user_current_date
+    user&.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
+  end
+
   validates :title, presence: true
   validates :target_word_count, presence: true, numericality: { greater_than: 0 }
   validates :start_date, presence: true
@@ -14,8 +19,8 @@ class WritingGoal < ApplicationRecord
   scope :current, -> { active.not_archived.where('end_date >= ?', Date.current) }
 
   def days_remaining
-    return 0 if Date.current > end_date
-    (end_date - Date.current).to_i
+    return 0 if user_current_date > end_date
+    (end_date - user_current_date).to_i
   end
 
   def total_days
@@ -23,13 +28,13 @@ class WritingGoal < ApplicationRecord
   end
 
   def days_elapsed
-    return 0 if Date.current < start_date
-    [total_days, (Date.current - start_date).to_i].min
+    return 0 if user_current_date < start_date
+    [total_days, (user_current_date - start_date).to_i].min
   end
 
   def words_written_during_goal
     WordCountUpdate.where(user: user)
-                   .where(for_date: start_date..Date.current)
+                   .where(for_date: start_date..user_current_date)
                    .sum(:word_count)
   end
 
@@ -53,8 +58,8 @@ class WritingGoal < ApplicationRecord
   end
 
   def expected_words_by_today
-    return target_word_count if Date.current >= end_date
-    return 0 if Date.current < start_date
+    return target_word_count if user_current_date >= end_date
+    return 0 if user_current_date < start_date
     (original_daily_goal * days_elapsed)
   end
 
@@ -84,7 +89,7 @@ class WritingGoal < ApplicationRecord
 
   def daily_word_counts
     WordCountUpdate.where(user: user)
-                   .where(for_date: start_date..[Date.current, end_date].min)
+                   .where(for_date: start_date..[user_current_date, end_date].min)
                    .group(:for_date)
                    .sum(:word_count)
   end

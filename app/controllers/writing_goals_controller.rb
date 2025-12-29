@@ -21,8 +21,9 @@ class WritingGoalsController < ApplicationController
     # Words remaining today
     @words_remaining_today = [@max_daily_goal - @words_today, 0].max
 
-    # 30-day word count history for chart
-    dates = (29.days.ago.to_date..Date.current).to_a
+    # 30-day word count history for chart (use user's timezone)
+    user_today = current_user.current_date_in_time_zone
+    dates = ((user_today - 29.days)..user_today).to_a
     @daily_word_counts_30_days = WordCountUpdate.words_written_on_dates(current_user, dates)
   end
 
@@ -35,11 +36,12 @@ class WritingGoalsController < ApplicationController
     @page_title = "New Writing Goal"
     @writing_goal = current_user.writing_goals.build
 
-    # Suggest novel challenge defaults
+    # Suggest novel challenge defaults (use user's timezone for dates)
+    user_today = current_user.current_date_in_time_zone
     @writing_goal.title = "My Writing Goal"
     @writing_goal.target_word_count = 50000
-    @writing_goal.start_date = Date.current
-    @writing_goal.end_date = Date.current + 30.days
+    @writing_goal.start_date = user_today
+    @writing_goal.end_date = user_today + 30.days
   end
 
   def create

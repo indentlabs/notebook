@@ -62,7 +62,7 @@ class RegistrationsController < Devise::RegistrationsController
       :bio, :favorite_genre, :favorite_author, :interests, :age, :location, :gender, :forums_badge_text,
       :keyboard_shortcuts_preference, :avatar, :favorite_book, :website, :inspirations, :other_names,
       :favorite_quote, :occupation, :favorite_page_type, :dark_mode_enabled, :notification_updates,
-      :community_features_enabled, :private_profile
+      :community_features_enabled, :private_profile, :time_zone
     )
   end
 

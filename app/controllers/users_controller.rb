@@ -50,6 +50,20 @@ class UsersController < ApplicationController
     end
   end
 
+  # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)
+  def update_timezone
+    return head :unauthorized unless user_signed_in?
+
+    timezone = params[:time_zone]
+
+    if ActiveSupport::TimeZone[timezone].present?
+      current_user.update(time_zone: timezone)
+      head :ok
+    else
+      head :unprocessable_entity
+    end
+  end
+
   def delete_my_account # :(
     unless user_signed_in?
       redirect_to(root_path, notice: "You must be signed in to do that!")

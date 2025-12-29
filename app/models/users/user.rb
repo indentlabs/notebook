@@ -25,6 +25,8 @@ class User < ApplicationRecord
     length: { maximum: 20 },
   if: Proc.new { |user| user.forums_badge_text_changed? }
 
+  validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_nil: false
+
   has_many :folders
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
@@ -186,8 +188,13 @@ class User < ApplicationRecord
     Rails.application.config.content_types[:all].select { |c| can_create? c }
   end
 
+  # Returns the current date in the user's configured timezone
+  def current_date_in_time_zone
+    Time.current.in_time_zone(time_zone).to_date
+  end
+
   def words_written_today
-    WordCountUpdate.words_written_on_date(self, Date.current)
+    WordCountUpdate.words_written_on_date(self, current_date_in_time_zone)
   end
 
   def current_writing_goals
