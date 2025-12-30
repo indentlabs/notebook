@@ -66,12 +66,23 @@
         <i class="material-icons text-sm mr-2 text-gray-400">show_chart</i>
         Words Written (Last 30 Days)
         <span class="ml-auto text-xs text-gray-500 dark:text-gray-400 flex items-center">
-          <span class="w-3 h-0.5 mr-1.5" style="border-top: 2px dashed #10B981;"></span>
-          Daily Goal: <%= number_with_delimiter(@max_daily_goal) %>
+          <span class="inline-block w-4 mr-1.5" style="border-top: 2px dashed #10B981;"></span>
+          Goal: <%= number_with_delimiter(@max_daily_goal) %>/day
         </span>
       </h3>
-      <div class="h-48">
-        <%= column_chart @daily_word_counts_30_days, colors: ["#2196F3"] %>
+      <div>
+        <%
+          # Format dates as "Dec 1" for readability and build chart data
+          formatted_word_counts = @daily_word_counts_30_days.transform_keys { |date| date.strftime("%b %-d") }
+          # Only show goal bar on days with writing activity (nil hides the bar but preserves x-axis position)
+          goal_line_data = formatted_word_counts.transform_values { |count| count > 0 ? @max_daily_goal : nil }
+        %>
+        <%= column_chart [
+              { name: "Daily Goal", data: goal_line_data },
+              { name: "Words Written", data: formatted_word_counts }
+            ],
+            colors: ["#10B981", "#2196F3"],
+            height: "300px" %>
       </div>
     </div>
   </div>
