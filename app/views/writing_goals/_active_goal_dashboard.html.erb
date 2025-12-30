@@ -68,37 +68,6 @@
     </div>
   </div>
 
-  <!-- Daily Progress Chart -->
-  <% daily_counts = goal.daily_word_counts %>
-  <% if daily_counts.any? %>
-    <div class="px-6 pb-6">
-      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-          <i class="material-icons text-purple-500 mr-2 text-base">show_chart</i>
-          Daily Progress
-        </h3>
-        <div class="h-48">
-          <%= column_chart daily_counts.transform_keys { |date| date.strftime('%m/%d') },
-                           colors: ['#10b981'],
-                           library: {
-                             plugins: { legend: { display: false } },
-                             scales: {
-                               y: { beginAtZero: true }
-                             }
-                           } %>
-        </div>
-        <div class="flex items-center justify-center mt-3 text-xs text-gray-500 dark:text-gray-400">
-          <span class="flex items-center">
-            <span class="w-2.5 h-2.5 bg-green-500 rounded-full mr-1.5"></span>
-            Words Written
-          </span>
-          <span class="mx-3">|</span>
-          <span>Daily target: <%= number_with_delimiter(goal.original_daily_goal) %> words</span>
-        </div>
-      </div>
-    </div>
-  <% end %>
-
   <!-- Action Buttons -->
   <div class="px-6 pb-6 flex flex-wrap gap-3">
     <%= link_to edit_writing_goal_path(goal), class: "inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors" do %>

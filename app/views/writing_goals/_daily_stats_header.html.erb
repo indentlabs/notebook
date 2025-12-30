@@ -65,44 +65,13 @@
       <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4 flex items-center">
         <i class="material-icons text-sm mr-2 text-gray-400">show_chart</i>
         Words Written (Last 30 Days)
+        <span class="ml-auto text-xs text-gray-500 dark:text-gray-400 flex items-center">
+          <span class="w-3 h-0.5 mr-1.5" style="border-top: 2px dashed #10B981;"></span>
+          Daily Goal: <%= number_with_delimiter(@max_daily_goal) %>
+        </span>
       </h3>
       <div class="h-48">
-        <%= column_chart @daily_word_counts_30_days,
-                         library: {
-                           colors: ['#3B82F6'],
-                           chart: { background: 'transparent' },
-                           plotOptions: {
-                             bar: {
-                               borderRadius: 2,
-                               columnWidth: '70%'
-                             }
-                           },
-                           xaxis: {
-                             labels: {
-                               show: true,
-                               rotate: -45,
-                               rotateAlways: false,
-                               hideOverlappingLabels: true,
-                               style: { fontSize: '10px' }
-                             },
-                             tickAmount: 10
-                           },
-                           yaxis: {
-                             labels: {
-                               formatter: "function(val) { return val.toLocaleString(); }"
-                             }
-                           },
-                           tooltip: {
-                             y: {
-                               formatter: "function(val) { return val.toLocaleString() + ' words'; }"
-                             }
-                           },
-                           dataLabels: { enabled: false },
-                           grid: {
-                             borderColor: '#E5E7EB',
-                             strokeDashArray: 4
-                           }
-                         } %>
+        <%= column_chart @daily_word_counts_30_days, colors: ["#2196F3"] %>
       </div>
     </div>
   </div>
