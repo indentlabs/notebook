@@ -36,4 +36,20 @@ namespace :daily do
   task eod_analytics: :environment do
     EndOfDayAnalyticsJob.perform_now
   end
+
+  desc "Auto-complete expired writing goals"
+  task complete_expired_writing_goals: :environment do
+    puts "Checking for expired writing goals..."
+
+    completed_count = 0
+    WritingGoal.where(archived: false, completed_at: nil)
+               .where('end_date < ?', Date.current)
+               .find_each do |goal|
+      goal.update(completed_at: Time.current, active: false)
+      completed_count += 1
+      puts "  Completed: #{goal.title} (User ##{goal.user_id}, ended #{goal.end_date})"
+    end
+
+    puts "Done. Auto-completed #{completed_count} expired writing goals."
+  end
 end

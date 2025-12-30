@@ -29,7 +29,17 @@ class WritingGoalsController < ApplicationController
 
   def history
     @page_title = "Writing Goals History"
-    @archived_goals = current_user.writing_goals.where('archived = ? OR completed_at IS NOT NULL', true).order(end_date: :desc)
+
+    # Auto-complete any expired goals that weren't manually completed/archived
+    user_today = current_user.current_date_in_time_zone
+    current_user.writing_goals
+      .where(archived: false, completed_at: nil)
+      .where('end_date < ?', user_today)
+      .find_each { |goal| goal.update(completed_at: Time.current, active: false) }
+
+    @archived_goals = current_user.writing_goals
+      .where('archived = ? OR completed_at IS NOT NULL', true)
+      .order(end_date: :desc)
   end
 
   def new
