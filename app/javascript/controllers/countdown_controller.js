@@ -1,4 +1,5 @@
 import { Controller } from "stimulus"
+import { railsToIana } from "../utils/timezone"
 
 export default class extends Controller {
     static targets = ["display"]
@@ -16,7 +17,9 @@ export default class extends Controller {
     }
 
     updateCountdown() {
-        const timezone = this.hasTimezoneValue ? this.timezoneValue : 'UTC'
+        // Convert Rails timezone name to IANA format for JavaScript Intl API
+        const railsTimezone = this.hasTimezoneValue ? this.timezoneValue : 'UTC'
+        const timezone = railsToIana(railsTimezone)
 
         // Get current time in user's timezone
         const now = new Date()
