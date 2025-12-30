@@ -158,6 +158,7 @@ Rails.application.routes.draw do
     get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
 
     post :toggle_favorite, on: :member
+    post :toggle_archive, on: :member
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member

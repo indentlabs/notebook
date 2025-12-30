@@ -384,6 +384,38 @@ class DocumentsController < ApplicationController
     end
   end
 
+  def toggle_archive
+    document = Document.find_by(id: params[:id])
+    return head :not_found unless document.present?
+
+    unless document.updatable_by?(current_user)
+      respond_to do |format|
+        format.html { redirect_to(root_path, notice: "You don't have permission to do that!") }
+        format.json { render json: { error: "You don't have permission to do that!" }, status: :forbidden }
+      end
+      return
+    end
+
+    verb = document.archived? ? "unarchived" : "archived"
+    success = document.archived? ? document.unarchive! : document.archive!
+
+    respond_to do |format|
+      if success
+        format.html do
+          if verb == "archived"
+            redirect_to archive_path, notice: "Document archived."
+          else
+            redirect_to document, notice: "Document unarchived."
+          end
+        end
+        format.json { render json: { success: true, archived: document.archived?, verb: verb } }
+      else
+        format.html { redirect_back(fallback_location: document, notice: "Failed to #{verb.chomp('d')} document.") }
+        format.json { render json: { error: "Failed to #{verb.chomp('d')} document" }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   def destroy
     if current_user.can_delete?(@document)
       @document.destroy

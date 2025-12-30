@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_12_29_075958) do
+ActiveRecord::Schema.define(version: 2025_12_29_230106) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1263,11 +1263,14 @@ ActiveRecord::Schema.define(version: 2025_12_29_075958) do
     t.text "notes_text"
     t.integer "folder_id"
     t.integer "cached_word_count"
+    t.datetime "archived_at"
+    t.index ["archived_at"], name: "index_documents_on_archived_at"
     t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
     t.index ["deleted_at", "universe_id"], name: "index_documents_on_deleted_at_and_universe_id"
     t.index ["folder_id"], name: "index_documents_on_folder_id"
     t.index ["universe_id", "deleted_at"], name: "index_documents_on_universe_id_and_deleted_at"
     t.index ["universe_id"], name: "index_documents_on_universe_id"
+    t.index ["user_id", "archived_at", "deleted_at"], name: "index_documents_on_user_archived_deleted"
     t.index ["user_id", "deleted_at"], name: "index_documents_on_user_id_and_deleted_at"
     t.index ["user_id", "privacy", "deleted_at"], name: "index_documents_on_user_privacy_deleted"
     t.index ["user_id"], name: "index_documents_on_user_id"

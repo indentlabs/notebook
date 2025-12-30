@@ -36,6 +36,22 @@ class Document < ApplicationRecord
 
   KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
 
+  # Archive scopes and methods (matching IsContentPage pattern)
+  scope :unarchived, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
+
+  def archive!
+    update!(archived_at: DateTime.now)
+  end
+
+  def unarchive!
+    update!(archived_at: nil)
+  end
+
+  def archived?
+    !archived_at.nil?
+  end
+
   def self.color
     'teal bg-teal-500'
   end
