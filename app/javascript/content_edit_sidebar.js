@@ -92,7 +92,8 @@ function countWordsInText(text) {
   let inWord = false;
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
-    const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r';
+    const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r' ||
+                    char === '\u00A0' || char === '\u200B';
     if (!isSpace && !inWord) {
       count++;
       inWord = true;
