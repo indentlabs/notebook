@@ -23,24 +23,27 @@ document.addEventListener('DOMContentLoaded', function() {
 // Initialize toggle switches to replace checkboxes
 function initializeToggleSwitches() {
   document.querySelectorAll('.toggle-switch').forEach(function(toggle) {
+    const checkbox = toggle.querySelector('input[type="checkbox"]');
+
+    // Skip toggle switches that don't have checkboxes (e.g., dropdowns styled similarly)
+    if (!checkbox) return;
+
     toggle.addEventListener('click', function(e) {
       if (e.target.tagName !== 'INPUT') {
-        const checkbox = this.querySelector('input[type="checkbox"]');
         checkbox.checked = !checkbox.checked;
-        
+
         // Trigger change event for any listeners
         const event = new Event('change', { bubbles: true });
         checkbox.dispatchEvent(event);
-        
+
         // Update toggle appearance
         updateToggleState(checkbox);
       }
     });
-    
+
     // Set initial state
-    const checkbox = toggle.querySelector('input[type="checkbox"]');
     updateToggleState(checkbox);
-    
+
     // Listen for changes
     checkbox.addEventListener('change', function() {
       updateToggleState(this);

@@ -143,13 +143,16 @@ class FoldersController < ApplicationController
   private
 
   def calculate_writing_streak_data
+    # Use user's timezone for date calculations
+    user_today = current_user.current_date_in_time_zone
+
     # Today's word count (actual delta from yesterday)
-    @words_written_today = WordCountUpdate.words_written_on_date(current_user, Date.current)
+    @words_written_today = WordCountUpdate.words_written_on_date(current_user, user_today)
 
     # This week's word count (actual delta from end of last week)
     @words_written_this_week = WordCountUpdate.words_written_in_range(
       current_user,
-      Date.current.beginning_of_week..Date.current
+      user_today.beginning_of_week..user_today
     )
   end
 

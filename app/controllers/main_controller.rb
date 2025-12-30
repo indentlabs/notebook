@@ -287,8 +287,11 @@ class MainController < ApplicationController
     # Calculate Editing Streak
     calculate_editing_streak(all_content)
 
+    # Use user's timezone for date calculations
+    user_today = current_user.current_date_in_time_zone
+
     # Words written today (actual delta from yesterday)
-    @words_written_today = WordCountUpdate.words_written_on_date(current_user, Date.current)
+    @words_written_today = WordCountUpdate.words_written_on_date(current_user, user_today)
 
     # Daily word goal (max of active goals or default 1,000)
     @daily_word_goal = current_user.daily_word_goal
@@ -296,36 +299,39 @@ class MainController < ApplicationController
     # Words written this week (actual delta from end of last week)
     @words_written_this_week = WordCountUpdate.words_written_in_range(
       current_user,
-      Date.current.beginning_of_week..Date.current
+      user_today.beginning_of_week..user_today
     )
   end
 
   def calculate_editing_streak(all_content)
+    # Use user's timezone for date calculations
+    user_today = current_user.current_date_in_time_zone
+
     # Get unique dates when user edited content (last 100 days to be safe)
     edit_dates = all_content.map { |page| page.updated_at.to_date }.uniq.sort.reverse
-    
+
     # Calculate current streak
     current_streak = 0
-    current_date = Date.current
-    
+    current_date = user_today
+
     # Check each day going backwards
     while edit_dates.include?(current_date)
       current_streak += 1
       current_date -= 1.day
     end
-    
+
     @current_streak = current_streak
-    
+
     # Calculate total edits in current streak
     @streak_total_edits = 0
     if current_streak > 0
-      streak_dates = (0..current_streak-1).map { |days_ago| Date.current - days_ago.days }
+      streak_dates = (0..current_streak-1).map { |days_ago| user_today - days_ago.days }
       @streak_total_edits = all_content.count { |page| streak_dates.include?(page.updated_at.to_date) }
     end
-    
+
     # Generate last 7 days for streak visualization
     @streak_days = (0..6).map do |days_ago|
-      date = Date.current - days_ago.days
+      date = user_today - days_ago.days
       has_activity = edit_dates.include?(date)
       edit_count = all_content.count { |page| page.updated_at.to_date == date }
       {
