@@ -6,4 +6,10 @@ class InformationController < ApplicationController
       render :content_type
     end
   end
+
+  # Override for Timeline since it doesn't use the attributes system
+  def timelines
+    @content_type = Timeline
+    render :timeline
+  end
 end

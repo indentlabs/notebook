@@ -438,8 +438,6 @@ Rails.application.routes.draw do
   scope '/worldbuilding' do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
-      # TODO: documents info page
-      # TODO: timelines info page
     end
   end
 
