@@ -191,6 +191,8 @@ Rails.application.routes.draw do
       end
     end
 
+    get 'writing-activity', to: 'writing_activity#index', as: :writing_activity
+
     get '/multiverse',      to: 'universes#hub', as: :multiverse
 
     get '/scratchpad',      to: 'main#notes', as: :notes

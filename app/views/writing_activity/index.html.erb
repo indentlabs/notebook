@@ -1,0 +1,273 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+          <i class="material-icons mr-3 text-blue-500">trending_up</i>
+          Writing Activity
+        </h1>
+        <div class="text-sm text-gray-500 dark:text-gray-400">
+          Last 7 days
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Key Metrics - 4 stat cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Words Written -->
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow p-6 text-center text-white">
+        <div class="flex items-center justify-center mb-3">
+          <i class="material-icons text-blue-200 mr-2">edit</i>
+          <span class="text-sm font-medium uppercase tracking-wide text-blue-100">Words Written</span>
+        </div>
+        <div class="text-4xl font-bold mb-1">
+          <%= number_with_delimiter @words_written %>
+        </div>
+        <div class="text-xs text-blue-200">
+          in the last 7 days
+        </div>
+      </div>
+
+      <!-- Active Days -->
+      <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow p-6 text-center text-white">
+        <div class="flex items-center justify-center mb-3">
+          <i class="material-icons text-green-200 mr-2">calendar_today</i>
+          <span class="text-sm font-medium uppercase tracking-wide text-green-100">Active Days</span>
+        </div>
+        <div class="text-4xl font-bold mb-1">
+          <%= @active_days %>
+        </div>
+        <div class="text-xs text-green-200">
+          of 7 days
+        </div>
+      </div>
+
+      <!-- Most Productive Day -->
+      <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow p-6 text-center text-white">
+        <div class="flex items-center justify-center mb-3">
+          <i class="material-icons text-purple-200 mr-2">star</i>
+          <span class="text-sm font-medium uppercase tracking-wide text-purple-100">Best Day</span>
+        </div>
+        <% if @most_productive_day %>
+          <div class="text-4xl font-bold mb-1">
+            <%= number_with_delimiter @most_productive_day[:words] %>
+          </div>
+          <div class="text-xs text-purple-200">
+            on <%= @most_productive_day[:date].strftime('%A') %>
+          </div>
+        <% else %>
+          <div class="text-2xl font-bold mb-1 text-purple-200">
+            No activity
+          </div>
+          <div class="text-xs text-purple-200">
+            this week
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Current Streak -->
+      <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow p-6 text-center text-white">
+        <div class="flex items-center justify-center mb-3">
+          <i class="material-icons text-orange-200 mr-2">local_fire_department</i>
+          <span class="text-sm font-medium uppercase tracking-wide text-orange-100">Streak</span>
+        </div>
+        <div class="text-4xl font-bold mb-1">
+          <%= @current_streak %>
+        </div>
+        <div class="text-xs text-orange-200">
+          <%= @current_streak == 1 ? 'day' : 'days' %> in a row
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Daily Word Count Chart -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons text-blue-500 mr-2 text-lg">show_chart</i>
+            Daily Word Count
+          </h3>
+        </div>
+        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
+          <%= area_chart @daily_word_counts.map { |date, count| [date.strftime('%a %b %d'), count] },
+              colors: ['#3b82f6'],
+              suffix: ' words',
+              library: { chart: { backgroundColor: 'transparent' } }
+          %>
+        </div>
+      </div>
+
+      <!-- Words by Content Type Chart -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons text-purple-500 mr-2 text-lg">pie_chart</i>
+            Words by Content Type
+          </h3>
+        </div>
+        <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
+          <% if @words_by_type.any? %>
+            <%= pie_chart @words_by_type.map { |type, count| [type.gsub(/([A-Z])/, ' \1').strip, count] },
+                donut: true,
+                legend: 'bottom',
+                suffix: ' words',
+                library: { chart: { backgroundColor: 'transparent' } }
+            %>
+          <% else %>
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <i class="material-icons text-4xl mb-2">analytics</i>
+              <p>No writing activity this week</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two Column Layout: Activity Log and Top Pages -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Activity Log -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons text-green-500 mr-2 text-lg">history</i>
+            Recent Activity
+          </h3>
+        </div>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700 max-h-96 overflow-y-auto">
+          <% if @recent_updates.any? %>
+            <% @recent_updates.group_by { |u| u[:for_date] }.each do |date, updates| %>
+              <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900 sticky top-0">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <%= date.strftime('%A, %B %d') %>
+                </span>
+              </div>
+              <% updates.each do |update_data| %>
+                <% entity = update_data[:entity] %>
+                <% delta = update_data[:delta] %>
+                <% entity_type = update_data[:update].entity_type %>
+                <% next unless entity %>
+                <div class="px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0 mr-3">
+                      <% entity_class = entity_type.constantize rescue nil %>
+                      <% if entity_class %>
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                             style="background-color: <%= entity_class.try(:color) || '#3b82f6' %>">
+                          <i class="material-icons text-sm"><%= entity_class.try(:icon) || 'description' %></i>
+                        </div>
+                      <% end %>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                      <% if entity.respond_to?(:path) %>
+                        <%= link_to entity.try(:name) || entity.try(:title) || 'Untitled',
+                            entity.path,
+                            class: "text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 truncate block" %>
+                      <% else %>
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate block">
+                          <%= entity.try(:name) || entity.try(:title) || 'Untitled' %>
+                        </span>
+                      <% end %>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">
+                        <%= entity_type.gsub(/([A-Z])/, ' \1').strip %>
+                      </span>
+                    </div>
+                    <div class="flex-shrink-0 ml-3 text-right">
+                      <% if delta > 0 %>
+                        <span class="text-sm font-medium text-green-600 dark:text-green-400">
+                          +<%= number_with_delimiter delta %>
+                        </span>
+                      <% else %>
+                        <span class="text-sm font-medium text-red-600 dark:text-red-400">
+                          <%= number_with_delimiter delta %>
+                        </span>
+                      <% end %>
+                      <span class="text-xs text-gray-500 dark:text-gray-400 block">words</span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          <% else %>
+            <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+              <i class="material-icons text-4xl mb-2">edit_off</i>
+              <p>No writing activity this week</p>
+              <p class="text-sm mt-1">Start writing to see your activity here!</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Top Growing Pages -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <i class="material-icons text-orange-500 mr-2 text-lg">trending_up</i>
+            Top Growing Pages
+          </h3>
+        </div>
+        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+          <% if @top_growing_pages.any? %>
+            <% @top_growing_pages.each_with_index do |page, index| %>
+              <% entity = page[:entity] %>
+              <div class="px-6 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 mr-3 w-6 text-center">
+                    <span class="text-sm font-bold text-gray-400 dark:text-gray-500"><%= index + 1 %></span>
+                  </div>
+                  <div class="flex-shrink-0 mr-3">
+                    <% entity_class = page[:entity_type].constantize rescue nil %>
+                    <% if entity_class %>
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                           style="background-color: <%= entity_class.try(:color) || '#3b82f6' %>">
+                        <i class="material-icons text-sm"><%= entity_class.try(:icon) || 'description' %></i>
+                      </div>
+                    <% end %>
+                  </div>
+                  <div class="flex-grow min-w-0">
+                    <% if entity.respond_to?(:path) %>
+                      <%= link_to entity.try(:name) || entity.try(:title) || 'Untitled',
+                          entity.path,
+                          class: "text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 truncate block" %>
+                    <% else %>
+                      <span class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate block">
+                        <%= entity.try(:name) || entity.try(:title) || 'Untitled' %>
+                      </span>
+                    <% end %>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">
+                      <%= page[:entity_type].gsub(/([A-Z])/, ' \1').strip %>
+                    </span>
+                  </div>
+                  <div class="flex-shrink-0 ml-3 text-right">
+                    <span class="text-sm font-medium text-green-600 dark:text-green-400">
+                      +<%= number_with_delimiter page[:words_added] %>
+                    </span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 block">words</span>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+              <i class="material-icons text-4xl mb-2">trending_flat</i>
+              <p>No page growth this week</p>
+              <p class="text-sm mt-1">Pages you write in will appear here!</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link to Writing Goals -->
+    <div class="mt-8 text-center">
+      <%= link_to writing_goals_path, class: "inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors" do %>
+        <i class="material-icons mr-2 text-sm">flag</i>
+        Set Writing Goals
+      <% end %>
+    </div>
+  </div>
+</div>
