@@ -53,7 +53,7 @@ class AdminController < ApplicationController
     @feed = ContentPageShare.where(id: reported_share_ids)
       .order('created_at DESC')
       .includes([:content_page, :user, :share_comments, content_page_share_reports: :user])
-      .limit(100)
+      .paginate(page: params[:page], per_page: 100)
   end
 
   def destroy_share
