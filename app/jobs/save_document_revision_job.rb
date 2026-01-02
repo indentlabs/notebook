@@ -28,10 +28,11 @@ class SaveDocumentRevisionJob < ApplicationJob
     # Update cached word count for the document (always do this)
     document.update(cached_word_count: new_word_count)
 
-    # Save a WordCountUpdate for this document for today (always do this)
-    # Use the user's timezone to determine "today"
+    # Save a WordCountUpdate for this document for the day the edit was made
+    # Use enqueued_at (when the job was created) to handle Sidekiq delays correctly
     user = document.user
-    user_date = user&.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
+    enqueue_time = enqueued_at || Time.current
+    user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
     update = document.word_count_updates.find_or_initialize_by(
       for_date: user_date,

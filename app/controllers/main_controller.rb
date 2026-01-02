@@ -276,10 +276,14 @@ class MainController < ApplicationController
     all_content = @current_user_content.values.flatten
     
     # 30-Day Activity Chart for Dashboard
+    # Use user's timezone to correctly attribute edits to the right day
+    user_today = current_user.current_date_in_time_zone
+    user_tz = current_user.time_zone.presence || 'UTC'
+
     @dashboard_daily_activity = (0..29).map do |days_ago|
-      date = Date.current - days_ago.days
+      date = user_today - days_ago.days
       activity_count = all_content.count do |content_page|
-        content_page.updated_at.to_date == date
+        content_page.updated_at.in_time_zone(user_tz).to_date == date
       end
       [date.strftime('%m/%d'), activity_count]
     end.reverse
@@ -306,9 +310,10 @@ class MainController < ApplicationController
   def calculate_editing_streak(all_content)
     # Use user's timezone for date calculations
     user_today = current_user.current_date_in_time_zone
+    user_tz = current_user.time_zone.presence || 'UTC'
 
     # Get unique dates when user edited content (last 100 days to be safe)
-    edit_dates = all_content.map { |page| page.updated_at.to_date }.uniq.sort.reverse
+    edit_dates = all_content.map { |page| page.updated_at.in_time_zone(user_tz).to_date }.uniq.sort.reverse
 
     # Calculate current streak
     current_streak = 0
@@ -326,14 +331,14 @@ class MainController < ApplicationController
     @streak_total_edits = 0
     if current_streak > 0
       streak_dates = (0..current_streak-1).map { |days_ago| user_today - days_ago.days }
-      @streak_total_edits = all_content.count { |page| streak_dates.include?(page.updated_at.to_date) }
+      @streak_total_edits = all_content.count { |page| streak_dates.include?(page.updated_at.in_time_zone(user_tz).to_date) }
     end
 
     # Generate last 7 days for streak visualization
     @streak_days = (0..6).map do |days_ago|
       date = user_today - days_ago.days
       has_activity = edit_dates.include?(date)
-      edit_count = all_content.count { |page| page.updated_at.to_date == date }
+      edit_count = all_content.count { |page| page.updated_at.in_time_zone(user_tz).to_date == date }
       {
         date: date,
         has_activity: has_activity,
