@@ -33,9 +33,7 @@ class WritingGoal < ApplicationRecord
   end
 
   def words_written_during_goal
-    WordCountUpdate.where(user: user)
-                   .where(for_date: start_date..user_current_date)
-                   .sum(:word_count)
+    WordCountUpdate.words_written_in_range(user, start_date..user_current_date)
   end
 
   def words_remaining
@@ -88,10 +86,9 @@ class WritingGoal < ApplicationRecord
   end
 
   def daily_word_counts
-    WordCountUpdate.where(user: user)
-                   .where(for_date: start_date..[user_current_date, end_date].min)
-                   .group(:for_date)
-                   .sum(:word_count)
+    end_dt = [user_current_date, end_date].min
+    dates = (start_date..end_dt).to_a
+    WordCountUpdate.words_written_on_dates(user, dates)
   end
 
   private
