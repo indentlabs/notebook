@@ -13,7 +13,8 @@
 $(document).ready(function() {
   var recent_autosave = false;
 
-  $('.autosave-closest-form-on-change').change(function () {
+  // Use delegated event binding to work with dynamically added elements and survive page refresh timing issues
+  $(document).on('change', '.autosave-closest-form-on-change', function () {
     var content_form = $(this).closest('form');
 
     var default_border_class     = 'border-gray-200'; // This needs to match whatever the actual CSS on the element is!
@@ -71,7 +72,7 @@ $(document).ready(function() {
     }
   });
 
-  $('.submit-closest-form-on-click').on('click', function() {
+  $(document).on('click', '.submit-closest-form-on-click', function() {
     $(this).closest('form').submit();
   })
 

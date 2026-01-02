@@ -156,7 +156,8 @@ $(document).ready(function() {
   }
 
   // Enhanced autosave for text fields
-  $('.js-enhanced-autosave').on('input', function() {
+  // Use delegated event binding to work with dynamically added elements and survive page refresh timing issues
+  $(document).on('input', '.js-enhanced-autosave', function() {
     var field = $(this);
     var fieldId = field.attr('id') || field.attr('name') || 'unknown';
 
@@ -169,7 +170,7 @@ $(document).ready(function() {
     }, 300); // 300ms debounce
   });
 
-  $('.js-enhanced-autosave').on('blur', function() {
+  $(document).on('blur', '.js-enhanced-autosave', function() {
     var field = $(this);
     var fieldId = field.attr('id') || field.attr('name') || 'unknown';
 
@@ -193,7 +194,7 @@ $(document).ready(function() {
   });
 
   // Focus event to reset dirty flag and any error states
-  $('.js-enhanced-autosave').on('focus', function() {
+  $(document).on('focus', '.js-enhanced-autosave', function() {
     var field = $(this);
     var fieldId = field.attr('id') || field.attr('name') || 'unknown';
     var saveIndicator = field.siblings('.js-save-indicator');

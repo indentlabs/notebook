@@ -1,9 +1,4 @@
 <div class="space-y-8">
-  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
-    <i class="material-icons text-gray-400 dark:text-gray-500 mr-2"><%= category[:icon] %></i>
-    <%= category[:label] %>
-  </h3>
-
   <% category[:fields].each do |field| %>
     <div class="pt-8"
          data-field-id="<%= field[:id] %>"
@@ -65,16 +60,16 @@
               Saved
             </span>
           </div>
-          
+
           <%= form_for raw_content, url: FieldTypeService.form_path(field), remote: true, authenticity_token: true, html: { class: "field-form" } do |f| %>
             <%= hidden_field_tag "entity[entity_id]",   raw_content.id %>
             <%= hidden_field_tag "entity[entity_type]", raw_content.class.name %>
-            
+
             <%=
               case field[:type]
               when 'name', 'text_area', 'textarea'
                 render partial: 'content/form/rich_text_input', locals: {
-                  f:            f, 
+                  f:            f,
                   content:      content,
                   field:        field,
                   show_label:   false,
@@ -146,13 +141,13 @@ document.addEventListener('DOMContentLoaded', function() {
       form.classList.remove('saved', 'error');
     }
   });
-  
+
   document.addEventListener('autosave:success', function(e) {
     const form = e.detail.field?.closest('.field-form');
     if (form) {
       form.classList.add('saved');
       form.classList.remove('saving', 'error');
-      
+
       const indicator = form.querySelector('.autosave-indicator');
       if (indicator) {
         indicator.classList.add('show');
@@ -162,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
   });
-  
+
   document.addEventListener('autosave:error', function(e) {
     const form = e.detail.field?.closest('.field-form');
     if (form) {

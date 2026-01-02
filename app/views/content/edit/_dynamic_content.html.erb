@@ -2,75 +2,74 @@
   
   <!-- Details View (Form Fields) -->
   <div x-show="currentView === 'details'" class="py-8 px-4 sm:px-6 lg:px-14 max-w-5xl mx-auto">
-    
-    <!-- Show All Categories (Expanded View) -->
-    <div x-show="expandAllCategories">
-      <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Edit All Details</h2>
-        <p class="text-gray-600 dark:text-gray-400">Complete information for this <%= content.class_name.downcase %></p>
-      </div>
-      
-      <%= render partial: 'content/edit/all_categories', locals: { content: content, raw_content: raw_content } %>
+
+    <!-- "Edit All Details" header - only shown in expanded view -->
+    <div x-show="expandAllCategories" class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Edit All Details</h2>
+      <p class="text-gray-600 dark:text-gray-400">Complete information for this <%= content.class_name.downcase %></p>
     </div>
 
-    <!-- Single Category View -->
-    <div x-show="!expandAllCategories && currentCategory">
+    <!-- Single unified loop - each category rendered ONCE -->
+    <%
+      # Find the first non-Gallery category for default view
+      first_category_label = content.data[:categories].find { |c| c[:label] != 'Gallery' }&.dig(:label) || ''
+    %>
+    <div class="space-y-12">
       <% content.data[:categories].each do |category| %>
         <% next if category[:label] == 'Gallery' %>
-        
-        <div x-show="currentCategory === '<%= category[:label] %>'">
-          <div class="mb-6">
-            <div class="flex items-center mb-4">
+        <% next if category[:label] == 'Contributors' && raw_content.class.name == 'Universe' %>
+        <% is_first_category = (category[:label] == first_category_label) %>
+
+        <!-- Category section - visible when:
+             1. expandAllCategories is true (show all), OR
+             2. currentCategory matches this category, OR
+             3. No currentCategory and this is the first category -->
+        <div x-show="expandAllCategories || currentCategory === '<%= category[:label] %>' || (!expandAllCategories && !currentCategory && <%= is_first_category %>)"
+             class="category-section"
+             id="category-<%= category[:label].parameterize %>">
+
+          <!-- Category header - shown in expanded view with border, or in single category view -->
+          <div class="mb-6"
+               :class="{ 'pb-4 border-b border-gray-200 dark:border-gray-700': expandAllCategories }">
+            <div class="flex items-center justify-between">
               <div class="flex items-center">
-                <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
+                <i class="material-icons text-2xl <%= content.class_text_color %> mr-3"><%= category[:icon] %></i>
                 <div>
-                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Edit <%= category[:label] %></h2>
-                  <p class="text-gray-600 dark:text-gray-400">Update <%= category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
+                  <h3 x-show="expandAllCategories" class="text-xl font-semibold text-gray-900 dark:text-white"><%= category[:label] %></h3>
+                  <h2 x-show="!expandAllCategories" class="text-2xl font-bold text-gray-900 dark:text-white">Edit <%= category[:label] %></h2>
+                  <p x-show="!expandAllCategories" class="text-gray-600 dark:text-gray-400">Update <%= category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
                 </div>
               </div>
+
+              <!-- Progress indicator - shown in expanded view or single category view with >= 25% -->
+              <% if category[:percent_complete].present? && category[:percent_complete] > 0 %>
+                <div x-show="expandAllCategories" class="hidden sm:flex items-center space-x-3">
+                  <span class="text-sm text-gray-500 dark:text-gray-400"><%= category[:percent_complete] %>% complete</span>
+                  <div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="<%= content.class_color %> h-2 rounded-full" style="width: <%= category[:percent_complete] %>%"></div>
+                  </div>
+                </div>
+              <% end %>
             </div>
-            
-            <!-- Progress indicator -->
+
+            <!-- Progress indicator for single category view -->
             <% if category[:percent_complete].present? && category[:percent_complete] >= 25 %>
-              <div class="bg-gray-200 rounded-full h-2 mb-4">
-                <div class="<%= content.class_color %> text-xs text-white font-medium text-center leading-none rounded-full h-2" 
-                     style="width: <%= category[:percent_complete] %>%">
+              <div x-show="!expandAllCategories" class="mt-4">
+                <div class="bg-gray-200 rounded-full h-2 mb-2">
+                  <div class="<%= content.class_color %> text-xs text-white font-medium text-center leading-none rounded-full h-2"
+                       style="width: <%= category[:percent_complete] %>%">
+                  </div>
                 </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400"><%= category[:percent_complete] %>% complete</p>
               </div>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4"><%= category[:percent_complete] %>% complete</p>
             <% end %>
           </div>
-          
-          <%= render partial: 'content/edit/single_category', locals: { 
-            content: content, 
-            category: category,
-            raw_content: raw_content 
-          } %>
-        </div>
-      <% end %>
-    </div>
 
-    <!-- Default: Show first category -->
-    <div x-show="!expandAllCategories && !currentCategory">
-      <% first_category = content.data[:categories].find { |cat| cat[:label] != 'Gallery' } %>
-      <% if first_category %>
-        <div>
-          <div class="mb-6">
-            <div class="flex items-center mb-4">
-              <div class="flex items-center">
-                <i class="material-icons text-3xl <%= content.class_text_color %> mr-3"><%= first_category[:icon] %></i>
-                <div>
-                  <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Edit <%= first_category[:label] %></h2>
-                  <p class="text-gray-600 dark:text-gray-400">Update <%= first_category[:label].downcase %> details for this <%= content.class_name.downcase %></p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <%= render partial: 'content/edit/single_category', locals: { 
-            content: content, 
-            category: first_category,
-            raw_content: raw_content 
+          <!-- Fields - rendered ONCE per category, always present in DOM -->
+          <%= render partial: 'content/edit/category_fields', locals: {
+            content: content,
+            category: category,
+            raw_content: raw_content
           } %>
         </div>
       <% end %>
