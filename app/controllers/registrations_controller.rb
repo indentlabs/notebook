@@ -2,6 +2,7 @@ class RegistrationsController < Devise::RegistrationsController
   after_action :add_account, only: [:create]
   after_action :attach_avatar, only: [:update]
 
+  prepend_before_action :authenticate_scope!, only: [:edit, :update, :destroy, :password]
   before_action :set_navbar_actions, only: [:edit, :preferences, :more_actions]
   before_action :set_navbar_color, only: [:edit, :preferences, :more_actions]
 
