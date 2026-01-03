@@ -1,0 +1,87 @@
+<%# Collapsible book section for the documents sidebar %>
+<%# Requires: book, document (current document being edited) %>
+<%# Alpine.js context: expandedBooks array, isExpanded(bookId), toggleBook(bookId) %>
+
+<div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+  <!-- Book Header (collapsible toggle) -->
+  <button
+    @click="toggleBook(<%= book.id %>)"
+    class="w-full flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+  >
+    <div class="flex items-center min-w-0 flex-1">
+      <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-2 transition-transform duration-200"
+         :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
+      <div class="min-w-0 flex-1">
+        <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.title %></h5>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          <%= pluralize(book.book_documents.count, 'chapter') %>
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-2 ml-2">
+      <%= link_to edit_book_path(book), class: "p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors", title: "Edit book", onclick: "event.stopPropagation();" do %>
+        <i class="material-icons text-sm">edit</i>
+      <% end %>
+      <button
+        @click.stop="removeFromBook(<%= book.id %>)"
+        class="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors"
+        title="Remove from book"
+      >
+        <i class="material-icons text-sm">close</i>
+      </button>
+    </div>
+  </button>
+
+  <!-- Book Contents (expandable) -->
+  <div
+    x-show="isExpanded(<%= book.id %>)"
+    x-collapse
+    class="border-t border-gray-200 dark:border-gray-700"
+  >
+    <% if book.book_documents.any? %>
+      <ul
+        class="books-sidebar-chapter-list py-1"
+        data-book-id="<%= book.id %>"
+      >
+        <% book.book_documents.order(position: :asc).each_with_index do |book_document, index| %>
+          <% is_current = book_document.document_id == document.id %>
+          <li
+            class="book-chapter-row flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group <%= is_current ? 'bg-teal-50 dark:bg-teal-900 bg-opacity-50 dark:bg-opacity-20' : '' %>"
+            data-book-document-id="<%= book_document.id %>"
+            data-position="<%= book_document.position %>"
+          >
+            <!-- Drag Handle -->
+            <div class="chapter-drag-handle cursor-move text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="material-icons text-sm">drag_indicator</i>
+            </div>
+
+            <!-- Position Number -->
+            <span class="w-5 text-xs text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0"><%= index + 1 %>.</span>
+
+            <!-- Document Link -->
+            <% if is_current %>
+              <span class="flex-1 text-sm font-medium text-teal-700 dark:text-teal-300 truncate flex items-center">
+                <%= book_document.document.title.presence || 'Untitled' %>
+                <i class="material-icons text-teal-500 text-xs ml-1">edit</i>
+              </span>
+            <% else %>
+              <%= link_to edit_document_path(book_document.document),
+                          class: "flex-1 text-sm text-gray-700 dark:text-gray-200 hover:text-notebook-blue dark:hover:text-blue-400 truncate transition-colors" do %>
+                <%= book_document.document.title.presence || 'Untitled' %>
+              <% end %>
+            <% end %>
+
+            <!-- Word count badge (optional, shown on hover) -->
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <%= number_with_delimiter(book_document.document.cached_word_count || 0) %>w
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <div class="px-3 py-4 text-center">
+        <p class="text-xs text-gray-500 dark:text-gray-400">No chapters yet</p>
+      </div>
+    <% end %>
+  </div>
+</div>
