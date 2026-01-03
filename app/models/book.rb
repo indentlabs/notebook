@@ -35,6 +35,24 @@ class Book < ApplicationRecord
     '#10b981'
   end
 
+  # Instance methods that delegate to class methods
+  # Needed for views that call book.color, book.icon, etc.
+  def color
+    Book.color
+  end
+
+  def icon
+    Book.icon
+  end
+
+  def text_color
+    Book.text_color
+  end
+
+  def hex_color
+    Book.hex_color
+  end
+
   def page_type
     'Book'
   end
