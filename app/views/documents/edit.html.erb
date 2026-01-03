@@ -187,17 +187,23 @@
                         </div>
                       </div>
                       <div x-show="isExpanded(<%= book.id %>)" x-collapse class="border-t border-gray-200 dark:border-gray-700">
-                        <div class="max-h-48 overflow-y-auto">
+                        <div class="max-h-64 overflow-y-auto sortable-chapters" data-book-id="<%= book.id %>">
                           <% book.book_documents.order(:position).each do |book_document| %>
                             <% is_current = book_document.document_id == @document.id %>
-                            <%= link_to edit_document_path(book_document.document),
-                                class: "flex items-center px-2 py-1.5 text-sm transition-colors #{is_current ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}" do %>
-                              <span class="w-5 text-xs text-gray-400 dark:text-gray-500 text-right mr-1.5"><%= book_document.position %>.</span>
-                              <span class="truncate"><%= book_document.document.title %></span>
-                              <% if is_current %>
-                                <i class="material-icons text-blue-500 text-xs ml-auto">arrow_back</i>
+                            <div class="flex items-center px-2 py-1.5 text-sm transition-colors <%= is_current ? 'bg-blue-50 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-gray-700' %>"
+                                 data-book-document-id="<%= book_document.id %>">
+                              <div class="drag-handle hidden lg:block cursor-move text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 mr-1 flex-shrink-0">
+                                <i class="material-icons text-xs">drag_indicator</i>
+                              </div>
+                              <span class="position-number w-4 text-xs text-gray-400 dark:text-gray-500 text-right mr-1 flex-shrink-0"><%= book_document.position %>.</span>
+                              <%= link_to edit_document_path(book_document.document),
+                                  class: "truncate flex-1 #{is_current ? 'text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300'}" do %>
+                                <%= book_document.document.title %>
                               <% end %>
-                            <% end %>
+                              <% if is_current %>
+                                <i class="material-icons text-blue-500 text-xs ml-auto flex-shrink-0">arrow_back</i>
+                              <% end %>
+                            </div>
                           <% end %>
                         </div>
                       </div>
@@ -973,6 +979,13 @@
             showCreateModal: false,
             newBookTitle: '',
 
+            init() {
+              // Initialize sortable for any auto-expanded books
+              this.$nextTick(() => {
+                this.initSortable();
+              });
+            },
+
             isExpanded(bookId) {
               return this.expandedBooks.includes(bookId);
             },
@@ -983,7 +996,60 @@
                 this.expandedBooks.splice(index, 1);
               } else {
                 this.expandedBooks.push(bookId);
+                // Initialize sortable after Alpine renders the expanded content
+                this.$nextTick(() => {
+                  this.initSortable();
+                });
               }
+            },
+
+            initSortable() {
+              if (typeof $ === 'undefined' || !$.fn.sortable) return;
+
+              const self = this;
+              document.querySelectorAll('.sortable-chapters').forEach(list => {
+                // Skip if already initialized
+                if ($(list).data('ui-sortable')) return;
+
+                const bookId = list.dataset.bookId;
+
+                $(list).sortable({
+                  handle: '.drag-handle',
+                  placeholder: 'bg-blue-50 dark:bg-blue-900 border border-dashed border-blue-300 dark:border-blue-600 rounded h-8',
+                  update: function(event, ui) {
+                    const bookDocumentId = ui.item.data('book-document-id');
+                    const newPosition = ui.item.index(); // 0-indexed
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                    fetch('/books/' + bookId + '/sort_document', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        book_document_id: bookDocumentId,
+                        position: newPosition  // Backend adds +1 for acts_as_list
+                      })
+                    }).then(() => {
+                      self.updatePositionNumbers(list);
+                    }).catch(error => {
+                      console.error('Error sorting:', error);
+                      $(list).sortable('cancel');
+                    });
+                  }
+                });
+              });
+            },
+
+            updatePositionNumbers(list) {
+              const items = list.querySelectorAll('[data-book-document-id]');
+              items.forEach((item, index) => {
+                const positionNumber = item.querySelector('.position-number');
+                if (positionNumber) {
+                  positionNumber.textContent = (index + 1) + '.';
+                }
+              });
             },
 
             addToBook() {

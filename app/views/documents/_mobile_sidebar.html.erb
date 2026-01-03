@@ -159,17 +159,21 @@
                     </div>
                   </div>
                   <div x-show="isExpanded(<%= book.id %>)" x-collapse class="border-t border-gray-200 dark:border-gray-700">
-                    <div class="max-h-48 overflow-y-auto">
+                    <div class="max-h-64 overflow-y-auto sortable-chapters" data-book-id="<%= book.id %>">
                       <% book.book_documents.order(:position).each do |book_document| %>
                         <% is_current = book_document.document_id == @document.id %>
-                        <%= link_to edit_document_path(book_document.document),
-                            class: "flex items-center px-2 py-1.5 text-sm transition-colors #{is_current ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}" do %>
-                          <span class="w-5 text-xs text-gray-400 dark:text-gray-500 text-right mr-1.5"><%= book_document.position %>.</span>
-                          <span class="truncate"><%= book_document.document.title %></span>
-                          <% if is_current %>
-                            <i class="material-icons text-blue-500 text-xs ml-auto">arrow_back</i>
+                        <div class="flex items-center px-2 py-1.5 text-sm transition-colors <%= is_current ? 'bg-blue-50 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-gray-700' %>"
+                             data-book-document-id="<%= book_document.id %>">
+                          <%# Drag handles hidden on mobile - reorder via books#edit %>
+                          <span class="position-number w-4 text-xs text-gray-400 dark:text-gray-500 text-right mr-1 flex-shrink-0"><%= book_document.position %>.</span>
+                          <%= link_to edit_document_path(book_document.document),
+                              class: "truncate flex-1 #{is_current ? 'text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300'}" do %>
+                            <%= book_document.document.title %>
                           <% end %>
-                        <% end %>
+                          <% if is_current %>
+                            <i class="material-icons text-blue-500 text-xs ml-auto flex-shrink-0">arrow_back</i>
+                          <% end %>
+                        </div>
                       <% end %>
                     </div>
                   </div>
