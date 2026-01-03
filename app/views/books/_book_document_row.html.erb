@@ -1,0 +1,41 @@
+<li
+  class="flex items-center px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors group"
+  data-book-document-id="<%= book_document.id %>"
+  data-position="<%= book_document.position %>"
+>
+  <!-- Drag Handle -->
+  <div class="drag-handle cursor-move text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mr-4">
+    <i class="material-icons">drag_indicator</i>
+  </div>
+
+  <!-- Position Number -->
+  <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mr-4 text-sm font-medium text-gray-600 dark:text-gray-300">
+    <%= index + 1 %>
+  </div>
+
+  <!-- Document Info -->
+  <div class="flex-1 min-w-0">
+    <%= link_to edit_document_path(book_document.document), class: "block group-hover:text-emerald-600 dark:group-hover:text-emerald-400" do %>
+      <h3 class="text-sm font-medium <%= Document.text_color %> truncate">
+        <%= book_document.document.title.presence || 'Untitled' %>
+      </h3>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+        <%= pluralize book_document.document.word_count, 'word' %>
+        <% if book_document.document.updated_at %>
+          • Updated <%= time_ago_in_words(book_document.document.updated_at) %> ago
+        <% end %>
+      </p>
+    <% end %>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+    <%= link_to edit_document_path(book_document.document), class: "p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg", title: "Edit document" do %>
+      <i class="material-icons text-lg">edit</i>
+    <% end %>
+
+    <%= button_to remove_document_book_path(book_document.book, document_id: book_document.document_id), method: :delete, class: "p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg", title: "Remove from book", data: { confirm: "Remove this document from the book?" } do %>
+      <i class="material-icons text-lg">close</i>
+    <% end %>
+  </div>
+</li>

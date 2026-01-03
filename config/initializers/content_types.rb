@@ -82,6 +82,7 @@ configure_content_types = -> do
   Rails.application.config.content_types_by_name = Rails.application.config.content_types[:all].map { |type| [type.name, type] }.to_h
   Rails.application.config.content_types_by_name['Document'] = 'Document'.constantize
   Rails.application.config.content_types_by_name['Timeline'] = 'Timeline'.constantize
+  Rails.application.config.content_types_by_name['Book'] = 'Book'.constantize
 end
 
 # Run once on boot

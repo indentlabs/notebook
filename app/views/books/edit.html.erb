@@ -1,0 +1,258 @@
+<%
+  status_options = [
+    ['Writing', 'writing'],
+    ['Revising', 'revising'],
+    ['Submitting', 'submitting'],
+    ['Published', 'published']
+  ]
+%>
+
+<div x-data="{
+  sidebarOpen: true,
+  searchQuery: '',
+  showAddDocument: false
+}" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <%= link_to books_path, class: "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" do %>
+            <i class="material-icons">arrow_back</i>
+          <% end %>
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg <%= Book.color %> flex items-center justify-center">
+              <i class="material-icons text-white"><%= Book.icon %></i>
+            </div>
+            <div>
+              <h1 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @book.title %></h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                <%= @book.status.humanize %> • <%= pluralize @book.documents.count, 'document' %>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <!-- Toggle Sidebar -->
+          <button
+            @click="sidebarOpen = !sidebarOpen"
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+          >
+            <i class="material-icons" x-text="sidebarOpen ? 'menu_open' : 'menu'"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div class="flex-1 p-6 lg:p-8 overflow-auto">
+      <div class="max-w-3xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Table of Contents</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Drag to reorder documents in your book</p>
+          </div>
+
+          <% if @book_documents.any? %>
+            <ul id="book-documents-list" class="divide-y divide-gray-200 dark:divide-gray-700">
+              <% @book_documents.each_with_index do |book_document, index| %>
+                <%= render 'book_document_row', book_document: book_document, index: index %>
+              <% end %>
+            </ul>
+          <% else %>
+            <div class="px-6 py-12 text-center">
+              <div class="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                <i class="material-icons text-gray-400 text-2xl">description</i>
+              </div>
+              <h3 class="text-sm font-medium text-gray-900 dark:text-white">No documents yet</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Add documents to build your table of contents</p>
+            </div>
+          <% end %>
+
+          <!-- Add Document Section -->
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            <div x-show="!showAddDocument">
+              <button
+                @click="showAddDocument = true"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <i class="material-icons text-lg mr-2">add</i>
+                Add Document
+              </button>
+            </div>
+
+            <div x-show="showAddDocument" x-transition class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white">Select a document to add</h4>
+                <button @click="showAddDocument = false" class="text-gray-400 hover:text-gray-600">
+                  <i class="material-icons text-lg">close</i>
+                </button>
+              </div>
+
+              <!-- Search Documents -->
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="material-icons text-gray-400 text-lg">search</i>
+                </div>
+                <input
+                  x-model="searchQuery"
+                  type="text"
+                  placeholder="Search documents..."
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                />
+              </div>
+
+              <!-- Available Documents List -->
+              <div class="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                <% documents_not_in_book = @available_documents.reject { |d| @book.document_ids.include?(d.id) } %>
+                <% if documents_not_in_book.any? %>
+                  <% documents_not_in_book.each do |document| %>
+                    <div
+                      x-show="searchQuery === '' || '<%= document.title.to_s.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())"
+                      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                    >
+                      <div class="flex items-center space-x-3 min-w-0">
+                        <i class="material-icons text-gray-400 text-lg">description</i>
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate"><%= document.title.presence || 'Untitled' %></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize document.word_count, 'word' %></p>
+                        </div>
+                      </div>
+                      <%= button_to add_document_book_path(@book, document_id: document.id), method: :post, class: "flex-shrink-0 inline-flex items-center px-3 py-1.5 text-xs font-medium text-white #{Book.color} rounded-lg hover:opacity-90" do %>
+                        <i class="material-icons text-sm mr-1">add</i>
+                        Add
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                    <p class="text-sm">All documents are already in this book</p>
+                    <%= link_to new_document_path, class: "text-sm #{Book.text_color} hover:underline mt-2 inline-block" do %>
+                      Create a new document
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside
+    x-show="sidebarOpen"
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0 translate-x-full"
+    x-transition:enter-end="opacity-100 translate-x-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100 translate-x-0"
+    x-transition:leave-end="opacity-0 translate-x-full"
+    class="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col"
+  >
+    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Book Details</h2>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <%= form_with model: @book, local: false, html: { class: 'space-y-6' } do |f| %>
+
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <%= f.text_field :title, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-enhanced-autosave" %>
+        </div>
+
+        <!-- Subtitle -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label>
+          <%= f.text_field :subtitle, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-enhanced-autosave", placeholder: "Optional subtitle" %>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <%= f.select :status, status_options, {}, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white autosave-closest-form-on-change" %>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+          <%= f.text_area :description, rows: 3, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-enhanced-autosave", placeholder: "What's this book about?" %>
+        </div>
+
+        <!-- Blurb -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Back Cover Blurb</label>
+          <%= f.text_area :blurb, rows: 4, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-enhanced-autosave", placeholder: "The hook for readers..." %>
+        </div>
+
+        <!-- Universe -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Universe</label>
+          <%= f.collection_select :universe_id, current_user.universes.order(:name), :id, :name, { include_blank: 'No universe' }, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white autosave-closest-form-on-change" %>
+        </div>
+
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+      <% if @book.archived? %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">unarchive</i>
+          Unarchive Book
+        <% end %>
+      <% else %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">archive</i>
+          Archive Book
+        <% end %>
+      <% end %>
+
+      <%= button_to book_path(@book), method: :delete, data: { confirm: 'Are you sure you want to delete this book? This cannot be undone.' }, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900" do %>
+        <i class="material-icons text-lg mr-2">delete</i>
+        Delete Book
+      <% end %>
+    </div>
+  </aside>
+</div>
+
+<!-- JavaScript for drag-and-drop sorting -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const list = document.getElementById('book-documents-list');
+  if (!list) return;
+
+  // Check if jQuery UI Sortable is available
+  if (typeof $ !== 'undefined' && $.fn.sortable) {
+    $(list).sortable({
+      handle: '.drag-handle',
+      placeholder: 'bg-emerald-50 dark:bg-emerald-900 border-2 border-dashed border-emerald-300 dark:border-emerald-600 rounded-lg',
+      update: function(event, ui) {
+        const bookDocumentId = ui.item.data('book-document-id');
+        const newPosition = ui.item.index();
+
+        fetch('<%= sort_document_book_path(@book) %>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            book_document_id: bookDocumentId,
+            position: newPosition
+          })
+        }).catch(error => {
+          console.error('Error sorting:', error);
+          $(list).sortable('cancel');
+        });
+      }
+    });
+  }
+});
+</script>

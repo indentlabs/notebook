@@ -1,0 +1,234 @@
+<div x-data="{
+  viewMode: localStorage.getItem('books_view_mode') || 'grid',
+  searchQuery: '',
+  showArchived: false,
+  statusFilters: [],
+  statusFilterOpen: false,
+  toggleStatus(status) {
+    if (this.statusFilters.includes(status)) {
+      this.statusFilters = this.statusFilters.filter(s => s !== status);
+    } else {
+      this.statusFilters.push(status);
+    }
+  },
+  matchesFilters(bookStatus) {
+    return this.statusFilters.length === 0 || this.statusFilters.includes(bookStatus);
+  }
+}" x-init="$watch('viewMode', value => localStorage.setItem('books_view_mode', value))" class="min-h-screen bg-gray-50 dark:bg-gray-900">
+
+  <!-- Hero Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm">
+    <div class="relative">
+      <div class="h-32 w-full bg-gradient-to-r from-emerald-500 to-teal-600 lg:h-48"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/20 to-black/10"></div>
+    </div>
+
+    <div class="px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-5">
+          <div class="flex-shrink-0">
+            <div class="h-16 w-16 rounded-xl <%= Book.color %> flex items-center justify-center ring-4 ring-white shadow-lg lg:h-20 lg:w-20">
+              <i class="material-icons text-white text-3xl lg:text-4xl"><%= Book.icon %></i>
+            </div>
+          </div>
+
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
+              Your Books
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">
+              <%= pluralize @books.count, 'book' %>
+              <% if @archived_books.any? %>
+                <span class="text-gray-400">(<%= @archived_books.count %> archived)</span>
+              <% end %>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <%= link_to new_book_path do %>
+            <button class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white <%= Book.color %> hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 shadow-sm">
+              <i class="material-icons text-lg mr-2">add</i>
+              <span class="hidden sm:inline">New Book</span>
+              <span class="sm:hidden">New</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Controls -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <!-- Search Input -->
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="material-icons text-gray-400 text-lg">search</i>
+          </div>
+          <input
+            x-model="searchQuery"
+            type="text"
+            placeholder="Search books..."
+            class="block w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+          />
+          <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
+              <i class="material-icons text-lg">clear</i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Status Filter Dropdown -->
+        <div class="relative" @click.away="statusFilterOpen = false">
+          <button
+            @click="statusFilterOpen = !statusFilterOpen"
+            class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            <i class="material-icons text-lg mr-2">filter_list</i>
+            Status
+            <span x-show="statusFilters.length > 0" class="ml-2 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 dark:bg-emerald-800 text-emerald-700 dark:text-emerald-200" x-text="statusFilters.length"></span>
+            <i class="material-icons text-lg ml-1">expand_more</i>
+          </button>
+
+          <div
+            x-show="statusFilterOpen"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            class="absolute z-10 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5"
+            style="display: none;"
+          >
+            <div class="py-1">
+              <% Book.statuses.keys.each do |status| %>
+                <label
+                  class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                  @click.stop
+                >
+                  <input
+                    type="checkbox"
+                    :checked="statusFilters.includes('<%= status %>')"
+                    @change="toggleStatus('<%= status %>')"
+                    class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-600 rounded"
+                  />
+                  <span class="ml-3"><%= status.humanize %></span>
+                </label>
+              <% end %>
+              <div x-show="statusFilters.length > 0" class="border-t border-gray-200 dark:border-gray-700 mt-1 pt-1">
+                <button
+                  @click="statusFilters = []; statusFilterOpen = false"
+                  class="w-full text-left px-4 py-2 text-sm text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  Clear filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- View Mode Toggle -->
+        <div class="hidden sm:flex border border-gray-300 dark:border-gray-600 rounded-lg">
+          <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg focus:outline-none">
+            <i class="material-icons text-lg">grid_view</i>
+          </button>
+          <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-r-lg focus:outline-none">
+            <i class="material-icons text-lg">view_list</i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 p-6 lg:p-8">
+    <% if @books.any? %>
+      <!-- Grid View -->
+      <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <% @books.each do |book| %>
+          <div x-show="(searchQuery === '' || '<%= book.title.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>')">
+            <%= render 'book_card', book: book %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- List View -->
+      <div x-show="viewMode === 'list'" style="display: none;" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <% @books.each_with_index do |book, index| %>
+          <div
+            class="<%= 'border-t border-gray-200 dark:border-gray-700' if index > 0 %> hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            x-show="(searchQuery === '' || '<%= book.title.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>')"
+          >
+            <%= link_to edit_book_path(book), class: "flex items-center p-4 space-x-4" do %>
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-lg <%= Book.color %> flex items-center justify-center">
+                  <i class="material-icons text-white text-xl"><%= Book.icon %></i>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate"><%= book.title %></h3>
+                <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
+                  <span class="<%= Book.text_color %>"><%= book.status.humanize %></span>
+                  <span>•</span>
+                  <span><%= pluralize book.documents.count, 'document' %></span>
+                  <% if book.subtitle.present? %>
+                    <span>•</span>
+                    <span class="truncate"><%= book.subtitle %></span>
+                  <% end %>
+                </div>
+              </div>
+              <div class="flex-shrink-0">
+                <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <!-- Empty State -->
+      <div class="flex-1 flex items-center justify-center p-8 min-h-96">
+        <div class="max-w-md w-full text-center">
+          <div class="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 dark:from-emerald-800 dark:to-emerald-700 flex items-center justify-center mb-4 shadow-sm">
+            <i class="material-icons text-3xl <%= Book.text_color %>"><%= Book.icon %></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create your first book</h2>
+          <p class="text-gray-600 dark:text-gray-400 mb-6">
+            Books help you organize your documents into collections. Create a book to start building your table of contents.
+          </p>
+          <%= link_to new_book_path, class: "inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white #{Book.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 shadow-sm" do %>
+            <i class="material-icons text-xl mr-2">add</i>
+            Create a Book
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Archived Books -->
+    <% if @archived_books.any? %>
+      <div class="mt-8">
+        <button
+          @click="showArchived = !showArchived"
+          class="flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4"
+        >
+          <i class="material-icons text-lg mr-1" x-text="showArchived ? 'expand_less' : 'expand_more'"></i>
+          <span><%= pluralize @archived_books.count, 'archived book' %></span>
+        </button>
+
+        <div x-show="showArchived" x-collapse class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 opacity-60">
+            <% @archived_books.each do |book| %>
+              <div x-show="(searchQuery === '' || '<%= book.title.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>')">
+                <%= render 'book_card', book: book %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

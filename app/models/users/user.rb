@@ -174,6 +174,7 @@ class User < ApplicationRecord
   end
 
   has_many :documents, dependent: :destroy
+  has_many :books, dependent: :destroy
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code

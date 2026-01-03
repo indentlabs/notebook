@@ -12,6 +12,9 @@ class Document < ApplicationRecord
   has_many :document_revisions, dependent: :destroy
   after_update :save_document_revision!
 
+  has_many :book_documents, dependent: :destroy
+  has_many :books, through: :book_documents
+
   include HasParseableText
   include HasPartsOfSpeech
   include HasImageUploads

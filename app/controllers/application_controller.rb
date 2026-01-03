@@ -114,13 +114,15 @@ class ApplicationController < ActionController::Base
       @current_user_content[content_type] ||= []
     end
 
-    # Likewise, we should also always cache Timelines & Documents
+    # Likewise, we should also always cache Timelines, Documents, & Books
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
       @current_user_content['Document'] = current_user.documents.unarchived.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
+      @current_user_content['Book'] = current_user.books.unarchived.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
     else
       @current_user_content['Timeline'] = current_user.timelines.to_a
       @current_user_content['Document'] = current_user.documents.unarchived.order('updated_at DESC').to_a
+      @current_user_content['Book'] = current_user.books.unarchived.order('updated_at DESC').to_a
     end
   end
 

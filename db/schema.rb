@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_12_29_230106) do
+ActiveRecord::Schema.define(version: 2026_01_02_155715) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -268,6 +268,36 @@ ActiveRecord::Schema.define(version: 2025_12_29_230106) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "book_documents", force: :cascade do |t|
+    t.integer "book_id", null: false
+    t.integer "document_id", null: false
+    t.integer "position"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["book_id", "position"], name: "index_book_documents_on_book_id_and_position"
+    t.index ["book_id"], name: "index_book_documents_on_book_id"
+    t.index ["document_id", "book_id"], name: "index_book_documents_on_document_id_and_book_id", unique: true
+    t.index ["document_id"], name: "index_book_documents_on_document_id"
+  end
+
+  create_table "books", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "universe_id"
+    t.string "title"
+    t.string "subtitle"
+    t.text "description"
+    t.text "blurb"
+    t.integer "status", default: 0
+    t.string "privacy", default: "private"
+    t.datetime "archived_at"
+    t.datetime "deleted_at"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["universe_id"], name: "index_books_on_universe_id"
+    t.index ["user_id", "deleted_at"], name: "index_books_on_user_id_and_deleted_at"
+    t.index ["user_id"], name: "index_books_on_user_id"
   end
 
   create_table "building_countries", force: :cascade do |t|
@@ -3807,6 +3837,10 @@ ActiveRecord::Schema.define(version: 2025_12_29_230106) do
   add_foreign_key "basil_feedbacks", "basil_commissions"
   add_foreign_key "basil_feedbacks", "users"
   add_foreign_key "basil_field_guidances", "users"
+  add_foreign_key "book_documents", "books"
+  add_foreign_key "book_documents", "documents"
+  add_foreign_key "books", "universes"
+  add_foreign_key "books", "users"
   add_foreign_key "buildings", "universes"
   add_foreign_key "buildings", "users"
   add_foreign_key "character_birthtowns", "characters"

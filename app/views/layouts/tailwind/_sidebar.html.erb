@@ -80,8 +80,22 @@
           </div>
           <div x-show="expandedWritingSidebar" x-cloak class="mt-1 pl-3.5 ml-2 border-l border-green-200 dark:border-green-800 overflow-hidden space-y-1">
             <!-- Simple content container -->
-            <div class="transform transition-all duration-200" 
+            <div class="transform transition-all duration-200"
                  :class="{ 'translate-y-0 opacity-100': expandedWritingSidebar, 'translate-y-4 opacity-0': !expandedWritingSidebar }">
+            <%= link_to main_app.books_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-l-md rounded-r-none transition duration-200 #{current_page?(main_app.books_path) ? 'sidebar-item-active' : 'text-gray-700 dark:text-gray-300 sidebar-item-hover hover:text-green-700 dark:hover:text-green-200'}", "aria-current": (current_page?(main_app.books_path) ? "page" : "false") do %>
+                <div class="flex items-center w-full">
+                  <div class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mr-3 dark:bg-gray-100">
+                    <i class="material-icons <%= Book.text_color %> text-lg"><%= Book.icon %></i>
+                  </div>
+                  <div class="flex-grow flex items-center justify-between min-w-0">
+                    <span class="text-sm font-medium truncate">Books</span>
+                    <span class="ml-1.5 px-1.5 py-0.5 text-xs rounded-full <%= current_page?(main_app.books_path) ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 group-hover:bg-green-100 dark:group-hover:bg-green-800 group-hover:text-green-700 dark:group-hover:text-green-200' %> transition-colors">
+                      <%= number_with_delimiter @current_user_content.fetch('Book', []).count %>
+                    </span>
+                  </div>
+                </div>
+              <% end %>
+
             <%= link_to main_app.documents_path, class: "ripple-effect flex items-center px-3 py-2 cursor-pointer group rounded-l-md rounded-r-none transition duration-200 #{current_page?(main_app.documents_path) ? 'sidebar-item-active' : 'text-gray-700 dark:text-gray-300 sidebar-item-hover hover:text-green-700 dark:hover:text-green-200'}", "aria-current": (current_page?(main_app.documents_path) ? "page" : "false") do %>
                 <div class="flex items-center w-full">
                   <div class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mr-3 dark:bg-gray-100">

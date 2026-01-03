@@ -173,6 +173,15 @@ Rails.application.routes.draw do
   end
   resources :folders, only: [:create, :update, :destroy, :show]
 
+  resources :books do
+    member do
+      post :toggle_archive
+      post :add_document
+      delete :remove_document
+      post :sort_document
+    end
+  end
+
   scope '/my' do
     get '/dashboard',       to: 'main#dashboard', as: :dashboard
     get '/content',         to: redirect('/my/dashboard')
