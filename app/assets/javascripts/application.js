@@ -17,4 +17,5 @@
 //= require autocomplete-rails
 // require tribute - Replaced with Alpine.js implementation
 //= require d3
+//= require tailwind_initialization
 //= require_tree .
