@@ -6,7 +6,7 @@ Rails.application.config.content_type_names = {
   all: %w(
     Universe Character Location Item Building Condition Continent Country Creature Deity Flora
     Food Government Group Job Landmark Language Lore Magic Planet Race Religion Scene
-    School Sport Technology Timeline Town Tradition Vehicle
+    School Sport Technology Timeline Town Tradition Vehicle Book
   )
 }
 
