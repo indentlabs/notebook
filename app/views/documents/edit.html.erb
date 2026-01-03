@@ -696,28 +696,12 @@
           }, 2000); // 2 seconds
         };
         
-        // Function to count words - optimized single-pass algorithm
-        // Uses textContent (browser-native) instead of regex on HTML
+        // Function to count words - simple whitespace split
+        // Note: Server-side WordCountService is authoritative; this is an approximation for real-time display
         const countWords = function() {
-          // textContent is browser-optimized and strips HTML automatically
           const text = document.getElementById('editor').textContent || '';
           if (text.length === 0) return 0;
-
-          // Single-pass word counting without creating large arrays
-          let count = 0;
-          let inWord = false;
-          for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r' ||
-                            char === '\u00A0' || char === '\u200B';
-            if (!isSpace && !inWord) {
-              count++;
-              inWord = true;
-            } else if (isSpace) {
-              inWord = false;
-            }
-          }
-          return count;
+          return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
         };
 
         // Function to count characters (uses textContent for efficiency)
