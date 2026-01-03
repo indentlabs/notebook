@@ -155,9 +155,11 @@ class Document < ApplicationRecord
         stray_punctuation: 'ignore'
       ).count(self.body)
     else
-      # For really long documents, use a faster approach to estimate word count
-      # Strip HTML tags first to avoid counting tag names like <p> as words
-      ActionController::Base.helpers.strip_tags(self.body).scan(/\b\w+\b/).count
+      # Strip HTML tags, then split on whitespace.
+      # This matches the JavaScript editor approach:
+      # - Contractions like "don't" count as 1 word
+      # - Hyphenated words like "well-known" count as 1 word
+      ActionController::Base.helpers.strip_tags(self.body).split.count
     end
   end
 
