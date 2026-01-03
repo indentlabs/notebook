@@ -7,12 +7,7 @@
 
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<!-- Set document ID for Alpine components (used by utility functions) -->
-<script>
-  window.DOCUMENT_ID = <%= @document.id %>;
-</script>
-
-<div x-data="documentEdit()" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col overflow-x-hidden">
+<div x-data="documentEditController()" x-init="init()" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col overflow-x-hidden">
 
   <!-- Main content area - Flex layout -->
   <main class="flex-1 pt-14">
@@ -72,19 +67,19 @@
          x-transition:leave-end="translate-x-full"
          class="fixed right-0 top-14 w-80 h-screen-minus-nav bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
          role="complementary"
-         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'">
+         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'">
 
       <!-- Desktop Header - Dynamic based on active panel -->
       <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <button @click="activeSidebarPanel = null"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
-                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'"
-                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'">
+                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : 'Hide Linked Pages'"
+                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : 'Hide Linked Pages'">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
           <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
+            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : 'link'"></i>
           </div>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'"></h2>
         </button>
       </div>
 
@@ -94,22 +89,13 @@
       </div>
 
       <!-- Linked Pages Panel -->
-      <div x-show="activeSidebarPanel === 'linked_pages'">
-        <div x-data="documentEntitiesSidebar({ documentId: <%= @document.id %> })">
-          <%= render partial: 'documents/entities_sidebar' %>
-        </div>
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()" >
+        <%= render partial: 'documents/entities_sidebar' %>
       </div>
 
       <!-- Actions Panel -->
       <div x-show="activeSidebarPanel === 'actions'">
         <%= render partial: 'documents/actions_sidebar' %>
-      </div>
-
-      <!-- Books Panel -->
-      <div x-show="activeSidebarPanel === 'books'">
-        <div x-data="documentBooksSidebar({ documentId: <%= @document.id %>, initialExpandedBooks: <%= (@document_books.count == 1 ? [@document_books.first&.id].compact : []).to_json %> })">
-          <%= render partial: 'documents/books_sidebar' %>
-        </div>
       </div>
     </div>
 
@@ -229,44 +215,6 @@
       <i class="material-icons text-base">bolt</i>
     </div>
 
-    <!-- Desktop Books Toggle Tab -->
-    <div x-show="isDesktop"
-         x-cloak
-         @click="togglePanel('books')"
-         :class="{
-           'right-80': showRightSidebar,
-           'right-0': !showRightSidebar,
-           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'books',
-           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'books'
-         }"
-         class="fixed z-40 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 220px;"
-         data-tooltip="Books"
-         role="button">
-      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'books'">chevron_left</i>
-      <i class="material-icons text-base" x-show="activeSidebarPanel === 'books'">chevron_right</i>
-      <i class="material-icons text-base">menu_book</i>
-    </div>
-
-    <!-- Mobile/Tablet Books Toggle Tab -->
-    <div x-show="!isDesktop"
-         x-cloak
-         @click="togglePanel('books')"
-         :class="{
-           'right-80': showRightSidebar,
-           'right-0': !showRightSidebar,
-           'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === 'books',
-           'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== 'books'
-         }"
-         class="fixed z-30 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
-         style="top: 220px;"
-         data-tooltip="Books"
-         role="button">
-      <i class="material-icons text-base" x-show="activeSidebarPanel !== 'books'">chevron_left</i>
-      <i class="material-icons text-base" x-show="activeSidebarPanel === 'books'">chevron_right</i>
-      <i class="material-icons text-base">menu_book</i>
-    </div>
-
     <!-- Mobile/Tablet Right Sidebar Overlay -->
     <div x-show="showRightSidebar && !isDesktop" x-cloak
          x-transition:enter="transition-opacity ease-linear duration-200"
@@ -294,20 +242,20 @@
          class="lg:hidden fixed right-0 top-14 h-screen-minus-nav w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
          role="dialog"
          aria-modal="true"
-         :aria-labelledby="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : activeSidebarPanel === 'books' ? 'mobile-books-title' : 'mobile-entities-title'">
+         :aria-labelledby="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : 'mobile-entities-title'">
 
       <!-- Mobile Header - Dynamic based on active panel -->
       <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <button @click="closeMobileSidebar()"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :aria-label="activeSidebarPanel === 'information' ? 'Close Information' : activeSidebarPanel === 'actions' ? 'Close Actions' : activeSidebarPanel === 'books' ? 'Close Books' : 'Close Linked Pages'">
+                :aria-label="activeSidebarPanel === 'information' ? 'Close Information' : activeSidebarPanel === 'actions' ? 'Close Actions' : 'Close Linked Pages'">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
           <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
+            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : 'link'"></i>
           </div>
-          <h2 :id="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : activeSidebarPanel === 'books' ? 'mobile-books-title' : 'mobile-entities-title'"
+          <h2 :id="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : 'mobile-entities-title'"
               class="text-sm font-semibold text-gray-900 dark:text-white"
-              x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
+              x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'"></h2>
         </button>
       </div>
 
@@ -317,22 +265,13 @@
       </div>
 
       <!-- Linked Pages Panel -->
-      <div x-show="activeSidebarPanel === 'linked_pages'">
-        <div x-data="documentEntitiesSidebar({ documentId: <%= @document.id %> })">
-          <%= render partial: 'documents/entities_sidebar' %>
-        </div>
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()" >
+        <%= render partial: 'documents/entities_sidebar' %>
       </div>
 
       <!-- Actions Panel -->
       <div x-show="activeSidebarPanel === 'actions'">
         <%= render partial: 'documents/actions_sidebar' %>
-      </div>
-
-      <!-- Books Panel -->
-      <div x-show="activeSidebarPanel === 'books'">
-        <div x-data="documentBooksSidebar({ documentId: <%= @document.id %>, initialExpandedBooks: <%= (@document_books.count == 1 ? [@document_books.first&.id].compact : []).to_json %> })">
-          <%= render partial: 'documents/books_sidebar' %>
-        </div>
       </div>
     </div>
 
@@ -757,36 +696,28 @@
           }, 2000); // 2 seconds
         };
         
-        // Function to count words - matches Ruby's WordCountService behavior
-        // Rules: split on /\, ignore ..., ---, ___, ignore stray punctuation
+        // Function to count words - optimized single-pass algorithm
+        // Uses textContent (browser-native) instead of regex on HTML
         const countWords = function() {
           // textContent is browser-optimized and strips HTML automatically
-          let text = document.getElementById('editor').textContent || '';
+          const text = document.getElementById('editor').textContent || '';
           if (text.length === 0) return 0;
 
-          // Preserve dates like 01/02/2024 by temporarily replacing slashes in them
-          text = text.replace(/(\d{1,2})\/(\d{1,2})(\/\d{2,4})?/g, function(match) {
-            return match.replace(/\//g, '-SLASH-');
-          });
-          // Split on forward slashes
-          text = text.replace(/\//g, ' ');
-          // Restore dates
-          text = text.replace(/-SLASH-/g, '/');
-
-          // Split on backslashes
-          text = text.replace(/\\/g, ' ');
-
-          // Remove dotted lines, dashed lines, underscores (standalone)
-          text = text.replace(/\.{2,}/g, ' ');  // ... or ....
-          text = text.replace(/-{2,}/g, ' ');   // -- or ---
-          text = text.replace(/_{2,}/g, ' ');   // __ or ___
-
-          // Remove stray punctuation (standalone punctuation not part of words)
-          text = text.replace(/(?<!\w)[^\w\s]+(?!\w)/g, ' ');
-
-          // Count words (non-empty sequences after splitting on whitespace)
-          const words = text.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
-          return words.length;
+          // Single-pass word counting without creating large arrays
+          let count = 0;
+          let inWord = false;
+          for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r' ||
+                            char === '\u00A0' || char === '\u200B';
+            if (!isSpace && !inWord) {
+              count++;
+              inWord = true;
+            } else if (isSpace) {
+              inWord = false;
+            }
+          }
+          return count;
         };
 
         // Function to count characters (uses textContent for efficiency)
@@ -1507,5 +1438,684 @@
           }
         }
       </style>
+      
+      <!-- Alpine.js components for Document Editor -->
+      <script>
+        // Main page controller for document edit page
+        function documentEditController() {
+          return {
+            // Sidebar state - null means closed, otherwise shows which panel is active
+            activeSidebarPanel: null, // null, 'linked_pages', or 'information'
+            isDesktop: window.innerWidth >= 1024,
 
-</div> <!-- Close main page container -->
+            // Computed property for backwards compatibility
+            get showRightSidebar() {
+              return this.activeSidebarPanel !== null;
+            },
+
+            init() {
+              this.setupResizeListener();
+            },
+
+            togglePanel(panel) {
+              if (this.activeSidebarPanel === panel) {
+                this.activeSidebarPanel = null;
+              } else {
+                this.activeSidebarPanel = panel;
+
+                // Focus search input when opening linked pages panel
+                if (panel === 'linked_pages') {
+                  setTimeout(() => {
+                    const searchInput = document.getElementById('entity-search-input');
+                    if (searchInput) searchInput.focus();
+                  }, 300);
+                }
+              }
+            },
+
+            // Legacy method for backwards compatibility
+            toggleRightSidebar() {
+              this.togglePanel('linked_pages');
+            },
+
+            closeMobileSidebar() {
+              if (!this.isDesktop) {
+                this.activeSidebarPanel = null;
+              }
+            },
+
+            setupResizeListener() {
+              window.addEventListener('resize', () => {
+                const wasDesktop = this.isDesktop;
+                this.isDesktop = window.innerWidth >= 1024;
+
+                // Close sidebar when transitioning between desktop and mobile
+                if (wasDesktop !== this.isDesktop) {
+                  this.activeSidebarPanel = null;
+                }
+              });
+            }
+          }
+        }
+
+        // Global function to unlink entity (accessible from nested Alpine scopes)
+        window.unlinkDocumentEntity = function(documentEntityId) {
+          if (!confirm('Remove this page from the document?')) {
+            return;
+          }
+
+          // Get CSRF token
+          const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+          // Send DELETE request to remove entity
+          fetch('/documents/<%= @document.id %>/unlink_entity/' + documentEntityId, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json().then(data => ({ ok: response.ok, data })))
+          .then(({ ok, data }) => {
+            if (ok) {
+              // Remove from UI (both desktop and mobile sidebars)
+              const entityElements = document.querySelectorAll(`[data-entity-id="${documentEntityId}"]`);
+              let entityType = null;
+              entityElements.forEach(el => {
+                entityType = el.dataset.entityType;
+                el.remove();
+              });
+
+              if (entityElements.length > 0) {
+                // Update total count (in all sidebars)
+                document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                  const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                  countSpan.textContent = `(${Math.max(0, currentCount - 1)})`;
+                });
+
+                // Update filter button count for this entity type (in all sidebars)
+                document.querySelectorAll(`[data-filter-type="${entityType}"] .filter-count`).forEach(filterButton => {
+                  const currentFilterCount = parseInt(filterButton.textContent.replace(/[()]/g, '')) || 0;
+                  const newCount = Math.max(0, currentFilterCount - 1);
+                  if (newCount === 0) {
+                    // Remove the filter button if no more entities of this type
+                    filterButton.closest('button').remove();
+                  } else {
+                    filterButton.textContent = `(${newCount})`;
+                  }
+                });
+
+                // Check if we need to show empty state (in all sidebars)
+                const remainingEntities = document.querySelectorAll('.linked-entity');
+                if (remainingEntities.length === 0) {
+                  document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                    entitiesList.innerHTML = `
+                      <div class="flex flex-col items-center justify-center py-8 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                          <i class="material-icons text-gray-400 text-xl">link_off</i>
+                        </div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No linked pages yet</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Type @ in the editor or search above to link pages</p>
+                      </div>
+                    `;
+                  });
+                }
+              }
+
+              // Show success toast
+              if (typeof showToast === 'function') {
+                showToast(data.message || 'Page unlinked from document', 'success');
+              }
+            } else {
+              console.error('Failed to unlink entity:', data);
+              if (typeof showToast === 'function') {
+                showToast('Failed to unlink page', 'error');
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error unlinking entity:', error);
+            if (typeof showToast === 'function') {
+              showToast('Error unlinking page', 'error');
+            }
+          });
+        };
+
+        // Global function to auto-link entities from @mentions (called once, updates all sidebars)
+        window.autoLinkEntityToDocument = function(entity) {
+          // Create form data for linking
+          const formData = new FormData();
+          formData.append('document_id', '<%= @document.id %>');
+          formData.append('document_analysis_id', '-1');
+          formData.append('entity_type', entity.type);
+          formData.append('entity_id', entity.id);
+          formData.append('document_entity_id', '-1');
+
+          const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+          fetch('/documents/link_entity', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Accept': 'application/json'
+            },
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && !data.already_linked) {
+              // Remove empty state if it exists
+              document.querySelectorAll('#linked-entities-list .flex.flex-col.items-center.justify-center').forEach(el => el.remove());
+
+              // Add the new entity card to all sidebar lists
+              document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                entitiesList.insertAdjacentHTML('afterbegin', data.card_html);
+                const newElement = entitiesList.firstElementChild;
+                if (window.Alpine && newElement) {
+                  window.Alpine.initTree(newElement);
+                }
+              });
+
+              // Update total count
+              document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                countSpan.textContent = `(${currentCount + 1})`;
+              });
+
+              // Show success toast
+              if (typeof showToast === 'function') {
+                showToast(`${entity.name || data.document_entity?.entity?.name} linked to document`, 'success');
+              }
+            }
+            // Silently ignore "already_linked" - no toast needed for auto-links
+          })
+          .catch(error => {
+            // Silently ignore errors for auto-links (e.g., duplicate, network issues)
+            console.debug('Auto-link skipped:', error);
+          });
+        };
+
+        // Entities sidebar component
+        function documentEntitiesSidebar() {
+          return {
+            activeTab: 'all',
+            selectedEntity: null,
+            searchQuery: '',
+            showSearchDropdown: false,
+            filteredSearchResults: [],
+            allLinkables: [],
+            
+            init() {
+              // Load linkables data if available
+              if (window.notebookLinkables) {
+                this.allLinkables = window.notebookLinkables.map(item => ({
+                  id: item.value.match(/\[\[[^\-]+\-([^\]]+)\]\]/)?.[1],
+                  name: item.name,
+                  type: item.type,
+                  value: item.value,
+                  color: item.color,
+                  icon: item.icon,
+                  textColor: item.textColor
+                }));
+              }
+            },
+            
+            filterSearchResults() {
+              if (this.searchQuery.length === 0) {
+                this.filteredSearchResults = [];
+                this.showSearchDropdown = false;
+                return;
+              }
+
+              // Get currently linked entity IDs (type + id combinations)
+              const linkedEntities = new Set();
+              document.querySelectorAll('.linked-entity').forEach(el => {
+                const type = el.dataset.entityType;
+                const entityId = el.dataset.linkedEntityId;
+                if (type && entityId) {
+                  linkedEntities.add(`${type}-${entityId}`);
+                }
+              });
+
+              const query = this.searchQuery.toLowerCase();
+              this.filteredSearchResults = this.allLinkables
+                .filter(item => item.name.toLowerCase().includes(query))
+                .filter(item => !linkedEntities.has(`${item.type}-${item.id}`)) // Exclude already linked
+                .slice(0, 10); // Limit to 10 results
+
+              this.showSearchDropdown = this.filteredSearchResults.length > 0;
+            },
+            
+            linkEntity(entity, silent = false) {
+              // Check if entity is already linked
+              const existingEntity = document.querySelector(`[data-entity-type="${entity.type}"][data-entity-id]`);
+              if (existingEntity) {
+                const existingIds = Array.from(document.querySelectorAll(`[data-entity-type="${entity.type}"]`))
+                  .map(el => el.querySelector('[data-linked-entity-id]')?.dataset.linkedEntityId)
+                  .filter(Boolean);
+
+                if (existingIds.includes(String(entity.id))) {
+                  if (!silent) {
+                    alert('This page is already linked to the document.');
+                  }
+                  return;
+                }
+              }
+              
+              // Create form data for linking
+              const formData = new FormData();
+              formData.append('document_id', '<%= @document.id %>');
+              formData.append('document_analysis_id', '-1'); // Create placeholder if needed
+              formData.append('entity_type', entity.type);
+              formData.append('entity_id', entity.id);
+              formData.append('document_entity_id', '-1'); // New entity
+              
+              // Get CSRF token
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              
+              // Send AJAX request to link entity
+              fetch('/documents/link_entity', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Accept': 'application/json'
+                },
+                body: formData
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Handle "already linked" case (skip toast for silent auto-links)
+                  if (data.already_linked) {
+                    if (!silent && typeof showToast === 'function') {
+                      showToast(data.message || 'Page is already linked', 'info');
+                    }
+                    return;
+                  }
+
+                  // Remove empty state if it exists (in all sidebars)
+                  document.querySelectorAll('#linked-entities-list .flex.flex-col.items-center.justify-center').forEach(el => el.remove());
+
+                  // Add the new entity card to all sidebar lists (desktop + mobile)
+                  document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                    // Insert the server-rendered card HTML
+                    entitiesList.insertAdjacentHTML('afterbegin', data.card_html);
+
+                    // Initialize Alpine for the new element
+                    const newElement = entitiesList.firstElementChild;
+                    if (window.Alpine && newElement) {
+                      window.Alpine.initTree(newElement);
+                    }
+                  });
+
+                  // Update total count (in all sidebars)
+                  document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                    const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                    countSpan.textContent = `(${currentCount + 1})`;
+                  });
+
+                  // Update filter buttons if this is a new entity type
+                  this.updateFilterButtons(data.document_entity.entity_type, data.document_entity.entity);
+
+                  // Apply current filter
+                  if (this.activeTab !== 'all') {
+                    this.filterByType(this.activeTab);
+                  }
+
+                  // Show success toast
+                  if (typeof showToast === 'function') {
+                    showToast(`${data.document_entity.entity.name} linked to document`, 'success');
+                  }
+                } else {
+                  console.error('Failed to link entity');
+                  if (typeof showToast === 'function') {
+                    showToast('Failed to link page. Please try again.', 'error');
+                  }
+                }
+              })
+              .catch(error => {
+                console.error('Error linking entity:', error);
+                if (typeof showToast === 'function') {
+                  showToast('An error occurred while linking the page.', 'error');
+                }
+              });
+              
+              // Clear search
+              this.searchQuery = '';
+              this.showSearchDropdown = false;
+              this.filteredSearchResults = [];
+            },
+            
+            unlinkEntity(documentEntityId) {
+              // Call the global unlink function
+              window.unlinkDocumentEntity(documentEntityId);
+            },
+            
+            getEntityColorClass(type) {
+              // Map content types to Tailwind color classes
+              const colorMap = {
+                'Character': 'bg-red-100',
+                'Location': 'bg-green-100',
+                'Item': 'bg-yellow-100',
+                'Creature': 'bg-purple-100',
+                'Flora': 'bg-green-100',
+                'Building': 'bg-gray-100',
+                'Landmark': 'bg-blue-100',
+                'Town': 'bg-orange-100',
+                'Country': 'bg-pink-100',
+                'Planet': 'bg-indigo-100',
+                'Universe': 'bg-blue-100',
+                'Document': 'bg-teal-100'
+              };
+              return colorMap[type] || 'bg-gray-100';
+            },
+            
+            getEntityTextColorClass(type) {
+              // Map content types to text color classes
+              const colorMap = {
+                'Character': 'text-red-600',
+                'Location': 'text-green-600',
+                'Item': 'text-yellow-600',
+                'Creature': 'text-purple-600',
+                'Flora': 'text-green-600',
+                'Building': 'text-gray-600',
+                'Landmark': 'text-blue-600',
+                'Town': 'text-orange-600',
+                'Country': 'text-pink-600',
+                'Planet': 'text-indigo-600',
+                'Universe': 'text-blue-600',
+                'Document': 'text-teal-600'
+              };
+              return colorMap[type] || 'text-gray-600';
+            },
+            
+            getEntityIcon(type) {
+              // Map content types to Material Icons
+              const iconMap = {
+                'Character': 'person',
+                'Location': 'place',
+                'Item': 'category',
+                'Creature': 'pets',
+                'Flora': 'local_florist',
+                'Building': 'home',
+                'Landmark': 'terrain',
+                'Town': 'location_city',
+                'Country': 'flag',
+                'Planet': 'public',
+                'Universe': 'public',
+                'Document': 'description'
+              };
+              return iconMap[type] || 'category';
+            },
+            
+            filterByType(type) {
+              this.activeTab = type;
+              
+              // Get all entity elements
+              const entities = document.querySelectorAll('.linked-entity');
+              
+              entities.forEach(entity => {
+                const entityType = entity.dataset.entityType;
+                
+                if (type === 'all') {
+                  // Show all entities
+                  entity.style.display = 'block';
+                } else {
+                  // Show only matching type
+                  entity.style.display = entityType === type ? 'block' : 'none';
+                }
+              });
+              
+              // Update count in header
+              const visibleCount = type === 'all' 
+                ? entities.length 
+                : document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+              
+              // Update the header count if it exists
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${visibleCount})`;
+              }
+              
+              // Update all filter button counts
+              this.updateAllFilterCounts();
+            },
+            
+            updateAllFilterCounts() {
+              // Update counts for all filter buttons
+              const filterButtons = document.querySelectorAll('[data-filter-type]');
+              filterButtons.forEach(button => {
+                const type = button.dataset.filterType;
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+                const countSpan = button.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+                
+                // Hide filter button if count is 0 (entity was removed)
+                if (count === 0) {
+                  button.style.display = 'none';
+                } else {
+                  button.style.display = '';
+                }
+              });
+            },
+            
+            createEntityElement(documentEntity) {
+              const entity = documentEntity.entity;
+              const colorClass = entity.class_color.replace('bg-', 'bg-').replace('-500', '-100');
+              
+              // Build attributes HTML based on entity type
+              let attributesHtml = '';
+              if (documentEntity.entity_type === 'Character') {
+                if (entity.role) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.role)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Location') {
+                if (entity.type_of) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.type_of)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Item') {
+                if (entity.item_type) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.item_type)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else {
+                // Generic fallback
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                } else if (entity.summary) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.summary, 150))}</p>
+                    </div>`;
+                }
+              }
+              
+              return `
+                <div x-data="{ expanded: false }" 
+                     class="border rounded-md overflow-hidden linked-entity"
+                     data-entity-type="${documentEntity.entity_type}"
+                     data-entity-id="${documentEntity.id}"
+                     data-linked-entity-id="${entity.id}">
+                  <!-- Entity header (always visible) -->
+                  <div
+                    @click="expanded = !expanded"
+                    :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                    class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full ${colorClass} flex items-center justify-center mr-2">
+                          <i class="material-icons ${entity.class_text_color} text-xs">${entity.class_icon}</i>
+                        </div>
+                        <div>
+                          <span class="text-sm font-medium">${this.escapeHtml(entity.name)}</span>
+                          <p class="text-xs text-gray-500">${entity.class_name}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <!-- Unlink button -->
+                        <button @click.stop="unlinkEntity(${documentEntity.id})"
+                                class="p-1 hover:bg-red-50 rounded transition-colors"
+                                title="Remove from document">
+                          <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+                        </button>
+                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Expandable preview section -->
+                  <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                    <div class="flex items-center justify-between mb-2">
+                      <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                      <a href="${entity.view_path}" 
+                         class="text-xs text-blue-600 hover:text-blue-800"
+                         target="_blank">
+                        View full page
+                      </a>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      ${attributesHtml}
+                    </div>
+                  </div>
+                </div>
+              `;
+            },
+            
+            updateEntityCount() {
+              const entities = document.querySelectorAll('.linked-entity');
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${entities.length})`;
+              }
+            },
+            
+            updateFilterButtons(entityType, entityData) {
+              const filterContainer = document.getElementById('entity-filter-buttons');
+              if (!filterContainer) return;
+              
+              // Check if a filter button for this type already exists
+              let filterButton = filterContainer.querySelector(`[data-filter-type="${entityType}"]`);
+              
+              if (filterButton) {
+                // Update the count for existing filter
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${entityType}"]`).length;
+                const countSpan = filterButton.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+              } else {
+                // Create a new filter button for this entity type
+                const newButton = document.createElement('button');
+                // Don't use Alpine directives - use regular JavaScript instead
+                newButton.className = 'p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 bg-gray-100 text-gray-700';
+                newButton.setAttribute('title', entityType + 's');
+                newButton.setAttribute('data-filter-type', entityType);
+                
+                // Use the icon from entity data
+                newButton.innerHTML = `
+                  <i class="material-icons text-sm">${entityData.class_icon}</i>
+                  <span class="text-xs filter-count">(1)</span>
+                `;
+                
+                // Add click handler
+                newButton.addEventListener('click', () => {
+                  this.filterByType(entityType);
+                  
+                  // Update button styles to show active state
+                  document.querySelectorAll('#entity-filter-buttons button').forEach(btn => {
+                    if (btn.getAttribute('data-filter-type') === entityType || 
+                        (btn.querySelector('.material-icons')?.textContent === 'apps' && entityType === 'all')) {
+                      btn.className = btn.className.replace('bg-gray-100 text-gray-700', 'bg-blue-100 text-blue-700');
+                    } else if (!btn.hasAttribute('@click')) {
+                      // Only update non-Alpine buttons
+                      btn.className = btn.className.replace('bg-blue-100 text-blue-700', 'bg-gray-100 text-gray-700');
+                    }
+                  });
+                });
+                
+                // Insert the button (keep alphabetical order)
+                const allButtons = Array.from(filterContainer.querySelectorAll('[data-filter-type]'));
+                const insertIndex = allButtons.findIndex(btn => btn.dataset.filterType > entityType);
+                
+                if (insertIndex === -1) {
+                  // Add at the end
+                  filterContainer.appendChild(newButton);
+                } else {
+                  // Insert before the found button
+                  filterContainer.insertBefore(newButton, allButtons[insertIndex]);
+                }
+              }
+            },
+            
+            showSuccessFeedback(message) {
+              // Create a temporary success message
+              const feedback = document.createElement('div');
+              feedback.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+              feedback.textContent = message;
+              document.body.appendChild(feedback);
+              
+              setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => feedback.remove(), 300);
+              }, 2000);
+            },
+            
+            escapeHtml(text) {
+              if (!text) return '';
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div.innerHTML;
+            },
+            
+            truncate(text, length) {
+              if (!text) return '';
+              if (text.length <= length) return text;
+              return text.substring(0, length) + '...';
+            }
+          }
+        }
+      </script>
+
+</div> <!-- Close main page container (x-data="documentEditController()") -->
