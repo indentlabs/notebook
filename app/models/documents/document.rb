@@ -135,32 +135,7 @@ class Document < ApplicationRecord
   def computed_word_count
     return 0 unless self.body && self.body.present?
 
-    # Settings: https://github.com/diasks2/word_count_analyzer
-    # TODO: move this into analysis services & call that here
-    if false && self.body.length <= 10_000
-      WordCountAnalyzer::Counter.new(
-        ellipsis:          'no_special_treatment',
-        hyperlink:         'count_as_one',
-        contraction:       'count_as_one',
-        hyphenated_word:   'count_as_one',
-        date:              'no_special_treatment',
-        number:            'count',
-        numbered_list:     'ignore',
-        xhtml:             'remove',
-        forward_slash:     'count_as_multiple_except_dates',
-        backslash:         'count_as_one',
-        dotted_line:       'ignore',
-        dashed_line:       'ignore',
-        underscore:        'ignore',
-        stray_punctuation: 'ignore'
-      ).count(self.body)
-    else
-      # Strip HTML tags, then split on whitespace.
-      # This matches the JavaScript editor approach:
-      # - Contractions like "don't" count as 1 word
-      # - Hyphenated words like "well-known" count as 1 word
-      ActionController::Base.helpers.strip_tags(self.body).split.count
-    end
+    WordCountService.count(self.body)
   end
 
   def reading_estimate

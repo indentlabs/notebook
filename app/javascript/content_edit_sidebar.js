@@ -81,27 +81,37 @@ function initializeWordCount() {
   updatePageWordCount();
 }
 
-// Word count calculation - matches server-side WordCountAnalyzer behavior
+// Word count calculation - matches server-side WordCountService behavior
+// Rules: split on /\, ignore ..., ---, ___, ignore stray punctuation
 function countWordsInText(text) {
   if (!text || text.length === 0) return 0;
 
   // Strip HTML tags (matches server's xhtml: 'remove' option)
   text = text.replace(/<[^>]*>/g, ' ');
 
-  let count = 0;
-  let inWord = false;
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const isSpace = char === ' ' || char === '\n' || char === '\t' || char === '\r' ||
-                    char === '\u00A0' || char === '\u200B';
-    if (!isSpace && !inWord) {
-      count++;
-      inWord = true;
-    } else if (isSpace) {
-      inWord = false;
-    }
-  }
-  return count;
+  // Preserve dates like 01/02/2024 by temporarily replacing slashes in them
+  text = text.replace(/(\d{1,2})\/(\d{1,2})(\/\d{2,4})?/g, function(match) {
+    return match.replace(/\//g, '-SLASH-');
+  });
+  // Split on forward slashes
+  text = text.replace(/\//g, ' ');
+  // Restore dates
+  text = text.replace(/-SLASH-/g, '/');
+
+  // Split on backslashes
+  text = text.replace(/\\/g, ' ');
+
+  // Remove dotted lines, dashed lines, underscores (standalone)
+  text = text.replace(/\.{2,}/g, ' ');  // ... or ....
+  text = text.replace(/-{2,}/g, ' ');   // -- or ---
+  text = text.replace(/_{2,}/g, ' ');   // __ or ___
+
+  // Remove stray punctuation (standalone punctuation not part of words)
+  text = text.replace(/(?<!\w)[^\w\s]+(?!\w)/g, ' ');
+
+  // Count words (non-empty sequences after splitting on whitespace)
+  const words = text.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
+  return words.length;
 }
 
 // Aggregate word count from all text fields on the page
