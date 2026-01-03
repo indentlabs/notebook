@@ -99,63 +99,81 @@
       </div>
 
       <!-- Books Panel -->
-      <div x-show="activeSidebarPanel === 'books'" x-data="documentBooksSidebar()">
-        <div class="flex flex-col h-full overflow-hidden">
-          <!-- Add to Book Section -->
-          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Add to a book</h4>
-
-            <% available_books = @user_books.reject { |b| @document_books.include?(b) } %>
-            <% if available_books.any? %>
-              <div class="relative mb-3">
-                <select
-                  x-model="selectedBookId"
-                  @change="addToBook()"
-                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 appearance-none cursor-pointer"
-                >
-                  <option value="">Select a book...</option>
-                  <% available_books.each do |book| %>
-                    <option value="<%= book.id %>"><%= book.title %></option>
-                  <% end %>
-                </select>
+      <div x-show="activeSidebarPanel === 'books'" x-data="documentBooksSidebar(<%= @document_books.count == 1 ? @document_books.first.id : 'null' %>)">
+        <!-- Create Book Modal -->
+        <div x-show="showCreateModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             @keydown.escape.window="showCreateModal = false">
+          <div class="fixed inset-0 bg-black bg-opacity-50" @click="showCreateModal = false"></div>
+          <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm"
+                 x-show="showCreateModal"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.stop>
+              <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-base font-medium text-gray-900 dark:text-white flex items-center">
+                    <i class="material-icons text-gray-400 mr-2 text-sm">menu_book</i>
+                    Create New Book
+                  </h3>
+                  <button @click="showCreateModal = false" class="text-gray-400 hover:text-gray-500">
+                    <i class="material-icons text-sm">close</i>
+                  </button>
+                </div>
               </div>
-            <% elsif @user_books.any? %>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">This document is in all your books</p>
-            <% end %>
-
-            <button
-              @click="createAndAddToBook()"
-              :disabled="isCreatingBook"
-              class="w-full flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md transition-colors text-sm font-medium disabled:opacity-50"
-            >
-              <i class="material-icons text-sm mr-2">add</i>
-              Create New Book
-            </button>
+              <div class="p-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Book Title</label>
+                <input type="text"
+                       x-model="newBookTitle"
+                       x-ref="newBookInput"
+                       @keydown.enter="createBookWithTitle()"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                       placeholder="My New Book">
+              </div>
+              <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
+                <button @click="showCreateModal = false"
+                        class="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+                  Cancel
+                </button>
+                <button @click="createBookWithTitle()"
+                        :disabled="isCreatingBook || !newBookTitle.trim()"
+                        class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span x-show="!isCreatingBook">Create</span>
+                  <span x-show="isCreatingBook">Creating...</span>
+                </button>
+              </div>
+            </div>
           </div>
-
-          <!-- Books List Section -->
-          <div class="flex-1 overflow-y-auto">
-            <% if @document_books.any? %>
-              <div class="p-4 pt-3">
-                <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+        </div>
+        <div class="flex flex-col h-full overflow-hidden">
+          <!-- Books List Section (moved to top) -->
+          <% if @document_books.any? %>
+            <div class="flex-1 overflow-y-auto">
+              <div class="px-2 py-3">
+                <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
                   In <%= pluralize(@document_books.count, 'book') %>
                 </h4>
-                <div class="space-y-2" id="books-accordion">
+                <div class="space-y-1" id="books-accordion">
                   <% @document_books.each do |book| %>
                     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                       <div
                         @click="toggleBook(<%= book.id %>)"
-                        class="w-full flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                        class="w-full flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
                       >
                         <div class="flex items-center min-w-0 flex-1">
-                          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-2 transition-transform duration-200"
+                          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1.5 transition-transform duration-200"
                              :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
                           <div class="min-w-0 flex-1">
                             <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.title %></h5>
                             <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize(book.book_documents.count, 'chapter') %></p>
                           </div>
                         </div>
-                        <div class="flex items-center space-x-2 ml-2">
+                        <div class="flex items-center space-x-1 ml-1">
                           <%= link_to edit_book_path(book), class: "p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors", title: "Edit book", onclick: "event.stopPropagation();" do %>
                             <i class="material-icons text-sm">edit</i>
                           <% end %>
@@ -173,8 +191,8 @@
                           <% book.book_documents.order(:position).each do |book_document| %>
                             <% is_current = book_document.document_id == @document.id %>
                             <%= link_to edit_document_path(book_document.document),
-                                class: "flex items-center px-3 py-2 text-sm transition-colors #{is_current ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}" do %>
-                              <span class="w-6 text-xs text-gray-400 dark:text-gray-500 text-right mr-2"><%= book_document.position %>.</span>
+                                class: "flex items-center px-2 py-1.5 text-sm transition-colors #{is_current ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}" do %>
+                              <span class="w-5 text-xs text-gray-400 dark:text-gray-500 text-right mr-1.5"><%= book_document.position %>.</span>
                               <span class="truncate"><%= book_document.document.title %></span>
                               <% if is_current %>
                                 <i class="material-icons text-blue-500 text-xs ml-auto">arrow_back</i>
@@ -187,16 +205,47 @@
                   <% end %>
                 </div>
               </div>
-            <% else %>
-              <div class="flex flex-col items-center justify-center py-8 text-center px-4">
-                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
-                  <i class="material-icons text-gray-400 text-xl">menu_book</i>
-                </div>
-                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Not in any books yet</h4>
-                <p class="text-xs text-gray-500 dark:text-gray-400">Add this document to a book to organize your writing</p>
+            </div>
+          <% end %>
+
+          <!-- Add to Book Section (moved to bottom) -->
+          <div class="px-2 py-3 border-t border-gray-200 dark:border-gray-700">
+            <% available_books = @user_books.reject { |b| @document_books.include?(b) } %>
+            <% if available_books.any? %>
+              <div class="relative mb-2">
+                <select
+                  x-model="selectedBookId"
+                  @change="addToBook()"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
+                >
+                  <option value="">Add to book...</option>
+                  <% available_books.each do |book| %>
+                    <option value="<%= book.id %>"><%= book.title %></option>
+                  <% end %>
+                </select>
               </div>
             <% end %>
+
+            <button
+              @click="createAndAddToBook()"
+              :disabled="isCreatingBook"
+              class="w-full flex items-center justify-center px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md transition-colors text-sm font-medium disabled:opacity-50"
+            >
+              <i class="material-icons text-sm mr-1.5">add</i>
+              Create New Book
+            </button>
           </div>
+
+          <% if @document_books.empty? %>
+            <!-- Empty state (only shown when no books) -->
+            <div class="flex-1 flex flex-col items-center justify-center py-8 text-center px-4">
+              <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                <i class="material-icons text-gray-400 text-xl">menu_book</i>
+              </div>
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Not in any books yet</h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Add this document to a book to organize your writing</p>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
@@ -916,11 +965,13 @@
         }
 
         // Books sidebar component
-        function documentBooksSidebar() {
+        function documentBooksSidebar(autoExpandBookId = null) {
           return {
             selectedBookId: '',
-            expandedBooks: [],
+            expandedBooks: autoExpandBookId ? [autoExpandBookId] : [],
             isCreatingBook: false,
+            showCreateModal: false,
+            newBookTitle: '',
 
             isExpanded(bookId) {
               return this.expandedBooks.includes(bookId);
@@ -993,18 +1044,34 @@
             },
 
             createAndAddToBook() {
+              this.newBookTitle = '';
+              this.showCreateModal = true;
+              this.$nextTick(() => {
+                this.$refs.newBookInput?.focus();
+              });
+            },
+
+            createBookWithTitle() {
+              if (!this.newBookTitle.trim()) return;
+
               this.isCreatingBook = true;
               const documentId = document.querySelector('[data-document-id]').dataset.documentId;
               const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              const title = this.newBookTitle.trim();
 
-              fetch('/books/new', {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
+              fetch('/books', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify({ book: { title: title } })
               })
               .then(response => response.json())
               .then(data => {
-                if (data.status === 'ok' && data.book) {
-                  return fetch('/books/' + data.book.id + '/add_document', {
+                if (data.id) {
+                  return fetch('/books/' + data.id + '/add_document', {
                     method: 'POST',
                     headers: {
                       'X-CSRF-Token': csrfToken,

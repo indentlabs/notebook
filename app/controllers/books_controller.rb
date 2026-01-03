@@ -20,6 +20,23 @@ class BooksController < ApplicationController
     end
   end
 
+  def create
+    @book = current_user.books.new(book_params)
+    @book.title = 'Untitled Book' if @book.title.blank?
+
+    if @book.save
+      respond_to do |format|
+        format.html { redirect_to edit_book_path(@book) }
+        format.json { render json: { id: @book.id, title: @book.title } }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to books_path, alert: 'Failed to create book.' }
+        format.json { render json: { errors: @book.errors }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   def edit
     @available_documents = current_user.documents.unarchived.order(:title)
     @book_documents = @book.book_documents.includes(:document).order(position: :asc)
