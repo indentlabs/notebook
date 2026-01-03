@@ -1,7 +1,6 @@
 <div x-data="{
   viewMode: localStorage.getItem('books_view_mode') || 'grid',
   searchQuery: '',
-  showArchived: false,
   statusFilters: [],
   statusFilterOpen: false,
   toggleStatus(status) {
@@ -38,9 +37,6 @@
             </h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">
               <%= pluralize @books.count, 'book' %>
-              <% if @archived_books.any? %>
-                <span class="text-gray-400">(<%= @archived_books.count %> archived)</span>
-              <% end %>
             </p>
           </div>
         </div>
@@ -198,7 +194,7 @@
           </div>
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Create your first book</h2>
           <p class="text-gray-600 dark:text-gray-400 mb-6">
-            Books help you organize your documents into collections. Create a book to start building your table of contents.
+            Books help you organize your documents into something bigger. Create a book to start building your table of contents.
           </p>
           <%= link_to new_book_path, class: "inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white #{Book.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 shadow-sm" do %>
             <i class="material-icons text-xl mr-2">add</i>
@@ -208,27 +204,5 @@
       </div>
     <% end %>
 
-    <!-- Archived Books -->
-    <% if @archived_books.any? %>
-      <div class="mt-8">
-        <button
-          @click="showArchived = !showArchived"
-          class="flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-4"
-        >
-          <i class="material-icons text-lg mr-1" x-text="showArchived ? 'expand_less' : 'expand_more'"></i>
-          <span><%= pluralize @archived_books.count, 'archived book' %></span>
-        </button>
-
-        <div x-show="showArchived" x-collapse class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 opacity-60">
-            <% @archived_books.each do |book| %>
-              <div x-show="(searchQuery === '' || '<%= book.title.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>')">
-                <%= render 'book_card', book: book %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      </div>
-    <% end %>
   </div>
 </div>

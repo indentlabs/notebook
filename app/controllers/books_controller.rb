@@ -5,7 +5,6 @@ class BooksController < ApplicationController
 
   def index
     @books = current_user.books.unarchived.order(updated_at: :desc)
-    @archived_books = current_user.books.archived.order(updated_at: :desc)
   end
 
   def show
@@ -15,12 +14,15 @@ class BooksController < ApplicationController
 
   def new
     @book = current_user.books.create!(title: 'Untitled Book')
-    redirect_to edit_book_path(@book)
+    respond_to do |format|
+      format.html { redirect_to edit_book_path(@book) }
+      format.json { render json: { status: 'ok', book: { id: @book.id, title: @book.title } } }
+    end
   end
 
   def edit
     @available_documents = current_user.documents.unarchived.order(:title)
-    @book_documents = @book.book_documents.includes(:document)
+    @book_documents = @book.book_documents.includes(:document).order(position: :asc)
   end
 
   def update
@@ -43,8 +45,19 @@ class BooksController < ApplicationController
   end
 
   def toggle_archive
-    @book.archived? ? @book.unarchive! : @book.archive!
-    redirect_to books_path
+    if @book.archived?
+      @book.unarchive!
+      respond_to do |format|
+        format.html { redirect_to edit_book_path(@book) }
+        format.json { render json: { success: true } }
+      end
+    else
+      @book.archive!
+      respond_to do |format|
+        format.html { redirect_to archive_path }
+        format.json { render json: { success: true } }
+      end
+    end
   end
 
   # Document management
