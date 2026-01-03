@@ -1,0 +1,30 @@
+<%#
+  Sidebar Toggle Tab
+
+  A reusable toggle button for the document editor sidebar panels.
+  Used for both desktop and mobile/tablet views.
+
+  Required locals:
+    - panel_name: String ('information', 'linked_pages', or 'actions')
+    - icon: String (Material Icons name, e.g., 'info', 'link', 'bolt')
+    - tooltip: String (Tooltip text, e.g., 'Information', 'Linked Pages', 'Actions')
+    - top_position: Integer (CSS top position in pixels)
+    - is_desktop: Boolean (true for desktop, false for mobile/tablet)
+%>
+<div x-show="<%= is_desktop ? 'isDesktop' : '!isDesktop' %>"
+     x-cloak
+     @click="togglePanel('<%= panel_name %>')"
+     :class="{
+       'right-80': showRightSidebar,
+       'right-0': !showRightSidebar,
+       'bg-teal-500 hover:bg-teal-600': activeSidebarPanel === '<%= panel_name %>',
+       'bg-notebook-blue hover:bg-blue-600': activeSidebarPanel !== '<%= panel_name %>'
+     }"
+     class="fixed z-<%= is_desktop ? '40' : '30' %> text-white p-2 rounded-l-md shadow-lg transition-all duration-300 cursor-pointer flex items-center gap-1 tooltip-left"
+     style="top: <%= top_position %>px;"
+     data-tooltip="<%= tooltip %>"
+     role="button">
+  <i class="material-icons text-base" x-show="activeSidebarPanel !== '<%= panel_name %>'">chevron_left</i>
+  <i class="material-icons text-base" x-show="activeSidebarPanel === '<%= panel_name %>'">chevron_right</i>
+  <i class="material-icons text-base"><%= icon %></i>
+</div>
