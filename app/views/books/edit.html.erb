@@ -228,6 +228,17 @@ document.addEventListener('DOMContentLoaded', function() {
   const list = document.getElementById('book-documents-list');
   if (!list) return;
 
+  // Update all position numbers to match current order
+  function updatePositionNumbers() {
+    const items = list.querySelectorAll('li');
+    items.forEach((item, index) => {
+      const positionNumber = item.querySelector('.position-number');
+      if (positionNumber) {
+        positionNumber.textContent = index + 1;
+      }
+    });
+  }
+
   // Check if jQuery UI Sortable is available
   if (typeof $ !== 'undefined' && $.fn.sortable) {
     $(list).sortable({
@@ -247,6 +258,8 @@ document.addEventListener('DOMContentLoaded', function() {
             book_document_id: bookDocumentId,
             position: newPosition
           })
+        }).then(() => {
+          updatePositionNumbers();
         }).catch(error => {
           console.error('Error sorting:', error);
           $(list).sortable('cancel');
