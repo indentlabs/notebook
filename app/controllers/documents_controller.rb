@@ -317,9 +317,13 @@ class DocumentsController < ApplicationController
     @linked_entities = @document.document_entities
       .includes(:entity)
       .where.not(entity_id: nil)
-    
+
     # Group by entity type for easier rendering
     @linked_entities_by_type = @linked_entities.group_by(&:entity_type)
+
+    # Books sidebar data
+    @document_books = @document.books.includes(book_documents: :document).order(:title)
+    @user_books = current_user.books.unarchived.order(:title)
   end
 
   def create
