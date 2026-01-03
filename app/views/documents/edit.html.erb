@@ -67,19 +67,19 @@
          x-transition:leave-end="translate-x-full"
          class="fixed right-0 top-14 w-80 h-screen-minus-nav bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
          role="complementary"
-         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'">
+         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'">
 
       <!-- Desktop Header - Dynamic based on active panel -->
       <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <button @click="activeSidebarPanel = null"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
-                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : 'Hide Linked Pages'"
-                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : 'Hide Linked Pages'">
+                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'"
+                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
           <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : 'link'"></i>
+            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
           </div>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : 'Linked Pages'"></h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
         </button>
       </div>
 
@@ -99,9 +99,104 @@
       </div>
 
       <!-- Books Panel -->
-      <div x-show="activeSidebarPanel === 'books'">
-        <div class="p-4">
-          <p class="text-sm text-gray-500">Books panel placeholder</p>
+      <div x-show="activeSidebarPanel === 'books'" x-data="documentBooksSidebar()">
+        <div class="flex flex-col h-full overflow-hidden">
+          <!-- Add to Book Section -->
+          <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Add to a book</h4>
+
+            <% available_books = @user_books.reject { |b| @document_books.include?(b) } %>
+            <% if available_books.any? %>
+              <div class="relative mb-3">
+                <select
+                  x-model="selectedBookId"
+                  @change="addToBook()"
+                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 appearance-none cursor-pointer"
+                >
+                  <option value="">Select a book...</option>
+                  <% available_books.each do |book| %>
+                    <option value="<%= book.id %>"><%= book.title %></option>
+                  <% end %>
+                </select>
+              </div>
+            <% elsif @user_books.any? %>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">This document is in all your books</p>
+            <% end %>
+
+            <button
+              @click="createAndAddToBook()"
+              :disabled="isCreatingBook"
+              class="w-full flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md transition-colors text-sm font-medium disabled:opacity-50"
+            >
+              <i class="material-icons text-sm mr-2">add</i>
+              Create New Book
+            </button>
+          </div>
+
+          <!-- Books List Section -->
+          <div class="flex-1 overflow-y-auto">
+            <% if @document_books.any? %>
+              <div class="p-4 pt-3">
+                <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
+                  In <%= pluralize(@document_books.count, 'book') %>
+                </h4>
+                <div class="space-y-2" id="books-accordion">
+                  <% @document_books.each do |book| %>
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                      <div
+                        @click="toggleBook(<%= book.id %>)"
+                        class="w-full flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                      >
+                        <div class="flex items-center min-w-0 flex-1">
+                          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-2 transition-transform duration-200"
+                             :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
+                          <div class="min-w-0 flex-1">
+                            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.title %></h5>
+                            <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize(book.book_documents.count, 'chapter') %></p>
+                          </div>
+                        </div>
+                        <div class="flex items-center space-x-2 ml-2">
+                          <%= link_to edit_book_path(book), class: "p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors", title: "Edit book", onclick: "event.stopPropagation();" do %>
+                            <i class="material-icons text-sm">edit</i>
+                          <% end %>
+                          <button
+                            @click.stop="removeFromBook(<%= book.id %>)"
+                            class="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors"
+                            title="Remove from book"
+                          >
+                            <i class="material-icons text-sm">close</i>
+                          </button>
+                        </div>
+                      </div>
+                      <div x-show="isExpanded(<%= book.id %>)" x-collapse class="border-t border-gray-200 dark:border-gray-700">
+                        <div class="max-h-48 overflow-y-auto">
+                          <% book.book_documents.order(:position).each do |book_document| %>
+                            <% is_current = book_document.document_id == @document.id %>
+                            <%= link_to edit_document_path(book_document.document),
+                                class: "flex items-center px-3 py-2 text-sm transition-colors #{is_current ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}" do %>
+                              <span class="w-6 text-xs text-gray-400 dark:text-gray-500 text-right mr-2"><%= book_document.position %>.</span>
+                              <span class="truncate"><%= book_document.document.title %></span>
+                              <% if is_current %>
+                                <i class="material-icons text-blue-500 text-xs ml-auto">arrow_back</i>
+                              <% end %>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <div class="flex flex-col items-center justify-center py-8 text-center px-4">
+                <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                  <i class="material-icons text-gray-400 text-xl">menu_book</i>
+                </div>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Not in any books yet</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Add this document to a book to organize your writing</p>
+              </div>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>
@@ -145,7 +240,7 @@
         function documentEditController() {
           return {
             // Sidebar state - null means closed, otherwise shows which panel is active
-            activeSidebarPanel: null, // null, 'linked_pages', or 'information'
+            activeSidebarPanel: null, // null, 'linked_pages', 'information', 'actions', or 'books'
             isDesktop: window.innerWidth >= 1024,
 
             // Computed property for backwards compatibility
@@ -818,6 +913,115 @@
               return text.substring(0, length) + '...';
             }
           }
+        }
+
+        // Books sidebar component
+        function documentBooksSidebar() {
+          return {
+            selectedBookId: '',
+            expandedBooks: [],
+            isCreatingBook: false,
+
+            isExpanded(bookId) {
+              return this.expandedBooks.includes(bookId);
+            },
+
+            toggleBook(bookId) {
+              const index = this.expandedBooks.indexOf(bookId);
+              if (index > -1) {
+                this.expandedBooks.splice(index, 1);
+              } else {
+                this.expandedBooks.push(bookId);
+              }
+            },
+
+            addToBook() {
+              if (!this.selectedBookId) return;
+
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+              fetch('/books/' + this.selectedBookId + '/add_document', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Accept': 'application/json'
+                },
+                body: 'document_id=' + documentId
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === 'ok') {
+                  window.location.reload();
+                }
+              })
+              .catch(error => console.error('Error adding to book:', error));
+
+              this.selectedBookId = '';
+            },
+
+            removeFromBook(bookId) {
+              if (!confirm('Remove this document from the book?')) return;
+
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+              fetch('/books/' + bookId + '/remove_document?document_id=' + documentId, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Accept': 'application/json'
+                }
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === 'ok') {
+                  const bookSection = document.querySelector('[data-book-id="' + bookId + '"]');
+                  if (bookSection) {
+                    const wrapper = bookSection.closest('.bg-gray-50');
+                    if (wrapper) wrapper.remove();
+                  }
+
+                  const remainingBooks = document.querySelectorAll('#books-accordion > div');
+                  if (remainingBooks.length === 0) {
+                    window.location.reload();
+                  }
+                }
+              })
+              .catch(error => console.error('Error removing from book:', error));
+            },
+
+            createAndAddToBook() {
+              this.isCreatingBook = true;
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+              fetch('/books/new', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === 'ok' && data.book) {
+                  return fetch('/books/' + data.book.id + '/add_document', {
+                    method: 'POST',
+                    headers: {
+                      'X-CSRF-Token': csrfToken,
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                      'Accept': 'application/json'
+                    },
+                    body: 'document_id=' + documentId
+                  });
+                }
+              })
+              .then(() => window.location.reload())
+              .catch(error => {
+                console.error('Error creating book:', error);
+                this.isCreatingBook = false;
+              });
+            }
+          };
         }
       </script>
 
