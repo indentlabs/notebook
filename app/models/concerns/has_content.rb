@@ -132,7 +132,10 @@ module HasContent
 
         Rails.application.config.content_types[:all].each do |type|
           relation = type.name.downcase.pluralize.to_sym # :characters
-          content_value[relation] = send(relation).is_public
+          pages = send(relation).is_public
+          # Eager load universe for content types that belong to a universe (not Universe itself)
+          pages = pages.includes(:universe) if type.name != 'Universe'
+          content_value[relation] = pages
         end
 
         content_value

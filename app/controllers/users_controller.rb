@@ -284,9 +284,12 @@ class UsersController < ApplicationController
     if user_signed_in?
       @is_following = UserFollowing.exists?(user_id: current_user.id, followed_user_id: @user.id)
       @is_blocked = UserBlocking.exists?(user_id: current_user.id, blocked_user_id: @user.id)
+      # Cache followed user IDs to prevent N+1 in view mutual connection checks
+      @current_user_following_ids = current_user.followed_users.pluck(:id)
     else
       @is_following = false
       @is_blocked = false
+      @current_user_following_ids = []
     end
   end
   
