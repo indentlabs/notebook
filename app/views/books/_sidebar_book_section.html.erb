@@ -6,7 +6,7 @@
   <!-- Book Header (collapsible toggle) -->
   <button
     @click="toggleBook(<%= book.id %>)"
-    class="w-full flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+    class="group w-full flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
   >
     <div class="flex items-center min-w-0 flex-1">
       <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-2 transition-transform duration-200"
@@ -18,7 +18,7 @@
         </p>
       </div>
     </div>
-    <div class="flex items-center space-x-2 ml-2">
+    <div class="flex items-center space-x-2 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
       <%= link_to edit_book_path(book), class: "p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors", title: "Edit book", onclick: "event.stopPropagation();" do %>
         <i class="material-icons text-sm">edit</i>
       <% end %>
@@ -46,7 +46,7 @@
         <% book.book_documents.order(position: :asc).each_with_index do |book_document, index| %>
           <% is_current = book_document.document_id == document.id %>
           <li
-            class="book-chapter-row flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group <%= is_current ? 'bg-teal-50 dark:bg-teal-900 bg-opacity-50 dark:bg-opacity-20' : '' %>"
+            class="book-chapter-row flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-l-4 border-teal-500' : '' %>"
             data-book-document-id="<%= book_document.id %>"
             data-position="<%= book_document.position %>"
           >
@@ -56,7 +56,15 @@
             </div>
 
             <!-- Position Number -->
-            <span class="w-5 text-xs text-gray-400 dark:text-gray-500 mr-2 flex-shrink-0"><%= index + 1 %>.</span>
+            <% if is_current %>
+              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-teal-500 text-xs text-white mr-2 flex-shrink-0 font-medium">
+                <%= index + 1 %>
+              </span>
+            <% else %>
+              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400 mr-2 flex-shrink-0 font-medium">
+                <%= index + 1 %>
+              </span>
+            <% end %>
 
             <!-- Document Link -->
             <% if is_current %>

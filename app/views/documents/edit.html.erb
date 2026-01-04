@@ -155,15 +155,13 @@
           <% if @document_books.any? %>
             <div class="flex-1 overflow-y-auto">
               <div class="px-2 py-3">
-                <h4 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-1">
-                  In <%= pluralize(@document_books.count, 'book') %>
-                </h4>
+                <%# Header removed - "Books" panel title already provides context %>
                 <div class="space-y-1" id="books-accordion">
                   <% @document_books.each do |book| %>
                     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
                       <div
                         @click="toggleBook(<%= book.id %>)"
-                        class="w-full flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                        class="group w-full flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
                       >
                         <div class="flex items-center min-w-0 flex-1">
                           <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1.5 transition-transform duration-200"
@@ -173,7 +171,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize(book.book_documents.count, 'chapter') %></p>
                           </div>
                         </div>
-                        <div class="flex items-center space-x-1 ml-1">
+                        <div class="flex items-center space-x-1 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <%= link_to edit_book_path(book), class: "p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors", title: "Edit book", onclick: "event.stopPropagation();" do %>
                             <i class="material-icons text-sm">edit</i>
                           <% end %>
@@ -190,18 +188,22 @@
                         <div class="max-h-64 overflow-y-auto sortable-chapters" data-book-id="<%= book.id %>">
                           <% book.book_documents.order(:position).each do |book_document| %>
                             <% is_current = book_document.document_id == @document.id %>
-                            <div class="flex items-center px-2 py-1.5 text-sm transition-colors <%= is_current ? 'bg-blue-50 dark:bg-blue-900' : 'hover:bg-gray-100 dark:hover:bg-gray-700' %>"
+                            <div class="group flex items-center px-2 py-1.5 text-sm transition-colors <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-l-4 border-teal-500' : 'hover:bg-gray-100 dark:hover:bg-gray-700' %>"
                                  data-book-document-id="<%= book_document.id %>">
-                              <div class="drag-handle hidden lg:block cursor-move text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 mr-1 flex-shrink-0">
+                              <div class="drag-handle hidden lg:block cursor-move text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 mr-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <i class="material-icons text-xs">drag_indicator</i>
                               </div>
-                              <span class="position-number w-4 text-xs text-gray-400 dark:text-gray-500 text-right mr-1 flex-shrink-0"><%= book_document.position %>.</span>
+                              <% if is_current %>
+                                <span class="position-number w-4 h-4 flex items-center justify-center rounded-full bg-teal-500 text-xs text-white mr-1.5 flex-shrink-0 font-medium"><%= book_document.position %></span>
+                              <% else %>
+                                <span class="position-number w-4 h-4 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400 mr-1.5 flex-shrink-0 font-medium"><%= book_document.position %></span>
+                              <% end %>
                               <%= link_to edit_document_path(book_document.document),
-                                  class: "truncate flex-1 #{is_current ? 'text-blue-700 dark:text-blue-300 font-medium' : 'text-gray-700 dark:text-gray-300'}" do %>
+                                  class: "truncate flex-1 #{is_current ? 'text-teal-700 dark:text-teal-300 font-medium' : 'text-gray-700 dark:text-gray-300'}" do %>
                                 <%= book_document.document.title %>
                               <% end %>
                               <% if is_current %>
-                                <i class="material-icons text-blue-500 text-xs ml-auto flex-shrink-0">arrow_back</i>
+                                <i class="material-icons text-teal-500 text-xs ml-auto flex-shrink-0">edit</i>
                               <% end %>
                             </div>
                           <% end %>
