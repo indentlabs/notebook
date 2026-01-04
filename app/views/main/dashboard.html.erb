@@ -117,11 +117,11 @@
               </div>
             </div>
 
-            <!-- Editing Streak -->
+            <!-- Writing Streak -->
             <div class="bg-gradient-to-br from-orange-50 via-white to-orange-25 dark:from-notebook-blue dark:to-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
               <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
                 <i class="material-icons mr-1 text-orange-600 dark:text-orange-400 text-base">local_fire_department</i>
-                Editing Streak
+                Writing Streak
               </h4>
               <div class="flex flex-row items-center space-x-4">
                 <div class="flex items-center justify-center space-x-1 flex-1">
@@ -333,11 +333,11 @@
                 </div>
               </div>
 
-              <!-- Editing Streak -->
+              <!-- Writing Streak -->
               <div class="bg-gradient-to-br from-orange-50 via-white to-orange-25 dark:from-notebook-blue dark:to-black rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                 <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
                   <i class="material-icons mr-1 text-orange-600 dark:text-orange-400 text-base">local_fire_department</i>
-                  Editing Streak
+                  Writing Streak
                 </h4>
 
                 <!-- Streak Visualization -->
@@ -351,7 +351,7 @@
                               <%= index < 6 ? 'relative' : '' %>"
                               data-date="<%= day[:date].strftime('%B %d, %Y') %>"
                               data-has-activity="<%= day[:has_activity] %>"
-                              data-edit-count="<%= day[:edit_count] %>"
+                              data-word-count="<%= day[:word_count] %>"
                               data-day-index="<%= index %>">
                             <!-- Connection line to next dot -->
                             <% if index < 6 %>
@@ -390,7 +390,7 @@
                         <%= @current_streak || 0 %>
                       </div>
                       <div class="streak-info text-xs text-gray-600 dark:text-gray-400 cursor-help transition-colors duration-200 hover:text-orange-600 dark:hover:text-orange-400 whitespace-nowrap"
-                           data-total-edits="<%= @streak_total_edits || 0 %>"
+                           data-total-words="<%= @streak_total_words || 0 %>"
                            data-streak-days="<%= @current_streak || 0 %>">
                         <%= (@current_streak || 0) == 1 ? 'day' : 'days' %> in a row
                       </div>
@@ -912,12 +912,12 @@ document.addEventListener('DOMContentLoaded', function() {
       // Mouse enter - show tooltip and fun effects
       day.addEventListener('mouseenter', function(e) {
         const date = this.dataset.date;
-        const editCount = parseInt(this.dataset.editCount);
-        
+        const wordCount = parseInt(this.dataset.wordCount);
+
         // Update tooltip content
         streakTooltipDate.textContent = date;
-        streakTooltipActivity.textContent = editCount === 1 ? 
-          '1 edit made' : `${editCount} edits made`;
+        streakTooltipActivity.textContent = wordCount === 1 ?
+          '1 word written' : `${wordCount.toLocaleString()} words written`;
         
         // Position tooltip relative to the hovered element
         const rect = this.getBoundingClientRect();
@@ -970,13 +970,13 @@ document.addEventListener('DOMContentLoaded', function() {
   if (streakInfoTooltip && streakInfoElement) {
     // Mouse enter - show streak info tooltip
     streakInfoElement.addEventListener('mouseenter', function(e) {
-      const totalEdits = parseInt(this.dataset.totalEdits) || 0;
+      const totalWords = parseInt(this.dataset.totalWords) || 0;
       const streakDays = parseInt(this.dataset.streakDays) || 0;
-      
+
       // Update tooltip content
       streakInfoTitle.textContent = `${streakDays}-Day Streak`;
-      streakInfoDetails.textContent = totalEdits === 1 ? 
-        '1 total edit made' : `${totalEdits} total edits made`;
+      streakInfoDetails.textContent = totalWords === 1 ?
+        '1 word written' : `${totalWords.toLocaleString()} words written`;
       
       // Position tooltip relative to the hovered element
       const rect = this.getBoundingClientRect();

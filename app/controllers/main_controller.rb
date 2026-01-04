@@ -288,8 +288,8 @@ class MainController < ApplicationController
       [date.strftime('%m/%d'), activity_count]
     end.reverse
     
-    # Calculate Editing Streak
-    calculate_editing_streak(all_content)
+    # Calculate Writing Streak
+    calculate_writing_streak
 
     # Use user's timezone for date calculations
     user_today = current_user.current_date_in_time_zone
@@ -307,43 +307,48 @@ class MainController < ApplicationController
     )
   end
 
-  def calculate_editing_streak(all_content)
+  def calculate_writing_streak
     # Use user's timezone for date calculations
     user_today = current_user.current_date_in_time_zone
-    user_tz = current_user.time_zone.presence || 'UTC'
 
-    # Get unique dates when user edited content (last 100 days to be safe)
-    edit_dates = all_content.map { |page| page.updated_at.in_time_zone(user_tz).to_date }.uniq.sort.reverse
+    # Calculate current streak using word count data (matches WritingActivityController)
+    @current_streak = 0
+    date = user_today
 
-    # Calculate current streak
-    current_streak = 0
-    current_date = user_today
-
-    # Check each day going backwards
-    while edit_dates.include?(current_date)
-      current_streak += 1
-      current_date -= 1.day
+    365.times do
+      words = WordCountUpdate.words_written_on_date(current_user, date)
+      if words > 0
+        @current_streak += 1
+        date -= 1.day
+      else
+        # If today has no words yet, check if yesterday started a streak
+        if date == user_today && @current_streak == 0
+          date -= 1.day
+          next
+        end
+        break
+      end
     end
 
-    @current_streak = current_streak
-
-    # Calculate total edits in current streak
-    @streak_total_edits = 0
-    if current_streak > 0
-      streak_dates = (0..current_streak-1).map { |days_ago| user_today - days_ago.days }
-      @streak_total_edits = all_content.count { |page| streak_dates.include?(page.updated_at.in_time_zone(user_tz).to_date) }
+    # Calculate total words written in current streak
+    @streak_total_words = 0
+    if @current_streak > 0
+      streak_start = date + 1.day # date is now one day before streak started
+      @streak_total_words = WordCountUpdate.words_written_in_range(
+        current_user,
+        streak_start..user_today
+      )
     end
 
     # Generate last 7 days for streak visualization
     @streak_days = (0..6).map do |days_ago|
-      date = user_today - days_ago.days
-      has_activity = edit_dates.include?(date)
-      edit_count = all_content.count { |page| page.updated_at.in_time_zone(user_tz).to_date == date }
+      day_date = user_today - days_ago.days
+      words = WordCountUpdate.words_written_on_date(current_user, day_date)
       {
-        date: date,
-        has_activity: has_activity,
-        edit_count: edit_count,
-        day_name: date.strftime('%a')[0] # First letter of day name
+        date: day_date,
+        has_activity: words > 0,
+        word_count: words,
+        day_name: day_date.strftime('%a')[0] # First letter of day name
       }
     end.reverse
   end
