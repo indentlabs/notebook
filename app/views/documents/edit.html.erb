@@ -154,18 +154,19 @@
           <!-- Books List Section (moved to top) -->
           <% if @document_books.any? %>
             <div class="flex-1 overflow-y-auto">
-              <div class="px-2 py-3">
+              <div class="py-1">
                 <%# Header removed - "Books" panel title already provides context %>
-                <div class="space-y-1" id="books-accordion">
+                <div class="divide-y divide-gray-200 dark:divide-gray-700" id="books-accordion">
                   <% @document_books.each do |book| %>
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <div>
                       <div
                         @click="toggleBook(<%= book.id %>)"
-                        class="group w-full flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                        class="group w-full flex items-center justify-between py-2 px-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
                       >
                         <div class="flex items-center min-w-0 flex-1">
-                          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1.5 transition-transform duration-200"
+                          <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1 transition-transform duration-200"
                              :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
+                          <i class="material-icons <%= Book.text_color %> text-base mr-1.5"><%= Book.icon %></i>
                           <div class="min-w-0 flex-1">
                             <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.title %></h5>
                             <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize(book.book_documents.count, 'chapter') %></p>
@@ -184,11 +185,11 @@
                           </button>
                         </div>
                       </div>
-                      <div x-show="isExpanded(<%= book.id %>)" x-collapse class="border-t border-gray-200 dark:border-gray-700">
+                      <div x-show="isExpanded(<%= book.id %>)" x-collapse>
                         <div class="max-h-64 overflow-y-auto sortable-chapters" data-book-id="<%= book.id %>">
                           <% book.book_documents.order(:position).each do |book_document| %>
                             <% is_current = book_document.document_id == @document.id %>
-                            <div class="group flex items-center px-2 py-1.5 text-sm transition-colors <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-l-4 border-teal-500' : 'hover:bg-gray-100 dark:hover:bg-gray-700' %>"
+                            <div class="group flex items-center px-2 py-1.5 text-sm transition-colors border-l-4 <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-teal-500' : 'border-transparent hover:bg-gray-100 dark:hover:bg-gray-700' %>"
                                  data-book-document-id="<%= book_document.id %>">
                               <div class="drag-handle hidden lg:block cursor-move text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 mr-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <i class="material-icons text-xs">drag_indicator</i>
@@ -1049,7 +1050,7 @@
               items.forEach((item, index) => {
                 const positionNumber = item.querySelector('.position-number');
                 if (positionNumber) {
-                  positionNumber.textContent = (index + 1) + '.';
+                  positionNumber.textContent = (index + 1);
                 }
               });
             },
