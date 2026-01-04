@@ -30,8 +30,8 @@
             <i class="material-icons text-blue-600 dark:text-blue-400 text-lg">edit</i>
           </div>
           <div class="ml-3">
-            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= pluralize(@stats.total_changes, 'change') %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Total</div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@stats.total_changes) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Total changes</div>
           </div>
         </div>
       </div>
@@ -44,20 +44,7 @@
           </div>
           <div class="ml-3">
             <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= @stats.active_days %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400"><%= @stats.active_days == 1 ? 'Day edited' : 'Days edited' %></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Days Since Creation -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-            <i class="material-icons text-purple-600 dark:text-purple-400 text-lg">schedule</i>
-          </div>
-          <div class="ml-3">
-            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= pluralize(@stats.days_since_creation, 'day') %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Since creation</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400"><%= @stats.active_days == 1 ? 'Day with edits' : 'Days with edits' %></div>
           </div>
         </div>
       </div>
@@ -75,6 +62,19 @@
               <%= pluralize(field_count, 'change') %>
             </div>
             <div class="text-sm text-gray-500 dark:text-gray-400">Biggest Edit Session</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Days Since Creation -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <i class="material-icons text-purple-600 dark:text-purple-400 text-lg">schedule</i>
+          </div>
+          <div class="ml-3">
+            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= pluralize(@stats.days_since_creation, 'day') %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Since creation</div>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@
                                end
             %>
             <div class="w-3 h-8 rounded-sm flex-shrink-0 <%= intensity_level %> border border-gray-200 dark:border-gray-600"
-                 title="<%= week_data[:change_count] %> changes during week of <%= week_data[:week_start].strftime('%b %d') %>">
+                 title="<%= week_data[:change_count] %> <%= week_data[:change_count] == 1 ? 'edit' : 'edits' %> during week of <%= week_data[:week_start].strftime('%b %d') %>">
             </div>
           <% end %>
         </div>
