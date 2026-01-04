@@ -197,12 +197,12 @@ document.addEventListener('DOMContentLoaded', function() {
     $('.js-autosave-status').text('Unsaved');
     $('.js-autosave-icon').text('edit');
 
-    // Clear and reset the short timer (2 seconds)
+    // Clear and reset the short timer (500ms)
     clearTimeout(short_timer);
     short_timer = setTimeout(function() {
-      console.log('Short timer triggered - 2 seconds since last change');
+      console.log('Short timer triggered - 500ms since last change');
       performSave();
-    }, 2000); // 2 seconds
+    }, 500); // 500ms
   };
 
   // Function to count words - simple whitespace split
