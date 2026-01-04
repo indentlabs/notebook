@@ -1,12 +1,18 @@
 class AdminController < ApplicationController
   layout 'admin'
-  layout 'application', only: [:unsubscribe, :perform_unsubscribe, :reported_shares, :destroy_share, :destroy_user, :dismiss_share_reports]
+  layout 'application', only: [:hub, :dashboard, :unsubscribe, :perform_unsubscribe, :reported_shares, :destroy_share, :destroy_user, :dismiss_share_reports]
 
   before_action :authenticate_user!
   before_action :require_admin_access, unless: -> { Rails.env.development? }
 
   def dashboard
+    @days = params.fetch(:days, 30).to_i
+    @days = 30 unless [1, 7, 30, 90].include?(@days)
     @reports = EndOfDayAnalyticsReport.order('day DESC')
+  end
+
+  def hub
+    @sidekiq_stats = Sidekiq::Stats.new
   end
 
   def content_type

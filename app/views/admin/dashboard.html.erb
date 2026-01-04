@@ -1,97 +1,113 @@
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          90-day signups
-          <span class="right grey-text">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Time Range Selector -->
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Analytics Dashboard</h1>
+    <div class="flex space-x-2">
+      <% [1, 7, 30, 90].each do |days| %>
+        <%= link_to admin_dashboard_path(days: days),
+            class: "px-4 py-2 rounded-lg text-sm font-medium #{@days == days ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}" do %>
+          <%= days %>d
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Signups & Subscriptions Section -->
+  <div class="space-y-6 mb-8">
+    <!-- Signups -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @days %>-day signups</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
             <%= number_with_delimiter User.last.id %> total users
           </span>
         </div>
-        <%= area_chart @reports.limit(90).pluck(:day, :user_signups), colors: ['#2196F3'] %>
+        <%= area_chart @reports.limit(@days).pluck(:day, :user_signups), colors: ['#2196F3'] %>
       </div>
     </div>
-  </div>
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          90-day monthly subscriptions
-          <span class="right grey-text">
+
+    <!-- Monthly subscriptions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @days %>-day monthly subscriptions</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
             <%= number_with_delimiter User.where(selected_billing_plan_id: 4).count %> current total
           </span>
         </div>
-        <%= 
+        <%=
           area_chart [
-            { name: 'Started subscriptions', data: @reports.limit(90).pluck(:day, :new_monthly_subscriptions) },
-            { name: 'Ended subscriptions',   data: @reports.limit(90).pluck(:day, :ended_monthly_subscriptions) }
+            { name: 'Started subscriptions', data: @reports.limit(@days).pluck(:day, :new_monthly_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.limit(@days).pluck(:day, :ended_monthly_subscriptions) }
           ],
           colors: ['#2196F3']
         %>
-        <div>
-          90-day net:
-          <%= sprintf "%+d", @reports.limit(90).sum(:new_monthly_subscriptions) - @reports.limit(90).sum(:ended_monthly_subscriptions) %>
+        <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+          <%= @days %>-day net:
+          <span class="font-medium"><%= sprintf "%+d", @reports.limit(@days).sum(:new_monthly_subscriptions) - @reports.limit(@days).sum(:ended_monthly_subscriptions) %></span>
           subscriptions
-        </div>
+        </p>
       </div>
     </div>
-  </div>
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          90-day trimonthly subscriptons
-          <span class="right grey-text">
+
+    <!-- Trimonthly subscriptions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @days %>-day trimonthly subscriptions</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
             <%= number_with_delimiter User.where(selected_billing_plan_id: 5).count %> current total
           </span>
         </div>
         <%=
           area_chart [
-            { name: 'Started subscriptions', data: @reports.limit(90).pluck(:day, :new_trimonthly_subscriptions) },
-            { name: 'Ended subscriptions',   data: @reports.limit(90).pluck(:day, :ended_trimonthly_subscriptions) }
+            { name: 'Started subscriptions', data: @reports.limit(@days).pluck(:day, :new_trimonthly_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.limit(@days).pluck(:day, :ended_trimonthly_subscriptions) }
           ],
           colors: ['#2196F3']
         %>
-        <div>
-          90-day net:
-          <%= sprintf "%+d", @reports.limit(90).sum(:new_trimonthly_subscriptions) - @reports.limit(90).sum(:ended_trimonthly_subscriptions) %>
+        <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+          <%= @days %>-day net:
+          <span class="font-medium"><%= sprintf "%+d", @reports.limit(@days).sum(:new_trimonthly_subscriptions) - @reports.limit(@days).sum(:ended_trimonthly_subscriptions) %></span>
           subscriptions
-        </div>
+        </p>
       </div>
     </div>
-  </div>
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          90-day annual subscriptions
-          <span class="right grey-text">
+
+    <!-- Annual subscriptions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @days %>-day annual subscriptions</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
             <%= number_with_delimiter User.where(selected_billing_plan_id: 6).count %> current total
           </span>
         </div>
         <%=
           area_chart [
-            { name: 'Started subscriptions', data: @reports.limit(90).pluck(:day, :new_annual_subscriptions) },
-            { name: 'Ended subscriptions',   data: @reports.limit(90).pluck(:day, :ended_annual_subscriptions) }
+            { name: 'Started subscriptions', data: @reports.limit(@days).pluck(:day, :new_annual_subscriptions) },
+            { name: 'Ended subscriptions',   data: @reports.limit(@days).pluck(:day, :ended_annual_subscriptions) }
           ],
           colors: ['#2196F3']
         %>
-        <div>
-          90-day net:
-          <%= sprintf "%+d", @reports.limit(90).sum(:new_annual_subscriptions) - @reports.limit(90).sum(:ended_annual_subscriptions) %>
+        <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">
+          <%= @days %>-day net:
+          <span class="font-medium"><%= sprintf "%+d", @reports.limit(@days).sum(:new_annual_subscriptions) - @reports.limit(@days).sum(:ended_annual_subscriptions) %></span>
           subscriptions
-        </div>
+        </p>
       </div>
     </div>
   </div>
 
-  <% Rails.application.config.content_types[:all].each do |content_type| %>
-    <div class="col s12 m12 l4">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">
-            New <%= content_type.name.pluralize %> each day
-            <span class="right grey-text"><%= number_with_delimiter content_type.last.id %> total</span>
+  <!-- Content Types Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <% Rails.application.config.content_types[:all].each do |content_type| %>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New <%= content_type.name.pluralize %></h3>
+            <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter content_type.last&.id || 0 %> total</span>
           </div>
           <%=
             area_chart @reports.pluck(:day, "#{content_type.name.downcase.pluralize}_created")
@@ -101,7 +117,7 @@
                                   data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                   {
-                                    name: year, 
+                                    name: year,
                                     data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                   }
                                },
@@ -109,14 +125,14 @@
           %>
         </div>
       </div>
-    </div>
-  <% end %>
-  <div class="col s12 m12 l4">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New timelines
-            <span class="right grey-text"><%= number_with_delimiter Timeline.last.id %> total</span>
+    <% end %>
+
+    <!-- Timelines -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New timelines</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter Timeline.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :timelines_created)
@@ -126,7 +142,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -136,12 +152,14 @@
     </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New stream shares
-          <span class="right grey-text"><%= number_with_delimiter ContentPageShare.last.id %> total</span>
+  <!-- Stream Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Stream shares -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New stream shares</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter ContentPageShare.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :stream_shares_created)
@@ -151,7 +169,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -159,12 +177,12 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New stream comments
+
+    <!-- Stream comments -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New stream comments</h3>
         </div>
         <%=
           area_chart @reports.pluck(:day, :stream_comments)
@@ -174,7 +192,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -184,12 +202,14 @@
     </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New collections
-          <span class="right grey-text"><%= number_with_delimiter PageCollection.last.id %> total</span>
+  <!-- Collections Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Collections -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New collections</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter PageCollection.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :collections_created)
@@ -199,7 +219,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -207,13 +227,13 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New collection submissions
-          <span class="right grey-text"><%= number_with_delimiter PageCollectionSubmission.last.id %> total</span>
+
+    <!-- Collection submissions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New collection submissions</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter PageCollectionSubmission.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :collection_submissions_created)
@@ -223,7 +243,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -233,12 +253,14 @@
     </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New discussion threads
-          <span class="right grey-text"><%= number_with_delimiter Thredded::Topic.last.id %> total</span>
+  <!-- Discussions Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Discussion threads -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New discussion threads</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter Thredded::Topic.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :thredded_threads_created)
@@ -248,7 +270,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -256,13 +278,13 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New discussion replies
-          <span class="right grey-text"><%= number_with_delimiter Thredded::Post.last.id %> total</span>
+
+    <!-- Discussion replies -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New discussion replies</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter Thredded::Post.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :thredded_replies_created)
@@ -272,7 +294,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -282,12 +304,14 @@
     </div>
   </div>
 
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New private discussions
-          <span class="right grey-text"><%= number_with_delimiter Thredded::PrivateTopic.last.id %> total</span>
+  <!-- Private Messages Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Private discussions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New private discussions</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter Thredded::PrivateTopic.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :thredded_private_messages_created)
@@ -297,7 +321,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -305,13 +329,13 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New private replies
-          <span class="right grey-text"><%= number_with_delimiter Thredded::PrivatePost.last.id %> total</span>
+
+    <!-- Private replies -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New private replies</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter Thredded::PrivatePost.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :thredded_private_replies_created)
@@ -321,7 +345,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -331,12 +355,14 @@
     </div>
   </div>
 
-  <div class="col s12 m12 l4">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New documents
-          <span class="right grey-text"><%= number_with_delimiter Document.last.id %> total</span>
+  <!-- Documents Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <!-- New documents -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New documents</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter Document.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :documents_created)
@@ -346,7 +372,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -354,12 +380,12 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l4">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          Updated documents
+
+    <!-- Updated documents -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Updated documents</h3>
         </div>
         <%=
           area_chart @reports.pluck(:day, :documents_edited)
@@ -369,7 +395,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -377,13 +403,13 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l4">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          Document revisions
-          <span class="right grey-text"><%= number_with_delimiter DocumentRevision.last.id %> total</span>
+
+    <!-- Document revisions -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Document revisions</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter DocumentRevision.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :document_revisions_created)
@@ -393,7 +419,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
@@ -401,13 +427,13 @@
         %>
       </div>
     </div>
-  </div>
-  <div class="col s12 m12 l4">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">
-          New document analyses
-          <span class="right grey-text"><%= number_with_delimiter DocumentAnalysis.last.id %> total</span>
+
+    <!-- Document analyses -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">New document analyses</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400"><%= number_with_delimiter DocumentAnalysis.last&.id || 0 %> total</span>
         </div>
         <%=
           area_chart @reports.pluck(:day, :document_analyses_created)
@@ -417,7 +443,7 @@
                                 data.each { |date, count| totals_per_month[date.strftime("%b")] += (count || 0) }
 
                                 {
-                                  name: year, 
+                                  name: year,
                                   data: Date::ABBR_MONTHNAMES.reject(&:nil?).map { |month| [month, totals_per_month[month]] }
                                 }
                               },
