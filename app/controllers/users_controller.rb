@@ -28,7 +28,7 @@ class UsersController < ApplicationController
       # Optimized: Only load images for content that will be displayed
       @content_type = content_type
       @content_list = @user.send(content_type_name)
-                           .includes(:page_tags, :image_uploads)
+                           .includes(:page_tags, :image_uploads, :user)
                            .is_public
                            .order(:name)
                            .paginate(page: params[:page], per_page: 20)
