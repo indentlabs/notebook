@@ -2,6 +2,16 @@ class WordCountUpdate < ApplicationRecord
   belongs_to :user
   belongs_to :entity, polymorphic: true
 
+  after_commit :check_daily_word_goal, on: [:create, :update]
+
+  private
+
+  def check_daily_word_goal
+    DailyWordGoalNotificationJob.perform_later(user_id) if user_id.present?
+  end
+
+  public
+
   # Calculate actual words written on a specific date (delta from previous day)
   # Uses ActiveRecord for database-agnostic queries
   def self.words_written_on_date(user, target_date)
