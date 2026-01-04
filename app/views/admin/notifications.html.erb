@@ -7,6 +7,47 @@
     </p>
   </div>
 
+  <!-- Search Box -->
+  <div class="mb-8">
+    <%= form_tag(nil, method: :get, id: 'reference-code-search', class: 'flex gap-4') do %>
+      <div class="flex-1 max-w-md">
+        <label for="reference_code_input" class="sr-only">Search reference code</label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
+          <input type="text"
+                 id="reference_code_input"
+                 name="reference_code"
+                 list="reference_codes_list"
+                 placeholder="Search by reference code..."
+                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <datalist id="reference_codes_list">
+            <% @codes.compact.each do |code| %>
+              <option value="<%= code %>">
+            <% end %>
+          </datalist>
+        </div>
+      </div>
+      <button type="submit"
+              class="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors">
+        View Analytics
+      </button>
+    <% end %>
+  </div>
+
+  <script>
+    document.getElementById('reference-code-search').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var code = document.getElementById('reference_code_input').value.trim();
+      if (code) {
+        window.location.href = '/admin/notifications/' + encodeURIComponent(code);
+      }
+    });
+  </script>
+
   <%
     total_count = @notifications.count
     clicked_count = @clicked_notifications.count
@@ -131,36 +172,69 @@
             bar_color = rate >= 20 ? 'bg-green-500' : rate >= 10 ? 'bg-yellow-500' : 'bg-red-500'
             text_color = rate >= 20 ? 'text-green-600 dark:text-green-400' : rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
           %>
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
-            <div class="p-6">
-              <!-- Code name -->
-              <div class="flex items-center justify-between mb-3">
-                <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate" title="<%= stats[:code] %>">
-                  <%= stats[:code].presence || '(no code)' %>
-                </h3>
-                <span class="text-lg font-bold <%= text_color %>"><%= rate %>%</span>
-              </div>
-
-              <!-- Progress bar -->
-              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-                <div class="<%= bar_color %> h-2 rounded-full" style="width: <%= [rate, 100].min %>%"></div>
-              </div>
-
-              <!-- Stats -->
-              <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                <span><%= number_with_delimiter stats[:clicked] %> clicked</span>
-                <span><%= number_with_delimiter stats[:total] %> sent</span>
-              </div>
-
-              <!-- Sample message -->
-              <% if stats[:sample]&.message_html.present? %>
-                <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                  <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Sample message:</p>
-                  <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2"><%= strip_tags(stats[:sample].message_html).truncate(100) %></p>
+          <% if stats[:code].present? %>
+            <%= link_to admin_notification_reference_path(stats[:code]), class: "block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" do %>
+              <div class="p-6">
+                <!-- Code name -->
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate" title="<%= stats[:code] %>">
+                    <%= stats[:code] %>
+                  </h3>
+                  <span class="text-lg font-bold <%= text_color %>"><%= rate %>%</span>
                 </div>
-              <% end %>
+
+                <!-- Progress bar -->
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                  <div class="<%= bar_color %> h-2 rounded-full" style="width: <%= [rate, 100].min %>%"></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  <span><%= number_with_delimiter stats[:clicked] %> clicked</span>
+                  <span><%= number_with_delimiter stats[:total] %> sent</span>
+                </div>
+
+                <!-- Sample message -->
+                <% if stats[:sample]&.message_html.present? %>
+                  <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Sample message:</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2"><%= strip_tags(stats[:sample].message_html).truncate(100) %></p>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          <% else %>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+              <div class="p-6">
+                <!-- Code name -->
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    (no code)
+                  </h3>
+                  <span class="text-lg font-bold <%= text_color %>"><%= rate %>%</span>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
+                  <div class="<%= bar_color %> h-2 rounded-full" style="width: <%= [rate, 100].min %>%"></div>
+                </div>
+
+                <!-- Stats -->
+                <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
+                  <span><%= number_with_delimiter stats[:clicked] %> clicked</span>
+                  <span><%= number_with_delimiter stats[:total] %> sent</span>
+                </div>
+
+                <!-- Sample message -->
+                <% if stats[:sample]&.message_html.present? %>
+                  <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Sample message:</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2"><%= strip_tags(stats[:sample].message_html).truncate(100) %></p>
+                  </div>
+                <% end %>
+              </div>
             </div>
-          </div>
+          <% end %>
         <% end %>
       </div>
     <% else %>

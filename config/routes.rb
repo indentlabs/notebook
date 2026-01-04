@@ -437,6 +437,7 @@ Rails.application.routes.draw do
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
       get '/notifications',        to: 'admin#notifications'
+      get '/notifications/:reference_code', to: 'admin#notification_reference', as: :admin_notification_reference
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'

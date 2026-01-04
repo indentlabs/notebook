@@ -98,6 +98,36 @@ class AdminController < ApplicationController
     @codes = Notification.distinct.order('reference_code').pluck(:reference_code)
   end
 
+  def notification_reference
+    @reference_code = params[:reference_code]
+    @notifications = Notification.where(reference_code: @reference_code)
+    @clicked_notifications = @notifications.where.not(viewed_at: nil)
+
+    # Basic counts
+    @total_sent = @notifications.count
+    @total_clicked = @clicked_notifications.count
+    @click_rate = @total_sent > 0 ? (@total_clicked / @total_sent.to_f * 100).round(1) : 0
+    @unique_users = @notifications.distinct.count(:user_id)
+
+    # Time to click calculations
+    @clicked_with_times = @clicked_notifications.where.not(happened_at: nil)
+    if @clicked_with_times.any?
+      time_diffs = @clicked_with_times.map { |n| (n.viewed_at - n.happened_at).to_i }
+      @avg_seconds = time_diffs.sum / time_diffs.count
+      sorted_diffs = time_diffs.sort
+      @median_seconds = sorted_diffs[sorted_diffs.length / 2]
+      @fastest_seconds = sorted_diffs.first
+      @slowest_seconds = sorted_diffs.last
+    end
+
+    # Date range
+    @first_notification = @notifications.order(:created_at).first
+    @last_notification = @notifications.order(created_at: :desc).first
+
+    # Sample message
+    @sample_notification = @notifications.where.not(message_html: [nil, '']).order(created_at: :desc).first
+  end
+
   def hate
     @posts = Thredded::PrivatePost.order('id DESC').limit(params.fetch(:limit, 500)).includes(:postable)
     @list  = params[:matchlist]

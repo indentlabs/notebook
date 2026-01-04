@@ -1,0 +1,286 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center gap-4 mb-2">
+      <%= link_to '/admin/notifications', class: 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300' do %>
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+      <% end %>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white"><%= @reference_code %></h1>
+    </div>
+    <p class="text-sm text-gray-500 dark:text-gray-400">
+      Analytics for notifications with this reference code
+    </p>
+  </div>
+
+  <%
+    # Helper to format seconds into human-readable time
+    def format_duration(seconds)
+      return "N/A" if seconds.nil?
+      if seconds < 60
+        "#{seconds} seconds"
+      elsif seconds < 3600
+        "#{(seconds / 60.0).round(1)} minutes"
+      elsif seconds < 86400
+        "#{(seconds / 3600.0).round(1)} hours"
+      else
+        "#{(seconds / 86400.0).round(1)} days"
+      end
+    end
+  %>
+
+  <!-- Summary Stats Row -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <!-- Total Sent -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+          <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Sent</p>
+          <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @total_sent %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Clicked -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+          <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Clicked</p>
+          <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @total_clicked %></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Click Rate -->
+    <%
+      rate_bg = @click_rate >= 20 ? 'bg-green-100 dark:bg-green-900' : @click_rate >= 10 ? 'bg-yellow-100 dark:bg-yellow-900' : 'bg-red-100 dark:bg-red-900'
+      rate_icon = @click_rate >= 20 ? 'text-green-600 dark:text-green-400' : @click_rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
+      rate_text = @click_rate >= 20 ? 'text-green-600 dark:text-green-400' : @click_rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
+    %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 <%= rate_bg %> rounded-lg">
+          <svg class="h-6 w-6 <%= rate_icon %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Click Rate</p>
+          <p class="text-2xl font-semibold <%= rate_text %>"><%= @click_rate %>%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unique Users -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+          <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Unique Users</p>
+          <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @unique_users %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time to Click Stats Row -->
+  <% if @clicked_with_times.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Average Time -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+            <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Avg Time to Click</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= format_duration(@avg_seconds) %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Median Time -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+            <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Median Time to Click</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= format_duration(@median_seconds) %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fastest Click -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+            <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fastest Click</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= format_duration(@fastest_seconds) %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slowest Click -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 p-3 bg-orange-100 dark:bg-orange-900 rounded-lg">
+            <svg class="h-6 w-6 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Slowest Click</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= format_duration(@slowest_seconds) %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Date Range Info -->
+  <% if @first_notification && @last_notification %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Campaign Timeline</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">First Notification</p>
+            <p class="text-lg text-gray-900 dark:text-white"><%= @first_notification.created_at.strftime('%B %d, %Y') %></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400"><%= time_ago_in_words(@first_notification.created_at) %> ago</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Last Notification</p>
+            <p class="text-lg text-gray-900 dark:text-white"><%= @last_notification.created_at.strftime('%B %d, %Y') %></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400"><%= time_ago_in_words(@last_notification.created_at) %> ago</p>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Period</p>
+            <%
+              duration_days = ((@last_notification.created_at - @first_notification.created_at) / 1.day).round
+              if duration_days == 0
+                duration_text = "Same day"
+              elsif duration_days == 1
+                duration_text = "1 day"
+              elsif duration_days < 30
+                duration_text = "#{duration_days} days"
+              elsif duration_days < 365
+                duration_text = "#{(duration_days / 30.0).round(1)} months"
+              else
+                duration_text = "#{(duration_days / 365.0).round(1)} years"
+              end
+            %>
+            <p class="text-lg text-gray-900 dark:text-white"><%= duration_text %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Click Rate Trend Chart -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
+    <div class="p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Trend</h3>
+      <%=
+        line_chart [
+          { name: "Sent", data: @notifications.group_by_month(:created_at).count },
+          { name: "Clicked", data: @clicked_notifications.group_by_month(:created_at).count }
+        ], colors: ['#3B82F6', '#10B981']
+      %>
+    </div>
+  </div>
+
+  <!-- Link Performance Table -->
+  <%
+    links = @notifications.where.not(passthrough_link: [nil, '']).distinct.pluck(:passthrough_link)
+    link_stats = links.map do |link|
+      notifications_for_link = @notifications.where(passthrough_link: link)
+      clicked = notifications_for_link.where.not(viewed_at: nil).count
+      total = notifications_for_link.count
+      rate = total > 0 ? (clicked / total.to_f * 100) : 0
+      { link: link, clicked: clicked, total: total, rate: rate }
+    end.sort_by { |s| -s[:rate] }
+  %>
+
+  <% if link_stats.any? %>
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance</h2>
+
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-900">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destination Link</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sent</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Clicked</th>
+              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Click Rate</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <% link_stats.each do |stats| %>
+              <%
+                link_rate = stats[:rate].round(1)
+                link_text_color = link_rate >= 20 ? 'text-green-600 dark:text-green-400' : link_rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
+              %>
+              <tr>
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  <span class="truncate block max-w-md" title="<%= stats[:link] %>"><%= stats[:link].truncate(60) %></span>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter stats[:total] %></td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter stats[:clicked] %></td>
+                <td class="px-6 py-4 text-sm font-medium text-right <%= link_text_color %>"><%= link_rate %>%</td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Sample Message -->
+  <% if @sample_notification %>
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Sample Message</h2>
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0 p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+            <i class="material-icons text-<%= @sample_notification.icon_color %>-500"><%= @sample_notification.icon %></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-gray-900 dark:text-white"><%= raw @sample_notification.message_html %></p>
+            <% if @sample_notification.passthrough_link.present? %>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Links to: <span class="text-blue-600 dark:text-blue-400"><%= @sample_notification.passthrough_link %></span>
+              </p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
