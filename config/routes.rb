@@ -354,7 +354,10 @@ Rails.application.routes.draw do
 
         # Browsable pages
         # Redirect old gallery URLs to the show page with #gallery hash
-        get  :gallery,         on: :member, to: redirect { |params, req| "/plan/#{params[:controller].split('/').last}/#{params[:id]}#gallery" }
+        get  :gallery,         on: :member, to: redirect { |params, req|
+          resource_type = req.path.split('/')[2]  # /plan/characters/123/gallery -> "characters"
+          "/plan/#{resource_type}/#{params[:id]}#gallery"
+        }
         get  :references,      on: :member
         get  :changelog,       on: :member
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
@@ -418,6 +421,7 @@ Rails.application.routes.draw do
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
     scope 'admin' do
+      get '/hub',                  to: 'admin#hub', as: :admin_hub
       get '/stats',                to: 'admin#dashboard', as: :admin_dashboard
       get '/content_type/:type',   to: 'admin#content_type', as: :admin_content_type
       get '/attributes',           to: 'admin#attributes', as: :admin_attributes
