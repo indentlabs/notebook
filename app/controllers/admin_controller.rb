@@ -94,7 +94,7 @@ class AdminController < ApplicationController
 
   def spam
     @posts = Thredded::PrivatePost
-      .where('content ILIKE ?', "%http%")
+      .where(Thredded::PrivatePost.arel_table[:content].matches('%http%'))
       .order('id DESC')
       .limit(params.fetch(:limit, 500))
       .includes(:postable)
