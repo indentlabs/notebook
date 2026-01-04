@@ -135,7 +135,7 @@
             <%=
               text_area_tag "field[value]",
                             @attribute_field_to_question[:value],
-                            class: "js-can-mention-pages autosave-closest-form-on-change w-full p-4 sm:p-8 text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-200
+                            class: "js-can-mention-pages js-autosave w-full p-4 sm:p-8 text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-200
                                    placeholder-gray-400 dark:placeholder-gray-500 border-2 border-gray-200 dark:border-gray-600 focus:ring-0 focus:outline-none resize-none
                                    transition-all duration-200 dark:bg-gray-800 min-h-64 sm:min-h-96",
                             placeholder: "Start writing your thoughts here...\n\nYour response will be saved automatically as you type.",
@@ -519,7 +519,7 @@ function writingPrompt() {
       this.lastAutosaveTime = now;
       
       // Use the unified jQuery autosave system
-      const textarea = document.querySelector('.autosave-closest-form-on-change');
+      const textarea = document.querySelector('.js-autosave');
       if (textarea && window.$ && window.$(textarea).length) {
         console.log('Manual save triggering jQuery autosave, current autosaveStatus:', this.autosaveStatus);
         window.$(textarea).trigger('change');
@@ -555,7 +555,7 @@ function writingPrompt() {
     setupAutosaveListeners() {
       // Listen for autosave events from the jQuery system
       // Use class selector since textarea is in a different Alpine component
-      const textarea = document.querySelector('.autosave-closest-form-on-change');
+      const textarea = document.querySelector('.js-autosave');
       if (!textarea) {
         console.log('Could not find autosave textarea');
         return;

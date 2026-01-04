@@ -498,35 +498,15 @@
               window.editor.trigger('editableInput', {}, this.textElement);
             }
           }
-          // The existing autosave system listens for 'change' events on elements with 'autosave-closest-form-on-change' class
-          else if (this.textElement.classList.contains('autosave-closest-form-on-change')) {
-            // Dispatch a change event to trigger the existing autosave system
-            const changeEvent = new Event('change', { 
-              bubbles: true, 
-              cancelable: true 
-            });
-            this.textElement.dispatchEvent(changeEvent);
-            
-            // Also try jQuery trigger as a fallback
+          // For unified autosave system, trigger jQuery change event
+          else if (this.textElement.classList.contains('js-autosave')) {
             if (window.$ && window.$(this.textElement).length) {
               window.$(this.textElement).trigger('change');
             }
-          } 
-          // Also check for enhanced autosave system
-          else if (this.textElement.classList.contains('js-enhanced-autosave')) {
-            // For enhanced autosave, trigger a blur event which immediately saves
-            const blurEvent = new Event('blur', { 
-              bubbles: true, 
-              cancelable: true 
-            });
-            this.textElement.dispatchEvent(blurEvent);
           }
-          // Fallback: try to find and trigger jQuery change event
-          else {
-            // Try jQuery if available (for backward compatibility)
-            if (window.$ && window.$(this.textElement).length) {
-              window.$(this.textElement).trigger('change');
-            }
+          // Fallback for any other autosave-enabled fields
+          else if (window.$ && window.$(this.textElement).length) {
+            window.$(this.textElement).trigger('change');
           }
         }
       }));

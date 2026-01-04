@@ -56,7 +56,7 @@ function initializeAutosaveListeners() {
 
   // Show unsaved changes when user starts typing
   document.addEventListener('input', function(e) {
-    if (e.target.matches('.autosave-closest-form-on-change, .js-enhanced-autosave')) {
+    if (e.target.matches('.js-autosave')) {
       const saveIndicator = document.getElementById('save-indicator');
       const saveText = saveIndicator?.parentElement.querySelector('span');
 
@@ -117,7 +117,7 @@ function countWordsInText(text) {
 // Aggregate word count from all text fields on the page
 function calculatePageWordCount() {
   let totalWords = 0;
-  document.querySelectorAll('.autosave-closest-form-on-change, .js-enhanced-autosave').forEach(function(field) {
+  document.querySelectorAll('.js-autosave').forEach(function(field) {
     totalWords += countWordsInText(field.value || '');
   });
   return totalWords;

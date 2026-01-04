@@ -43,7 +43,7 @@ Wrap your textarea in the Alpine component and add required classes:
 <div x-data="contentLinking()">
   <%= text_area_tag "field[value]",
                     @value,
-                    class: "js-can-mention-pages autosave-closest-form-on-change",
+                    class: "js-can-mention-pages js-autosave",
                     "x-ref": "editor" %>
   
   <!-- Dropdown will be inserted here by Alpine -->
@@ -52,7 +52,7 @@ Wrap your textarea in the Alpine component and add required classes:
 
 **Required classes:**
 - `js-can-mention-pages` - Identifies the field as mention-enabled
-- `autosave-closest-form-on-change` - Enables autosave integration
+- `js-autosave` - Enables autosave integration
 
 ### 3. Dropdown Template
 

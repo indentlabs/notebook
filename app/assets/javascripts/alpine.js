@@ -47,9 +47,8 @@ function alpineMultiSelectController() {
         originalSelect.options[i].selected = this.options[i].selected;
       }
 
-      // Finally, trigger a manual on-change event on the original select
-      // to make sure our autosave fires on it.
-      originalSelect.dispatchEvent(new Event('change'));
+      // Trigger autosave via jQuery (required for delegated event handlers)
+      $(originalSelect).trigger('change');
     },
     remove(index, option) {
       this.options[option].selected = false;
@@ -60,9 +59,8 @@ function alpineMultiSelectController() {
       const originalSelect = document.getElementById(this.sourceFieldId);
       originalSelect.options[option].selected = false;
 
-      // After removing the option, we want to emit a change event to trigger
-      // a field autosave.
-      originalSelect.dispatchEvent(new Event('change'));
+      // Trigger autosave via jQuery (required for delegated event handlers)
+      $(originalSelect).trigger('change');
     },
     loadOptions(fieldId) {
       this.sourceFieldId = fieldId;

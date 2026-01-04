@@ -1,22 +1,30 @@
 /**
- * Enhanced Autosave System (Input-based with debouncing)
+ * Unified Autosave System
  *
- * Use this for: Textareas and text inputs where users type continuously.
- * Provides 300ms input debouncing and visual feedback (border colors, status text).
+ * This is the single autosave system for all field types. It handles:
+ * - Text inputs/textareas: 300ms input debouncing, save on blur
+ * - Selects/checkboxes/radios/hidden fields: Immediate save on change
  *
- * How to use: Add the class 'js-enhanced-autosave' to the input element.
+ * How to use: Add the class 'js-autosave' to any input element.
  * Optionally add a status indicator element nearby:
  *   <div class="js-autosave-status hidden"><span class="js-status-text"></span></div>
- *
- * For select dropdowns, checkboxes, and other inputs that fire a single 'change'
- * event, use the simpler autosave system in autosave.js with the
- * 'autosave-closest-form-on-change' class instead.
  */
 $(document).ready(function() {
   var recent_autosave = false;
   var autosave_timers = {};
   var input_debounce_timers = {};
   var fields_dirty = {}; // Track if field has changed since focus
+
+  // Determine if an element should save immediately (no debounce)
+  // Selects, checkboxes, radios, and hidden fields save on change
+  function isImmediateSaveElement(element) {
+    var tagName = element.tagName.toLowerCase();
+    var inputType = element.type ? element.type.toLowerCase() : '';
+    return tagName === 'select' ||
+           inputType === 'checkbox' ||
+           inputType === 'radio' ||
+           inputType === 'hidden';
+  }
 
   function updateFieldVisualState(field, state) {
     // Remove all autosave-related classes
@@ -155,9 +163,9 @@ $(document).ready(function() {
     }, delay);
   }
 
-  // Enhanced autosave for text fields
+  // Autosave for text fields (with debouncing)
   // Use delegated event binding to work with dynamically added elements and survive page refresh timing issues
-  $(document).on('input', '.js-enhanced-autosave', function() {
+  $(document).on('input', '.js-autosave', function() {
     var field = $(this);
     var fieldId = field.attr('id') || field.attr('name') || 'unknown';
 
@@ -170,7 +178,7 @@ $(document).ready(function() {
     }, 300); // 300ms debounce
   });
 
-  $(document).on('blur', '.js-enhanced-autosave', function() {
+  $(document).on('blur', '.js-autosave', function() {
     var field = $(this);
     var fieldId = field.attr('id') || field.attr('name') || 'unknown';
 
@@ -194,7 +202,7 @@ $(document).ready(function() {
   });
 
   // Focus event to reset dirty flag and any error states
-  $(document).on('focus', '.js-enhanced-autosave', function() {
+  $(document).on('focus', '.js-autosave', function() {
     var field = $(this);
     var fieldId = field.attr('id') || field.attr('name') || 'unknown';
     var saveIndicator = field.siblings('.js-save-indicator');
@@ -208,6 +216,19 @@ $(document).ready(function() {
         saveIndicator.addClass('hidden');
       }, 500);
     }
+  });
+
+  // Immediate save on change for selects, checkboxes, radios, hidden fields
+  $(document).on('change', '.js-autosave', function() {
+    var field = $(this);
+    if (isImmediateSaveElement(this)) {
+      performAutosave(field);
+    }
+  });
+
+  // Click-to-submit handler (migrated from autosave.js)
+  $(document).on('click', '.submit-closest-form-on-click', function() {
+    $(this).closest('form').submit();
   });
 
   // Clear timers on page unload to prevent memory leaks
