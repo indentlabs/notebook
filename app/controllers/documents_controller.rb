@@ -157,7 +157,7 @@ class DocumentsController < ApplicationController
   # todo this function is an embarassment
   def link_entity
     # Preconditions lol
-    unless (Rails.application.config.content_types[:all].map(&:name) + [Timeline.name, Document.name]).include?(linked_entity_params[:entity_type])
+    unless (Rails.application.config.content_types[:all].map(&:name) + [Timeline.name, Document.name, Book.name]).include?(linked_entity_params[:entity_type])
       raise "Invalid entity type #{linked_entity_params[:entity_type]}"
     end
 

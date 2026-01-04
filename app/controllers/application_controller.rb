@@ -222,7 +222,7 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
     
     linkable_classes = @activated_content_types
-    linkable_classes += %w(Document Timeline)
+    linkable_classes += %w(Document Timeline Book)
 
     @linkables_cache = {} # Cache is list of [[page_name, page_id], [page_name, page_id], ...]
     @linkables_raw   = {} # Raw is list of objects [#{page}, #{page}, ...]
