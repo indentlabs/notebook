@@ -1,53 +1,101 @@
-<h5>New subscriptions per month</h5>
-<%= 
-  line_chart [
-    { name: "Early Adopters", data: Subscription.where(billing_plan_id: 3).group_by_month(:start_date) },
-    { name: "Monthly",        data: Subscription.where(billing_plan_id: 4).group_by_month(:start_date) },
-    { name: "Tri-monthly",    data: Subscription.where(billing_plan_id: 5).group_by_month(:start_date) },
-    { name: "Yearly",         data: Subscription.where(billing_plan_id: 6).group_by_month(:start_date) },
-  ]
-%>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Subscription Churn</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      New and cancelled subscriptions over time
+    </p>
+  </div>
 
-<h5>Cancelled subscriptions per month</h5>
-<%= 
-  line_chart [
-    { name: "Early Adopters", data: Subscription.where(billing_plan_id: 3).where('end_date < ?', Date.current).group_by_month(:end_date) },
-    { name: "Monthly",        data: Subscription.where(billing_plan_id: 4).where('end_date < ?', Date.current).group_by_month(:end_date) },
-    { name: "Tri-monthly",    data: Subscription.where(billing_plan_id: 5).where('end_date < ?', Date.current).group_by_month(:end_date) },
-    { name: "Yearly",         data: Subscription.where(billing_plan_id: 6).where('end_date < ?', Date.current).group_by_month(:end_date) },
-  ]
-%>
+  <!-- Overview Section -->
+  <div class="space-y-6 mb-8">
+    <!-- New subscriptions per month -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">New subscriptions per month</h3>
+        <%=
+          line_chart [
+            { name: "Early Adopters", data: Subscription.where(billing_plan_id: 3).group_by_month(:start_date) },
+            { name: "Monthly",        data: Subscription.where(billing_plan_id: 4).group_by_month(:start_date) },
+            { name: "Tri-monthly",    data: Subscription.where(billing_plan_id: 5).group_by_month(:start_date) },
+            { name: "Yearly",         data: Subscription.where(billing_plan_id: 6).group_by_month(:start_date) },
+          ]
+        %>
+      </div>
+    </div>
 
-<hr />
-<h5>Per plan</h5>
-<h6>Early adopters</h5>
-<%= 
-  line_chart [
-    { name: "Started",   data: Subscription.where(billing_plan_id: 3).group_by_month(:start_date) },
-    { name: "Cancelled", data: Subscription.where(billing_plan_id: 3).where('end_date < ?', Date.current).group_by_month(:end_date) }
-  ]
-%>
+    <!-- Cancelled subscriptions per month -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cancelled subscriptions per month</h3>
+        <%=
+          line_chart [
+            { name: "Early Adopters", data: Subscription.where(billing_plan_id: 3).where('end_date < ?', Date.current).group_by_month(:end_date) },
+            { name: "Monthly",        data: Subscription.where(billing_plan_id: 4).where('end_date < ?', Date.current).group_by_month(:end_date) },
+            { name: "Tri-monthly",    data: Subscription.where(billing_plan_id: 5).where('end_date < ?', Date.current).group_by_month(:end_date) },
+            { name: "Yearly",         data: Subscription.where(billing_plan_id: 6).where('end_date < ?', Date.current).group_by_month(:end_date) },
+          ]
+        %>
+      </div>
+    </div>
+  </div>
 
-<h6>Monthly</h5>
-<%= 
-  line_chart [
-    { name: "Started",   data: Subscription.where(billing_plan_id: 4).group_by_month(:start_date) },
-    { name: "Cancelled", data: Subscription.where(billing_plan_id: 4).where('end_date < ?', Date.current).group_by_month(:end_date) }
-  ]
-%>
+  <!-- Per Plan Breakdown Section -->
+  <div class="mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Per Plan Breakdown</h2>
 
-<h6>Tri-monthly</h5>
-<%= 
-  line_chart [
-    { name: "Started",   data: Subscription.where(billing_plan_id: 5).group_by_month(:start_date) },
-    { name: "Cancelled", data: Subscription.where(billing_plan_id: 5).where('end_date < ?', Date.current).group_by_month(:end_date) }
-  ]
-%>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Early Adopters -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Early Adopters</h3>
+          <%=
+            line_chart [
+              { name: "Started",   data: Subscription.where(billing_plan_id: 3).group_by_month(:start_date) },
+              { name: "Cancelled", data: Subscription.where(billing_plan_id: 3).where('end_date < ?', Date.current).group_by_month(:end_date) }
+            ]
+          %>
+        </div>
+      </div>
 
-<h6>Yearly</h5>
-<%= 
-  line_chart [
-    { name: "Started",   data: Subscription.where(billing_plan_id: 6).group_by_month(:start_date) },
-    { name: "Cancelled", data: Subscription.where(billing_plan_id: 6).where('end_date < ?', Date.current).group_by_month(:end_date) }
-  ]
-%>
+      <!-- Monthly -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Monthly</h3>
+          <%=
+            line_chart [
+              { name: "Started",   data: Subscription.where(billing_plan_id: 4).group_by_month(:start_date) },
+              { name: "Cancelled", data: Subscription.where(billing_plan_id: 4).where('end_date < ?', Date.current).group_by_month(:end_date) }
+            ]
+          %>
+        </div>
+      </div>
+
+      <!-- Tri-monthly -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tri-monthly</h3>
+          <%=
+            line_chart [
+              { name: "Started",   data: Subscription.where(billing_plan_id: 5).group_by_month(:start_date) },
+              { name: "Cancelled", data: Subscription.where(billing_plan_id: 5).where('end_date < ?', Date.current).group_by_month(:end_date) }
+            ]
+          %>
+        </div>
+      </div>
+
+      <!-- Yearly -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Yearly</h3>
+          <%=
+            line_chart [
+              { name: "Started",   data: Subscription.where(billing_plan_id: 6).group_by_month(:start_date) },
+              { name: "Cancelled", data: Subscription.where(billing_plan_id: 6).where('end_date < ?', Date.current).group_by_month(:end_date) }
+            ]
+          %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

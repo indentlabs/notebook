@@ -1,0 +1,108 @@
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Admin Hub</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Analytics & Insights -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Analytics & Insights</h2>
+      <ul class="space-y-2">
+        <li>
+          <%= link_to "Dashboard", admin_dashboard_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Churn Analysis", "/admin/churn", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Notifications", "/admin/notifications", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Moderation -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Moderation</h2>
+      <ul class="space-y-2">
+        <li>
+          <%= link_to "Reported Shares", admin_reported_shares_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Forum Moderation", "/forum/admin/moderation", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Spam Watch", "/admin/spamwatch", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Hate Watch", "/admin/hatewatch/default", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Image Audit", image_audit_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+      </ul>
+    </div>
+
+    <!-- AI / Basil -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">AI / Basil</h2>
+      <ul class="space-y-2">
+        <li>
+          <%= link_to "Basil Review", "/ai/basil/review", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Basil Stats", "/ai/basil/stats", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+      </ul>
+    </div>
+
+    <!-- User Management -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">User Management</h2>
+      <ul class="space-y-2">
+        <li>
+          <%= link_to "Bulk Unsubscribe", mass_unsubscribe_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Configuration -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Configuration</h2>
+      <ul class="space-y-2">
+        <li>
+          <%= link_to "Attributes", admin_attributes_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Promo Codes", admin_promos_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+        <li>
+          <%= link_to "Rails Admin", rails_admin_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Background Jobs -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Background Jobs</h2>
+      <div class="mb-4">
+        <div class="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.enqueued) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Enqueued</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.processed) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Processed</div>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.failed) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Failed</div>
+          </div>
+        </div>
+      </div>
+      <ul class="space-y-2">
+        <li>
+          <%= link_to "Sidekiq Dashboard", "/sidekiq", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

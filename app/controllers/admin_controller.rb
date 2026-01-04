@@ -1,7 +1,4 @@
 class AdminController < ApplicationController
-  layout 'admin'
-  layout 'application', only: [:hub, :dashboard, :unsubscribe, :perform_unsubscribe, :reported_shares, :destroy_share, :destroy_user, :dismiss_share_reports]
-
   before_action :authenticate_user!
   before_action :require_admin_access, unless: -> { Rails.env.development? }
 
