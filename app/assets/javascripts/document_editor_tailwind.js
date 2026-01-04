@@ -240,6 +240,11 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#sidebar-word-count').text(wordCount);
     $('#sidebar-char-count').text(charCount.toLocaleString());
     $('#sidebar-reading-time').text(readingTime);
+
+    // Restore "fresh" state on word count circle - change back to teal gradient
+    $('#word-count-circle')
+      .removeClass('from-gray-400 to-gray-500')
+      .addClass('from-teal-400 to-teal-600');
   };
 
   // Initial word count
@@ -256,6 +261,10 @@ document.addEventListener('DOMContentLoaded', function() {
   window.editor.subscribe('editableInput', function() {
     // Queue an autosave
     queueAutosave();
+    // Show "stale" state on word count circle - change to gray gradient
+    $('#word-count-circle')
+      .removeClass('from-teal-400 to-teal-600')
+      .addClass('from-gray-400 to-gray-500');
     // Update word count (debounced for performance on large docs)
     debouncedWordCount();
   });
