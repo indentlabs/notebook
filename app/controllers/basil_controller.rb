@@ -430,7 +430,8 @@ class BasilController < ApplicationController
                                           .order(:score_adjustment)
                                           .group(:score_adjustment)
                                           .count
-    days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
+    earliest_feedback = BasilFeedback.minimum(:updated_at)
+    days_since_start = earliest_feedback ? (Date.current - earliest_feedback.to_date) : 1
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
 
     total = @feedback_before_today.values.sum
@@ -528,7 +529,8 @@ class BasilController < ApplicationController
                                           .order(:score_adjustment)
                                           .group(:score_adjustment)
                                           .count
-    days_since_start = (Date.current - BasilFeedback.minimum(:updated_at).to_date)
+    earliest_feedback = BasilFeedback.minimum(:updated_at)
+    days_since_start = earliest_feedback ? (Date.current - earliest_feedback.to_date) : 1
     days_since_start = 1 if days_since_start.zero? # no dividing by 0 lol
 
     total = @feedback_before_today.values.sum
