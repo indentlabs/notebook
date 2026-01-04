@@ -583,6 +583,7 @@ class BasilController < ApplicationController
                                          .paginate(page: params[:page], per_page: 100)
 
     @commissions_per_user_id = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).order('count_all DESC').limit(5).count
+    @top_users_by_id = User.where(id: @commissions_per_user_id.keys).index_by(&:id)
     @unique_users_generating_count = BasilCommission.with_deleted.where('created_at > ?', 48.hours.ago).group(:user_id).count
 
     @current_queue_items = BasilCommission.where(completed_at: nil).order('created_at ASC')

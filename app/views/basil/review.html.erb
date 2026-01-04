@@ -11,7 +11,8 @@
         </h3>
         <ul class="space-y-3">
           <% @commissions_per_user_id.each do |user_id, count| %>
-            <% user = User.find(user_id.to_i) %>
+            <% user = @top_users_by_id[user_id.to_i] %>
+            <% next unless user %>
             <li class="flex items-center justify-between group">
               <%= link_to user, class: "flex items-center min-w-0" do %>
                 <!-- Avatar placeholder or actual avatar if available -->
