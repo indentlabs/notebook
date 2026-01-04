@@ -7,9 +7,12 @@
           <i class="material-icons mr-3 text-blue-500">trending_up</i>
           Writing Activity
         </h1>
-        <div class="text-sm text-gray-500 dark:text-gray-400">
-          Last 7 days
-        </div>
+        <select onchange="window.location.href='?period=' + this.value"
+                class="text-sm bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg pl-3 pr-8 py-1.5 text-gray-700 dark:text-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="24h" <%= 'selected' if @period == '24h' %>>Last 24 hours</option>
+          <option value="7d" <%= 'selected' if @period == '7d' %>>Last 7 days</option>
+          <option value="30d" <%= 'selected' if @period == '30d' %>>Last 30 days</option>
+        </select>
       </div>
     </div>
   </div>
@@ -27,7 +30,7 @@
           <%= number_with_delimiter @words_written %>
         </div>
         <div class="text-xs text-blue-200">
-          in the last 7 days
+          <%= @period == '24h' ? 'today' : "in #{@period_label}" %>
         </div>
       </div>
 
@@ -41,7 +44,7 @@
           <%= @active_days %>
         </div>
         <div class="text-xs text-green-200">
-          of 7 days
+          of <%= @period_days %> <%= @period_days == 1 ? 'day' : 'days' %>
         </div>
       </div>
 
@@ -63,7 +66,7 @@
             No activity
           </div>
           <div class="text-xs text-purple-200">
-            this week
+            <%= @period == '24h' ? 'today' : 'this period' %>
           </div>
         <% end %>
       </div>
@@ -94,7 +97,7 @@
           </h3>
         </div>
         <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-b-lg [&>div]:dark:invert [&>div]:dark:hue-rotate-180">
-          <%= area_chart @daily_word_counts.map { |date, count| [date.strftime('%a %b %d'), count] },
+          <%= area_chart @daily_word_counts.map { |date, count| [date.strftime('%b %d, %Y'), count] },
               colors: ['#3b82f6'],
               prefix: '+',
               suffix: ' words',
@@ -124,7 +127,7 @@
           <% else %>
             <div class="text-center py-8 text-gray-500 dark:text-gray-400">
               <i class="material-icons text-4xl mb-2">analytics</i>
-              <p>No writing activity this week</p>
+              <p>No writing activity <%= @period == '24h' ? 'today' : 'this period' %></p>
             </div>
           <% end %>
         </div>
@@ -192,7 +195,7 @@
           <% else %>
             <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
               <i class="material-icons text-4xl mb-2">edit_off</i>
-              <p>No writing activity this week</p>
+              <p>No writing activity <%= @period == '24h' ? 'today' : 'this period' %></p>
               <p class="text-sm mt-1">Start writing to see your activity here!</p>
             </div>
           <% end %>
@@ -245,7 +248,7 @@
           <% else %>
             <div class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
               <i class="material-icons text-4xl mb-2">trending_flat</i>
-              <p>No page growth this week</p>
+              <p>No page growth <%= @period == '24h' ? 'today' : 'this period' %></p>
               <p class="text-sm mt-1">Pages you write in will appear here!</p>
             </div>
           <% end %>

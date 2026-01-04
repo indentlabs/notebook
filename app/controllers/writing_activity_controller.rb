@@ -4,7 +4,11 @@ class WritingActivityController < ApplicationController
 
   def index
     @page_title = "Writing Activity"
+    @period = params[:period].presence || '7d'
+    @period = '7d' unless %w[24h 7d 30d].include?(@period)
     @date_range = calculate_date_range
+    @period_label = period_label
+    @period_days = @date_range.count
 
     # Key metrics
     @words_written = WordCountUpdate.words_written_in_range(current_user, @date_range)
@@ -29,7 +33,22 @@ class WritingActivityController < ApplicationController
 
   def calculate_date_range
     user_today = current_user.current_date_in_time_zone
-    (user_today - 6.days)..user_today
+    case @period
+    when '24h'
+      user_today..user_today
+    when '30d'
+      (user_today - 29.days)..user_today
+    else # '7d'
+      (user_today - 6.days)..user_today
+    end
+  end
+
+  def period_label
+    case @period
+    when '24h' then 'today'
+    when '30d' then 'the last 30 days'
+    else 'the last 7 days'
+    end
   end
 
   def prepare_daily_chart_data
