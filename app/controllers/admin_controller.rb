@@ -80,6 +80,17 @@ class AdminController < ApplicationController
   def churn
   end
 
+  def attributes
+    @total_attributes = AttributeField.count
+    @total_users = AttributeField.distinct.count(:user_id)
+    @avg_per_user = @total_users > 0 ? (@total_attributes.to_f / @total_users).round(1) : 0
+
+    @by_content_type = AttributeCategory
+      .joins(:attribute_fields)
+      .group(:entity_type)
+      .count
+  end
+
   def notifications
     @clicked_notifications = Notification.where.not(viewed_at: nil)
     @notifications = Notification.all.order(:reference_code)
