@@ -464,7 +464,7 @@ class ContentController < ApplicationController
     
     # Get paginated change events first, then group them
     page = params[:page] || 1
-    per_page = 20 # 20 change events per page
+    per_page = 50 # 50 change events per page
     
     # Get the base query for change events (without the .last() limit)
     change_events_query = ContentChangeEvent.where(

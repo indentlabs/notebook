@@ -42,9 +42,12 @@ class ChangelogStatsService
   end
 
   def change_intensity_by_week
-    # Group changes by week for the past 12 weeks
+    # Group changes by week for the page's lifetime (capped at 52 weeks)
+    weeks_since_creation = (days_since_creation / 7.0).ceil
+    weeks_to_show = [weeks_since_creation + 1, 52].min
+
     weeks = []
-    (0..11).each do |i|
+    (0..(weeks_to_show - 1)).each do |i|
       week_start = i.weeks.ago.beginning_of_week
       week_end = week_start.end_of_week
       
