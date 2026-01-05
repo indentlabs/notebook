@@ -1305,13 +1305,13 @@
        style="display: none;">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <!-- Backdrop -->
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"></div>
+      <div class="fixed inset-0 bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75 transition-opacity" @click="typeof showShareModal !== 'undefined' ? (showShareModal = false) : console.error('showShareModal not available')"></div>
       
       <!-- Modal -->
       <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
         <div class="sm:flex sm:items-start">
-          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-            <i class="material-icons text-green-600">share</i>
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 sm:mx-0 sm:h-10 sm:w-10">
+            <i class="material-icons text-green-600 dark:text-green-400">share</i>
           </div>
           <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">Share Timeline</h3>
@@ -1334,19 +1334,19 @@
               </div>
               
               <% if current_user && @timeline.user == current_user %>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
                   <div class="flex">
                     <div class="flex-shrink-0">
-                      <i class="material-icons text-blue-400">info</i>
+                      <i class="material-icons text-blue-400 dark:text-blue-300">info</i>
                     </div>
                     <div class="ml-3">
-                      <h3 class="text-sm font-medium text-blue-800">Sharing Settings</h3>
-                      <p class="mt-1 text-sm text-blue-700">
+                      <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">Sharing Settings</h3>
+                      <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
                         To be shared, content must either be public <strong>or</strong> in a public Universe.
-                        <%= link_to 'Learn more about privacy', 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2', 
-                            class: 'font-medium underline hover:text-blue-600', target: '_blank' %>
+                        <%= link_to 'Learn more about privacy', 'https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2',
+                            class: 'font-medium underline hover:text-blue-600 dark:hover:text-blue-400', target: '_blank' %>
                       </p>
-                      <p class="mt-1 text-xs text-blue-600">
+                      <p class="mt-1 text-xs text-blue-600 dark:text-blue-400">
                         Changes are saved automatically and can be changed at any time.
                       </p>
                     </div>
@@ -1357,13 +1357,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <% if @timeline.universe.present? %>
                     <!-- Universe Privacy Toggle -->
-                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-30 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
                       <div class="mb-3">
-                        <h4 class="text-sm font-medium text-purple-900 flex items-center">
-                          <i class="material-icons text-purple-600 text-sm mr-2">public</i>
+                        <h4 class="text-sm font-medium text-purple-900 dark:text-purple-200 flex items-center">
+                          <i class="material-icons text-purple-600 dark:text-purple-400 text-sm mr-2">public</i>
                           Universe-wide sharing
                         </h4>
-                        <p class="text-xs text-purple-700 mt-1">
+                        <p class="text-xs text-purple-700 dark:text-purple-300 mt-1">
                           Controls visibility for the entire "<%= @timeline.universe.name %>" universe
                         </p>
                       </div>
@@ -1380,13 +1380,13 @@
                   <% end %>
 
                   <!-- Timeline Privacy Toggle -->
-                  <div class="<%= @timeline.universe.present? ? '' : 'md:col-span-2' %> bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div class="<%= @timeline.universe.present? ? '' : 'md:col-span-2' %> bg-green-50 dark:bg-green-900 dark:bg-opacity-30 border border-green-200 dark:border-green-800 rounded-lg p-4">
                     <div class="mb-3">
-                      <h4 class="text-sm font-medium text-green-900 flex items-center">
-                        <i class="material-icons text-green-600 text-sm mr-2">timeline</i>
+                      <h4 class="text-sm font-medium text-green-900 dark:text-green-200 flex items-center">
+                        <i class="material-icons text-green-600 dark:text-green-400 text-sm mr-2">timeline</i>
                         Timeline-specific sharing
                       </h4>
-                      <p class="text-xs text-green-700 mt-1">
+                      <p class="text-xs text-green-700 dark:text-green-300 mt-1">
                         Controls visibility for this specific timeline
                       </p>
                     </div>
@@ -1405,7 +1405,7 @@
                 <% if @timeline.universe.present? %>
                   <div class="mt-4 bg-gray-50 dark:bg-gray-700 dark:bg-opacity-50 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      <i class="material-icons text-gray-400 text-sm mr-1">info_outline</i>
+                      <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1">info_outline</i>
                       This timeline belongs to the "<%= @timeline.universe.name %>" universe. 
                       Making the universe public will also make this timeline viewable to others.
                     </p>
