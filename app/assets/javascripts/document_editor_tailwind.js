@@ -68,6 +68,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Strip background colors when copying to prevent dark mode backgrounds in clipboard
+  editorElement.addEventListener('copy', function(e) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    // Get the selected HTML
+    const range = selection.getRangeAt(0);
+    const div = document.createElement('div');
+    div.appendChild(range.cloneContents());
+
+    // Remove background colors from all elements
+    div.querySelectorAll('*').forEach(function(el) {
+      el.style.removeProperty('background-color');
+      el.style.removeProperty('background');
+    });
+
+    // Also clean inline style attributes that may contain background
+    const html = div.innerHTML.replace(/background(-color)?:\s*[^;]+;?/gi, '');
+
+    // Set the cleaned content on the clipboard
+    e.clipboardData.setData('text/html', html);
+    e.clipboardData.setData('text/plain', selection.toString());
+    e.preventDefault();
+  });
+
   // Add tooltips to toolbar buttons
   setTimeout(function() {
     const tooltips = {
