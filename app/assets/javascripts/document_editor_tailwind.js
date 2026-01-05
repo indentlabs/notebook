@@ -305,6 +305,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Prevent Enter from submitting the form, focus editor instead
+  $('#document_title').on('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      $('#editor').focus();
+    }
+  });
+
   // Manual save on click - immediate save, not queued
   $('.js-autosave-status').on('click', performSave);
 
