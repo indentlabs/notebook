@@ -10,7 +10,29 @@
 <div x-data="{
   sidebarOpen: true,
   searchQuery: '',
-  showAddDocument: false
+  showAddDocument: false,
+  showNewDocumentModal: false,
+  newDocumentTitle: '',
+  isCreatingDocument: false,
+  async createDocument() {
+    this.isCreatingDocument = true;
+    try {
+      const response = await fetch('<%= create_document_book_path(@book) %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
+        },
+        body: JSON.stringify({ title: this.newDocumentTitle })
+      });
+      if (response.ok) {
+        window.location.reload();
+      }
+    } finally {
+      this.isCreatingDocument = false;
+      this.showNewDocumentModal = false;
+    }
+  }
 }" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
 
   <!-- Header (always at top) -->
@@ -76,13 +98,20 @@
 
           <!-- Add Document Section -->
           <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-            <div x-show="!showAddDocument">
+            <div x-show="!showAddDocument" class="flex items-center space-x-2">
               <button
                 @click="showAddDocument = true"
                 class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <i class="material-icons text-lg mr-2">add</i>
                 Add Document
+              </button>
+              <button
+                @click="showNewDocumentModal = true"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white <%= Book.color %> rounded-lg hover:opacity-90"
+              >
+                <i class="material-icons text-lg mr-2">note_add</i>
+                Create Document
               </button>
             </div>
 
@@ -217,6 +246,8 @@
     </div>
   </aside>
   </div><!-- end content area with sidebar -->
+
+  <%= render 'new_document_modal' %>
 </div>
 
 <!-- JavaScript for drag-and-drop sorting -->

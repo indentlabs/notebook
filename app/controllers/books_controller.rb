@@ -105,6 +105,16 @@ class BooksController < ApplicationController
     render json: { status: 'ok' }
   end
 
+  def create_document
+    document = current_user.documents.create!(title: params[:title].presence || 'Untitled')
+    @book.book_documents.create!(document: document)
+
+    respond_to do |format|
+      format.html { redirect_to edit_book_path(@book) }
+      format.json { render json: { status: 'ok', document: { id: document.id, title: document.title } } }
+    end
+  end
+
   private
 
   def set_book

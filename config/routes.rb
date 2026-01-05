@@ -178,6 +178,7 @@ Rails.application.routes.draw do
     member do
       post :toggle_archive
       post :add_document
+      post :create_document
       delete :remove_document
       post :sort_document
     end
