@@ -434,7 +434,7 @@ Rails.application.routes.draw do
       delete '/shares/:id',               to: 'admin#destroy_share', as: :admin_destroy_share
       delete '/users/:id',                to: 'admin#destroy_user', as: :admin_destroy_user
       post '/shares/:id/dismiss_reports', to: 'admin#dismiss_share_reports', as: :admin_dismiss_share_reports
-      get '/churn',                to: 'admin#churn'
+      get '/churn',                to: 'admin#churn', as: :admin_churn
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
       get '/notifications',        to: 'admin#notifications'

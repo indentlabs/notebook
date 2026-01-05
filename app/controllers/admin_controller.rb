@@ -78,6 +78,10 @@ class AdminController < ApplicationController
   end
   
   def churn
+    @timespan = params[:timespan]
+    @timespan = nil unless %w[30 90 365].include?(@timespan)
+
+    @start_date = @timespan.present? ? @timespan.to_i.days.ago.to_date : nil
   end
 
   def attributes
@@ -92,10 +96,52 @@ class AdminController < ApplicationController
   end
 
   def notifications
-    @clicked_notifications = Notification.where.not(viewed_at: nil)
-    @notifications = Notification.all.order(:reference_code)
+    # Pre-aggregate stats by reference_code in a single query (top 50 by volume)
+    @code_stats = Notification
+      .select(
+        'reference_code',
+        'COUNT(*) as total_count',
+        'COUNT(viewed_at) as clicked_count'
+      )
+      .group(:reference_code)
+      .order('total_count DESC')
+      .limit(50)
 
-    @codes = Notification.distinct.order('reference_code').pluck(:reference_code)
+    # Get list of codes for the search autocomplete
+    @codes = Notification.distinct.pluck(:reference_code).compact
+
+    # Overall stats using database aggregation
+    @total_count = Notification.count
+    @clicked_count = Notification.where.not(viewed_at: nil).count
+
+    # Time-to-click stats calculated in SQL (avoid loading all rows into memory)
+    # Use database-specific syntax for date diff calculation
+    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
+      @avg_seconds = Notification
+        .where.not(viewed_at: nil)
+        .where.not(happened_at: nil)
+        .average('EXTRACT(EPOCH FROM (viewed_at - happened_at))')
+        &.to_i
+    else
+      # SQLite: use strftime to calculate seconds
+      @avg_seconds = Notification
+        .where.not(viewed_at: nil)
+        .where.not(happened_at: nil)
+        .average("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+    end
+
+    # Pre-aggregate link stats (top 50 by volume)
+    @link_stats = Notification
+      .where.not(passthrough_link: [nil, ''])
+      .select(
+        'passthrough_link',
+        'COUNT(*) as total_count',
+        'COUNT(viewed_at) as clicked_count'
+      )
+      .group(:passthrough_link)
+      .order('total_count DESC')
+      .limit(50)
   end
 
   def notification_reference

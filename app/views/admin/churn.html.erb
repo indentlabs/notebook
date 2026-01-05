@@ -1,11 +1,33 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <!-- Header -->
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Subscription Churn</h1>
-    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-      New and cancelled subscriptions over time
-    </p>
+  <div class="mb-8 flex items-start justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Subscription Churn</h1>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        New and cancelled subscriptions over time
+      </p>
+    </div>
+    <div>
+      <%= form_tag admin_churn_path, method: :get, class: "flex items-center" do %>
+        <%= select_tag :timespan,
+          options_for_select([
+            ["All Time", ""],
+            ["Last 30 Days", "30"],
+            ["Last 90 Days", "90"],
+            ["Last Year", "365"]
+          ], @timespan),
+          class: "rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm",
+          onchange: "this.form.submit()"
+        %>
+      <% end %>
+    </div>
   </div>
+
+  <%
+    # Build base scope with optional date filter
+    base_scope = @start_date ? Subscription.where('start_date >= ?', @start_date) : Subscription.all
+    cancelled_scope = @start_date ? Subscription.where('end_date >= ? AND end_date < ?', @start_date, Date.current) : Subscription.where('end_date < ?', Date.current)
+  %>
 
   <!-- Overview Section -->
   <div class="space-y-6 mb-8">
@@ -15,10 +37,10 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">New subscriptions per month</h3>
         <%=
           line_chart [
-            { name: "Early Adopters", data: Subscription.where(billing_plan_id: 3).group_by_month(:start_date) },
-            { name: "Monthly",        data: Subscription.where(billing_plan_id: 4).group_by_month(:start_date) },
-            { name: "Tri-monthly",    data: Subscription.where(billing_plan_id: 5).group_by_month(:start_date) },
-            { name: "Yearly",         data: Subscription.where(billing_plan_id: 6).group_by_month(:start_date) },
+            { name: "Early Adopters", data: base_scope.where(billing_plan_id: 3).group_by_month(:start_date) },
+            { name: "Monthly",        data: base_scope.where(billing_plan_id: 4).group_by_month(:start_date) },
+            { name: "Tri-monthly",    data: base_scope.where(billing_plan_id: 5).group_by_month(:start_date) },
+            { name: "Yearly",         data: base_scope.where(billing_plan_id: 6).group_by_month(:start_date) },
           ]
         %>
       </div>
@@ -30,10 +52,10 @@
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cancelled subscriptions per month</h3>
         <%=
           line_chart [
-            { name: "Early Adopters", data: Subscription.where(billing_plan_id: 3).where('end_date < ?', Date.current).group_by_month(:end_date) },
-            { name: "Monthly",        data: Subscription.where(billing_plan_id: 4).where('end_date < ?', Date.current).group_by_month(:end_date) },
-            { name: "Tri-monthly",    data: Subscription.where(billing_plan_id: 5).where('end_date < ?', Date.current).group_by_month(:end_date) },
-            { name: "Yearly",         data: Subscription.where(billing_plan_id: 6).where('end_date < ?', Date.current).group_by_month(:end_date) },
+            { name: "Early Adopters", data: cancelled_scope.where(billing_plan_id: 3).group_by_month(:end_date) },
+            { name: "Monthly",        data: cancelled_scope.where(billing_plan_id: 4).group_by_month(:end_date) },
+            { name: "Tri-monthly",    data: cancelled_scope.where(billing_plan_id: 5).group_by_month(:end_date) },
+            { name: "Yearly",         data: cancelled_scope.where(billing_plan_id: 6).group_by_month(:end_date) },
           ]
         %>
       </div>
@@ -51,8 +73,8 @@
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Early Adopters</h3>
           <%=
             line_chart [
-              { name: "Started",   data: Subscription.where(billing_plan_id: 3).group_by_month(:start_date) },
-              { name: "Cancelled", data: Subscription.where(billing_plan_id: 3).where('end_date < ?', Date.current).group_by_month(:end_date) }
+              { name: "Started",   data: base_scope.where(billing_plan_id: 3).group_by_month(:start_date) },
+              { name: "Cancelled", data: cancelled_scope.where(billing_plan_id: 3).group_by_month(:end_date) }
             ]
           %>
         </div>
@@ -64,8 +86,8 @@
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Monthly</h3>
           <%=
             line_chart [
-              { name: "Started",   data: Subscription.where(billing_plan_id: 4).group_by_month(:start_date) },
-              { name: "Cancelled", data: Subscription.where(billing_plan_id: 4).where('end_date < ?', Date.current).group_by_month(:end_date) }
+              { name: "Started",   data: base_scope.where(billing_plan_id: 4).group_by_month(:start_date) },
+              { name: "Cancelled", data: cancelled_scope.where(billing_plan_id: 4).group_by_month(:end_date) }
             ]
           %>
         </div>
@@ -77,8 +99,8 @@
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Tri-monthly</h3>
           <%=
             line_chart [
-              { name: "Started",   data: Subscription.where(billing_plan_id: 5).group_by_month(:start_date) },
-              { name: "Cancelled", data: Subscription.where(billing_plan_id: 5).where('end_date < ?', Date.current).group_by_month(:end_date) }
+              { name: "Started",   data: base_scope.where(billing_plan_id: 5).group_by_month(:start_date) },
+              { name: "Cancelled", data: cancelled_scope.where(billing_plan_id: 5).group_by_month(:end_date) }
             ]
           %>
         </div>
@@ -90,8 +112,8 @@
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Yearly</h3>
           <%=
             line_chart [
-              { name: "Started",   data: Subscription.where(billing_plan_id: 6).group_by_month(:start_date) },
-              { name: "Cancelled", data: Subscription.where(billing_plan_id: 6).where('end_date < ?', Date.current).group_by_month(:end_date) }
+              { name: "Started",   data: base_scope.where(billing_plan_id: 6).group_by_month(:start_date) },
+              { name: "Cancelled", data: cancelled_scope.where(billing_plan_id: 6).group_by_month(:end_date) }
             ]
           %>
         </div>
