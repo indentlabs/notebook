@@ -49,15 +49,13 @@
   </script>
 
   <%
-    total_count = @notifications.count
-    clicked_count = @clicked_notifications.count
+    total_count = @total_count
+    clicked_count = @clicked_count
     overall_rate = total_count > 0 ? (clicked_count / total_count.to_f * 100).round(1) : 0
 
-    # Calculate average time to click (in seconds)
-    clicked_with_times = @clicked_notifications.where.not(happened_at: nil)
-    if clicked_with_times.any?
-      total_seconds = clicked_with_times.sum { |n| (n.viewed_at - n.happened_at).to_i }
-      avg_seconds = total_seconds / clicked_with_times.count
+    # Use pre-calculated average from controller (calculated in SQL)
+    avg_seconds = @avg_seconds
+    if avg_seconds.present? && avg_seconds > 0
       if avg_seconds < 60
         avg_time_display = "#{avg_seconds} seconds"
       elsif avg_seconds < 3600
@@ -138,11 +136,14 @@
   <!-- Click Rate Trend Chart -->
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
     <div class="p-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Trend</h3>
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Trend (Last 12 Months)</h3>
+      <%
+        twelve_months_ago = 12.months.ago
+      %>
       <%=
         line_chart [
-          { name: "Sent", data: Notification.group_by_month(:created_at).count },
-          { name: "Clicked", data: Notification.where.not(viewed_at: nil).group_by_month(:created_at).count }
+          { name: "Sent", data: Notification.where('created_at > ?', twelve_months_ago).group_by_month(:created_at).count },
+          { name: "Clicked", data: Notification.where.not(viewed_at: nil).where('created_at > ?', twelve_months_ago).group_by_month(:created_at).count }
         ], colors: ['#3B82F6', '#10B981']
       %>
     </div>
@@ -150,35 +151,25 @@
 
   <!-- By Reference Code Section -->
   <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">By Reference Code</h2>
+    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">By Reference Code (Top 50 by Volume)</h2>
 
-    <%
-      # Build data for each code and sort by click rate
-      code_stats = @codes.map do |code|
-        notifications_for_code = Notification.where(reference_code: code)
-        clicked = notifications_for_code.where.not(viewed_at: nil).count
-        total = notifications_for_code.count
-        rate = total > 0 ? (clicked / total.to_f * 100) : 0
-        sample = notifications_for_code.order(created_at: :desc).first
-        { code: code, clicked: clicked, total: total, rate: rate, sample: sample }
-      end.sort_by { |s| -s[:rate] }
-    %>
-
-    <% if code_stats.any? %>
+    <% if @code_stats.any? %>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <% code_stats.each do |stats| %>
+        <% @code_stats.each do |stats| %>
           <%
-            rate = stats[:rate].round(1)
+            total = stats.total_count.to_i
+            clicked = stats.clicked_count.to_i
+            rate = total > 0 ? (clicked / total.to_f * 100).round(1) : 0
             bar_color = rate >= 20 ? 'bg-green-500' : rate >= 10 ? 'bg-yellow-500' : 'bg-red-500'
             text_color = rate >= 20 ? 'text-green-600 dark:text-green-400' : rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
           %>
-          <% if stats[:code].present? %>
-            <%= link_to admin_notification_reference_path(stats[:code]), class: "block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" do %>
+          <% if stats.reference_code.present? %>
+            <%= link_to admin_notification_reference_path(stats.reference_code), class: "block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" do %>
               <div class="p-6">
                 <!-- Code name -->
                 <div class="flex items-center justify-between mb-3">
-                  <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate" title="<%= stats[:code] %>">
-                    <%= stats[:code] %>
+                  <h3 class="text-sm font-medium text-gray-900 dark:text-white truncate" title="<%= stats.reference_code %>">
+                    <%= stats.reference_code %>
                   </h3>
                   <span class="text-lg font-bold <%= text_color %>"><%= rate %>%</span>
                 </div>
@@ -189,18 +180,10 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  <span><%= number_with_delimiter stats[:clicked] %> clicked</span>
-                  <span><%= number_with_delimiter stats[:total] %> sent</span>
+                <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                  <span><%= number_with_delimiter clicked %> clicked</span>
+                  <span><%= number_with_delimiter total %> sent</span>
                 </div>
-
-                <!-- Sample message -->
-                <% if stats[:sample]&.message_html.present? %>
-                  <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Sample message:</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2"><%= strip_tags(stats[:sample].message_html).truncate(100) %></p>
-                  </div>
-                <% end %>
               </div>
             <% end %>
           <% else %>
@@ -220,18 +203,10 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                  <span><%= number_with_delimiter stats[:clicked] %> clicked</span>
-                  <span><%= number_with_delimiter stats[:total] %> sent</span>
+                <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+                  <span><%= number_with_delimiter clicked %> clicked</span>
+                  <span><%= number_with_delimiter total %> sent</span>
                 </div>
-
-                <!-- Sample message -->
-                <% if stats[:sample]&.message_html.present? %>
-                  <div class="pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Sample message:</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 line-clamp-2"><%= strip_tags(stats[:sample].message_html).truncate(100) %></p>
-                  </div>
-                <% end %>
               </div>
             </div>
           <% end %>
@@ -245,20 +220,9 @@
   </div>
 
   <!-- Link Performance Section -->
-  <%
-    links = Notification.where.not(passthrough_link: [nil, '']).distinct.pluck(:passthrough_link)
-    link_stats = links.map do |link|
-      notifications_for_link = Notification.where(passthrough_link: link)
-      clicked = notifications_for_link.where.not(viewed_at: nil).count
-      total = notifications_for_link.count
-      rate = total > 0 ? (clicked / total.to_f * 100) : 0
-      { link: link, clicked: clicked, total: total, rate: rate }
-    end.sort_by { |s| -s[:rate] }
-  %>
-
-  <% if link_stats.any? %>
+  <% if @link_stats.any? %>
     <div class="mb-8">
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance</h2>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance (Top 50 by Volume)</h2>
 
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -271,17 +235,19 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <% link_stats.each do |stats| %>
+            <% @link_stats.each do |stats| %>
               <%
-                rate = stats[:rate].round(1)
+                total = stats.total_count.to_i
+                clicked = stats.clicked_count.to_i
+                rate = total > 0 ? (clicked / total.to_f * 100).round(1) : 0
                 text_color = rate >= 20 ? 'text-green-600 dark:text-green-400' : rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
               %>
               <tr>
                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                  <span class="truncate block max-w-md" title="<%= stats[:link] %>"><%= stats[:link].truncate(60) %></span>
+                  <span class="truncate block max-w-md" title="<%= stats.passthrough_link %>"><%= stats.passthrough_link.truncate(60) %></span>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter stats[:total] %></td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter stats[:clicked] %></td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter total %></td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter clicked %></td>
                 <td class="px-6 py-4 text-sm font-medium text-right <%= text_color %>"><%= rate %>%</td>
               </tr>
             <% end %>

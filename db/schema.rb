@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_02_155715) do
+ActiveRecord::Schema.define(version: 2026_01_05_074125) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2443,7 +2443,11 @@ ActiveRecord::Schema.define(version: 2026_01_02_155715) do
     t.string "icon_color", default: "blue"
     t.string "passthrough_link"
     t.string "reference_code"
+    t.index ["created_at"], name: "index_notifications_on_created_at"
+    t.index ["passthrough_link"], name: "index_notifications_on_passthrough_link"
+    t.index ["reference_code"], name: "index_notifications_on_reference_code"
     t.index ["user_id"], name: "index_notifications_on_user_id"
+    t.index ["viewed_at"], name: "index_notifications_on_viewed_at"
   end
 
   create_table "officeships", force: :cascade do |t|
