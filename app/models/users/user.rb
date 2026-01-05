@@ -31,7 +31,8 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
-    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id) || active_promo_codes.any?
+    # Use Ruby filtering on eager-loaded promotions to avoid N+1 queries
+    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id) || promotions.any?(&:active?)
   end
   has_many :promotions, dependent: :destroy
   has_many :paypal_invoices

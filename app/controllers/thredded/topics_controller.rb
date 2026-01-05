@@ -58,7 +58,8 @@ module Thredded
       page_scope = policy_scope(topic.posts)
         .order_oldest_first
         # Include user with avatar attachment to prevent N+1 on post.user.image_url
-        .includes(user: :avatar_attachment)
+        # Include promotions to prevent N+1 on post.user.on_premium_plan?
+        .includes(user: [{ avatar_attachment: :blob }, :promotions])
         .includes(:messageboard)
         .send(Kaminari.config.page_method_name, current_page)
       return redirect_to(last_page_params(page_scope)) if page_beyond_last?(page_scope)
