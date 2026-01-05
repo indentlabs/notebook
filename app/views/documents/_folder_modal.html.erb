@@ -97,14 +97,37 @@
                 </span>
               </div>
 
-              <!-- Folder options -->
-              <% current_user.folders.where(context: 'Document').order(:title).each do |folder| %>
+              <!-- Folder options (hierarchical) -->
+              <%
+                # Build hierarchical folder list with depth tracking
+                def build_folder_hierarchy(folders, parent_id: nil, depth: 0)
+                  folders.select { |f| f.parent_folder_id == parent_id }
+                         .sort_by { |f| f.title.downcase }
+                         .flat_map do |folder|
+                    [[folder, depth]] + build_folder_hierarchy(folders, parent_id: folder.id, depth: depth + 1)
+                  end
+                end
+
+                all_folders = current_user.folders.where(context: 'Document').to_a
+                hierarchical_folders = build_folder_hierarchy(all_folders)
+              %>
+              <% hierarchical_folders.each do |folder, depth| %>
+                <%
+                  # Calculate padding based on depth (base padding + depth * increment)
+                  base_padding = 3
+                  depth_padding = depth * 1
+                  total_padding = base_padding + depth_padding
+                %>
                 <div
                   @click="selectedId = '<%= folder.id %>'; selectedName = '<%= j folder.title %>'; dropdownOpen = false"
-                  class="cursor-pointer select-none relative py-2 pl-3 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
+                  class="cursor-pointer select-none relative py-2 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
+                  style="padding-left: <%= total_padding * 0.25 %>rem;"
                   :class="{ 'bg-teal-100 dark:bg-teal-900 dark:bg-opacity-50 text-teal-900 dark:text-teal-200': selectedId === '<%= folder.id %>' }"
                 >
                   <span class="flex items-center">
+                    <% if depth > 0 %>
+                      <span class="text-gray-300 dark:text-gray-500 mr-1 text-xs">└</span>
+                    <% end %>
                     <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">folder</i>
                     <span class="block truncate"><%= folder.title %></span>
                   </span>
