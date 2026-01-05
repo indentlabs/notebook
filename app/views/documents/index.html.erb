@@ -104,16 +104,6 @@
                         <span><%= time_ago_in_words(document.updated_at) %> ago</span>
                       </div>
                     </div>
-                    <% 
-                      time_diff = Time.current - document.updated_at
-                      recency_class = case
-                        when time_diff < 1.hour then "bg-red-500 animate-pulse"
-                        when time_diff < 6.hours then "bg-orange-500"
-                        when time_diff < 24.hours then "bg-yellow-500"
-                        else "bg-gray-400"
-                      end
-                    %>
-                    <div class="w-2 h-2 rounded-full <%= recency_class %> mt-1.5 ml-2 flex-shrink-0"></div>
                   </div>
                 </div>
               <% end %>
@@ -244,16 +234,6 @@
                         <span><%= time_ago_in_words(document.updated_at) %> ago</span>
                       </div>
                     </div>
-                    <% 
-                      time_diff = Time.current - document.updated_at
-                      recency_class = case
-                        when time_diff < 1.hour then "bg-red-500 animate-pulse"
-                        when time_diff < 6.hours then "bg-orange-500"
-                        when time_diff < 24.hours then "bg-yellow-500"
-                        else "bg-gray-400"
-                      end
-                    %>
-                    <div class="w-2 h-2 rounded-full <%= recency_class %> mt-1.5 ml-2 flex-shrink-0"></div>
                   </div>
                 </div>
               <% end %>
@@ -703,20 +683,6 @@
                           x-data="{ isFavorite: <%= document.favorite? %>, isLoading: false, async toggleFavorite(event) { event.preventDefault(); event.stopPropagation(); this.isLoading = true; try { const result = await window.toggleDocumentFavorite('<%= document.id %>'); if (result.success) { this.isFavorite = !this.isFavorite; if (window.showToast) window.showToast(this.isFavorite ? 'Added to favorites' : 'Removed from favorites', 'success'); } else { if (window.showToast) window.showToast('Error toggling favorite', 'error'); } } catch (error) { console.error('Error:', error); if (window.showToast) window.showToast('An unexpected error occurred', 'error'); } finally { this.isLoading = false; } } }">
                         <%= link_to edit_document_path(document), class: "block hover:bg-gray-50 dark:hover:bg-gray-700 group" do %>
                           <div class="relative px-4 py-3 flex items-center">
-                            <!-- Recency indicator -->
-                            <% 
-                              time_diff = Time.current - document.updated_at
-                              recency_class = case
-                                when time_diff < 1.hour then "bg-red-500 animate-pulse"
-                                when time_diff < 6.hours then "bg-orange-500"
-                                when time_diff < 24.hours then "bg-yellow-500"
-                                else "bg-gray-400"
-                              end
-                            %>
-                            <div class="flex-shrink-0 mr-3">
-                              <div class="w-2 h-2 rounded-full <%= recency_class %>"></div>
-                            </div>
-                            
                             <!-- Document icon -->
                             <div class="flex-shrink-0 mr-3">
                               <i class="material-icons <%= Document.text_color %> text-lg">description</i>
