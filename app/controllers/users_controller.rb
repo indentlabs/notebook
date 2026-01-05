@@ -97,6 +97,8 @@ class UsersController < ApplicationController
     # TODO this can take quite a while for active users, so it should be moved to a background job
     current_user.destroy!
 
+    sign_out(current_user)
+
     redirect_to(root_path, notice: 'Your account has been deleted. We will miss you greatly!')
   end
 
