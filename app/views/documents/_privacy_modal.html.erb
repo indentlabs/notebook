@@ -284,15 +284,14 @@
     // Submit the form
     const form = document.getElementById('document-privacy-form');
     if (form) {
-      // Use fetch for cleaner AJAX submission
-      const formData = new FormData(form);
       fetch(form.action, {
         method: 'PATCH',
         headers: {
+          'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
           'Accept': 'application/json'
         },
-        body: formData
+        body: JSON.stringify({ document: { privacy: value } })
       }).then(function() {
         // Re-enable radio buttons
         document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
