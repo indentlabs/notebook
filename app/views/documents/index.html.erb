@@ -1103,8 +1103,16 @@ function documentsIndexController() {
 
     // Sidebar states
     showLeftSidebar: (() => {
-      // Only show left sidebar by default if user has documents and on desktop
-      return window.innerWidth >= 1024 && <%= @recent_documents.any? %>;
+      if (window.innerWidth >= 1024) {
+        try {
+          const saved = localStorage.getItem('documents_index_left_sidebar_visible');
+          // Default to true only if user has documents
+          return saved === null ? <%= @recent_documents.any? %> : saved === 'true';
+        } catch (e) {
+          return <%= @recent_documents.any? %>;
+        }
+      }
+      return false;
     })(),
     showRightSidebar: false,
 
@@ -1129,13 +1137,18 @@ function documentsIndexController() {
       // Handle window resize
       window.addEventListener('resize', () => {
         // Left Sidebar Logic (lg breakpoint)
+        const wasDesktop = this.isDesktop;
         this.isDesktop = window.innerWidth >= 1024;
-        if (window.innerWidth >= 1024) {
-          // Only auto-show if user has documents
-          this.showLeftSidebar = <%= @recent_documents.any? %>;
-        } else {
+
+        // When transitioning from mobile to desktop, restore saved left sidebar state
+        if (!wasDesktop && this.isDesktop) {
+          this.showLeftSidebar = this.getSavedSidebarState('left', <%= @recent_documents.any? %>);
+        }
+        // When transitioning from desktop to mobile, close left sidebar
+        if (wasDesktop && !this.isDesktop) {
           this.showLeftSidebar = false;
         }
+        // If staying on same breakpoint, don't touch the sidebar state (respect user's toggle)
 
         // Right Sidebar Logic (lg breakpoint)
         const wasXlDesktop = this.isXlDesktop;
@@ -1143,7 +1156,7 @@ function documentsIndexController() {
 
         // When transitioning from mobile to desktop (lg), restore saved right sidebar state
         if (!wasXlDesktop && this.isXlDesktop) {
-          this.showRightSidebar = this.getSavedSidebarState();
+          this.showRightSidebar = this.getSavedSidebarState('right', true);
         }
         // When transitioning from desktop (lg) to mobile, always close right sidebar
         if (wasXlDesktop && !this.isXlDesktop) {
@@ -1154,35 +1167,38 @@ function documentsIndexController() {
     
     initializeSidebarState() {
       if (this.isXlDesktop) {
-        this.showRightSidebar = this.getSavedSidebarState();
+        this.showRightSidebar = this.getSavedSidebarState('right', true);
       } else {
         this.showRightSidebar = false;
       }
     },
 
-    getSavedSidebarState() {
+    getSavedSidebarState(side, defaultValue = true) {
       try {
-        const saved = localStorage.getItem('documents_index_right_sidebar_visible');
-        return saved === null ? true : saved === 'true';
+        const saved = localStorage.getItem(`documents_index_${side}_sidebar_visible`);
+        return saved === null ? defaultValue : saved === 'true';
       } catch (e) {
-        return true;
+        return defaultValue;
       }
     },
 
-    saveSidebarState() {
+    saveSidebarState(side, value) {
       try {
-        localStorage.setItem('documents_index_right_sidebar_visible', this.showRightSidebar.toString());
+        localStorage.setItem(`documents_index_${side}_sidebar_visible`, value.toString());
       } catch (e) {}
     },
 
     toggleLeftSidebar() {
       this.showLeftSidebar = !this.showLeftSidebar;
+      if (this.isDesktop) {
+        this.saveSidebarState('left', this.showLeftSidebar);
+      }
     },
 
     toggleRightSidebar() {
       this.showRightSidebar = !this.showRightSidebar;
       if (this.isXlDesktop) {
-        this.saveSidebarState();
+        this.saveSidebarState('right', this.showRightSidebar);
       }
     },
 
