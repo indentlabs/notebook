@@ -1,32 +1,32 @@
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
   <!-- Timeline Header - Clean Application Style -->
-  <header class="bg-white border-b border-gray-200 shadow-sm">
+  <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
     <div class="px-6 py-4">
       <!-- Header Content -->
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4 flex-1 min-w-0">
           <!-- Back Button -->
-          <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0 p-2 rounded-lg hover:bg-gray-100", title: "Back to all Timelines" do %>
+          <%= link_to timelines_path, class: "inline-flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors flex-shrink-0 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700", title: "Back to all Timelines" do %>
             <i class="material-icons text-lg">arrow_back</i>
           <% end %>
           
           <!-- Timeline Title and Subtitle -->
           <div class="flex-1 min-w-0">
-            <h1 class="text-xl font-semibold text-gray-900 truncate">
+            <h1 class="text-xl font-semibold text-gray-900 dark:text-gray-100 truncate">
               <%= @timeline.name.present? ? @timeline.name : 'Untitled Timeline' %>
             </h1>
             
             <div class="flex items-center mt-1 space-x-2">
               <% if @timeline.subtitle.present? %>
-                <span class="text-sm text-gray-600 truncate">
+                <span class="text-sm text-gray-600 dark:text-gray-400 truncate">
                   <%= @timeline.subtitle %>
                 </span>
-                <span class="text-gray-400">•</span>
+                <span class="text-gray-400 dark:text-gray-500">•</span>
               <% end %>
               
               <!-- Creator Attribution in Header -->
               <div class="flex items-center space-x-1">
-                <span class="text-xs text-gray-500">by</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">by</span>
                 <%= link_to @timeline.user.name, @timeline.user, 
                     class: "text-xs font-medium text-green-600 hover:text-green-500 transition-colors truncate" %>
               </div>
@@ -37,14 +37,14 @@
         <div class="flex items-center space-x-3 ml-4">
           <!-- Action Buttons -->
           <% if current_user && @timeline.user == current_user %>
-            <%= link_to edit_timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors" do %>
+            <%= link_to edit_timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors" do %>
               <i class="material-icons text-lg mr-2">edit</i>
               <span class="hidden sm:inline">Edit</span>
             <% end %>
           <% end %>
           
           <!-- Share Button -->
-          <button onclick="openShareModal()" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+          <button onclick="openShareModal()" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
             <i class="material-icons text-lg mr-2">share</i>
             <span class="hidden sm:inline">Share</span>
           </button>
@@ -58,7 +58,7 @@
     <!-- Timeline Container -->
     <div class="timeline-viewer-container relative">
       <!-- Timeline Rail -->
-      <div class="absolute top-0 bottom-0 left-6 w-0.5 bg-gray-300 timeline-spine rounded-full"></div>
+      <div class="absolute top-0 bottom-0 left-6 w-0.5 bg-gray-300 dark:bg-gray-600 timeline-spine rounded-full"></div>
       
       <!-- Timeline Header -->
       <% if @timeline.description.present? || @timeline.notes.present? || @timeline.universe.present? || @timeline.page_tags.any? %>
@@ -70,17 +70,17 @@
           </div>
           
           <!-- Header Card -->
-          <div class="ml-16 timeline-header-card bg-white rounded-xl shadow-sm border border-gray-200">
-            <div class="px-6 py-4 border-b border-gray-100">
-              <h3 class="text-lg font-semibold text-gray-900">Timeline Overview</h3>
+          <div class="ml-16 timeline-header-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Overview</h3>
             </div>
             
             <div class="px-6 py-4 space-y-4">
               <!-- Description -->
               <% if @timeline.description.present? %>
                 <div>
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Description</h4>
-                  <div class="prose prose-sm text-gray-700 max-w-none">
+                  <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h4>
+                  <div class="prose prose-sm dark:prose-invert text-gray-700 dark:text-gray-300 max-w-none">
                     <%= simple_format(@timeline.description) %>
                   </div>
                 </div>
@@ -89,8 +89,8 @@
               <!-- Notes -->
               <% if @timeline.notes.present? %>
                 <div>
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Notes</h4>
-                  <div class="prose prose-sm text-gray-700 max-w-none">
+                  <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Notes</h4>
+                  <div class="prose prose-sm dark:prose-invert text-gray-700 dark:text-gray-300 max-w-none">
                     <%= simple_format(@timeline.notes) %>
                   </div>
                 </div>
@@ -99,10 +99,10 @@
               <!-- Tags -->
               <% if @timeline.page_tags.any? %>
                 <div>
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Tags</h4>
+                  <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</h4>
                   <div class="flex flex-wrap gap-2">
                     <% @timeline.page_tags.each do |tag| %>
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800 border border-blue-200">
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700">
                         <%= tag.tag %>
                       </span>
                     <% end %>
@@ -113,7 +113,7 @@
               <!-- Universe -->
               <% if @timeline.universe.present? %>
                 <div>
-                  <h4 class="text-sm font-medium text-gray-700 mb-2">Universe</h4>
+                  <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Universe</h4>
                   <div class="inline-flex items-center">
                     <i class="material-icons text-sm mr-2 text-purple-600">public</i>
                     <%= link_to @timeline.universe.name, @timeline.universe, 
@@ -137,18 +137,18 @@
             </div>
             
             <!-- Event Card -->
-            <div class="ml-16 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 timeline-event-card">
+            <div class="ml-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 timeline-event-card">
               <!-- Card Header -->
-              <div class="px-6 py-4 border-b border-gray-100">
+              <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
                 <div class="flex items-start justify-between">
                   <div class="flex-1 min-w-0">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                       <%= event.title.present? ? event.title : "Untitled Event" %>
                     </h2>
-                    
+
                     <!-- Time Information -->
                     <% if event.time_label.present? || event.end_time_label.present? %>
-                      <div class="flex items-center space-x-4 text-sm text-gray-600">
+                      <div class="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
                         <% if event.time_label.present? %>
                           <div class="flex items-center">
                             <i class="material-icons text-sm mr-1 text-green-600">schedule</i>
@@ -172,16 +172,16 @@
               <div class="px-6 py-4 space-y-4">
                 <!-- Description -->
                 <% if event.description.present? %>
-                  <div class="prose prose-sm text-gray-700 max-w-none">
+                  <div class="prose prose-sm dark:prose-invert text-gray-700 dark:text-gray-300 max-w-none">
                     <%= simple_format(event.description) %>
                   </div>
                 <% end %>
-                
+
                 <!-- Tags Display -->
                 <% if event.page_tags.any? %>
                   <div class="flex flex-wrap gap-2">
                     <% event.page_tags.each do |tag| %>
-                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
                         <%= tag.tag %>
                       </span>
                     <% end %>
@@ -197,11 +197,11 @@
       <% else %>
         <!-- Empty State -->
         <div class="text-center py-16">
-          <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
-            <i class="material-icons text-4xl text-green-600">timeline</i>
+          <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900 dark:to-green-800 flex items-center justify-center mb-6 shadow-sm">
+            <i class="material-icons text-4xl text-green-600 dark:text-green-400">timeline</i>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-3">This timeline is empty</h3>
-          <p class="text-gray-600 mb-8 max-w-md mx-auto">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-3">This timeline is empty</h3>
+          <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
             No events have been added to this timeline yet.
           </p>
         </div>
@@ -209,73 +209,73 @@
     </div>
     
     <!-- Enhanced Author Attribution -->
-    <div class="mt-12 pt-8 border-t border-gray-200">
+    <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
       <div class="max-w-md mx-auto">
         <!-- Creator Spotlight Card -->
-        <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6 border border-green-100 shadow-sm">
+        <div class="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900 dark:to-blue-900 rounded-xl p-6 border border-green-100 dark:border-green-800 shadow-sm">
           <div class="text-center">
             <div class="flex items-center justify-center mb-3">
-              <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                <i class="material-icons text-green-600">person</i>
+              <div class="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center">
+                <i class="material-icons text-green-600 dark:text-green-400">person</i>
               </div>
             </div>
-            
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">
+
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
               <%= link_to @timeline.user.name, @timeline.user, 
                   class: "hover:text-green-600 transition-colors" %>
             </h3>
             
-            <p class="text-sm text-gray-600 mb-4">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
               Created this timeline
               <% if @timeline.created_at %>
                 on <%= @timeline.created_at.strftime("%B %d, %Y") %>
               <% end %>
             </p>
-            
+
             <!-- Timeline Stats -->
-            <div class="flex justify-center space-x-6 text-sm text-gray-500 mb-4">
+            <div class="flex justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400 mb-4">
               <div class="text-center">
-                <div class="font-medium text-gray-900">
+                <div class="font-medium text-gray-900 dark:text-gray-100">
                   <%= @timeline.timeline_events.count %>
                 </div>
                 <div class="text-xs">
                   <%= @timeline.timeline_events.count == 1 ? 'Event' : 'Events' %>
                 </div>
               </div>
-              
+
               <% if @timeline.cached_word_count && @timeline.cached_word_count > 0 %>
                 <div class="text-center">
-                  <div class="font-medium text-gray-900">
+                  <div class="font-medium text-gray-900 dark:text-gray-100">
                     <%= number_with_delimiter(@timeline.cached_word_count) %>
                   </div>
                   <div class="text-xs">Words</div>
                 </div>
               <% end %>
-              
+
               <% if @timeline.timeline_events.joins(:timeline_event_entities).count > 0 %>
                 <div class="text-center">
-                  <div class="font-medium text-gray-900">
+                  <div class="font-medium text-gray-900 dark:text-gray-100">
                     <%= @timeline.timeline_events.joins(:timeline_event_entities).count %>
                   </div>
                   <div class="text-xs">Links</div>
                 </div>
               <% end %>
             </div>
-            
+
             <!-- Call-to-action -->
-            <div class="border-t border-green-100 pt-4">
-              <%= link_to @timeline.user, 
-                  class: "inline-flex items-center px-4 py-2 bg-white border border-green-200 rounded-lg text-sm font-medium text-green-600 hover:bg-green-50 transition-colors shadow-sm" do %>
+            <div class="border-t border-green-100 dark:border-green-800 pt-4">
+              <%= link_to @timeline.user,
+                  class: "inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-green-200 dark:border-green-700 rounded-lg text-sm font-medium text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900 transition-colors shadow-sm" do %>
                 <i class="material-icons text-sm mr-2">visibility</i>
                 View more from <%= @timeline.user.name.split(' ').first %>
               <% end %>
             </div>
           </div>
         </div>
-        
+
         <!-- Powered by -->
         <div class="text-center mt-4">
-          <p class="text-xs text-gray-400">
+          <p class="text-xs text-gray-400 dark:text-gray-500">
             Powered by <%= link_to "Notebook.ai", "https://www.notebook.ai", 
                          class: "text-green-600 hover:text-green-500 transition-colors font-medium" %>
           </p>
@@ -289,50 +289,50 @@
 <div id="shareModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
   <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
     <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeShareModal()"></div>
-    
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-80 transition-opacity" onclick="closeShareModal()"></div>
+
     <!-- Modal -->
-    <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
       <div class="sm:flex sm:items-start">
-        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
-          <i class="material-icons text-green-600">share</i>
+        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 dark:bg-green-900 sm:mx-0 sm:h-10 sm:w-10">
+          <i class="material-icons text-green-600 dark:text-green-400">share</i>
         </div>
         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
-          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Share Timeline</h3>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100 mb-4">Share Timeline</h3>
           
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Shareable URL</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Shareable URL</label>
               <div class="flex rounded-lg shadow-sm">
-                <input type="text" 
+                <input type="text"
                        readonly
                        value="<%= timeline_url(@timeline) %>"
                        id="shareUrlInput"
-                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-lg border border-gray-300 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50"
+                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-lg border border-gray-300 dark:border-gray-600 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50 dark:bg-gray-700 dark:text-gray-100"
                        onclick="this.focus(); this.select();">
-                <button type="button" 
+                <button type="button"
                         onclick="copyShareURL()"
                         id="copyButton"
-                        class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-lg bg-gray-50 text-gray-500 text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-lg bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-300 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                   Copy
                 </button>
               </div>
             </div>
             
             <% if current_user && @timeline.user == current_user %>
-              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-4">
                 <div class="flex">
                   <div class="flex-shrink-0">
                     <i class="material-icons text-blue-400">info</i>
                   </div>
                   <div class="ml-3">
-                    <h3 class="text-sm font-medium text-blue-800">Sharing Settings</h3>
-                    <p class="mt-1 text-sm text-blue-700">
+                    <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">Sharing Settings</h3>
+                    <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
                       To be shared, content must either be public <strong>or</strong> in a public Universe.
-                      <a href="https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2" 
-                         class="font-medium underline hover:text-blue-600" target="_blank">Learn more about privacy</a>
+                      <a href="https://medium.com/indent-labs/privacy-on-notebook-ai-how-it-works-c23a59faeae2"
+                         class="font-medium underline hover:text-blue-600 dark:hover:text-blue-400" target="_blank">Learn more about privacy</a>
                     </p>
-                    <p class="mt-1 text-xs text-blue-600">
+                    <p class="mt-1 text-xs text-blue-600 dark:text-blue-400">
                       Changes are saved automatically and can be changed at any time.
                     </p>
                   </div>
@@ -343,13 +343,13 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <% if @timeline.universe.present? %>
                   <!-- Universe Privacy Toggle -->
-                  <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div class="bg-purple-50 dark:bg-purple-900 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
                     <div class="mb-3">
-                      <h4 class="text-sm font-medium text-purple-900 flex items-center">
-                        <i class="material-icons text-purple-600 text-sm mr-2">public</i>
+                      <h4 class="text-sm font-medium text-purple-900 dark:text-purple-200 flex items-center">
+                        <i class="material-icons text-purple-600 dark:text-purple-400 text-sm mr-2">public</i>
                         Universe-wide sharing
                       </h4>
-                      <p class="text-xs text-purple-700 mt-1">
+                      <p class="text-xs text-purple-700 dark:text-purple-300 mt-1">
                         Controls visibility for the entire "<%= @timeline.universe.name %>" universe
                       </p>
                     </div>
@@ -366,13 +366,13 @@
                 <% end %>
 
                 <!-- Timeline Privacy Toggle -->
-                <div class="<%= @timeline.universe.present? ? '' : 'md:col-span-2' %> bg-green-50 border border-green-200 rounded-lg p-4">
+                <div class="<%= @timeline.universe.present? ? '' : 'md:col-span-2' %> bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-4">
                   <div class="mb-3">
-                    <h4 class="text-sm font-medium text-green-900 flex items-center">
-                      <i class="material-icons text-green-600 text-sm mr-2">timeline</i>
+                    <h4 class="text-sm font-medium text-green-900 dark:text-green-200 flex items-center">
+                      <i class="material-icons text-green-600 dark:text-green-400 text-sm mr-2">timeline</i>
                       Timeline-specific sharing
                     </h4>
-                    <p class="text-xs text-green-700 mt-1">
+                    <p class="text-xs text-green-700 dark:text-green-300 mt-1">
                       Controls visibility for this specific timeline
                     </p>
                   </div>
@@ -389,10 +389,10 @@
               </div>
 
               <% if @timeline.universe.present? %>
-                <div class="mt-4 bg-gray-50 border border-gray-200 rounded-lg p-3">
-                  <p class="text-xs text-gray-600">
-                    <i class="material-icons text-gray-400 text-sm mr-1">info_outline</i>
-                    This timeline belongs to the "<%= @timeline.universe.name %>" universe. 
+                <div class="mt-4 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                  <p class="text-xs text-gray-600 dark:text-gray-300">
+                    <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1">info_outline</i>
+                    This timeline belongs to the "<%= @timeline.universe.name %>" universe.
                     Making the universe public will also make this timeline viewable to others.
                   </p>
                 </div>
@@ -422,8 +422,8 @@
               </div>
             <% else %>
               <!-- Non-owner view -->
-              <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                <p class="text-sm text-gray-700">
+              <div class="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                <p class="text-sm text-gray-700 dark:text-gray-300">
                   This timeline is being shared by <%= link_to @timeline.user.name, @timeline.user, class: "font-medium text-green-600 hover:text-green-500" %>.
                 </p>
               </div>
@@ -456,9 +456,9 @@
       </div>
       
       <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-        <button type="button" 
+        <button type="button"
                 onclick="closeShareModal()"
-                class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
+                class="w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:text-gray-500 dark:hover:text-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:mt-0 sm:w-auto sm:text-sm">
           Close
         </button>
       </div>
