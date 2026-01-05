@@ -146,6 +146,7 @@ Rails.application.routes.draw do
     get '/analysis/style',       to: 'document_analyses#style',       on: :member
     get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
     get  '/plaintext',           to: 'documents#plaintext',               on: :member
+    get  '/printable',           to: 'documents#printable',               on: :member
     get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
     resources :document_revisions, path: 'revisions', on: :member do

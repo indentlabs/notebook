@@ -6,7 +6,7 @@ class DocumentsController < ApplicationController
   # todo Uh, this is a hack. The CSRF token on document editor model to add entities is being rejected... for whatever reason.
   skip_before_action :verify_authenticity_token, only: [:link_entity]
 
-  before_action :set_document,          only:   [:show, :analysis, :plaintext, :queue_analysis, :edit, :destroy]
+  before_action :set_document,          only:   [:show, :analysis, :plaintext, :printable, :queue_analysis, :edit, :destroy]
   before_action :set_sidenav_expansion, except: [:plaintext]
   before_action :set_navbar_color,      except: [:plaintext]
   before_action :set_navbar_actions,    except: [:edit, :plaintext]
@@ -371,6 +371,14 @@ class DocumentsController < ApplicationController
     end
 
     render
+  end
+
+  def printable
+    unless @document.present? && (current_user || User.new).can_read?(@document)
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
+    end
+
+    render layout: 'printable'
   end
 
   def toggle_favorite
