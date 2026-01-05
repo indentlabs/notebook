@@ -1,0 +1,136 @@
+<%#
+  Document Folder Modal
+
+  A modal for selecting the folder for a document.
+
+  Required: @document must be set, current_user must be available
+%>
+<div
+  id="document-folder-modal"
+  x-data="{
+    open: false,
+    dropdownOpen: false,
+    selectedId: '<%= @document.folder_id || 'none' %>',
+    selectedName: '<%= @document.folder&.title || 'No folder' %>'
+  }"
+  x-show="open"
+  @open-modal.window="if ($event.detail === 'document-folder-modal') open = true"
+  @close-modal.window="open = false"
+  @keydown.escape.window="open = false"
+  class="fixed inset-0 z-50 overflow-y-auto"
+  x-cloak
+>
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-visible w-full max-w-md transform transition-all"
+      x-show="open"
+      x-transition:enter="ease-out duration-300"
+      x-transition:enter-start="opacity-0 translate-y-4"
+      x-transition:enter-end="opacity-100 translate-y-0"
+      x-transition:leave="ease-in duration-200"
+      x-transition:leave-start="opacity-100 translate-y-0"
+      x-transition:leave-end="opacity-0 translate-y-4"
+      @click.away="open = false"
+    >
+      <%= form_for(@document, remote: true, html: { id: 'document-folder-form', class: 'metadata-form' }) do |f| %>
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-600 to-teal-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-teal-600">folder</i>
+              </div>
+              <h3 class="text-lg font-medium text-white">Document Folder</h3>
+            </div>
+            <button type="button" @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+              <i class="material-icons">close</i>
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="flex items-start mb-4">
+            <i class="material-icons text-teal-600 mr-3 mt-0.5">folder</i>
+            <span class="text-sm text-gray-600 dark:text-gray-300">
+              Organize this document by placing it in a folder. Folders help you keep related documents together.
+            </span>
+          </div>
+          <div class="mt-4 relative">
+            <label for="document_folder_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder</label>
+
+            <!-- Hidden input to store the actual value -->
+            <%= f.hidden_field :folder_id, "x-bind:value": "selectedId === 'none' ? '' : selectedId" %>
+
+            <!-- Custom dropdown trigger -->
+            <div
+              @click="dropdownOpen = !dropdownOpen"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-left cursor-pointer bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 relative"
+              :class="{ 'ring-2 ring-teal-500 border-teal-500': dropdownOpen }"
+            >
+              <span class="block truncate" x-text="selectedName"></span>
+              <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <i class="material-icons text-gray-400 dark:text-gray-500">expand_more</i>
+              </span>
+            </div>
+
+            <!-- Dropdown menu -->
+            <div
+              x-show="dropdownOpen"
+              @click.away="dropdownOpen = false"
+              x-transition:enter="transition ease-out duration-100"
+              x-transition:enter-start="transform opacity-0 scale-95"
+              x-transition:enter-end="transform opacity-100 scale-100"
+              x-transition:leave="transition ease-in duration-75"
+              x-transition:leave-start="transform opacity-100 scale-100"
+              x-transition:leave-end="transform opacity-0 scale-95"
+              class="absolute z-[60] mt-1 w-full bg-white dark:bg-gray-700 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm"
+              style="display: none;"
+            >
+              <!-- No folder option -->
+              <div
+                @click="selectedId = 'none'; selectedName = 'No folder'; dropdownOpen = false"
+                class="cursor-pointer select-none relative py-2 pl-3 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
+                :class="{ 'bg-teal-100 dark:bg-teal-900 dark:bg-opacity-50 text-teal-900 dark:text-teal-200': selectedId === 'none' }"
+              >
+                <span class="block truncate">No folder</span>
+                <span x-show="selectedId === 'none'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-teal-600 dark:text-teal-400">
+                  <i class="material-icons text-sm">check</i>
+                </span>
+              </div>
+
+              <!-- Folder options -->
+              <% current_user.folders.where(context: 'Document').order(:title).each do |folder| %>
+                <div
+                  @click="selectedId = '<%= folder.id %>'; selectedName = '<%= j folder.title %>'; dropdownOpen = false"
+                  class="cursor-pointer select-none relative py-2 pl-3 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
+                  :class="{ 'bg-teal-100 dark:bg-teal-900 dark:bg-opacity-50 text-teal-900 dark:text-teal-200': selectedId === '<%= folder.id %>' }"
+                >
+                  <span class="flex items-center">
+                    <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">folder</i>
+                    <span class="block truncate"><%= folder.title %></span>
+                  </span>
+                  <span x-show="selectedId === '<%= folder.id %>'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-teal-600 dark:text-teal-400">
+                    <i class="material-icons text-sm">check</i>
+                  </span>
+                </div>
+              <% end %>
+            </div>
+
+            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              Select a folder to organize this document, or choose "No folder" to keep it at the root level.
+            </p>
+          </div>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+          <div class="flex space-x-3">
+            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+              Cancel
+            </button>
+            <button type="button" class="save-metadata-button px-4 py-2 text-sm font-medium text-white bg-teal-500 border border-transparent rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+              Save & Close
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
