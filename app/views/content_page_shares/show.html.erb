@@ -270,11 +270,21 @@
               <div class="space-y-4">
                 <% @share.share_comments.each do |comment| %>
                   <div class="flex space-x-3">
-                    <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0 border border-green-200" %>
+                    <% if comment.user.present? %>
+                      <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0 border border-green-200" %>
+                    <% else %>
+                      <div class="h-8 w-8 rounded-full flex-shrink-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                        <i class="material-icons text-gray-400 text-sm">person</i>
+                      </div>
+                    <% end %>
                     <div class="flex-1 min-w-0">
                       <div class="bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
                         <div class="flex items-center space-x-2 mb-1">
-                          <span class="font-medium text-sm text-gray-900 dark:text-white"><%= comment.user.display_name %></span>
+                          <% if comment.user.present? %>
+                            <span class="font-medium text-sm text-gray-900 dark:text-white"><%= comment.user.display_name %></span>
+                          <% else %>
+                            <span class="font-medium text-sm text-gray-500 dark:text-gray-400">Deleted User</span>
+                          <% end %>
                           <span class="text-xs text-gray-500 dark:text-gray-400"><%= time_ago_in_words comment.created_at %> ago</span>
                         </div>
                         <div class="text-sm text-gray-700 dark:text-gray-300">
