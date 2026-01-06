@@ -7,12 +7,7 @@
 %>
 <div
   id="document-folder-modal"
-  x-data="{
-    open: false,
-    dropdownOpen: false,
-    selectedId: '<%= @document.folder_id || 'none' %>',
-    selectedName: '<%= @document.folder&.title || 'No folder' %>'
-  }"
+  x-data="{ open: false }"
   x-show="open"
   @open-modal.window="if ($event.detail === 'document-folder-modal') open = true"
   @close-modal.window="open = false"
@@ -34,6 +29,7 @@
       @click.away="open = false"
     >
       <%= form_for(@document, remote: true, html: { id: 'document-folder-form', class: 'metadata-form' }) do |f| %>
+        <!-- Gradient Header -->
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-600 to-teal-700">
           <div class="flex items-center justify-between">
             <div class="flex items-center">
@@ -47,6 +43,8 @@
             </button>
           </div>
         </div>
+
+        <!-- Form Content -->
         <div class="p-6">
           <div class="flex items-start mb-4">
             <i class="material-icons text-teal-600 mr-3 mt-0.5">folder</i>
@@ -54,95 +52,25 @@
               Organize this document by placing it in a folder. Folders help you keep related documents together.
             </span>
           </div>
-          <div class="mt-4 relative">
-            <label for="document_folder_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder</label>
 
-            <!-- Hidden input to store the actual value -->
-            <%= f.hidden_field :folder_id, "x-bind:value": "selectedId === 'none' ? '' : selectedId" %>
-
-            <!-- Custom dropdown trigger -->
-            <div
-              @click="dropdownOpen = !dropdownOpen"
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-left cursor-pointer bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 relative"
-              :class="{ 'ring-2 ring-teal-500 border-teal-500': dropdownOpen }"
-            >
-              <span class="block truncate" x-text="selectedName"></span>
-              <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                <i class="material-icons text-gray-400 dark:text-gray-500">expand_more</i>
-              </span>
-            </div>
-
-            <!-- Dropdown menu -->
-            <div
-              x-show="dropdownOpen"
-              @click.away="dropdownOpen = false"
-              x-transition:enter="transition ease-out duration-100"
-              x-transition:enter-start="transform opacity-0 scale-95"
-              x-transition:enter-end="transform opacity-100 scale-100"
-              x-transition:leave="transition ease-in duration-75"
-              x-transition:leave-start="transform opacity-100 scale-100"
-              x-transition:leave-end="transform opacity-0 scale-95"
-              class="absolute z-[60] mt-1 w-full bg-white dark:bg-gray-700 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm"
-              style="display: none;"
-            >
-              <!-- No folder option -->
-              <div
-                @click="selectedId = 'none'; selectedName = 'No folder'; dropdownOpen = false"
-                class="cursor-pointer select-none relative py-2 pl-3 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
-                :class="{ 'bg-teal-100 dark:bg-teal-900 dark:bg-opacity-50 text-teal-900 dark:text-teal-200': selectedId === 'none' }"
-              >
-                <span class="block truncate">No folder</span>
-                <span x-show="selectedId === 'none'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-teal-600 dark:text-teal-400">
-                  <i class="material-icons text-sm">check</i>
-                </span>
-              </div>
-
-              <!-- Folder options (hierarchical) -->
-              <%
-                # Build hierarchical folder list with depth tracking
-                def build_folder_hierarchy(folders, parent_id: nil, depth: 0)
-                  folders.select { |f| f.parent_folder_id == parent_id }
-                         .sort_by { |f| f.title.downcase }
-                         .flat_map do |folder|
-                    [[folder, depth]] + build_folder_hierarchy(folders, parent_id: folder.id, depth: depth + 1)
-                  end
-                end
-
-                all_folders = current_user.folders.where(context: 'Document').to_a
-                hierarchical_folders = build_folder_hierarchy(all_folders)
-              %>
-              <% hierarchical_folders.each do |folder, depth| %>
-                <%
-                  # Calculate padding based on depth (base padding + depth * increment)
-                  base_padding = 3
-                  depth_padding = depth * 1
-                  total_padding = base_padding + depth_padding
-                %>
-                <div
-                  @click="selectedId = '<%= folder.id %>'; selectedName = '<%= j folder.title %>'; dropdownOpen = false"
-                  class="cursor-pointer select-none relative py-2 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
-                  style="padding-left: <%= total_padding * 0.25 %>rem;"
-                  :class="{ 'bg-teal-100 dark:bg-teal-900 dark:bg-opacity-50 text-teal-900 dark:text-teal-200': selectedId === '<%= folder.id %>' }"
-                >
-                  <span class="flex items-center">
-                    <% if depth > 0 %>
-                      <span class="text-gray-300 dark:text-gray-500 mr-1 text-xs">└</span>
-                    <% end %>
-                    <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">folder</i>
-                    <span class="block truncate"><%= folder.title %></span>
-                  </span>
-                  <span x-show="selectedId === '<%= folder.id %>'" class="absolute inset-y-0 right-0 flex items-center pr-4 text-teal-600 dark:text-teal-400">
-                    <i class="material-icons text-sm">check</i>
-                  </span>
-                </div>
-              <% end %>
-            </div>
-
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder</label>
+            <%= render 'shared/folder_dropdown',
+                form: f,
+                field_name: :folder_id,
+                selected_id: @document.folder_id,
+                selected_name: @document.folder&.title || 'No folder',
+                folders: current_user.folders,
+                context: 'Document',
+                color: 'teal',
+                none_label: 'No folder' %>
             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
               Select a folder to organize this document, or choose "No folder" to keep it at the root level.
             </p>
           </div>
         </div>
+
+        <!-- Footer -->
         <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end">
           <div class="flex space-x-3">
             <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">

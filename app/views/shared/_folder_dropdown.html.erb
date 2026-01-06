@@ -1,0 +1,118 @@
+<%#
+  Shared Folder Dropdown Component
+
+  A reusable hierarchical folder dropdown for selecting folders.
+
+  Required locals:
+  - form: The form builder object (f)
+  - field_name: The form field name (e.g., :folder_id or :parent_folder_id)
+  - folders: ActiveRecord collection of folders to display
+
+  Optional locals:
+  - selected_id: Currently selected folder ID (default: nil)
+  - selected_name: Display name for current selection (default: none_label)
+  - exclude_id: Folder ID to exclude from list (default: nil)
+  - color: Accent color - 'teal' or 'blue' (default: 'blue')
+  - none_label: Label for no selection option (default: 'None')
+  - dropdown_var: Alpine.js variable name for dropdown state (default: 'open')
+  - context: Filter folders by context, e.g. 'Document' (default: nil, shows all)
+%>
+<%
+  # Set defaults for optional locals
+  selected_id ||= nil
+  selected_name ||= defined?(none_label) ? none_label : 'None'
+  exclude_id ||= nil
+  color ||= 'blue'
+  none_label ||= 'None'
+  dropdown_var ||= 'open'
+  context ||= nil
+
+  # Color classes based on accent color
+  ring_color = color == 'teal' ? 'ring-teal-500 border-teal-500' : 'ring-blue-500 border-blue-500'
+  selected_bg = color == 'teal' ? 'bg-teal-100 dark:bg-teal-900 dark:bg-opacity-50 text-teal-900 dark:text-teal-200' : 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-200'
+  check_color = color == 'teal' ? 'text-teal-600 dark:text-teal-400' : 'text-blue-600 dark:text-blue-400'
+
+  # Build hierarchical folder list with depth tracking
+  def build_folder_hierarchy(folders, parent_id: nil, depth: 0)
+    folders.select { |f| f.parent_folder_id == parent_id }
+           .sort_by { |f| f.title.downcase }
+           .flat_map do |folder|
+      [[folder, depth]] + build_folder_hierarchy(folders, parent_id: folder.id, depth: depth + 1)
+    end
+  end
+
+  # Filter and prepare folders
+  all_folders = context ? folders.where(context: context).to_a : folders.to_a
+  all_folders = all_folders.reject { |f| f.id == exclude_id } if exclude_id
+  hierarchical_folders = build_folder_hierarchy(all_folders)
+%>
+
+<div class="relative" x-data="{ <%= dropdown_var %>: false, selectedId: '<%= selected_id || 'none' %>', selectedName: '<%= selected_name %>' }">
+  <!-- Hidden input to store the actual value -->
+  <%= form.hidden_field field_name, "x-bind:value": "selectedId === 'none' ? '' : selectedId" %>
+
+  <!-- Custom dropdown trigger -->
+  <div
+    @click="<%= dropdown_var %> = !<%= dropdown_var %>"
+    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-left cursor-pointer bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-<%= color %>-500 focus:border-<%= color %>-500 relative"
+    :class="{ '<%= ring_color %> ring-2': <%= dropdown_var %> }"
+  >
+    <span class="block truncate" x-text="selectedName"></span>
+    <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+      <i class="material-icons text-gray-400 dark:text-gray-500">expand_more</i>
+    </span>
+  </div>
+
+  <!-- Dropdown menu -->
+  <div
+    x-show="<%= dropdown_var %>"
+    @click.away="<%= dropdown_var %> = false"
+    x-transition:enter="transition ease-out duration-100"
+    x-transition:enter-start="transform opacity-0 scale-95"
+    x-transition:enter-end="transform opacity-100 scale-100"
+    x-transition:leave="transition ease-in duration-75"
+    x-transition:leave-start="transform opacity-100 scale-100"
+    x-transition:leave-end="transform opacity-0 scale-95"
+    class="absolute z-[60] mt-1 w-full bg-white dark:bg-gray-700 shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 dark:ring-gray-600 overflow-auto focus:outline-none sm:text-sm"
+    style="display: none;"
+  >
+    <!-- None/No folder option -->
+    <div
+      @click="selectedId = 'none'; selectedName = '<%= none_label %>'; <%= dropdown_var %> = false"
+      class="cursor-pointer select-none relative py-2 pl-3 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
+      :class="{ '<%= selected_bg %>': selectedId === 'none' }"
+    >
+      <span class="block truncate"><%= none_label %></span>
+      <span x-show="selectedId === 'none'" class="absolute inset-y-0 right-0 flex items-center pr-4 <%= check_color %>">
+        <i class="material-icons text-sm">check</i>
+      </span>
+    </div>
+
+    <!-- Folder options (hierarchical) -->
+    <% hierarchical_folders.each do |folder, depth| %>
+      <%
+        # Calculate padding based on depth (base padding + depth * increment)
+        base_padding = 3
+        depth_padding = depth * 1
+        total_padding = base_padding + depth_padding
+      %>
+      <div
+        @click="selectedId = '<%= folder.id %>'; selectedName = '<%= j folder.title %>'; <%= dropdown_var %> = false"
+        class="cursor-pointer select-none relative py-2 pr-9 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600"
+        style="padding-left: <%= total_padding * 0.25 %>rem;"
+        :class="{ '<%= selected_bg %>': selectedId === '<%= folder.id %>' }"
+      >
+        <span class="flex items-center">
+          <% if depth > 0 %>
+            <span class="text-gray-300 dark:text-gray-500 mr-1 text-xs"></span>
+          <% end %>
+          <i class="material-icons text-gray-400 dark:text-gray-500 mr-2 text-sm">folder</i>
+          <span class="block truncate"><%= folder.title %></span>
+        </span>
+        <span x-show="selectedId === '<%= folder.id %>'" class="absolute inset-y-0 right-0 flex items-center pr-4 <%= check_color %>">
+          <i class="material-icons text-sm">check</i>
+        </span>
+      </div>
+    <% end %>
+  </div>
+</div>
