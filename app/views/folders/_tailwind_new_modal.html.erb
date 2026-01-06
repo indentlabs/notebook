@@ -1,39 +1,51 @@
 <div class="fixed z-50 inset-0 overflow-y-auto" id="new-folder-modal"
      x-effect="if (showNewFolderModal) $nextTick(() => $refs.folderTitle.focus())">
-  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showNewFolderModal = false"></div>
-    <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-
-    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showNewFolderModal = false"></div>
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
+         @click.away="showNewFolderModal = false">
       <%= form_for Folder.new do |f| %>
-        <div class="sm:flex sm:items-start">
-          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/30 sm:mx-0 sm:h-10 sm:w-10">
-            <i class="material-icons text-blue-600 dark:text-blue-400"><%= Folder.icon %></i>
-          </div>
-          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">Create Folder</h3>
-            <div class="mb-4">
-              <label for="folder_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder name</label>
-              <%= f.text_field :title,
-                  value: "",
-                  placeholder: "Enter folder name",
-                  class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400",
-                  id: "folder_title",
-                  "x-ref": "folderTitle" %>
+        <!-- Gradient Header -->
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-blue-600"><%= Folder.icon %></i>
+              </div>
+              <h3 class="text-lg font-medium text-white">Create Folder</h3>
             </div>
+            <button type="button" @click="showNewFolderModal = false" class="text-white hover:text-gray-100 focus:outline-none">
+              <i class="material-icons">close</i>
+            </button>
           </div>
         </div>
-        
+
+        <!-- Form Content -->
+        <div class="p-6">
+          <div class="mb-4">
+            <label for="folder_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder name</label>
+            <%= f.text_field :title,
+                value: "",
+                placeholder: "Enter folder name",
+                class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400",
+                id: "folder_title",
+                "x-ref": "folderTitle" %>
+          </div>
+        </div>
+
         <%= f.hidden_field :parent_folder_id, value: parent_folder.try(:id) %>
-        
-        <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-          <%= f.submit 'Create Folder',
-              class: "w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 hover:bg-blue-700 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm" %>
-          <button type="button"
-              class="mt-3 w-full inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
-              @click="showNewFolderModal = false">
-            Cancel
-          </button>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
+            <%= f.submit 'Create Folder',
+                class: "w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-500 border border-transparent rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+            <button type="button"
+                class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                @click="showNewFolderModal = false">
+              Cancel
+            </button>
+          </div>
         </div>
       <% end %>
     </div>
