@@ -34,12 +34,17 @@ class SaveDocumentRevisionJob < ApplicationJob
     enqueue_time = enqueued_at || Time.current
     user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
-    update = document.word_count_updates.find_or_initialize_by(
-      for_date: user_date,
-    )
-    update.word_count = new_word_count
-    update.user_id  ||= document.user_id
-    update.save!
+    begin
+      update = document.word_count_updates.find_or_initialize_by(
+        for_date: user_date,
+      )
+      update.word_count = new_word_count
+      update.user_id  ||= document.user_id
+      update.save!
+    rescue ActiveRecord::RecordNotUnique
+      # Unique index exists and found a duplicate via race condition - retry to find the existing record
+      retry
+    end
 
     # Check if revision is needed BEFORE potentially loading body again
     latest_revision = document.document_revisions.order('created_at DESC').limit(1).first

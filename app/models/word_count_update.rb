@@ -22,6 +22,13 @@ class WordCountUpdate < ApplicationRecord
 
     return 0 if today_records.empty?
 
+    # Defensive: Dedupe by entity (in case of duplicate records from race conditions)
+    # Keep the record with the highest word_count per entity
+    today_records = today_records
+      .group_by { |r| [r.entity_type, r.entity_id] }
+      .transform_values { |records| records.max_by(&:word_count) }
+      .values
+
     # Get the previous record for each entity in a single query using a subquery
     entity_keys = today_records.map { |r| [r.entity_type, r.entity_id] }
 

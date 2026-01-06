@@ -23,13 +23,18 @@ class CacheSumAttributeWordCountJob < ApplicationJob
     user_date = user&.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
 
     # Create or re-use an existing WordCountUpdate for today (in user's timezone)
-    update = entity.word_count_updates.find_or_initialize_by(
-      for_date: user_date,
-    )
-    update.word_count = sum_attribute_word_count
-    update.user_id  ||= entity.user_id
+    begin
+      update = entity.word_count_updates.find_or_initialize_by(
+        for_date: user_date,
+      )
+      update.word_count = sum_attribute_word_count
+      update.user_id  ||= entity.user_id
 
-    # Save!
-    update.save!
+      # Save!
+      update.save!
+    rescue ActiveRecord::RecordNotUnique
+      # Unique index exists and found a duplicate via race condition - retry to find the existing record
+      retry
+    end
   end
 end
