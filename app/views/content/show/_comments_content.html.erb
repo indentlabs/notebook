@@ -1,0 +1,140 @@
+<%
+  # Fetch shares for this content with their comments and users
+  shares = raw_content.content_page_shares
+    .includes(:user, share_comments: :user)
+    .order(created_at: :desc)
+    .limit(50) rescue []
+%>
+
+<% if user_signed_in? && raw_content.user_id == current_user.id %>
+  <div class="mb-6">
+    <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
+            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+      <i class="material-icons text-sm mr-2">campaign</i>
+      Share to Community
+    </button>
+  </div>
+<% end %>
+
+<% if shares.any? %>
+  <div class="space-y-6">
+    <% shares.each do |share| %>
+      <!-- Share as top-level comment -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+
+        <!-- Share header (author info, timestamp) -->
+        <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+          <div class="flex items-start space-x-3">
+            <% if share.user.present? %>
+              <%= link_to user_path(share.user) do %>
+                <%= image_tag share.user.image_url(size: 40), class: "w-10 h-10 rounded-full object-cover" %>
+              <% end %>
+            <% else %>
+              <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                <i class="material-icons text-gray-400">person</i>
+              </div>
+            <% end %>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center space-x-2">
+                <% if share.user.present? %>
+                  <%= link_to share.user.display_name, user_path(share.user),
+                      class: "font-medium text-gray-900 dark:text-white hover:underline" %>
+                <% else %>
+                  <span class="font-medium text-gray-500 dark:text-gray-400">Deleted User</span>
+                <% end %>
+                <span class="text-gray-500 dark:text-gray-400 text-sm">shared</span>
+              </div>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                <%= time_ago_in_words(share.created_at) %> ago
+              </p>
+            </div>
+            <% if share.user.present? %>
+              <%= link_to user_content_page_share_path(share.user, share),
+                  class: "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300",
+                  title: "View full share" do %>
+                <i class="material-icons text-sm">open_in_new</i>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Share message -->
+        <% if share.message.present? %>
+          <div class="p-4 text-gray-700 dark:text-gray-300">
+            <%= simple_format(share.message) %>
+          </div>
+        <% end %>
+
+        <!-- Nested comments (replies) -->
+        <% comments = share.share_comments.order(created_at: :asc) %>
+        <% if comments.any? %>
+          <div class="bg-gray-50 dark:bg-gray-900 bg-opacity-100 dark:bg-opacity-50 border-t border-gray-100 dark:border-gray-700">
+            <div class="p-4 space-y-4">
+              <% comments.each do |comment| %>
+                <div class="flex items-start space-x-3 pl-4 border-l-2 border-gray-200 dark:border-gray-600">
+                  <% if comment.user.present? %>
+                    <%= link_to user_path(comment.user) do %>
+                      <%= image_tag comment.user.image_url(size: 32), class: "w-8 h-8 rounded-full object-cover" %>
+                    <% end %>
+                  <% else %>
+                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <i class="material-icons text-sm text-gray-400">person</i>
+                    </div>
+                  <% end %>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center space-x-2">
+                      <% if comment.user.present? %>
+                        <%= link_to comment.user.display_name, user_path(comment.user),
+                            class: "font-medium text-sm text-gray-900 dark:text-white hover:underline" %>
+                      <% else %>
+                        <span class="font-medium text-sm text-gray-500 dark:text-gray-400">Deleted User</span>
+                      <% end %>
+                      <span class="text-xs text-gray-500 dark:text-gray-400">
+                        <%= time_ago_in_words(comment.created_at) %> ago
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                      <%= simple_format(comment.message) %>
+                    </p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <!-- Reply link -->
+            <% if share.user.present? %>
+              <%= link_to user_content_page_share_path(share.user, share),
+                  class: "block px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" do %>
+                <i class="material-icons text-sm align-middle mr-1">reply</i>
+                Reply to this thread
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <!-- No replies yet -->
+          <% if share.user.present? %>
+            <div class="bg-gray-50 dark:bg-gray-900 bg-opacity-100 dark:bg-opacity-50 border-t border-gray-100 dark:border-gray-700 px-4 py-3">
+              <%= link_to user_content_page_share_path(share.user, share),
+                  class: "text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" do %>
+                <i class="material-icons text-sm align-middle mr-1">add_comment</i>
+                Be the first to reply
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <!-- Empty state -->
+  <div class="text-center py-12">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+      <i class="material-icons text-3xl text-gray-400">forum</i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No comments yet</h3>
+    <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+      Be the first to start a discussion about this <%= raw_content.class.name.downcase %> by sharing it to the community stream.
+    </p>
+  </div>
+<% end %>

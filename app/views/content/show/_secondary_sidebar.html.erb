@@ -60,14 +60,36 @@
 
     <!-- Community -->
     <% forum_url = ForumsLinkbuilderService.worldbuilding_url(content.raw_model.class) %>
-    <% if forum_url %>
-      <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-          <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
-          Community
-        </h2>
-        
-        <div class="space-y-2">
+    <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+        <i class="material-icons text-sm <%= content.class_text_color %> mr-2">groups</i>
+        Community
+      </h2>
+
+      <div class="space-y-2">
+        <!-- Comments -->
+        <button @click="switchView('comments')"
+                class="group flex items-center w-full p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors text-left">
+          <i class="material-icons text-base text-gray-400 group-hover:text-blue-500 mr-3">chat</i>
+          <div class="flex-1">
+            <div class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300">Comments</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              <% if @comments_count && @comments_count > 0 %>
+                <%= @comments_count %> <%= 'comment'.pluralize(@comments_count) %>
+              <% else %>
+                Start a discussion
+              <% end %>
+            </div>
+          </div>
+          <% if @comments_count && @comments_count > 0 %>
+            <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
+              <%= @comments_count %>
+            </span>
+          <% end %>
+        </button>
+
+        <!-- Forum -->
+        <% if forum_url %>
           <%= link_to forum_url, target: "_blank", class: "group flex items-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900 transition-colors" do %>
             <i class="material-icons text-base text-gray-400 group-hover:text-blue-500 mr-3">forum</i>
             <div class="flex-1">
@@ -76,9 +98,9 @@
             </div>
             <i class="material-icons text-xs text-gray-400 group-hover:text-blue-500">open_in_new</i>
           <% end %>
-        </div>
+        <% end %>
       </div>
-    <% end %>
+    </div>
     
   </div>
 </div>
