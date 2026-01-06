@@ -198,20 +198,14 @@ class ContentController < ApplicationController
       # TimelineEvent model might not exist
     end
 
-    # Comments count (shares + their comments)
-    @comments_count = 0
+    # Shares count
+    @shares_count = 0
     begin
       if @content.respond_to?(:content_page_shares)
-        shares_count = @content.content_page_shares.count
-        share_comments_count = ShareComment.joins(:content_page_share)
-          .where(content_page_shares: {
-            content_page_type: @content.class.name,
-            content_page_id: @content.id
-          }).count
-        @comments_count = shares_count + share_comments_count
+        @shares_count = @content.content_page_shares.count
       end
     rescue
-      # ShareComment model might not exist
+      # ContentPageShare model might not exist
     end
 
     if (current_user || User.new).can_read?(@content)
