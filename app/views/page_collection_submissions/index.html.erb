@@ -1,5 +1,5 @@
 <!-- Main Container -->
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
   
   <!-- Hero Section -->
   <div class="<%= PageCollection.color %> text-white relative">
@@ -59,20 +59,20 @@
         <!-- Progress Indicator -->
         <div class="mb-8 flex items-center justify-between">
           <div class="flex items-center space-x-4">
-            <span class="text-sm font-medium text-gray-700">
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
               Page <span id="current-submission">1</span> of <%= @page_collection_submissions.count %>
             </span>
-            <div class="bg-gray-200 rounded-full h-2 w-48">
+            <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2 w-48">
               <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: <%= (1.0 / @page_collection_submissions.count * 100).round(1) %>%"></div>
             </div>
           </div>
           
           <!-- Navigation Controls -->
           <div class="flex items-center space-x-2">
-            <button id="prev-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200" disabled>
+            <button id="prev-btn" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200" disabled>
               <i class="material-icons">chevron_left</i>
             </button>
-            <button id="next-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200">
+            <button id="next-btn" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-200">
               <i class="material-icons">chevron_right</i>
             </button>
           </div>
@@ -86,16 +86,16 @@
               <div class="carousel-slide w-full flex-shrink-0 <%= 'hidden' unless index == 0 %>" data-slide="<%= index %>" data-submission-id="<%= submission.id %>">
                 
                 <!-- Large Submission Card -->
-                <div class="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-200">
                   <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
                     
                     <!-- Content Preview -->
-                    <div class="relative h-96 lg:h-auto bg-gray-50 overflow-hidden">
+                    <div class="relative h-96 lg:h-auto bg-gray-50 dark:bg-gray-700 overflow-hidden">
                       <%= link_to content, class: "block w-full h-full group", target: "_blank" do %>
                         <% if content.respond_to?(:first_public_image) && content.first_public_image.present? %>
                           <%= image_tag content.first_public_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
                         <% else %>
-                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
                             <i class="material-icons <%= content.class.text_color %> text-8xl opacity-40">
                               <%= content.class.icon %>
                             </i>
@@ -105,7 +105,7 @@
                       
                       <!-- Content Type Badge -->
                       <div class="absolute top-6 left-6">
-                        <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-white shadow-sm <%= content.class.text_color %>">
+                        <span class="inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium bg-white dark:bg-gray-800 shadow-sm <%= content.class.text_color %>">
                           <i class="material-icons text-sm mr-2"><%= content.class.icon %></i>
                           <%= content.class.name %>
                         </span>
@@ -117,25 +117,25 @@
                       <!-- Header -->
                       <div class="mb-6">
                         <div class="flex items-center justify-between mb-4">
-                          <span class="text-sm font-medium text-gray-500 uppercase tracking-wide">
+                          <span class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                             Submission <%= index + 1 %> of <%= @page_collection_submissions.count %>
                           </span>
-                          <span class="text-sm text-gray-500">
+                          <span class="text-sm text-gray-500 dark:text-gray-400">
                             <%= time_ago_in_words submission.submitted_at %> ago
                           </span>
                         </div>
                         
-                        <h2 class="text-3xl font-serif font-bold text-gray-900 leading-tight mb-4">
+                        <h2 class="text-3xl font-serif font-bold text-gray-900 dark:text-white leading-tight mb-4">
                           <%= link_to content.name, content, target: "_blank", class: "hover:text-blue-600 transition-colors duration-200" %>
                         </h2>
                         
                         <!-- Author -->
                         <div class="flex items-center mb-6">
                           <%= link_to content.user, target: "_blank", class: "flex items-center space-x-3 hover:opacity-75 transition-opacity duration-200" do %>
-                            <%= image_tag content.user.image_url(size: 48), class: "w-12 h-12 rounded-full border border-gray-300" %>
+                            <%= image_tag content.user.image_url(size: 48), class: "w-12 h-12 rounded-full border border-gray-300 dark:border-gray-600" %>
                             <div>
-                              <div class="text-lg font-medium text-gray-900">by <%= content.user.display_name %></div>
-                              <div class="text-sm text-gray-600">Author</div>
+                              <div class="text-lg font-medium text-gray-900 dark:text-white">by <%= content.user.display_name %></div>
+                              <div class="text-sm text-gray-600 dark:text-gray-400">Author</div>
                             </div>
                           <% end %>
                         </div>
@@ -144,8 +144,8 @@
                       <!-- Content Preview -->
                       <% if content.respond_to?(:description) && content.description.present? %>
                         <div class="mb-8">
-                          <h4 class="text-sm font-semibold text-gray-900 mb-2 uppercase tracking-wide">Content Preview</h4>
-                          <p class="text-gray-700 leading-relaxed line-clamp-4">
+                          <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-2 uppercase tracking-wide">Content Preview</h4>
+                          <p class="text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-4">
                             <%= truncate(content.description, length: 300, separator: ' ') %>
                           </p>
                         </div>
@@ -153,16 +153,16 @@
                       
                       <!-- Submission Message -->
                       <% if submission.explanation.present? %>
-                        <div class="mb-8 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg">
-                          <h4 class="text-sm font-semibold text-orange-900 mb-2">Submission Note</h4>
-                          <blockquote class="text-orange-800 italic leading-relaxed">
+                        <div class="mb-8 p-4 bg-orange-50 dark:bg-orange-900 dark:bg-opacity-30 border-l-4 border-orange-400 dark:border-orange-500 rounded-r-lg">
+                          <h4 class="text-sm font-semibold text-orange-900 dark:text-orange-300 mb-2">Submission Note</h4>
+                          <blockquote class="text-orange-800 dark:text-orange-200 italic leading-relaxed">
                             "<%= submission.explanation %>"
                           </blockquote>
                         </div>
                       <% end %>
                       
                       <!-- Action Buttons -->
-                      <div class="border-t border-gray-200 pt-6">
+                      <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                         <div class="flex flex-col sm:flex-row gap-4">
                           <%= link_to approve_page_collection_submission_path(submission), 
                               method: :get,
@@ -202,11 +202,11 @@
     <% else %>
       <!-- Empty State -->
       <div class="text-center py-16">
-        <div class="mx-auto w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center mb-6">
+        <div class="mx-auto w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6">
           <i class="material-icons text-gray-400 text-4xl">assignment_turned_in</i>
         </div>
-        <h3 class="text-2xl font-serif font-bold text-gray-900 mb-2">All Submissions Reviewed</h3>
-        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+        <h3 class="text-2xl font-serif font-bold text-gray-900 dark:text-white mb-2">All Submissions Reviewed</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
           You're all caught up! There are no submissions waiting for review at this time.
         </p>
         <%= link_to @page_collection, 
@@ -219,7 +219,7 @@
     
     <!-- Navigation Footer -->
     <% if @page_collection_submissions.any? %>
-      <div class="mt-12 pt-8 border-t border-gray-200 text-center">
+      <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center">
         <%= link_to @page_collection, 
             class: "inline-flex items-center px-6 py-3 #{PageCollection.color} hover:opacity-90 text-white font-medium rounded-lg transition-opacity duration-200" do %>
           <i class="material-icons text-sm mr-2">arrow_back</i>
