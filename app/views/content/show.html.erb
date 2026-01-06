@@ -113,12 +113,13 @@
       </div>
 
       <!-- Mobile/Tablet Left Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed left-0 top-1/2 transform -translate-y-1/2 z-40">
+      <div class="lg:hidden fixed left-0 top-28 z-40">
         <button @click="showLeftSidebar = !showLeftSidebar"
-                class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-r-lg shadow-lg transition-colors"
+                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1"
                 title="Navigation">
-          <i class="material-icons text-lg" x-show="!showLeftSidebar">menu</i>
-          <i class="material-icons text-lg" x-show="showLeftSidebar">chevron_left</i>
+          <i class="material-icons text-base" x-show="!showLeftSidebar">menu</i>
+          <i class="material-icons text-base" x-show="!showLeftSidebar">chevron_right</i>
+          <i class="material-icons text-base" x-show="showLeftSidebar">chevron_left</i>
         </button>
       </div>
 
@@ -178,12 +179,13 @@
       </div>
       
       <!-- Mobile/Tablet Right Sidebar Toggle Tab -->
-      <div class="lg:hidden fixed right-0 top-1/2 transform -translate-y-1/2 z-40">
-        <button @click="toggleRightSidebar()" 
-                class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-l-lg shadow-lg transition-colors"
+      <div class="lg:hidden fixed right-0 top-28 z-40">
+        <button @click="toggleRightSidebar()"
+                class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1"
                 title="Quick Links">
-          <i class="material-icons text-lg" x-show="!showRightSidebar">chevron_left</i>
-          <i class="material-icons text-lg" x-show="showRightSidebar">chevron_right</i>
+          <i class="material-icons text-base" x-show="!showRightSidebar">chevron_left</i>
+          <i class="material-icons text-base" x-show="!showRightSidebar">link</i>
+          <i class="material-icons text-base" x-show="showRightSidebar">chevron_right</i>
         </button>
       </div>
       
@@ -289,7 +291,8 @@ function showPageController() {
       this.expandAllCategories = false;
       window.location.hash = view;
 
-      // Close mobile sidebar when switching views
+      // Close mobile sidebars when switching views
+      this.showLeftSidebar = false;
       this.showRightSidebar = false;
 
       // Scroll to top of content area
@@ -301,6 +304,9 @@ function showPageController() {
       this.currentCategory = categoryName;
       this.expandAllCategories = false;
       window.location.hash = 'overview';
+
+      // Close mobile sidebar when navigating
+      this.showLeftSidebar = false;
     },
     
     showAllCategories() {
@@ -308,6 +314,9 @@ function showPageController() {
       this.currentCategory = null;
       this.expandAllCategories = true;
       window.location.hash = 'overview';
+
+      // Close mobile sidebar when navigating
+      this.showLeftSidebar = false;
     },
     
     isViewActive(view) {
