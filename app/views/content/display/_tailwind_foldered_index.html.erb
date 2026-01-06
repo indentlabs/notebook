@@ -23,7 +23,7 @@
         <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20"></div>
       </div>
       
-      <div class="px-6 lg:px-8 py-6">
+      <div id="hero-header" class="px-6 lg:px-8 py-6">
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-5">
             <div class="flex-shrink-0">
@@ -117,7 +117,7 @@
       <div x-data="{ questionExpanded: false }" class="border-b border-gray-200 dark:border-gray-700">
         <!-- Compact Question Header -->
         <button
-          @click="questionExpanded = !questionExpanded; if(questionExpanded) $nextTick(() => $refs.questionInput.focus())"
+          @click="questionExpanded = !questionExpanded; if(questionExpanded) $nextTick(() => { $refs.questionInput.focus(); if(window.innerWidth < 640) document.getElementById('hero-header').scrollIntoView({ behavior: 'smooth', block: 'start' }); })"
           class="w-full px-6 lg:px-8 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 hover:from-blue-100 hover:to-indigo-100 dark:hover:from-gray-700 dark:hover:to-gray-700 transition-all duration-200 focus:outline-none"
         >
           <div class="flex items-center justify-between">
