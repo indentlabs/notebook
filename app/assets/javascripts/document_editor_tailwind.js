@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#mini-word-count').text(wordCount);
 
     // Update sidebar stats
-    $('#sidebar-word-count').text(wordCount);
+    $('#sidebar-word-count').text(wordCount.toLocaleString());
     $('#sidebar-char-count').text(charCount.toLocaleString());
     $('#sidebar-reading-time').text(readingTime);
 
