@@ -276,16 +276,13 @@ class MainController < ApplicationController
     all_content = @current_user_content.values.flatten
     
     # 30-Day Activity Chart for Dashboard
-    # Use user's timezone to correctly attribute edits to the right day
+    # Use user's timezone and track words written per day (consistent with streak)
     user_today = current_user.current_date_in_time_zone
-    user_tz = current_user.time_zone.presence || 'UTC'
 
     @dashboard_daily_activity = (0..29).map do |days_ago|
       date = user_today - days_ago.days
-      activity_count = all_content.count do |content_page|
-        content_page.updated_at.in_time_zone(user_tz).to_date == date
-      end
-      [date.strftime('%m/%d'), activity_count]
+      word_count = WordCountUpdate.words_written_on_date(current_user, date)
+      [date.strftime('%m/%d'), word_count]
     end.reverse
     
     # Calculate Writing Streak
