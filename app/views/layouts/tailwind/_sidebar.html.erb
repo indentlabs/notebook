@@ -1,15 +1,88 @@
     <% if user_signed_in? %>
-    <!-- Simplified sidebar for debugging -->
-    <nav x-show="showSidebar" x-cloak class="notebook--sidebar fixed top-14 flex flex-col left-0 z-20 overflow-hidden border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all duration-300 origin-left transform w-56 sm:w-60 lg:w-56" 
-         style="height: calc(100dvh - 3.5rem);"
-         :class="{ '-translate-x-full' : !showSidebar, 'translate-x-0' : showSidebar }">
+    <!-- Sidebar with integrated logo -->
+    <nav class="notebook--sidebar fixed top-0 flex flex-col left-0 overflow-hidden border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all duration-300 origin-left transform"
+         style="height: 100dvh; z-index: 60;"
+         :class="{
+           'w-56 sm:w-60 lg:w-56': showSidebar,
+           'w-16': !showSidebar && isDesktop,
+           '-translate-x-full': !showSidebar && !isDesktop
+         }">
       <div class="absolute inset-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 shadow-lg"></div>
-      
 
+      <!-- Logo header -->
+      <div class="h-14 flex items-center border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0 relative z-20"
+           :class="{ 'justify-center': !showSidebar && isDesktop }">
+        <!-- Expanded: logo links home -->
+        <%= link_to main_app.root_path, class: 'flex items-center px-3 py-2 hover:opacity-80 transition', 'x-show': 'showSidebar', 'x-cloak': true do %>
+          <%= image_tag 'logos/book-small.webp', class: 'h-8 shrink-0' %>
+          <span class="ml-3 text-xl font-bold text-notebook-blue dark:text-blue-300 tracking-wide whitespace-nowrap">
+            Notebook.ai
+          </span>
+        <% end %>
 
+        <!-- Collapsed: logo expands sidebar -->
+        <button x-show="!showSidebar && isDesktop" x-cloak
+                @click="showSidebar = true; localStorage.setItem('site_navigation_sidebar_visible', 'true')"
+                class="p-2 hover:opacity-80 transition relative group"
+                aria-label="Expand sidebar">
+          <%= image_tag 'logos/book-small.webp', class: 'h-8' %>
+          <i class="material-icons text-gray-400 group-hover:text-notebook-blue dark:group-hover:text-blue-400 transition-colors absolute -right-1 top-1/2 -translate-y-1/2 text-sm">chevron_right</i>
+        </button>
 
-      
-      <nav class="notebook--sidebar text-sm font-medium overflow-y-auto flex-1 min-h-0 relative z-10 pl-0" aria-label="Main Navigation">
+        <!-- Toggle button (expanded state only) -->
+        <button x-show="showSidebar" x-cloak
+                @click="showSidebar = false; localStorage.setItem('site_navigation_sidebar_visible', 'false')"
+                class="ml-auto mr-2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition group"
+                aria-label="Collapse sidebar">
+          <i class="material-icons text-gray-400 group-hover:text-notebook-blue dark:group-hover:text-blue-400 transition-colors text-xl">chevron_left</i>
+        </button>
+      </div>
+
+      <!-- Collapsed state: icon ribbon -->
+      <div x-show="!showSidebar && isDesktop" x-cloak class="flex flex-col items-center py-3 space-y-1 overflow-y-auto flex-1 min-h-0 relative z-10 thin-scrollbar">
+        <!-- Worldbuilding icons -->
+        <% @activated_content_types.each do |content_type| %>
+          <% content_type_klass = content_class_from_name(content_type) %>
+          <%= link_to main_app.polymorphic_path(content_type_klass),
+              class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip",
+              "data-tooltip": content_type.pluralize do %>
+            <i class="material-icons <%= content_type_klass.text_color %> text-xl"><%= content_type_klass.icon %></i>
+          <% end %>
+        <% end %>
+
+        <!-- Divider -->
+        <div class="w-8 border-t border-gray-200 dark:border-slate-700 my-1.5"></div>
+
+        <!-- Writing icons -->
+        <%= link_to main_app.books_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Books" do %>
+          <i class="material-icons <%= Book.text_color %> text-xl"><%= Book.icon %></i>
+        <% end %>
+        <%= link_to main_app.documents_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Documents" do %>
+          <i class="material-icons <%= Document.text_color %> text-xl"><%= Document.icon %></i>
+        <% end %>
+        <%= link_to main_app.timelines_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Timelines" do %>
+          <i class="material-icons <%= Timeline.text_color %> text-xl"><%= Timeline.icon %></i>
+        <% end %>
+        <%= link_to main_app.prompts_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Prompts" do %>
+          <i class="material-icons text-orange-400 text-xl">lightbulb</i>
+        <% end %>
+
+        <!-- Divider -->
+        <div class="w-8 border-t border-gray-200 dark:border-slate-700 my-1.5"></div>
+
+        <!-- Community icons -->
+        <%= link_to main_app.page_collections_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Collections" do %>
+          <i class="material-icons <%= PageCollection.text_color %> text-xl"><%= PageCollection.icon %></i>
+        <% end %>
+        <%= link_to main_app.thredded_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Discussions" do %>
+          <i class="material-icons text-blue-500 text-xl">forum</i>
+        <% end %>
+        <%= link_to main_app.stream_path, class: "w-11 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Activity" do %>
+          <i class="material-icons text-purple-400 text-xl">ballot</i>
+        <% end %>
+      </div>
+
+      <nav x-show="showSidebar" x-cloak class="notebook--sidebar text-sm font-medium overflow-y-auto flex-1 min-h-0 relative z-10 pl-0 thin-scrollbar" aria-label="Main Navigation">
         <div x-data="{ expandedWorldbuildingSidebar: <%= @sidenav_expansion == 'worldbuilding' %> }" class="mb-2 mt-1">
           <!-- Section header with indicator dot -->
           <div class="cursor-pointer relative ripple-effect" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar">
@@ -210,7 +283,7 @@
         </div>
       </nav>
 
-      <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-purple-900 dark:to-black shadow-sm shrink-0 relative z-20">
+      <div x-show="showSidebar" x-cloak class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-purple-900 dark:to-black shadow-sm shrink-0 relative z-20">
         <% if @universe_scope %>
           <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800 overflow-hidden">
 
@@ -253,31 +326,35 @@
           </div>
         <% end %>
       </div>
-
-      </div>
-
-      
     </nav>
 
-    <!-- sidebar backdrop on mobile --> 
-    <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 lg:hidden" x-show="showSidebar" @click="showSidebar = false" @touchmove.prevent x-cloak></div>
+    <!-- sidebar backdrop on mobile -->
+    <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show="showSidebar" @click="showSidebar = false" @touchmove.prevent x-cloak></div>
 
-    <!-- Hide sidebar pull-tab (shows when sidebar IS visible) -->
-    <div x-show="showSidebar" x-cloak
-         @click="showSidebar = false"
-         class="fixed top-14 mt-0.5 left-56 sm:left-60 lg:left-56 z-50 border-b border-r border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-r-md shadow-sm h-12 w-8 flex items-center justify-center cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-300 group tooltip-right"
-         data-tooltip="Hide sidebar"
-         role="button" aria-label="Hide Sidebar">
-      <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-notebook-blue dark:group-hover:text-blue-400 transition-colors text-2xl">chevron_left</i>
-    </div>
+    <!-- Sidebar tooltip (positioned via JS to escape overflow containers) -->
+    <div id="sidebar-tooltip"></div>
+    <script>
+      (function() {
+        var tooltip = document.getElementById('sidebar-tooltip');
+        if (!tooltip) return;
 
-    <!-- Sliver toggle button (shows when sidebar is hidden) -->
-    <div x-show="!showSidebar" x-cloak 
-         @click="showSidebar = true"
-         class="fixed top-14 left-0 z-50 border-b border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-br-md shadow-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 flex items-center justify-center w-16 h-12 group tooltip-right"
-         data-tooltip="Show sidebar"
-         role="button" aria-label="Show Sidebar">
-      <i class="material-icons text-notebook-blue dark:text-blue-400 transition-colors text-2xl mr-[-6px]">view_sidebar</i>
-      <i class="material-icons text-notebook-blue dark:text-blue-400 group-hover:scale-110 transition-transform text-3xl">chevron_right</i>
-    </div>
+        document.querySelectorAll('.sidebar-tooltip').forEach(function(el) {
+          el.addEventListener('mouseenter', function(e) {
+            var text = el.getAttribute('data-tooltip');
+            if (!text) return;
+
+            tooltip.textContent = text;
+            var rect = el.getBoundingClientRect();
+            tooltip.style.left = (rect.right + 8) + 'px';
+            tooltip.style.top = (rect.top + rect.height / 2) + 'px';
+            tooltip.style.transform = 'translateY(-50%)';
+            tooltip.classList.add('visible');
+          });
+
+          el.addEventListener('mouseleave', function() {
+            tooltip.classList.remove('visible');
+          });
+        });
+      })();
+    </script>
   <% end %>

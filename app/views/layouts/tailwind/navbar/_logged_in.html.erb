@@ -1,11 +1,25 @@
-<header class="flex fixed top-0 z-50 w-full h-14 shadow" style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
-  <%= link_to main_app.root_path, class: 'flex items-center mr-2 px-3 sm:px-6 py-4 border-b border-gray-300 dark:border-slate-700 shadow hover:shadow-md transition bg-white dark:bg-slate-800 rounded-br-lg' do %>
-    <%= image_tag 'logos/book-small.webp', class: 'h-6 sm:h-8 mr-2 sm:mr-3' %>
-    <span class="text-lg sm:text-2xl font-bold text-notebook-blue dark:text-blue-300 tracking-wide">
-      <span>Notebook.ai</span>
-    </span>
-  <% end %>
+<header class="flex fixed top-0 z-50 w-full h-14 shadow transition-all duration-300"
+        :class="{
+          'md:pl-56': showSidebar && isDesktop,
+          'md:pl-16': !showSidebar && isDesktop,
+          'pl-0': !isDesktop
+        }"
+        style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
 
+  <!-- Mobile: Logo and hamburger menu -->
+  <div class="flex items-center md:hidden pl-3" x-show="!isDesktop" x-cloak>
+    <!-- Hamburger menu button -->
+    <button @click="showSidebar = true"
+            class="w-10 h-10 flex items-center justify-center text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition"
+            aria-label="Open menu">
+      <i class="material-icons">menu</i>
+    </button>
+
+    <!-- Logo -->
+    <%= link_to main_app.root_path, class: 'flex items-center ml-2 hover:opacity-80 transition' do %>
+      <span class="text-lg font-bold text-white tracking-wide">Notebook.ai</span>
+    <% end %>
+  </div>
 
   <div class="flex-grow"></div>
 

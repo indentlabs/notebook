@@ -23,13 +23,13 @@
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      x-data="{ showSidebar: false }"
+      x-data="{ showSidebar: false, isDesktop: window.innerWidth >= 768 }"
 >
   <%= render 'layouts/tailwind/navbar' %>
   <%= render 'layouts/tailwind/sidebar' %>
 
   <!-- main content -->
-  <main class="<%= user_signed_in? ? 'lg:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-60 lg:ml-56': showSidebar, 'ml-0': !showSidebar }"<% end %>>
+  <main class="<%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
     <%= yield %>
   </main>
 

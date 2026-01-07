@@ -23,7 +23,7 @@
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 1024' : 'false' %> }"
+      x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 768' : 'false' %>, isDesktop: window.innerWidth >= 768 }"
 >
   <%= render 'layouts/tailwind/navbar' %>
 
@@ -31,7 +31,7 @@
 
   <% unless content_for?(:messenger_fullscreen) %>
     <!-- forum navigation & breadcrumbs -->
-    <nav class="thredded-nav bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-14 z-40 overflow-hidden <%= user_signed_in? ? 'lg:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-60 lg:ml-56': showSidebar, 'ml-0': !showSidebar }"<% end %>>
+    <nav class="thredded-nav bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-14 z-40 overflow-hidden <%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
       <ol role="list" class="flex-1 flex space-x-4 pl-12 pr-4 py-2 min-w-0 overflow-hidden">
         <%= render('thredded/redesigned/breadcrumbs') %>
       </ol>
@@ -44,7 +44,7 @@
   <% end %>
 
   <!-- main content -->
-  <main class="pt-14 <%= user_signed_in? ? 'lg:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-60 lg:ml-56': showSidebar, 'ml-0': !showSidebar }"<% end %>>
+  <main class="pt-14 <%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
     <%= yield %>
   </main>
 

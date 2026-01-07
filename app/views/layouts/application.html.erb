@@ -31,16 +31,16 @@
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
       :class="{ 'overflow-hidden': showSidebar && !isDesktop }"
       x-data="{
-        isDesktop: window.innerWidth >= 1024,
+        isDesktop: window.innerWidth >= 768,
         showSidebar: (() => {
           <% if user_signed_in? %>
             try {
               const saved = localStorage.getItem('site_navigation_sidebar_visible');
-              const isDesktop = window.innerWidth >= 1024;
+              const isDesktop = window.innerWidth >= 768;
               // On desktop, use saved preference (default true), on mobile default false
               return isDesktop ? (saved === null ? true : saved === 'true') : false;
             } catch (e) {
-              return window.innerWidth >= 1024;
+              return window.innerWidth >= 768;
             }
           <% else %>
             return false;
@@ -75,7 +75,7 @@
 
           // Handle window resize
           window.addEventListener('resize', () => {
-            isDesktop = window.innerWidth >= 1024;
+            isDesktop = window.innerWidth >= 768;
             if (!isDesktop) {
               showSidebar = false;
             } else {
@@ -100,7 +100,11 @@
 
   <!-- main content -->
   <main class="no-transition transition-all duration-300 pt-14"
-        <% if user_signed_in? %>:class="{ 'ml-56 sm:ml-60 lg:ml-56': showSidebar, 'ml-0': !showSidebar }"<% end %>
+        <% if user_signed_in? %>:class="{
+          'md:ml-56': showSidebar && isDesktop,
+          'md:ml-16': !showSidebar && isDesktop,
+          'ml-0': !isDesktop
+        }"<% end %>
         x-init="setTimeout(() => { $el.classList.remove('no-transition') }, 100)">
     <%= yield %>
   </main>
