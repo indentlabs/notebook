@@ -24,6 +24,32 @@ class Document < ApplicationRecord
 
   belongs_to :folder, optional: true
 
+  # Status enum for document workflow tracking
+  enum status: {
+    idea: 0,
+    draft: 1,
+    writing: 2,
+    revising: 3,
+    editing: 4,
+    submitting: 5,
+    published: 6,
+    complete: 7
+  }
+
+  # Returns status options for select dropdowns: [['Display Label', 'value'], ...]
+  def self.status_options
+    [
+      ['Idea', 'idea'],
+      ['Draft', 'draft'],
+      ['Writing', 'writing'],
+      ['Revising', 'revising'],
+      ['Editing', 'editing'],
+      ['Submitting', 'submitting'],
+      ['Published', 'published'],
+      ['Complete', 'complete']
+    ]
+  end
+
   # TODO: include IsContentPage ?
 
   include Authority::Abilities

@@ -557,7 +557,7 @@ class DocumentsController < ApplicationController
   end
 
   def document_params
-    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :folder_id, :notes_text, :synopsis)
+    params.require(:document).permit(:title, :body, :deleted_at, :privacy, :universe_id, :folder_id, :notes_text, :synopsis, :status)
   end
 
   def document_tag_params
