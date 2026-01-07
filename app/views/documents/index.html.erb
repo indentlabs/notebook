@@ -380,10 +380,10 @@
           <div class="flex items-center gap-3 flex-shrink-0">
             <!-- View Toggle -->
             <div class="flex border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 shadow-sm">
-              <button @click="viewMode = 'list'; localStorage.setItem('documentsViewMode', 'list')" :class="viewMode === 'list' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg" title="List View">
+              <button @click="viewMode = 'list'; localStorage.setItem('documentsViewMode', 'list')" :class="viewMode === 'list' ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg" title="List View">
                 <i class="material-icons text-sm">view_list</i>
               </button>
-              <button @click="viewMode = 'timeline'; localStorage.setItem('documentsViewMode', 'timeline')" :class="viewMode === 'timeline' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-r-lg" title="Timeline View">
+              <button @click="viewMode = 'timeline'; localStorage.setItem('documentsViewMode', 'timeline')" :class="viewMode === 'timeline' ? 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-r-lg" title="Timeline View">
                 <i class="material-icons text-sm">timeline</i>
               </button>
             </div>
@@ -394,7 +394,7 @@
             <!-- Compact Filters Dropdown (shown when very tight on space) -->
             <div class="relative lg:hidden" x-data="{ open: false }" @click.away="open = false">
               <button @click="open = !open"
-                      class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= (params[:tag].present? || params[:favorite_only].present? || params[:statuses].present?) ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-700 dark:text-gray-300' %>">
+                      class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= (params[:tag].present? || params[:favorite_only].present? || params[:statuses].present?) ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900' : 'text-gray-700 dark:text-gray-300' %>">
                 <i class="material-icons text-sm">filter_list</i>
                 <span class="ml-1.5">Filters</span>
                 <% active_filters = 0 %>
@@ -449,7 +449,7 @@
                 <div class="px-3 py-2">
                   <% if params[:favorite_only].present? %>
                     <%= link_to documents_path(params.permit(:tag, statuses: [])),
-                                class: "block w-full text-center px-3 py-2 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-sm font-medium" do %>
+                                class: "block w-full text-center px-3 py-2 bg-yellow-50 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-400 rounded-md hover:bg-yellow-100 dark:hover:bg-yellow-800 text-sm font-medium" do %>
                       <i class="material-icons text-sm align-middle">star</i>
                       <span class="ml-1">Showing Favorites</span>
                     <% end %>
@@ -469,7 +469,7 @@
               <!-- Tag Filter Dropdown -->
               <div class="relative" x-data="{ open: false }" @click.away="open = false">
                 <button @click="open = !open"
-                        class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= params[:tag].present? ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-700 dark:text-gray-300' %>"
+                        class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= params[:tag].present? ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900' : 'text-gray-700 dark:text-gray-300' %>"
                         title="Filter by tag">
                   <i class="material-icons text-sm">label</i>
                   <span class="hidden xl:inline ml-1 max-w-[120px] truncate">
@@ -562,7 +562,7 @@
               <!-- Favorite Toggle -->
               <% if params[:favorite_only].present? %>
                 <%= link_to documents_path(params.permit(:tag, statuses: [])),
-                            class: "inline-flex items-center px-2.5 py-1.5 border border-yellow-300 dark:border-yellow-600 text-xs font-medium rounded-lg text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50",
+                            class: "inline-flex items-center px-2.5 py-1.5 border border-yellow-300 dark:border-yellow-600 text-xs font-medium rounded-lg text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900 hover:bg-yellow-100 dark:hover:bg-yellow-800",
                             title: "Showing favorites only. Click to show all." do %>
                   <i class="material-icons text-sm">star</i>
                   <span class="hidden 2xl:inline ml-1">Favorites</span>
