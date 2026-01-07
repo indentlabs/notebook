@@ -221,13 +221,19 @@
       <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance (Top 50 by Volume)</h2>
 
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table id="link-stats-table" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destination Link</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sent</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Clicked</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Click Rate</th>
+              <th scope="col" data-sort-col="sent" class="sortable-header px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                Sent <span class="sort-indicator">↓</span>
+              </th>
+              <th scope="col" data-sort-col="clicked" class="sortable-header px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                Clicked <span class="sort-indicator"></span>
+              </th>
+              <th scope="col" data-sort-col="rate" class="sortable-header px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                Click Rate <span class="sort-indicator"></span>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -238,7 +244,7 @@
                 link_rate = total > 0 ? (clicked / total.to_f * 100).round(1) : 0
                 link_text_color = link_rate >= 20 ? 'text-green-600 dark:text-green-400' : link_rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
               %>
-              <tr>
+              <tr data-sent="<%= total %>" data-clicked="<%= clicked %>" data-rate="<%= link_rate %>">
                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
                   <span class="truncate block max-w-md" title="<%= stats.passthrough_link %>"><%= stats.passthrough_link.truncate(60) %></span>
                 </td>
@@ -275,3 +281,42 @@
     </div>
   <% end %>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Link Stats Table Sorting
+  var linkTable = document.getElementById('link-stats-table');
+  if (linkTable) {
+    var headers = linkTable.querySelectorAll('.sortable-header');
+    var currentSort = { col: 'sent', dir: 'desc' };
+
+    headers.forEach(function(header) {
+      header.addEventListener('click', function() {
+        var col = this.dataset.sortCol;
+        var newDir = (currentSort.col === col && currentSort.dir === 'desc') ? 'asc' : 'desc';
+
+        // Update indicators
+        headers.forEach(function(h) {
+          h.querySelector('.sort-indicator').textContent = '';
+        });
+        this.querySelector('.sort-indicator').textContent = newDir === 'desc' ? '↓' : '↑';
+
+        currentSort = { col: col, dir: newDir };
+
+        // Sort rows
+        var tbody = linkTable.querySelector('tbody');
+        var rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort(function(a, b) {
+          var aVal = parseFloat(a.dataset[col]) || 0;
+          var bVal = parseFloat(b.dataset[col]) || 0;
+          return newDir === 'desc' ? bVal - aVal : aVal - bVal;
+        });
+
+        rows.forEach(function(row) {
+          tbody.appendChild(row);
+        });
+      });
+    });
+  }
+});
+</script>

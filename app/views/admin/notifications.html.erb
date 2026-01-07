@@ -148,10 +148,35 @@
 
   <!-- By Reference Code Section -->
   <div class="mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">By Reference Code (Top 50 by Volume)</h2>
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white">By Reference Code (Top 50 by Volume)</h2>
+
+      <!-- Sort Controls -->
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-gray-500 dark:text-gray-400">Sort by:</span>
+        <div class="inline-flex rounded-lg shadow-sm" role="group">
+          <button type="button" data-sort="volume" data-direction="desc"
+                  class="sort-btn active px-3 py-1.5 text-sm font-medium rounded-l-lg border border-gray-300 dark:border-gray-600 bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-10 focus:outline-none">
+            Volume ↓
+          </button>
+          <button type="button" data-sort="rate" data-direction="desc"
+                  class="sort-btn px-3 py-1.5 text-sm font-medium border-t border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-10 focus:outline-none">
+            Rate ↓
+          </button>
+          <button type="button" data-sort="rate" data-direction="asc"
+                  class="sort-btn px-3 py-1.5 text-sm font-medium border-t border-b border-l border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-10 focus:outline-none">
+            Rate ↑
+          </button>
+          <button type="button" data-sort="clicked" data-direction="desc"
+                  class="sort-btn px-3 py-1.5 text-sm font-medium rounded-r-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:z-10 focus:outline-none">
+            Clicked ↓
+          </button>
+        </div>
+      </div>
+    </div>
 
     <% if @code_stats.any? %>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div id="reference-codes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <% @code_stats.each do |stats| %>
           <%
             total = stats.total_count.to_i
@@ -161,7 +186,9 @@
             text_color = rate >= 20 ? 'text-green-600 dark:text-green-400' : rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
           %>
           <% if stats.reference_code.present? %>
-            <%= link_to admin_notification_reference_path(stats.reference_code), class: "block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer" do %>
+            <%= link_to admin_notification_reference_path(stats.reference_code),
+                class: "reference-code-card block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer",
+                data: { volume: total, rate: rate, clicked: clicked } do %>
               <div class="p-6">
                 <!-- Code name -->
                 <div class="flex items-center justify-between mb-3">
@@ -184,7 +211,8 @@
               </div>
             <% end %>
           <% else %>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div class="reference-code-card bg-white dark:bg-gray-800 rounded-lg shadow"
+                 data-volume="<%= total %>" data-rate="<%= rate %>" data-clicked="<%= clicked %>">
               <div class="p-6">
                 <!-- Code name -->
                 <div class="flex items-center justify-between mb-3">
@@ -222,13 +250,19 @@
       <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance (Top 50 by Volume)</h2>
 
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table id="link-stats-table" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-900">
             <tr>
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destination Link</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Sent</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Clicked</th>
-              <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Click Rate</th>
+              <th scope="col" data-sort-col="sent" class="sortable-header px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                Sent <span class="sort-indicator">↓</span>
+              </th>
+              <th scope="col" data-sort-col="clicked" class="sortable-header px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                Clicked <span class="sort-indicator"></span>
+              </th>
+              <th scope="col" data-sort-col="rate" class="sortable-header px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 select-none">
+                Click Rate <span class="sort-indicator"></span>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -239,7 +273,7 @@
                 rate = total > 0 ? (clicked / total.to_f * 100).round(1) : 0
                 text_color = rate >= 20 ? 'text-green-600 dark:text-green-400' : rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
               %>
-              <tr>
+              <tr data-sent="<%= total %>" data-clicked="<%= clicked %>" data-rate="<%= rate %>">
                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
                   <span class="truncate block max-w-md" title="<%= stats.passthrough_link %>"><%= stats.passthrough_link.truncate(60) %></span>
                 </td>
@@ -316,3 +350,76 @@
     <% end %>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Reference Codes Grid Sorting
+  var grid = document.getElementById('reference-codes-grid');
+  var sortButtons = document.querySelectorAll('.sort-btn');
+
+  if (grid && sortButtons.length > 0) {
+    sortButtons.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var sortBy = this.dataset.sort;
+        var direction = this.dataset.direction;
+
+        // Update active state
+        sortButtons.forEach(function(b) {
+          b.classList.remove('active', 'bg-blue-50', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-300');
+          b.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
+        });
+        this.classList.add('active', 'bg-blue-50', 'dark:bg-blue-900', 'text-blue-700', 'dark:text-blue-300');
+        this.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300');
+
+        // Get cards and sort
+        var cards = Array.from(grid.querySelectorAll('.reference-code-card'));
+        cards.sort(function(a, b) {
+          var aVal = parseFloat(a.dataset[sortBy]) || 0;
+          var bVal = parseFloat(b.dataset[sortBy]) || 0;
+          return direction === 'desc' ? bVal - aVal : aVal - bVal;
+        });
+
+        // Re-append in sorted order
+        cards.forEach(function(card) {
+          grid.appendChild(card);
+        });
+      });
+    });
+  }
+
+  // Link Stats Table Sorting
+  var linkTable = document.getElementById('link-stats-table');
+  if (linkTable) {
+    var headers = linkTable.querySelectorAll('.sortable-header');
+    var currentSort = { col: 'sent', dir: 'desc' };
+
+    headers.forEach(function(header) {
+      header.addEventListener('click', function() {
+        var col = this.dataset.sortCol;
+        var newDir = (currentSort.col === col && currentSort.dir === 'desc') ? 'asc' : 'desc';
+
+        // Update indicators
+        headers.forEach(function(h) {
+          h.querySelector('.sort-indicator').textContent = '';
+        });
+        this.querySelector('.sort-indicator').textContent = newDir === 'desc' ? '↓' : '↑';
+
+        currentSort = { col: col, dir: newDir };
+
+        // Sort rows
+        var tbody = linkTable.querySelector('tbody');
+        var rows = Array.from(tbody.querySelectorAll('tr'));
+        rows.sort(function(a, b) {
+          var aVal = parseFloat(a.dataset[col]) || 0;
+          var bVal = parseFloat(b.dataset[col]) || 0;
+          return newDir === 'desc' ? bVal - aVal : aVal - bVal;
+        });
+
+        rows.forEach(function(row) {
+          tbody.appendChild(row);
+        });
+      });
+    });
+  }
+});
+</script>
