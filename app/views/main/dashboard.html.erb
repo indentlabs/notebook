@@ -285,54 +285,6 @@
             <!-- Charts Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-              <!-- 30-Day Activity Chart -->
-              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                  <i class="material-icons mr-1 text-purple-600 dark:text-purple-400 text-base">show_chart</i>
-                  30-Day Activity
-                </h4>
-                <div class="relative mb-6">
-                  <!-- Chart Container -->
-                  <div id="dashboard-activity-chart" class="flex items-end justify-between h-10 space-x-0.5 relative overflow-hidden">
-                    <% if @dashboard_daily_activity %>
-                      <%
-                        # Extract counts from array of [date, count] pairs and find max
-                        max_count = @dashboard_daily_activity.map { |_, count| count }.max || 1
-                        max_height = 40 # h-10 = 40px
-                      %>
-                      <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
-                        <%
-                          # Scale bar height proportionally to fit within container
-                          bar_height = count > 0 ? [(count.to_f / max_count * max_height).round, 2].max : 1
-                        %>
-                        <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer"
-                             style="height: <%= bar_height %>px;"
-                             data-date="<%= date %>"
-                             data-count="<%= count %>"
-                             data-index="<%= index %>">
-                        </div>
-                      <% end %>
-                    <% end %>
-                  </div>
-
-                  <!-- Custom Tooltip -->
-                  <div id="dashboard-chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
-                    <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
-                      <div class="font-semibold" id="dashboard-tooltip-date"></div>
-                      <div id="dashboard-tooltip-count"></div>
-                      <!-- Tooltip arrow -->
-                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Chart Legend -->
-                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                  <span>30 days ago</span>
-                  <span>Today</span>
-                </div>
-              </div>
-
               <!-- Writing Progress (Streak + Today) -->
               <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <!-- Streak Section -->
@@ -439,6 +391,54 @@
                       <div class="bg-green-500 h-2 rounded-full" style="width: <%= [(@words_written_today || 0).to_f / @daily_word_goal * 100, 100].min %>%"></div>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- 30-Day Activity Chart -->
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                  <i class="material-icons mr-1 text-purple-600 dark:text-purple-400 text-base">show_chart</i>
+                  30-Day Activity
+                </h4>
+                <div class="relative mb-6">
+                  <!-- Chart Container -->
+                  <div id="dashboard-activity-chart" class="flex items-end justify-between h-24 space-x-0.5 relative overflow-hidden">
+                    <% if @dashboard_daily_activity %>
+                      <%
+                        # Extract counts from array of [date, count] pairs and find max
+                        max_count = @dashboard_daily_activity.map { |_, count| count }.max || 1
+                        max_height = 96 # h-24 = 96px
+                      %>
+                      <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
+                        <%
+                          # Scale bar height proportionally to fit within container
+                          bar_height = count > 0 ? [(count.to_f / max_count * max_height).round, 2].max : 1
+                        %>
+                        <div class="dashboard-activity-bar flex-1 rounded-t transition-all duration-200 cursor-pointer"
+                             style="height: <%= bar_height %>px;"
+                             data-date="<%= date %>"
+                             data-count="<%= count %>"
+                             data-index="<%= index %>">
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <!-- Custom Tooltip -->
+                  <div id="dashboard-chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
+                    <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
+                      <div class="font-semibold" id="dashboard-tooltip-date"></div>
+                      <div id="dashboard-tooltip-count"></div>
+                      <!-- Tooltip arrow -->
+                      <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-3 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Chart Legend -->
+                <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span>30 days ago</span>
+                  <span>Today</span>
                 </div>
               </div>
 
