@@ -8,12 +8,29 @@
 %>
 
 <div x-data="{
-  sidebarOpen: true,
+  showLeftSidebar: true,
+  showRightSidebar: false,
+  isDesktop: window.innerWidth >= 1024,
   searchQuery: '',
   showAddDocument: false,
   showNewDocumentModal: false,
   newDocumentTitle: '',
   isCreatingDocument: false,
+
+  init() {
+    window.addEventListener('resize', () => {
+      this.isDesktop = window.innerWidth >= 1024;
+    });
+  },
+
+  toggleLeftSidebar() {
+    this.showLeftSidebar = !this.showLeftSidebar;
+  },
+
+  toggleRightSidebar() {
+    this.showRightSidebar = !this.showRightSidebar;
+  },
+
   async createDocument() {
     this.isCreatingDocument = true;
     try {
@@ -39,6 +56,12 @@
   <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-4">
+        <!-- Mobile menu toggle -->
+        <button @click="showLeftSidebar = true"
+                class="lg:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                aria-label="Open book details">
+          <i class="material-icons">menu</i>
+        </button>
         <%= link_to books_path, class: "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" do %>
           <i class="material-icons">arrow_back</i>
         <% end %>
@@ -55,22 +78,25 @@
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <!-- Toggle Sidebar (hidden on mobile) -->
-        <button
-          @click="sidebarOpen = !sidebarOpen"
-          class="hidden sm:block p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-        >
-          <i class="material-icons" x-text="sidebarOpen ? 'menu_open' : 'menu'"></i>
-        </button>
-      </div>
     </div>
   </div>
 
+  <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
+  <div x-show="!showLeftSidebar && isDesktop" x-cloak
+       class="hidden lg:block fixed top-28 z-30 transition-all duration-300">
+    <button @click="toggleLeftSidebar()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
+            data-tooltip="Show Book Details"
+            aria-label="Show Book Details">
+      <i class="material-icons text-base">menu_book</i>
+      <i class="material-icons text-base">chevron_right</i>
+    </button>
+  </div>
+
   <!-- Content area with sidebar -->
-  <div class="flex-1 flex flex-col sm:flex-row overflow-hidden">
+  <div class="flex-1 flex flex-row overflow-hidden">
     <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col order-2 sm:order-1 overflow-auto">
+    <main class="flex-1 flex flex-col order-2 overflow-auto">
       <!-- Table of Contents -->
     <div class="flex-1 p-6 lg:p-8 overflow-auto">
       <div class="max-w-3xl mx-auto">
@@ -175,13 +201,127 @@
     </div>
   </main>
 
-  <!-- Right Sidebar (always visible on mobile, toggleable on desktop) -->
-  <aside
-    x-bind:class="{ 'sm:hidden': !sidebarOpen }"
-    class="w-full sm:w-80 bg-white dark:bg-gray-800 sm:border-l border-b sm:border-b-0 border-gray-200 dark:border-gray-700 flex flex-col order-1 sm:order-2"
-  >
-    <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Book Details</h2>
+  <!-- Mobile Overlay Background -->
+  <div x-show="showLeftSidebar && !isDesktop" x-cloak
+       x-transition:enter="transition-opacity ease-linear duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition-opacity ease-linear duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       @click="showLeftSidebar = false"
+       class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+       role="presentation"
+       aria-hidden="true">
+  </div>
+
+  <!-- Mobile Left Sidebar -->
+  <aside x-show="showLeftSidebar && !isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="lg:hidden fixed inset-y-0 left-0 w-80 max-w-full bg-white dark:bg-gray-800 z-50 shadow-xl overflow-y-auto flex flex-col"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobile-sidebar-title">
+
+    <!-- Header with clickable toggle -->
+    <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:hidden">
+      <button @click="showLeftSidebar = false"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+              aria-label="Close Book Details">
+        <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+        <i class="material-icons text-gray-600 text-lg mr-1.5">menu_book</i>
+        <h2 id="mobile-sidebar-title" class="text-sm font-semibold text-gray-900 dark:text-white">Book Details</h2>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <%= form_with model: @book, local: false, html: { class: 'space-y-6' } do |f| %>
+
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <%= f.text_field :title, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+        <!-- Subtitle -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label>
+          <%= f.text_field :subtitle, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave", placeholder: "Optional subtitle" %>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <%= f.select :status, status_options, {}, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+          <%= f.text_area :description, rows: 3, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-autosave", placeholder: "What's this book about?" %>
+        </div>
+
+        <!-- Blurb -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Back Cover Blurb</label>
+          <%= f.text_area :blurb, rows: 4, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-autosave", placeholder: "The hook for readers..." %>
+        </div>
+
+        <!-- Universe -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Universe</label>
+          <%= f.collection_select :universe_id, current_user.universes.order(:name), :id, :name, { include_blank: 'No universe' }, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+      <% if @book.archived? %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">unarchive</i>
+          Unarchive Book
+        <% end %>
+      <% else %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">archive</i>
+          Archive Book
+        <% end %>
+      <% end %>
+
+      <%= button_to book_path(@book), method: :delete, data: { confirm: 'Are you sure you want to delete this book? This cannot be undone.' }, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900" do %>
+        <i class="material-icons text-lg mr-2">delete</i>
+        Delete Book
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Desktop Left Sidebar -->
+  <aside x-show="showLeftSidebar && isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="hidden lg:flex w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex-col order-1 max-h-screen overflow-hidden">
+
+    <!-- Header with clickable toggle -->
+    <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <button @click="toggleLeftSidebar()"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+              title="Hide Book Details"
+              aria-label="Hide Book Details">
+        <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+        <i class="material-icons text-gray-600 text-lg mr-1.5">menu_book</i>
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Book Details</h2>
+      </button>
     </div>
 
     <div class="flex-1 overflow-y-auto p-6 space-y-6">
