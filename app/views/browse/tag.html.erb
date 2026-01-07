@@ -1,33 +1,38 @@
 <%
-  # Calculate stats for the header
+  # Calculate stats
   total_items = @tagged_content.sum { |group| group[:content].count }
-  content_types_count = @tagged_content.size
   creators_count = @tagged_content.flat_map { |group| group[:content].map(&:user_id) }.uniq.count
-  pattern_url = asset_path("card-headers/patterns/pattern5.png")
+
+  # Flatten all content into a single array for unified masonry grid
+  all_content = @tagged_content.flat_map do |group|
+    group[:content].map do |item|
+      {
+        item: item,
+        type: group[:type],
+        icon: group[:icon],
+        color: group[:color]
+      }
+    end
+  end.sort_by { |c| c[:item].updated_at }.reverse
 %>
 
 <!-- How to Join Dialog -->
 <dialog id="how-to-join-dialog" class="rounded-xl p-0 max-w-lg w-full mx-4 backdrop:bg-black backdrop:bg-opacity-50">
   <div class="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
-    <!-- Dialog Header -->
     <div class="bg-purple-600 px-6 py-4">
       <h2 class="text-xl font-semibold text-white flex items-center">
         <i class="material-icons mr-2">info</i>
         How to join this showcase
       </h2>
     </div>
-
-    <!-- Dialog Content -->
     <div class="p-6">
       <p class="text-gray-700 dark:text-gray-300 mb-4">Want your page to appear here? Follow these steps:</p>
       <ol class="list-decimal list-inside space-y-3 text-gray-700 dark:text-gray-300 mb-6">
         <li>Add the <span class="px-2 py-0.5 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded font-medium">ArtFight2025</span> tag to your notebook page</li>
-        <li>Set your page's privacy to <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded font-medium">Public</span> in the privacy toggle</li>
+        <li>Set your page's privacy to <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200 rounded font-medium">Public</span></li>
         <li>That's it! Your page will appear here automatically</li>
       </ol>
       <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Note: It may take a few minutes for new content to appear.</p>
-
-      <!-- What is Art Fight section -->
       <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-3">
           <i class="material-icons text-purple-600 mr-2">brush</i>
@@ -40,135 +45,69 @@
           <li>Each completed artwork earns points for your team</li>
           <li>The team with the most points at the end of July wins</li>
         </ul>
-        <p class="text-gray-700 dark:text-gray-300 mb-2">It's a great way to practice your art skills, discover new characters to draw, and connect with other creatives.</p>
         <p class="text-sm text-gray-500 dark:text-gray-400">
           Note: Notebook.ai is not officially affiliated with Art Fight. Visit
           <a href="https://artfight.net" target="_blank" class="text-purple-600 hover:text-purple-700 dark:text-purple-400 underline">artfight.net</a>
-          to learn more and participate.
+          to learn more.
         </p>
       </div>
     </div>
-
-    <!-- Dialog Footer -->
     <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 flex justify-end">
-      <button onclick="this.closest('dialog').close()"
-              class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors duration-200">
+      <button onclick="this.closest('dialog').close()" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors">
         Got it
       </button>
     </div>
   </div>
 </dialog>
 
-<!-- Privacy Notice -->
-<div class="mb-4 text-right">
-  <p class="text-sm text-gray-500 dark:text-gray-400">
-    <i class="material-icons text-xs align-middle mr-1">lock_open</i>
-    All content on Notebook.ai is private by default. Only pages with the <strong>ArtFight2025</strong> tag <em>and</em> set to <strong>public</strong> appear here.
-  </p>
-</div>
-
-<!-- Hero Header -->
-<div class="relative overflow-hidden rounded-xl mb-6 shadow-lg">
-  <!-- Background with pattern -->
-  <div class="absolute inset-0 bg-cover bg-center opacity-20" style="background-image: url('<%= pattern_url %>')"></div>
-  <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-500"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-black from-0% via-transparent via-50% to-transparent opacity-30"></div>
-
-  <!-- Content -->
-  <div class="relative z-10 px-6 lg:px-8 py-10 lg:py-12">
-    <!-- Help button -->
+<!-- Compact Header -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+  <!-- Left: Tag + Stats -->
+  <div class="flex items-center gap-3 flex-wrap">
+    <span class="inline-flex items-center px-3 py-1.5 bg-purple-600 text-white text-sm font-medium rounded-full">
+      <i class="material-icons text-sm mr-1.5"><%= PageTag.icon %></i>
+      <%= @tag %>
+    </span>
+    <span class="text-sm text-gray-500 dark:text-gray-400">
+      <%= pluralize(total_items, 'page') %> from <%= pluralize(creators_count, 'creator') %>
+    </span>
     <button onclick="document.getElementById('how-to-join-dialog').showModal()"
-            class="absolute top-4 right-4 p-2.5 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow duration-200 group"
-            aria-label="Learn how to join Art Fight 2025"
-            title="Learn how to join Art Fight 2025">
-      <i class="material-icons text-purple-600 group-hover:text-purple-700">help_outline</i>
+            class="text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+            aria-label="How to join"
+            title="How to join">
+      <i class="material-icons text-lg">help_outline</i>
     </button>
+  </div>
 
-    <!-- Title & Subtitle -->
-    <div class="mb-6">
-      <h1 class="text-3xl lg:text-4xl font-bold text-white mb-2">Art Fight 2025</h1>
-      <p class="text-purple-100 text-lg">A showcase of creators' public content across Notebook.ai</p>
-    </div>
+  <!-- Right: Filters + Sort -->
+  <div class="flex items-center gap-2 overflow-x-auto pb-1">
+    <button class="category-filter px-3 py-1.5 rounded-full text-xs font-medium transition-colors bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200"
+            data-category="all"
+            onclick="filterByCategory('all')">
+      All
+    </button>
+    <% @tagged_content.each do |content_group| %>
+      <button class="category-filter px-3 py-1.5 rounded-full text-xs font-medium transition-colors bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+              data-category="<%= content_group[:type].downcase %>"
+              onclick="filterByCategory('<%= content_group[:type].downcase %>')">
+        <%= content_group[:type].pluralize %>
+      </button>
+    <% end %>
 
-    <!-- Stats -->
-    <div class="flex flex-wrap gap-3 mb-8">
-      <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white text-purple-700 text-sm font-medium shadow-sm">
-        <i class="material-icons text-base mr-2"><%= PageTag.icon %></i>
-        <%= pluralize(total_items, 'page') %>
-      </span>
-      <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white text-purple-700 text-sm font-medium shadow-sm">
-        <i class="material-icons text-base mr-2">category</i>
-        <%= pluralize(content_types_count, 'page type') %>
-      </span>
-      <span class="inline-flex items-center px-3 py-1.5 rounded-full bg-white text-purple-700 text-sm font-medium shadow-sm">
-        <i class="material-icons text-base mr-2">people</i>
-        <%= pluralize(creators_count, 'creator') %>
-      </span>
-    </div>
-
-    <!-- Tag Badge -->
-    <div class="inline-flex items-center px-5 py-3 bg-white rounded-xl shadow-md">
-      <i class="material-icons text-purple-600 text-2xl mr-3"><%= PageTag.icon %></i>
-      <span class="text-2xl font-bold text-purple-600"><%= @tag %></span>
-    </div>
+    <select id="sortSelect"
+            class="ml-2 px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs focus:ring-1 focus:ring-purple-500"
+            onchange="applySorting(this.value)">
+      <option value="latest">Latest</option>
+      <option value="oldest">Oldest</option>
+      <option value="name_asc">A-Z</option>
+      <option value="name_desc">Z-A</option>
+      <option value="random">Random</option>
+    </select>
   </div>
 </div>
 
-<!-- Filter & Sort Bar -->
-<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-6">
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-    <!-- Category Filters -->
-    <div class="flex-1">
-      <div class="flex items-center gap-2 mb-2 lg:mb-0">
-        <i class="material-icons text-purple-600 text-lg">filter_list</i>
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by category:</span>
-      </div>
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 mt-2" role="tablist" aria-label="Content category filters">
-        <button
-          class="category-filter inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200"
-          data-category="all"
-          role="tab"
-          aria-selected="true"
-          onclick="filterByCategory('all')">
-          <i class="material-icons text-base mr-1.5">layers</i>
-          All <span class="ml-1 text-gray-500 dark:text-gray-400">(<%= total_items %>)</span>
-        </button>
-
-        <% @tagged_content.each do |content_group| %>
-          <button
-            class="category-filter inline-flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-            data-category="<%= content_group[:type].downcase %>"
-            role="tab"
-            aria-selected="false"
-            onclick="filterByCategory('<%= content_group[:type].downcase %>')">
-            <i class="material-icons text-base mr-1.5 <%= content_group[:color] %>"><%= content_group[:icon] %></i>
-            <%= content_group[:type].pluralize %> <span class="ml-1 text-gray-500 dark:text-gray-400">(<%= content_group[:content].count %>)</span>
-          </button>
-        <% end %>
-      </div>
-    </div>
-
-    <!-- Sort Options -->
-    <div class="flex items-center gap-3 flex-shrink-0">
-      <div class="flex items-center gap-2">
-        <i class="material-icons text-purple-600 text-lg">sort</i>
-        <label for="sortSelect" class="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</label>
-      </div>
-      <select id="sortSelect"
-              class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              onchange="applySorting(this.value)">
-        <option value="latest" selected>Latest Updates</option>
-        <option value="oldest">Oldest First</option>
-        <option value="name_asc">Name (A-Z)</option>
-        <option value="name_desc">Name (Z-A)</option>
-        <option value="random">Random</option>
-      </select>
-    </div>
-  </div>
-</div>
-
-<!-- Content Sections -->
-<% if @tagged_content.empty? %>
+<!-- Masonry Grid -->
+<% if all_content.empty? %>
   <div class="text-center py-16">
     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
       <i class="material-icons text-3xl text-gray-400">sell</i>
@@ -179,239 +118,132 @@
     </p>
   </div>
 <% else %>
-  <% @tagged_content.each do |content_group| %>
-    <section
-      id="<%= content_group[:type].downcase %>-content"
-      class="content-section mb-10"
-      data-content-type="<%= content_group[:type].downcase %>"
-      role="tabpanel"
-      aria-labelledby="tab-<%= content_group[:type].downcase %>">
+  <div class="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-3" id="masonry-grid">
+    <% all_content.each do |content_data| %>
+      <%
+        content = content_data[:item]
+        content_type = content_data[:type]
+        content_icon = content_data[:icon]
 
-      <!-- Section Header -->
-      <div class="flex items-center justify-between mb-5 pb-3 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center">
-          <i class="material-icons text-2xl mr-3 <%= content_group[:color] %>"><%= content_group[:icon] %></i>
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-            <%= content_group[:type].pluralize %>
-            <span class="text-gray-500 dark:text-gray-400 text-base font-normal ml-1">(<%= content_group[:content].count %>)</span>
-          </h2>
-        </div>
-        <span class="text-sm text-gray-500 dark:text-gray-400">
-          Showing <span class="count-shown"><%= content_group[:content].count %></span> items
-        </span>
-      </div>
+        # Get content name
+        content_name = content.respond_to?(:name) ? content.name : content.title
+        content_name = content_name.presence || 'Untitled'
 
-      <!-- Card Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 js-content-cards-list">
-        <% content_group[:content].each do |content| %>
-          <%
-            # Get content name
-            content_name = content.respond_to?(:name) ? content.name : content.title
-            content_name = content_name.presence || 'Untitled'
+        # Find image for this content
+        content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
+          .sample
+          .try(:src, :medium)
 
-            # Find image for this content
-            content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
-              .sample
-              .try(:src, :medium)
+        if @saved_basil_commissions
+          content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
+            .sample
+            .try(:image)
+            .try(:url)
+        end
 
-            if @saved_basil_commissions
-              content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
-                .sample
-                .try(:image)
-                .try(:url)
-            end
+        content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.webp")
 
-            content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
+        # Get user
+        user = @users_cache[content.user_id]
+      %>
 
-            # Get user
-            user = @users_cache[content.user_id]
-          %>
+      <div class="masonry-item break-inside-avoid mb-3"
+           data-content-type="<%= content_type.downcase %>"
+           data-updated-at="<%= content.updated_at.iso8601 %>"
+           data-name="<%= content_name.downcase %>">
+        <%= link_to content,
+            target: (content.is_a?(Document) ? '_blank' : nil),
+            class: "block relative overflow-hidden rounded-lg group" do %>
 
-          <div class="js-content-card-container" data-updated-at="<%= content.updated_at.iso8601 %>" data-name="<%= content_name.downcase %>">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200 overflow-hidden h-full flex flex-col">
-              <%= link_to content,
-                  target: (content.is_a?(Document) ? '_blank' : nil),
-                  class: "block flex-1 flex flex-col",
-                  aria: { label: "#{content_name} (#{content.class.name})" } do %>
+          <!-- Image -->
+          <img src="<%= content_image %>"
+               alt="<%= content_name %>"
+               class="w-full"
+               loading="lazy">
 
-                <!-- Image with 3:2 aspect ratio -->
-                <div class="relative" style="padding-top: 66.67%;">
-                  <div class="absolute inset-0 bg-cover bg-center bg-gray-200 dark:bg-gray-700"
-                       style="background-image: url('<%= content_image %>');"></div>
+          <!-- Content type badge (top-right) -->
+          <span class="absolute top-2 right-2 px-2 py-0.5 bg-black bg-opacity-50 rounded text-white text-xs flex items-center">
+            <i class="material-icons text-xs mr-0.5"><%= content_icon %></i>
+            <%= content_type %>
+          </span>
 
-                  <!-- Content type badge -->
-                  <span class="absolute top-2 right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white shadow-sm"
-                        style="background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);">
-                    <i class="material-icons text-xs mr-1"><%= content_group[:icon] %></i>
-                    <%= content.class.name %>
-                  </span>
-
-                  <!-- Title overlay at bottom -->
-                  <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black via-20% to-transparent pt-8 pb-3 px-4">
-                    <h3 class="font-semibold text-white line-clamp-2 text-base">
-                      <%= ContentFormatterService.show(text: content_name, viewing_user: current_user) %>
-                    </h3>
+          <!-- Bottom overlay: title + creator -->
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent p-3 pt-10">
+            <h3 class="text-white text-sm font-medium line-clamp-2 mb-1">
+              <%= ContentFormatterService.show(text: content_name, viewing_user: current_user) %>
+            </h3>
+            <% if user %>
+              <div class="flex items-center gap-1.5 text-white text-xs opacity-80">
+                <% if user.image_url.present? %>
+                  <img src="<%= user.image_url.html_safe %>"
+                       alt="<%= user.display_name %>"
+                       class="w-4 h-4 rounded-full"
+                       loading="lazy">
+                <% else %>
+                  <div class="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
+                    <i class="material-icons text-xs">person</i>
                   </div>
-                </div>
-
-                <!-- Card content -->
-                <div class="p-4 flex-1 flex flex-col">
-                  <!-- Creator info -->
-                  <% if user %>
-                    <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mb-3">
-                      <div class="flex items-center min-w-0">
-                        <% if user.image_url.present? %>
-                          <img src="<%= user.image_url.html_safe %>"
-                               alt="<%= user.display_name %>"
-                               class="w-5 h-5 rounded-full mr-2 flex-shrink-0"
-                               loading="lazy">
-                        <% else %>
-                          <div class="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-2 flex-shrink-0">
-                            <i class="material-icons text-xs text-gray-400">person</i>
-                          </div>
-                        <% end %>
-                        <span class="truncate"><%= user.display_name %></span>
-                      </div>
-                      <span class="flex-shrink-0 ml-2 flex items-center">
-                        <i class="material-icons text-xs mr-1">schedule</i>
-                        <%= time_ago_in_words(content.updated_at) %> ago
-                      </span>
-                    </div>
-                  <% end %>
-
-                  <!-- Tags -->
-                  <% if content.respond_to?(:page_tags) && content.page_tags.any? %>
-                    <div class="flex flex-wrap gap-1 mt-auto">
-                      <% content.page_tags.first(5).each do |tag| %>
-                        <span class="px-2 py-0.5 rounded-full text-xs <%= tag.tag == @tag ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200 font-medium' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' %>">
-                          <%= tag.tag %>
-                        </span>
-                      <% end %>
-                      <% if content.page_tags.count > 5 %>
-                        <span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
-                          +<%= content.page_tags.count - 5 %>
-                        </span>
-                      <% end %>
-                    </div>
-                  <% end %>
-                </div>
-              <% end %>
-            </div>
+                <% end %>
+                <span class="truncate"><%= user.display_name %></span>
+              </div>
+            <% end %>
           </div>
         <% end %>
       </div>
-    </section>
-  <% end %>
+    <% end %>
+  </div>
 <% end %>
 
-<!-- JavaScript for filtering and sorting -->
+<!-- JavaScript -->
 <script type="text/javascript">
-  let originalContent = {};
-  let currentActiveCategory = 'all';
+  let currentCategory = 'all';
 
   document.addEventListener('DOMContentLoaded', function() {
-    // Store original content for filtering and sorting
-    storeOriginalContent();
-
-    // Apply initial filtering based on URL hash
+    // Apply initial filter from URL hash
     let initialCategory = window.location.hash.substring(1) || 'all';
-    if (initialCategory.startsWith('!') || initialCategory === '#' || initialCategory === '') {
-      initialCategory = 'all';
-    }
+    if (!initialCategory || initialCategory.startsWith('!')) initialCategory = 'all';
+    filterByCategory(initialCategory);
 
-    // Apply initial sort from URL params if present
+    // Apply initial sort from URL params
     const urlParams = new URLSearchParams(window.location.search);
     const sortParam = urlParams.get('sort');
     if (sortParam) {
       document.getElementById('sortSelect').value = sortParam;
       applySorting(sortParam, false);
     }
-
-    filterByCategory(initialCategory);
-
-    // Initialize keyboard navigation for filter buttons
-    initKeyboardNavigationForFilters();
   });
 
-  function storeOriginalContent() {
-    const contentSections = document.querySelectorAll('.content-section');
-
-    contentSections.forEach(function(section) {
-      const contentType = section.getAttribute('data-content-type');
-      const contentItems = Array.from(section.querySelectorAll('.js-content-card-container'));
-
-      originalContent[contentType] = contentItems.map(function(item) {
-        return {
-          element: item,
-          name: item.getAttribute('data-name') || '',
-          updatedAt: item.getAttribute('data-updated-at') || ''
-        };
-      });
-    });
-  }
-
   function filterByCategory(category) {
-    category = (category || '').toLowerCase();
+    category = (category || 'all').toLowerCase();
+    currentCategory = category;
 
-    if (category.startsWith('!') || category === '' || category === '#') {
-      category = 'all';
-    }
+    // Update button states
+    document.querySelectorAll('.category-filter').forEach(btn => {
+      const btnCategory = btn.dataset.category;
+      const isActive = btnCategory === category;
 
-    currentActiveCategory = category;
-
-    const filterButtons = document.querySelectorAll('.category-filter');
-    const contentSections = document.querySelectorAll('.content-section');
-
-    // Check if the category matches any available content sections
-    let validCategory = category === 'all';
-    if (!validCategory) {
-      contentSections.forEach(function(section) {
-        const sectionType = section.getAttribute('data-content-type');
-        if (sectionType && sectionType.toLowerCase() === category.toLowerCase()) {
-          validCategory = true;
-        }
-      });
-
-      if (!validCategory) {
-        category = 'all';
-      }
-    }
-
-    // Update filter button states
-    filterButtons.forEach(function(button) {
-      const buttonCategory = button.getAttribute('data-category');
-      const isActive = buttonCategory === category;
-
-      if (isActive) {
-        button.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
-        button.classList.add('bg-purple-100', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-200');
-        button.setAttribute('aria-selected', 'true');
-      } else {
-        button.classList.remove('bg-purple-100', 'dark:bg-purple-900', 'text-purple-700', 'dark:text-purple-200');
-        button.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300', 'hover:bg-gray-200', 'dark:hover:bg-gray-600');
-        button.setAttribute('aria-selected', 'false');
-      }
+      btn.classList.toggle('bg-purple-100', isActive);
+      btn.classList.toggle('dark:bg-purple-900', isActive);
+      btn.classList.toggle('text-purple-700', isActive);
+      btn.classList.toggle('dark:text-purple-200', isActive);
+      btn.classList.toggle('bg-gray-100', !isActive);
+      btn.classList.toggle('dark:bg-gray-700', !isActive);
+      btn.classList.toggle('text-gray-600', !isActive);
+      btn.classList.toggle('dark:text-gray-300', !isActive);
     });
 
-    // Show/hide content sections
-    contentSections.forEach(function(section) {
-      const sectionType = section.getAttribute('data-content-type');
-      const shouldShow = category === 'all' || (sectionType && sectionType.toLowerCase() === category.toLowerCase());
-
-      if (shouldShow) {
-        section.style.display = 'block';
-        section.setAttribute('aria-hidden', 'false');
-      } else {
-        section.style.display = 'none';
-        section.setAttribute('aria-hidden', 'true');
-      }
+    // Show/hide cards
+    document.querySelectorAll('.masonry-item').forEach(card => {
+      const cardType = card.dataset.contentType;
+      const shouldShow = category === 'all' || cardType === category;
+      card.classList.toggle('hidden', !shouldShow);
     });
 
-    // Update URL hash
+    // Update URL
     if (category === 'all') {
       window.history.replaceState(null, null, window.location.pathname + window.location.search);
     } else {
-      window.history.replaceState(null, null, '#' + category + window.location.search);
+      window.history.replaceState(null, null, '#' + category);
     }
 
     return false;
@@ -424,90 +256,28 @@
       window.history.replaceState({}, '', url);
     }
 
-    Object.keys(originalContent).forEach(function(contentType) {
-      const section = document.querySelector(`[data-content-type="${contentType}"]`);
-      if (!section) return;
+    const grid = document.getElementById('masonry-grid');
+    if (!grid) return;
 
-      const container = section.querySelector('.js-content-cards-list');
-      if (!container) return;
+    const items = Array.from(grid.querySelectorAll('.masonry-item'));
 
-      let contentItems = [...originalContent[contentType]];
-
+    items.sort((a, b) => {
       switch (sortValue) {
         case 'latest':
-          contentItems.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
-          break;
+          return new Date(b.dataset.updatedAt) - new Date(a.dataset.updatedAt);
         case 'oldest':
-          contentItems.sort((a, b) => new Date(a.updatedAt || 0) - new Date(b.updatedAt || 0));
-          break;
+          return new Date(a.dataset.updatedAt) - new Date(b.dataset.updatedAt);
         case 'name_asc':
-          contentItems.sort((a, b) => a.name.localeCompare(b.name));
-          break;
+          return (a.dataset.name || '').localeCompare(b.dataset.name || '');
         case 'name_desc':
-          contentItems.sort((a, b) => b.name.localeCompare(a.name));
-          break;
+          return (b.dataset.name || '').localeCompare(a.dataset.name || '');
         case 'random':
-          for (let i = contentItems.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [contentItems[i], contentItems[j]] = [contentItems[j], contentItems[i]];
-          }
-          break;
+          return Math.random() - 0.5;
+        default:
+          return 0;
       }
-
-      contentItems.forEach(function(item) {
-        container.appendChild(item.element);
-      });
     });
-  }
 
-  function initKeyboardNavigationForFilters() {
-    const filterButtonsContainer = document.querySelector('[role="tablist"]');
-    const filterButtons = Array.from(document.querySelectorAll('.category-filter'));
-
-    if (filterButtonsContainer && filterButtons.length > 0) {
-      filterButtonsContainer.addEventListener('keydown', function(e) {
-        const focusedIndex = filterButtons.indexOf(document.activeElement);
-
-        if (focusedIndex >= 0) {
-          let nextIndex;
-
-          switch (e.key) {
-            case 'ArrowRight':
-            case 'ArrowDown':
-              e.preventDefault();
-              nextIndex = (focusedIndex + 1) % filterButtons.length;
-              filterButtons[nextIndex].focus();
-              break;
-            case 'ArrowLeft':
-            case 'ArrowUp':
-              e.preventDefault();
-              nextIndex = (focusedIndex - 1 + filterButtons.length) % filterButtons.length;
-              filterButtons[nextIndex].focus();
-              break;
-            case 'Home':
-              e.preventDefault();
-              filterButtons[0].focus();
-              break;
-            case 'End':
-              e.preventDefault();
-              filterButtons[filterButtons.length - 1].focus();
-              break;
-            case 'Enter':
-            case ' ':
-              e.preventDefault();
-              document.activeElement.click();
-              break;
-          }
-        }
-      });
-    }
+    items.forEach(item => grid.appendChild(item));
   }
 </script>
-
-<!-- Screen reader live region -->
-<div id="aria-live-region"
-     aria-live="polite"
-     aria-atomic="true"
-     class="sr-only"
-     style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0);">
-</div>
