@@ -394,12 +394,13 @@
             <!-- Compact Filters Dropdown (shown when very tight on space) -->
             <div class="relative lg:hidden" x-data="{ open: false }" @click.away="open = false">
               <button @click="open = !open"
-                      class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= (params[:tag].present? || params[:favorite_only].present?) ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-700 dark:text-gray-300' %>">
+                      class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= (params[:tag].present? || params[:favorite_only].present? || params[:statuses].present?) ? 'text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'text-gray-700 dark:text-gray-300' %>">
                 <i class="material-icons text-sm">filter_list</i>
                 <span class="ml-1.5">Filters</span>
                 <% active_filters = 0 %>
                 <% active_filters += 1 if params[:tag].present? %>
                 <% active_filters += 1 if params[:favorite_only].present? %>
+                <% active_filters += 1 if params[:statuses].present? %>
                 <% if active_filters > 0 %>
                   <span class="ml-1.5 px-1.5 py-0.5 text-xs bg-blue-600 text-white rounded-full"><%= active_filters %></span>
                 <% end %>
@@ -408,31 +409,52 @@
                    x-transition:enter="transition ease-out duration-100"
                    x-transition:enter-start="opacity-0 transform scale-95"
                    x-transition:enter-end="opacity-100 transform scale-100"
-                   class="hidden absolute left-0 mt-2 w-64 rounded-lg shadow-lg py-2 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10">
+                   class="absolute left-0 mt-2 w-64 rounded-lg shadow-lg py-2 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10"
+                   style="display: none;">
                 <!-- Tag Filter in Dropdown -->
                 <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
                   <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Tag</div>
                   <select onchange="window.location.href = this.value" class="w-full text-sm border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                    <option value="<%= documents_path(params.permit(:favorite_only)) %>" <%= !params[:tag].present? ? 'selected' : '' %>>
+                    <option value="<%= documents_path(params.permit(:favorite_only, statuses: [])) %>" <%= !params[:tag].present? ? 'selected' : '' %>>
                       All Tags
                     </option>
                     <% @page_tags.each do |page_tag| %>
-                      <option value="<%= documents_path(params.permit(:favorite_only).merge(tag: page_tag.slug)) %>" <%= params[:tag] == page_tag.slug ? 'selected' : '' %>>
+                      <option value="<%= documents_path(params.permit(:favorite_only, statuses: []).merge(tag: page_tag.slug)) %>" <%= params[:tag] == page_tag.slug ? 'selected' : '' %>>
                         <%= page_tag.tag %>
                       </option>
                     <% end %>
                   </select>
                 </div>
+                <!-- Status Filter in Dropdown -->
+                <div class="px-3 py-2 border-b border-gray-100 dark:border-gray-700">
+                  <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Status</div>
+                  <div class="space-y-1 max-h-40 overflow-y-auto">
+                    <% Document.status_options.each do |label, value| %>
+                      <%
+                        current_statuses = Array(params[:statuses])
+                        is_selected = current_statuses.include?(value)
+                        new_statuses = is_selected ? current_statuses - [value] : current_statuses + [value]
+                        new_params = params.permit(:favorite_only, :tag).to_h
+                        new_params[:statuses] = new_statuses if new_statuses.any?
+                      %>
+                      <%= link_to documents_path(new_params),
+                                  class: "flex items-center px-2 py-1 text-sm rounded #{is_selected ? 'bg-teal-50 dark:bg-gray-700 text-teal-700 dark:text-teal-400' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}" do %>
+                        <i class="material-icons text-xs mr-2 <%= is_selected ? 'text-teal-600' : 'text-gray-300 dark:text-gray-600' %>"><%= is_selected ? 'check_box' : 'check_box_outline_blank' %></i>
+                        <%= label %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
                 <!-- Favorites Toggle in Dropdown -->
                 <div class="px-3 py-2">
                   <% if params[:favorite_only].present? %>
-                    <%= link_to documents_path(params.permit(:tag)),
+                    <%= link_to documents_path(params.permit(:tag, statuses: [])),
                                 class: "block w-full text-center px-3 py-2 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-md hover:bg-yellow-100 dark:hover:bg-yellow-900/50 text-sm font-medium" do %>
                       <i class="material-icons text-sm align-middle">star</i>
                       <span class="ml-1">Showing Favorites</span>
                     <% end %>
                   <% else %>
-                    <%= link_to documents_path(params.permit(:tag).merge(favorite_only: true)),
+                    <%= link_to documents_path(params.permit(:tag, statuses: []).merge(favorite_only: true)),
                                 class: "block w-full text-center px-3 py-2 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium" do %>
                       <i class="material-icons text-sm align-middle">star_outline</i>
                       <span class="ml-1">Show Favorites</span>
@@ -463,8 +485,9 @@
                      x-transition:enter="transition ease-out duration-100"
                      x-transition:enter-start="opacity-0 transform scale-95"
                      x-transition:enter-end="opacity-100 transform scale-100"
-                     class="hidden absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10 max-h-64 overflow-y-auto">
-                  <%= link_to documents_path(params.permit(:favorite_only)),
+                     class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10 max-h-64 overflow-y-auto"
+                     style="display: none;">
+                  <%= link_to documents_path(params.permit(:favorite_only, statuses: [])),
                               class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{!params[:tag].present? ? 'font-medium bg-gray-50 dark:bg-gray-700' : ''}" do %>
                     <% if !params[:tag].present? %>
                       <i class="material-icons text-xs mr-1 align-middle">check</i>
@@ -474,7 +497,7 @@
                   <% if @page_tags.any? %>
                     <div class="border-t border-gray-100"></div>
                     <% @page_tags.each do |page_tag| %>
-                      <%= link_to documents_path(params.permit(:favorite_only).merge(tag: page_tag.slug)),
+                      <%= link_to documents_path(params.permit(:favorite_only, statuses: []).merge(tag: page_tag.slug)),
                                   class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{params[:tag] == page_tag.slug ? 'font-medium bg-gray-50 dark:bg-gray-700' : ''}" do %>
                         <% if params[:tag] == page_tag.slug %>
                           <i class="material-icons text-xs mr-1 align-middle">check</i>
@@ -490,16 +513,62 @@
                 </div>
               </div>
 
+              <!-- Status Filter Dropdown (multi-select) -->
+              <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                <button @click="open = !open"
+                        class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-lg bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 <%= params[:statuses].present? ? 'text-teal-700 dark:text-teal-400 border-teal-300 dark:border-teal-500 bg-teal-50 dark:bg-gray-600' : 'text-gray-700 dark:text-gray-300' %>"
+                        title="Filter by status">
+                  <i class="material-icons text-sm">assignment</i>
+                  <span class="hidden xl:inline ml-1 max-w-[120px] truncate">
+                    <% if params[:statuses].present? %>
+                      <%= params[:statuses].count %> <%= 'status'.pluralize(params[:statuses].count) %>
+                    <% else %>
+                      All Statuses
+                    <% end %>
+                  </span>
+                  <i class="material-icons text-xs ml-0.5">arrow_drop_down</i>
+                </button>
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 transform scale-95"
+                     x-transition:enter-end="opacity-100 transform scale-100"
+                     class="absolute right-0 mt-2 w-56 rounded-lg shadow-lg py-1 bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-10 max-h-64 overflow-y-auto"
+                     style="display: none;">
+                  <%= link_to documents_path(params.permit(:favorite_only, :tag)),
+                              class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{!params[:statuses].present? ? 'font-medium bg-gray-50 dark:bg-gray-700' : ''}" do %>
+                    <% if !params[:statuses].present? %>
+                      <i class="material-icons text-xs mr-1 align-middle">check</i>
+                    <% end %>
+                    All Statuses
+                  <% end %>
+                  <div class="border-t border-gray-100 dark:border-gray-700"></div>
+                  <% Document.status_options.each do |label, value| %>
+                    <%
+                      current_statuses = Array(params[:statuses])
+                      is_selected = current_statuses.include?(value)
+                      new_statuses = is_selected ? current_statuses - [value] : current_statuses + [value]
+                      new_params = params.permit(:favorite_only, :tag).to_h
+                      new_params[:statuses] = new_statuses if new_statuses.any?
+                    %>
+                    <%= link_to documents_path(new_params),
+                                class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{is_selected ? 'font-medium bg-teal-50 dark:bg-gray-700' : ''}" do %>
+                      <i class="material-icons text-xs mr-1 align-middle <%= is_selected ? 'text-teal-600' : 'text-gray-300 dark:text-gray-600' %>"><%= is_selected ? 'check_box' : 'check_box_outline_blank' %></i>
+                      <%= label %>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+
               <!-- Favorite Toggle -->
               <% if params[:favorite_only].present? %>
-                <%= link_to documents_path(params.permit(:tag)),
+                <%= link_to documents_path(params.permit(:tag, statuses: [])),
                             class: "inline-flex items-center px-2.5 py-1.5 border border-yellow-300 dark:border-yellow-600 text-xs font-medium rounded-lg text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50",
                             title: "Showing favorites only. Click to show all." do %>
                   <i class="material-icons text-sm">star</i>
                   <span class="hidden 2xl:inline ml-1">Favorites</span>
                 <% end %>
               <% else %>
-                <%= link_to documents_path(params.permit(:tag).merge(favorite_only: true)),
+                <%= link_to documents_path(params.permit(:tag, statuses: []).merge(favorite_only: true)),
                             class: "inline-flex items-center px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 text-xs font-medium rounded-lg text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600",
                             title: "Show favorites only" do %>
                   <i class="material-icons text-sm">star_outline</i>

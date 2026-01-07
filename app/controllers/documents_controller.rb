@@ -110,6 +110,11 @@ class DocumentsController < ApplicationController
       # @documents = @documents.where(page_tags: { slug: params[:tag] })
     end
 
+    # Filter by status (supports multiple statuses via statuses[] param)
+    if params[:statuses].present?
+      @documents = @documents.where(status: params[:statuses])
+    end
+
     @page_tags = @page_tags.uniq(&:tag)
     @suggested_page_tags = (@page_tags.pluck(:tag) + PageTagService.suggested_tags_for('Document')).uniq
   end
