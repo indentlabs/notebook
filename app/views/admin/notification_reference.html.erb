@@ -99,7 +99,7 @@
   </div>
 
   <!-- Time to Click Stats Row -->
-  <% if @clicked_with_times.any? %>
+  <% if @has_time_stats %>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <!-- Average Time -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -208,28 +208,17 @@
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Trend</h3>
       <%=
         line_chart [
-          { name: "Sent", data: @notifications.group_by_month(:created_at).count },
-          { name: "Clicked", data: @clicked_notifications.group_by_month(:created_at).count }
+          { name: "Sent", data: @sent_by_month },
+          { name: "Clicked", data: @clicked_by_month }
         ], colors: ['#3B82F6', '#10B981']
       %>
     </div>
   </div>
 
-  <!-- Link Performance Table -->
-  <%
-    links = @notifications.where.not(passthrough_link: [nil, '']).distinct.pluck(:passthrough_link)
-    link_stats = links.map do |link|
-      notifications_for_link = @notifications.where(passthrough_link: link)
-      clicked = notifications_for_link.where.not(viewed_at: nil).count
-      total = notifications_for_link.count
-      rate = total > 0 ? (clicked / total.to_f * 100) : 0
-      { link: link, clicked: clicked, total: total, rate: rate }
-    end.sort_by { |s| -s[:rate] }
-  %>
-
-  <% if link_stats.any? %>
+  <!-- Link Performance Table (pre-aggregated in controller) -->
+  <% if @link_stats.any? %>
     <div class="mb-8">
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance</h2>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Link Performance (Top 50 by Volume)</h2>
 
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -242,17 +231,19 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-            <% link_stats.each do |stats| %>
+            <% @link_stats.each do |stats| %>
               <%
-                link_rate = stats[:rate].round(1)
+                total = stats.total_count.to_i
+                clicked = stats.clicked_count.to_i
+                link_rate = total > 0 ? (clicked / total.to_f * 100).round(1) : 0
                 link_text_color = link_rate >= 20 ? 'text-green-600 dark:text-green-400' : link_rate >= 10 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'
               %>
               <tr>
                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
-                  <span class="truncate block max-w-md" title="<%= stats[:link] %>"><%= stats[:link].truncate(60) %></span>
+                  <span class="truncate block max-w-md" title="<%= stats.passthrough_link %>"><%= stats.passthrough_link.truncate(60) %></span>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter stats[:total] %></td>
-                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter stats[:clicked] %></td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter total %></td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-right"><%= number_with_delimiter clicked %></td>
                 <td class="px-6 py-4 text-sm font-medium text-right <%= link_text_color %>"><%= link_rate %>%</td>
               </tr>
             <% end %>

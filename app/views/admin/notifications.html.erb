@@ -137,13 +137,10 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-8">
     <div class="p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Trend (Last 12 Months)</h3>
-      <%
-        twelve_months_ago = 12.months.ago
-      %>
       <%=
         line_chart [
-          { name: "Sent", data: Notification.where('created_at > ?', twelve_months_ago).group_by_month(:created_at).count },
-          { name: "Clicked", data: Notification.where.not(viewed_at: nil).where('created_at > ?', twelve_months_ago).group_by_month(:created_at).count }
+          { name: "Sent", data: @sent_by_month },
+          { name: "Clicked", data: @clicked_by_month }
         ], colors: ['#3B82F6', '#10B981']
       %>
     </div>

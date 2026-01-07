@@ -107,8 +107,8 @@ class AdminController < ApplicationController
       .order('total_count DESC')
       .limit(50)
 
-    # Get list of codes for the search autocomplete
-    @codes = Notification.distinct.pluck(:reference_code).compact
+    # Get list of codes for search autocomplete (use top 50 codes already fetched, not all codes)
+    @codes = @code_stats.map(&:reference_code).compact
 
     # Overall stats using database aggregation
     @total_count = Notification.count
@@ -142,36 +142,102 @@ class AdminController < ApplicationController
       .group(:passthrough_link)
       .order('total_count DESC')
       .limit(50)
+
+    # Pre-calculate chart data (last 12 months) - avoid running in view
+    twelve_months_ago = 12.months.ago
+    @sent_by_month = Notification
+      .where('created_at > ?', twelve_months_ago)
+      .group_by_month(:created_at)
+      .count
+
+    @clicked_by_month = Notification
+      .where.not(viewed_at: nil)
+      .where('created_at > ?', twelve_months_ago)
+      .group_by_month(:created_at)
+      .count
   end
 
   def notification_reference
     @reference_code = params[:reference_code]
     @notifications = Notification.where(reference_code: @reference_code)
-    @clicked_notifications = @notifications.where.not(viewed_at: nil)
 
-    # Basic counts
+    # Basic counts (all done in SQL)
     @total_sent = @notifications.count
-    @total_clicked = @clicked_notifications.count
+    @total_clicked = @notifications.where.not(viewed_at: nil).count
     @click_rate = @total_sent > 0 ? (@total_clicked / @total_sent.to_f * 100).round(1) : 0
     @unique_users = @notifications.distinct.count(:user_id)
 
-    # Time to click calculations
-    @clicked_with_times = @clicked_notifications.where.not(happened_at: nil)
-    if @clicked_with_times.any?
-      time_diffs = @clicked_with_times.map { |n| (n.viewed_at - n.happened_at).to_i }
-      @avg_seconds = time_diffs.sum / time_diffs.count
-      sorted_diffs = time_diffs.sort
-      @median_seconds = sorted_diffs[sorted_diffs.length / 2]
-      @fastest_seconds = sorted_diffs.first
-      @slowest_seconds = sorted_diffs.last
+    # Time to click calculations - done entirely in SQL (avoid loading all rows into Ruby)
+    clicked_with_times = @notifications.where.not(viewed_at: nil).where.not(happened_at: nil)
+
+    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
+      # PostgreSQL: use EXTRACT and PERCENTILE_CONT for all stats in one query
+      time_stats = clicked_with_times.select(
+        'COUNT(*) as stat_count',
+        'AVG(EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as avg_seconds',
+        'MIN(EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as min_seconds',
+        'MAX(EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as max_seconds',
+        'PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as median_seconds'
+      ).take
+
+      if time_stats && time_stats.stat_count.to_i > 0
+        @avg_seconds = time_stats.avg_seconds
+        @median_seconds = time_stats.median_seconds
+        @fastest_seconds = time_stats.min_seconds
+        @slowest_seconds = time_stats.max_seconds
+      end
+    else
+      # SQLite: no PERCENTILE_CONT, calculate separately
+      @avg_seconds = clicked_with_times
+        .average("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+
+      @fastest_seconds = clicked_with_times
+        .minimum("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+
+      @slowest_seconds = clicked_with_times
+        .maximum("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+
+      # For median in SQLite, we need a subquery approach (approximation using LIMIT/OFFSET)
+      total_clicked_with_times = clicked_with_times.count
+      if total_clicked_with_times > 0
+        median_row = clicked_with_times
+          .select("(julianday(viewed_at) - julianday(happened_at)) * 86400 as diff_seconds")
+          .order('diff_seconds')
+          .offset(total_clicked_with_times / 2)
+          .limit(1)
+          .first
+        @median_seconds = median_row&.diff_seconds&.to_i
+      end
     end
 
-    # Date range
-    @first_notification = @notifications.order(:created_at).first
-    @last_notification = @notifications.order(created_at: :desc).first
+    # Date range (single row queries with index)
+    @first_notification = @notifications.order(:created_at).limit(1).first
+    @last_notification = @notifications.order(created_at: :desc).limit(1).first
 
     # Sample message
-    @sample_notification = @notifications.where.not(message_html: [nil, '']).order(created_at: :desc).first
+    @sample_notification = @notifications.where.not(message_html: [nil, '']).order(created_at: :desc).limit(1).first
+
+    # Pre-aggregate link stats for this reference code (avoid N+1 in view)
+    @link_stats = @notifications
+      .where.not(passthrough_link: [nil, ''])
+      .select(
+        'passthrough_link',
+        'COUNT(*) as total_count',
+        'COUNT(viewed_at) as clicked_count'
+      )
+      .group(:passthrough_link)
+      .order('total_count DESC')
+      .limit(50)
+
+    # Pre-calculate chart data (avoid running queries in view)
+    @sent_by_month = @notifications.group_by_month(:created_at).count
+    @clicked_by_month = @notifications.where.not(viewed_at: nil).group_by_month(:created_at).count
+
+    # Flag for whether we have time stats to display
+    @has_time_stats = @avg_seconds.present?
   end
 
   def hate
