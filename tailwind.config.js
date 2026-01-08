@@ -9,6 +9,11 @@ module.exports = {
     'app/assets/javascripts/**/*.js'
   ],
   safelist: [
+    // Sidebar layout classes (used in Alpine.js :class bindings, not detected by purge)
+    'md:ml-56',
+    'md:ml-16',
+    'md:pl-56',
+    'md:pl-16',
     // Text shadow utilities
     'text-shadow',
     'text-shadow-lg',
