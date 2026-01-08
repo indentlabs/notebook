@@ -6,7 +6,7 @@ Rails.application.config.content_type_names = {
   all: %w(
     Universe Character Location Item Building Condition Continent Country Creature Deity Flora
     Food Government Group Job Landmark Language Lore Magic Planet Race Religion Scene
-    School Sport Technology Timeline Town Tradition Vehicle Book
+    School Sport Technology Town Tradition Vehicle Book
   )
 }
 
@@ -22,7 +22,7 @@ configure_content_types = -> do
     all: [
       'Universe'.constantize, 'Character'.constantize, 'Location'.constantize, 'Item'.constantize, 'Building'.constantize, 'Condition'.constantize, 'Continent'.constantize, 'Country'.constantize, 'Creature'.constantize, 'Deity'.constantize, 'Flora'.constantize,
       'Food'.constantize, 'Government'.constantize, 'Group'.constantize, 'Job'.constantize, 'Landmark'.constantize, 'Language'.constantize, 'Lore'.constantize, 'Magic'.constantize, 'Planet'.constantize, 'Race'.constantize, 'Religion'.constantize, 'Scene'.constantize,
-      'School'.constantize, 'Sport'.constantize, 'Technology'.constantize, 'Timeline'.constantize, 'Town'.constantize, 'Tradition'.constantize, 'Vehicle'.constantize,
+      'School'.constantize, 'Sport'.constantize, 'Technology'.constantize, 'Town'.constantize, 'Tradition'.constantize, 'Vehicle'.constantize,
     ],
 
     # These content types are always on for all users, and cannot be toggled off
@@ -34,7 +34,7 @@ configure_content_types = -> do
     # These content types are available to be turned on
     available: [
       'Building'.constantize, 'Condition'.constantize, 'Country'.constantize, 'Creature'.constantize, 'Deity'.constantize, 'Flora'.constantize, 'Government'.constantize, 'Group'.constantize, 'Job'.constantize, 'Landmark'.constantize, 'Language'.constantize,
-      'Magic'.constantize, 'Planet'.constantize, 'Race'.constantize, 'Religion'.constantize, 'Scene'.constantize, 'Technology'.constantize, 'Timeline'.constantize, 'Town'.constantize, 'Tradition'.constantize, 'Vehicle'.constantize, 'Sport'.constantize, 'School'.constantize, 'Food'.constantize,
+      'Magic'.constantize, 'Planet'.constantize, 'Race'.constantize, 'Religion'.constantize, 'Scene'.constantize, 'Technology'.constantize, 'Town'.constantize, 'Tradition'.constantize, 'Vehicle'.constantize, 'Sport'.constantize, 'School'.constantize, 'Food'.constantize,
       'Continent'.constantize, 'Lore'.constantize
     ],
 
@@ -54,7 +54,6 @@ configure_content_types = -> do
       'School'.constantize,
       'Job'.constantize,
       'Technology'.constantize,
-      'Timeline'.constantize,
       'Lore'.constantize,
       'Vehicle'.constantize,
       'Condition'.constantize, 
