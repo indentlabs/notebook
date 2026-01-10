@@ -1,14 +1,14 @@
 <% if @content && @attribute_field_to_question %>
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" x-data="writingPrompt()">
+<div class="min-h-screen bg-white dark:bg-gray-900" x-data="writingPrompt()">
   <!-- Include content linking functionality -->
   <%= render partial: 'javascripts/content_linking_alpine' %>
 
   <!-- Main Content Area -->
-  <div class="py-4 px-3 sm:py-8 sm:px-6 lg:py-12">
+  <div class="py-2 px-3 sm:py-4 sm:px-6">
     <div class="max-w-4xl mx-auto">
 
       <!-- Top Stats Bar -->
-      <div class="mb-4 sm:mb-8 flex flex-row items-center justify-between gap-2 sm:gap-4">
+      <div class="mb-2 sm:mb-4 flex flex-row items-center justify-between gap-2 sm:gap-4">
         <!-- Left: Writing Stats -->
         <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           <!-- Timer - hidden on mobile -->
@@ -43,38 +43,32 @@
       </div>
       
       <!-- Prompt Section -->
-      <div class="mb-4 sm:mb-6 animate-fade-in">
+      <div class="mb-3 sm:mb-4 animate-fade-in">
         <!-- Content Context -->
-        <div class="mb-4 sm:mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
-          <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            <span class="uppercase tracking-wider text-xxs sm:text-xs">Expanding</span>
-            <span class="text-gray-300 dark:text-gray-600">•</span>
-          </div>
-          <%= link_to @content.view_path, class: "flex items-center gap-1.5 sm:gap-2 group" do %>
-            <i class="material-icons text-base sm:text-lg <%= @content.text_color %>"><%= @content.icon %></i>
-            <span class="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition-colors text-sm sm:text-base truncate max-w-48 sm:max-w-none"><%= @content.name %></span>
-            <i class="material-icons text-sm sm:text-base text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline">open_in_new</i>
+        <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <span class="uppercase tracking-wider text-xxs sm:text-xs">Expanding</span>
+          <span class="text-gray-300 dark:text-gray-600">•</span>
+          <%= link_to @content.view_path, class: "flex items-center gap-1.5 group" do %>
+            <i class="material-icons text-base <%= @content.text_color %>"><%= @content.icon %></i>
+            <span class="text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white font-medium transition-colors truncate max-w-48 sm:max-w-none"><%= @content.name %></span>
           <% end %>
+          <span class="text-gray-300 dark:text-gray-600">•</span>
+          <span class="inline-flex items-center gap-1">
+            <i class="material-icons text-sm">label</i>
+            <span><%= @attribute_field_to_question.label %></span>
+          </span>
         </div>
-        
-        <!-- The Prompt - Clean presentation -->
-        <div class="mb-4 sm:mb-8">
-          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug sm:leading-relaxed mb-2 sm:mb-3">
-            <%=
-              t(
-                "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
-                name:    @content.name,
-                default: "What is #{@content.name}'s #{@attribute_field_to_question.label.downcase}?"
-              )
-            %>
-          </h1>
-          <div class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            <span class="inline-flex items-center gap-1">
-              <i class="material-icons text-sm sm:text-base">label</i>
-              <span><%= @attribute_field_to_question.label %></span>
-            </span>
-          </div>
-        </div>
+
+        <!-- The Prompt -->
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-snug sm:leading-relaxed">
+          <%=
+            t(
+              "serendipitous_questions.attributes.#{@content.page_type.downcase}.#{@attribute_field_to_question.label.downcase}",
+              name:    @content.name,
+              default: "What is #{@content.name}'s #{@attribute_field_to_question.label.downcase}?"
+            )
+          %>
+        </h1>
       </div>
 
       <!-- Writing Area -->
@@ -85,36 +79,36 @@
         <%= hidden_field_tag "entity[entity_type]", @content.page_type %>
         <%= hidden_field_tag "field[name]", @attribute_field_to_question[:id] %>
         
-        <!-- Beautiful Writing Box -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg sm:rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-xl">
+        <!-- Writing Box -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <!-- Editor Toolbar -->
-          <div class="border-b border-gray-100 dark:border-gray-700 px-3 py-2 sm:px-6 sm:py-3 flex items-center justify-between bg-gradient-to-b from-gray-50 to-white dark:from-gray-700 dark:to-gray-800">
-            <div class="flex items-center gap-1 sm:gap-3">
+          <div class="border-b border-gray-100 dark:border-gray-700 px-2 py-1 sm:px-3 sm:py-1 flex items-center justify-between bg-gray-50 dark:bg-gray-800">
+            <div class="flex items-center gap-1 sm:gap-2">
               <button type="button" @click="insertMarkdown('**', '**')"
-                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                      class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                       title="Bold (Cmd/Ctrl+B)">
-                <i class="material-icons text-base sm:text-lg">format_bold</i>
+                <i class="material-icons text-base">format_bold</i>
               </button>
               <button type="button" @click="insertMarkdown('*', '*')"
-                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                      class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                       title="Italic (Cmd/Ctrl+I)">
-                <i class="material-icons text-base sm:text-lg">format_italic</i>
+                <i class="material-icons text-base">format_italic</i>
               </button>
-              <div class="w-px h-5 sm:h-6 bg-gray-200 dark:bg-gray-600"></div>
+              <div class="w-px h-4 bg-gray-200 dark:bg-gray-600"></div>
               <button type="button" @click="insertMarkdown('# ', '')"
-                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                      class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                       title="Heading">
-                <i class="material-icons text-base sm:text-lg">title</i>
+                <i class="material-icons text-base">title</i>
               </button>
               <button type="button" @click="insertMarkdown('- ', '')"
-                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                      class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                       title="List">
-                <i class="material-icons text-base sm:text-lg">format_list_bulleted</i>
+                <i class="material-icons text-base">format_list_bulleted</i>
               </button>
               <button type="button" @click="insertMarkdown('> ', '')"
-                      class="p-1.5 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                      class="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
                       title="Quote">
-                <i class="material-icons text-base sm:text-lg">format_quote</i>
+                <i class="material-icons text-base">format_quote</i>
               </button>
             </div>
 
@@ -131,13 +125,13 @@
           </div>
           
           <!-- Text Editor with Auto-Expand -->
-          <div class="relative bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900" x-data="contentLinking()">
+          <div class="relative bg-white dark:bg-gray-800" x-data="contentLinking()">
             <%=
               text_area_tag "field[value]",
                             @attribute_field_to_question[:value],
-                            class: "js-can-mention-pages js-autosave w-full p-4 sm:p-8 text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-200
-                                   placeholder-gray-400 dark:placeholder-gray-500 border-2 border-gray-200 dark:border-gray-600 focus:ring-0 focus:outline-none resize-none
-                                   transition-all duration-200 dark:bg-gray-800 min-h-64 sm:min-h-96",
+                            class: "js-can-mention-pages js-autosave w-full p-3 sm:p-5 text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-200
+                                   placeholder-gray-400 dark:placeholder-gray-500 border-0 focus:ring-0 focus:outline-none resize-none
+                                   dark:bg-gray-800 min-h-64 sm:min-h-96",
                             placeholder: "Start writing your thoughts here...\n\nYour response will be saved automatically as you type.",
                             "x-model": "content",
                             "@input": "handleInput",
@@ -158,42 +152,40 @@
             <%= render partial: 'javascripts/content_linking_dropdown' %>
 
             <!-- Mention Helper Tooltip - hidden on mobile -->
-            <div class="hidden sm:block absolute bottom-4 right-4 text-xs text-gray-400 dark:text-gray-300 bg-white bg-opacity-80 dark:bg-gray-700 backdrop-blur-sm px-3 py-1 rounded-full">
+            <div class="hidden sm:block absolute bottom-2 right-3 text-xs text-gray-400 dark:text-gray-300 bg-white bg-opacity-80 dark:bg-gray-700 backdrop-blur-sm px-2 py-0.5 rounded-full">
               Press @ to mention other pages
             </div>
           </div>
           
           <!-- Footer Actions - Sticky on mobile -->
-          <div class="fixed bottom-0 left-0 right-0 z-20 sm:relative sm:z-auto border-t border-gray-200 dark:border-gray-700 px-4 py-3 sm:px-6 sm:py-4 bg-white dark:bg-gray-800 sm:bg-gradient-to-b sm:from-white sm:to-gray-50 sm:dark:from-gray-800 sm:dark:to-gray-900">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 max-w-4xl mx-auto sm:max-w-none">
-              <!-- Stats - centered on mobile -->
-              <div class="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <div class="fixed bottom-0 left-0 right-0 z-20 sm:relative sm:z-auto border-t border-gray-200 dark:border-gray-700 px-2 py-1.5 sm:px-3 sm:py-1.5 bg-white dark:bg-gray-800">
+            <div class="flex flex-row items-center justify-between max-w-4xl mx-auto sm:max-w-none">
+              <!-- Stats -->
+              <div class="flex items-center gap-2 sm:gap-3 text-xs text-gray-500 dark:text-gray-400">
                 <span class="flex items-center gap-1">
-                  <i class="material-icons text-sm sm:text-base">subject</i>
+                  <i class="material-icons text-sm">subject</i>
                   <span><span x-text="characterCount"></span> chars</span>
                 </span>
                 <span class="text-gray-300 dark:text-gray-600">•</span>
                 <span class="flex items-center gap-1">
-                  <i class="material-icons text-sm sm:text-base">timer</i>
+                  <i class="material-icons text-sm">timer</i>
                   <span>~<span x-text="readingTime"></span> min</span>
                 </span>
               </div>
 
-              <!-- Button - full width on mobile -->
-              <div class="flex items-center">
-                <button type="button" @click="handleSaveAndNext"
-                        class="w-full sm:w-auto px-5 py-3 sm:py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm font-medium">
-                  <span>Save & Next</span>
-                  <i class="material-icons text-base">arrow_forward</i>
-                </button>
-              </div>
+              <!-- Button -->
+              <button type="button" @click="handleSaveAndNext"
+                      class="px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded transition-colors flex items-center gap-1.5 text-sm font-medium">
+                <span>Save & Next</span>
+                <i class="material-icons text-sm">arrow_forward</i>
+              </button>
             </div>
           </div>
         </div>
       <% end %>
       
       <!-- Writing Tips Card -->
-      <div class="mt-4 sm:mt-8 mb-24 sm:mb-0 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800 border border-blue-100 dark:border-slate-700 rounded-lg sm:rounded-xl p-4 sm:p-6 shadow-sm">
+      <div class="mt-3 sm:mt-4 mb-24 sm:mb-0 bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 rounded-lg p-3 sm:p-4">
         <h3 class="font-semibold text-blue-900 dark:text-blue-300 mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
           <i class="material-icons text-lg sm:text-xl">lightbulb</i>
           <span>Writing Tips</span>
@@ -250,17 +242,7 @@
   .animate-spin {
     animation: spin 1s linear infinite;
   }
-  
-  /* Smooth focus transition for textarea */
-  textarea:focus {
-    background: linear-gradient(to bottom, #ffffff, #fafafa);
-  }
-  
-  /* Dark mode focus transition */
-  .dark textarea:focus {
-    background: linear-gradient(to bottom, #1f2937, #111827);
-  }
-  
+
   /* Custom scrollbar for textarea */
   textarea::-webkit-scrollbar {
     width: 8px;
@@ -640,7 +622,7 @@ function writingPrompt() {
 </script>
 <% else %>
 <!-- Empty state: No prompts available -->
-<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+<div class="min-h-screen bg-white dark:bg-gray-900">
   <div class="py-16 px-4 sm:py-24 sm:px-6 lg:py-32">
     <div class="max-w-2xl mx-auto text-center">
       <div class="mb-8">
