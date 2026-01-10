@@ -190,7 +190,7 @@
           <!-- Keyboard shortcut tips (hidden on mobile and tablet) -->
           <li class="hidden lg:flex items-start gap-2">
             <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
-            <span>Press Cmd/Ctrl + S to manually save, or let auto-save handle it.</span>
+            <span>Press <span x-text="isMac ? 'Cmd' : 'Ctrl'"></span> + S to manually save, or let auto-save handle it.</span>
           </li>
           <li class="hidden lg:flex items-start gap-2">
             <span class="text-blue-500 dark:text-blue-400 mt-0.5">•</span>
@@ -272,6 +272,7 @@ function writingPrompt() {
     autosaveStatus: 'Auto-saves every 30 seconds • Press Esc to save now',
     isAutosaving: false,
     lastAutosaveTime: 0,
+    isMac: navigator.platform.toUpperCase().indexOf('MAC') >= 0,
     
     // Word count that matches Ruby's WordCountService behavior
     // Rules: split on /\, ignore ..., ---, ___, ignore stray punctuation
