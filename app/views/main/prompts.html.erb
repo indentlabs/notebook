@@ -7,39 +7,13 @@
   <div class="py-2 px-3 sm:py-4 sm:px-6">
     <div class="max-w-4xl mx-auto">
 
-      <!-- Top Stats Bar -->
-      <div class="mb-2 sm:mb-4 flex flex-row items-center justify-between gap-2 sm:gap-4">
-        <!-- Left: Writing Stats -->
-        <div class="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-          <!-- Timer - hidden on mobile -->
-          <div class="hidden sm:flex items-center gap-1" x-show="hasStartedWriting">
-            <i class="material-icons text-base" :class="{ 'text-orange-500': isPaused }">
-              <span x-text="isPaused ? 'pause_circle' : 'schedule'"></span>
-            </i>
-            <span x-text="formattedTime" :class="{ 'text-orange-500': isPaused }"></span>
-          </div>
-          <div class="hidden sm:block text-gray-300 dark:text-gray-600" x-show="hasStartedWriting">•</div>
-          <!-- Word count - always visible -->
-          <div class="flex items-center gap-1">
-            <i class="material-icons text-sm sm:text-base">edit</i>
-            <span><span x-text="wordCount"></span> words</span>
-          </div>
-          <!-- WPM - hidden on mobile -->
-          <div class="hidden sm:block text-gray-300 dark:text-gray-600" x-show="hasStartedWriting && wpm > 0">•</div>
-          <div class="hidden sm:flex items-center gap-1" x-show="hasStartedWriting && wpm > 0">
-            <i class="material-icons text-base">speed</i>
-            <span><span x-text="wpm"></span> wpm</span>
-          </div>
-        </div>
-
-        <!-- Right: Actions -->
-        <div class="flex items-center">
-          <button @click="getNewPrompt()"
-                  class="px-2 py-1.5 sm:px-3 sm:py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-            <i class="material-icons text-sm sm:text-base">refresh</i>
-            <span class="hidden sm:inline">New Prompt</span>
-          </button>
-        </div>
+      <!-- Top Actions Bar -->
+      <div class="mb-2 sm:mb-4 flex flex-row items-center justify-end">
+        <button @click="getNewPrompt()"
+                class="px-2 py-1.5 sm:px-3 sm:py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+          <i class="material-icons text-sm sm:text-base">refresh</i>
+          <span class="hidden sm:inline">New Prompt</span>
+        </button>
       </div>
       
       <!-- Prompt Section -->
@@ -162,11 +136,27 @@
             <div class="flex flex-row items-center justify-between max-w-4xl mx-auto sm:max-w-none">
               <!-- Stats -->
               <div class="flex items-center gap-2 sm:gap-3 text-xs text-gray-500 dark:text-gray-400">
+                <!-- Timer -->
+                <span class="hidden sm:flex items-center gap-1" x-show="hasStartedWriting" x-cloak>
+                  <i class="material-icons text-sm" :class="{ 'text-orange-500': isPaused }">
+                    <span x-text="isPaused ? 'pause_circle' : 'schedule'"></span>
+                  </i>
+                  <span x-text="formattedTime" :class="{ 'text-orange-500': isPaused }"></span>
+                </span>
+                <span class="hidden sm:block text-gray-300 dark:text-gray-600" x-show="hasStartedWriting" x-cloak>•</span>
+                <!-- Word count -->
                 <span class="flex items-center gap-1">
-                  <i class="material-icons text-sm">subject</i>
-                  <span><span x-text="characterCount"></span> chars</span>
+                  <i class="material-icons text-sm">edit</i>
+                  <span><span x-text="wordCount"></span> words</span>
+                </span>
+                <!-- WPM -->
+                <span class="hidden sm:block text-gray-300 dark:text-gray-600" x-show="hasStartedWriting && wpm > 0" x-cloak>•</span>
+                <span class="hidden sm:flex items-center gap-1" x-show="hasStartedWriting && wpm > 0" x-cloak>
+                  <i class="material-icons text-sm">speed</i>
+                  <span><span x-text="wpm"></span> wpm</span>
                 </span>
                 <span class="text-gray-300 dark:text-gray-600">•</span>
+                <!-- Reading time -->
                 <span class="flex items-center gap-1">
                   <i class="material-icons text-sm">timer</i>
                   <span>~<span x-text="readingTime"></span> min</span>
@@ -269,7 +259,6 @@ function writingPrompt() {
   return {
     content: `<%= j(@attribute_field_to_question[:value] || "") %>`,
     wordCount: 0,
-    characterCount: 0,
     readingTime: 0,
     startTime: null,
     elapsedSeconds: 0,
@@ -434,7 +423,6 @@ function writingPrompt() {
     updateWordCount() {
       const text = this.content || '';
       this.wordCount = this.countWords(text);
-      this.characterCount = text.length;
       this.readingTime = Math.max(1, Math.round(this.wordCount / 200));
     },
     
