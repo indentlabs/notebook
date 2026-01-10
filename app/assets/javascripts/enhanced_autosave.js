@@ -143,7 +143,7 @@ $(document).ready(function() {
 
     // Set new timer for 10 seconds
     autosave_timers[fieldId] = setTimeout(function() {
-      if (field.is(':focus') && field.val().trim().length > 0) {
+      if (field.is(':focus') && fields_dirty[fieldId]) {
         performAutosave(field);
       }
       delete autosave_timers[fieldId];
@@ -192,8 +192,8 @@ $(document).ready(function() {
       delete input_debounce_timers[fieldId];
     }
 
-    // Only autosave if field is dirty (user typed something) and there's content
-    if (fields_dirty[fieldId] && field.val().trim().length > 0) {
+    // Only autosave if field is dirty (user made changes)
+    if (fields_dirty[fieldId]) {
       performAutosave(field);
     } else {
       // Reset visual state if no changes to save
