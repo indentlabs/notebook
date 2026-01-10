@@ -17,14 +17,14 @@
           <% @enabled_content_types.each do |content_type| %>
             <%= link_to basil_content_index_path(content_type.downcase), class: 'block group' do %>
               <div class="<%= content_class_from_name(content_type).color %> relative overflow-hidden rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform group-hover:-translate-y-1">
-                <div class="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors"></div>
+                <div class="absolute inset-0 bg-black bg-opacity-10 group-hover:bg-opacity-0 transition-colors"></div>
                 <div class="relative p-4 flex items-center justify-between text-white">
                   <div class="flex items-center gap-3">
                     <i class="material-icons text-2xl opacity-90 group-hover:scale-110 transition-transform"><%= content_class_from_name(content_type).icon %></i>
                     <span class="font-bold text-lg tracking-wide"><%= content_type.pluralize %></span>
                   </div>
                   <% if @content_type == content_type %>
-                    <div class="bg-white/20 p-1 rounded-full">
+                    <div class="bg-white bg-opacity-20 p-1 rounded-full">
                       <i class="material-icons text-sm">check</i>
                     </div>
                   <% else %>
@@ -91,15 +91,15 @@
       <% if @universe_scope %>
         <div class="<%= Universe.color %> bg-opacity-100 text-white rounded-2xl p-6 mb-8 shadow-md flex items-center justify-between flex-wrap gap-4">
           <div class="flex items-center gap-4">
-            <div class="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+            <div class="bg-white bg-opacity-20 p-3 rounded-xl backdrop-blur-sm">
               <i class="material-icons text-2xl"><%= Universe.icon %></i>
             </div>
             <div>
-              <p class="text-white/80 text-sm font-medium uppercase tracking-wider mb-1">Filtering by Universe</p>
+              <p class="text-white text-opacity-80 text-sm font-medium uppercase tracking-wider mb-1">Filtering by Universe</p>
               <h3 class="text-xl font-bold"><%= @universe_scope.name %></h3>
             </div>
           </div>
-          <%= link_to basil_content_index_path(@content_type, universe: "all"), class: 'bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors backdrop-blur-sm flex items-center gap-2' do %>
+          <%= link_to basil_content_index_path(@content_type, universe: "all"), class: 'bg-white bg-opacity-10 hover:bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors backdrop-blur-sm flex items-center gap-2' do %>
             <span>Show all <%= @content_type.pluralize.downcase %></span>
             <i class="material-icons text-sm">close</i>
           <% end %>
@@ -112,7 +112,6 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 overflow-hidden h-full flex flex-col transform hover:-translate-y-1">
               <div class="relative aspect-[4/3] overflow-hidden bg-gray-100">
                 <%= image_tag content.random_image_including_private(format: :medium), class: "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" %>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
               </div>
               <div class="p-5 flex-1 flex flex-col justify-center">
                 <h3 class="font-bold text-gray-900 dark:text-gray-100 text-lg group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">

@@ -1,10 +1,10 @@
   <%= link_to messageboard.path,
-              class: "thredded-messageboard-card block bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group h-full flex flex-col" do %>
+              class: "thredded-messageboard-card block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-stone-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 group h-full flex flex-col" do %>
     
     <!-- Card Content -->
     <div class="p-4 flex-grow flex flex-col">
       <div class="flex items-start justify-between mb-1">
-        <h3 class="text-base font-bold text-gray-900 group-hover:text-purple-600 transition-colors line-clamp-1">
+        <h3 class="text-base font-bold text-gray-900 dark:text-gray-100 group-hover:text-purple-600 transition-colors line-clamp-1">
           <% if messageboard.locked? %>
             <i class="material-icons text-gray-400 mr-1 text-sm align-middle" title="<%= t('thredded.messageboard.form.locked_notice') %>">lock</i>
           <% end %>
@@ -12,11 +12,11 @@
         </h3>
         
         <% if messageboard.unread_followed_topics? %>
-          <span class="bg-blue-100 text-blue-600 text-xs font-bold px-1.5 py-0.5 rounded ml-2">
+          <span class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs font-bold px-1.5 py-0.5 rounded ml-2">
             <%= messageboard.unread_followed_topics_count %>
           </span>
         <% elsif messageboard.unread_topics? %>
-          <span class="bg-blue-50 text-blue-600 text-xs font-bold px-1.5 py-0.5 rounded ml-2">
+          <span class="bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-xs font-bold px-1.5 py-0.5 rounded ml-2">
             <%= messageboard.unread_topics_count %>
           </span>
         <% end %>
@@ -24,15 +24,15 @@
       
       <!-- Description -->
       <% if messageboard.description.present? %>
-        <p class="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
+        <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 leading-relaxed">
           <%= messageboard.description %>
         </p>
       <% else %>
-        <p class="text-xs text-gray-400 italic mb-3">No description available</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 italic mb-3">No description available</p>
       <% end %>
       
       <!-- Stats -->
-      <div class="mt-auto flex items-center gap-3 text-xs text-gray-400 font-medium">
+      <div class="mt-auto flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 font-medium">
         <span class="flex items-center" title="Topics">
           <i class="material-icons mr-1 text-[13px]">chat_bubble_outline</i>
           <%= number_with_delimiter(messageboard.topics_count) %> Topics
@@ -45,19 +45,19 @@
     </div>
     
     <!-- Footer -->
-    <div class="px-4 py-2.5 border-t border-gray-100 text-xs text-gray-500 bg-gray-50">
+    <div class="px-4 py-2.5 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700">
       <% if messageboard.last_topic %>
         <div class="flex items-center truncate">
           <span class="whitespace-nowrap mr-1">
             <%= messageboard.last_topic.last_post_at.strftime("%b %d") %>
           </span>
-          <span class="mx-1 text-gray-300">•</span>
-          <span class="truncate font-medium text-gray-700">
+          <span class="mx-1 text-gray-300 dark:text-gray-600">•</span>
+          <span class="truncate font-medium text-gray-700 dark:text-gray-300">
             <%= messageboard.last_user.respond_to?(:display_name) ? messageboard.last_user.display_name : messageboard.last_user.thredded_display_name %>
           </span>
         </div>
       <% else %>
-        <span class="italic text-gray-400">No activity yet</span>
+        <span class="italic text-gray-400 dark:text-gray-500">No activity yet</span>
       <% end %>
     </div>
   <% end %>

@@ -13,7 +13,7 @@
        @click="console.log('Category header clicked, toggling isOpen from', isOpen, 'to', !isOpen); isOpen = !isOpen; if (isOpen) { $dispatch('select-category', { id: <%= category.id %> }) }"
        <%= category.hidden? ? 'style="background-color: #f9fafb;"' : "style=\"background-color: #{content_type_class.hex_color}20;\"" %>>
     <!-- Drag Handle -->
-    <div class="category-drag-handle flex items-center justify-center p-2 mr-2 rounded hover:bg-white/50 dark:hover:bg-black/20 cursor-move" 
+    <div class="category-drag-handle flex items-center justify-center p-2 mr-2 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20 cursor-move" 
          @click.stop>
       <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -45,7 +45,7 @@
     <!-- Actions -->
     <div class="flex items-center space-x-1">
       <!-- Edit Button -->
-      <button class="p-1.5 rounded hover:bg-white/50 dark:hover:bg-black/20" 
+      <button class="p-1.5 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20" 
               title="Configure Category"
               @click.stop="$dispatch('select-category', { id: <%= category.id %> })">
         <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -54,7 +54,7 @@
       </button>
       
       <!-- Archive Toggle -->
-      <button class="category-archive-toggle p-1.5 rounded hover:bg-white/50 dark:hover:bg-black/20 transition-colors" 
+      <button class="category-archive-toggle p-1.5 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20 transition-colors" 
               data-category-id="<%= category.id %>"
               data-archived="<%= category.hidden? %>"
               title="<%= category.hidden? ? 'Archived category - Click to restore' : 'Active category - Click to archive' %>"

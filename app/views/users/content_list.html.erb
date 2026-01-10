@@ -19,7 +19,7 @@
         
         <!-- Breadcrumb -->
         <nav class="mb-8">
-          <div class="flex items-center space-x-2 text-white/80 text-sm">
+          <div class="flex items-center space-x-2 text-white text-opacity-80 text-sm">
             <%= link_to "Users", users_path, class: "hover:text-white transition-colors duration-200" %>
             <i class="material-icons text-xs">chevron_right</i>
             <%= link_to @user.display_name, (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "hover:text-white transition-colors duration-200" %>
@@ -39,9 +39,9 @@
               <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "group" do %>
                 <div class="relative">
                   <% if @user.image_url.present? %>
-                    <%= image_tag @user.image_url, class: "w-20 h-20 rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300" %>
+                    <%= image_tag @user.image_url, class: "w-20 h-20 rounded-full border-4 border-white border-opacity-30 group-hover:border-opacity-50 transition-all duration-300" %>
                   <% else %>
-                    <div class="w-20 h-20 bg-white/20 rounded-full border-4 border-white/30 group-hover:border-white/50 transition-all duration-300 flex items-center justify-center">
+                    <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full border-4 border-white border-opacity-30 group-hover:border-opacity-50 transition-all duration-300 flex items-center justify-center">
                       <i class="material-icons text-white text-3xl">person</i>
                     </div>
                   <% end %>
@@ -61,13 +61,13 @@
                   <h1 class="text-2xl font-bold text-white"><%= @user.display_name %></h1>
                 <% end %>
                 <% if @user.username.present? %>
-                  <span class="text-white/70 text-lg">@<%= @user.username %></span>
+                  <span class="text-white text-opacity-70 text-lg">@<%= @user.username %></span>
                 <% end %>
               </div>
               
               <!-- Content Type Display -->
               <div class="flex items-center space-x-3">
-                <div class="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full">
+                <div class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 backdrop-blur-sm rounded-full">
                   <i class="material-icons mr-2 text-white"><%= @content_type.icon %></i>
                   <span class="text-white font-semibold text-lg"><%= @content_type.to_s.capitalize.pluralize %></span>
                 </div>
@@ -78,18 +78,18 @@
           <!-- Right: Stats & Actions -->
           <div class="flex flex-wrap gap-4">
             <% if @content_list.any? %>
-              <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
+              <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
                 <div class="text-2xl font-bold text-white"><%= @content_list.count %></div>
-                <div class="text-white/80 text-sm">Items</div>
+                <div class="text-white text-opacity-80 text-sm">Items</div>
               </div>
-              
-              <div class="bg-white/20 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
+
+              <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-3 text-center">
                 <div class="text-2xl font-bold text-white"><%= @content_list.sum(&:cached_word_count) rescue 0 %></div>
-                <div class="text-white/80 text-sm">Words</div>
+                <div class="text-white text-opacity-80 text-sm">Words</div>
               </div>
             <% end %>
             
-            <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors duration-200 rounded-lg px-4 py-3 flex items-center space-x-2" do %>
+            <%= link_to (@user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)), class: "bg-white bg-opacity-20 backdrop-blur-sm hover:bg-opacity-30 transition-colors duration-200 rounded-lg px-4 py-3 flex items-center space-x-2" do %>
               <i class="material-icons text-white">person</i>
               <span class="text-white font-medium">View Profile</span>
             <% end %>
@@ -189,9 +189,6 @@
                 <div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300" 
                      style="background-image: url('<%= content_image %>');">
                 </div>
-                
-                <!-- Gradient Overlay -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                 
                 <!-- Content Title -->
                 <div class="absolute bottom-4 left-4 right-4">

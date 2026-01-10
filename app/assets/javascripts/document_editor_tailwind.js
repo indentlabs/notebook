@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update save indicator to saving state (subtle)
     $('.js-autosave-status').text('Saving...');
     $('.js-autosave-icon').text('cloud_upload').addClass('text-gray-400').removeClass('text-gray-500 text-red-400');
-    $('#save-indicator').removeClass('bg-red-500/80').addClass('bg-gray-100/80 dark:bg-gray-800/80 pulse-animation');
+    $('#save-indicator').removeClass('bg-red-500 bg-opacity-80').addClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 pulse-animation');
     $('.js-autosave-status').removeClass('text-white').addClass('text-gray-500 dark:text-gray-400');
 
     // Update mini save indicator
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
       // Update indicator to error state (subtle red)
       $('.js-autosave-status').text('Error!');
       $('.js-autosave-icon').text('cloud_off').addClass('text-white').removeClass('text-gray-400 text-gray-500');
-      $('#save-indicator').removeClass('bg-gray-100/80 dark:bg-gray-800/80 bg-green-100/80').addClass('bg-red-500/90');
+      $('#save-indicator').removeClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 bg-green-100 bg-opacity-80').addClass('bg-red-500 bg-opacity-90');
       $('.js-autosave-status').removeClass('text-gray-500 dark:text-gray-400').addClass('text-white');
 
       // Mark that we still have unsaved changes
@@ -187,17 +187,17 @@ document.addEventListener('DOMContentLoaded', function() {
       // Update indicator to saved state (subtle)
       $('.js-autosave-status').text('Saved');
       $('.js-autosave-icon').text('cloud_done').addClass('text-gray-400 dark:text-gray-500').removeClass('text-white text-red-400');
-      $('#save-indicator').removeClass('bg-red-500/90 pulse-animation').addClass('bg-gray-100/80 dark:bg-gray-800/80');
+      $('#save-indicator').removeClass('bg-red-500 bg-opacity-90 pulse-animation').addClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80');
       $('.js-autosave-status').removeClass('text-white').addClass('text-gray-500 dark:text-gray-400');
 
       // Update mini save indicator
       $('#mini-save-indicator i').removeClass('pulse-animation');
 
       // Brief subtle green flash for success
-      $('#save-indicator').addClass('bg-green-100/80 dark:bg-green-900/30');
+      $('#save-indicator').addClass('bg-green-100 bg-opacity-80 dark:bg-green-900 dark:bg-opacity-30');
       clearTimeout(autosave_hide_timeout);
       autosave_hide_timeout = setTimeout(function() {
-        $('#save-indicator').removeClass('bg-green-100/80 dark:bg-green-900/30');
+        $('#save-indicator').removeClass('bg-green-100 bg-opacity-80 dark:bg-green-900 dark:bg-opacity-30');
       }, 800);
     });
   };

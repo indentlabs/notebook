@@ -12,15 +12,15 @@
   end
 %>
 
-<div x-data="{ 
-  showNewFolderModal: false, 
+<div x-data="{
+  showNewFolderModal: false,
   sidebarOpen: false,
   showContentSidebar: <%= @folders.any? ? 'true' : 'false' %>,
   viewMode: 'grid',
   selectedItems: [],
   searchQuery: '',
   isLoading: false
-}" class="min-h-screen flex bg-gray-50 dark:bg-gray-900">
+}" class="min-h-screen flex bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
   
   <!-- Content Sidebar -->
   <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
@@ -158,41 +158,40 @@
   </aside>
 
   <!-- Main Content Area -->
-  <main class="flex-1 flex flex-col lg:pt-0 pt-16" :class="{ 'lg:ml-0': !showContentSidebar }">
+  <main class="flex-1 flex flex-col lg:pt-0 pt-16 min-w-0" :class="{ 'lg:ml-0': !showContentSidebar }">
     <!-- Hero Header -->
     <div class="bg-white dark:bg-gray-800 shadow-sm">
       <div class="relative">
         <%= image_tag asset_path("card-headers/timelines.webp"), class: 'h-32 w-full object-cover lg:h-48' %>
-        <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20"></div>
       </div>
       
-      <div class="px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-5">
+      <div class="px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex items-center space-x-3 sm:space-x-5 min-w-0">
             <!-- Content Sidebar Toggle Button -->
-            <button 
+            <button
               @click="showContentSidebar = !showContentSidebar"
-              class="hidden lg:inline-flex items-center p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              class="hidden lg:inline-flex items-center p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors flex-shrink-0"
               title="Toggle content sidebar"
             >
               <i class="material-icons text-xl" x-text="showContentSidebar ? 'menu_open' : 'menu'"></i>
             </button>
-            
+
             <div class="flex-shrink-0">
               <% if @universe_scope %>
                 <%= link_to @universe_scope do %>
-                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-16 w-24 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-32 object-cover' %>
+                  <%= image_tag @universe_scope.random_image_including_private(format: :hero), class: 'h-12 w-18 sm:h-16 sm:w-24 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-32 object-cover' %>
                 <% end %>
               <% else %>
-                <%= image_tag current_user.image_url, class: 'h-16 w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
+                <%= image_tag current_user.image_url, class: 'h-12 w-12 sm:h-16 sm:w-16 rounded-xl ring-4 ring-white shadow-lg lg:h-20 lg:w-20' %>
               <% end %>
             </div>
-            
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl">
+
+            <div class="min-w-0">
+              <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white lg:text-3xl truncate">
                 <%= @content_type_name.pluralize %>
               </h1>
-              <p class="text-gray-600 dark:text-gray-400 mt-1">
+              <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 truncate">
                 <% if @universe_scope %>
                   in <%= link_to @universe_scope.name, @universe_scope, class: "#{Universe.text_color} font-medium hover:underline" %>
                 <% else %>
@@ -201,8 +200,8 @@
               </p>
             </div>
           </div>
-          
-          <div class="flex items-center space-x-3">
+
+          <div class="flex items-center space-x-3 flex-shrink-0">
             <!-- Timeline-specific options (no template customization) -->
 
 
@@ -228,19 +227,19 @@
     </div>
 
     <!-- Filters & Controls -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <!-- Search Input -->
-          <div class="relative group">
+          <div class="relative group w-full sm:w-64">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="material-icons text-gray-400 text-lg">search</i>
             </div>
-            <input 
+            <input
               x-model="searchQuery"
-              type="text" 
+              type="text"
               placeholder="Search timelines..."
-              class="block w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
               <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
@@ -248,100 +247,105 @@
               </button>
             </div>
           </div>
-          
-          <!-- Sort Dropdown -->
-          <div data-controller="dropdown" class="relative">
-            <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-              <i class="material-icons text-lg mr-2">sort</i>
-              <% 
-                sort_labels = {
-                  'updated_at' => 'Recently edited',
-                  'alphabetical' => 'Alphabetical',
-                  'created_at' => 'Date created',
-                  'events' => 'Most events'
-                }
-                current_sort = params[:sort] || 'updated_at'
-              %>
-              <%= sort_labels[current_sort] || 'Sort' %>
-              <%= chevron_down %>
-            </button>
-            <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-              <div class="py-1">
-                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
-                  Recently edited
-                <% end %>
-                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'alphabetical'}" do %>
-                  Alphabetical
-                <% end %>
-                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'created_at'}" do %>
-                  Date created
-                <% end %>
-                <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'events' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'events'}" do %>
-                  Most events
-                <% end %>
+
+          <!-- Sort & Tag Filters (wrapped together on mobile) -->
+          <div class="flex items-center gap-2 sm:gap-4">
+            <!-- Sort Dropdown -->
+            <div data-controller="dropdown" class="relative">
+              <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <i class="material-icons text-lg sm:mr-2">sort</i>
+                <span class="hidden sm:inline">
+                  <%
+                    sort_labels = {
+                      'updated_at' => 'Recently edited',
+                      'alphabetical' => 'Alphabetical',
+                      'created_at' => 'Date created',
+                      'events' => 'Most events'
+                    }
+                    current_sort = params[:sort] || 'updated_at'
+                  %>
+                  <%= sort_labels[current_sort] || 'Sort' %>
+                </span>
+                <span class="hidden sm:inline"><%= chevron_down %></span>
+              </button>
+              <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                <div class="py-1">
+                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
+                    Recently edited
+                  <% end %>
+                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'alphabetical'}" do %>
+                    Alphabetical
+                  <% end %>
+                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'created_at'}" do %>
+                    Date created
+                  <% end %>
+                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'events' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'events'}" do %>
+                    Most events
+                  <% end %>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Tag Filter -->
-          <% if true # Always show tag filter so users can start tagging %>
-            <div data-controller="dropdown" class="relative">
-              <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
-                <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
-                <button 
-                  data-action="dropdown#toggle click@window->dropdown#hide" 
-                  type="button"
-                  class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' %>"
-                >
-                  <i class="material-icons text-lg mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : @content_type_class.text_color %>">label</i>
-                  Tags
-                  <% if @filtered_page_tags && @filtered_page_tags.any? %>
-                    <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
-                      <%= @filtered_page_tags.count %>
-                    </span>
-                  <% end %>
-                  <%= chevron_down %>
-                </button>
-                <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                  <div class="p-4">
-                    <div class="space-y-3">
-                      <% if @page_tags && @page_tags.any? %>
-                        <% @page_tags.each do |page_tag| %>
-                          <div class="flex items-center">
-                            <input 
-                              id="filter-tag-<%= page_tag.id %>" 
-                              name="slug[]" 
-                              <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %> 
-                              value="<%= page_tag.slug %>" 
-                              type="checkbox" 
-                              class="h-4 w-4 border-gray-300 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
-                            >
-                            <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                              <%= page_tag.tag %>
-                            </label>
+            <!-- Tag Filter -->
+            <% if true # Always show tag filter so users can start tagging %>
+              <div data-controller="dropdown" class="relative">
+                <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
+                  <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+                  <button
+                    data-action="dropdown#toggle click@window->dropdown#hide"
+                    type="button"
+                    class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' %>"
+                  >
+                    <i class="material-icons text-lg sm:mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : @content_type_class.text_color %>">label</i>
+                    <span class="hidden sm:inline">Tags</span>
+                    <% if @filtered_page_tags && @filtered_page_tags.any? %>
+                      <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
+                        <%= @filtered_page_tags.count %>
+                      </span>
+                    <% end %>
+                    <span class="hidden sm:inline"><%= chevron_down %></span>
+                  </button>
+                  <div data-dropdown-target="menu" class="origin-top-right absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                    <div class="p-4">
+                      <div class="space-y-3">
+                        <% if @page_tags && @page_tags.any? %>
+                          <% @page_tags.each do |page_tag| %>
+                            <div class="flex items-center">
+                              <input
+                                id="filter-tag-<%= page_tag.id %>"
+                                name="slug[]"
+                                <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %>
+                                value="<%= page_tag.slug %>"
+                                type="checkbox"
+                                class="h-4 w-4 border-gray-300 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
+                              >
+                              <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                                <%= page_tag.tag %>
+                              </label>
+                            </div>
+                          <% end %>
+                          <div class="pt-2">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                              Apply filters
+                            </button>
+                          </div>
+                        <% else %>
+                          <div class="text-center text-gray-500 py-4">
+                            <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
+                            <p class="text-sm">No tags yet</p>
+                            <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
                           </div>
                         <% end %>
-                        <div class="pt-2">
-                          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
-                            Apply filters
-                          </button>
-                        </div>
-                      <% else %>
-                        <div class="text-center text-gray-500 py-4">
-                          <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
-                          <p class="text-sm">No tags yet</p>
-                          <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
-                        </div>
-                      <% end %>
+                      </div>
                     </div>
                   </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
         </div>
-        
-        <div class="flex items-center space-x-2">
+
+        <div class="flex items-center gap-2 flex-shrink-0">
           <!-- View Mode Toggle -->
           <div class="hidden sm:flex border border-gray-300 dark:border-gray-600 rounded-lg">
             <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg focus:outline-none">
@@ -351,8 +355,8 @@
               <i class="material-icons text-lg">view_list</i>
             </button>
           </div>
-          
-          <span class="text-sm text-gray-500">
+
+          <span class="hidden sm:inline text-sm text-gray-500">
             <% if (@total_content_count || 0) > 0 %>
               <span x-text="searchQuery === '' ? 'Showing <%= @content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
               <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
@@ -535,7 +539,7 @@
                     <div class="bg-gradient-to-br from-gray-50 to-<%= @content_type_class.color.split('-')[1] %>-50 dark:bg-gray-800 hover:from-<%= @content_type_class.color.split('-')[1] %>-50 hover:to-<%= @content_type_class.color.split('-')[1] %>-100 dark:hover:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-<%= @content_type_class.color.split('-')[1] %>-400 dark:hover:border-<%= @content_type_class.color.split('-')[1] %>-500 rounded-lg transition-all duration-200 overflow-hidden">
                       <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-<%= @content_type_class.color.split('-')[1] %>-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center relative overflow-hidden">
                         <div class="text-center relative z-10">
-                          <div class="bg-white/90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
+                          <div class="bg-white bg-opacity-90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
                             <i class="material-icons text-3xl text-gray-600 dark:text-<%= @content_type_class.color.split('-')[1] %>-300 group-hover:<%= @content_type_class.text_color %> transition-colors"><%= @content_type_class.icon %></i>
                           </div>
                           <div class="text-xs font-medium text-gray-500 dark:text-<%= @content_type_class.color.split('-')[1] %>-300 uppercase tracking-wider">Create</div>
@@ -560,7 +564,7 @@
                     <div class="bg-gradient-to-br from-gray-50 to-blue-50 dark:bg-gray-800 hover:from-blue-50 hover:to-blue-100 dark:hover:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 rounded-lg transition-all duration-200 overflow-hidden">
                       <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-blue-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center relative overflow-hidden">
                         <div class="text-center relative z-10">
-                          <div class="bg-white/90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
+                          <div class="bg-white bg-opacity-90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
                             <i class="material-icons text-3xl text-gray-600 dark:text-blue-300 group-hover:text-blue-600 dark:group-hover:text-blue-200 transition-colors">lock</i>
                           </div>
                           <div class="text-xs font-medium text-gray-500 dark:text-blue-300 uppercase tracking-wider">Premium</div>
@@ -587,7 +591,7 @@
                   <div class="bg-gradient-to-br from-gray-50 to-purple-50 dark:bg-gray-800 hover:from-purple-50 hover:to-purple-100 dark:hover:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500 rounded-lg transition-all duration-200 overflow-hidden">
                     <div class="h-48 w-full bg-gradient-to-br from-gray-100 to-purple-100 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center relative overflow-hidden">
                       <div class="text-center relative z-10">
-                        <div class="bg-white/90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
+                        <div class="bg-white bg-opacity-90 dark:bg-gray-600 backdrop-blur-sm rounded-full w-16 h-16 flex items-center justify-center mb-3 shadow-sm">
                           <i class="material-icons text-3xl text-gray-600 dark:text-purple-300 group-hover:text-purple-600 dark:group-hover:text-purple-200 transition-colors">help_outline</i>
                         </div>
                         <div class="text-xs font-medium text-gray-500 dark:text-purple-300 uppercase tracking-wider">Guide</div>
