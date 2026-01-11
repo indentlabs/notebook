@@ -1,0 +1,107 @@
+<%# Settings Panel Content Partial (for mobile overlay) %>
+<%# Locals: timeline %>
+
+<!-- Settings Content -->
+<div class="flex-1 overflow-y-auto">
+  <div class="p-6 space-y-6">
+    <!-- Timeline Actions -->
+    <div>
+      <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+        <i class="material-icons text-gray-600 dark:text-gray-400 mr-2 text-base">manage_history</i>
+        Timeline Actions
+      </h4>
+
+      <div x-data="{
+             isArchived: <%= timeline.archived? %>,
+             isLoading: false,
+             async toggleArchive() {
+               const confirmMsg = this.isArchived
+                 ? 'Are you sure you want to unarchive this timeline?'
+                 : 'Are you sure you want to archive this timeline?';
+               if (!confirm(confirmMsg)) return;
+
+               this.isLoading = true;
+               try {
+                 const response = await fetch('<%= toggle_archive_timeline_path(timeline) %>', {
+                   method: 'POST',
+                   headers: {
+                     'Accept': 'application/json',
+                     'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                   }
+                 });
+                 const data = await response.json();
+                 if (data.success) {
+                   this.isArchived = data.archived;
+                   if (window.showToast) {
+                     window.showToast(this.isArchived ? 'Timeline archived' : 'Timeline un-archived', 'success');
+                   }
+                 } else {
+                   if (window.showToast) window.showToast(data.error || 'Something went wrong', 'error');
+                 }
+               } catch (error) {
+                 console.error('Error:', error);
+                 if (window.showToast) window.showToast('An error occurred', 'error');
+               } finally {
+                 this.isLoading = false;
+               }
+             }
+           }">
+        <!-- Archive/Unarchive Action -->
+        <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <i class="material-icons text-blue-600 text-lg" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+            </div>
+            <div class="ml-3 flex-1">
+              <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <span x-text="isArchived ? 'Unarchive Timeline' : 'Archive Timeline'"></span>
+              </h5>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-1" x-show="isArchived">
+                This timeline is archived. Unarchive to make it active again.
+              </p>
+              <p class="text-xs text-gray-600 dark:text-gray-400 mt-1" x-show="!isArchived">
+                Archive to hide from your timeline list while keeping all content.
+              </p>
+              <button @click="toggleArchive()"
+                      :disabled="isLoading"
+                      :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                      class="mt-3 inline-flex items-center px-3 py-1.5 border border-blue-300 dark:border-blue-700 text-xs font-medium rounded-md text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                <i class="material-icons text-sm mr-1" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+                <span x-text="isArchived ? 'Unarchive' : 'Archive'"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+      <h4 class="text-sm font-semibold text-red-900 dark:text-red-400 mb-4 flex items-center">
+        <i class="material-icons text-red-600 mr-2 text-base">warning</i>
+        Danger Zone
+      </h4>
+
+      <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-800 dark:border-opacity-50 rounded-lg p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <i class="material-icons text-red-600 text-lg">delete_forever</i>
+          </div>
+          <div class="ml-3 flex-1">
+            <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">Delete Timeline</h5>
+            <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Permanently delete this timeline and all its events. This cannot be undone.
+            </p>
+            <%= link_to timeline_path(timeline),
+                method: :delete,
+                data: { confirm: "Are you sure you want to permanently delete this timeline?\n\nThis will delete:\n• All timeline events\n• All linked content connections\n• All timeline metadata\n\nThis action cannot be undone!" },
+                class: "mt-3 inline-flex items-center px-3 py-1.5 border border-red-300 dark:border-red-700 text-xs font-medium rounded-md text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
+              <i class="material-icons text-sm mr-1">delete_forever</i>
+              Delete Timeline
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

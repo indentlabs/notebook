@@ -1,8 +1,4 @@
 <div x-data="timelineEditor()" class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-
-  <%# Header Partial %>
-  <%= render 'timelines/edit/header', timeline: @timeline %>
-
   <!-- Three-Column Layout with Pull-Out Tabs -->
   <div class="flex-1 flex min-h-0 relative">
 
@@ -89,18 +85,103 @@
     <!-- Main Content Area -->
     <main class="flex-1 overflow-y-auto min-h-0">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="timeline-events-container relative" data-timeline-id="<%= @timeline.id %>">
-          <!-- Timeline Rail - Extended to Header -->
-          <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700 timeline-spine rounded-full"></div>
+        <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
+          <%# Timeline Title Section - Plain Text %>
+          <div class="mb-6 ml-20">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1 min-w-0">
+                <!-- View Mode -->
+                <div x-show="!editingTitle && !editingSubtitle">
+                  <!-- Title -->
+                  <h1 @click="editingTitle = true; tempTitle = timelineName; $nextTick(() => { const input = document.querySelector('[x-ref=titleInput]'); input?.focus(); input?.select(); })"
+                      class="text-3xl font-bold text-gray-900 dark:text-gray-100 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors inline-block">
+                    <span x-text="timelineName || 'Untitled Timeline'"></span>
+                  </h1>
+
+                  <!-- Subtitle (shown below title) -->
+                  <template x-if="timelineSubtitle && timelineSubtitle.trim()">
+                    <p @click="editingSubtitle = true; tempSubtitle = timelineSubtitle; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
+                       class="text-gray-600 dark:text-gray-400 mt-1 cursor-pointer hover:text-gray-500 dark:hover:text-gray-300 transition-colors"
+                       x-text="timelineSubtitle"></p>
+                  </template>
+
+                  <!-- Add Subtitle Link (only shown if no subtitle exists) -->
+                  <template x-if="!timelineSubtitle || !timelineSubtitle.trim()">
+                    <button @click="editingSubtitle = true; tempSubtitle = ''; $nextTick(() => { const input = document.querySelector('[x-ref=subtitleInput]'); input?.focus(); input?.select(); })"
+                            class="mt-1 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                      + Add subtitle
+                    </button>
+                  </template>
+                </div>
+
+                <!-- Title Edit Mode -->
+                <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit.prevent': 'console.log("Title form submission prevented")', 'x-ref': 'titleForm' }, remote: true do |f| %>
+                  <div x-show="editingTitle">
+                    <div class="flex items-center space-x-2">
+                      <%= f.text_field :name,
+                          class: "text-3xl font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
+                          placeholder: "Timeline title...",
+                          'x-model': 'tempTitle',
+                          'x-ref': 'titleInput',
+                          '@keydown.enter.prevent': 'saveTitle()',
+                          '@keydown.escape': 'editingTitle = false; tempTitle = timelineName' %>
+                      <button @click="saveTitle()"
+                              type="button" class="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900 dark:hover:bg-opacity-20 transition-colors">
+                        <i class="material-icons">check</i>
+                      </button>
+                      <button @click="editingTitle = false; tempTitle = timelineName"
+                              type="button" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <i class="material-icons">close</i>
+                      </button>
+                    </div>
+                  </div>
+                <% end %>
+
+                <!-- Subtitle Edit Mode -->
+                <%= form_for @timeline, html: { class: 'timeline-meta-form', '@submit.prevent': 'console.log("Subtitle form submission prevented")', 'x-ref': 'subtitleForm' }, remote: true do |f| %>
+                  <div x-show="editingSubtitle">
+                    <div class="flex items-center space-x-2">
+                      <%= f.text_field :subtitle,
+                          class: "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:border-green-500 flex-1 min-w-0",
+                          placeholder: "Brief description of this timeline...",
+                          'x-model': 'tempSubtitle',
+                          'x-ref': 'subtitleInput',
+                          '@keydown.enter.prevent': 'saveSubtitle()',
+                          '@keydown.escape': 'editingSubtitle = false; tempSubtitle = timelineSubtitle' %>
+                      <button @click="saveSubtitle()"
+                              type="button" class="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900 dark:hover:bg-opacity-20 transition-colors">
+                        <i class="material-icons">check</i>
+                      </button>
+                      <button @click="editingSubtitle = false; tempSubtitle = timelineSubtitle"
+                              type="button" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <i class="material-icons">close</i>
+                      </button>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+
+              <!-- View Button -->
+              <%= link_to timeline_path(@timeline), class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors flex-shrink-0" do %>
+                <i class="material-icons text-lg mr-2">visibility</i>
+                <span class="hidden sm:inline">View</span>
+              <% end %>
+            </div>
+          </div>
 
           <%# Timeline Overview Partial %>
           <%= render 'timelines/edit/timeline_overview', timeline: @timeline %>
 
-          <!-- Timeline Events -->
+          <!-- Timeline Events Section with Spine -->
           <% if @timeline.timeline_events.any? %>
-            <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
-              <%= render 'timeline_events/event_card', event: event, timeline: @timeline, index: index %>
-            <% end %>
+            <div class="relative">
+              <!-- Timeline Rail - Only for events -->
+              <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700 timeline-spine rounded-full" style="left: 38px;"></div>
+
+              <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
+                <%= render 'timeline_events/event_card', event: event, timeline: @timeline, index: index %>
+              <% end %>
+            </div>
           <% else %>
             <!-- Empty State -->
             <div class="text-center py-16">
@@ -122,7 +203,7 @@
       </div>
     </main>
 
-    <%# Right Inspector Panel (Desktop - beside content) %>
+    <%# Right Sidebar Panel (Desktop - beside content) %>
     <div x-show="showRightSidebar && isDesktop" x-cloak
          x-transition:enter="transform transition ease-in-out duration-200"
          x-transition:enter-start="translate-x-full"
@@ -131,32 +212,65 @@
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
          class="hidden lg:block flex-shrink-0">
-      <%= render 'timelines/edit/inspector_panel', timeline: @timeline %>
+      <%# Inspector Panel %>
+      <div x-show="activeRightPanel === 'inspector'">
+        <%= render 'timelines/edit/inspector_panel', timeline: @timeline %>
+      </div>
+      <%# Settings Panel %>
+      <div x-show="activeRightPanel === 'settings'">
+        <%= render 'timelines/edit/settings_panel', timeline: @timeline %>
+      </div>
     </div>
 
-    <%# Desktop Right Sidebar Toggle Tab (when collapsed) %>
-    <div x-show="!showRightSidebar && isDesktop" x-cloak
+    <%# Desktop Event Details Toggle Tab %>
+    <div x-show="activeRightPanel !== 'inspector' && isDesktop" x-cloak
          class="hidden lg:block fixed right-0 top-28 z-40">
-      <button @click="toggleRightSidebar()"
+      <button @click="toggleRightPanel('inspector')"
               class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
-              data-tooltip="Show Event Details"
+              data-tooltip="Event Details"
               aria-label="Show Event Details">
         <i class="material-icons text-base">chevron_left</i>
         <i class="material-icons text-base">info</i>
       </button>
     </div>
 
-    <%# Mobile/Tablet Right Sidebar Toggle Tab %>
+    <%# Desktop Timeline Settings Toggle Tab %>
+    <div x-show="activeRightPanel !== 'settings' && isDesktop" x-cloak
+         class="hidden lg:block fixed right-0 top-40 z-40">
+      <button @click="toggleRightPanel('settings')"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              data-tooltip="Timeline Settings"
+              aria-label="Show Timeline Settings">
+        <i class="material-icons text-base">chevron_left</i>
+        <i class="material-icons text-base">settings</i>
+      </button>
+    </div>
+
+    <%# Mobile/Tablet Event Details Toggle Tab %>
     <div class="lg:hidden fixed right-0 top-28 z-40">
-      <button @click="toggleRightSidebar()"
-              @keydown.escape="showRightSidebar && toggleRightSidebar()"
+      <button @click="toggleRightPanel('inspector')"
               class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
-              :title="showRightSidebar ? 'Close Event Details' : 'Open Event Details'"
-              :aria-label="showRightSidebar ? 'Close Event Details' : 'Open Event Details'"
-              :aria-expanded="showRightSidebar">
-        <i class="material-icons text-base" x-show="!showRightSidebar">chevron_left</i>
-        <i class="material-icons text-base" x-show="!showRightSidebar">info</i>
-        <i class="material-icons text-base" x-show="showRightSidebar">chevron_right</i>
+              :class="{ 'bg-blue-700': activeRightPanel === 'inspector' }"
+              :title="activeRightPanel === 'inspector' ? 'Close Event Details' : 'Open Event Details'"
+              :aria-label="activeRightPanel === 'inspector' ? 'Close Event Details' : 'Open Event Details'"
+              :aria-expanded="activeRightPanel === 'inspector'">
+        <i class="material-icons text-base" x-show="activeRightPanel !== 'inspector'">chevron_left</i>
+        <i class="material-icons text-base">info</i>
+        <i class="material-icons text-base" x-show="activeRightPanel === 'inspector'">chevron_right</i>
+      </button>
+    </div>
+
+    <%# Mobile/Tablet Timeline Settings Toggle Tab %>
+    <div class="lg:hidden fixed right-0 top-40 z-40">
+      <button @click="toggleRightPanel('settings')"
+              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
+              :class="{ 'bg-blue-700': activeRightPanel === 'settings' }"
+              :title="activeRightPanel === 'settings' ? 'Close Timeline Settings' : 'Open Timeline Settings'"
+              :aria-label="activeRightPanel === 'settings' ? 'Close Timeline Settings' : 'Open Timeline Settings'"
+              :aria-expanded="activeRightPanel === 'settings'">
+        <i class="material-icons text-base" x-show="activeRightPanel !== 'settings'">chevron_left</i>
+        <i class="material-icons text-base">settings</i>
+        <i class="material-icons text-base" x-show="activeRightPanel === 'settings'">chevron_right</i>
       </button>
     </div>
 
@@ -187,10 +301,10 @@
          class="lg:hidden fixed right-0 top-0 h-full w-96 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
          role="dialog"
          aria-modal="true"
-         aria-labelledby="mobile-inspector-title">
+         :aria-labelledby="activeRightPanel === 'inspector' ? 'mobile-inspector-title' : 'mobile-settings-title'">
 
-      <%# Mobile close button %>
-      <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <%# Mobile close button - Event Details %>
+      <div x-show="activeRightPanel === 'inspector'" class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
         <button @click="closeMobileSidebar()"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Close Event Details">
@@ -200,12 +314,28 @@
         </button>
       </div>
 
-      <%= render 'timelines/edit/inspector_panel_content', timeline: @timeline %>
+      <%# Mobile close button - Timeline Settings %>
+      <div x-show="activeRightPanel === 'settings'" class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <button @click="closeMobileSidebar()"
+                class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Close Timeline Settings">
+          <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+          <i class="material-icons text-gray-600 text-lg mr-1.5">settings</i>
+          <h2 id="mobile-settings-title" class="text-sm font-semibold text-gray-900 dark:text-white">Timeline Settings</h2>
+        </button>
+      </div>
+
+      <%# Inspector Panel Content %>
+      <div x-show="activeRightPanel === 'inspector'">
+        <%= render 'timelines/edit/inspector_panel_content', timeline: @timeline %>
+      </div>
+
+      <%# Settings Panel Content %>
+      <div x-show="activeRightPanel === 'settings'">
+        <%= render 'timelines/edit/settings_panel_content', timeline: @timeline %>
+      </div>
     </div>
   </div>
-
-  <%# Settings Modal Partial %>
-  <%= render 'timelines/edit/settings_modal', timeline: @timeline %>
 
   <%# Link Content Modal Partial %>
   <%= render 'timelines/edit/link_content_modal',
@@ -270,8 +400,11 @@ function timelineEditor() {
 
     // Sidebar visibility state (pull-out tab system)
     showLeftSidebar: false,  // Closed by default on desktop
-    showRightSidebar: false,
+    activeRightPanel: null,  // null | 'inspector' | 'settings' - mutually exclusive panels
     isDesktop: window.innerWidth >= 1024,
+
+    // Computed property for backward compatibility
+    get showRightSidebar() { return this.activeRightPanel !== null; },
 
     // Reactive properties for real-time inspector panel updates
     liveTitle: '',
@@ -626,8 +759,8 @@ function timelineEditor() {
       this.selectedEventData = eventData;
 
       // Auto-open inspector panel when event is selected
-      if (!this.showRightSidebar) {
-        this.showRightSidebar = true;
+      if (this.activeRightPanel !== 'inspector') {
+        this.activeRightPanel = 'inspector';
         if (this.isDesktop) {
           this.saveSidebarState();
         }
@@ -1281,8 +1414,13 @@ function timelineEditor() {
       this.showLeftSidebar = !this.showLeftSidebar;
     },
 
-    toggleRightSidebar() {
-      this.showRightSidebar = !this.showRightSidebar;
+    toggleRightPanel(panel) {
+      // If clicking the same panel, close it; otherwise switch to the new panel
+      if (this.activeRightPanel === panel) {
+        this.activeRightPanel = null;
+      } else {
+        this.activeRightPanel = panel;
+      }
       if (this.isDesktop) {
         this.saveSidebarState();
       }
@@ -1290,9 +1428,9 @@ function timelineEditor() {
 
     initializeSidebarState() {
       if (this.isDesktop) {
-        this.showRightSidebar = this.getSavedSidebarState();
+        this.activeRightPanel = this.getSavedSidebarState();
       } else {
-        this.showRightSidebar = false;
+        this.activeRightPanel = null;
       }
     },
 
@@ -1303,28 +1441,29 @@ function timelineEditor() {
 
         // When transitioning from mobile to desktop, restore saved state
         if (!wasDesktop && this.isDesktop) {
-          this.showRightSidebar = this.getSavedSidebarState();
+          this.activeRightPanel = this.getSavedSidebarState();
         }
         // When transitioning from desktop to mobile, close sidebars
         if (wasDesktop && !this.isDesktop) {
           this.showLeftSidebar = false;
-          this.showRightSidebar = false;
+          this.activeRightPanel = null;
         }
       });
     },
 
     getSavedSidebarState() {
       try {
-        const saved = localStorage.getItem('timeline_edit_right_sidebar_visible');
-        return saved === 'true';
+        const saved = localStorage.getItem('timeline_edit_active_right_panel');
+        // Return null if not set, or the saved panel name ('inspector' or 'settings')
+        return saved && saved !== 'null' ? saved : null;
       } catch (e) {
-        return false;
+        return null;
       }
     },
 
     saveSidebarState() {
       try {
-        localStorage.setItem('timeline_edit_right_sidebar_visible', this.showRightSidebar.toString());
+        localStorage.setItem('timeline_edit_active_right_panel', this.activeRightPanel || 'null');
       } catch (e) {
         // Silently fail if localStorage is unavailable
       }
@@ -1332,7 +1471,7 @@ function timelineEditor() {
 
     closeMobileSidebar() {
       if (!this.isDesktop) {
-        this.showRightSidebar = false;
+        this.activeRightPanel = null;
       }
     },
 
