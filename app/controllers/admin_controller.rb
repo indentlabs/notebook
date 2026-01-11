@@ -12,6 +12,10 @@ class AdminController < ApplicationController
     @sidekiq_stats = Sidekiq::Stats.new
     @basil_queue_count = BasilCommission.where(completed_at: nil).count
     @basil_today_count = BasilCommission.where('completed_at >= ?', Time.current.beginning_of_day).count
+
+    # Words written stats (aggregate across all users)
+    @words_written_today = calculate_words_written_for_date(Date.current)
+    @words_written_this_week = calculate_words_written_in_range(Date.current.beginning_of_week..Date.current)
   end
 
   def content_type
@@ -272,5 +276,79 @@ class AdminController < ApplicationController
 
   def promos
     @codes = PageUnlockPromoCode.all.includes(:promotions)
+  end
+
+  private
+
+  # Calculate total words written across all users for a specific date
+  # Uses delta calculation: today's count - previous day's count for each entity
+  def calculate_words_written_for_date(target_date)
+    # Get all records for the target date grouped by entity
+    today_totals = WordCountUpdate.where(for_date: target_date)
+      .group(:entity_type, :entity_id)
+      .maximum(:word_count)
+
+    return 0 if today_totals.empty?
+
+    # Get the previous record for each entity (day before target_date or earlier)
+    prev_totals = {}
+    today_totals.keys.each do |entity_key|
+      entity_type, entity_id = entity_key
+      prev_record = WordCountUpdate
+        .where(entity_type: entity_type, entity_id: entity_id)
+        .where('for_date < ?', target_date)
+        .order(for_date: :desc)
+        .limit(1)
+        .pluck(:word_count)
+        .first
+      prev_totals[entity_key] = prev_record || 0
+    end
+
+    # Calculate deltas (only count positive deltas)
+    total_delta = 0
+    today_totals.each do |entity_key, today_count|
+      prev_count = prev_totals[entity_key] || 0
+      delta = today_count - prev_count
+      total_delta += delta if delta > 0
+    end
+
+    total_delta
+  end
+
+  # Calculate total words written across all users for a date range
+  def calculate_words_written_in_range(date_range)
+    start_date = date_range.first
+    end_date = date_range.last
+
+    # Get the latest word count for each entity within the range
+    latest_in_range = WordCountUpdate.where(for_date: date_range)
+      .group(:entity_type, :entity_id)
+      .maximum(:word_count)
+
+    return 0 if latest_in_range.empty?
+
+    # Get the previous record for each entity (before range started)
+    prev_totals = {}
+    latest_in_range.keys.each do |entity_key|
+      entity_type, entity_id = entity_key
+      prev_record = WordCountUpdate
+        .where(entity_type: entity_type, entity_id: entity_id)
+        .where('for_date < ?', start_date)
+        .order(for_date: :desc)
+        .limit(1)
+        .pluck(:word_count)
+        .first
+      prev_totals[entity_key] = prev_record || 0
+    end
+
+    # Calculate deltas
+    total_delta = 0
+    latest_in_range.each do |entity_key, current_count|
+      prev_count = prev_totals[entity_key] || 0
+      delta = current_count - prev_count
+      total_delta += delta if delta > 0
+    end
+
+    total_delta
   end
 end
