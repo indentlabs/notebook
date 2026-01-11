@@ -445,6 +445,13 @@ Rails.application.routes.draw do
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
   end
 
+  # Moderation hub for forum moderators
+  authenticate :user, lambda { |u| u.forum_moderator? || Rails.env.development? } do
+    scope 'moderation' do
+      get '/', to: 'moderation#hub', as: :moderation_hub
+    end
+  end
+
   # Browse global content routes
   scope '/browse' do
     get '/tag/:tag_slug', to: 'browse#tag', as: :browse_tag
