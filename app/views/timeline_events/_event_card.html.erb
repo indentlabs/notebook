@@ -175,6 +175,22 @@
 
       <!-- Linked Content -->
       <%= render 'shared/timeline_event_linked_content', timeline_event: event %>
+
+      <!-- Event Details Button (mobile only) -->
+      <button @click.stop="selectEvent(<%= event.id %>, {
+                id: <%= event.id %>,
+                title: '<%= j(event.title) %>',
+                time_label: '<%= j(event.time_label) %>',
+                end_time_label: '<%= j(event.end_time_label) %>',
+                description: '<%= j(event.description) %>',
+                event_type: '<%= event.event_type || 'general' %>',
+                status: '<%= event.status || 'completed' %>',
+                tags: [<%= event.page_tags.map { |tag| "'#{j(tag.tag)}'" }.join(', ') %>]
+              }); toggleRightPanel('inspector')"
+              class="lg:hidden w-full mt-4 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-lg transition-colors flex items-center justify-center">
+        <i class="material-icons text-sm mr-2">info</i>
+        Event Details
+      </button>
     </div>
   </div>
 </div>
