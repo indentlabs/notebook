@@ -1,0 +1,109 @@
+<%# Filter Panel Partial %>
+<%# Locals: timeline, timeline_event_tags %>
+
+<!-- Left Filter Panel -->
+<aside class="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 sticky top-0 max-h-screen">
+  <div class="h-full flex flex-col overflow-hidden">
+    <!-- Desktop Panel Header with Toggle Button -->
+    <div class="hidden lg:flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+      <button @click="toggleLeftPanel('filter')"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              title="Hide Search / Filter"
+              aria-label="Hide Search / Filter">
+        <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_left</i>
+        <i class="material-icons text-gray-600 dark:text-gray-400 text-lg mr-1.5">search</i>
+        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Search / Filter</h3>
+      </button>
+    </div>
+
+    <!-- Panel Content -->
+    <div class="flex-1 overflow-y-auto p-6">
+      <!-- Search Box -->
+      <div class="relative mb-6">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="material-icons text-gray-400 text-lg">search</i>
+        </div>
+        <input type="text"
+               x-model="searchQuery"
+               @input="applyEventFilters()"
+               @keydown.escape="searchQuery = ''; applyEventFilters()"
+               placeholder="Search timeline..."
+               class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-green-500 focus:border-green-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+      </div>
+
+      <!-- Filter Mode Toggle -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter Mode</label>
+        <div class="flex rounded-lg bg-gray-100 dark:bg-gray-700 p-1">
+          <button @click="changeTagFilterMode('filter')"
+                  :class="tagFilterMode === 'filter' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+                  class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors">
+            Filter
+          </button>
+          <button @click="changeTagFilterMode('highlight')"
+                  :class="tagFilterMode === 'highlight' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+                  class="flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors">
+            Highlight
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          <span x-show="tagFilterMode === 'filter'">Show only events with selected tags</span>
+          <span x-show="tagFilterMode === 'highlight'">Show all events, highlight selected tags</span>
+        </p>
+      </div>
+
+      <!-- Tag Selection -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filter by Tags</label>
+          <span x-show="selectedTagFilters.length > 0"
+                class="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded-full">
+            <span x-text="selectedTagFilters.length"></span> selected
+          </span>
+        </div>
+
+        <% if timeline_event_tags.any? %>
+          <div class="space-y-2 max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+            <% timeline_event_tags.each do |tag_data| %>
+              <label class="flex items-center space-x-2 text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 py-1.5 transition-colors">
+                <input type="checkbox"
+                       x-model="selectedTagFilters"
+                       value="<%= tag_data[:name] %>"
+                       @change="applyEventFilters()"
+                       class="rounded border-gray-300 text-green-600 focus:ring-green-500 focus:ring-offset-0">
+                <span class="flex-1 text-gray-700 dark:text-gray-300"><%= tag_data[:name] %></span>
+                <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full"><%= tag_data[:count] %></span>
+              </label>
+            <% end %>
+          </div>
+
+          <!-- Clear Filters -->
+          <div class="mt-4">
+            <button @click="clearTagFilters()"
+                    x-show="selectedTagFilters.length > 0"
+                    class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">
+              <i class="material-icons text-sm mr-2">clear</i>
+              Clear all filters
+            </button>
+          </div>
+        <% else %>
+          <div class="text-center py-8 border border-gray-200 dark:border-gray-700 rounded-lg">
+            <i class="material-icons text-3xl mb-2 text-gray-300 dark:text-gray-600">label_outline</i>
+            <p class="text-sm text-gray-500 dark:text-gray-400">No tags found</p>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Add tags to events to enable filtering</p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Filter Results -->
+      <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-gray-600 dark:text-gray-400">Showing:</span>
+          <span class="font-medium text-gray-900 dark:text-gray-100">
+            <span x-text="getFilteredEventCount()"></span> of <%= timeline.timeline_events.count %> events
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>

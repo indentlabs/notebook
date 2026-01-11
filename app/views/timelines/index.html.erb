@@ -85,7 +85,7 @@
           <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Recently Edited</h3>
           <div class="space-y-1">
             <% recent_timelines.each do |timeline| %>
-              <%= link_to timeline, class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" do %>
+              <%= link_to edit_timeline_path(timeline), class: "group flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-colors" do %>
                 <i class="material-icons text-lg mr-3 text-gray-400 group-hover:text-notebook-blue <%= timeline.text_color %>"><%= timeline.icon %></i>
                 <div class="flex-1 min-w-0">
                   <span class="truncate block"><%= timeline.name %></span>
@@ -400,7 +400,7 @@
                   isLoading: false
                 }"
               >
-                <%= link_to timeline, class: "block" do %>
+                <%= link_to edit_timeline_path(timeline), class: "block" do %>
                   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
                     <%
                       timeline_image = timeline.random_image_including_private(format: :medium) || asset_path("card-headers/timelines.jpg")
@@ -441,11 +441,11 @@
                       }
                     }()"
                     :disabled="isLoading"
-                    class="absolute top-4 right-4 group p-1 text-xl rounded-lg bg-white bg-opacity-80 dark:bg-gray-800 backdrop-blur-sm hover:bg-notebook-blue dark:hover:bg-blue-900 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
+                    class="absolute top-3 right-3 w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-90 dark:bg-gray-800 backdrop-blur-sm shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all"
                     :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
                     title="Toggle favorite"
                   >
-                    <i class="material-icons" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 group-hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+                    <i class="material-icons text-xl" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
                   </button>
                 <% end %>
               </div>
@@ -465,7 +465,7 @@
                   isLoading: false
                 }"
               >
-                <%= link_to timeline, class: "flex items-center p-4 space-x-4 pr-16" do %>
+                <%= link_to edit_timeline_path(timeline), class: "flex items-center p-4 space-x-4 pr-16" do %>
                   <div class="flex-shrink-0">
                     <%
                       timeline_image = timeline.random_image_including_private(format: :small) || asset_path("card-headers/timelines.jpg")
@@ -624,7 +624,7 @@
     window.toggleItemFavorite = async function(itemId, itemType) {
       try {
         const response = await fetch(`/${itemType}/${itemId}/toggle_favorite`, {
-          method: 'PATCH',
+          method: 'POST',
           headers: {
             'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
             'Content-Type': 'application/json',

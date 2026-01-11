@@ -374,6 +374,7 @@ Rails.application.routes.draw do
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
       get 'tag_suggestions', to: 'timelines#tag_suggestions', on: :member
       post :toggle_archive, on: :member
+      post :toggle_favorite, on: :member
     end
     resources :timeline_events do
       scope '/move', as: :move do

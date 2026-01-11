@@ -2,7 +2,7 @@ class TimelinesController < ApplicationController
   include ApplicationHelper
 
   before_action :authenticate_user!, except: [:show]
-  before_action :set_timeline, only: [:show, :edit, :update, :destroy, :toggle_archive]
+  before_action :set_timeline, only: [:show, :edit, :update, :destroy, :toggle_archive, :toggle_favorite]
 
   before_action :set_navbar_color
   before_action :set_sidenav_expansion
@@ -173,6 +173,27 @@ class TimelinesController < ApplicationController
         end
         format.json { render json: { success: false, error: "Failed to #{verb}" }, status: :unprocessable_entity }
       end
+    end
+  end
+
+  # POST /timelines/1/toggle_favorite
+  def toggle_favorite
+    unless @timeline.updatable_by?(current_user)
+      respond_to do |format|
+        format.html do
+          flash[:notice] = "You don't have permission to edit that!"
+          redirect_back fallback_location: @timeline
+        end
+        format.json { render json: { success: false, error: "Permission denied" }, status: :forbidden }
+      end
+      return
+    end
+
+    @timeline.update(favorite: !@timeline.favorite)
+
+    respond_to do |format|
+      format.html { redirect_back(fallback_location: timelines_path) }
+      format.json { render json: { success: true, favorite: @timeline.favorite } }
     end
   end
 
