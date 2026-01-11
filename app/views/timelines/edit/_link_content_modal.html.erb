@@ -1,0 +1,277 @@
+<%# Link Content Modal Partial %>
+<%# Locals: timeline, timeline_linked_content, current_user_content %>
+
+<!-- Link Content Modal -->
+<div x-show="typeof showLinkModal !== 'undefined' ? showLinkModal : false"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-50 overflow-y-auto"
+     style="display: none;">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"></div>
+
+    <!-- Modal -->
+    <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
+      <!-- Modal Header -->
+      <div class="flex items-center mb-6">
+        <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100">
+          <i class="material-icons text-green-600">link</i>
+        </div>
+        <h3 class="ml-4 text-xl font-semibold text-gray-900 dark:text-gray-100">Link Content to Event</h3>
+      </div>
+
+      <!-- Two-Column Layout -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6" style="height: 32rem;">
+        <!-- Left Sidebar - Filters (Hidden on mobile) -->
+        <div class="hidden md:block col-span-1 bg-gray-50 dark:bg-gray-900 dark:bg-opacity-50 rounded-lg p-4 overflow-y-auto">
+          <div class="space-y-3">
+            <!-- All Pages Filter -->
+            <button type="button"
+                    @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'all' ? '' : 'all') : console.error('selectedFilter not available')"
+                    :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? (selectedFilter === 'all' || !selectedFilter) : true }"
+                    class="w-full text-left px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center">
+              <i class="material-icons text-sm mr-2 text-gray-600">view_list</i>
+              <span class="text-sm font-medium">All Pages</span>
+            </button>
+
+            <!-- Timeline Content Filter (if exists) -->
+            <% if timeline_linked_content&.any? { |_, content| content.any? } %>
+              <button type="button"
+                      @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === 'timeline' ? '' : 'timeline') : console.error('selectedFilter not available')"
+                      :class="{ 'bg-blue-100 text-blue-800 border-blue-300': typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false }"
+                      class="w-full text-left px-3 py-2 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors flex items-center">
+                <i class="material-icons text-sm mr-2">timeline</i>
+                <span class="text-sm font-medium">Timeline Content</span>
+              </button>
+            <% end %>
+
+            <!-- Divider -->
+            <div class="border-t border-gray-300 dark:border-gray-600 my-3"></div>
+            <div class="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">By Type</div>
+
+            <!-- Content Type Filters -->
+            <div class="space-y-1">
+              <% current_user_content.keys.sort.each do |content_type| %>
+                <% next if current_user_content[content_type].empty? %>
+                <% content_type_class = content_class_from_name(content_type) %>
+                <button type="button"
+                        @click="typeof selectedFilter !== 'undefined' ? (selectedFilter = selectedFilter === '<%= content_type.downcase %>' ? '' : '<%= content_type.downcase %>') : console.error('selectedFilter not available')"
+                        :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
+                        class="w-full text-left px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-between group">
+                  <div class="flex items-center min-w-0">
+                    <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
+                    <span class="text-sm truncate"><%= content_type.pluralize %></span>
+                  </div>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">(<%= current_user_content[content_type].count %>)</span>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Content Area -->
+        <div class="col-span-1 md:col-span-3 flex flex-col min-h-0">
+          <!-- Mobile Filter Toggle (Visible on mobile only) -->
+          <div class="md:hidden mb-4">
+            <button type="button"
+                    @click="typeof showMobileFilters !== 'undefined' ? (showMobileFilters = !showMobileFilters) : console.error('showMobileFilters not available')"
+                    class="w-full flex items-center justify-between px-4 py-2 bg-gray-50 rounded-lg border border-gray-300 text-gray-700">
+              <span class="flex items-center">
+                <i class="material-icons text-sm mr-2">filter_list</i>
+                <span class="text-sm font-medium">Filters</span>
+              </span>
+              <i class="material-icons text-sm" :class="typeof showMobileFilters !== 'undefined' ? (showMobileFilters ? 'rotate-180' : '') : ''">expand_more</i>
+            </button>
+
+            <!-- Mobile Filter Panel -->
+            <div x-show="typeof showMobileFilters !== 'undefined' ? showMobileFilters : false"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button"
+                        @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = '', showMobileFilters = false) : console.error('variables not available')"
+                        :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? !selectedFilter : true }"
+                        class="px-3 py-2 rounded border border-gray-300 text-gray-700 text-sm">
+                  All Pages
+                </button>
+                <% if timeline_linked_content&.any? { |_, content| content.any? } %>
+                  <button type="button"
+                          @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = 'timeline', showMobileFilters = false) : console.error('variables not available')"
+                          :class="{ 'bg-blue-100 text-blue-800 border-blue-300': typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false }"
+                          class="px-3 py-2 rounded border border-blue-300 text-blue-700 text-sm">
+                    Timeline
+                  </button>
+                <% end %>
+                <% current_user_content.keys.sort.first(6).each do |content_type| %>
+                  <% next if current_user_content[content_type].empty? %>
+                  <button type="button"
+                          @click="typeof selectedFilter !== 'undefined' && typeof showMobileFilters !== 'undefined' ? (selectedFilter = '<%= content_type.downcase %>', showMobileFilters = false) : console.error('variables not available')"
+                          :class="{ 'bg-green-100 text-green-800 border-green-300': typeof selectedFilter !== 'undefined' ? selectedFilter === '<%= content_type.downcase %>' : false }"
+                          class="px-2 py-2 rounded border border-gray-300 text-gray-700 text-xs truncate">
+                    <%= content_type.pluralize %>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="relative mb-4">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="material-icons text-gray-400 text-lg">search</i>
+            </div>
+            <input type="text"
+                   :value="typeof linkModalSearchQuery !== 'undefined' ? linkModalSearchQuery : ''"
+                   @input="typeof linkModalSearchQuery !== 'undefined' ? (linkModalSearchQuery = $event.target.value) : null"
+                   placeholder="Search your content..."
+                   class="link-modal-search block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                   @keydown.escape="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
+                   @keydown.enter.prevent="typeof linkFirstResult !== 'undefined' ? linkFirstResult() : console.error('linkFirstResult not available')">
+          </div>
+
+          <!-- Content Lists -->
+          <div class="flex-1 overflow-y-auto space-y-4 min-h-0 pr-2">
+            <!-- Timeline Linked Content Section -->
+            <% if timeline_linked_content&.any? { |_, content| content.any? } %>
+              <div x-show="typeof selectedFilter !== 'undefined' ? selectedFilter === 'timeline' : false" class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <button type="button"
+                        @click="typeof toggleSection !== 'undefined' ? toggleSection('timeline-overview') : console.error('toggleSection not available')"
+                        class="w-full text-left mb-3 flex items-center justify-between hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors">
+                  <div class="flex items-center">
+                    <i class="material-icons text-sm mr-2 text-blue-600">timeline</i>
+                    <h4 class="text-sm font-semibold text-blue-900">Already Used in This Timeline</h4>
+                  </div>
+                  <i class="material-icons text-sm text-blue-600 transition-transform duration-200"
+                     :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('timeline-overview') ? '' : 'rotate-90') : ''">chevron_right</i>
+                </button>
+
+                <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('timeline-overview') : true"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2">
+                  <p class="text-xs text-blue-700 mb-3">Content linked to other events in this timeline:</p>
+
+                  <div class="space-y-4">
+                    <% timeline_linked_content.each do |content_type, content_list| %>
+                      <% next if content_list.empty? %>
+                      <% content_type_class = content_class_from_name(content_type) %>
+
+                      <div>
+                        <button type="button"
+                                @click="typeof toggleSection !== 'undefined' ? toggleSection('timeline-<%= content_type.downcase %>') : console.error('toggleSection not available')"
+                                class="w-full text-left mb-3 flex items-center justify-between hover:bg-blue-100 rounded-lg p-2 -m-2 transition-colors">
+                          <div class="flex items-center">
+                            <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                            <h5 class="text-sm font-semibold text-blue-900"><%= content_type.pluralize %></h5>
+                            <span class="ml-2 text-xs text-blue-700 font-normal">(<%= content_list.count %>)</span>
+                          </div>
+                          <i class="material-icons text-xs text-blue-600 transition-transform duration-200"
+                             :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('timeline-<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
+                        </button>
+
+                        <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('timeline-<%= content_type.downcase %>') : true"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             class="space-y-2">
+                          <% content_list.each do |content| %>
+                            <% content_name = content.name.presence || "Untitled #{content_type}" %>
+                            <button type="button"
+                                    class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors border border-blue-200 flex items-center justify-between group"
+                                    data-id="<%= content.id %>"
+                                    data-type="<%= content_type %>"
+                                    data-name="<%= j(content_name) %>"
+                                    x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
+                              <div class="flex items-center">
+                                <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                                <span class="text-sm font-medium text-blue-900"><%= content_name %></span>
+                              </div>
+                              <i class="material-icons text-sm text-blue-400 group-hover:text-blue-600 transition-colors">add_circle</i>
+                            </button>
+                          <% end %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+
+            <!-- Regular Content Lists -->
+            <% current_user_content.each do |content_type, content_list| %>
+              <% next if content_list.empty? %>
+              <% content_type_class = content_class_from_name(content_type) %>
+
+              <div x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_type) %>', '<%= j(content_type) %>') : true">
+                <button type="button"
+                        @click="typeof toggleSection !== 'undefined' ? toggleSection('<%= content_type.downcase %>') : console.error('toggleSection not available')"
+                        class="w-full text-left mb-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 -m-2 transition-colors">
+                  <div class="flex items-center">
+                    <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %>"><%= content_type_class.icon %></i>
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100"><%= content_type.pluralize %></h4>
+                    <span class="ml-2 text-xs text-gray-500 dark:text-gray-400 font-normal">(<%= content_list.count %>)</span>
+                  </div>
+                  <i class="material-icons text-sm text-gray-400 transition-transform duration-200"
+                     :class="typeof isSectionCollapsed !== 'undefined' ? (isSectionCollapsed('<%= content_type.downcase %>') ? '' : 'rotate-90') : ''">chevron_right</i>
+                </button>
+
+                <div x-show="typeof isSectionCollapsed !== 'undefined' ? !isSectionCollapsed('<%= content_type.downcase %>') : true"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 -translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 translate-y-0"
+                     x-transition:leave-end="opacity-0 -translate-y-2"
+                     class="space-y-2">
+                  <% content_list.first(20).each do |content| %>
+                    <% content_name = content.name.presence || "Untitled #{content_type}" %>
+                    <button type="button"
+                            class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors flex items-center justify-between group"
+                            data-id="<%= content.id %>"
+                            data-type="<%= content_type %>"
+                            data-name="<%= j(content_name) %>"
+                            x-show="typeof linkableContentMatches !== 'undefined' ? linkableContentMatches('<%= j(content_name) %>', '<%= j(content_type) %>') : true">
+                      <div class="flex items-center min-w-0">
+                        <i class="material-icons text-sm mr-2 <%= content_type_class.text_color %> flex-shrink-0"><%= content_type_class.icon %></i>
+                        <span class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-gray-100 truncate">
+                          <%= content_name %>
+                        </span>
+                      </div>
+                      <i class="material-icons text-sm text-gray-400 group-hover:text-green-600 transition-colors flex-shrink-0">add_circle_outline</i>
+                    </button>
+                  <% end %>
+                  <% if content_list.count > 20 %>
+                    <div class="text-xs text-gray-500 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+                      <i class="material-icons text-xs mr-1">info</i>
+                      Showing first 20 of <%= content_list.count %> <%= content_type.pluralize.downcase %>. Use search to find more.
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="mt-6 flex justify-end">
+        <button type="button"
+                @click="typeof closeLinkModal !== 'undefined' ? closeLinkModal() : console.error('closeLinkModal not available')"
+                class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+          <span>Close</span>
+          <span class="ml-2 text-xs text-gray-400">(ESC)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

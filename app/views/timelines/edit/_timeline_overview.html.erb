@@ -1,0 +1,266 @@
+<%# Timeline Overview Partial %>
+<%# Locals: timeline %>
+
+<!-- Timeline Header -->
+<div class="timeline-header-container relative mb-8"
+     x-data="{
+       showDescription: false,
+       hasContent: <%= (timeline.description.present? || timeline.notes.present? || timeline.private_notes.present?) ? 'true' : 'false' %>,
+       descriptionPreview: '<%= j(timeline.description.to_s.truncate(60)) %>',
+       description: '<%= j(timeline.description) %>',
+       notes: '<%= j(timeline.notes) %>',
+       private_notes: '<%= j(timeline.private_notes) %>',
+       updateOverviewState(field, value) {
+         // Update the local field value
+         this[field] = value;
+
+         const hasDesc = this.description && this.description.trim().length > 0;
+         const hasNotes = this.notes && this.notes.trim().length > 0;
+         const hasPrivateNotes = this.private_notes && this.private_notes.trim().length > 0;
+
+         this.hasContent = hasDesc || hasNotes || hasPrivateNotes;
+
+         // Update preview based on description field (primary preview)
+         if (hasDesc) {
+           this.descriptionPreview = this.description.length > 60 ?
+             this.description.substring(0, 60) + '...' :
+             this.description;
+         } else if (hasNotes) {
+           this.descriptionPreview = this.notes.length > 60 ?
+             this.notes.substring(0, 60) + '...' :
+             this.notes;
+         } else if (hasPrivateNotes) {
+           this.descriptionPreview = this.private_notes.length > 60 ?
+             this.private_notes.substring(0, 60) + '...' :
+             this.private_notes;
+         } else {
+           this.descriptionPreview = '';
+         }
+       },
+       getTotalWords() {
+         const descWords = (this.description || '').split(/\s+/).filter(w => w.length > 0).length;
+         const notesWords = (this.notes || '').split(/\s+/).filter(w => w.length > 0).length;
+         const privateWords = (this.private_notes || '').split(/\s+/).filter(w => w.length > 0).length;
+         const totalWords = descWords + notesWords + privateWords;
+         return totalWords + (totalWords === 1 ? ' word' : ' words');
+       }
+     }">
+  <!-- Header Dot - Now Connected to Main Spine -->
+  <div class="absolute w-12 h-12 bg-blue-600 rounded-full z-10 timeline-header-dot shadow-sm flex items-center justify-center"
+       style="left: 16px; top: 16px;"
+       title="Timeline Overview">
+    <i class="material-icons text-white text-base">description</i>
+  </div>
+
+  <!-- Header Card -->
+  <div class="ml-20 timeline-header-card bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200">
+    <!-- Clickable Header Toggle -->
+    <div @click="showDescription = !showDescription"
+         class="timeline-header-toggle px-6 py-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 border-b border-gray-100 dark:border-gray-700">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Overview</h3>
+
+        <!-- Expand/Collapse Chevron -->
+        <i class="material-icons text-gray-400 transition-transform duration-200"
+           :class="showDescription ? 'rotate-180' : ''">expand_more</i>
+      </div>
+
+      <!-- Description Preview (when collapsed and has content) -->
+      <template x-if="hasContent && !showDescription">
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 truncate" x-text="descriptionPreview"></p>
+      </template>
+
+      <!-- Add Description Prompt (when collapsed and no content) -->
+      <template x-if="!hasContent && !showDescription">
+        <p class="text-sm text-gray-400 mt-2">Add a description to provide context for this timeline...</p>
+      </template>
+    </div>
+
+    <!-- Collapsible Description Area -->
+    <div x-show="showDescription"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="timeline-header-description px-6 py-4">
+
+      <%= form_for timeline, html: { class: 'timeline-meta-form' }, remote: true do |f| %>
+        <div class="space-y-6">
+          <!-- Description Field -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+            <%= f.text_area :description,
+                rows: 4,
+                class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
+                placeholder: "Describe what this timeline covers, its purpose, key themes, or important context that helps understand the events below...",
+                'x-model': 'description',
+                '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("description", $el.value)' %>
+
+            <!-- Character Count and Helper Text -->
+            <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
+              <span>This description helps provide context for anyone viewing your timeline</span>
+              <span x-show="description"
+                    x-text="description.split(/\s+/).filter(w => w.length > 0).length + ' words'"></span>
+            </div>
+          </div>
+
+          <!-- Notes Field -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notes</label>
+            <%= f.text_area :notes,
+                rows: 3,
+                class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
+                placeholder: "Public notes about this timeline...",
+                'x-model': 'notes',
+                '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("notes", $el.value)' %>
+
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <span>These notes are visible to anyone who can view your timeline</span>
+            </div>
+          </div>
+
+          <!-- Private Notes Field -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Private Notes</label>
+            <%= f.text_area :private_notes,
+                rows: 3,
+                class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500",
+                placeholder: "Private notes (only visible to you)...",
+                'x-model': 'private_notes',
+                '@input.debounce.500ms': 'submitFormRemotely($el.form); updateOverviewState("private_notes", $el.value)' %>
+
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <span>These notes are private and only visible to you</span>
+            </div>
+          </div>
+
+          <!-- Tags Field -->
+          <div x-data="{
+            currentTags: <%= timeline.page_tags.map(&:tag).to_json %>,
+            timelineId: <%= timeline.id %>,
+            availableTags: [],
+            showSuggestions: false,
+            tagInput: '',
+            init() {
+              console.log('Initialized timeline tags:', this.currentTags);
+              this.loadTagSuggestions();
+            },
+            async loadTagSuggestions() {
+              try {
+                const response = await fetch(`/plan/timelines/${this.timelineId}/tag_suggestions`);
+                const data = await response.json();
+                this.availableTags = data.suggestions || [];
+              } catch (error) {
+                console.error('Failed to load tag suggestions:', error);
+                this.availableTags = [];
+              }
+            },
+            get filteredSuggestions() {
+              if (!this.tagInput || this.tagInput.length < 1) return this.availableTags.slice(0, 10);
+              const input = this.tagInput.toLowerCase();
+              return this.availableTags
+                .filter(tag =>
+                  tag.toLowerCase().includes(input) &&
+                  !this.currentTags.includes(tag)
+                )
+                .slice(0, 10);
+            },
+            addTag(tagName) {
+              if (!tagName || !tagName.trim()) return;
+              const cleanTag = tagName.trim();
+              if (this.currentTags.includes(cleanTag)) return;
+              this.currentTags.push(cleanTag);
+              updateTimelineTags(this.timelineId, this.currentTags);
+              this.tagInput = '';
+              this.showSuggestions = false;
+            },
+            removeTag(tagName) {
+              this.currentTags = this.currentTags.filter(tag => tag !== tagName);
+              updateTimelineTags(this.timelineId, this.currentTags);
+            },
+            selectSuggestion(tag) {
+              this.addTag(tag);
+            },
+            handleKeydown(event) {
+              if (event.key === 'Escape') {
+                this.showSuggestions = false;
+                this.tagInput = '';
+              }
+            }
+          }">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+            <div class="space-y-2">
+              <div class="flex flex-wrap gap-2">
+                <template x-for="tag in currentTags" :key="tag">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800">
+                    <span x-text="tag"></span>
+                    <button type="button"
+                            @click="removeTag(tag)"
+                            class="ml-2 hover:text-blue-600 transition-colors">
+                      <i class="material-icons text-sm">close</i>
+                    </button>
+                  </span>
+                </template>
+              </div>
+              <div class="relative">
+                <input type="text"
+                       placeholder="Add tags..."
+                       class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                       x-model="tagInput"
+                       @focus="showSuggestions = true"
+                       @input="showSuggestions = true"
+                       @keydown="handleKeydown($event)"
+                       @keydown.enter.prevent="addTag(tagInput)"
+                       @keydown.comma.prevent="addTag(tagInput)"
+                       @click.away="showSuggestions = false">
+
+                <!-- Autocomplete Dropdown -->
+                <div x-show="showSuggestions && (filteredSuggestions.length > 0 || availableTags.length > 0)"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-150"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
+                  <div class="py-1">
+                    <template x-for="tag in filteredSuggestions" :key="tag">
+                      <button type="button"
+                              @click="selectSuggestion(tag)"
+                              class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center text-gray-700 dark:text-gray-300">
+                        <i class="material-icons text-xs mr-2 text-gray-400">label</i>
+                        <span x-text="tag"></span>
+                      </button>
+                    </template>
+                    <div x-show="filteredSuggestions.length === 0 && tagInput.length > 0"
+                         class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">
+                      Press Enter to create "<span x-text="tagInput"></span>"
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="text-xs text-gray-500">
+                <span>Start typing for suggestions, or press Enter/comma to add tags. These help organize and categorize your timeline.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Universe Field -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Universe</label>
+            <%= f.select :universe_id,
+                options_from_collection_for_select(current_user.universes, :id, :name, timeline.universe_id),
+                { include_blank: "No universe" },
+                { class: "w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
+                  '@change': 'submitFormRemotely($el.form)' } %>
+            <div class="text-xs text-gray-500 mt-2">
+              <span>Organize this timeline within a universe to group related content together</span>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

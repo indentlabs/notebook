@@ -1,0 +1,165 @@
+<%#
+Tag Input Partial - Reusable tag input with autocomplete
+
+Locals:
+  - tags_array: Array of current tag strings (required)
+  - add_tag_action: JavaScript expression to call when adding a tag, receives 'tag' variable (required)
+  - remove_tag_action: JavaScript expression to call when removing a tag, receives 'tag' variable (required)
+  - suggestions_url: URL to fetch tag suggestions from (optional)
+  - static_suggestions: Array of static tag suggestions (optional, used if no URL)
+  - placeholder: Placeholder text for input (optional, default: "Add tag...")
+  - input_class: Additional CSS classes for input (optional)
+  - tag_class: CSS classes for tag badges (optional, default: blue theme)
+  - show_create_hint: Show "Press Enter to create" hint (optional, default: true)
+
+Example usage:
+  <%= render 'shared/tag_input',
+      tags_array: @timeline.page_tags.map(&:tag),
+      add_tag_action: "addTimelineTag(tag)",
+      remove_tag_action: "removeTimelineTag(tag)",
+      suggestions_url: timeline_tag_suggestions_path(@timeline),
+      placeholder: "Add timeline tags..." %>
+%>
+
+<% tags_array ||= [] %>
+<% placeholder ||= "Add tag..." %>
+<% tag_class ||= "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800" %>
+<% show_create_hint = true if local_assigns[:show_create_hint].nil? %>
+<% static_suggestions ||= [] %>
+
+<div class="tag-input-component space-y-2"
+     x-data="{
+       currentTags: <%= tags_array.to_json %>,
+       availableSuggestions: <%= static_suggestions.to_json %>,
+       tagInput: '',
+       showSuggestions: false,
+       loadingTags: [],
+       <% if local_assigns[:suggestions_url] %>
+       async init() {
+         try {
+           const response = await fetch('<%= suggestions_url %>');
+           if (response.ok) {
+             const data = await response.json();
+             this.availableSuggestions = data.suggestions || data || [];
+           }
+         } catch (error) {
+           console.error('Failed to load tag suggestions:', error);
+         }
+       },
+       <% end %>
+       get filteredSuggestions() {
+         const input = (this.tagInput || '').toLowerCase().trim();
+         return this.availableSuggestions
+           .filter(tag => {
+             const matchesInput = !input || tag.toLowerCase().includes(input);
+             const notAlreadyAdded = !this.currentTags.includes(tag);
+             return matchesInput && notAlreadyAdded;
+           })
+           .slice(0, 10);
+       },
+       isTagLoading(tag) {
+         return this.loadingTags.includes(tag);
+       },
+       addTag(tagName) {
+         if (!tagName || !tagName.trim()) return;
+         const tag = tagName.trim();
+         if (this.currentTags.includes(tag)) {
+           this.tagInput = '';
+           this.showSuggestions = false;
+           return;
+         }
+         this.currentTags.push(tag);
+         this.loadingTags.push(tag);
+         <%= add_tag_action %>;
+         this.loadingTags = this.loadingTags.filter(t => t !== tag);
+         this.tagInput = '';
+         this.showSuggestions = false;
+       },
+       removeTag(tagName) {
+         const tag = tagName;
+         this.loadingTags.push(tag);
+         this.currentTags = this.currentTags.filter(t => t !== tag);
+         <%= remove_tag_action %>;
+         this.loadingTags = this.loadingTags.filter(t => t !== tag);
+       },
+       handleKeydown(event) {
+         if (event.key === 'Escape') {
+           this.showSuggestions = false;
+           this.tagInput = '';
+         } else if (event.key === 'Enter') {
+           event.preventDefault();
+           this.addTag(this.tagInput);
+         } else if (event.key === ',') {
+           event.preventDefault();
+           this.addTag(this.tagInput);
+         }
+       }
+     }">
+
+  <!-- Current Tags Display -->
+  <div x-show="currentTags.length > 0" class="flex flex-wrap gap-2">
+    <template x-for="tag in currentTags" :key="tag">
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm border transition-all duration-200 <%= tag_class %>"
+            :class="isTagLoading(tag) ? 'opacity-50' : ''">
+        <!-- Loading spinner -->
+        <div x-show="isTagLoading(tag)" class="animate-spin rounded-full h-3 w-3 border-b border-current mr-1"></div>
+        <span x-text="tag"></span>
+        <button type="button"
+                @click="removeTag(tag)"
+                :disabled="isTagLoading(tag)"
+                class="ml-2 hover:opacity-70 transition-opacity"
+                :class="isTagLoading(tag) ? 'cursor-not-allowed' : 'cursor-pointer'">
+          <i class="material-icons text-sm">close</i>
+        </button>
+      </span>
+    </template>
+  </div>
+
+  <!-- Tag Input with Autocomplete -->
+  <div class="relative">
+    <input type="text"
+           x-model="tagInput"
+           @focus="showSuggestions = true"
+           @input="showSuggestions = true"
+           @keydown="handleKeydown($event)"
+           @click.away="showSuggestions = false"
+           placeholder="<%= placeholder %>"
+           class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 <%= local_assigns[:input_class] %>">
+
+    <!-- Autocomplete Dropdown -->
+    <div x-show="showSuggestions && (filteredSuggestions.length > 0 || tagInput.length > 0)"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+      <div class="py-1">
+        <!-- Suggestions -->
+        <template x-for="suggestion in filteredSuggestions" :key="suggestion">
+          <button type="button"
+                  @click="addTag(suggestion)"
+                  class="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center text-gray-700 dark:text-gray-300">
+            <i class="material-icons text-xs mr-2 text-gray-400">label</i>
+            <span x-text="suggestion"></span>
+          </button>
+        </template>
+
+        <% if show_create_hint %>
+          <!-- Create new tag hint -->
+          <div x-show="filteredSuggestions.length === 0 && tagInput.length > 0"
+               class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">
+            Press Enter to create "<span x-text="tagInput"></span>"
+          </div>
+        <% end %>
+
+        <!-- Empty state -->
+        <div x-show="filteredSuggestions.length === 0 && tagInput.length === 0 && availableSuggestions.length === 0"
+             class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400 italic">
+          Type to add a new tag
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

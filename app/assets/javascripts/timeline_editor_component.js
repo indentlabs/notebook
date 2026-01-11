@@ -1,90 +1,39 @@
-<div x-data="timelineEditor()" class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+// Timeline Editor Alpine.js Component
+// Extracted from timelines/edit.html.erb for maintainability
+//
+// Usage: Add a JSON data block in the view:
+// <script type="application/json" id="timeline-editor-init-data">
+//   <%= { timeline: {...}, tags: [...], ... }.to_json.html_safe %>
+// </script>
 
-  <%# Header Partial %>
-  <%= render 'timelines/edit/header', timeline: @timeline %>
+// Event types configuration - loaded from server via JSON block
+// This consolidates the previously duplicated icon/name maps
+let EVENT_TYPES = {};
 
-  <!-- Three-Column Layout -->
-  <div class="flex-1 flex min-h-0">
-    <%# Left Sidebar Partial %>
-    <%= render 'timelines/edit/left_sidebar',
-        timeline: @timeline,
-        timeline_event_tags: @timeline_event_tags,
-        timeline_content_summary: @timeline_content_summary %>
-
-    <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto min-h-0">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="timeline-events-container relative" data-timeline-id="<%= @timeline.id %>">
-          <!-- Timeline Rail - Extended to Header -->
-          <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700 timeline-spine rounded-full"></div>
-
-          <%# Timeline Overview Partial %>
-          <%= render 'timelines/edit/timeline_overview', timeline: @timeline %>
-
-          <!-- Timeline Events -->
-          <% if @timeline.timeline_events.any? %>
-            <% @timeline.timeline_events.includes(:timeline_event_entities).each_with_index do |event, index| %>
-              <%= render 'timeline_events/event_card', event: event, timeline: @timeline, index: index %>
-            <% end %>
-          <% else %>
-            <!-- Empty State -->
-            <div class="text-center py-16">
-              <div class="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center mb-6 shadow-sm">
-                <i class="material-icons text-4xl text-green-600">timeline</i>
-              </div>
-              <h3 class="text-xl font-semibold text-gray-900 mb-3">Your timeline is empty</h3>
-              <p class="text-gray-600 mb-8 max-w-md mx-auto">
-                Start building your timeline by adding your first event. Track important moments, plot points, and key developments in chronological order.
-              </p>
-              <button id="js-create-first-event"
-                      class="inline-flex items-center px-6 py-3 text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
-                <i class="material-icons text-lg mr-2">add</i>
-                Add Your First Event
-              </button>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </main>
-
-    <%# Inspector Panel Partial (Right Sidebar) %>
-    <%= render 'timelines/edit/inspector_panel', timeline: @timeline %>
-  </div>
-
-  <%# Settings Modal Partial %>
-  <%= render 'timelines/edit/settings_modal', timeline: @timeline %>
-
-  <%# Link Content Modal Partial %>
-  <%= render 'timelines/edit/link_content_modal',
-      timeline: @timeline,
-      timeline_linked_content: @timeline_linked_content,
-      current_user_content: @current_user_content %>
-
-  <%# Share Modal Partial %>
-  <%= render 'timelines/edit/share_modal', timeline: @timeline %>
-</div>
-
-<!-- Timeline Editor Initialization Data (for external JS files) -->
-<script type="application/json" id="timeline-editor-init-data">
-  <%= {
-    timeline: {
-      id: @timeline.id,
-      name: @timeline.name,
-      subtitle: @timeline.subtitle,
-      is_archived: @timeline.archived?
-    },
-    tags: @timeline.page_tags.map(&:tag),
-    timeline_event_tags: @timeline_event_tags.map { |t| t[:name] },
-    event_types: TimelineEvent::EVENT_TYPES.transform_values { |v| { icon: v[:icon], name: v[:name] } }
-  }.to_json.html_safe %>
-</script>
-
-<!-- JavaScript for Timeline Editor -->
-<!-- External files available: timeline_editor_component.js, timeline_form_helpers.js -->
-<script>
-// Create a direct Alpine.js component using object literal syntax
 function timelineEditor() {
+  // Load initialization data from JSON block
+  const initDataElement = document.getElementById('timeline-editor-init-data');
+  const initData = initDataElement ? JSON.parse(initDataElement.textContent) : {};
+
+  // Initialize EVENT_TYPES from server data
+  EVENT_TYPES = initData.event_types || {
+    'general': { icon: 'radio_button_checked', name: 'General' },
+    'setup': { icon: 'foundation', name: 'Setup' },
+    'exposition': { icon: 'info', name: 'Exposition' },
+    'inciting_incident': { icon: 'flash_on', name: 'Inciting Incident' },
+    'complication': { icon: 'warning', name: 'Complication' },
+    'obstacle': { icon: 'block', name: 'Obstacle' },
+    'conflict': { icon: 'gavel', name: 'Conflict' },
+    'progress': { icon: 'trending_up', name: 'Progress' },
+    'revelation': { icon: 'visibility', name: 'Revelation' },
+    'transformation': { icon: 'autorenew', name: 'Transformation' },
+    'climax': { icon: 'whatshot', name: 'Climax' },
+    'resolution': { icon: 'check_circle', name: 'Resolution' },
+    'aftermath': { icon: 'restore', name: 'Aftermath' }
+  };
+
   return {
+    // Modal and panel states
     showMetaPanel: false,
     showLinkModal: false,
     showShareModal: false,
@@ -92,44 +41,55 @@ function timelineEditor() {
     showMobileFilters: false,
     linkingEventId: null,
     draggedEvent: null,
+
+    // Search and filter state
     searchQuery: '',
     linkModalSearchQuery: '',
     selectedFilter: 'all',
     collapsedSections: {},
     contentSummaryCollapsed: {},
+
+    // Event selection state
     selectedEvents: [],
     selectedEventId: null,
     selectedEventData: null,
+
+    // Auto-save status
     autoSaveStatus: 'saved',
+
+    // Event sections and filters
     eventSections: {},
     eventTypeFilters: [],
     importanceFilters: [],
     statusFilters: [],
-    eventTags: {}, // Store tags for each event: { eventId: [tag1, tag2, ...] }
-    loadingTags: new Set(), // Track which tags are currently being processed
-    timelineTagSuggestions: [], // Available timeline tags for autocomplete
+
+    // Tag management
+    eventTags: {},
+    loadingTags: new Set(),
+    timelineTagSuggestions: [],
 
     // Tag filtering state
     showTagFilters: false,
-    showFilterSection: false, // For the new dedicated filter section
+    showFilterSection: false,
     selectedTagFilters: [],
-    tagFilterMode: 'filter', // 'filter' or 'highlight'
+    tagFilterMode: 'filter',
 
     // Reactive properties for real-time inspector panel updates
     liveTitle: '',
     liveTimeLabel: '',
     liveEndTimeLabel: '',
     liveDescription: '',
-    activeInputListeners: new Map(), // Track active listeners for cleanup
-    // Timeline form data
-    timelineName: '<%= j(@timeline.name) %>',
-    timelineSubtitle: '<%= j(@timeline.subtitle) %>',
+    activeInputListeners: new Map(),
+
+    // Timeline form data - loaded from JSON block
+    timelineName: initData.timeline?.name || '',
+    timelineSubtitle: initData.timeline?.subtitle || '',
 
     // Inline edit states
     editingTitle: false,
     editingSubtitle: false,
-    tempTitle: '<%= j(@timeline.name) %>',
-    tempSubtitle: '<%= j(@timeline.subtitle) %>',
+    tempTitle: initData.timeline?.name || '',
+    tempSubtitle: initData.timeline?.subtitle || '',
 
     // Initialize method
     init() {
@@ -139,7 +99,7 @@ function timelineEditor() {
       // Load timeline tag suggestions for autocomplete
       this.loadTimelineTagSuggestions();
 
-      // Add fallback click handlers for server-rendered events in case Alpine.js @click isn't working
+      // Add fallback click handlers for server-rendered events
       setTimeout(() => {
         const serverEventCards = document.querySelectorAll('.timeline-event-card:not(.js-template-event-card)');
 
@@ -148,14 +108,9 @@ function timelineEditor() {
           if (eventContainer) {
             const eventId = parseInt(eventContainer.getAttribute('data-event-id'));
 
-            // Add a JavaScript click listener as fallback
             card.addEventListener('click', (e) => {
-              // Check if Alpine.js handler already processed this
-              if (e.alpineProcessed) {
-                return;
-              }
+              if (e.alpineProcessed) return;
 
-              // Get event data from the card
               const titleEl = card.querySelector('input[name*="[title]"]');
               const timeEl = card.querySelector('input[name*="[time_label]"]');
               const descEl = card.querySelector('textarea[name*="[description]"]');
@@ -186,25 +141,25 @@ function timelineEditor() {
         const eventId = container.getAttribute('data-event-id');
         if (!eventId) return;
 
-        // Find the tags container for this event
         const tagContainer = container.querySelector(`#event-tags-${eventId}`);
         if (!tagContainer) {
           this.eventTags[eventId] = [];
           return;
         }
 
-        // Extract tag names from server-rendered spans
         const tagSpans = tagContainer.querySelectorAll('span');
         const tags = Array.from(tagSpans).map(span => span.textContent.trim());
-
         this.eventTags[eventId] = tags;
       });
     },
 
     // Load timeline tag suggestions for autocomplete
     async loadTimelineTagSuggestions() {
+      const timelineId = initData.timeline?.id;
+      if (!timelineId) return;
+
       try {
-        const response = await fetch(`/plan/timelines/<%= @timeline.id %>/tag_suggestions`);
+        const response = await fetch(`/plan/timelines/${timelineId}/tag_suggestions`);
         const data = await response.json();
         this.timelineTagSuggestions = data.suggestions || [];
       } catch (error) {
@@ -237,19 +192,14 @@ function timelineEditor() {
         return false;
       }
 
-      // Tag filter - only apply in filter mode, not highlight mode
+      // Tag filter - only apply in filter mode
       if (this.tagFilterMode === 'filter' && this.selectedTagFilters.length > 0) {
         const eventId = eventElement.getAttribute('data-event-id');
         const eventTags = this.getEventTags(eventId);
-
-        // Check if event has any of the selected tags
         const hasSelectedTag = this.selectedTagFilters.some(selectedTag =>
           eventTags.includes(selectedTag)
         );
-
-        if (!hasSelectedTag) {
-          return false;
-        }
+        if (!hasSelectedTag) return false;
       }
 
       // Type filter
@@ -273,8 +223,6 @@ function timelineEditor() {
     getEventDataFromElement(eventElement) {
       const title = eventElement.querySelector('input[name*="[title]"]')?.value || '';
       const description = eventElement.querySelector('textarea[name*="[description]"]')?.value || '';
-
-      // Use data attributes instead of form elements for reliable filtering
       const type = eventElement.dataset.eventType || eventElement.getAttribute('data-event-type') || 'general';
       const importance = eventElement.dataset.importance || eventElement.getAttribute('data-importance') || 'minor';
       const status = eventElement.dataset.status || eventElement.getAttribute('data-status') || 'completed';
@@ -317,15 +265,13 @@ function timelineEditor() {
           }, 200);
         }
 
-        // Update tag display for highlight mode (only when needed)
+        // Update tag display for highlight mode
         if (eventId && shouldShow && this.tagFilterMode === 'highlight' && this.selectedTagFilters.length > 0) {
           this.updateMainPanelTags(eventId);
         }
       });
 
-      // Update empty state
       this.updateEmptyState(visibleCount);
-
       return visibleCount;
     },
 
@@ -334,7 +280,6 @@ function timelineEditor() {
       let emptyState = eventsContainer.querySelector('.search-empty-state');
 
       if (visibleCount === 0 && this.searchQuery.length > 0) {
-        // Show search empty state
         if (!emptyState) {
           emptyState = document.createElement('div');
           emptyState.className = 'search-empty-state text-center py-16';
@@ -356,7 +301,6 @@ function timelineEditor() {
         }
         emptyState.style.display = 'block';
       } else {
-        // Hide search empty state
         if (emptyState) {
           emptyState.style.display = 'none';
         }
@@ -370,7 +314,6 @@ function timelineEditor() {
       this.linkModalSearchQuery = '';
       this.selectedFilter = 'all';
       this.showMobileFilters = false;
-      // Focus the search input after modal opens
       setTimeout(() => {
         const searchInput = document.querySelector('.link-modal-search');
         if (searchInput) searchInput.focus();
@@ -400,21 +343,17 @@ function timelineEditor() {
     },
 
     isContentSummaryCollapsed(contentType) {
-      // Default to collapsed (true) on first load to handle lots of content
       return this.contentSummaryCollapsed[contentType] ?? true;
     },
 
     linkableContentMatches(contentName, contentType) {
-
       // First check filter selection
       if (this.selectedFilter && this.selectedFilter !== 'all') {
-        // Special case for timeline filter
         if (this.selectedFilter === 'timeline') {
           if (contentName !== 'timeline' && contentType !== 'timeline') {
             return false;
           }
         } else {
-          // Regular content type filter
           if (this.selectedFilter !== contentType.toLowerCase()) {
             return false;
           }
@@ -427,7 +366,6 @@ function timelineEditor() {
         return contentName.toLowerCase().includes(query);
       }
 
-      // If no search query and filter matches (or is 'all'), show the content
       return true;
     },
 
@@ -463,25 +401,18 @@ function timelineEditor() {
       this.selectedEventId = eventId;
       this.selectedEventData = eventData;
 
-      // Set up live form listeners for real-time inspector panel updates
       this.setupLiveFormListeners(eventId);
-
-      // Update sidebar linked content
       this.updateSidebarLinkedContent(eventId);
 
-      // Load tags for this event - use provided tags or ensure they're cached
       if (eventData && eventData.tags) {
         this.eventTags[eventId] = eventData.tags;
-        // Only update tag display if tags were actually provided
         if (eventData.tags.length > 0) {
           this.updateMainPanelTags(eventId);
         }
       } else {
-        // getEventTags() will handle caching from DOM if needed
         this.getEventTags(eventId);
       }
 
-      // Scroll inspector panel to top
       const inspectorContent = document.querySelector('.w-96 .overflow-y-auto');
       if (inspectorContent) {
         inspectorContent.scrollTop = 0;
@@ -496,66 +427,50 @@ function timelineEditor() {
 
     // Set up real-time input listeners for inspector panel updates
     setupLiveFormListeners(eventId) {
-      // Clear any existing listeners first
       this.clearInputListeners();
 
-      // Find form inputs for this event
       const eventContainer = document.querySelector(`[data-event-id="${eventId}"]`);
-      if (!eventContainer) {
-        return;
-      }
+      if (!eventContainer) return;
 
       const titleInput = eventContainer.querySelector('input[name*="[title]"]');
       const timeLabelInput = eventContainer.querySelector('input[name*="[time_label]"]');
       const endTimeLabelInput = eventContainer.querySelector('input[name*="[end_time_label]"]');
       const descriptionTextarea = eventContainer.querySelector('textarea[name*="[description]"]');
 
-      // Set initial values
       this.liveTitle = titleInput?.value || 'Untitled Event';
       this.liveTimeLabel = timeLabelInput?.value || '';
       this.liveEndTimeLabel = endTimeLabelInput?.value || '';
       this.liveDescription = descriptionTextarea?.value || '';
 
-      // Create and store event listeners
       const listeners = [];
 
       if (titleInput) {
-        const titleListener = (e) => {
-          this.liveTitle = e.target.value || 'Untitled Event';
-        };
+        const titleListener = (e) => { this.liveTitle = e.target.value || 'Untitled Event'; };
         titleInput.addEventListener('input', titleListener);
         listeners.push({ element: titleInput, type: 'input', listener: titleListener });
       }
 
       if (timeLabelInput) {
-        const timeLabelListener = (e) => {
-          this.liveTimeLabel = e.target.value || '';
-        };
+        const timeLabelListener = (e) => { this.liveTimeLabel = e.target.value || ''; };
         timeLabelInput.addEventListener('input', timeLabelListener);
         listeners.push({ element: timeLabelInput, type: 'input', listener: timeLabelListener });
       }
 
       if (endTimeLabelInput) {
-        const endTimeLabelListener = (e) => {
-          this.liveEndTimeLabel = e.target.value || '';
-        };
+        const endTimeLabelListener = (e) => { this.liveEndTimeLabel = e.target.value || ''; };
         endTimeLabelInput.addEventListener('input', endTimeLabelListener);
         listeners.push({ element: endTimeLabelInput, type: 'input', listener: endTimeLabelListener });
       }
 
       if (descriptionTextarea) {
-        const descriptionListener = (e) => {
-          this.liveDescription = e.target.value || '';
-        };
+        const descriptionListener = (e) => { this.liveDescription = e.target.value || ''; };
         descriptionTextarea.addEventListener('input', descriptionListener);
         listeners.push({ element: descriptionTextarea, type: 'input', listener: descriptionListener });
       }
 
-      // Store listeners for cleanup
       this.activeInputListeners.set(eventId, listeners);
     },
 
-    // Clear all active input listeners
     clearInputListeners() {
       this.activeInputListeners.forEach((listeners, eventId) => {
         listeners.forEach(({ element, type, listener }) => {
@@ -564,8 +479,6 @@ function timelineEditor() {
       });
 
       this.activeInputListeners.clear();
-
-      // Reset live data
       this.liveTitle = '';
       this.liveTimeLabel = '';
       this.liveEndTimeLabel = '';
@@ -575,14 +488,10 @@ function timelineEditor() {
     // Update sidebar linked content
     updateSidebarLinkedContent(eventId) {
       const sidebarContainer = document.getElementById('sidebar-linked-content');
-      if (!sidebarContainer) {
-        return;
-      }
+      if (!sidebarContainer) return;
 
-      // Find the main timeline linked content for this event
       const mainLinkedContent = document.querySelector(`#linked-content-${eventId}`);
       if (!mainLinkedContent) {
-        // Show empty state
         sidebarContainer.innerHTML = `
           <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
             <i class="material-icons text-xs mr-1">info</i>
@@ -592,11 +501,9 @@ function timelineEditor() {
         return;
       }
 
-      // Extract linked entities from the main content
       const linkedCards = mainLinkedContent.querySelectorAll('.linked-content-card');
 
       if (linkedCards.length === 0) {
-        // Show empty state
         sidebarContainer.innerHTML = `
           <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
             <i class="material-icons text-xs mr-1">info</i>
@@ -606,7 +513,6 @@ function timelineEditor() {
         return;
       }
 
-      // Build compact vertical list
       let sidebarHTML = '';
       linkedCards.forEach(card => {
         const nameLink = card.querySelector('.type-badge a');
@@ -643,55 +549,31 @@ function timelineEditor() {
       sidebarContainer.innerHTML = sidebarHTML;
     },
 
-    // Computed properties for live form data reading (now using reactive data with DOM fallback)
+    // Computed properties for live form data
     get selectedEventTitle() {
       if (!this.selectedEventId) return '';
-
-      // Use reactive data if available (updated by input listeners)
-      if (this.liveTitle) {
-        return this.liveTitle;
-      }
-
-      // Fallback to DOM query for initial load
+      if (this.liveTitle) return this.liveTitle;
       const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[title]"]`);
       return input?.value || 'Untitled Event';
     },
 
     get selectedEventTimeLabel() {
       if (!this.selectedEventId) return '';
-
-      // Use reactive data if available (updated by input listeners)
-      if (this.liveTimeLabel !== '') {
-        return this.liveTimeLabel;
-      }
-
-      // Fallback to DOM query for initial load
+      if (this.liveTimeLabel !== '') return this.liveTimeLabel;
       const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[time_label]"]`);
       return input?.value || '';
     },
 
     get selectedEventEndTimeLabel() {
       if (!this.selectedEventId) return '';
-
-      // Use reactive data if available (updated by input listeners)
-      if (this.liveEndTimeLabel !== '') {
-        return this.liveEndTimeLabel;
-      }
-
-      // Fallback to DOM query for initial load
+      if (this.liveEndTimeLabel !== '') return this.liveEndTimeLabel;
       const input = document.querySelector(`[data-event-id="${this.selectedEventId}"] input[name*="[end_time_label]"]`);
       return input?.value || '';
     },
 
     get selectedEventDescription() {
       if (!this.selectedEventId) return '';
-
-      // Use reactive data if available (updated by input listeners)
-      if (this.liveDescription !== '') {
-        return this.liveDescription;
-      }
-
-      // Fallback to DOM query for initial load
+      if (this.liveDescription !== '') return this.liveDescription;
       const textarea = document.querySelector(`[data-event-id="${this.selectedEventId}"] textarea[name*="[description]"]`);
       return textarea?.value || '';
     },
@@ -701,68 +583,34 @@ function timelineEditor() {
       return this.selectedEventData?.event_type || 'general';
     },
 
-    // Event type helper methods
+    // Event type helper methods - now using consolidated EVENT_TYPES
     getEventTypeIcon(eventId) {
       if (!eventId) return 'radio_button_checked';
       const eventType = this.selectedEventData?.event_type || 'general';
-      const eventTypeMap = {
-        'general': 'radio_button_checked',
-        'setup': 'foundation',
-        'exposition': 'info',
-        'inciting_incident': 'flash_on',
-        'complication': 'warning',
-        'obstacle': 'block',
-        'conflict': 'gavel',
-        'progress': 'trending_up',
-        'revelation': 'visibility',
-        'transformation': 'autorenew',
-        'climax': 'whatshot',
-        'resolution': 'check_circle',
-        'aftermath': 'restore'
-      };
-      return eventTypeMap[eventType] || 'radio_button_checked';
+      return EVENT_TYPES[eventType]?.icon || 'radio_button_checked';
     },
 
     getEventTypeName(eventId) {
       if (!eventId) return 'General';
       const eventType = this.selectedEventData?.event_type || 'general';
-      const eventTypeMap = {
-        'general': 'General',
-        'setup': 'Setup',
-        'exposition': 'Exposition',
-        'inciting_incident': 'Inciting Incident',
-        'complication': 'Complication',
-        'obstacle': 'Obstacle',
-        'conflict': 'Conflict',
-        'progress': 'Progress',
-        'revelation': 'Revelation',
-        'transformation': 'Transformation',
-        'climax': 'Climax',
-        'resolution': 'Resolution',
-        'aftermath': 'Aftermath'
-      };
-      return eventTypeMap[eventType] || 'General';
+      return EVENT_TYPES[eventType]?.name || 'General';
     },
 
     // Update event type and refresh timeline dot
     updateEventType(newType) {
       if (!this.selectedEventId) return;
 
-      // Update the selected event data
       if (this.selectedEventData) {
         this.selectedEventData.event_type = newType;
       }
 
-      // Find the event form and submit the update
       const eventContainer = document.querySelector(`[data-event-id="${this.selectedEventId}"]`);
       if (eventContainer) {
-        // Create a form to submit the event type update
         const form = document.createElement('form');
         form.setAttribute('method', 'POST');
         form.setAttribute('action', `/plan/timeline_events/${this.selectedEventId}`);
         form.classList.add('autosave-form');
 
-        // Add CSRF token
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         if (csrfToken) {
           const csrfInput = document.createElement('input');
@@ -772,59 +620,26 @@ function timelineEditor() {
           form.appendChild(csrfInput);
         }
 
-        // Add method override
         const methodInput = document.createElement('input');
         methodInput.type = 'hidden';
         methodInput.name = '_method';
         methodInput.value = 'patch';
         form.appendChild(methodInput);
 
-        // Add event type
         const eventTypeInput = document.createElement('input');
         eventTypeInput.type = 'hidden';
         eventTypeInput.name = 'timeline_event[event_type]';
         eventTypeInput.value = newType;
         form.appendChild(eventTypeInput);
 
-        // Submit via our existing auto-save mechanism
         submitFormWithFetch(form);
 
-        // Update the timeline dot icon and tooltip immediately
+        // Update the timeline dot icon using consolidated EVENT_TYPES
         const timelineDotContainer = eventContainer.querySelector('.timeline-dot');
         const timelineDot = timelineDotContainer?.querySelector('i');
         if (timelineDot && timelineDotContainer) {
-          const iconMap = {
-            'general': 'radio_button_checked',
-            'setup': 'foundation',
-            'exposition': 'info',
-            'inciting_incident': 'flash_on',
-            'complication': 'warning',
-            'obstacle': 'block',
-            'conflict': 'gavel',
-            'progress': 'trending_up',
-            'revelation': 'visibility',
-            'transformation': 'autorenew',
-            'climax': 'whatshot',
-            'resolution': 'check_circle',
-            'aftermath': 'restore'
-          };
-          const nameMap = {
-            'general': 'General',
-            'setup': 'Setup',
-            'exposition': 'Exposition',
-            'inciting_incident': 'Inciting Incident',
-            'complication': 'Complication',
-            'obstacle': 'Obstacle',
-            'conflict': 'Conflict',
-            'progress': 'Progress',
-            'revelation': 'Revelation',
-            'transformation': 'Transformation',
-            'climax': 'Climax',
-            'resolution': 'Resolution',
-            'aftermath': 'Aftermath'
-          };
-          timelineDot.textContent = iconMap[newType] || 'radio_button_checked';
-          timelineDotContainer.title = nameMap[newType] || 'General';
+          timelineDot.textContent = EVENT_TYPES[newType]?.icon || 'radio_button_checked';
+          timelineDotContainer.title = EVENT_TYPES[newType]?.name || 'General';
         }
       }
     },
@@ -833,12 +648,10 @@ function timelineEditor() {
     getEventTags(eventId) {
       if (!eventId) return [];
 
-      // If we have cached tags, return them
       if (this.eventTags[eventId]) {
         return this.eventTags[eventId];
       }
 
-      // Fallback: scrape tags from DOM if not in cache
       const tagContainer = document.querySelector(`#event-tags-${eventId}`);
       if (!tagContainer) {
         this.eventTags[eventId] = [];
@@ -847,8 +660,6 @@ function timelineEditor() {
 
       const tagSpans = tagContainer.querySelectorAll('span');
       const tags = Array.from(tagSpans).map(span => span.textContent.trim());
-
-      // Cache the scraped tags
       this.eventTags[eventId] = tags;
       return tags;
     },
@@ -856,15 +667,12 @@ function timelineEditor() {
     loadEventTags(eventId) {
       if (!eventId) return;
 
-      // Find the event's existing tags from the server-rendered data
       const eventContainer = document.querySelector(`[data-event-id="${eventId}"]`);
       if (!eventContainer) {
         this.eventTags[eventId] = [];
         return;
       }
 
-      // For now, initialize empty array - in future could fetch from API
-      // The tags will be loaded when the page renders with existing data
       this.eventTags[eventId] = [];
     },
 
@@ -872,34 +680,22 @@ function timelineEditor() {
       if (!this.selectedEventId || !tagName.trim()) return;
 
       const cleanTagName = tagName.trim();
-
-      // Check if tag already exists
       const existingTags = this.getEventTags(this.selectedEventId);
-      if (existingTags.includes(cleanTagName)) {
-        return; // Tag already exists
-      }
+      if (existingTags.includes(cleanTagName)) return;
 
-      // Optimistically add tag to local state immediately
       if (!this.eventTags[this.selectedEventId]) {
         this.eventTags[this.selectedEventId] = [];
       }
       this.eventTags[this.selectedEventId].push(cleanTagName);
 
-      // Clear tag container cache for this event
       if (this._tagContainerCache) {
         this._tagContainerCache.delete(this.selectedEventId);
       }
 
-      // Update the main panel tag display
       this.updateMainPanelTags(this.selectedEventId);
-
-      // Mark this tag as loading
       this.loadingTags.add(`${this.selectedEventId}-${cleanTagName}`);
-
-      // Set loading state
       this.autoSaveStatus = 'saving';
 
-      // Make API call to add tag
       fetch(`/plan/timeline_events/${this.selectedEventId}/tags`, {
         method: 'POST',
         headers: {
@@ -907,21 +703,16 @@ function timelineEditor() {
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content'),
           'Accept': 'application/json'
         },
-        body: JSON.stringify({
-          tag_name: cleanTagName
-        })
+        body: JSON.stringify({ tag_name: cleanTagName })
       })
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          // Remove loading state for this tag
           this.loadingTags.delete(`${this.selectedEventId}-${cleanTagName}`);
-
-          // Tag was already added optimistically, just update save status
           this.autoSaveStatus = 'saved';
           setTimeout(() => {
             if (this.autoSaveStatus === 'saved') {
-              this.autoSaveStatus = 'saved'; // Keep it visible for a moment
+              this.autoSaveStatus = 'saved';
             }
           }, 1000);
         } else {
@@ -931,24 +722,18 @@ function timelineEditor() {
       .catch(error => {
         console.error('Error adding tag:', error);
         this.autoSaveStatus = 'error';
-
-        // Remove loading state for this tag
         this.loadingTags.delete(`${this.selectedEventId}-${cleanTagName}`);
 
-        // Remove the optimistically added tag since the request failed
         if (this.eventTags[this.selectedEventId]) {
           this.eventTags[this.selectedEventId] = this.eventTags[this.selectedEventId].filter(tag => tag !== cleanTagName);
         }
 
-        // Clear tag container cache for this event
         if (this._tagContainerCache) {
           this._tagContainerCache.delete(this.selectedEventId);
         }
 
-        // Update the main panel tag display
         this.updateMainPanelTags(this.selectedEventId);
 
-        // Show error for a few seconds, then revert
         setTimeout(() => {
           if (this.autoSaveStatus === 'error') {
             this.autoSaveStatus = 'saved';
@@ -960,29 +745,20 @@ function timelineEditor() {
     removeEventTag(tagName) {
       if (!this.selectedEventId || !tagName) return;
 
-      // Store the original tags for rollback if needed
       const originalTags = [...(this.eventTags[this.selectedEventId] || [])];
-
-      // Mark this tag as loading before removal
       this.loadingTags.add(`${this.selectedEventId}-${tagName}`);
 
-      // Optimistically remove tag from local state immediately
       if (this.eventTags[this.selectedEventId]) {
         this.eventTags[this.selectedEventId] = this.eventTags[this.selectedEventId].filter(tag => tag !== tagName);
       }
 
-      // Clear tag container cache for this event
       if (this._tagContainerCache) {
         this._tagContainerCache.delete(this.selectedEventId);
       }
 
-      // Update the main panel tag display
       this.updateMainPanelTags(this.selectedEventId);
-
-      // Set loading state
       this.autoSaveStatus = 'saving';
 
-      // Make API call to remove tag
       fetch(`/plan/timeline_events/${this.selectedEventId}/tags/${encodeURIComponent(tagName)}`, {
         method: 'DELETE',
         headers: {
@@ -993,14 +769,11 @@ function timelineEditor() {
       .then(response => response.json())
       .then(data => {
         if (data.status === 'success') {
-          // Remove loading state for this tag
           this.loadingTags.delete(`${this.selectedEventId}-${tagName}`);
-
-          // Tag was already removed optimistically, just update save status
           this.autoSaveStatus = 'saved';
           setTimeout(() => {
             if (this.autoSaveStatus === 'saved') {
-              this.autoSaveStatus = 'saved'; // Keep it visible for a moment
+              this.autoSaveStatus = 'saved';
             }
           }, 1000);
         } else {
@@ -1010,22 +783,15 @@ function timelineEditor() {
       .catch(error => {
         console.error('Error removing tag:', error);
         this.autoSaveStatus = 'error';
-
-        // Remove loading state for this tag
         this.loadingTags.delete(`${this.selectedEventId}-${tagName}`);
-
-        // Restore the original tags since the request failed
         this.eventTags[this.selectedEventId] = originalTags;
 
-        // Clear tag container cache for this event
         if (this._tagContainerCache) {
           this._tagContainerCache.delete(this.selectedEventId);
         }
 
-        // Update the main panel tag display
         this.updateMainPanelTags(this.selectedEventId);
 
-        // Show error for a few seconds, then revert
         setTimeout(() => {
           if (this.autoSaveStatus === 'error') {
             this.autoSaveStatus = 'saved';
@@ -1034,14 +800,11 @@ function timelineEditor() {
       });
     },
 
-    // Helper method to check if a tag is currently loading
     isTagLoading(eventId, tagName) {
       return this.loadingTags.has(`${eventId}-${tagName}`);
     },
 
-    // Update the main panel tag display for an event
     updateMainPanelTags(eventId) {
-      // Cache DOM query
       if (!this._tagContainerCache) {
         this._tagContainerCache = new Map();
       }
@@ -1056,13 +819,11 @@ function timelineEditor() {
       const eventTags = this.getEventTags(eventId);
 
       if (eventTags.length === 0) {
-        // Batch DOM updates
         if (!tagContainer.classList.contains('hidden')) {
           tagContainer.classList.add('hidden');
           tagContainer.innerHTML = '';
         }
       } else {
-        // Check if we need to update highlighting
         const needsHighlightUpdate = this.tagFilterMode === 'highlight' && this.selectedTagFilters.length > 0;
         const currentContent = tagContainer.innerHTML;
 
@@ -1079,7 +840,6 @@ function timelineEditor() {
           `;
         }).join('');
 
-        // Only update DOM if content actually changed
         if (currentContent !== newContent) {
           tagContainer.classList.remove('hidden');
           tagContainer.innerHTML = newContent;
@@ -1087,12 +847,10 @@ function timelineEditor() {
       }
     },
 
-    // Clear all tag filters
     clearTagFilters() {
       this.selectedTagFilters = [];
       this.applyEventFilters();
 
-      // Only update tag displays if we were in highlight mode
       if (this.tagFilterMode === 'highlight') {
         Object.keys(this.eventTags).forEach(eventId => {
           this.updateMainPanelTags(eventId);
@@ -1100,7 +858,6 @@ function timelineEditor() {
       }
     },
 
-    // Handle tag filter mode change
     changeTagFilterMode(newMode) {
       this.tagFilterMode = newMode;
       this.applyEventFilters();
@@ -1134,165 +891,3 @@ function timelineEditor() {
     }
   };
 }
-
-
-// Global function for updating timeline tags
-function updateTimelineTags(timelineId, tags) {
-  const tagString = tags.join(',,,|||,,,');
-  console.log('Sending tags:', tagString, 'from array:', tags);
-
-  // Create a temporary form to submit the tag update
-  const form = document.createElement('form');
-  form.method = 'POST';
-  form.action = `/plan/timelines/${timelineId}`;
-  form.style.display = 'none';
-
-  // Add CSRF token
-  const csrfInput = document.createElement('input');
-  csrfInput.type = 'hidden';
-  csrfInput.name = 'authenticity_token';
-  csrfInput.value = document.querySelector('meta[name=csrf-token]').content;
-  form.appendChild(csrfInput);
-
-  // Add method override for PATCH
-  const methodInput = document.createElement('input');
-  methodInput.type = 'hidden';
-  methodInput.name = '_method';
-  methodInput.value = 'patch';
-  form.appendChild(methodInput);
-
-  // Add tags field - send all current tags
-  const tagsInput = document.createElement('input');
-  tagsInput.type = 'hidden';
-  tagsInput.name = 'timeline[page_tags]';
-  tagsInput.value = tagString;
-  form.appendChild(tagsInput);
-
-  // Submit form
-  document.body.appendChild(form);
-  return fetch(form.action, {
-    method: 'PATCH',
-    body: new FormData(form),
-    headers: {
-      'X-CSRF-Token': csrfInput.value,
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    console.log('Tags update successful:', data);
-    // Set status to indicate successful save
-    const alpineEl = document.querySelector('[x-data*="timelineEditor"]');
-    if (alpineEl && window.Alpine) {
-      Alpine.$data(alpineEl).autoSaveStatus = 'saved';
-      setTimeout(() => {
-        if (Alpine.$data(alpineEl).autoSaveStatus === 'saved') {
-          Alpine.$data(alpineEl).autoSaveStatus = 'saved';
-        }
-      }, 2000);
-    }
-  })
-  .catch(error => {
-    console.error('Error updating tags:', error);
-    // Revert to server state on error by reloading
-    location.reload();
-  })
-  .finally(() => {
-    document.body.removeChild(form);
-  });
-}
-
-// Helper function to submit forms remotely
-function submitFormRemotely(form) {
-
-  if (form.getAttribute('data-remote') !== 'true') {
-    form.setAttribute('data-remote', 'true');
-  }
-
-
-  // Use Rails UJS to submit the form remotely
-  if (typeof Rails !== 'undefined' && Rails.fire) {
-    Rails.fire(form, 'submit');
-  } else {
-    // Manual AJAX implementation since Rails UJS is not working
-    submitFormWithFetch(form);
-  }
-}
-
-// Manual AJAX form submission function
-function submitFormWithFetch(form) {
-
-  // Set auto-save status to saving
-  const alpineEl = document.querySelector('[x-data]');
-  if (alpineEl) {
-    Alpine.$data(alpineEl).autoSaveStatus = 'saving';
-  }
-
-  const formData = new FormData(form);
-  const url = form.action;
-  const method = form.method.toUpperCase();
-
-  // Add Rails authenticity token if not present
-  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-  if (csrfToken && !formData.has('authenticity_token')) {
-    formData.append('authenticity_token', csrfToken);
-  }
-
-
-  fetch(url, {
-    method: method,
-    body: formData,
-    headers: {
-      'X-CSRF-Token': csrfToken,
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-  })
-  .then(data => {
-
-    // Trigger success event manually
-    const successEvent = new CustomEvent('ajax:success', {
-      detail: [data],
-      bubbles: true,
-      cancelable: true
-    });
-    form.dispatchEvent(successEvent);
-
-    // Update auto-save status
-    if (alpineEl) {
-      Alpine.$data(alpineEl).autoSaveStatus = 'saved';
-      setTimeout(() => {
-        Alpine.$data(alpineEl).autoSaveStatus = 'saved';
-      }, 2000);
-    }
-  })
-  .catch(error => {
-
-    // Trigger error event manually
-    const errorEvent = new CustomEvent('ajax:error', {
-      detail: [null, { status: 'error', message: error.message }],
-      bubbles: true,
-      cancelable: true
-    });
-    form.dispatchEvent(errorEvent);
-
-    // Update auto-save status
-    if (alpineEl) {
-      Alpine.$data(alpineEl).autoSaveStatus = 'error';
-    }
-  });
-}
-</script>

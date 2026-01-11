@@ -1,0 +1,159 @@
+<%# Settings Modal Partial %>
+<%# Locals: timeline %>
+
+<!-- Settings Panel (Floating Card) -->
+<div x-show="showMetaPanel"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-95 -translate-y-4"
+     x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+     x-transition:leave="transition ease-in duration-200"
+     x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+     x-transition:leave-end="opacity-0 scale-95 -translate-y-4"
+     class="fixed inset-0 z-40 overflow-y-auto bg-black bg-opacity-25 backdrop-blur-sm"
+     style="display: none;"
+     @click.self="showMetaPanel = false">
+  <div class="flex items-start justify-center min-h-screen pt-16 px-4">
+    <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-4xl w-full mx-auto border border-gray-100 dark:border-gray-700">
+      <!-- Close Button -->
+      <button @click="showMetaPanel = false"
+              class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors z-10">
+        <i class="material-icons text-lg">close</i>
+      </button>
+
+      <!-- Panel Header -->
+      <div class="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-green-100 dark:bg-green-900">
+            <i class="material-icons text-green-600 text-lg">settings</i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Timeline Settings</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Configure your timeline details and metadata</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel Content -->
+      <div class="px-8 py-6 space-y-8">
+        <!-- Timeline Actions -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+            <i class="material-icons text-gray-600 dark:text-gray-400 mr-2">manage_history</i>
+            Timeline Actions
+          </h3>
+
+          <div class="space-y-4"
+               x-data="{
+                 isArchived: <%= timeline.archived? %>,
+                 isLoading: false,
+                 async toggleArchive() {
+                   const confirmMsg = this.isArchived
+                     ? 'Are you sure you want to unarchive this timeline?'
+                     : 'Are you sure you want to archive this timeline?';
+                   if (!confirm(confirmMsg)) return;
+
+                   this.isLoading = true;
+                   try {
+                     const response = await fetch('<%= toggle_archive_timeline_path(timeline) %>', {
+                       method: 'POST',
+                       headers: {
+                         'Accept': 'application/json',
+                         'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                       }
+                     });
+                     const data = await response.json();
+                     if (data.success) {
+                       this.isArchived = data.archived;
+                       if (window.showToast) {
+                         window.showToast(this.isArchived ? 'Timeline archived' : 'Timeline un-archived', 'success');
+                       }
+                     } else {
+                       if (window.showToast) window.showToast(data.error || 'Something went wrong', 'error');
+                     }
+                   } catch (error) {
+                     console.error('Error:', error);
+                     if (window.showToast) window.showToast('An error occurred', 'error');
+                   } finally {
+                     this.isLoading = false;
+                   }
+                 }
+               }">
+            <!-- Archive/Unarchive Action -->
+            <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center mb-2">
+                    <i class="material-icons text-blue-600 mr-2" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                      <span x-text="isArchived ? 'Unarchive Timeline' : 'Archive Timeline'"></span>
+                    </h4>
+                  </div>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3" x-show="isArchived">
+                    This timeline is currently archived and hidden from your main timeline list.
+                    Unarchive it to make it active again.
+                  </p>
+                  <p class="text-xs text-blue-700 dark:text-blue-300" x-show="isArchived">
+                    <i class="material-icons text-xs mr-1">info</i>
+                    Archived timeline content is preserved and can be restored at any time.
+                  </p>
+                  <p class="text-sm text-gray-700 dark:text-gray-300 mb-3" x-show="!isArchived">
+                    Archive this timeline to hide it from your main timeline list while preserving all content and events.
+                    You can unarchive it at any time.
+                  </p>
+                  <p class="text-xs text-blue-700 dark:text-blue-300" x-show="!isArchived">
+                    <i class="material-icons text-xs mr-1">info</i>
+                    Archiving is reversible and keeps all your timeline data intact.
+                  </p>
+                </div>
+                <div class="ml-6">
+                  <button @click="toggleArchive()"
+                          :disabled="isLoading"
+                          :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+                          class="inline-flex items-center px-4 py-2 border border-blue-300 dark:border-blue-700 text-sm font-medium rounded-lg text-blue-700 dark:text-blue-300 bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    <i class="material-icons text-lg mr-2" x-text="isArchived ? 'unarchive' : 'archive'"></i>
+                    <span x-text="isArchived ? 'Unarchive' : 'Archive'"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
+          <h3 class="text-lg font-semibold text-red-900 mb-4 flex items-center">
+            <i class="material-icons text-red-600 mr-2">warning</i>
+            Danger Zone
+          </h3>
+
+          <div class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 border border-red-200 dark:border-red-800 dark:border-opacity-50 rounded-lg p-6">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center mb-2">
+                  <i class="material-icons text-red-600 mr-2">delete_forever</i>
+                  <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100">Delete Timeline</h4>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                  Permanently delete this timeline and all its events. This action cannot be undone.
+                </p>
+                <p class="text-xs text-red-700 dark:text-red-400">
+                  <i class="material-icons text-xs mr-1">warning</i>
+                  This will permanently remove all timeline events, linked content, and metadata.
+                </p>
+              </div>
+              <div class="ml-6">
+                <%= link_to timeline_path(timeline),
+                    method: :delete,
+                    data: { confirm: "Are you sure you want to permanently delete this timeline?\n\nThis will delete:\n• All timeline events\n• All linked content connections\n• All timeline metadata\n\nThis action cannot be undone!" },
+                    class: "inline-flex items-center px-4 py-2 border border-red-300 dark:border-red-700 text-sm font-medium rounded-lg text-red-700 dark:text-red-400 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
+                  <i class="material-icons text-lg mr-2">delete_forever</i>
+                  Delete Timeline
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
