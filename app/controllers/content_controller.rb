@@ -748,26 +748,32 @@ class ContentController < ApplicationController
     # TODO: move this into a link mention update job
     valid_reference_ids = []
     referenced_page_codes = JSON.parse(attribute_value.value)
+
+    # Preload existing references to avoid N+1 queries in the loop
+    existing_references = referencing_page.outgoing_page_references
+      .where(attribute_field_id: @attribute_field.id, reference_type: 'linked')
+      .index_by { |ref| "#{ref.referenced_page_type}-#{ref.referenced_page_id}" }
+
     referenced_page_codes.each do |page_code|
       page_type, page_id = page_code.split('-')
 
-      reference = referencing_page.outgoing_page_references.find_or_initialize_by(
-        referenced_page_type:  page_type,
-        referenced_page_id:    page_id,
-        attribute_field_id:    @attribute_field.id,
-        reference_type:        'linked'
+      reference = existing_references[page_code] || referencing_page.outgoing_page_references.build(
+        referenced_page_type: page_type,
+        referenced_page_id: page_id,
+        attribute_field_id: @attribute_field.id,
+        reference_type: 'linked'
       )
       reference.cached_relation_title = @attribute_field.label
       reference.save!
 
-      valid_reference_ids << reference.reload.id
+      valid_reference_ids << reference.id
     end
 
     # Delete all other references still attached to this field, but not present in this request
     referencing_page.outgoing_page_references
       .where(attribute_field_id: @attribute_field.id)
       .where.not(id: valid_reference_ids)
-      .destroy_all
+      .delete_all
   end
 
   # Content update for name fields
