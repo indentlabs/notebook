@@ -66,11 +66,6 @@
       
       <!-- Publication Controls -->
       <div class="flex items-center space-x-3">
-        <!-- Dark Mode Toggle -->
-        <button type="button" id="theme-toggle" class="p-2 text-white text-shadow hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full transition-all duration-200" title="Toggle dark mode">
-          <i class="material-icons text-sm">dark_mode</i>
-        </button>
-
         <!-- Share Publication -->
         <button type="button" class="share-publication p-2 text-white text-shadow hover:text-gray-200 hover:bg-white hover:bg-opacity-20 rounded-full transition-all duration-200" title="Share this collection">
           <i class="material-icons text-sm">share</i>
@@ -918,30 +913,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   lazyImages.forEach(img => imageObserver.observe(img));
 
-  // Dark mode toggle
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-  
-  // Check for saved theme preference
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme) {
-    html.classList.toggle('dark', savedTheme === 'dark');
-    updateThemeIcon(savedTheme === 'dark');
-  }
-  
-  themeToggle?.addEventListener('click', function() {
-    const isDark = html.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    updateThemeIcon(isDark);
-  });
-  
-  function updateThemeIcon(isDark) {
-    const icon = themeToggle?.querySelector('i');
-    if (icon) {
-      icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-    }
-  }
-
   // Share functionality
   const shareButtons = document.querySelectorAll('.share-publication');
   shareButtons.forEach(button => {
@@ -1206,18 +1177,7 @@ document.addEventListener('DOMContentLoaded', function() {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
-    /* Dark mode styles - scoped to main content only to avoid affecting navbar */
-    .dark main .bg-white { background-color: #1f2937; }
-    .dark main .text-gray-900 { color: #f9fafb; }
-    .dark main .text-gray-700 { color: #d1d5db; }
-    .dark main .text-gray-600 { color: #9ca3af; }
-    .dark main .text-gray-500 { color: #6b7280; }
-    .dark main .border-gray-200 { border-color: #374151; }
-    .dark main .border-gray-300 { border-color: #4b5563; }
-    .dark main .bg-gray-50 { background-color: #111827; }
-    .dark main .bg-gray-100 { background-color: #1f2937; }
-    
+
     /* Prevent MaterializeCSS dropdown conflicts */
     select[data-no-materialize="true"] + .select-wrapper {
       display: none !important;
