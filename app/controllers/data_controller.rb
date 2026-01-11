@@ -204,7 +204,7 @@ class DataController < ApplicationController
   def calculate_community_green_stats
     Rails.cache.fetch('green_community_stats', expires_in: 1.hour) do
       pages = 0
-      (Rails.application.config.content_type_names[:all] + ['Timeline', 'Document']).each do |type|
+      (Rails.application.config.content_type_names[:all] - ['Book'] + ['Timeline', 'Document']).each do |type|
         pages += case type
         when 'Timeline'
           GreenService.total_timeline_pages_equivalent
