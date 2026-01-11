@@ -1,0 +1,202 @@
+<%# Inspector Panel Content Partial (for mobile overlay) %>
+<%# Locals: timeline %>
+
+<!-- Inspector Content -->
+<div class="flex-1 overflow-y-auto" data-inspector-content>
+  <!-- Empty State -->
+  <div x-show="!selectedEventId" class="p-6">
+    <div class="text-center text-gray-500 py-8">
+      <i class="material-icons text-4xl mb-4 text-gray-300">click</i>
+      <p class="text-sm">Select an event to view details and manage linked content</p>
+    </div>
+  </div>
+
+  <!-- Event Details Panel -->
+  <div x-show="selectedEventId" class="p-6 space-y-6">
+    <!-- Event Title Section -->
+    <div class="border-b border-gray-100 dark:border-gray-700 pb-4">
+      <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2" x-text="selectedEventTitle || 'Untitled Event'"></h4>
+
+      <!-- Time Information -->
+      <div class="space-y-1">
+        <div x-show="selectedEventTimeLabel" class="flex items-center text-sm text-gray-600">
+          <i class="material-icons text-sm mr-2 text-green-600">schedule</i>
+          <span class="font-medium mr-1">Starts:</span>
+          <span x-text="selectedEventTimeLabel"></span>
+        </div>
+        <div x-show="selectedEventEndTimeLabel" class="flex items-center text-sm text-gray-600">
+          <i class="material-icons text-sm mr-2 text-red-600">schedule</i>
+          <span class="font-medium mr-1">Ends:</span>
+          <span x-text="selectedEventEndTimeLabel"></span>
+        </div>
+        <div x-show="!selectedEventTimeLabel && !selectedEventEndTimeLabel" class="text-sm text-gray-500 italic">
+          No time specified
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Event Type Selector -->
+    <div>
+      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Event Type</label>
+      <div class="relative" x-data="{ showEventTypeDropdown: false }">
+        <button @click="showEventTypeDropdown = !showEventTypeDropdown"
+                class="w-full flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors text-sm text-gray-700 dark:text-gray-200"
+                type="button">
+          <div class="flex items-center">
+            <i class="material-icons text-sm mr-2 text-green-600" x-text="getEventTypeIcon(selectedEventId)"></i>
+            <span class="capitalize" x-text="getEventTypeName(selectedEventId)"></span>
+          </div>
+          <i class="material-icons text-sm text-gray-400 transition-transform duration-200"
+             :class="showEventTypeDropdown ? 'rotate-180' : ''">expand_more</i>
+        </button>
+
+        <!-- Event Type Dropdown -->
+        <div x-show="showEventTypeDropdown"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.away="showEventTypeDropdown = false"
+             class="absolute z-20 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+
+          <% TimelineEvent::EVENT_TYPES.each do |type_key, type_info| %>
+            <button type="button"
+                    @click="updateEventType('<%= type_key %>'); showEventTypeDropdown = false"
+                    class="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 text-gray-700 dark:text-gray-200">
+              <i class="material-icons text-sm mr-3 text-green-600"><%= type_info[:icon] %></i>
+              <span class="text-sm"><%= type_info[:name] %></span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Tags -->
+    <div>
+      <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Tags</label>
+
+      <!-- Existing Tags Display -->
+      <div x-show="selectedEventId && getEventTags(selectedEventId).length > 0" class="mb-3">
+        <div class="flex flex-wrap gap-2">
+          <template x-for="tag in getEventTags(selectedEventId)" :key="tag">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium transition-all duration-200"
+                  :class="isTagLoading(selectedEventId, tag) ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400' : 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300'">
+              <!-- Loading spinner for tags being processed -->
+              <div x-show="isTagLoading(selectedEventId, tag)" class="animate-spin rounded-full h-3 w-3 border-b border-gray-400 mr-1"></div>
+              <span x-text="tag"></span>
+              <button @click="removeEventTag(tag)"
+                      type="button"
+                      :disabled="isTagLoading(selectedEventId, tag)"
+                      class="ml-1 p-0.5 rounded-full transition-colors"
+                      :class="isTagLoading(selectedEventId, tag) ? 'text-gray-400 cursor-not-allowed' : 'hover:bg-blue-200'">
+                <i class="material-icons text-xs">close</i>
+              </button>
+            </span>
+          </template>
+        </div>
+      </div>
+
+      <!-- Tag Input with Suggestions -->
+      <div class="relative" x-data="{
+        showTagSuggestions: false,
+        tagInput: '',
+        get timelineTagSuggestions() {
+          const input = this.tagInput.toLowerCase();
+          return timelineTagSuggestions
+            .filter(tag =>
+              (tag.toLowerCase().includes(input) || !input) &&
+              !getEventTags(selectedEventId).includes(tag)
+            )
+            .slice(0, 8);
+        }
+      }">
+        <input type="text"
+               x-model="tagInput"
+               @input="showTagSuggestions = true"
+               @focus="showTagSuggestions = true"
+               @click.stop="showTagSuggestions = true"
+               @keydown.enter.prevent="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
+               @keydown.escape="tagInput = ''; showTagSuggestions = false"
+               placeholder="Add tag..."
+               class="w-full px-3 py-2 text-xs border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400">
+
+        <!-- Tag Suggestions Dropdown -->
+        <div x-show="showTagSuggestions"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             @click.away="showTagSuggestions = false"
+             class="absolute z-30 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-y-auto tag-autocomplete-dropdown">
+
+          <div class="py-1">
+            <!-- Your Timeline Tags -->
+            <div x-show="timelineTagSuggestions.length > 0">
+              <div class="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border-b border-blue-100">Your Timeline Tags</div>
+              <template x-for="tag in timelineTagSuggestions" :key="'timeline-' + tag">
+                <button type="button"
+                        @click="addEventTag(tag); tagInput = ''; showTagSuggestions = false"
+                        class="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 transition-colors flex items-center">
+                  <i class="material-icons text-xs mr-2 text-blue-500">label</i>
+                  <span x-text="tag"></span>
+                </button>
+              </template>
+            </div>
+
+            <!-- Default Suggested Tags -->
+            <div x-show="timelineTagSuggestions.length > 0" class="border-t border-gray-100"></div>
+            <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">Suggested Tags</div>
+            <% %w[Character\ Development Character\ Introduction Worldbuilding Flashback Foreshadowing Action Discovery Plot\ Twist Turning\ Point Relationship Tonal\ Shift POV\ Shift].each do |suggested_tag| %>
+              <button type="button"
+                      x-show="'<%= suggested_tag %>'.toLowerCase().includes(tagInput.toLowerCase()) || tagInput === ''"
+                      @click="addEventTag('<%= suggested_tag %>'); tagInput = ''; showTagSuggestions = false"
+                      class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300 transition-colors">
+                <%= suggested_tag %>
+              </button>
+            <% end %>
+
+            <!-- Custom Tag Option -->
+            <div x-show="tagInput && tagInput.length > 1" class="border-t border-gray-100">
+              <button type="button"
+                      @click="addEventTag(tagInput); tagInput = ''; showTagSuggestions = false"
+                      class="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-green-600 dark:text-green-400 font-medium">
+                <i class="material-icons text-xs mr-1">add</i>
+                <span>Add "</span><span x-text="tagInput"></span><span>"</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div x-show="selectedEventId && getEventTags(selectedEventId).length === 0"
+           class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3 mt-2">
+        <i class="material-icons text-xs mr-1">label_outline</i>
+        No tags yet. Add tags to categorize this event.
+      </div>
+    </div>
+
+    <!-- Linked Content Section -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">Linked Content</h5>
+        <button @click="typeof openLinkModal !== 'undefined' ? openLinkModal(selectedEventId) : console.error('openLinkModal not available')"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-sm transition-colors">
+          <i class="material-icons text-sm mr-2">add</i>
+          Add Link
+        </button>
+      </div>
+
+      <!-- Dynamic Linked Content List -->
+      <div id="sidebar-linked-content-mobile" class="space-y-2">
+        <!-- Content will be populated by JavaScript -->
+        <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+          <i class="material-icons text-xs mr-1">info</i>
+          Linked content will appear here when you connect pages to this event
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
