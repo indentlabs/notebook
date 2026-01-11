@@ -10,6 +10,8 @@ class AdminController < ApplicationController
 
   def hub
     @sidekiq_stats = Sidekiq::Stats.new
+    @basil_queue_count = BasilCommission.where(completed_at: nil).count
+    @basil_today_count = BasilCommission.where('completed_at >= ?', Time.current.beginning_of_day).count
   end
 
   def content_type

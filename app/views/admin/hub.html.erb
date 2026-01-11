@@ -1,6 +1,53 @@
 <div class="container mx-auto px-4 py-8">
   <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-8">Admin Hub</h1>
 
+  <!-- Top row: Background Jobs (2/3) + Basil (1/3) -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Background Jobs - 2 columns -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 lg:col-span-2">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Background Jobs</h2>
+      <div class="mb-4">
+        <div class="grid grid-cols-3 gap-8 text-center">
+          <div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.enqueued) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Enqueued</div>
+          </div>
+          <div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.processed) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Processed</div>
+          </div>
+          <div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.failed) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Failed</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <%= link_to "Sidekiq Dashboard", "/sidekiq", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+      </div>
+    </div>
+
+    <!-- AI / Basil - 1 column -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">AI / Basil</h2>
+      <div class="mb-4">
+        <div class="grid grid-cols-2 gap-4 text-center">
+          <div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@basil_queue_count) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">In Queue</div>
+          </div>
+          <div>
+            <div class="text-4xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@basil_today_count) %></div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Done Today</div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <%= link_to "Basil Review", "/ai/basil/review", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
+      </div>
+    </div>
+  </div>
+
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <!-- Analytics & Insights -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -40,19 +87,6 @@
       </ul>
     </div>
 
-    <!-- AI / Basil -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">AI / Basil</h2>
-      <ul class="space-y-2">
-        <li>
-          <%= link_to "Basil Review", "/ai/basil/review", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
-        </li>
-        <li>
-          <%= link_to "Basil Stats", "/ai/basil/stats", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
-        </li>
-      </ul>
-    </div>
-
     <!-- User Management -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">User Management</h2>
@@ -75,32 +109,6 @@
         </li>
         <li>
           <%= link_to "Rails Admin", rails_admin_path, class: "text-blue-600 dark:text-blue-400 hover:underline" %>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Background Jobs -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Background Jobs</h2>
-      <div class="mb-4">
-        <div class="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.enqueued) %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Enqueued</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.processed) %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Processed</div>
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@sidekiq_stats.failed) %></div>
-            <div class="text-sm text-gray-500 dark:text-gray-400">Failed</div>
-          </div>
-        </div>
-      </div>
-      <ul class="space-y-2">
-        <li>
-          <%= link_to "Sidekiq Dashboard", "/sidekiq", class: "text-blue-600 dark:text-blue-400 hover:underline" %>
         </li>
       </ul>
     </div>
