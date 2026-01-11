@@ -13,21 +13,21 @@ class BooksController < ApplicationController
   end
 
   def new
-    @book = current_user.books.create!(title: 'Untitled Book')
+    @book = current_user.books.create!(name: 'Untitled Book')
     respond_to do |format|
       format.html { redirect_to edit_book_path(@book) }
-      format.json { render json: { status: 'ok', book: { id: @book.id, title: @book.title } } }
+      format.json { render json: { status: 'ok', book: { id: @book.id, name: @book.name } } }
     end
   end
 
   def create
     @book = current_user.books.new(book_params)
-    @book.title = 'Untitled Book' if @book.title.blank?
+    @book.name = 'Untitled Book' if @book.name.blank?
 
     if @book.save
       respond_to do |format|
         format.html { redirect_to edit_book_path(@book) }
-        format.json { render json: { id: @book.id, title: @book.title } }
+        format.json { render json: { id: @book.id, name: @book.name } }
       end
     else
       respond_to do |format|
@@ -126,6 +126,6 @@ class BooksController < ApplicationController
   end
 
   def book_params
-    params.require(:book).permit(:title, :subtitle, :description, :blurb, :status, :privacy, :universe_id)
+    params.require(:book).permit(:name, :subtitle, :description, :blurb, :status, :privacy, :universe_id)
   end
 end

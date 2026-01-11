@@ -16,7 +16,7 @@ class Book < ApplicationRecord
 
   enum status: { writing: 0, revising: 1, submitting: 2, published: 3 }
 
-  validates :title, presence: true
+  validates :name, presence: true
 
   # Display helpers (like Timeline/Document patterns)
   def self.icon
@@ -51,14 +51,6 @@ class Book < ApplicationRecord
 
   def hex_color
     Book.hex_color
-  end
-
-  def page_type
-    'Book'
-  end
-
-  def name
-    title
   end
 
   def archive!

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_07_035140) do
+ActiveRecord::Schema.define(version: 2026_01_11_091916) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -285,7 +285,7 @@ ActiveRecord::Schema.define(version: 2026_01_07_035140) do
   create_table "books", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "universe_id"
-    t.string "title"
+    t.string "name"
     t.string "subtitle"
     t.text "description"
     t.text "blurb"
@@ -295,6 +295,9 @@ ActiveRecord::Schema.define(version: 2026_01_07_035140) do
     t.datetime "deleted_at"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "favorite", default: false, null: false
+    t.string "page_type", default: "Book"
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_books_on_universe_id"
     t.index ["user_id", "deleted_at"], name: "index_books_on_user_id_and_deleted_at"
     t.index ["user_id"], name: "index_books_on_user_id"
