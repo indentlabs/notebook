@@ -170,31 +170,35 @@
             <span class="text-sm text-gray-600 dark:text-gray-400">Visibility</span>
             <% if can_edit_privacy %>
               <button @click="switchView('privacy')"
-                      class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>"
+                      class="inline-flex flex-col items-end px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>"
                       title="Click to manage privacy settings">
-                <% if is_effectively_public %>
-                  <i class="material-icons text-sm mr-1.5">public</i>
-                  Public
-                  <% if !is_page_public && is_universe_public %>
-                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(via universe)</span>
+                <span class="inline-flex items-center">
+                  <% if is_effectively_public %>
+                    <i class="material-icons text-sm mr-1.5">public</i>
+                    Public
+                  <% else %>
+                    <i class="material-icons text-sm mr-1.5">lock</i>
+                    Private
                   <% end %>
-                <% else %>
-                  <i class="material-icons text-sm mr-1.5">lock</i>
-                  Private
+                  <i class="material-icons text-xs ml-1 text-gray-400">edit</i>
+                </span>
+                <% if is_effectively_public && !is_page_public && is_universe_public %>
+                  <span class="text-xs text-green-600 dark:text-green-400">(via universe)</span>
                 <% end %>
-                <i class="material-icons text-xs ml-1 text-gray-400">edit</i>
               </button>
             <% else %>
-              <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>">
-                <% if is_effectively_public %>
-                  <i class="material-icons text-sm mr-1.5">public</i>
-                  Public
-                  <% if !is_page_public && is_universe_public %>
-                    <span class="text-xs text-green-600 dark:text-green-400 ml-1">(via universe)</span>
+              <span class="inline-flex flex-col items-end px-3 py-1.5 rounded-lg text-sm font-medium <%= is_effectively_public ? 'bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-200 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600' %>">
+                <span class="inline-flex items-center">
+                  <% if is_effectively_public %>
+                    <i class="material-icons text-sm mr-1.5">public</i>
+                    Public
+                  <% else %>
+                    <i class="material-icons text-sm mr-1.5">lock</i>
+                    Private
                   <% end %>
-                <% else %>
-                  <i class="material-icons text-sm mr-1.5">lock</i>
-                  Private
+                </span>
+                <% if is_effectively_public && !is_page_public && is_universe_public %>
+                  <span class="text-xs text-green-600 dark:text-green-400">(via universe)</span>
                 <% end %>
               </span>
             <% end %>
