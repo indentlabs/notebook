@@ -493,7 +493,7 @@ function timelineEditor() {
       const mainLinkedContent = document.querySelector(`#linked-content-${eventId}`);
       if (!mainLinkedContent) {
         sidebarContainer.innerHTML = `
-          <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+          <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
             <i class="material-icons text-xs mr-1">info</i>
             Linked content will appear here when you connect pages to this event
           </div>
@@ -505,7 +505,7 @@ function timelineEditor() {
 
       if (linkedCards.length === 0) {
         sidebarContainer.innerHTML = `
-          <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+          <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
             <i class="material-icons text-xs mr-1">info</i>
             Linked content will appear here when you connect pages to this event
           </div>
