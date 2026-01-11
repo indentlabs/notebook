@@ -234,25 +234,29 @@
     </div>
 
     <%# Desktop Event Details Toggle Tab %>
-    <div x-show="activeRightPanel !== 'inspector' && isDesktop" x-cloak
-         class="hidden lg:block fixed right-0 top-28 z-40">
+    <div x-show="isDesktop" x-cloak
+         class="hidden lg:block fixed top-28 z-40 transition-all duration-300"
+         :class="showRightSidebar ? 'right-96' : 'right-0'">
       <button @click="toggleRightPanel('inspector')"
-              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              class="text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              :class="activeRightPanel === 'inspector' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
               data-tooltip="Event Details"
-              aria-label="Show Event Details">
-        <i class="material-icons text-base">chevron_left</i>
+              :aria-label="activeRightPanel === 'inspector' ? 'Hide Event Details' : 'Show Event Details'">
+        <i class="material-icons text-base" x-text="activeRightPanel === 'inspector' ? 'chevron_right' : 'chevron_left'"></i>
         <i class="material-icons text-base">info</i>
       </button>
     </div>
 
     <%# Desktop Timeline Settings Toggle Tab %>
-    <div x-show="activeRightPanel !== 'settings' && isDesktop" x-cloak
-         class="hidden lg:block fixed right-0 top-40 z-40">
+    <div x-show="isDesktop" x-cloak
+         class="hidden lg:block fixed top-40 z-40 transition-all duration-300"
+         :class="showRightSidebar ? 'right-96' : 'right-0'">
       <button @click="toggleRightPanel('settings')"
-              class="bg-notebook-blue hover:bg-blue-600 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              class="text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+              :class="activeRightPanel === 'settings' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
               data-tooltip="Timeline Settings"
-              aria-label="Show Timeline Settings">
-        <i class="material-icons text-base">chevron_left</i>
+              :aria-label="activeRightPanel === 'settings' ? 'Hide Timeline Settings' : 'Show Timeline Settings'">
+        <i class="material-icons text-base" x-text="activeRightPanel === 'settings' ? 'chevron_right' : 'chevron_left'"></i>
         <i class="material-icons text-base">settings</i>
       </button>
     </div>
