@@ -11,11 +11,6 @@
          x-transition:leave-end="-translate-x-full"
          class="hidden lg:block fixed top-14 bottom-0 z-30 overflow-hidden"
          :style="{ left: siteNavExpanded ? '224px' : '64px' }">
-      <%# Tools Panel %>
-      <div x-show="activeLeftPanel === 'tools'" class="h-full">
-        <%= render 'timelines/edit/left_sidebar',
-            timeline: @timeline %>
-      </div>
       <%# Filter Panel %>
       <div x-show="activeLeftPanel === 'filter'" class="h-full">
         <%= render 'timelines/edit/filter_panel',
@@ -57,17 +52,11 @@
       <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:hidden">
         <button @click="activeLeftPanel = null"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :aria-label="activeLeftPanel === 'tools' ? 'Close Timeline Tools' : activeLeftPanel === 'filter' ? 'Close Search / Filter' : 'Close Linked Content'">
+                :aria-label="activeLeftPanel === 'filter' ? 'Close Search / Filter' : 'Close Linked Content'">
           <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
-          <i class="material-icons text-gray-600 text-lg mr-1.5" x-text="activeLeftPanel === 'tools' ? 'menu' : activeLeftPanel === 'filter' ? 'search' : 'link'"></i>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeLeftPanel === 'tools' ? 'Timeline Tools' : activeLeftPanel === 'filter' ? 'Search / Filter' : 'Linked Content'"></h2>
+          <i class="material-icons text-gray-600 text-lg mr-1.5" x-text="activeLeftPanel === 'filter' ? 'search' : 'link'"></i>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeLeftPanel === 'filter' ? 'Search / Filter' : 'Linked Content'"></h2>
         </button>
-      </div>
-
-      <%# Tools Panel Content (Mobile) %>
-      <div x-show="activeLeftPanel === 'tools'">
-        <%= render 'timelines/edit/left_sidebar_content',
-            timeline: @timeline %>
       </div>
 
       <%# Filter Panel Content (Mobile) %>
@@ -85,23 +74,9 @@
       </div>
     </div>
 
-    <%# Desktop Timeline Tools Toggle Tab - offset by site sidenav %>
-    <div x-show="isDesktop" x-cloak
-         class="hidden lg:block fixed top-28 z-30 transition-all duration-300"
-         :style="{ left: leftTabPosition }">
-      <button @click="toggleLeftPanel('tools')"
-              class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
-              :class="activeLeftPanel === 'tools' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
-              data-tooltip="Timeline Tools"
-              :aria-label="activeLeftPanel === 'tools' ? 'Hide Timeline Tools' : 'Show Timeline Tools'">
-        <i class="material-icons text-base">menu</i>
-        <i class="material-icons text-base" x-text="activeLeftPanel === 'tools' ? 'chevron_left' : 'chevron_right'"></i>
-      </button>
-    </div>
-
     <%# Desktop Search / Filter Toggle Tab - offset by site sidenav %>
     <div x-show="isDesktop" x-cloak
-         class="hidden lg:block fixed top-40 z-30 transition-all duration-300"
+         class="hidden lg:block fixed top-28 z-30 transition-all duration-300"
          :style="{ left: leftTabPosition }">
       <button @click="toggleLeftPanel('filter')"
               class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
@@ -115,7 +90,7 @@
 
     <%# Desktop Linked Content Toggle Tab - offset by site sidenav %>
     <div x-show="isDesktop" x-cloak
-         class="hidden lg:block fixed top-52 z-30 transition-all duration-300"
+         class="hidden lg:block fixed top-40 z-30 transition-all duration-300"
          :style="{ left: leftTabPosition }">
       <button @click="toggleLeftPanel('linked-content')"
               class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
@@ -127,20 +102,8 @@
       </button>
     </div>
 
-    <%# Mobile/Tablet Timeline Tools Toggle Tab %>
-    <div class="lg:hidden fixed left-0 top-28 z-30">
-      <button @click="toggleLeftPanel('tools')"
-              class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
-              :class="activeLeftPanel === 'tools' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
-              :title="activeLeftPanel === 'tools' ? 'Close Timeline Tools' : 'Open Timeline Tools'"
-              :aria-label="activeLeftPanel === 'tools' ? 'Close Timeline Tools' : 'Open Timeline Tools'">
-        <i class="material-icons text-base">menu</i>
-        <i class="material-icons text-base" x-text="activeLeftPanel === 'tools' ? 'chevron_left' : 'chevron_right'"></i>
-      </button>
-    </div>
-
     <%# Mobile/Tablet Search / Filter Toggle Tab %>
-    <div class="lg:hidden fixed left-0 top-40 z-30">
+    <div class="lg:hidden fixed left-0 top-28 z-30">
       <button @click="toggleLeftPanel('filter')"
               class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
               :class="activeLeftPanel === 'filter' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
@@ -152,7 +115,7 @@
     </div>
 
     <%# Mobile/Tablet Linked Content Toggle Tab %>
-    <div class="lg:hidden fixed left-0 top-52 z-30">
+    <div class="lg:hidden fixed left-0 top-40 z-30">
       <button @click="toggleLeftPanel('linked-content')"
               class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
               :class="activeLeftPanel === 'linked-content' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
@@ -499,7 +462,7 @@ function timelineEditor() {
     tagFilterMode: 'filter', // 'filter' or 'highlight'
 
     // Sidebar visibility state (pull-out tab system)
-    activeLeftPanel: null,   // null | 'tools' | 'filter' - mutually exclusive left panels
+    activeLeftPanel: null,   // null | 'filter' | 'linked-content' - mutually exclusive left panels
     activeRightPanel: null,  // null | 'inspector' | 'settings' - mutually exclusive right panels
     isDesktop: window.innerWidth >= 1024,
     siteNavExpanded: localStorage.getItem('site_navigation_sidebar_visible') === 'true',
