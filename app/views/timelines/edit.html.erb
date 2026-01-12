@@ -14,15 +14,19 @@
       <%# Tools Panel %>
       <div x-show="activeLeftPanel === 'tools'" class="h-full">
         <%= render 'timelines/edit/left_sidebar',
-            timeline: @timeline,
-            timeline_event_tags: @timeline_event_tags,
-            timeline_content_summary: @timeline_content_summary %>
+            timeline: @timeline %>
       </div>
       <%# Filter Panel %>
       <div x-show="activeLeftPanel === 'filter'" class="h-full">
         <%= render 'timelines/edit/filter_panel',
             timeline: @timeline,
             timeline_event_tags: @timeline_event_tags %>
+      </div>
+      <%# Linked Content Panel %>
+      <div x-show="activeLeftPanel === 'linked-content'" class="h-full">
+        <%= render 'timelines/edit/linked_content_panel',
+            timeline: @timeline,
+            timeline_content_summary: @timeline_content_summary %>
       </div>
     </div>
 
@@ -53,19 +57,17 @@
       <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:hidden">
         <button @click="activeLeftPanel = null"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                :aria-label="activeLeftPanel === 'tools' ? 'Close Timeline Tools' : 'Close Search / Filter'">
+                :aria-label="activeLeftPanel === 'tools' ? 'Close Timeline Tools' : activeLeftPanel === 'filter' ? 'Close Search / Filter' : 'Close Linked Content'">
           <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
-          <i class="material-icons text-gray-600 text-lg mr-1.5" x-text="activeLeftPanel === 'tools' ? 'menu' : 'search'"></i>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeLeftPanel === 'tools' ? 'Timeline Tools' : 'Search / Filter'"></h2>
+          <i class="material-icons text-gray-600 text-lg mr-1.5" x-text="activeLeftPanel === 'tools' ? 'menu' : activeLeftPanel === 'filter' ? 'search' : 'link'"></i>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeLeftPanel === 'tools' ? 'Timeline Tools' : activeLeftPanel === 'filter' ? 'Search / Filter' : 'Linked Content'"></h2>
         </button>
       </div>
 
       <%# Tools Panel Content (Mobile) %>
       <div x-show="activeLeftPanel === 'tools'">
         <%= render 'timelines/edit/left_sidebar_content',
-            timeline: @timeline,
-            timeline_event_tags: @timeline_event_tags,
-            timeline_content_summary: @timeline_content_summary %>
+            timeline: @timeline %>
       </div>
 
       <%# Filter Panel Content (Mobile) %>
@@ -73,6 +75,13 @@
         <%= render 'timelines/edit/filter_panel_content',
             timeline: @timeline,
             timeline_event_tags: @timeline_event_tags %>
+      </div>
+
+      <%# Linked Content Panel Content (Mobile) %>
+      <div x-show="activeLeftPanel === 'linked-content'">
+        <%= render 'timelines/edit/linked_content_panel_content',
+            timeline: @timeline,
+            timeline_content_summary: @timeline_content_summary %>
       </div>
     </div>
 
@@ -104,6 +113,20 @@
       </button>
     </div>
 
+    <%# Desktop Linked Content Toggle Tab - offset by site sidenav %>
+    <div x-show="isDesktop" x-cloak
+         class="hidden lg:block fixed top-52 z-30 transition-all duration-300"
+         :style="{ left: leftTabPosition }">
+      <button @click="toggleLeftPanel('linked-content')"
+              class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
+              :class="activeLeftPanel === 'linked-content' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
+              data-tooltip="Linked Content"
+              :aria-label="activeLeftPanel === 'linked-content' ? 'Hide Linked Content' : 'Show Linked Content'">
+        <i class="material-icons text-base">link</i>
+        <i class="material-icons text-base" x-text="activeLeftPanel === 'linked-content' ? 'chevron_left' : 'chevron_right'"></i>
+      </button>
+    </div>
+
     <%# Mobile/Tablet Timeline Tools Toggle Tab %>
     <div class="lg:hidden fixed left-0 top-28 z-30">
       <button @click="toggleLeftPanel('tools')"
@@ -125,6 +148,18 @@
               :aria-label="activeLeftPanel === 'filter' ? 'Close Search / Filter' : 'Open Search / Filter'">
         <i class="material-icons text-base">search</i>
         <i class="material-icons text-base" x-text="activeLeftPanel === 'filter' ? 'chevron_left' : 'chevron_right'"></i>
+      </button>
+    </div>
+
+    <%# Mobile/Tablet Linked Content Toggle Tab %>
+    <div class="lg:hidden fixed left-0 top-52 z-30">
+      <button @click="toggleLeftPanel('linked-content')"
+              class="text-white p-2 rounded-r-md shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-1"
+              :class="activeLeftPanel === 'linked-content' ? '<%= Timeline.color %>' : 'bg-notebook-blue hover:bg-blue-600'"
+              :title="activeLeftPanel === 'linked-content' ? 'Close Linked Content' : 'Open Linked Content'"
+              :aria-label="activeLeftPanel === 'linked-content' ? 'Close Linked Content' : 'Open Linked Content'">
+        <i class="material-icons text-base">link</i>
+        <i class="material-icons text-base" x-text="activeLeftPanel === 'linked-content' ? 'chevron_left' : 'chevron_right'"></i>
       </button>
     </div>
 
