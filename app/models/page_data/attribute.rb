@@ -19,14 +19,16 @@ class Attribute < ApplicationRecord
     end
   end
 
-  after_commit do
-    if saved_changes.key?('value')
-      # Cache the updated word count on this attribute
-      CacheAttributeWordCountJob.perform_later(self.id)
+  after_commit :enqueue_word_count_jobs, on: [:create, :update]
 
-      # Cache the updated word count on the page this attribute belongs to
-      CacheSumAttributeWordCountJob.perform_later(self.entity_type, self.entity_id)
-    end
+  def enqueue_word_count_jobs
+    # Cache the updated word count on this attribute
+    CacheAttributeWordCountJob.perform_later(self.id)
+
+    # Cache the updated word count on the page this attribute belongs to
+    CacheSumAttributeWordCountJob.perform_later(self.entity_type, self.entity_id)
+  rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+    Rails.logger.warn "[WordCount] Could not enqueue jobs for Attribute##{id}: #{e.message}"
   end
 
   after_save do
