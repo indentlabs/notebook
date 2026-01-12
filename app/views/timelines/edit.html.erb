@@ -9,16 +9,17 @@
          x-transition:enter-end="translate-x-0"
          x-transition:leave="transform transition ease-in-out duration-200"
          x-transition:leave-end="-translate-x-full"
-         class="hidden lg:block flex-shrink-0">
+         class="hidden lg:block fixed top-14 bottom-0 z-30 overflow-hidden"
+         :style="{ left: siteNavExpanded ? '224px' : '64px' }">
       <%# Tools Panel %>
-      <div x-show="activeLeftPanel === 'tools'">
+      <div x-show="activeLeftPanel === 'tools'" class="h-full">
         <%= render 'timelines/edit/left_sidebar',
             timeline: @timeline,
             timeline_event_tags: @timeline_event_tags,
             timeline_content_summary: @timeline_content_summary %>
       </div>
       <%# Filter Panel %>
-      <div x-show="activeLeftPanel === 'filter'">
+      <div x-show="activeLeftPanel === 'filter'" class="h-full">
         <%= render 'timelines/edit/filter_panel',
             timeline: @timeline,
             timeline_event_tags: @timeline_event_tags %>
@@ -128,7 +129,11 @@
     </div>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto min-h-0">
+    <main class="flex-1 min-h-0"
+          :class="{
+            'lg:ml-80': showLeftSidebar && isDesktop,
+            'lg:mr-96': showRightSidebar && isDesktop
+          }">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="timeline-events-container" data-timeline-id="<%= @timeline.id %>">
           <%# Timeline Title Section - Plain Text %>
@@ -267,13 +272,13 @@
          x-transition:leave="transform transition ease-in-out duration-200"
          x-transition:leave-start="translate-x-0"
          x-transition:leave-end="translate-x-full"
-         class="hidden lg:block flex-shrink-0">
+         class="hidden lg:block fixed top-14 right-0 bottom-0 z-30 overflow-hidden">
       <%# Inspector Panel %>
-      <div x-show="activeRightPanel === 'inspector'">
+      <div x-show="activeRightPanel === 'inspector'" class="h-full">
         <%= render 'timelines/edit/inspector_panel', timeline: @timeline %>
       </div>
       <%# Settings Panel %>
-      <div x-show="activeRightPanel === 'settings'">
+      <div x-show="activeRightPanel === 'settings'" class="h-full">
         <%= render 'timelines/edit/settings_panel', timeline: @timeline %>
       </div>
     </div>
@@ -840,8 +845,10 @@ function timelineEditor() {
       // Set up live form listeners for real-time inspector panel updates
       this.setupLiveFormListeners(eventId);
 
-      // Update sidebar linked content
-      this.updateSidebarLinkedContent(eventId);
+      // Update sidebar linked content (use $nextTick to ensure DOM is rendered after panel state change)
+      this.$nextTick(() => {
+        this.updateSidebarLinkedContent(eventId);
+      });
 
       // Load tags for this event - use provided tags or ensure they're cached
       if (eventData && eventData.tags) {
@@ -946,23 +953,32 @@ function timelineEditor() {
       this.liveDescription = '';
     },
 
-    // Update sidebar linked content
+    // Update sidebar linked content (both desktop and mobile containers)
     updateSidebarLinkedContent(eventId) {
-      const sidebarContainer = document.getElementById('sidebar-linked-content');
-      if (!sidebarContainer) {
+      // Target both desktop and mobile containers
+      const containers = [
+        document.getElementById('sidebar-linked-content'),
+        document.getElementById('sidebar-linked-content-mobile')
+      ].filter(c => c !== null);
+
+      if (containers.length === 0) {
         return;
       }
+
+      const emptyStateHTML = `
+        <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+          <i class="material-icons text-xs mr-1">info</i>
+          Linked content will appear here when you connect pages to this event
+        </div>
+      `;
 
       // Find the main timeline linked content for this event
       const mainLinkedContent = document.querySelector(`#linked-content-${eventId}`);
       if (!mainLinkedContent) {
-        // Show empty state
-        sidebarContainer.innerHTML = `
-          <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-            <i class="material-icons text-xs mr-1">info</i>
-            Linked content will appear here when you connect pages to this event
-          </div>
-        `;
+        // Show empty state in all containers
+        containers.forEach(container => {
+          container.innerHTML = emptyStateHTML;
+        });
         return;
       }
 
@@ -970,13 +986,10 @@ function timelineEditor() {
       const linkedCards = mainLinkedContent.querySelectorAll('.linked-content-card');
 
       if (linkedCards.length === 0) {
-        // Show empty state
-        sidebarContainer.innerHTML = `
-          <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-            <i class="material-icons text-xs mr-1">info</i>
-            Linked content will appear here when you connect pages to this event
-          </div>
-        `;
+        // Show empty state in all containers
+        containers.forEach(container => {
+          container.innerHTML = emptyStateHTML;
+        });
         return;
       }
 
@@ -1014,7 +1027,10 @@ function timelineEditor() {
         }
       });
 
-      sidebarContainer.innerHTML = sidebarHTML;
+      // Update all containers with the same content
+      containers.forEach(container => {
+        container.innerHTML = sidebarHTML;
+      });
     },
 
     // Computed properties for live form data reading (now using reactive data with DOM fallback)

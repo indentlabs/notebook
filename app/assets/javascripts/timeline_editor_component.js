@@ -402,7 +402,10 @@ function timelineEditor() {
       this.selectedEventData = eventData;
 
       this.setupLiveFormListeners(eventId);
-      this.updateSidebarLinkedContent(eventId);
+      // Use $nextTick to ensure DOM is rendered after panel state change
+      this.$nextTick(() => {
+        this.updateSidebarLinkedContent(eventId);
+      });
 
       if (eventData && eventData.tags) {
         this.eventTags[eventId] = eventData.tags;
@@ -485,31 +488,37 @@ function timelineEditor() {
       this.liveDescription = '';
     },
 
-    // Update sidebar linked content
+    // Update sidebar linked content (both desktop and mobile containers)
     updateSidebarLinkedContent(eventId) {
-      const sidebarContainer = document.getElementById('sidebar-linked-content');
-      if (!sidebarContainer) return;
+      // Target both desktop and mobile containers
+      const containers = [
+        document.getElementById('sidebar-linked-content'),
+        document.getElementById('sidebar-linked-content-mobile')
+      ].filter(c => c !== null);
+
+      if (containers.length === 0) return;
+
+      const emptyStateHTML = `
+        <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+          <i class="material-icons text-xs mr-1">info</i>
+          Linked content will appear here when you connect pages to this event
+        </div>
+      `;
 
       const mainLinkedContent = document.querySelector(`#linked-content-${eventId}`);
       if (!mainLinkedContent) {
-        sidebarContainer.innerHTML = `
-          <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-            <i class="material-icons text-xs mr-1">info</i>
-            Linked content will appear here when you connect pages to this event
-          </div>
-        `;
+        containers.forEach(container => {
+          container.innerHTML = emptyStateHTML;
+        });
         return;
       }
 
       const linkedCards = mainLinkedContent.querySelectorAll('.linked-content-card');
 
       if (linkedCards.length === 0) {
-        sidebarContainer.innerHTML = `
-          <div class="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-            <i class="material-icons text-xs mr-1">info</i>
-            Linked content will appear here when you connect pages to this event
-          </div>
-        `;
+        containers.forEach(container => {
+          container.innerHTML = emptyStateHTML;
+        });
         return;
       }
 
@@ -546,7 +555,10 @@ function timelineEditor() {
         }
       });
 
-      sidebarContainer.innerHTML = sidebarHTML;
+      // Update all containers with the same content
+      containers.forEach(container => {
+        container.innerHTML = sidebarHTML;
+      });
     },
 
     // Computed properties for live form data

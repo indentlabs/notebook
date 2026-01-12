@@ -112,12 +112,13 @@ class TimelineEventsController < ApplicationController
       # Reload the timeline event to get the latest linked content
       @timeline_event.reload
       
-      render json: { 
-        status: 'success', 
+      render json: {
+        status: 'success',
         message: 'Content unlinked successfully',
         html: render_to_string(
-          partial: 'shared/timeline_event_linked_content', 
-          locals: { timeline_event: @timeline_event }
+          partial: 'shared/timeline_event_linked_content',
+          locals: { timeline_event: @timeline_event },
+          formats: [:html]
         )
       }
     else

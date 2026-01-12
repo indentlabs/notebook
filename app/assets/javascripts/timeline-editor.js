@@ -896,13 +896,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update main linked content section
         const eventId = unlinkHref.match(/timeline_events\/(\d+)\/unlink/)[1];
         replaceLinkedContentSection(eventId, data.html);
-
-        // Update sidebar
-        const alpineEl = document.querySelector('[x-data]');
-        if (alpineEl && Alpine.$data(alpineEl).selectedEventId) {
-          Alpine.$data(alpineEl).updateSidebarLinkedContent(Alpine.$data(alpineEl).selectedEventId);
-        }
-
         showSuccessMessage(data.message || 'Content unlinked successfully!');
       } else {
         throw new Error(data.message || 'Failed to unlink content');

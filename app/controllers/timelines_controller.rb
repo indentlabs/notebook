@@ -67,7 +67,7 @@ class TimelinesController < ApplicationController
 
   # GET /timelines/new
   def new
-    timeline = current_user.timelines.create(name: 'Untitled Timeline', universe: @universe_scope).reload
+    timeline = current_user.timelines.create(name: '', universe: @universe_scope).reload
     redirect_to edit_timeline_path(timeline)
   end
 
