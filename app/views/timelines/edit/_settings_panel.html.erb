@@ -26,6 +26,30 @@
             Timeline Actions
           </h4>
 
+          <!-- Privacy & Sharing Action -->
+          <div class="bg-green-50 dark:bg-green-900 dark:bg-opacity-30 border border-green-200 dark:border-green-800 rounded-lg p-4 mb-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="material-icons text-green-600 text-lg"><%= timeline.public_content? ? 'public' : 'lock' %></i>
+              </div>
+              <div class="ml-3 flex-1">
+                <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100">Privacy & Sharing</h5>
+                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <% if timeline.public_content? %>
+                    This timeline is <strong class="text-green-600 dark:text-green-400">public</strong> and can be viewed by anyone.
+                  <% else %>
+                    This timeline is <strong class="text-gray-700 dark:text-gray-300">private</strong> and only visible to you.
+                  <% end %>
+                </p>
+                <button @click="showShareModal = true"
+                        class="mt-3 inline-flex items-center px-3 py-1.5 border border-green-300 dark:border-green-700 text-xs font-medium rounded-md text-green-700 dark:text-green-300 bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                  <i class="material-icons text-sm mr-1">share</i>
+                  Manage Privacy
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div x-data="{
                  isArchived: <%= timeline.archived? %>,
                  isLoading: false,
