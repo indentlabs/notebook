@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_01_11_091916) do
+ActiveRecord::Schema.define(version: 2026_01_12_072712) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3498,6 +3498,7 @@ ActiveRecord::Schema.define(version: 2026_01_11_091916) do
     t.string "end_time_label"
     t.string "status", default: "completed"
     t.text "private_notes"
+    t.integer "cached_word_count", default: 0
     t.index ["event_type"], name: "index_timeline_events_on_event_type"
     t.index ["importance_level"], name: "index_timeline_events_on_importance_level"
     t.index ["status"], name: "index_timeline_events_on_status"

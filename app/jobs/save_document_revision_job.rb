@@ -1,6 +1,8 @@
 class SaveDocumentRevisionJob < ApplicationJob
   queue_as :low_priority
 
+  MAX_RETRY_ATTEMPTS = 3
+
   def perform(*args)
     document_id = args.shift
     document = Document.find_by(id: document_id)
@@ -34,6 +36,7 @@ class SaveDocumentRevisionJob < ApplicationJob
     enqueue_time = enqueued_at || Time.current
     user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
+    retry_count = 0
     begin
       update = document.word_count_updates.find_or_initialize_by(
         for_date: user_date,
@@ -43,7 +46,12 @@ class SaveDocumentRevisionJob < ApplicationJob
       update.save!
     rescue ActiveRecord::RecordNotUnique
       # Unique index exists and found a duplicate via race condition - retry to find the existing record
-      retry
+      retry_count += 1
+      if retry_count <= MAX_RETRY_ATTEMPTS
+        retry
+      else
+        Rails.logger.warn("SaveDocumentRevisionJob: max retries exceeded for Document##{document_id} on #{user_date}")
+      end
     end
 
     # Check if revision is needed BEFORE potentially loading body again

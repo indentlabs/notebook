@@ -1,6 +1,8 @@
 class CacheSumAttributeWordCountJob < ApplicationJob
   queue_as :cache
 
+  MAX_RETRY_ATTEMPTS = 3
+
   def perform(*args)
     entity_type = args.shift
     entity_id   = args.shift
@@ -23,6 +25,7 @@ class CacheSumAttributeWordCountJob < ApplicationJob
     user_date = user&.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
 
     # Create or re-use an existing WordCountUpdate for today (in user's timezone)
+    retry_count = 0
     begin
       update = entity.word_count_updates.find_or_initialize_by(
         for_date: user_date,
@@ -34,7 +37,12 @@ class CacheSumAttributeWordCountJob < ApplicationJob
       update.save!
     rescue ActiveRecord::RecordNotUnique
       # Unique index exists and found a duplicate via race condition - retry to find the existing record
-      retry
+      retry_count += 1
+      if retry_count <= MAX_RETRY_ATTEMPTS
+        retry
+      else
+        Rails.logger.warn("CacheSumAttributeWordCountJob: max retries exceeded for #{entity.class.name}##{entity.id} on #{user_date}")
+      end
     end
   end
 end

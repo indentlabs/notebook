@@ -4,7 +4,8 @@ class TimelineEvent < ApplicationRecord
   belongs_to :timeline, touch: true
 
   has_many :timeline_event_entities, dependent: :destroy
-  
+  has_many :word_count_updates, as: :entity, dependent: :destroy
+
   include HasPageTags
 
   acts_as_list scope: [:timeline_id]
@@ -28,6 +29,19 @@ class TimelineEvent < ApplicationRecord
 
   # Validation
   validates :event_type, inclusion: { in: EVENT_TYPES.keys }
+
+  # Track word count changes for title and description fields
+  WORD_COUNT_TRACKED_FIELDS = %w[title description].freeze
+
+  after_commit :enqueue_word_count_update, if: :word_count_fields_changed?
+
+  def word_count_fields_changed?
+    (saved_changes.keys & WORD_COUNT_TRACKED_FIELDS).any?
+  end
+
+  def enqueue_word_count_update
+    CacheTimelineEventWordCountJob.perform_later(self.id)
+  end
 
   # Helper methods
   def event_type_info
