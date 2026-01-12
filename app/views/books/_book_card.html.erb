@@ -11,6 +11,7 @@
 <div
   class="group relative"
   x-show="searchQuery === '' || '<%= book.name.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())"
+  x-data="{ isFavorite: <%= book.favorite? %>, isLoading: false }"
 >
   <%= link_to edit_book_path(book), class: "block" do %>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700">
@@ -19,6 +20,16 @@
         <div class="text-center">
           <i class="material-icons text-white text-5xl opacity-80"><%= Book.icon %></i>
         </div>
+        <!-- Favorite Button -->
+        <button
+          @click.prevent="async function() { isLoading = true; try { const result = await window.toggleBookFavorite('<%= book.id %>'); if (result.success) { isFavorite = !isFavorite; } } finally { isLoading = false; } }()"
+          :disabled="isLoading"
+          class="absolute top-3 left-3 w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-90 dark:bg-gray-800 backdrop-blur-sm shadow-sm hover:bg-opacity-100"
+          :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+          title="Toggle favorite"
+        >
+          <i class="material-icons text-xl" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+        </button>
         <!-- Status Badge -->
         <div class="absolute top-3 right-3">
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_color %>">

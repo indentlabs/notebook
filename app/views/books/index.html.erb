@@ -3,6 +3,7 @@
   searchQuery: '',
   statusFilters: [],
   statusFilterOpen: false,
+  showFavoritesOnly: false,
   toggleStatus(status) {
     if (this.statusFilters.includes(status)) {
       this.statusFilters = this.statusFilters.filter(s => s !== status);
@@ -10,8 +11,10 @@
       this.statusFilters.push(status);
     }
   },
-  matchesFilters(bookStatus) {
-    return this.statusFilters.length === 0 || this.statusFilters.includes(bookStatus);
+  matchesFilters(bookStatus, isFavorite) {
+    const statusMatch = this.statusFilters.length === 0 || this.statusFilters.includes(bookStatus);
+    const favoriteMatch = !this.showFavoritesOnly || isFavorite;
+    return statusMatch && favoriteMatch;
   }
 }" x-init="$watch('viewMode', value => localStorage.setItem('books_view_mode', value))" class="min-h-screen bg-gray-50 dark:bg-gray-900">
 
@@ -124,6 +127,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Favorites Toggle -->
+        <button
+          @click="showFavoritesOnly = !showFavoritesOnly"
+          :class="showFavoritesOnly ? 'bg-yellow-100 dark:bg-yellow-900 border-yellow-400 text-yellow-700 dark:text-yellow-200' : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600'"
+          class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <i class="material-icons text-lg mr-2" :class="showFavoritesOnly ? 'text-yellow-500' : 'text-gray-400'">star</i>
+          <span x-text="showFavoritesOnly ? 'Favorites' : 'All Books'"></span>
+        </button>
       </div>
 
       <div class="flex items-center space-x-2">
@@ -146,7 +159,7 @@
       <!-- Grid View -->
       <div x-show="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         <% @books.each do |book| %>
-          <div x-show="(searchQuery === '' || '<%= book.name.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>')">
+          <div x-show="(searchQuery === '' || '<%= book.name.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>', <%= book.favorite? %>)">
             <%= render 'book_card', book: book %>
           </div>
         <% end %>
@@ -157,30 +170,43 @@
         <% @books.each_with_index do |book, index| %>
           <div
             class="<%= 'border-t border-gray-200 dark:border-gray-700' if index > 0 %> hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            x-show="(searchQuery === '' || '<%= book.name.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>')"
+            x-show="(searchQuery === '' || '<%= book.name.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())) && matchesFilters('<%= book.status %>', <%= book.favorite? %>)"
+            x-data="{ isFavorite: <%= book.favorite? %>, isLoading: false }"
           >
-            <%= link_to edit_book_path(book), class: "flex items-center p-4 space-x-4" do %>
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 rounded-lg <%= Book.color %> flex items-center justify-center">
-                  <i class="material-icons text-white text-xl"><%= Book.icon %></i>
+            <div class="flex items-center p-4 space-x-4">
+              <!-- Favorite Button -->
+              <button
+                @click="async function() { isLoading = true; try { const result = await window.toggleBookFavorite('<%= book.id %>'); if (result.success) { isFavorite = !isFavorite; } } finally { isLoading = false; } }()"
+                :disabled="isLoading"
+                class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600"
+                :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
+              >
+                <i class="material-icons text-xl" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
+              </button>
+
+              <%= link_to edit_book_path(book), class: "flex items-center flex-1 space-x-4" do %>
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 rounded-lg <%= Book.color %> flex items-center justify-center">
+                    <i class="material-icons text-white text-xl"><%= Book.icon %></i>
+                  </div>
                 </div>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate"><%= book.name %></h3>
-                <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
-                  <span class="<%= Book.text_color %>"><%= book.status.humanize %></span>
-                  <span>•</span>
-                  <span><%= pluralize book.documents.count, 'document' %></span>
-                  <% if book.subtitle.present? %>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate"><%= book.name %></h3>
+                  <div class="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="<%= Book.text_color %>"><%= book.status.humanize %></span>
                     <span>•</span>
-                    <span class="truncate"><%= book.subtitle %></span>
-                  <% end %>
+                    <span><%= pluralize book.documents.count, 'document' %></span>
+                    <% if book.subtitle.present? %>
+                      <span>•</span>
+                      <span class="truncate"><%= book.subtitle %></span>
+                    <% end %>
+                  </div>
                 </div>
-              </div>
-              <div class="flex-shrink-0">
-                <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
-              </div>
-            <% end %>
+                <div class="flex-shrink-0">
+                  <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
+                </div>
+              <% end %>
+            </div>
           </div>
         <% end %>
       </div>
@@ -205,3 +231,23 @@
 
   </div>
 </div>
+
+<script>
+window.toggleBookFavorite = async function(bookId) {
+  const csrfToken = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+  try {
+    const response = await fetch(`/books/${bookId}/toggle_favorite`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken
+      },
+      body: JSON.stringify({ id: bookId })
+    });
+    return { success: response.ok };
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return { success: false };
+  }
+};
+</script>

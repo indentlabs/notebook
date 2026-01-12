@@ -177,6 +177,7 @@ Rails.application.routes.draw do
   resources :books do
     member do
       post :toggle_archive
+      post :toggle_favorite
       post :add_document
       post :create_document
       delete :remove_document

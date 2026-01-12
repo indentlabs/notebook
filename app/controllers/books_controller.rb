@@ -4,7 +4,7 @@ class BooksController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
-    @books = current_user.books.unarchived.order(updated_at: :desc)
+    @books = current_user.books.unarchived.order(favorite: :desc, updated_at: :desc)
   end
 
   def show
@@ -74,6 +74,14 @@ class BooksController < ApplicationController
         format.html { redirect_to archive_path }
         format.json { render json: { success: true } }
       end
+    end
+  end
+
+  def toggle_favorite
+    if @book.update(favorite: !@book.favorite)
+      render json: { success: true, favorite: @book.favorite }
+    else
+      render json: { error: "Failed to update favorite status" }, status: :unprocessable_entity
     end
   end
 
