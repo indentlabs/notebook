@@ -46,12 +46,16 @@ class WritingGoalsController < ApplicationController
     @page_title = "New Writing Goal"
     @writing_goal = current_user.writing_goals.build
 
-    # Suggest novel challenge defaults (use user's timezone for dates)
+    # Use user's timezone for dates
     user_today = current_user.current_date_in_time_zone
-    @writing_goal.title = "My Writing Goal"
-    @writing_goal.target_word_count = 50000
+
+    # Use query params if provided, otherwise use defaults
+    @writing_goal.title = params[:title] || "My Writing Goal"
+    @writing_goal.target_word_count = params[:target_word_count]&.to_i || 50000
     @writing_goal.start_date = user_today
-    @writing_goal.end_date = user_today + 30.days
+
+    days = params[:days]&.to_i || 30
+    @writing_goal.end_date = user_today + days.days
   end
 
   def create
