@@ -30,18 +30,24 @@ class WordCountUpdate < ApplicationRecord
       .values
 
     # Get the previous record for each entity in a single query using a subquery
-    entity_keys = today_records.map { |r| [r.entity_type, r.entity_id] }
+    entity_ids_by_type = today_records.group_by(&:entity_type).transform_values { |recs| recs.map(&:entity_id).uniq }
 
-    # Find the max for_date before target_date for each entity
-    prev_records = where(user: user)
-      .where('for_date < ?', target_date)
-      .where(entity_type: entity_keys.map(&:first).uniq)
-      .group(:entity_type, :entity_id)
-      .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
-      .to_a
+    prev_records = []
+    entity_ids_by_type.each do |type, ids|
+      prev_records.concat(
+        where(user: user)
+          .where('for_date < ?', target_date)
+          .where(entity_type: type, entity_id: ids)
+          .group(:entity_type, :entity_id)
+          .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
+          .to_a
+      )
+    end
 
     # Fetch the actual word counts for those dates
     prev_word_counts = {}
+    
+    # Do this in bulk for each type to avoid N+1
     prev_records.each do |pr|
       record = find_by(
         user: user,
@@ -102,14 +108,19 @@ class WordCountUpdate < ApplicationRecord
     end
 
     # Get the previous record for each entity before the range started
-    entity_keys = latest_in_range.map { |r| [r.entity_type, r.entity_id] }
+    entity_ids_by_type = latest_in_range.group_by(&:entity_type).transform_values { |recs| recs.map(&:entity_id).uniq }
 
-    prev_records = where(user: user)
-      .where('for_date < ?', start_date)
-      .where(entity_type: entity_keys.map(&:first).uniq)
-      .group(:entity_type, :entity_id)
-      .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
-      .to_a
+    prev_records = []
+    entity_ids_by_type.each do |type, ids|
+      prev_records.concat(
+        where(user: user)
+          .where('for_date < ?', start_date)
+          .where(entity_type: type, entity_id: ids)
+          .group(:entity_type, :entity_id)
+          .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
+          .to_a
+      )
+    end
 
     prev_word_counts = {}
     prev_records.each do |pr|
