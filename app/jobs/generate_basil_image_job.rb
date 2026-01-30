@@ -27,35 +27,31 @@ class GenerateBasilImageJob < ApplicationJob
     # commission.entity_type - the type of entity the image is for (e.g. Character, Location, etc)
     prompt_to_send = "(#{commission.style} style), #{commission.entity_type}, #{sanitized_commmission_prompt}"
 
-    # Make the API request to generate the imagex
+    # Make the API request to generate the image
     endpoint_url = ENV.fetch("BASIL_ENDPOINT")
-    api_url = URI.join(endpoint_url, '/sdapi/v1/txt2img')
-
-    puts "*" * 100
-    puts "Prompt: #{prompt_to_send}"
-    puts "*" * 100
+    api_url = URI.parse("#{endpoint_url}/v1/image/generations")
+    api_key = ENV.fetch("BASIL_API_KEY")
 
     payload = {
+      client_id: commission.user_id.to_s,
       prompt: prompt_to_send,
-      steps: 20,
-      # Add other parameters like negative_prompt, width, height, sampler_index, etc. as needed
-      # Example:
-      negative_prompt: "(naked, nudity, nsfw, nude), (tits, breasts, boobs), (sex, hardcore, porn, pornographic), xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked, words, text",
-      width: 512,
-      height: 512,
-      override_settings: {
-        sd_model_checkpoint: (commission.style == "anime") ? "openxl" : "photorealism.safetensors",
-      },
-      sampler_index: "DPM++ 3M SDE",
-      cfg_scale: 4
+      negative_prompt: "(naked, nudity, nsfw, nude), (tits, breasts, boobs), (sex, hardcore, porn, pornographic), xxx, low quality, blurry, worst quality, diptych, triptych, multiple images, multiple subjects, signed, signature, watermark, watermarked, words, text"
     }.to_json
 
     begin
-      response = Net::HTTP.post(api_url, payload, "Content-Type" => "application/json")
+      http = Net::HTTP.new(api_url.host, api_url.port)
+      http.use_ssl = api_url.scheme == 'https'
+
+      request = Net::HTTP::Post.new(api_url.path)
+      request['Content-Type'] = 'application/json'
+      request['Authorization'] = "Bearer #{api_key}"
+      request.body = payload
+
+      response = http.request(request)
       response.value # Raises an HTTPError if the response is not 2xx
 
       response_data = JSON.parse(response.body)
-      image_data_base64 = response_data['images']&.first
+      image_data_base64 = response_data['image']
 
       raise ApiError, "No image data found in API response" unless image_data_base64
 
