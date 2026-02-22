@@ -45,8 +45,8 @@
     <!-- Actions -->
     <div class="flex items-center space-x-2 sm:space-x-1">
       <!-- Edit Button -->
-      <button class="p-3 sm:p-1.5 -m-1 sm:m-0 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20"
-              title="Configure Category"
+      <button class="p-3 sm:p-1.5 -m-1 sm:m-0 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20 relative tooltip-left"
+              data-tooltip="Configure Category"
               @click.stop="$dispatch('select-category', { id: <%= category.id %> })">
         <svg class="w-5 h-5 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -54,10 +54,10 @@
       </button>
 
       <!-- Archive Toggle -->
-      <button class="category-archive-toggle p-3 sm:p-1.5 -m-1 sm:m-0 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20 transition-colors"
+      <button class="category-archive-toggle p-3 sm:p-1.5 -m-1 sm:m-0 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20 transition-colors relative tooltip-left"
               data-category-id="<%= category.id %>"
               data-archived="<%= category.hidden? %>"
-              title="<%= category.hidden? ? 'Archived category - Click to restore' : 'Active category - Click to archive' %>"
+              data-tooltip="<%= category.hidden? ? 'Click to restore' : 'Click to archive' %>"
               @click.stop="toggleCategoryArchive(<%= category.id %>, $el.dataset.archived === 'true')">
         <% if category.hidden? %>
           <i class="material-icons text-amber-600 text-base sm:text-sm">unarchive</i>
@@ -67,8 +67,8 @@
       </button>
 
       <!-- Expand/Collapse Button -->
-      <button class="p-3 sm:p-1.5 -m-1 sm:m-0 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20"
-              title="Expand/Collapse"
+      <button class="p-3 sm:p-1.5 -m-1 sm:m-0 rounded hover:bg-white hover:bg-opacity-50 dark:hover:bg-black dark:hover:bg-opacity-20 relative tooltip-left"
+              data-tooltip="Expand/Collapse"
               @click.stop="isOpen = !isOpen">
         <svg class="w-5 h-5 sm:w-4 sm:h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200"
              :class="{ 'transform rotate-180': isOpen }"
