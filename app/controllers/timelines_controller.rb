@@ -20,16 +20,17 @@ class TimelinesController < ApplicationController
     # without reworking most of the views. For now, we're just grabbing timelines and contributable
     # timelines manually.
     # @timelines = @linkables_raw.fetch('Timeline', [])
-    @timelines = current_user.timelines
+    @timelines = current_user.timelines.includes(:timeline_events)
 
     @page_title = "My timelines"
 
     if @universe_scope
-      @timelines = Timeline.where(universe: @universe_scope)
+      @timelines = Timeline.where(universe: @universe_scope).includes(:timeline_events)
     else
       # Add in all timelines from shared universes also
       @timelines += Timeline.where(universe_id: current_user.contributable_universe_ids)
                             .where.not(id: @timelines.pluck(:id))
+                            .includes(:timeline_events)
     end
 
     @filtered_page_tags = []
@@ -46,17 +47,33 @@ class TimelinesController < ApplicationController
     #   @timelines.select!(&:favorite?)
     # end
 
+    # Precompute timeline event statistics using already-loaded associations
+    @timeline_event_counts = {}
+    @total_events = 0
+    @event_type_counts = Hash.new(0)
+
+    @timelines.each do |timeline|
+      events = timeline.timeline_events
+      count = events.size  # Uses loaded data, no query
+      @timeline_event_counts[timeline.id] = count
+      @total_events += count
+
+      events.each do |event|
+        type = event.respond_to?(:event_type) ? (event.event_type || 'Unspecified') : 'Unspecified'
+        @event_type_counts[type] += 1
+      end
+    end
 
     # New style, using content#index view (we can wipe unused stuff from above once this is finalized)
     @content_type_class = Timeline
     @content_type_name = @content_type_class.name
     @content = @timelines
     @total_content_count = @timelines.count
-    
+
     # Set up pagination variables (no actual pagination for now, but template expects them)
     @current_page = 1
     @total_pages = 1
-    
+
     @folders = []
     render 'timelines/index'
   end

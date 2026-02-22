@@ -1,15 +1,10 @@
 <%
   # Timeline-specific content counts
   content_counts_per_type = { 'Timeline' => @content.count }
-  
-  # Calculate timeline event statistics
-  timeline_event_counts = {}
-  total_events = 0
-  @content.each do |timeline|
-    event_count = timeline.timeline_events.count
-    timeline_event_counts[timeline.id] = event_count
-    total_events += event_count
-  end
+
+  # Use precomputed statistics from controller (avoids N+1 queries)
+  timeline_event_counts = @timeline_event_counts
+  total_events = @total_events
 %>
 
 <div x-data="{
@@ -105,15 +100,7 @@
 
       <!-- Timeline Event Type Breakdown -->
       <% if @content.any? && total_events > 0 %>
-        <%
-          event_type_counts = Hash.new(0)
-          @content.each do |timeline|
-            timeline.timeline_events.each do |event|
-              type = event.respond_to?(:event_type) ? (event.event_type || 'Unspecified') : 'Unspecified'
-              event_type_counts[type] += 1
-            end
-          end
-        %>
+        <% event_type_counts = @event_type_counts %>
         <% if event_type_counts.any? %>
           <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
             <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Event Types</h3>
