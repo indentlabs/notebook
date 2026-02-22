@@ -12,4 +12,10 @@ class InformationController < ApplicationController
     @content_type = Timeline
     render :timeline
   end
+
+  # Override for Book since it's not a standard content type
+  def books
+    @content_type = Book
+    render :book
+  end
 end

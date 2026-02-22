@@ -467,6 +467,8 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
     end
+    # Manual route for Book (not in content_types[:all])
+    get 'books', to: 'information#books', as: 'book_worldbuilding_info'
   end
 
   scope '/scene/:scene_id' do
