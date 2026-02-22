@@ -99,13 +99,16 @@ class TimelinesController < ApplicationController
                                                           .limit(20)
       
       # Enhanced data for content summary sidebar
+      # Sort in Ruby instead of SQL because some models (e.g. Document) don't have
+      # a 'name' column - they have 'title' with a Ruby method aliasing it to 'name'
       all_content = content_class.where(id: entity_ids)
                                 .where(user: current_user)
-                                .order(:name)
+                                .to_a
+                                .sort_by { |c| c.name.to_s.downcase }
       
       @timeline_content_summary[entity_type] = {
         count: all_content.count,
-        items: all_content.limit(10), # Show first 10, with expansion option
+        items: all_content.first(10), # Show first 10, with expansion option
         total_items: all_content.count,
         content_class: content_class
       }
