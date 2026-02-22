@@ -8,8 +8,8 @@ class CacheBookWordCountJob < ApplicationJob
     return if book.nil?
 
     # Count words in description and blurb
-    description_words = book.description.present? ? WordCountService.count(book.description) : 0
-    blurb_words = book.blurb.present? ? WordCountService.count(book.blurb) : 0
+    description_words = book.description.present? ? WordCountService.count_with_fallback(book.description) : 0
+    blurb_words = book.blurb.present? ? WordCountService.count_with_fallback(book.blurb) : 0
     total_word_count = description_words + blurb_words
 
     # Cache the total word count on the model

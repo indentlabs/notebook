@@ -24,7 +24,7 @@ class CacheAttributeWordCountJob < ApplicationJob
     end
 
     # Use centralized WordCountService for consistent counting across the app
-    word_count = WordCountService.count(attribute.value)
+    word_count = WordCountService.count_with_fallback(attribute.value)
 
     attribute.update_column(:word_count_cache, word_count)
   end

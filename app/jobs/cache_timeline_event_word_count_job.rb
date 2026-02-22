@@ -8,8 +8,8 @@ class CacheTimelineEventWordCountJob < ApplicationJob
     return if timeline_event.nil?
 
     # Count words in title and description
-    title_words = timeline_event.title.present? ? WordCountService.count(timeline_event.title) : 0
-    description_words = timeline_event.description.present? ? WordCountService.count(timeline_event.description) : 0
+    title_words = timeline_event.title.present? ? WordCountService.count_with_fallback(timeline_event.title) : 0
+    description_words = timeline_event.description.present? ? WordCountService.count_with_fallback(timeline_event.description) : 0
     total_word_count = title_words + description_words
 
     # Cache the total word count on the model
