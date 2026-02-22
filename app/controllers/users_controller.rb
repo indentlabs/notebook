@@ -128,8 +128,12 @@ class UsersController < ApplicationController
   
   def tag
     @tag_slug = params[:tag_slug]
-    @tag = PageTag.find_by(user_id: @user.id, slug: @tag_slug)
-    
+
+    # Slugs are always stored lowercase, so direct equality works
+    @tag = PageTag.where(user_id: @user.id)
+                  .where(slug: @tag_slug.downcase)
+                  .first
+
     if @tag.nil?
       redirect_url = @user.username.present? ? profile_by_username_path(username: @user.username) : user_path(@user)
       return redirect_to(redirect_url, notice: 'That tag does not exist.', status: :not_found)
@@ -137,51 +141,70 @@ class UsersController < ApplicationController
 
     # Find all public content with this tag
     @tagged_content = []
-    
-    # Go through each content type and find items with this tag
-    Rails.application.config.content_types[:all].each do |content_type|
-      content_pages = content_type.joins(:page_tags)
-                              .where(privacy: 'public')
-                              .where(user_id: @user.id)
-                              .where(page_tags: { slug: @tag_slug })
-                              .order(:name)
 
-      @tagged_content << {
-        type: content_type.name,
-        icon: content_type.icon,
-        color: content_type.color,
-        content: content_pages
-      } if content_pages.any?
+    # Go through each content type and find items with this tag
+    # Use two-step approach: first get page IDs, then query content (matches BrowseController pattern)
+    Rails.application.config.content_types[:all].each do |content_type|
+      tag_page_ids = PageTag.where(user_id: @user.id)
+                            .where(page_type: content_type.name)
+                            .where(slug: @tag_slug.downcase)
+                            .pluck(:page_id)
+
+      if tag_page_ids.any?
+        content_pages = content_type.where(id: tag_page_ids)
+                                    .where(privacy: 'public')
+                                    .where(user_id: @user.id)
+                                    .order(:name)
+
+        @tagged_content << {
+          type: content_type.name,
+          icon: content_type.icon,
+          color: content_type.color,
+          content: content_pages
+        } if content_pages.any?
+      end
     end
-    
+
     # Add documents and timelines if they have the tag
     # Handle documents separately since they don't use the common content type structure
-    documents = Document.joins(:page_tags)
-                        .where(privacy: 'public')
-                        .where(user_id: @user.id)
-                        .where(page_tags: { slug: @tag_slug })
-                        .order(:title) # Documents use 'title' instead of 'name'
-                        
-    @tagged_content << {
-      type: 'Document',
-      icon: 'description',
-      color: 'blue',
-      content: documents
-    } if documents.any?
-    
+    document_page_ids = PageTag.where(user_id: @user.id)
+                               .where(page_type: 'Document')
+                               .where(slug: @tag_slug.downcase)
+                               .pluck(:page_id)
+
+    if document_page_ids.any?
+      documents = Document.where(id: document_page_ids)
+                          .where(privacy: 'public')
+                          .where(user_id: @user.id)
+                          .order(:title) # Documents use 'title' instead of 'name'
+
+      @tagged_content << {
+        type: 'Document',
+        icon: 'description',
+        color: 'blue',
+        content: documents
+      } if documents.any?
+    end
+
     # Handle timelines separately since they don't use the common content type structure
-    timelines = Timeline.joins(:page_tags)
-                        .where(privacy: 'public')
-                        .where(user_id: @user.id)
-                        .where(page_tags: { slug: @tag_slug })
-                        .order(:name)
-                        
-    @tagged_content << {
-      type: 'Timeline',
-      icon: 'timeline',
-      color: 'blue',
-      content: timelines
-    } if timelines.any?
+    timeline_page_ids = PageTag.where(user_id: @user.id)
+                               .where(page_type: 'Timeline')
+                               .where(slug: @tag_slug.downcase)
+                               .pluck(:page_id)
+
+    if timeline_page_ids.any?
+      timelines = Timeline.where(id: timeline_page_ids)
+                          .where(privacy: 'public')
+                          .where(user_id: @user.id)
+                          .order(:name)
+
+      @tagged_content << {
+        type: 'Timeline',
+        icon: 'timeline',
+        color: 'blue',
+        content: timelines
+      } if timelines.any?
+    end
     
     # Get images for content cards
     @random_image_including_private_pool_cache = ImageUpload.where(
