@@ -21,10 +21,16 @@ class WritingGoalsController < ApplicationController
     # Words remaining today
     @words_remaining_today = [@max_daily_goal - @words_today, 0].max
 
-    # 30-day word count history for chart (use user's timezone)
+    # Configurable time range for chart (use user's timezone)
     user_today = current_user.current_date_in_time_zone
-    dates = ((user_today - 29.days)..user_today).to_a
+    @chart_days = [7, 14, 30, 90].include?(params[:days].to_i) ? params[:days].to_i : 30
+    dates = ((user_today - (@chart_days - 1).days)..user_today).to_a
     @daily_word_counts_30_days = WordCountUpdate.words_written_on_dates(current_user, dates)
+
+    # Summary statistics
+    @total_words_period = @daily_word_counts_30_days.values.sum
+    @days_goal_met = @daily_word_counts_30_days.count { |_, count| count >= @max_daily_goal }
+    @current_streak = calculate_writing_streak(@daily_word_counts_30_days, @max_daily_goal)
   end
 
   def history
@@ -114,5 +120,14 @@ class WritingGoalsController < ApplicationController
 
   def set_sidenav_expansion
     @sidenav_expansion = 'writing'
+  end
+
+  def calculate_writing_streak(word_counts, goal)
+    streak = 0
+    word_counts.to_a.reverse.each do |_date, count|
+      break if count < goal
+      streak += 1
+    end
+    streak
   end
 end
