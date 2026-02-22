@@ -318,16 +318,43 @@ class DocumentsController < ApplicationController
   def edit
     redirect_to(root_path, notice: "You don't have permission to edit that!") unless @document.updatable_by?(current_user)
 
-    # Fetch all document entities (linked and unlinked) with their associations
+    # Fetch all document entities (linked and unlinked)
+    # Note: We can't use includes(:entity) effectively on polymorphic associations
+    # because Rails doesn't know which tables to join. Instead, we'll load entities
+    # in bulk by type below.
     @linked_entities = @document.document_entities
-      .includes(:entity)
       .where.not(entity_id: nil)
+      .to_a
+
+    # Eager-load polymorphic entities by grouping by type and batch-loading
+    # This prevents N+1 queries when rendering linked_entity_card partials
+    entities_by_type = @linked_entities.group_by(&:entity_type)
+    preloaded_entities = {}
+
+    entities_by_type.each do |entity_type, document_entities|
+      entity_ids = document_entities.map(&:entity_id)
+      entity_class = entity_type.safe_constantize
+      next unless entity_class
+
+      # Load all entities of this type in a single query
+      entities = entity_class.where(id: entity_ids).index_by(&:id)
+      preloaded_entities[entity_type] = entities
+    end
+
+    # Associate preloaded entities back to document_entities to avoid N+1
+    @linked_entities.each do |document_entity|
+      entity = preloaded_entities.dig(document_entity.entity_type, document_entity.entity_id)
+      document_entity.association(:entity).target = entity if entity
+    end
 
     # Group by entity type for easier rendering
     @linked_entities_by_type = @linked_entities.group_by(&:entity_type)
 
-    # Books sidebar data
-    @document_books = @document.books.includes(book_documents: :document).order(:title)
+    # Books sidebar data - eager load documents through book_documents
+    @document_books = @document.books
+      .includes(book_documents: :document)
+      .order(:title)
+      .to_a
     @user_books = current_user.books.unarchived.order(:title)
   end
 
