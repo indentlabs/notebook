@@ -72,7 +72,7 @@ module HasContentGroupers
 
       # inverse_siblingships
       has_many "inverse_#{connecting_class_name}".to_sym,
-        class_name: "#{singularized_relation.capitalize}",
+        class_name: through_relation_class,
         foreign_key: "#{singularized_relation}_id"
 
       # inverse_siblings
