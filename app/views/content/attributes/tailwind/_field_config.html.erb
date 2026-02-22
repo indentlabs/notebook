@@ -178,25 +178,11 @@
             </p>
             
             <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
-              <div x-data="{ displayStyle: '<%= field.field_options&.dig('display_style') || 'list' %>' }">
+              <div x-data="{ displayStyle: '<%= field.field_options&.dig('display_style') || 'tags' %>' }">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Display Style</label>
-                
+
                 <!-- Display Style Options -->
                 <div class="space-y-3">
-                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
-                         :class="displayStyle === 'list' ? 'border-blue-300 dark:border-blue-600' : 'border-gray-200 dark:border-slate-700'"
-                         :style="displayStyle === 'list' ? (document.documentElement.classList.contains('dark') ? 'background-color: rgb(51, 65, 85)' : 'background-color: rgb(239, 246, 255)') : ''">
-                    <input type="radio"
-                           x-model="displayStyle"
-                           name="attribute_field[field_options][display_style]"
-                           value="list"
-                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
-                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
-                    <div class="ml-3">
-                      <div class="text-sm font-medium text-gray-900 dark:text-white">Text</div>
-                    </div>
-                  </label>
-
                   <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
                          :class="displayStyle === 'tags' ? 'border-blue-300 dark:border-blue-600' : 'border-gray-200 dark:border-slate-700'"
                          :style="displayStyle === 'tags' ? (document.documentElement.classList.contains('dark') ? 'background-color: rgb(51, 65, 85)' : 'background-color: rgb(239, 246, 255)') : ''">
@@ -208,6 +194,20 @@
                            style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
                     <div class="ml-3">
                       <div class="text-sm font-medium text-gray-900 dark:text-white">Tags</div>
+                    </div>
+                  </label>
+
+                  <label class="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
+                         :class="displayStyle === 'list' ? 'border-blue-300 dark:border-blue-600' : 'border-gray-200 dark:border-slate-700'"
+                         :style="displayStyle === 'list' ? (document.documentElement.classList.contains('dark') ? 'background-color: rgb(51, 65, 85)' : 'background-color: rgb(239, 246, 255)') : ''">
+                    <input type="radio"
+                           x-model="displayStyle"
+                           name="attribute_field[field_options][display_style]"
+                           value="list"
+                           class="h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2"
+                           style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
+                    <div class="ml-3">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white">Text</div>
                     </div>
                   </label>
 
@@ -230,13 +230,6 @@
                 <div class="mt-4">
                   <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preview</label>
                   <div class="border border-gray-200 dark:border-slate-600 rounded-md p-3 bg-gray-50 dark:bg-slate-900">
-                    <!-- Simple List Preview -->
-                    <div x-show="displayStyle === 'list'" class="text-sm text-gray-600 dark:text-gray-400">
-                      <div>• Alice Johnson</div>
-                      <div>• The Rusty Tavern</div>
-                      <div>• Magic Sword</div>
-                    </div>
-                    
                     <!-- Tags Preview -->
                     <div x-show="displayStyle === 'tags'" class="text-sm text-gray-600 dark:text-gray-400">
                       <div class="flex flex-wrap gap-2">
@@ -254,7 +247,14 @@
                         </span>
                       </div>
                     </div>
-                    
+
+                    <!-- Simple List Preview -->
+                    <div x-show="displayStyle === 'list'" class="text-sm text-gray-600 dark:text-gray-400">
+                      <div>• Alice Johnson</div>
+                      <div>• The Rusty Tavern</div>
+                      <div>• Magic Sword</div>
+                    </div>
+
                     <!-- Cards Preview -->
                     <div x-show="displayStyle === 'cards'" class="text-sm text-gray-600 dark:text-gray-400">
                       <div class="w-full max-w-md overflow-x-auto overflow-y-hidden">

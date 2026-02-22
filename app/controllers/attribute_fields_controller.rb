@@ -283,12 +283,14 @@ class AttributeFieldsController < ContentController
       :attribute_category,
       :name, :field_type,
       :label, :description,
-      :entity_type, 
+      :entity_type,
       :attribute_category_id,
       :hidden, :position,
-      field_options: {
+      field_options: [
+        :display_style,
+        :input_size,
         linkable_types: []
-      }
+      ]
     ]
   end
 

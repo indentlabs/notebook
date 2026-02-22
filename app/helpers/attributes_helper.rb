@@ -1,4 +1,14 @@
 module AttributesHelper
+  # Resolves linked content from the current user's content cache
+  # Returns the content object if found, nil otherwise (triggers JS lazy loading)
+  def resolve_link_content(klass, id)
+    return nil unless user_signed_in? && @current_user_content
+
+    @current_user_content.fetch(klass, []).detect do |page|
+      page.page_type == klass && page.id == id.to_i
+    end
+  end
+
   #todo this might not actually be used anymore
   def attribute_category_tab(content, category)
     is_disabled = category.attribute_fields.any? do |field|
