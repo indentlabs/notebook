@@ -467,11 +467,12 @@ Rails.application.routes.draw do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
     end
-    # Manual route for Book (not in content_types[:all])
+  end
+
+  # Writing tools info pages (separate from worldbuilding content types)
+  scope '/writing' do
     get 'books', to: 'information#books', as: 'book_worldbuilding_info'
-    # Manual route for Document (not in content_types[:all])
     get 'documents', to: 'information#documents', as: 'document_worldbuilding_info'
-    # Manual route for Timeline (not in content_types[:all])
     get 'timelines', to: 'information#timelines', as: 'timeline_worldbuilding_info'
   end
 
