@@ -179,7 +179,7 @@ class DataController < ApplicationController
   def calculate_personal_green_stats
     stats = { pages_equivalent: 0, by_type: {} }
 
-    @current_user_content.each do |content_type, content_list|
+    @current_user_content.reject { |type, _| type == 'Book' }.each do |content_type, content_list|
       count = content_list.count
       next if count == 0
 
