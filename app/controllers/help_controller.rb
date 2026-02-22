@@ -5,7 +5,8 @@ class HelpController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
-    @page_title = "Help center"
+    @page_title = "Help Center"
+    @meta_description = "Get help with Notebook.ai - guides for worldbuilding, writing tools, page templates, and more. Find answers, tutorials, and contact support."
   end
 
   def page_templates
