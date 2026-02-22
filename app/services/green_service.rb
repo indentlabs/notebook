@@ -89,31 +89,37 @@ class GreenService < Service
     end
   end
 
-  # Batch-fetch max IDs for all content types in minimal queries
+  # Batch-fetch max IDs for all content types in a single query
   # Returns a hash mapping content_type.name => max_id
   def self.max_ids_for_content_types(content_types)
-    max_ids = {}
+    return {} if content_types.empty?
 
-    content_types.each do |content_type|
+    queries = content_types.map do |content_type|
       case content_type.name
       when 'Timeline'
-        # Timeline uses TimelineEvent max ID, will be fetched separately
-        next
+        # Timeline uses TimelineEvent's max ID from timeline_events table
+        "SELECT 'TimelineEvent' as content_type, COALESCE(MAX(id), 0) as max_id FROM timeline_events"
       when 'Document'
-        # Document max ID is used for digital count display
-        max_ids['Document'] = Document.with_deleted.maximum(:id) || 0
+        # Document table - include all records for total count
+        "SELECT 'Document' as content_type, COALESCE(MAX(id), 0) as max_id FROM documents"
       else
-        # Batch these queries - they're simple MAX(id) queries
-        max_ids[content_type.name] = content_type.maximum(:id) || 0
+        # Standard content types use pluralized lowercase table names
+        table_name = content_type.name.downcase.pluralize
+        "SELECT '#{content_type.name}' as content_type, COALESCE(MAX(id), 0) as max_id FROM #{table_name}"
       end
     end
 
-    # Fetch TimelineEvent max ID if Timeline is in the list
-    if content_types.any? { |ct| ct.name == 'Timeline' }
-      max_ids['TimelineEvent'] = TimelineEvent.maximum(:id) || 0
-    end
+    sql = queries.join(' UNION ALL ')
+    results = ActiveRecord::Base.connection.execute(sql)
 
-    max_ids
+    # Convert to hash, handling both SQLite (hash) and MySQL (array) result formats
+    results.to_a.each_with_object({}) do |row, hash|
+      if row.is_a?(Hash)
+        hash[row['content_type']] = row['max_id'].to_i
+      else
+        hash[row[0]] = row[1].to_i
+      end
+    end
   end
 
   def self.total_pages_saved_by(user)
