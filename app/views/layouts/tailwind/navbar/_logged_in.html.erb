@@ -24,7 +24,7 @@
   <div class="flex-grow"></div>
 
   <!-- right-hand side of navbar -->
-  <div class="pr-2 flex items-center justify-end space-x-1 sm:space-x-2 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false, mobileSearchOpen: false }">
+  <div class="pr-2 flex items-center justify-end space-x-2 sm:space-x-3 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false, mobileSearchOpen: false }">
     <% if user_signed_in? %>
       <!-- Mobile Search Toggle -->
       <button @click.stop="mobileSearchOpen = true; $nextTick(() => document.getElementById('navbar-search-input').focus())" 
@@ -45,8 +45,8 @@
 
         <!-- Wrap in form to isolate autocomplete context -->
         <form onsubmit="return false;" autocomplete="off" class="w-full md:w-auto">
-          <input class="border-2 border-blue-400 dark:border-blue-500 text-notebook-blue dark:text-blue-400 focus:border-notebook-blue dark:focus:border-blue-400 bg-white dark:bg-gray-800 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                 :class="{ 'w-full h-10': mobileSearchOpen, 'w-64 lg:w-80 xl:w-96 h-9': !mobileSearchOpen }"
+          <input class="border-2 border-white border-opacity-50 dark:border-gray-400 text-notebook-blue dark:text-blue-400 focus:border-white focus:border-opacity-80 dark:focus:border-gray-300 bg-white dark:bg-gray-800 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                 :class="{ 'w-full h-10': mobileSearchOpen, 'w-64 lg:w-80 xl:w-96 h-11': !mobileSearchOpen }"
                  type="search"
                  id="navbar-search-input"
                  name="navbar_search_query"
@@ -152,8 +152,8 @@
       <!-- Paper-Style Notification Dropdown -->
       <div class="inline-flex items-center">
         <!-- Notification Button -->
-        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen; accountDropdownOpen = false" class="z-10 block p-2 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded-full transition-all duration-200">
-          <svg class="h-5 w-5 sm:h-6 sm:w-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+        <button @click="notificationsDropdownOpen = !notificationsDropdownOpen; accountDropdownOpen = false" class="z-10 flex items-center justify-center h-11 w-9 <%= @user_notifications.reject { |n| n.viewed_at? }.any? ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 rounded transition-all duration-200">
+          <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
           </svg>
         </button>
@@ -269,14 +269,14 @@
       </div>
 
       <div class="inline-flex items-center">
-        <button @click="accountDropdownOpen = !accountDropdownOpen; notificationsDropdownOpen = false" class="z-10 block p-1 <%= unread_inbox_count > 0 ? 'bg-yellow-300 border-yellow-400' : 'bg-white bg-opacity-20 border-white border-opacity-30' %> border-2 hover:bg-opacity-30 <%= unread_inbox_count > 0 ? 'hover:border-yellow-500' : 'hover:border-opacity-50' %> rounded-full transition-all duration-200">
-          <%= image_tag current_user.image_url, class: 'rounded-full h-6 w-6 sm:h-8 sm:w-8' %>
+        <button @click="accountDropdownOpen = !accountDropdownOpen; notificationsDropdownOpen = false" class="z-10 block hover:opacity-80 transition-all duration-200">
+          <%= image_tag current_user.image_url, class: 'rounded h-11 w-9 object-cover border-2', style: unread_inbox_count > 0 ? 'border-color: #fcd34d;' : 'border-color: rgba(255,255,255,0.5);' %>
         </button>
         <div x-show="accountDropdownOpen" @click="accountDropdownOpen = false" style="display: none;" class="fixed inset-0 h-full w-full z-10"></div>
 
         <div x-show="accountDropdownOpen" style="display: none;" class="absolute top-full right-0 mt-2 bg-white dark:bg-gray-800 rounded-md shadow-lg overflow-hidden z-50 w-64 border border-gray-200 dark:border-gray-700">
           <%= link_to current_user.profile_url, class: 'flex border-t border-gray-300 dark:border-gray-700 p-2 border-b shadow group hover:bg-notebook-blue dark:hover:bg-blue-600 hover:text-white' do %>
-            <%= image_tag current_user.image_url(size: 32), class: 'rounded-full h-12 w-12 sm:h-16 sm:w-16 mr-2 p-1 border-2 border-notebook-blue dark:border-blue-400 group-hover:border-green-500' %>
+            <%= image_tag current_user.image_url(size: 32), class: 'rounded h-16 w-12 sm:h-20 sm:w-16 mr-2 p-1 border-2 border-notebook-blue dark:border-blue-400 group-hover:border-green-500 object-cover' %>
             <div class="m-auto ml-1">
               <div class="text-xs text-gray-500 dark:text-gray-400 group-hover:text-white">You're signed in as</div>
               <div class="text-sm <%= User.text_color %> dark:text-blue-400 group-hover:text-white font-bold">
