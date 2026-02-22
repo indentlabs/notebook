@@ -5,6 +5,12 @@ class Attribute < ApplicationRecord
   belongs_to :attribute_field
   belongs_to :entity, polymorphic: true, touch: true
 
+  validates :attribute_field_id, uniqueness: {
+    scope: [:entity_type, :entity_id],
+    conditions: -> { where(deleted_at: nil) },
+    message: "already has a value for this entity"
+  }
+
   include HasChangelog
 
   include Authority::Abilities
@@ -28,7 +34,8 @@ class Attribute < ApplicationRecord
     # Cache the updated word count on the page this attribute belongs to
     CacheSumAttributeWordCountJob.perform_later(self.entity_type, self.entity_id)
   rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
-    Rails.logger.warn "[WordCount] Could not enqueue jobs for Attribute##{id}: #{e.message}"
+    Rails.logger.error "[WordCount] Redis unavailable - word count jobs not enqueued for Attribute##{id}: #{e.message}"
+    # No inline fallback - would be DDoS risk with large documents
   end
 
   after_save do

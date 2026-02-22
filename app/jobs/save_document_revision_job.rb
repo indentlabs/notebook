@@ -50,7 +50,8 @@ class SaveDocumentRevisionJob < ApplicationJob
       if retry_count <= MAX_RETRY_ATTEMPTS
         retry
       else
-        Rails.logger.warn("SaveDocumentRevisionJob: max retries exceeded for Document##{document_id} on #{user_date}")
+        Rails.logger.error("SaveDocumentRevisionJob: max retries exceeded for Document##{document_id} on #{user_date}")
+        raise # Let Sidekiq handle with its retry mechanism
       end
     end
 

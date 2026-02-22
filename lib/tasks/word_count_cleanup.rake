@@ -1,4 +1,77 @@
 namespace :word_count do
+  desc "Clean up duplicate Attribute records that cause inflated word counts (DRY_RUN=true for preview)"
+  task cleanup_duplicate_attributes: :environment do
+    dry_run = ENV['DRY_RUN'] != 'false'
+    batch_size = (ENV['BATCH_SIZE'] || 1000).to_i
+
+    puts dry_run ? "=== DRY RUN MODE ===" : "=== EXECUTING CLEANUP ==="
+    puts ""
+
+    # Find duplicate sets using GROUP BY (doesn't load all rows into memory)
+    duplicates = Attribute
+      .where(deleted_at: nil)
+      .group(:entity_type, :entity_id, :attribute_field_id)
+      .having('count(*) > 1')
+      .pluck(:entity_type, :entity_id, :attribute_field_id)
+
+    puts "Found #{duplicates.size} duplicate sets to process"
+    puts ""
+
+    total_deleted = 0
+    sample_deletions = []
+
+    duplicates.each_with_index do |(entity_type, entity_id, field_id), idx|
+      # Small query per set - typically 2-3 rows
+      attrs = Attribute.where(
+        entity_type: entity_type,
+        entity_id: entity_id,
+        attribute_field_id: field_id,
+        deleted_at: nil
+      ).order(updated_at: :desc)
+
+      keeper = attrs.first
+      to_delete = attrs.offset(1)
+      delete_count = to_delete.count
+
+      # Collect samples for dry-run report
+      if dry_run && sample_deletions.size < 10
+        to_delete.limit(3).each do |attr|
+          sample_deletions << {
+            id: attr.id,
+            entity: "#{attr.entity_type}##{attr.entity_id}",
+            field_id: attr.attribute_field_id,
+            value_preview: attr.value.to_s.truncate(50)
+          }
+        end
+      end
+
+      unless dry_run
+        # Soft delete duplicates (respects acts_as_paranoid)
+        to_delete.update_all(deleted_at: Time.current)
+      end
+
+      total_deleted += delete_count
+
+      if (idx + 1) % 100 == 0
+        puts "Progress: #{idx + 1}/#{duplicates.size} sets processed (#{total_deleted} duplicates #{dry_run ? 'found' : 'deleted'})"
+      end
+    end
+
+    puts ""
+    puts "Total duplicate records #{dry_run ? 'that would be' : ''} soft-deleted: #{total_deleted}"
+
+    if dry_run && sample_deletions.any?
+      puts ""
+      puts "Sample of records that would be deleted:"
+      sample_deletions.each do |s|
+        puts "  - Attribute##{s[:id]}: #{s[:entity]}, field_id=#{s[:field_id]}"
+        puts "    Value: #{s[:value_preview]}"
+      end
+      puts ""
+      puts "To execute cleanup, run: rails word_count:cleanup_duplicate_attributes DRY_RUN=false"
+    end
+  end
+
   desc "Remove duplicate WordCountUpdate records in batches (DRY_RUN=true for preview)"
   task cleanup_duplicates: :environment do
     dry_run = ENV['DRY_RUN'] != 'false'  # Default to dry-run mode

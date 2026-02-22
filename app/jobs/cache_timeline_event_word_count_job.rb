@@ -34,7 +34,8 @@ class CacheTimelineEventWordCountJob < ApplicationJob
       if retry_count <= MAX_RETRY_ATTEMPTS
         retry
       else
-        Rails.logger.warn("CacheTimelineEventWordCountJob: max retries exceeded for TimelineEvent##{timeline_event_id} on #{user_date}")
+        Rails.logger.error("CacheTimelineEventWordCountJob: max retries exceeded for TimelineEvent##{timeline_event_id} on #{user_date}")
+        raise # Let Sidekiq handle with its retry mechanism
       end
     end
   end

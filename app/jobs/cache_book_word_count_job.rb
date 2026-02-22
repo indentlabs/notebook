@@ -31,7 +31,8 @@ class CacheBookWordCountJob < ApplicationJob
       if retry_count <= MAX_RETRY_ATTEMPTS
         retry
       else
-        Rails.logger.warn("CacheBookWordCountJob: max retries exceeded for Book##{book_id} on #{user_date}")
+        Rails.logger.error("CacheBookWordCountJob: max retries exceeded for Book##{book_id} on #{user_date}")
+        raise # Let Sidekiq handle with its retry mechanism
       end
     end
   end

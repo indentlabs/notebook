@@ -731,7 +731,9 @@ class ContentController < ApplicationController
   # Content update for link-type fields
   def link_field_update
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
+      entity_params.merge(attribute_field_id: @attribute_field.id)
+    )
     attribute_value.user_id ||= current_user.id
 
     if params.key?(:attribute_field)
@@ -779,7 +781,9 @@ class ContentController < ApplicationController
   # Content update for name fields
   def name_field_update
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
+      entity_params.merge(attribute_field_id: @attribute_field.id)
+    )
     attribute_value.value = field_params.fetch('value', '')
     attribute_value.user_id ||= current_user.id
     attribute_value.save!
@@ -797,7 +801,9 @@ class ContentController < ApplicationController
   def text_field_update
     text = field_params.fetch('value', '')
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
+      entity_params.merge(attribute_field_id: @attribute_field.id)
+    )
     attribute_value.user_id ||= current_user.id
     attribute_value.value = text
     attribute_value.save!
@@ -814,7 +820,9 @@ class ContentController < ApplicationController
     return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
+      entity_params.merge(attribute_field_id: @attribute_field.id)
+    )
     attribute_value.user_id ||= current_user.id
     attribute_value.value = field_params.fetch('value', '')
     attribute_value.save!
@@ -834,7 +842,9 @@ class ContentController < ApplicationController
     return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.order('created_at desc').find_or_initialize_by(entity_params)
+    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
+      entity_params.merge(attribute_field_id: @attribute_field.id)
+    )
     attribute_value.user_id ||= current_user.id
 
     new_universe_id = field_params.fetch('value', nil).to_i

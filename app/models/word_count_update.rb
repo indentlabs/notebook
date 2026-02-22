@@ -135,7 +135,7 @@ class WordCountUpdate < ApplicationRecord
 
     # Calculate deltas
     total_delta = 0
-    entity_keys.each do |key|
+    current_word_counts.keys.each do |key|
       current = current_word_counts[key] || 0
       prev = prev_word_counts[key] || 0
       delta = current - prev
