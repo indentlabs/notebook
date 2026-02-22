@@ -3,25 +3,26 @@
   pluralized_class_name = @content_type.name.pluralize
   premium_page          = !User.new.can_create?(@content_type)
 
-  set_meta_tags title: "Creating #{pluralized_class_name.downcase}",
-                description: "Notebook.ai provides a powerful timeline tool to track events, plot points, and chronological stories within your fictional world.",
+  set_meta_tags title: "Build Your Story. Event by Event.",
+                description: "Track events, plot points, and chronological stories within your fictional world with Notebook.ai's powerful timeline tools.",
                 image_src: URI.join(root_url, asset_path("card-headers/#{pluralized_class_name.downcase}.webp")),
                 og: {
-                  title: "Creating #{pluralized_class_name.downcase} on Notebook.ai"
+                  title: "Build Your Story. Event by Event. on Notebook.ai"
                 }
 %>
 
-<section class="text-green-900" style="height: 25vh;">
-  <div class="h-full bg-right-bottom bg-cover flex shadow-lg" style="background-image: url(<%= image_path "card-headers/#{@content_type.name.downcase.pluralize}.webp" %>);">
+<%# ========== SECTION 1: HERO (Enhanced - 40vh) ========== %>
+<section class="text-green-900" style="height: 40vh;">
+  <div class="h-full bg-right-bottom bg-cover flex shadow-lg bg-gradient-to-r from-green-600 to-green-800">
     <div class="container mx-auto p-4 flex items-center z-10">
       <div class="text-center w-full">
         <div class="text-white tracking-widest py-4 px-5 my-5">
           <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: black 0px 0px 10px;">
             <i class="material-icons text-5xl <%= @content_type.text_color %>"><%= @content_type.icon %></i>
-            <%= @content_type.name.pluralize %>
+            Build Your Story. Event by Event.
           </div>
-          <div class="leading-normal text-2xl" style="text-shadow: black 0px 0px 10px;">
-            <%= t("content_oneliners.#{@content_type.name.downcase}") %>
+          <div class="leading-normal text-xl md:text-2xl" style="text-shadow: black 0px 0px 10px;">
+            Track events, plot points, and chronological stories within your fictional world
           </div>
         </div>
       </div>
@@ -29,99 +30,108 @@
   </div>
 </section>
 
+<%# ========== SECTION 2: VALUE PROPOSITION ========== %>
 <section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container mx-auto flex px-5 py-12 md:flex-row flex-col items-center">
+  <div class="container mx-auto flex px-5 py-16 md:flex-row flex-col items-center">
     <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6 mb-10 md:mb-0">
-      <%= image_tag "card-headers/#{@content_type.name.downcase.pluralize}.webp", class: 'object-cover object-center rounded-lg tooltipped materialboxed', alt: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads.", data: { tooltip: "The default image used for all #{pluralized_class_name.downcase} on Notebook.ai, but you can replace it with your own uploads."} %>
+      <div class="bg-gradient-to-br from-green-500 to-green-700 rounded-lg p-8 flex items-center justify-center h-64">
+        <i class="material-icons text-white text-9xl"><%= @content_type.icon %></i>
+      </div>
     </div>
     <div class="lg:flex-grow md:w-1/2 lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
-      <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium <%= @content_type.text_color %>">
-        Creating <%= pluralized_class_name %> on Notebook.ai
+      <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900 dark:text-white">
+        Master Your Narrative's
+        <span class="<%= @content_type.text_color %>">Flow of Time</span>
       </h1>
-      <p class="bg-gray-200 dark:bg-gray-700 py-4 px-4 my-2 rounded">
+      <p class="bg-green-50 dark:bg-green-900 py-4 px-4 my-2 rounded border border-green-200 dark:border-green-700">
         <em>
           <%= t("content_descriptions.#{singular_class_name.downcase}") %>
         </em>
       </p>
-      <p class="my-2">
-        Creating <%= pluralized_class_name.downcase %> on Notebook.ai is easy.
-      </p>
-      <p class="my-2">
-        To get started, just click <strong><%= pluralized_class_name %></strong> under the "Worldbuilding" header in the site sidebar.
-        You'll be able to see or edit all of your existing <%= singular_class_name.downcase %> pages and create new ones at any time.
-      </p>
+      <ul class="my-4 space-y-2">
+        <li class="flex items-center">
+          <i class="material-icons text-green-500 mr-2">check_circle</i>
+          <span><strong>13 narrative event types</strong> &mdash; from setup to resolution</span>
+        </li>
+        <li class="flex items-center">
+          <i class="material-icons text-green-500 mr-2">check_circle</i>
+          <span><strong>Entity linking</strong> &mdash; connect events to characters, locations, and more</span>
+        </li>
+        <li class="flex items-center">
+          <i class="material-icons text-green-500 mr-2">check_circle</i>
+          <span><strong>Flexible date tracking</strong> &mdash; real or fictional calendars</span>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
 
-<section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container px-5 py-12 mx-auto">
+<%# ========== SECTION 3: CORE FEATURES (3 Cards) ========== %>
+<section class="text-gray-600 dark:text-gray-300 body-font bg-gray-50 dark:bg-gray-900">
+  <div class="container px-5 py-16 mx-auto">
     <div class="flex flex-wrap sm:-m-4 -mx-4 -mb-10 -mt-4 md:space-y-0 space-y-6">
       <div class="p-8 lg:w-1/3 flex flex-col items-center">
-        <div class="bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-700 rounded-lg p-4 text-center h-full">
-          <div class="w-20 h-20 md:mt-4 inline-flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 mb-5 flex-shrink-0">
-            <i class="material-icons text-notebook-blue dark:text-blue-400 text-5xl">search</i>
+        <div class="bg-white dark:bg-gray-800 border border-green-100 dark:border-gray-700 rounded-lg p-4 text-center h-full shadow-sm">
+          <div class="w-20 h-20 md:mt-4 inline-flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900 mb-5 flex-shrink-0">
+            <i class="material-icons text-green-600 dark:text-green-400 text-5xl">event</i>
           </div>
           <div class="flex-grow text-left px-4">
             <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-3">
-              Search your <%= pluralized_class_name.downcase %>
+              Narrative Event Types
             </h2>
             <p class="leading-relaxed text-base my-2">
-              If you've got a lot of <%= pluralized_class_name.downcase %>, you can quickly get around to the right
-              one with Notebook.ai's full-text search. It searches your entire notebook for anything you wrote about
-              that <%= singular_class_name.downcase %>.
+              Categorize your events by their narrative purpose. Track inciting incidents, complications,
+              revelations, climaxes, and more to understand your story's structure.
             </p>
-            <p class="leading-relaxed text-base my-2 bg-blue-50 dark:bg-blue-900 py-2 px-4 -mx-4 my-4 border border-blue-100 dark:border-blue-800 rounded">
-              You can also filter your <%= pluralized_class_name.downcase %> by tag, whether you've favorited that page,
-              and which universe it's in.
+            <p class="leading-relaxed text-base my-2 bg-green-50 dark:bg-green-900 py-2 px-4 -mx-4 my-4 border border-green-100 dark:border-green-800 rounded">
+              Each event type has its own icon and color for visual storytelling at a glance.
             </p>
           </div>
         </div>
       </div>
       <div class="p-8 lg:w-1/3 flex flex-col items-center">
-        <div class="bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-700 rounded-lg p-4 text-center h-full">
-          <div class="w-20 h-20 md:mt-4 inline-flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 mb-5 flex-shrink-0">
-            <i class="material-icons text-notebook-blue dark:text-blue-400 text-5xl">lock</i>
+        <div class="bg-white dark:bg-gray-800 border border-green-100 dark:border-gray-700 rounded-lg p-4 text-center h-full shadow-sm">
+          <div class="w-20 h-20 md:mt-4 inline-flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900 mb-5 flex-shrink-0">
+            <i class="material-icons text-green-600 dark:text-green-400 text-5xl">link</i>
           </div>
           <div class="flex-grow text-left px-4">
             <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-3">
-              Private by default
+              Entity Linking
             </h2>
             <p class="leading-relaxed text-base my-2">
-              Your ideas are valuable. Every <%= singular_class_name.downcase %> you create in Notebook.ai is owned by you, completely private by default, and only accessible to you.
+              Connect any worldbuilding page to timeline events. Link characters, locations, items,
+              and more to build a rich, interconnected narrative web.
             </p>
-            <p class="leading-relaxed text-base my-2">
-              But of course, you also have full control over that privacy and can share any <%= singular_class_name.downcase %> page you want, however you want, whenever
-              you want.
+            <p class="leading-relaxed text-base my-2 bg-green-50 dark:bg-green-900 py-2 px-4 -mx-4 my-4 border border-green-100 dark:border-green-800 rounded">
+              See at a glance which characters appear in which events.
             </p>
           </div>
         </div>
       </div>
       <div class="p-8 lg:w-1/3 flex flex-col items-center">
-        <div class="bg-white dark:bg-gray-800 border border-blue-100 dark:border-gray-700 rounded-lg p-4 text-center h-full">
-          <div class="w-20 h-20 md:mt-4 inline-flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900 mb-5 flex-shrink-0">
-            <i class="material-icons text-notebook-blue dark:text-blue-400 text-5xl">star</i>
+        <div class="bg-white dark:bg-gray-800 border border-green-100 dark:border-gray-700 rounded-lg p-4 text-center h-full shadow-sm">
+          <div class="w-20 h-20 md:mt-4 inline-flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900 mb-5 flex-shrink-0">
+            <i class="material-icons text-green-600 dark:text-green-400 text-5xl">star</i>
           </div>
           <div class="flex-grow text-left px-4">
             <h2 class="text-gray-900 dark:text-white text-lg title-font font-medium mb-3">
-              <%= (premium_page) ? "#{pluralized_class_name} are a Premium page" : "#{pluralized_class_name} are free to create" %>
+              <%= (premium_page) ? "Premium Feature" : "Free Forever" %>
             </h2>
             <% if premium_page %>
               <p class="leading-relaxed text-base my-2">
-                <%= singular_class_name %> notebook pages require an active Premium subscription to create, but users on free plans can
-                view and edit their existing <%= singular_class_name.downcase %> pages at any time.
+                Timelines are a Premium feature, giving advanced storytellers powerful tools to
+                organize complex narratives and track character arcs across time.
               </p>
-              <p class="leading-relaxed text-base my-2">
-                Notebook.ai is your personal worldbuilding notebook; any page you create is yours forever and you'll never lose access to
-                any part of it for any reason &mdash; even if you downgrade to a free account in the future.
+              <p class="leading-relaxed text-base my-2 bg-green-50 dark:bg-green-900 py-2 px-4 -mx-4 my-4 border border-green-100 dark:border-green-800 rounded">
+                Your timelines are yours forever &mdash; even if you downgrade later.
               </p>
             <% else %>
               <p class="leading-relaxed text-base my-2">
-                Free users can create an unlimited number of <%= pluralized_class_name.downcase %> on Notebook.ai.
+                Create unlimited timelines on Notebook.ai without ever paying a dime. No credit card required,
+                no trial period, no catch.
               </p>
-              <p class="leading-relaxed text-base my-2">
-                Notebook.ai's free tier was designed to be more than enough for most creators, with Premium pages serving as a way
-                for more advanced worldbuilders to further flesh out their rich worlds in even more detail.
+              <p class="leading-relaxed text-base my-2 bg-green-50 dark:bg-green-900 py-2 px-4 -mx-4 my-4 border border-green-100 dark:border-green-800 rounded">
+                Your timelines are yours forever &mdash; we'll never lock you out.
               </p>
             <% end %>
           </div>
@@ -131,8 +141,189 @@
   </div>
 </section>
 
+<%# ========== SECTION 4: NARRATIVE EVENT TYPES (Dark Section) ========== %>
+<section class="text-white body-font bg-gray-900">
+  <div class="container px-5 py-20 mx-auto">
+    <div class="text-center mb-16">
+      <h1 class="sm:text-4xl text-3xl font-medium title-font mb-4">
+        13 Narrative Event Types to
+        <span class="text-green-400">Structure Your Story</span>
+      </h1>
+      <p class="text-gray-400 lg:w-2/3 mx-auto leading-relaxed text-lg">
+        Every great story follows a structure. Track your narrative beats with purpose-built event types
+        that help you understand your story's flow.
+      </p>
+    </div>
+
+    <%# Story Structure Visual Timeline %>
+    <div class="max-w-6xl mx-auto">
+      <%# Beginning %>
+      <div class="mb-8">
+        <div class="flex items-center mb-4">
+          <div class="h-px flex-grow bg-gradient-to-r from-transparent to-blue-500"></div>
+          <span class="px-4 text-blue-400 font-medium uppercase tracking-wider text-sm">Beginning</span>
+          <div class="h-px flex-grow bg-gradient-to-l from-transparent to-blue-500"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-gray-500 hover:border-gray-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center mr-3">
+                <i class="material-icons text-gray-400">circle</i>
+              </div>
+              <h3 class="font-semibold text-lg">General</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Basic events and worldbuilding moments</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-blue-500 hover:border-blue-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-blue-400">flag</i>
+              </div>
+              <h3 class="font-semibold text-lg">Setup</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Establishing the world and characters</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-indigo-500 hover:border-indigo-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-indigo-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-indigo-400">info</i>
+              </div>
+              <h3 class="font-semibold text-lg">Exposition</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Background information and context</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-yellow-500 hover:border-yellow-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-yellow-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-yellow-400">bolt</i>
+              </div>
+              <h3 class="font-semibold text-lg">Inciting Incident</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">The event that sets everything in motion</p>
+          </div>
+        </div>
+      </div>
+
+      <%# Rising Action %>
+      <div class="mb-8">
+        <div class="flex items-center mb-4">
+          <div class="h-px flex-grow bg-gradient-to-r from-transparent to-orange-500"></div>
+          <span class="px-4 text-orange-400 font-medium uppercase tracking-wider text-sm">Rising Action</span>
+          <div class="h-px flex-grow bg-gradient-to-l from-transparent to-orange-500"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-orange-500 hover:border-orange-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-orange-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-orange-400">warning</i>
+              </div>
+              <h3 class="font-semibold text-lg">Complication</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Things getting more difficult</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-red-500 hover:border-red-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-red-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-red-400">block</i>
+              </div>
+              <h3 class="font-semibold text-lg">Obstacle</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Barriers the protagonist must overcome</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-red-600 hover:border-red-500 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-red-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-red-500">gavel</i>
+              </div>
+              <h3 class="font-semibold text-lg">Conflict</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Direct confrontation and struggle</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-green-500 hover:border-green-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-green-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-green-400">trending_up</i>
+              </div>
+              <h3 class="font-semibold text-lg">Progress</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Moving toward the goal</p>
+          </div>
+        </div>
+      </div>
+
+      <%# Climax & Turning Points %>
+      <div class="mb-8">
+        <div class="flex items-center mb-4">
+          <div class="h-px flex-grow bg-gradient-to-r from-transparent to-amber-500"></div>
+          <span class="px-4 text-amber-400 font-medium uppercase tracking-wider text-sm">Climax & Turning Points</span>
+          <div class="h-px flex-grow bg-gradient-to-l from-transparent to-amber-500"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-purple-500 hover:border-purple-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-purple-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-purple-400">lightbulb</i>
+              </div>
+              <h3 class="font-semibold text-lg">Revelation</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Plot twists and discoveries</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-pink-500 hover:border-pink-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-pink-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-pink-400">autorenew</i>
+              </div>
+              <h3 class="font-semibold text-lg">Transformation</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Character growth and change</p>
+          </div>
+          <div class="group bg-gradient-to-br from-amber-900 to-orange-900 rounded-xl p-5 border-l-4 border-amber-400 hover:border-amber-300 transition-all hover:shadow-lg hover:shadow-amber-900">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-amber-800 flex items-center justify-center mr-3">
+                <i class="material-icons text-amber-400">whatshot</i>
+              </div>
+              <h3 class="font-semibold text-lg text-amber-100">Climax</h3>
+            </div>
+            <p class="text-amber-200 text-sm leading-relaxed">The peak of tension and action</p>
+          </div>
+        </div>
+      </div>
+
+      <%# Resolution %>
+      <div>
+        <div class="flex items-center mb-4">
+          <div class="h-px flex-grow bg-gradient-to-r from-transparent to-teal-500"></div>
+          <span class="px-4 text-teal-400 font-medium uppercase tracking-wider text-sm">Resolution</span>
+          <div class="h-px flex-grow bg-gradient-to-l from-transparent to-teal-500"></div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-teal-500 hover:border-teal-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-teal-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-teal-400">check_circle</i>
+              </div>
+              <h3 class="font-semibold text-lg">Resolution</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Conflict resolved, story concludes</p>
+          </div>
+          <div class="group bg-gray-800 rounded-xl p-5 border-l-4 border-cyan-500 hover:border-cyan-400 transition-all hover:bg-gray-750 hover:shadow-lg">
+            <div class="flex items-center mb-3">
+              <div class="w-10 h-10 rounded-full bg-cyan-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-cyan-400">history</i>
+              </div>
+              <h3 class="font-semibold text-lg">Aftermath</h3>
+            </div>
+            <p class="text-gray-400 text-sm leading-relaxed">Life after the main events</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ========== SECTION 5: TIMELINE EVENTS STRUCTURE ========== %>
 <section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container flex flex-wrap px-5 py-12 mx-auto items-center">
+  <div class="container flex flex-wrap px-5 py-20 mx-auto items-center">
     <div class="md:w-2/5 md:pr-12 md:py-8 md:border-r md:border-b-0 mb-10 md:mb-0 pb-10 border-b border-gray-200 dark:border-gray-700">
       <h1 class="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900 dark:text-white">
         <i class="material-icons <%= @content_type.text_color %> text-6xl float-left mr-4">
@@ -165,19 +356,27 @@
           <ul class="space-y-3">
             <li class="flex items-start">
               <i class="material-icons text-green-500 mr-2 text-sm">check_circle</i>
-              <span><strong>Event name</strong> - Give each event a memorable title</span>
+              <span><strong>Event name</strong> &mdash; Give each event a memorable title</span>
             </li>
             <li class="flex items-start">
               <i class="material-icons text-green-500 mr-2 text-sm">check_circle</i>
-              <span><strong>Description</strong> - Add as much detail as you need</span>
+              <span><strong>Description</strong> &mdash; Add as much detail as you need</span>
             </li>
             <li class="flex items-start">
               <i class="material-icons text-green-500 mr-2 text-sm">check_circle</i>
-              <span><strong>Date tracking</strong> - Use real or fictional calendar systems</span>
+              <span><strong>Date tracking</strong> &mdash; Use real or fictional calendar systems</span>
             </li>
             <li class="flex items-start">
               <i class="material-icons text-green-500 mr-2 text-sm">check_circle</i>
-              <span><strong>Page links</strong> - Connect events to characters, locations, and more</span>
+              <span><strong>Duration</strong> &mdash; Track start and end times for events</span>
+            </li>
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm">check_circle</i>
+              <span><strong>Event type</strong> &mdash; Categorize by narrative purpose</span>
+            </li>
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm">check_circle</i>
+              <span><strong>Page links</strong> &mdash; Connect events to characters, locations, and more</span>
             </li>
           </ul>
         </div>
@@ -186,83 +385,176 @@
   </div>
 </section>
 
-<section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container px-5 py-12 mx-auto">
-    <div class="flex flex-wrap w-full mb-20">
-      <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
-        <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900 dark:text-white">
-          More <%= singular_class_name.downcase %> features
-        </h1>
-        <div class="h-1 w-20 <%= @content_type.color %> rounded"></div>
-      </div>
-      <p class="lg:w-1/2 w-full leading-relaxed text-gray-500 dark:text-gray-400">
-        <% if premium_page %>
-          <%= pluralized_class_name %> require an active Premium subscription to create.
-        <% else %>
-          <%= pluralized_class_name %> are available to create for free.
-        <% end %>
-        Once you've created a page, it's yours forever!
-        The following features are always enabled for all <%= singular_class_name %> pages to help you
-        build the wonderful world in your head.
+<%# ========== SECTION 6: WORLDBUILDING INTEGRATION ========== %>
+<section class="text-gray-600 dark:text-gray-300 body-font bg-gradient-to-br from-green-50 to-emerald-50 dark:from-gray-900 dark:to-gray-800">
+  <div class="container px-5 py-20 mx-auto">
+    <div class="text-center mb-12">
+      <h1 class="sm:text-4xl text-3xl font-medium title-font mb-4 text-gray-900 dark:text-white">
+        Connect Events to
+        <span class="<%= @content_type.text_color %>">Your Entire World</span>
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 lg:w-2/3 mx-auto leading-relaxed text-lg">
+        Link characters, locations, items, and any other worldbuilding page directly to timeline events.
+        Build a rich, interconnected narrative web.
       </p>
     </div>
-    <div class="flex flex-wrap -m-4">
-      <div class="xl:w-1/2 md:w-full p-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-blue-100 dark:border-gray-700 h-full">
-          <h3 class="tracking-widest text-indigo-500 dark:text-indigo-400 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
-          <h2 class="text-lg text-gray-900 dark:text-white font-medium title-font mb-4">
-            <i class="material-icons left <%= Universe.text_color %>">vpn_lock</i>
-            Focus on <%= pluralized_class_name.downcase %> from a single universe
-          </h2>
-          <p class="leading-relaxed text-base my-2">
-            Building entire fictional worlds is hard! And it gets even harder when you've got ideas that span multiple universes or worlds.
-          </p>
-          <p class="leading-relaxed text-base my-2">
-            To help you focus on what's relevant, Notebook.ai lets you <strong>focus</strong> on a single universe at a time. This hides
-            your notebook pages from all other universes and lets you work on your world without distractions.
-          </p>
-          <p class="leading-relaxed text-base my-2">
-            To focus on a single universe, simply select it from the top-left dropdown of any page.
-          </p>
+
+    <div class="flex flex-wrap items-center">
+      <div class="lg:w-1/2 w-full mb-10 lg:mb-0 lg:pr-12">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-green-200 dark:border-gray-700 p-6">
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
+            <i class="material-icons <%= @content_type.text_color %> mr-2 align-middle"><%= @content_type.icon %></i>
+            Link Any Page to Events
+          </h3>
+          <ul class="space-y-3">
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm mt-1">check_circle</i>
+              <span><strong>Link characters</strong> &mdash; Track character arcs and appearances across your story</span>
+            </li>
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm mt-1">check_circle</i>
+              <span><strong>Connect locations</strong> &mdash; See where each event takes place</span>
+            </li>
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm mt-1">check_circle</i>
+              <span><strong>Reference items</strong> &mdash; Track when important objects appear in your story</span>
+            </li>
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm mt-1">check_circle</i>
+              <span><strong>Link creatures</strong> &mdash; Document when monsters and beings are encountered</span>
+            </li>
+            <li class="flex items-start">
+              <i class="material-icons text-green-500 mr-2 text-sm mt-1">check_circle</i>
+              <span><strong>Any page type</strong> &mdash; Connect 30+ worldbuilding page types to events</span>
+            </li>
+          </ul>
         </div>
       </div>
-      <div class="xl:w-1/2 md:w-full p-4">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-blue-100 dark:border-gray-700 h-full">
-          <h3 class="tracking-widest text-indigo-500 dark:text-indigo-400 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
-          <h2 class="text-lg text-gray-900 dark:text-white font-medium title-font mb-4">
-            <i class="material-icons left green-text">group_add</i>
-            Invite others to collaborate
-          </h2>
-          <p class="leading-relaxed text-base my-2">
-            Notebook.ai lets you add an unlimited number of collaborators to your universes for free. Each one has full access to work alongside you
-            on your <%= pluralized_class_name.downcase %> and other pages within that universe.
-          </p>
-          <p class="leading-relaxed text-base my-2">
-            If you have a Premium subscription active, your collaborators can also share all of your Premium perks while working in your universe, too!
-          </p>
-        </div>
-      </div>
-      <div class="xl:w-1/2 md:w-full p-4">
-        <div class="bg-black dark:bg-gray-900 text-white dark:text-gray-200 p-6 rounded-lg border border-blue-100 dark:border-gray-700 h-full">
-          <h3 class="tracking-widest text-indigo-100 dark:text-indigo-200 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
-          <h2 class="text-lg text-gray-100 dark:text-white font-medium title-font mb-4">
-            <i class="material-icons left white-text">brightness_4</i>
-            Work in light or dark mode
-          </h2>
-          <p class="leading-relaxed text-base my-2">
-            Protect your eyes at night by choosing between light and dark themes at the click of a button, available across the entire website.
-          </p>
-          <div class="mt-8 mb-2">
-            <a href="#" class="dark-toggle bg-gray-800 hover:bg-gray-500 border border-gray-300 py-2 px-4">Toggle dark mode</a>
+      <div class="lg:w-1/2 w-full">
+        <div class="text-center lg:text-left">
+          <div class="inline-flex flex-wrap gap-4 justify-center lg:justify-start">
+            <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <i class="material-icons <%= Character.text_color %> mr-2"><%= Character.icon %></i>
+              <span>Characters</span>
+            </div>
+            <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <i class="material-icons <%= Location.text_color %> mr-2"><%= Location.icon %></i>
+              <span>Locations</span>
+            </div>
+            <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <i class="material-icons <%= Item.text_color %> mr-2"><%= Item.icon %></i>
+              <span>Items</span>
+            </div>
+            <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <i class="material-icons <%= Creature.text_color %> mr-2"><%= Creature.icon %></i>
+              <span>Creatures</span>
+            </div>
+            <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg px-4 py-2 shadow-sm border border-gray-200 dark:border-gray-700">
+              <i class="material-icons <%= Magic.text_color %> mr-2"><%= Magic.icon %></i>
+              <span>Magic</span>
+            </div>
           </div>
+          <p class="mt-6 text-gray-500 dark:text-gray-400">
+            Plus 30+ more worldbuilding page types to connect to your timeline events.
+          </p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<%# ========== SECTION 7: ADDITIONAL FEATURES (2x2 Grid) ========== %>
 <section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container px-5 py-12 mx-auto flex flex-wrap">
+  <div class="container px-5 py-20 mx-auto">
+    <div class="flex flex-wrap w-full mb-12">
+      <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
+        <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900 dark:text-white">
+          More Timeline Features
+        </h1>
+        <div class="h-1 w-20 <%= @content_type.color %> rounded"></div>
+      </div>
+      <p class="lg:w-1/2 w-full leading-relaxed text-gray-500 dark:text-gray-400">
+        <% if premium_page %>
+          Timelines require an active Premium subscription to create.
+        <% else %>
+          Timelines are available to create for free.
+        <% end %>
+        Once you've created a timeline, it's yours forever!
+        The following features help you build the wonderful world in your head.
+      </p>
+    </div>
+    <div class="flex flex-wrap -m-4">
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-green-100 dark:border-gray-700 h-full">
+          <h3 class="tracking-widest text-green-500 dark:text-green-400 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 dark:text-white font-medium title-font mb-4">
+            <i class="material-icons left <%= Universe.text_color %>">vpn_lock</i>
+            Universe Focus
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Working on multiple stories? Focus on a single universe at a time to see only the timelines and events
+            relevant to your current project. Stay immersed in one world without distractions.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            Select your active universe from the top-left dropdown on any page.
+          </p>
+        </div>
+      </div>
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-green-100 dark:border-gray-700 h-full">
+          <h3 class="tracking-widest text-green-500 dark:text-green-400 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 dark:text-white font-medium title-font mb-4">
+            <i class="material-icons left green-text">group_add</i>
+            Unlimited Collaboration
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Building a world with others? Invite unlimited collaborators to your universes for free.
+            Each one gets full access to work alongside you on your timelines and events.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            Premium subscribers can share their Premium perks with collaborators too!
+          </p>
+        </div>
+      </div>
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-black dark:bg-gray-900 text-white dark:text-gray-200 p-6 rounded-lg border border-gray-800 dark:border-gray-700 h-full">
+          <h3 class="tracking-widest text-green-300 dark:text-green-200 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-100 dark:text-white font-medium title-font mb-4">
+            <i class="material-icons left white-text">brightness_4</i>
+            Dark Mode
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Protect your eyes during late-night worldbuilding sessions. Toggle between light and dark themes
+            with a single click.
+          </p>
+          <div class="mt-8 mb-2">
+            <a href="#" class="dark-toggle bg-gray-800 hover:bg-gray-600 border border-gray-600 py-2 px-4 rounded">Toggle dark mode</a>
+          </div>
+        </div>
+      </div>
+      <div class="xl:w-1/2 md:w-full p-4">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-green-100 dark:border-gray-700 h-full">
+          <h3 class="tracking-widest text-green-500 dark:text-green-400 text-xs font-medium title-font mb-4">AVAILABLE ON ALL PAGES</h3>
+          <h2 class="text-lg text-gray-900 dark:text-white font-medium title-font mb-4">
+            <i class="material-icons left text-blue-500">lock</i>
+            Privacy Controls
+          </h2>
+          <p class="leading-relaxed text-base my-2">
+            Your timelines are private by default. Only you can see them unless you explicitly choose to share.
+            Share individual timelines, entire universes, or keep everything completely private.
+          </p>
+          <p class="leading-relaxed text-base my-2">
+            You own your worldbuilding &mdash; we'll never lock you out of your own work.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<%# ========== SECTION 8: STATS & TRUST ========== %>
+<section class="text-gray-600 dark:text-gray-300 body-font">
+  <div class="container px-5 py-16 mx-auto flex flex-wrap">
     <div class="flex flex-wrap -mx-4 mt-auto mb-auto lg:w-1/2 sm:w-2/3 content-start sm:pr-10">
       <div class="w-full sm:p-4 px-4 mb-6">
         <h1 class="title-font font-medium text-xl mb-2 text-gray-900 dark:text-white">
@@ -270,21 +562,21 @@
           We're here to stay.
         </h1>
         <div class="leading-relaxed">
-          Notebook.ai has been around since 2016 and we're still growing. We're dedicated to making the best writing tool for authors
-          out there &mdash; so we'll be around (and improving) for a very long time. Your <%= pluralized_class_name.downcase %> are safe with us!
+          Notebook.ai has been around since 2016 and we're still growing. We're dedicated to making the best worldbuilding tool for authors
+          out there &mdash; so we'll be around (and improving) for a very long time. Your timelines are safe with us!
         </div>
       </div>
       <div class="p-4 sm:w-full lg:w-1/3 w-full">
         <h2 class="title-font font-medium text-3xl <%= @content_type.text_color %>">
           <%= number_with_delimiter @content_type.last.try(:id) || 0 %>
         </h2>
-        <p class="leading-relaxed">total <%= pluralized_class_name %> created</p>
+        <p class="leading-relaxed">total Timelines created</p>
       </div>
       <div class="p-4 sm:w-full lg:w-1/3 w-full">
         <h2 class="title-font font-medium text-3xl <%= @content_type.text_color %>">
           <%= number_with_delimiter @content_type.where('created_at > ?', Date.current.beginning_of_day - 31.days).count %>
         </h2>
-        <p class="leading-relaxed"><%= pluralized_class_name %> recently created</p>
+        <p class="leading-relaxed">Timelines created this month</p>
       </div>
       <div class="p-4 sm:w-full lg:w-1/3 w-full">
         <h2 class="title-font font-medium text-3xl <%= @content_type.text_color %>">
@@ -293,105 +585,34 @@
         <p class="leading-relaxed">total events tracked</p>
       </div>
     </div>
-    <div class="lg:w-1/2 sm:w-1/3 w-full rounded-lg overflow-hidden mt-6 sm:mt-0">
-      <%= image_tag "card-headers/#{@content_type.name.downcase.pluralize}.webp", class: 'object-cover object-center w-full h-64 rounded-lg' %>
+    <div class="lg:w-1/2 sm:w-1/3 w-full rounded-lg overflow-hidden mt-6 sm:mt-0 bg-gradient-to-r from-green-600 to-green-800 flex items-center justify-center h-64">
+      <i class="material-icons text-white text-9xl"><%= @content_type.icon %></i>
     </div>
   </div>
 </section>
 
-<section class="text-gray-600 dark:text-gray-300 body-font">
+<%# ========== SECTION 9: PRIMARY CTA ========== %>
+<section class="text-gray-600 dark:text-gray-300 body-font bg-green-50 dark:bg-gray-900">
   <div class="container px-5 py-24 mx-auto">
     <div class="lg:w-4/5 flex flex-col sm:flex-row sm:items-center items-start mx-auto">
       <h1 class="flex-grow sm:pr-16 text-2xl font-medium title-font text-gray-900 dark:text-white">
         It takes just seconds to sign up and<br class="hidden sm:block" />
-        start creating
+        start building
         <span class="<%= @content_type.text_color %>">
-          your first <%= singular_class_name.downcase %>
+          your first timeline
         </span>
         on Notebook.ai.
       </h1>
       <%= link_to new_user_registration_path do %>
-        <button class="flex-shrink-0 text-white <%= @content_type.color %> border-0 py-2 px-8 focus:outline-none hover:bg-notebook-blue hover:shadow-lg rounded text-lg mt-10 sm:mt-0">
-          Get Started
+        <button class="flex-shrink-0 text-white <%= @content_type.color %> border-0 py-3 px-10 focus:outline-none hover:bg-green-700 hover:shadow-lg rounded-lg text-lg mt-10 sm:mt-0 font-medium">
+          Start Building Your Timeline
         </button>
       <% end %>
     </div>
   </div>
 </section>
 
-<section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container px-5 py-24 mx-auto flex flex-col">
-    <div class="lg:w-4/6 mx-auto">
-      <div class="rounded-lg h-64 overflow-hidden">
-        <%= image_tag "card-headers/documents.webp", class: 'object-cover object-center w-full h-full rounded-lg' %>
-      </div>
-      <div class="flex flex-col sm:flex-row mt-10">
-        <div class="sm:w-1/3 text-center sm:pr-8 sm:py-8">
-          <div class="w-20 h-20 rounded-full inline-flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500">
-            <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-10 h-10" viewBox="0 0 24 24">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-          </div>
-          <div class="flex flex-col items-center text-center justify-center">
-            <h2 class="font-medium title-font mt-4 text-gray-900 dark:text-white text-lg">Your Name Here</h2>
-            <div class="w-12 h-1 bg-indigo-500 rounded mt-2 mb-4"></div>
-            <p class="text-base">
-              <em>Bestselling author?</em>
-            </p>
-          </div>
-        </div>
-        <div class="sm:w-2/3 sm:pl-8 sm:py-8 sm:border-l border-gray-200 dark:border-gray-700 sm:border-t-0 border-t mt-4 pt-4 sm:mt-0 text-center sm:text-left">
-          <h1 class="title-font font-medium text-xl mb-2 text-gray-900 dark:text-white">
-            <i class="material-icons left <%= @content_type.text_color %>"><%= @content_type.icon %></i>
-            Write smarter with your world at your fingertips.
-          </h1>
-          <p class="leading-relaxed text-lg mb-4">
-            When you're ready to start writing, Notebook.ai makes it easy to take the world you've built and keep it at your fingertips, ready to reference
-            any time you need it.
-          </p>
-          <p class="leading-relaxed text-lg mb-4">
-            Every account on Notebook.ai also includes unlimited document storage using our integrated editor that's full of smart features. You can
-            link your <%= pluralized_class_name.downcase %> and other worldbuilding pages to individual documents to see them directly inside the editor
-            &mdash; making it easy to reference small details without losing momentum.
-          </p>
-          <p class="leading-relaxed text-lg mb-4">
-            If you prefer to use another word processor, our page search makes it easy to look up any information you need about your world, letting you
-            focus on the big picture story instead of fretting over the small details.
-          </p>
-
-          <h1 class="title-font font-medium text-xl mb-2 text-gray-900 dark:text-white mt-32">
-            <i class="material-icons left <%= Document.text_color %>"><%= Document.icon %></i>
-            Take your story to the next level with more integrated tools
-          </h1>
-          <p class="leading-relaxed text-lg mb-4">
-            Our other integrated tools allow you to build upon the foundation you lay from a world of <%= pluralized_class_name.downcase %>
-            and other notebook pages. Each feature offers new ways to enrich your world and write better stories within them.
-          </p>
-          <ul>
-              <li class="mb-4">
-                <i class="material-icons <%= Character.text_color %> left"><%= Character.icon %></i>
-                Link your characters to timeline events to track their story arcs.
-              </li>
-              <li class="mb-4">
-                <i class="material-icons <%= Location.text_color %> left"><%= Location.icon %></i>
-                Connect locations to events that happened there.
-              </li>
-              <li class="mb-4">
-                <i class="material-icons <%= Document.text_color %> left"><%= Document.icon %></i>
-                Create unlimited documents and reference your <%= pluralized_class_name.downcase %> within them.
-              </li>
-              <li class="mb-4">
-                <i class="material-icons <%= PageCollection.text_color %> left"><%= PageCollection.icon %></i>
-                Group your notebook pages together in new ways by adding them to Collections.
-              </li>
-            </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+<%# ========== SECTION 10: RELATED WRITING TOOLS ========== %>
 <section class="text-gray-600 dark:text-gray-300 body-font">
   <div class="container px-5 py-20 mx-auto">
     <div class="text-center mb-12">
@@ -406,13 +627,13 @@
 
     <div class="flex flex-wrap -m-4 justify-center items-stretch">
       <div class="p-4 md:w-1/3 flex">
-        <div class="bg-indigo-50 dark:bg-indigo-900 border-2 border-indigo-300 dark:border-indigo-700 rounded-lg p-6 h-full w-full flex flex-col">
+        <div class="bg-green-50 dark:bg-green-900 border-2 border-green-300 dark:border-green-700 rounded-lg p-6 h-full w-full flex flex-col">
           <div class="flex items-center mb-4">
-            <div class="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center mr-4 flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center mr-4 flex-shrink-0">
               <i class="material-icons <%= Timeline.text_color %>"><%= Timeline.icon %></i>
             </div>
             <h3 class="text-lg font-medium text-gray-900 dark:text-white">Timelines</h3>
-            <span class="ml-2 text-xs bg-indigo-200 dark:bg-indigo-700 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded">You are here</span>
+            <span class="ml-2 text-xs bg-green-200 dark:bg-green-700 text-green-800 dark:text-green-200 px-2 py-1 rounded">You are here</span>
           </div>
           <p class="text-gray-500 dark:text-gray-400 flex-grow">
             Track events, plot points, and chronological stories within your fictional world.
@@ -421,10 +642,10 @@
         </div>
       </div>
       <div class="p-4 md:w-1/3 flex">
-        <%= link_to documents_path, class: "block w-full" do %>
+        <%= link_to document_worldbuilding_info_path, class: "block w-full" do %>
           <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 h-full hover:shadow-lg transition-shadow flex flex-col">
             <div class="flex items-center mb-4">
-              <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-4 flex-shrink-0">
+              <div class="w-12 h-12 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center mr-4 flex-shrink-0">
                 <i class="material-icons <%= Document.text_color %>"><%= Document.icon %></i>
               </div>
               <h3 class="text-lg font-medium text-gray-900 dark:text-white">Documents</h3>
@@ -456,26 +677,27 @@
   </div>
 </section>
 
-<section class="text-gray-600 dark:text-gray-300 body-font">
-  <div class="container px-5 py-12 mx-auto">
+<%# ========== SECTION 11: CONTENT TYPE NAVIGATION ========== %>
+<section class="text-gray-600 dark:text-gray-300 body-font bg-gray-50 dark:bg-gray-900">
+  <div class="container px-5 py-16 mx-auto">
     <div class="lg:w-2/3 mx-auto text-center">
-      <h1 class="text-2xl font-medium title-font">
-        <%= pluralized_class_name %> are just one of the <%= Rails.application.config.content_types[:all].count %> types of worldbuilding
+      <h1 class="text-2xl font-medium title-font mb-4 text-gray-900 dark:text-white">
+        Timelines are just one of the <%= Rails.application.config.content_types[:all].count %> types of worldbuilding
         pages available on Notebook.ai.
       </h1>
-      <div class="my-2">
+      <div class="my-6">
         <% Rails.application.config.content_types[:all].each do |content_type| %>
           <% next if content_type == Timeline %>
-          <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: "tooltipped", data: { tooltip: content_type.name.pluralize } do %>
-            <i class="material-icons <%= content_type.text_color %> text-5xl m-2"><%= content_type.icon %></i>
+          <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: "tooltipped inline-block", data: { tooltip: content_type.name.pluralize } do %>
+            <i class="material-icons <%= content_type.text_color %> text-5xl m-2 hover:scale-110 transition-transform"><%= content_type.icon %></i>
           <% end %>
         <% end %>
       </div>
       <div class="mt-12 mb-4">
-        <%= link_to "Start worldbuilding now", new_user_registration_path, class: "#{@content_type.color} text-white p-4 hover:shadow-lg rounded-lg" %>
+        <%= link_to "Start worldbuilding now", new_user_registration_path, class: "#{@content_type.color} text-white py-3 px-8 hover:shadow-lg rounded-lg font-medium inline-block" %>
       </div>
       <p class="text-gray-500 dark:text-gray-400">
-        Create your first <%= singular_class_name.downcase %> today!
+        Create your first timeline today!
       </p>
     </div>
   </div>
