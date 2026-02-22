@@ -656,43 +656,6 @@ function editPageController() {
   }
 }
 
-// Delete confirmation function
-function confirmDelete(pageName, deletePath) {
-  // Create a more robust confirmation dialog
-  const confirmed = confirm(`⚠️ WARNING: This action cannot be undone!\n\nAre you absolutely sure you want to permanently delete "${pageName}"?\n\nAll associated data, images, and links will be lost forever.`);
-  
-  if (confirmed) {
-    // Second confirmation for extra safety
-    const doubleConfirmed = confirm(`This is your FINAL warning!\n\nType OK to permanently delete "${pageName}".`);
-    
-    if (doubleConfirmed) {
-      // Create a form and submit it with DELETE method
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = deletePath;
-      
-      // Add CSRF token
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-      const csrfInput = document.createElement('input');
-      csrfInput.type = 'hidden';
-      csrfInput.name = 'authenticity_token';
-      csrfInput.value = csrfToken;
-      form.appendChild(csrfInput);
-      
-      // Add method override for DELETE
-      const methodInput = document.createElement('input');
-      methodInput.type = 'hidden';
-      methodInput.name = '_method';
-      methodInput.value = 'delete';
-      form.appendChild(methodInput);
-      
-      // Append to body and submit
-      document.body.appendChild(form);
-      form.submit();
-    }
-  }
-}
-
 // Update breadcrumb when name field is saved
 document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('autosave:success', function(event) {
