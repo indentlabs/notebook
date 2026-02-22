@@ -179,11 +179,17 @@
                 <i class="material-icons mr-2 text-blue-600 dark:text-blue-400 text-base">notifications</i>
                 Recent Activity
               </h3>
-              <% if @user_notifications.reject { |n| n.viewed_at? }.any? %>
-                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                  <%= @user_notifications.reject { |n| n.viewed_at? }.count %> new
-                </span>
-              <% end %>
+              <div class="flex items-center space-x-2">
+                <% if @user_notifications.reject { |n| n.viewed_at? }.any? %>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <%= @user_notifications.reject { |n| n.viewed_at? }.count %> new
+                  </span>
+                <% end %>
+                <%= link_to main_app.notifications_path,
+                    class: "text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium" do %>
+                  View all
+                <% end %>
+              </div>
             </div>
           </div>
 
@@ -251,18 +257,11 @@
           <!-- Footer -->
           <% if @user_notifications.any? %>
             <div class="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-4 py-3">
-              <div class="flex space-x-2">
-                <%= link_to main_app.mark_all_read_path,
-                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" do %>
-                  <i class="material-icons text-xs mr-1">done_all</i>
-                  Mark all read
-                <% end %>
-                <%= link_to main_app.notifications_path,
-                    class: "flex-1 inline-flex items-center justify-center px-3 py-2 border border-transparent shadow-sm text-xs font-medium rounded text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-200" do %>
-                  View all
-                  <i class="material-icons text-xs ml-1">arrow_forward</i>
-                <% end %>
-              </div>
+              <%= link_to main_app.mark_all_read_path,
+                  class: "w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-xs font-medium rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" do %>
+                <i class="material-icons text-xs mr-1">done_all</i>
+                Mark all read
+              <% end %>
             </div>
           <% end %>
         </div>
