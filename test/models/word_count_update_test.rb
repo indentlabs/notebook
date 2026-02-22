@@ -136,4 +136,68 @@ class WordCountUpdateTest < ActiveSupport::TestCase
     assert_equal 200, result[Date.current - 1.day], "Day 2: 700 - 500 = 200 words"
     assert_equal 100, result[Date.current], "Day 3: 800 - 700 = 100 words"
   end
+
+  test "batch_words_written_on_dates returns same results as individual calls" do
+    doc2 = Document.create!(user: @user, title: "Doc 2", body: "Test")
+
+    # Create records across multiple days and documents
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 100, for_date: Date.current - 5.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 300, for_date: Date.current - 3.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 500, for_date: Date.current - 1.day)
+    WordCountUpdate.create!(user: @user, entity: doc2, word_count: 200, for_date: Date.current - 2.days)
+    WordCountUpdate.create!(user: @user, entity: doc2, word_count: 400, for_date: Date.current)
+
+    dates = (0..5).map { |days_ago| Date.current - days_ago.days }
+
+    # Get results from batch method
+    batch_result = WordCountUpdate.batch_words_written_on_dates(@user, dates)
+
+    # Compare with individual calls
+    dates.each do |date|
+      individual_result = WordCountUpdate.words_written_on_date(@user, date)
+      assert_equal individual_result, batch_result[date] || 0,
+        "Batch and individual results should match for #{date}"
+    end
+  end
+
+  test "batch_words_written_on_dates handles empty dates" do
+    result = WordCountUpdate.batch_words_written_on_dates(@user, [])
+    assert_equal({}, result)
+  end
+
+  test "batch_words_written_on_dates handles user with no records" do
+    dates = [Date.current - 1.day, Date.current]
+    result = WordCountUpdate.batch_words_written_on_dates(@user, dates)
+
+    assert_equal 0, result[Date.current - 1.day] || 0
+    assert_equal 0, result[Date.current] || 0
+  end
+
+  test "dates_with_writing_activity returns set of active dates" do
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 500, for_date: Date.current - 3.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 700, for_date: Date.current - 1.day)
+
+    result = WordCountUpdate.dates_with_writing_activity(@user, Date.current - 5.days, Date.current)
+
+    assert result.is_a?(Set), "Should return a Set"
+    assert result.include?(Date.current - 3.days), "Day with 500 words should be active"
+    assert result.include?(Date.current - 1.day), "Day with 200 word delta should be active"
+    assert_not result.include?(Date.current - 2.days), "Day with no activity should not be included"
+    assert_not result.include?(Date.current), "Day with no activity should not be included"
+  end
+
+  test "dates_with_writing_activity excludes days with only deletions" do
+    # Day 1: Document has 1000 words
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 1000, for_date: Date.current - 2.days)
+    # Day 2: Document has 800 words (deleted 200)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 800, for_date: Date.current - 1.day)
+    # Day 3: Document has 900 words (added 100)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 900, for_date: Date.current)
+
+    result = WordCountUpdate.dates_with_writing_activity(@user, Date.current - 3.days, Date.current)
+
+    assert result.include?(Date.current - 2.days), "Day with initial 1000 words should be active"
+    assert_not result.include?(Date.current - 1.day), "Day with only deletions should not be active"
+    assert result.include?(Date.current), "Day with 100 word addition should be active"
+  end
 end

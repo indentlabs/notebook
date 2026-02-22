@@ -294,28 +294,26 @@ class MainController < ApplicationController
 
   def generate_dashboard_analytics
     return unless user_signed_in?
-    
-    cache_current_user_content
-    all_content = @current_user_content.values.flatten
-    
-    # 30-Day Activity Chart for Dashboard
-    # Use user's timezone and track words written per day (consistent with streak)
-    user_today = current_user.current_date_in_time_zone
 
-    @dashboard_daily_activity = (0..29).map do |days_ago|
-      date = user_today - days_ago.days
-      word_count = WordCountUpdate.words_written_on_date(current_user, date)
-      [date.strftime('%m/%d'), word_count]
-    end.reverse
-    
-    # Calculate Writing Streak
-    calculate_writing_streak
+    cache_current_user_content
 
     # Use user's timezone for date calculations
     user_today = current_user.current_date_in_time_zone
 
-    # Words written today (actual delta from yesterday)
-    @words_written_today = WordCountUpdate.words_written_on_date(current_user, user_today)
+    # 30-Day Activity Chart for Dashboard
+    # Batch fetch all 30 days of word counts in a single efficient query
+    dates = (0..29).map { |days_ago| user_today - days_ago.days }
+    @word_counts_by_date = WordCountUpdate.batch_words_written_on_dates(current_user, dates)
+
+    @dashboard_daily_activity = dates.map do |date|
+      [date.strftime('%m/%d'), @word_counts_by_date[date] || 0]
+    end.reverse
+
+    # Calculate Writing Streak (uses separate batch query for 365 days)
+    calculate_writing_streak
+
+    # Words written today - reuse data from the batch query
+    @words_written_today = @word_counts_by_date[user_today] || 0
 
     # Daily word goal (max of active goals or default 1,000)
     @daily_word_goal = current_user.daily_word_goal
@@ -331,29 +329,29 @@ class MainController < ApplicationController
     # Use user's timezone for date calculations
     user_today = current_user.current_date_in_time_zone
 
-    # Calculate current streak using word count data (matches WritingActivityController)
-    @current_streak = 0
-    date = user_today
+    # Fetch all dates with writing activity in last 365 days in a single efficient query
+    dates_with_activity = WordCountUpdate.dates_with_writing_activity(
+      current_user,
+      user_today - 365.days,
+      user_today
+    )
 
-    365.times do
-      words = WordCountUpdate.words_written_on_date(current_user, date)
-      if words > 0
-        @current_streak += 1
-        date -= 1.day
-      else
-        # If today has no words yet, check if yesterday started a streak
-        if date == user_today && @current_streak == 0
-          date -= 1.day
-          next
-        end
-        break
-      end
+    # Calculate current streak from the set of dates
+    @current_streak = 0
+    check_date = user_today
+
+    # Allow for "today has no activity yet" case - start checking from yesterday
+    check_date -= 1.day unless dates_with_activity.include?(user_today)
+
+    while dates_with_activity.include?(check_date) && @current_streak < 365
+      @current_streak += 1
+      check_date -= 1.day
     end
 
     # Calculate total words written in current streak
     @streak_total_words = 0
     if @current_streak > 0
-      streak_start = date + 1.day # date is now one day before streak started
+      streak_start = check_date + 1.day # check_date is now one day before streak started
       @streak_total_words = WordCountUpdate.words_written_in_range(
         current_user,
         streak_start..user_today
@@ -361,9 +359,12 @@ class MainController < ApplicationController
     end
 
     # Generate last 7 days for streak visualization
-    @streak_days = (0..6).map do |days_ago|
-      day_date = user_today - days_ago.days
-      words = WordCountUpdate.words_written_on_date(current_user, day_date)
+    # Reuse data from @word_counts_by_date (30-day batch) if available, otherwise fetch
+    last_7_days = (0..6).map { |days_ago| user_today - days_ago.days }
+    word_counts_7_days = @word_counts_by_date || WordCountUpdate.batch_words_written_on_dates(current_user, last_7_days)
+
+    @streak_days = last_7_days.map do |day_date|
+      words = word_counts_7_days[day_date] || 0
       {
         date: day_date,
         has_activity: words > 0,

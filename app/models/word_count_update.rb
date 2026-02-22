@@ -44,18 +44,25 @@ class WordCountUpdate < ApplicationRecord
       )
     end
 
-    # Fetch the actual word counts for those dates
+    # Fetch the actual word counts for those dates in bulk (avoids N+1)
     prev_word_counts = {}
-    
-    # Do this in bulk for each type to avoid N+1
-    prev_records.each do |pr|
-      record = find_by(
-        user: user,
-        entity_type: pr.entity_type,
-        entity_id: pr.entity_id,
-        for_date: pr.max_date
-      )
-      prev_word_counts[[pr.entity_type, pr.entity_id]] = record&.word_count || 0
+
+    if prev_records.any?
+      # Build conditions for bulk fetch using OR clauses
+      conditions = prev_records.map do |pr|
+        sanitize_sql_array([
+          "(entity_type = ? AND entity_id = ? AND for_date = ?)",
+          pr.entity_type, pr.entity_id, pr.max_date
+        ])
+      end
+
+      records = where(user: user)
+        .where(conditions.join(' OR '))
+        .select(:entity_type, :entity_id, :word_count)
+
+      records.each do |r|
+        prev_word_counts[[r.entity_type, r.entity_id]] = r.word_count
+      end
     end
 
     # Calculate deltas
@@ -69,16 +76,65 @@ class WordCountUpdate < ApplicationRecord
     total_delta
   end
 
-  # Batch calculate words written for multiple dates
+  # Batch calculate words written for multiple dates efficiently
   # Returns a hash of { date => word_count }
-  def self.words_written_on_dates(user, dates)
+  # Uses a single query to fetch all data, then calculates deltas in Ruby
+  def self.batch_words_written_on_dates(user, dates)
     return {} if dates.empty?
 
-    # For simplicity, call words_written_on_date for each date
-    # This is still efficient since each call is only 2-3 queries
-    dates.each_with_object({}) do |date, hash|
-      hash[date] = words_written_on_date(user, date)
+    dates = dates.sort
+    earliest_date = dates.first
+    latest_date = dates.last
+
+    # Fetch all records in the date range plus records before earliest_date for baseline
+    # We need records from before earliest_date to calculate delta for the first date
+    all_records = where(user: user)
+      .where('for_date <= ?', latest_date)
+      .select(:entity_type, :entity_id, :word_count, :for_date)
+      .order(:entity_type, :entity_id, :for_date)
+      .to_a
+
+    return dates.each_with_object({}) { |d, h| h[d] = 0 } if all_records.empty?
+
+    # Group records by entity
+    records_by_entity = all_records.group_by { |r| [r.entity_type, r.entity_id] }
+
+    # For each target date, calculate delta for each entity
+    result = {}
+    dates.each do |target_date|
+      total_delta = 0
+
+      records_by_entity.each do |_entity_key, entity_records|
+        # Find the record for target_date (if any)
+        today_record = entity_records.find { |r| r.for_date == target_date }
+        next unless today_record
+
+        # Find the previous record (most recent before target_date)
+        prev_record = entity_records
+          .select { |r| r.for_date < target_date }
+          .max_by(&:for_date)
+
+        prev_count = prev_record&.word_count || 0
+        delta = today_record.word_count - prev_count
+        total_delta += delta if delta > 0
+      end
+
+      result[target_date] = total_delta
     end
+
+    result
+  end
+
+  # Alias for backwards compatibility - calls the efficient batch method
+  def self.words_written_on_dates(user, dates)
+    batch_words_written_on_dates(user, dates)
+  end
+
+  # Get all dates with writing activity in a range (single query)
+  # Returns a Set of dates where the user wrote words (positive delta)
+  def self.dates_with_writing_activity(user, start_date, end_date)
+    word_counts = batch_words_written_on_dates(user, (start_date..end_date).to_a)
+    word_counts.select { |_date, count| count > 0 }.keys.to_set
   end
 
   # Calculate actual words written in a date range
@@ -95,16 +151,24 @@ class WordCountUpdate < ApplicationRecord
 
     return 0 if latest_in_range.empty?
 
-    # Fetch the actual word counts for the latest dates
+    # Fetch the actual word counts for the latest dates in bulk (avoids N+1)
     current_word_counts = {}
-    latest_in_range.each do |lr|
-      record = find_by(
-        user: user,
-        entity_type: lr.entity_type,
-        entity_id: lr.entity_id,
-        for_date: lr.max_date
-      )
-      current_word_counts[[lr.entity_type, lr.entity_id]] = record&.word_count || 0
+
+    if latest_in_range.any?
+      conditions = latest_in_range.map do |lr|
+        sanitize_sql_array([
+          "(entity_type = ? AND entity_id = ? AND for_date = ?)",
+          lr.entity_type, lr.entity_id, lr.max_date
+        ])
+      end
+
+      records = where(user: user)
+        .where(conditions.join(' OR '))
+        .select(:entity_type, :entity_id, :word_count)
+
+      records.each do |r|
+        current_word_counts[[r.entity_type, r.entity_id]] = r.word_count
+      end
     end
 
     # Get the previous record for each entity before the range started
@@ -122,15 +186,24 @@ class WordCountUpdate < ApplicationRecord
       )
     end
 
+    # Fetch the actual word counts for those dates in bulk (avoids N+1)
     prev_word_counts = {}
-    prev_records.each do |pr|
-      record = find_by(
-        user: user,
-        entity_type: pr.entity_type,
-        entity_id: pr.entity_id,
-        for_date: pr.max_date
-      )
-      prev_word_counts[[pr.entity_type, pr.entity_id]] = record&.word_count || 0
+
+    if prev_records.any?
+      conditions = prev_records.map do |pr|
+        sanitize_sql_array([
+          "(entity_type = ? AND entity_id = ? AND for_date = ?)",
+          pr.entity_type, pr.entity_id, pr.max_date
+        ])
+      end
+
+      records = where(user: user)
+        .where(conditions.join(' OR '))
+        .select(:entity_type, :entity_id, :word_count)
+
+      records.each do |r|
+        prev_word_counts[[r.entity_type, r.entity_id]] = r.word_count
+      end
     end
 
     # Calculate deltas
