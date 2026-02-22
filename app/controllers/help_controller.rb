@@ -48,7 +48,22 @@ class HelpController < ApplicationController
     @page_title = "Organizing with Tags"
     @meta_description = "Master the art of content organization using tags in Notebook.ai. Learn how to create, manage, and use tags to efficiently organize and discover your worldbuilding content."
   end
-  
+
+  def your_account
+    @page_title = "Managing Your Account"
+    @meta_description = "Learn how to manage your Notebook.ai account settings, update your profile, change your password, customize notifications, and control your privacy preferences."
+  end
+
+  def your_data
+    @page_title = "Your Data: Export, Backup & Recovery"
+    @meta_description = "Complete guide to managing your data in Notebook.ai. Learn about the Data Vault, export formats, recovering deleted content, archives, and storage limits."
+  end
+
+  def troubleshooting
+    @page_title = "Troubleshooting & FAQ"
+    @meta_description = "Find answers to common questions and solutions to frequent issues in Notebook.ai. Troubleshooting guides for universes, content, collaboration, and more."
+  end
+
   def set_sidenav_expansion
     @sidenav_expansion = 'my account'
   end

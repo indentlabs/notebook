@@ -296,6 +296,9 @@ Rails.application.routes.draw do
   get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
   get '/help/premium-features', to: 'help#premium_features', as: :help_premium_features
   get '/help/free-features', to: 'help#free_features', as: :help_free_features
+  get '/help/your-account', to: 'help#your_account', as: :help_your_account
+  get '/help/your-data', to: 'help#your_data', as: :help_your_data
+  get '/help/troubleshooting', to: 'help#troubleshooting', as: :help_troubleshooting
 
   # Main pages
   root to: 'main#index'
@@ -304,7 +307,7 @@ Rails.application.routes.draw do
   scope '/about' do
     get '/paper',       to: 'main#paper',       as: :green_paper
     get '/privacy',     to: 'main#privacyinfo', as: :privacy_policy
-    get '/billing/faq', to: 'subscriptions#faq'
+    get '/billing/faq', to: 'subscriptions#faq', as: :billing_faq
   end
 
   # Landing pages
@@ -492,7 +495,7 @@ Rails.application.routes.draw do
     end
       
     get '/',             to: 'api_docs#index'
-    get '/docs',         to: 'api_docs#docs'
+    get '/docs',         to: 'api_docs#docs', as: :documentation
     # get '/applications', to: 'api_docs#applications'
     get '/approvals',    to: 'api_docs#approvals'
     get '/integrations', to: 'api_docs#integrations'
