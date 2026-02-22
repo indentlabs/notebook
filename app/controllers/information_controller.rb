@@ -18,4 +18,10 @@ class InformationController < ApplicationController
     @content_type = Book
     render :book
   end
+
+  # Override for Document since it's not a standard content type
+  def documents
+    @content_type = Document
+    render :document
+  end
 end
