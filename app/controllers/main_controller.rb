@@ -92,12 +92,35 @@ class MainController < ApplicationController
 
     @per_page_savings = {}
 
-    (Rails.application.config.content_types[:all] + [Timeline, Document]).each do |content_type|
-      physical_page_equivalent = GreenService.total_physical_pages_equivalent(content_type)
+    content_types = Rails.application.config.content_types[:all] + [Timeline, Document]
+
+    # Batch-fetch all max IDs upfront to avoid N+1 queries
+    max_ids = GreenService.max_ids_for_content_types(content_types)
+
+    content_types.each do |content_type|
+      # Determine the max_id for this content type
+      max_id = case content_type.name
+        when 'Timeline'
+          max_ids['TimelineEvent']
+        when 'Document'
+          nil # Document uses word count calculation, not max ID
+        else
+          max_ids[content_type.name]
+        end
+
+      physical_page_equivalent = GreenService.total_physical_pages_equivalent(content_type, max_id: max_id)
       tree_equivalent          = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
 
+      # Use the same max_id for digital count (avoiding duplicate query)
+      digital_count = case content_type.name
+        when 'Document'
+          max_ids['Document']
+        else
+          max_id || 0
+        end
+
       @per_page_savings[content_type.name] = {
-        digital: content_type.last.try(:id) || 0,
+        digital: digital_count,
         pages:   physical_page_equivalent,
         trees:   tree_equivalent
       }
