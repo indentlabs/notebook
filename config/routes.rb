@@ -471,6 +471,8 @@ Rails.application.routes.draw do
     get 'books', to: 'information#books', as: 'book_worldbuilding_info'
     # Manual route for Document (not in content_types[:all])
     get 'documents', to: 'information#documents', as: 'document_worldbuilding_info'
+    # Manual route for Timeline (not in content_types[:all])
+    get 'timelines', to: 'information#timelines', as: 'timeline_worldbuilding_info'
   end
 
   scope '/scene/:scene_id' do
