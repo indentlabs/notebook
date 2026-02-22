@@ -353,9 +353,9 @@ class DocumentsController < ApplicationController
     # Books sidebar data - eager load documents through book_documents
     @document_books = @document.books
       .includes(book_documents: :document)
-      .order(:title)
+      .order(:name)
       .to_a
-    @user_books = current_user.books.unarchived.order(:title)
+    @user_books = current_user.books.unarchived.order(:name)
   end
 
   def create
