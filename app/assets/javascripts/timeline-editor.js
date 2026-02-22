@@ -1,3 +1,37 @@
+// Auto-scroll configuration for drag and drop
+const AUTO_SCROLL_CONFIG = {
+  edgeZone: 100,       // Pixels from viewport edge to trigger scroll
+  maxScrollSpeed: 20,  // Max pixels per frame when at edge
+  minScrollSpeed: 2    // Min pixels per frame when entering zone
+};
+
+let autoScrollInterval = null;
+
+// Start auto-scrolling in the given direction at the given speed
+function startAutoScroll(direction, speed) {
+  stopAutoScroll();
+  function scroll() {
+    window.scrollBy(0, direction * speed);
+    autoScrollInterval = requestAnimationFrame(scroll);
+  }
+  autoScrollInterval = requestAnimationFrame(scroll);
+}
+
+// Stop any active auto-scrolling
+function stopAutoScroll() {
+  if (autoScrollInterval) {
+    cancelAnimationFrame(autoScrollInterval);
+    autoScrollInterval = null;
+  }
+}
+
+// Calculate scroll speed based on distance from viewport edge
+function calculateScrollSpeed(distanceFromEdge) {
+  const { edgeZone, maxScrollSpeed, minScrollSpeed } = AUTO_SCROLL_CONFIG;
+  const normalized = 1 - (distanceFromEdge / edgeZone);
+  return minScrollSpeed + (maxScrollSpeed - minScrollSpeed) * normalized;
+}
+
 // Initialize timeline events sortable functionality
 function initTimelineEventsSortable() {
   // Check if jQuery UI is available
@@ -26,6 +60,21 @@ function initTimelineEventsSortable() {
       // Store original position for rollback if needed (count only event containers)
       const allEvents = $('.timeline-events-container .timeline-event-container:not(.timeline-event-template)');
       ui.item.data('original-position', allEvents.index(ui.item));
+    },
+    sort: function(event, ui) {
+      // Auto-scroll when dragging near viewport edges
+      const helperRect = ui.helper[0].getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const distanceFromTop = helperRect.top;
+      const distanceFromBottom = viewportHeight - helperRect.bottom;
+
+      if (distanceFromTop < AUTO_SCROLL_CONFIG.edgeZone) {
+        startAutoScroll(-1, calculateScrollSpeed(distanceFromTop));
+      } else if (distanceFromBottom < AUTO_SCROLL_CONFIG.edgeZone) {
+        startAutoScroll(1, calculateScrollSpeed(distanceFromBottom));
+      } else {
+        stopAutoScroll();
+      }
     },
     update: function(event, ui) {
       const eventId = ui.item.attr('data-event-id');
@@ -99,6 +148,8 @@ function initTimelineEventsSortable() {
     stop: function(event, ui) {
       // Remove visual feedback
       ui.item.removeClass('timeline-event-dragging');
+      // Stop any auto-scrolling that was active during drag
+      stopAutoScroll();
     }
   });
 
