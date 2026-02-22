@@ -19,8 +19,9 @@ class CacheTimelineEventWordCountJob < ApplicationJob
     user = timeline_event.timeline&.user
     return if user.nil?
 
-    # Determine the user's current date based on their timezone
-    user_date = user.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
+    # Determine the user's date based on their timezone at enqueue time (not job execution time)
+    enqueue_time = enqueued_at || Time.current
+    user_date = user.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
     # Create or update WordCountUpdate for today (in user's timezone)
     retry_count = 0

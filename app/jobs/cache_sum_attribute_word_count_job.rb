@@ -20,9 +20,10 @@ class CacheSumAttributeWordCountJob < ApplicationJob
     # Cache the total word count onto the model, too
     entity.update(cached_word_count: sum_attribute_word_count)
 
-    # Determine the user's current date based on their timezone
+    # Determine the user's date based on their timezone at enqueue time (not job execution time)
     user = entity.user
-    user_date = user&.time_zone.present? ? Time.current.in_time_zone(user.time_zone).to_date : Date.current
+    enqueue_time = enqueued_at || Time.current
+    user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
     # Create or re-use an existing WordCountUpdate for today (in user's timezone)
     retry_count = 0
