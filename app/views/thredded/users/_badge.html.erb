@@ -3,13 +3,18 @@
   badge_text    = user.forums_badge_text
 
   if user.favorite_page_type?
-    favorite_link = link_to main_app.send("#{user.favorite_page_type.downcase.pluralize}_user_path", { id: user.id }) do
-      content_tag(:i, class: "material-icons align-middle mr-1 #{content_class_from_name(user.favorite_page_type).try(:text_color)}", style: "font-size: 16px;") do
-        "#{content_class_from_name(user.favorite_page_type).try(:icon)}"
+    begin
+      route_helper_name = "#{user.favorite_page_type.downcase.pluralize}_user_path"
+      favorite_link = link_to main_app.send(route_helper_name, id: user.id) do
+        content_tag(:i, class: "material-icons align-middle mr-1 #{content_class_from_name(user.favorite_page_type).try(:text_color)}", style: "font-size: 16px;") do
+          "#{content_class_from_name(user.favorite_page_type).try(:icon)}"
+        end
       end
-    end
 
-    badge_text = favorite_link + badge_text
+      badge_text = favorite_link + badge_text
+    rescue NoMethodError
+      # Route helper not available for this page type, skip favorite link
+    end
   end
 %>
 

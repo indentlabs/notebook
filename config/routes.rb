@@ -107,14 +107,15 @@ Rails.application.routes.draw do
     get 'followers', on: :member
     get 'following', on: :member
 
+    # Timeline isn't in content_types[:all] but needs a user route for favorite_page_type badges.
+    # Defined before the loop to ensure route helper is available early during boot.
+    get :timelines, on: :member
+
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize.to_sym, on: :member
       # todo page tags here
     end
-
-    # Timeline isn't in content_types[:all] but needs a user route for favorite_page_type badges
-    get :timelines, on: :member
 
     resources :content_page_shares, path: 'shares' do
       get 'follow',   on: :member
