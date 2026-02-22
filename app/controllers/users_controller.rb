@@ -32,7 +32,7 @@ class UsersController < ApplicationController
                            .is_public
                            .order(:name)
                            .paginate(page: params[:page], per_page: 20)
-      
+
       # Only load public images for the content being displayed
       content_ids = @content_list.pluck(:id)
       @random_image_including_private_pool_cache = ImageUpload
@@ -48,6 +48,26 @@ class UsersController < ApplicationController
 
       render :content_list
     end
+  end
+
+  # Timeline isn't in content_types[:all] but some users have it as favorite_page_type
+  def timelines
+    set_user
+    return if @user.nil?
+    return if @user.private_profile?
+
+    @content_type = Timeline
+    @content_list = @user.timelines
+                         .includes(:page_tags, :user)
+                         .where(privacy: 'public')
+                         .order(:name)
+                         .paginate(page: params[:page], per_page: 20)
+
+    # Timeline doesn't use image_uploads or basil commissions like content pages
+    @random_image_including_private_pool_cache = {}
+    @saved_basil_commissions = {}
+
+    render :content_list
   end
 
   # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)

@@ -113,6 +113,9 @@ Rails.application.routes.draw do
       # todo page tags here
     end
 
+    # Timeline isn't in content_types[:all] but needs a user route for favorite_page_type badges
+    get :timelines, on: :member
+
     resources :content_page_shares, path: 'shares' do
       get 'follow',   on: :member
       get 'unfollow', on: :member
