@@ -99,6 +99,9 @@ module.exports = {
       height: {
         'screen-minus-nav': 'calc(100vh - 3.5rem)', // Viewport height minus navbar (56px)
       },
+      width: {
+        '112': '28rem', // 448px - for wider notification panel on xl screens
+      },
     },
   },
   plugins: [
