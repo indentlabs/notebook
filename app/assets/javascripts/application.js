@@ -13,6 +13,7 @@
 //= require_tree ./preload
 //= require cocoon
 //= require Chart.bundle
+//= require chartjs-plugin-annotation.min
 //= require chartkick
 //= require autocomplete-rails
 // require tribute - Replaced with Alpine.js implementation
