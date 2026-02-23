@@ -684,7 +684,10 @@ class ContentController < ApplicationController
     
     # Now update this image's pin status (without triggering callbacks that cause locks)
     @image.update_column(:pinned, new_pin_status)
-    
+
+    # Touch the content so it appears in "recently edited" views
+    content.touch
+
     # Clear any cached images to ensure pinned images are shown
     content.instance_variable_set(:@random_image_including_private_cache, nil)
     content.instance_variable_set(:@pinned_public_image_cache, nil)
