@@ -783,6 +783,12 @@ class BasilController < ApplicationController
       id:   params[:id],
       user: current_user
     )
+
+    if @commission.nil?
+      render json: { error: "Commission not found" }, status: :not_found
+      return
+    end
+
     @commission.update(saved_at: DateTime.current)
     render json: { success: true }, status: 200
   end
@@ -792,6 +798,12 @@ class BasilController < ApplicationController
       id:   params[:id],
       user: current_user
     )
+
+    if @commission.nil?
+      render json: { error: "Commission not found" }, status: :not_found
+      return
+    end
+
     @commission.destroy!
     render json: { success: true }, status: 200
   end
