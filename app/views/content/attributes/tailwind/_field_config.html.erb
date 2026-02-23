@@ -178,6 +178,14 @@
             </p>
             
             <%= form_for(field, method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
+              <!-- Hidden fields to preserve linkable_types when updating appearance -->
+              <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="" />
+              <% if field.field_options&.dig('linkable_types')&.any? %>
+                <% field.field_options['linkable_types'].each do |linkable_type| %>
+                  <input type="hidden" name="attribute_field[field_options][linkable_types][]" value="<%= linkable_type %>" />
+                <% end %>
+              <% end %>
+
               <div x-data="{ displayStyle: '<%= field.field_options&.dig('display_style') || 'tags' %>' }">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Display Style</label>
 
