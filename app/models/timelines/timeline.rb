@@ -67,4 +67,8 @@ class Timeline < ApplicationRecord
   def initialize_first_event
     timeline_events.create(title: "Untitled Event", position: 1)
   end
+
+  def total_word_count
+    (cached_word_count || 0) + timeline_events.sum(:cached_word_count)
+  end
 end
