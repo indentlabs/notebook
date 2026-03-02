@@ -167,7 +167,8 @@ document.addEventListener('DOMContentLoaded', function() {
       data: {
         document: {
           title: $('#document_title').val(),
-          body: $('#editor').html()
+          body: $('#editor').html(),
+          cached_word_count: countWords()
         }
       }
     });

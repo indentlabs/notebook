@@ -9,26 +9,32 @@ class SaveDocumentRevisionJob < ApplicationJob
     return unless document
 
     # Initialize variables; body is NOT loaded yet
-    new_word_count = 0
     body_loaded = false
     body_text = nil
 
-    begin
-      # Try the accurate (but potentially memory-intensive) count first
-      # This accesses document.body internally
-      new_word_count = document.computed_word_count
-    rescue StandardError => e
-      # Log the error for visibility
-      Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
+    # Use client-provided word count if available (browser edit), otherwise calculate server-side (API/import)
+    if document.cached_word_count.present? && document.cached_word_count > 0
+      # Client already provided the count via autosave - use it as-is
+      new_word_count = document.cached_word_count
+    else
+      # No client count (API/import edit) - calculate server-side
+      begin
+        # Try the accurate (but potentially memory-intensive) count first
+        # This accesses document.body internally
+        new_word_count = document.computed_word_count
+      rescue StandardError => e
+        # Log the error for visibility
+        Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
 
-      # Fallback: Load body ONLY if needed for fallback count
-      body_text = document.body || "" # Load body here
-      body_loaded = true
-      new_word_count = body_text.split.size
+        # Fallback: Load body ONLY if needed for fallback count
+        body_text = document.body || "" # Load body here
+        body_loaded = true
+        new_word_count = body_text.split.size
+      end
+
+      # Only update cached_word_count if we calculated it server-side
+      document.update(cached_word_count: new_word_count)
     end
-
-    # Update cached word count for the document (always do this)
-    document.update(cached_word_count: new_word_count)
 
     # Save a WordCountUpdate for this document for the day the edit was made
     # Use enqueued_at (when the job was created) to handle Sidekiq delays correctly

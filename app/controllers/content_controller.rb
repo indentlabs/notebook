@@ -131,7 +131,7 @@ class ContentController < ApplicationController
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
-    @serialized_content = ContentSerializer.new(@content)
+    @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
 
     # For basil images, assume they're all public for now since there's no privacy column
     @basil_images = BasilCommission.where(entity: @content)
@@ -229,7 +229,7 @@ class ContentController < ApplicationController
     return redirect_to(root_path) if @content.user.nil? # deleted user's content    
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
-    @serialized_content = ContentSerializer.new(@content)
+    @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
 
     analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
     document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
@@ -300,7 +300,7 @@ class ContentController < ApplicationController
       )
     end
 
-    @serialized_content = ContentSerializer.new(@content)
+    @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
     @suggested_page_tags = (
       current_user.page_tags.where(page_type: content_type_class.name).pluck(:tag) +
         PageTagService.suggested_tags_for(content_type_class.name)
@@ -465,7 +465,7 @@ class ContentController < ApplicationController
     return redirect_to root_path unless valid_content_types.include?(content_type.name)
     @content = content_type.find_by(id: params[:id])
     return redirect_to(root_path, notice: "You don't have permission to view that content.") if @content.nil?
-    @serialized_content = ContentSerializer.new(@content)
+    @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
     return redirect_to(root_path, notice: "You don't have permission to view that content.") unless @content.updatable_by?(current_user || User.new)
 
     # Generate changelog statistics and data

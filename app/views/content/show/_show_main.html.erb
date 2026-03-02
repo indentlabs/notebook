@@ -20,7 +20,8 @@
           <% category[:fields].each do |field| %>
             <!-- Only show fields that have content -->
             <% next if field[:value].blank? %>
-            
+            <% next if field[:private] && !(user_signed_in? && @content.user_id == current_user.id) %>
+
             <div class="field-display">
               <div class="sm:grid sm:grid-cols-4 sm:gap-4 sm:items-start">
                 <!-- Field label -->

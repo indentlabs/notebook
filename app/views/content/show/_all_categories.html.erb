@@ -19,7 +19,8 @@
         <div class="space-y-10">
           <% category[:fields].each do |field| %>
             <% next if field[:value].blank? %>
-            
+            <% next if field[:private] && !(user_signed_in? && defined?(raw_content) && raw_content.user_id == current_user.id) %>
+
             <div class="field-display">
               <!-- Field Label -->
               <dt class="text-base font-semibold <%= content.class_text_color %> mb-4 flex items-center">
