@@ -118,7 +118,7 @@ class BooksController < ApplicationController
     @book.book_documents.create!(document: document)
 
     respond_to do |format|
-      format.html { redirect_to edit_book_path(@book) }
+      format.html { redirect_to edit_document_path(document) }
       format.json { render json: { status: 'ok', document: { id: document.id, title: document.title } } }
     end
   end
