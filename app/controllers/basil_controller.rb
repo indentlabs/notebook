@@ -27,8 +27,14 @@ class BasilController < ApplicationController
       page.id == params[:id].to_i
     end
 
+    # If the content wasn't in the universe-filtered cache, fall back to a direct lookup
+    # so users can use Basil on content from any universe regardless of active filter.
     if @content.nil?
-      redirect_to basil_path, notice: "That content could not be found. If you have a universe filter active, try switching to the correct universe or removing the filter."
+      @content = @content_type.constantize.find_by(id: params[:id], user: current_user)
+    end
+
+    if @content.nil?
+      redirect_to basil_path, notice: "That content could not be found."
       return
     end
 
@@ -474,10 +480,19 @@ class BasilController < ApplicationController
     end
 
     # Fetch the related content
-    @content = @current_user_content.fetch(commission_params.fetch(:entity_type), [])
-                  .find { |c| c.id == commission_params.fetch(:entity_id).to_i }
+    entity_type = commission_params.fetch(:entity_type)
+    entity_id   = commission_params.fetch(:entity_id).to_i
+    @content = @current_user_content.fetch(entity_type, [])
+                  .find { |c| c.id == entity_id }
+
+    # If the content wasn't in the universe-filtered cache, fall back to a direct lookup
+    # so users can use Basil on content from any universe regardless of active filter.
     if @content.nil?
-      redirect_back fallback_location: basil_path, notice: "That content could not be found. If you have a universe filter active, try switching to the correct universe or removing the filter."
+      @content = entity_type.constantize.find_by(id: entity_id, user: current_user)
+    end
+
+    if @content.nil?
+      redirect_back fallback_location: basil_path, notice: "That content could not be found."
       return
     end
 
