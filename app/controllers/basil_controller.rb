@@ -1,6 +1,5 @@
 class BasilController < ApplicationController
   before_action :authenticate_user!, except: [:complete_commission, :about, :stats, :jam, :queue_jam_job, :commission_info]
-  before_action :cache_basil_user_content, if: :user_signed_in?
 
   before_action :require_admin_access, only: [:review], unless: -> { Rails.env.development? }
 
@@ -805,18 +804,15 @@ class BasilController < ApplicationController
   private
 
   # Cache user content for Basil without universe filtering
+  # Override ApplicationController's cache to skip universe filtering,
   # since Basil should be able to generate images for any user content
-  def cache_basil_user_content
+  def cache_current_user_content
+    return if @current_user_content
     @current_user_content = {}
     return unless user_signed_in?
 
-    # Get all enabled content types for Basil
-    enabled_types = BasilService::ENABLED_PAGE_TYPES
-
-    # Cache content without universe filtering so users can access
-    # characters from any universe, even when a universe filter is active
     @current_user_content = current_user.content(
-      content_types: enabled_types,
+      content_types: BasilService::ENABLED_PAGE_TYPES,
       universe_id: nil
     )
   end
