@@ -23,10 +23,14 @@ class BasilController < ApplicationController
   def content
     # Fetch the content page from our already-queried cache of current user content
     @content_type = params[:content_type].humanize
-    @content      = @current_user_content[@content_type].detect do |page|
+    @content      = @current_user_content.fetch(@content_type, []).detect do |page|
       page.id == params[:id].to_i
     end
-    raise "No content found for #{params[:content_type]} with ID #{params[:id]} for user #{current_user.id}" if @content.nil?
+
+    if @content.nil?
+      redirect_to basil_path, notice: "That content could not be found. If you have a universe filter active, try switching to the correct universe or removing the filter."
+      return
+    end
 
     # Fetch any existing Basil configurations/guidance for this character
     @guidance   = BasilFieldGuidance.find_or_initialize_by(
@@ -470,9 +474,12 @@ class BasilController < ApplicationController
     end
 
     # Fetch the related content
-    @content = @current_user_content[commission_params.fetch(:entity_type)]
+    @content = @current_user_content.fetch(commission_params.fetch(:entity_type), [])
                   .find { |c| c.id == commission_params.fetch(:entity_id).to_i }
-    return raise "Invalid content commission params" if @content.nil?
+    if @content.nil?
+      redirect_back fallback_location: basil_path, notice: "That content could not be found. If you have a universe filter active, try switching to the correct universe or removing the filter."
+      return
+    end
 
     current_queue_size = current_user.basil_commissions.where(completed_at: nil).where(entity: @content).count
     if current_queue_size >= BasilService::MAX_JOB_QUEUE_SIZE
