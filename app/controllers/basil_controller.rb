@@ -24,13 +24,7 @@ class BasilController < ApplicationController
   def content
     # Fetch the content page from our already-queried cache of current user content
     @content_type = params[:content_type].humanize
-    
-    # Debug: Let's see what's actually in the cache
-    Rails.logger.debug "=== BASIL DEBUG ==="
-    Rails.logger.debug "Looking for #{@content_type} with ID #{params[:id]}"
-    Rails.logger.debug "Available content types: #{@current_user_content&.keys}"
-    Rails.logger.debug "#{@content_type} content: #{@current_user_content[@content_type]&.map { |p| "#{p.class.name}##{p.id}:#{p.name}" }}"
-    
+
     @content      = @current_user_content[@content_type]&.detect do |page|
       page.id == params[:id].to_i
     end
@@ -813,17 +807,17 @@ class BasilController < ApplicationController
   # Cache user content for Basil without universe filtering
   # since Basil should be able to generate images for any user content
   def cache_basil_user_content
-    return if @current_user_content
     @current_user_content = {}
     return unless user_signed_in?
-    
+
     # Get all enabled content types for Basil
     enabled_types = BasilService::ENABLED_PAGE_TYPES
-    
-    # Cache content without universe filtering
+
+    # Cache content without universe filtering so users can access
+    # characters from any universe, even when a universe filter is active
     @current_user_content = current_user.content(
       content_types: enabled_types,
-      universe_id: nil  # No universe filtering for Basil
+      universe_id: nil
     )
   end
 
