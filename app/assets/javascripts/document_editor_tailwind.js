@@ -262,13 +262,13 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#word-count').text(wordCount);
     $('#mini-word-count').text(wordCount);
 
-    // Update sidebar stats
-    $('#sidebar-word-count').text(wordCount.toLocaleString());
-    $('#sidebar-char-count').text(charCount.toLocaleString());
-    $('#sidebar-reading-time').text(readingTime);
+    // Update sidebar stats (use attribute selectors to update both desktop and mobile sidebars)
+    $('[id="sidebar-word-count"]').text(wordCount.toLocaleString());
+    $('[id="sidebar-char-count"]').text(charCount.toLocaleString());
+    $('[id="sidebar-reading-time"]').text(readingTime);
 
     // Restore "fresh" state on word count circle - change back to teal gradient
-    $('#word-count-circle')
+    $('[id="word-count-circle"]')
       .removeClass('from-gray-400 to-gray-500')
       .addClass('from-teal-400 to-teal-600');
   };
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Queue an autosave
     queueAutosave();
     // Show "stale" state on word count circle - change to gray gradient
-    $('#word-count-circle')
+    $('[id="word-count-circle"]')
       .removeClass('from-teal-400 to-teal-600')
       .addClass('from-gray-400 to-gray-500');
     // Update word count (debounced for performance on large docs)
