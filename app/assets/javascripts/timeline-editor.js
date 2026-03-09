@@ -719,7 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const entityType = button.dataset.type;
       const entityId = button.dataset.id;
       const alpineEl = document.querySelector('[x-data*="timelineEditor"]');
-      const eventId = alpineEl && alpineEl._x_dataStack ? alpineEl._x_dataStack[0].linkingEventId : null;
+      const eventId = alpineEl && window.Alpine ? Alpine.$data(alpineEl).linkingEventId : null;
 
       if (eventId) {
         // Show loading state on the clicked button
