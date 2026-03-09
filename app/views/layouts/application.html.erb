@@ -20,9 +20,43 @@
   <!-- Simplified stylesheet and script section for debugging -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+  <% if user_signed_in? %>
+  <script>
+    // Set sidebar state before first paint to prevent layout jump.
+    // This runs synchronously before the browser paints, so the correct
+    // margins/widths are applied from the very first frame.
+    (function() {
+      try {
+        var isDesktop = window.innerWidth >= 768;
+        if (!isDesktop) return;
+        var saved = localStorage.getItem('site_navigation_sidebar_visible');
+        var sidebarOpen = saved === null || saved === 'true';
+        document.documentElement.setAttribute('data-sidebar-initial', sidebarOpen ? 'open' : 'collapsed');
+      } catch(e) {
+        document.documentElement.setAttribute('data-sidebar-initial', 'open');
+      }
+    })();
+  </script>
+  <% end %>
   <style>
     /* Prevent transition on initial page load */
     .no-transition {
+      transition: none !important;
+    }
+
+    /* Initial sidebar layout before Alpine.js loads - prevents page jump */
+    @media (min-width: 768px) {
+      [data-sidebar-initial="open"] main { margin-left: 14rem; }
+      [data-sidebar-initial="collapsed"] main { margin-left: 4rem; }
+      [data-sidebar-initial="open"] header { padding-left: 14rem; }
+      [data-sidebar-initial="collapsed"] header { padding-left: 4rem; }
+      [data-sidebar-initial="open"] .notebook--sidebar { width: 14rem; }
+      [data-sidebar-initial="collapsed"] .notebook--sidebar { width: 4rem; }
+    }
+    /* Suppress all transitions while initial state is active */
+    [data-sidebar-initial] main,
+    [data-sidebar-initial] .notebook--sidebar,
+    [data-sidebar-initial] header {
       transition: none !important;
     }
   </style>
@@ -49,6 +83,16 @@
       }"
       x-init="
         <% if user_signed_in? %>
+          // Hand off from initial CSS to Alpine: remove the data attribute
+          // after Alpine has processed all :class bindings in the tree
+          $nextTick(() => {
+            document.documentElement.removeAttribute('data-sidebar-initial');
+            // Re-enable transitions after layout is settled
+            setTimeout(() => {
+              document.querySelectorAll('.no-transition').forEach(el => el.classList.remove('no-transition'));
+            }, 50);
+          });
+
           // Save sidebar state to localStorage when it changes
           $watch('showSidebar', value => {
             try {
@@ -105,7 +149,7 @@
           'md:ml-16': !showSidebar && isDesktop,
           'ml-0': !isDesktop
         }"<% end %>
-        x-init="setTimeout(() => { $el.classList.remove('no-transition') }, 100)">
+>
     <%= yield %>
   </main>
 
