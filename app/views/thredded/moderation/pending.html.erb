@@ -1,0 +1,90 @@
+<% content_for :thredded_page_title, t('thredded.nav.moderation') %>
+<% content_for :thredded_page_id, 'thredded--pending-moderation' %>
+<%= render 'nav' %>
+
+<%= thredded_page do %>
+  <div class="thredded--main-section">
+    <!-- Moderation Stats Dashboard -->
+    <div class="moderation-dashboard">
+      <div class="stat-card">
+        <div class="stat-icon pending">
+          <i class="material-icons">pending_actions</i>
+        </div>
+        <div class="stat-value"><%= @posts.try(:total_count) || 0 %></div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon approved">
+          <i class="material-icons">check_circle</i>
+        </div>
+        <div class="stat-value">--</div>
+        <div class="stat-label">Approved Today</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon blocked">
+          <i class="material-icons">block</i>
+        </div>
+        <div class="stat-value">--</div>
+        <div class="stat-label">Blocked Today</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon users">
+          <i class="material-icons">group</i>
+        </div>
+        <div class="stat-value">--</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+    </div>
+    
+    <!-- Last Moderated Notice -->
+    <% if @last_moderated_record %>
+      <div class="thredded--moderated-notice">
+        <i class="material-icons">check_circle</i>
+        <div class="notice-content">
+          <div class="notice-title">Successfully moderated</div>
+          <div class="notice-text">
+            <%= render_post_moderation_records([@last_moderated_record]) %>
+          </div>
+        </div>
+        <button class="notice-dismiss" onclick="this.parentElement.style.display='none'">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+    <% end %>
+    
+    <!-- Posts List -->
+    <% if @posts.present? %>
+      <div class="moderation-posts">
+        <div class="moderation-posts-header">
+          <h3>
+            <i class="material-icons">forum</i>
+            Posts Awaiting Review
+          </h3>
+          <div class="filter-buttons">
+            <button class="active">All</button>
+            <button>Topics</button>
+            <button>Replies</button>
+            <button>Reports</button>
+          </div>
+        </div>
+        
+        <%= render_posts @posts,
+                         partial: 'thredded/moderation/post',
+                         content_partial: 'thredded/posts/content' %>
+      </div>
+      
+      <%= paginate @posts %>
+    <% else %>
+      <div class="thredded--empty">
+        <div class="empty-icon">
+          <i class="material-icons">inbox</i>
+        </div>
+        <h3 class="thredded--empty--title"><%= t 'thredded.moderation.pending.empty.title' %></h3>
+        <p><%= t 'thredded.moderation.pending.empty.content' %></p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

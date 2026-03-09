@@ -1,33 +1,31 @@
+<!--
+<div class="text-black text-center mb-3 font-bold">
+  <small>Sign in with email</small>
+</div>
+-->
 <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true %>
+  <div class="relative w-full mb-3">
+    <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2" for="grid-password">Email</label>
+    <%= f.email_field :email, autofocus: true, placeholder: 'Email', class: 'border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150' %>
+    <div class="validation-feedback h-5 text-xs mt-1"></div>
   </div>
-
-  <div class="field">
-    <%= f.label :password %><br />
-    <%= f.password_field :password, autocomplete: "off" %>
+  <div class="relative w-full mb-3">
+    <label class="block uppercase text-blueGray-600 text-xs font-bold mb-2" for="grid-password">Password</label>
+    <%= f.password_field :password, autocomplete: "off", placeholder: 'Password', class: 'border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150' %>
+    <div class="validation-feedback h-5 text-xs mt-1"></div>
   </div>
-
-  <div class="spacer">&nbsp;</div>
-
-  <div class="actions center">
-    <div class="col s6">
-      <% if devise_mapping.rememberable? -%>
-        <%= f.label :remember_me do %>
-          <%= f.check_box :remember_me %>
-          <span>Remember me</span>
-        <% end %>
-      <% end -%>
-    </div>
-    <div class="col s6">
-      <%= f.submit "Log in", class: 'btn blue' %>
-    </div>
-
-    <p class="center">
-      <br />
-      <%= render "devise/shared/links" %>
-    </p>
+  <div>
+    <label class="inline-flex items-center cursor-pointer">
+      <%= f.check_box :remember_me, id: "customCheckLogin", class: "form-checkbox border-0 rounded text-blueGray-700 ml-1 w-5 h-5 ease-linear transition-all duration-150" %>
+      <span class="ml-2 text-sm font-semibold text-blueGray-600">
+        Remember me
+      </span>
+    </label>
+  </div>
+  <div class="text-center mt-6">
+    <%= f.submit 'Sign In', class: 'bg-notebook-blue text-white text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150 cursor-pointer' %>
+  </div>
+  <div class="text-center mt-4 text-sm hover:text-notebook-blue">
+    <%= link_to 'Forgot your password?', new_user_password_path, class: 'text-notebook-blue hover:border-notebook-blue border-b-2' %>
   </div>
 <% end %>

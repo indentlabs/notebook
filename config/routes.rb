@@ -1,10 +1,20 @@
 # rubocop:disable LineLength
 Rails.application.routes.draw do
+  # Add password route for devise registrations
+  devise_scope :user do
+    get 'users/password', to: 'registrations#password', as: 'user_password_edit'
+  end
+  get 'styleguide/tailwind'
+  
+  # API routes from master
   namespace :api do
     namespace :v1 do
       post 'gallery_images/sort'
-      get 'categories/suggest/:content_type', to: 'categories#suggest'
-      get 'fields/suggest/:content_type/:category', to: 'fields#suggest'
+      put 'content/sort', to: 'content#sort'
+      get 'categories/suggest/:content_type', to: 'attribute_categories#suggest'
+      get 'categories/:id/edit', to: 'attribute_categories#edit'
+      get 'fields/suggest/:content_type/:category', to: 'attribute_fields#suggest'
+      get 'fields/:id/edit', to: 'attribute_fields#edit'
     end
   end
   default_url_options :host => "notebook.ai"
@@ -62,8 +72,15 @@ Rails.application.routes.draw do
     get 'follow',   on: :member
     get 'unfollow', on: :member
     get 'report',   on: :member
+    get 'rss',      on: :member, defaults: { format: 'rss' }
+    get 'feed',     on: :member, to: 'page_collections#rss', defaults: { format: 'rss' }, as: 'feed'
+    get 'pages',    on: :member, to: 'page_collections#pages', defaults: { format: 'json' }
 
     get 'by/:user_id', to: 'page_collections#by_user', as: :submissions_by_user
+    
+    # Editor picks management
+    get 'editor_picks', to: 'page_collection_editor_picks#index', as: 'manage_editor_picks'
+    resources :editor_picks, controller: 'page_collection_editor_picks', except: [:show, :edit]
   end
   resources :page_collection_submissions do
     get 'approve', on: :member
@@ -80,7 +97,7 @@ Rails.application.routes.draw do
   post 'customization/toggle_content_type'
 
   # User-centric stuff
-  devise_for :users, :controllers => { registrations: 'registrations' }
+  devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions' }
   resources :users do
     devise_scope :user do
       get 'preferences',  to: 'registrations#preferences'
@@ -89,6 +106,10 @@ Rails.application.routes.draw do
 
     get 'followers', on: :member
     get 'following', on: :member
+
+    # Timeline isn't in content_types[:all] but needs a user route for favorite_page_type badges.
+    # Defined before the loop to ensure route helper is available early during boot.
+    get :timelines, on: :member
 
     # get :characters, on: :member <...etc...>
     Rails.application.config.content_types[:all].each do |content_type|
@@ -105,6 +126,9 @@ Rails.application.routes.draw do
   resources :user_followings
   resources :user_blockings
 
+  # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)
+  patch 'users/update_timezone', to: 'users#update_timezone'
+
   # Username URL aliases
   get '/@:username', to: 'users#show', as: :profile_by_username
   get '/@:username/followers', to: 'users#followers'
@@ -114,6 +138,11 @@ Rails.application.routes.draw do
   # ID-based alternative routes for users without usernames
   get '/users/:id/tag/:tag_slug', to: 'users#tag', as: :user_id_tag
 
+  scope '/analysis' do
+    get '/', to: 'document_analyses#landing', as: :landing_path
+    get '/hub', to: 'document_analyses#hub', as: :analysis_hub
+  end
+
   resources :documents do
     # Document Analysis routes
     get '/analysis/',            to: 'document_analyses#show',        on: :member      
@@ -121,13 +150,20 @@ Rails.application.routes.draw do
     get '/analysis/style',       to: 'document_analyses#style',       on: :member
     get '/analysis/sentiment',   to: 'document_analyses#sentiment',   on: :member
     get  '/plaintext',           to: 'documents#plaintext',               on: :member
+    get  '/printable',           to: 'documents#printable',               on: :member
     get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
-    resources :document_revisions, path: 'revisions', on: :member
+    resources :document_revisions, path: 'revisions', on: :member do
+      member do
+        get 'diff'
+        post 'restore'
+      end
+    end
 
     get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
 
     post :toggle_favorite, on: :member
+    post :toggle_archive, on: :member
 
     # todo these routes don't belong here and make for awfully weird urls (/documents/:analysis_id/destroy, etc)
     get  '/destroy_analysis', to: 'documents#destroy_analysis',        on: :member
@@ -137,14 +173,43 @@ Rails.application.routes.draw do
     get  '/destroy_entity',   to: 'documents#destroy_document_entity', on: :member
     # new route:
     get  '/unlink/:page_type/:page_id', to: 'documents#unlink_entity', on: :member
+    # API route for unlinking by document_entity ID:
+    delete '/unlink_entity/:entity_id', to: 'documents#unlink_entity_by_id', on: :member
   end
   resources :folders, only: [:create, :update, :destroy, :show]
 
+  resources :books do
+    member do
+      post :toggle_archive
+      post :toggle_favorite
+      post :add_document
+      post :create_document
+      delete :remove_document
+      post :sort_document
+    end
+  end
+
   scope '/my' do
-    get '/content',         to: 'main#dashboard', as: :dashboard
+    get '/dashboard',       to: 'main#dashboard', as: :dashboard
+    get '/content',         to: redirect('/my/dashboard')
     get '/content/recent',  to: 'main#recent_content', as: :recent_content
     get '/content/deleted', to: 'content#deleted', as: :recently_deleted_content
     get '/prompts',         to: 'main#prompts', as: :prompts
+
+    resources :writing_goals, path: 'writing-goals', only: [:index, :new, :create, :edit, :update, :destroy] do
+      collection do
+        get :history
+      end
+      member do
+        post :complete
+        post :activate
+        post :archive
+      end
+    end
+
+    get 'writing-activity', to: 'writing_activity#index', as: :writing_activity
+
+    get '/multiverse',      to: 'universes#hub', as: :multiverse
 
     get '/scratchpad',      to: 'main#notes', as: :notes
 
@@ -197,6 +262,7 @@ Rails.application.routes.draw do
       get '/discussions',   to: 'data#discussions'
       get '/collaboration', to: 'data#collaboration'
       get '/green',         to: 'data#green'
+      get '/achievements',  to: 'data#achievements', as: :achievements
       scope 'yearly' do
         get '/',      to: 'data#yearly_index',   as: :year_in_review
         get '/:year', to: 'data#review_year',    as: :review_year
@@ -213,13 +279,27 @@ Rails.application.routes.draw do
         get '/:model.csv',    to: 'export#csv',           as: :notebook_csv
       end
     end
-    get '/help', to: 'help#index', as: :help_center
   end
   delete 'delete_my_account', to: 'users#delete_my_account'
   delete 'contributor/:id/remove', to: 'contributors#destroy', as: :remove_contributor
+  post 'universes/:universe_id/contributors', to: 'contributors#create', as: :universe_contributors
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
   get '/paper', to: redirect('https://www.notebook-paper.com')
+
+  # Help Center - Public routes
+  get '/help', to: 'help#index', as: :help_center
+  get '/help/your-first-universe', to: 'help#your_first_universe', as: :help_your_first_universe
+  get '/help/page-visualization', to: 'help#page_visualization', as: :help_page_visualization
+  get '/help/document-analysis', to: 'help#document_analysis', as: :help_document_analysis
+  get '/help/organizing-with-tags', to: 'help#organizing_with_tags', as: :help_organizing_with_tags
+  get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
+  get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
+  get '/help/premium-features', to: 'help#premium_features', as: :help_premium_features
+  get '/help/free-features', to: 'help#free_features', as: :help_free_features
+  get '/help/your-account', to: 'help#your_account', as: :help_your_account
+  get '/help/your-data', to: 'help#your_data', as: :help_your_data
+  get '/help/troubleshooting', to: 'help#troubleshooting', as: :help_troubleshooting
 
   # Main pages
   root to: 'main#index'
@@ -228,7 +308,7 @@ Rails.application.routes.draw do
   scope '/about' do
     get '/paper',       to: 'main#paper',       as: :green_paper
     get '/privacy',     to: 'main#privacyinfo', as: :privacy_policy
-    get '/billing/faq', to: 'subscriptions#faq'
+    get '/billing/faq', to: 'subscriptions#faq', as: :billing_faq
   end
 
   # Landing pages
@@ -269,23 +349,40 @@ Rails.application.routes.draw do
       get :timelines, on: :member
 
       get  :changelog,       on: :member
-      get  :gallery,         on: :member
-      get  :toggle_archive,  on: :member
+      # Redirect old gallery URLs to the show page with #gallery hash
+      get  :gallery,         on: :member, to: redirect { |params, req| "/plan/#{params[:controller].split('/').last}/#{params[:id]}#gallery" }
+      post :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
+      # Skip Timeline since it has its own explicit routes below
+      next if content_type.name == 'Timeline'
+
       # resources :characters do
       resources content_type.name.downcase.pluralize.to_sym do
+
+        # Browsable pages
+        # Redirect old gallery URLs to the show page with #gallery hash
+        get  :gallery,         on: :member, to: redirect { |params, req|
+          resource_type = req.path.split('/')[2]  # /plan/characters/123/gallery -> "characters"
+          "/plan/#{resource_type}/#{params[:id]}#gallery"
+        }
+        get  :references,      on: :member
         get  :changelog,       on: :member
-        get  :toggle_archive,  on: :member
-        post :toggle_favorite, on: :member
-        get  :gallery,         on: :member
         get '/tagged/:slug',   on: :collection, action: :index, as: :page_tag
+
+        # API endpoints
+        post :toggle_archive,  on: :member
+        post :toggle_favorite, on: :member
+        # Already have these routes above, no need to duplicate
       end
     end
     resources :timelines, only: [:index, :show, :new, :update, :edit, :destroy] do
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
+      get 'tag_suggestions', to: 'timelines#tag_suggestions', on: :member
+      post :toggle_archive, on: :member
+      post :toggle_favorite, on: :member
     end
     resources :timeline_events do
       scope '/move', as: :move do
@@ -296,12 +393,17 @@ Rails.application.routes.draw do
       end
       post 'link',              to: 'timeline_events#link_entity',    on: :member
       post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
+      post 'tags',              to: 'timeline_events#add_tag',        on: :member, as: :add_tag
+      delete 'tags/:tag_name',  to: 'timeline_events#remove_tag',     on: :member, as: :remove_tag
     end
 
     # Content attributes
-    put '/content/sort', to: 'content#api_sort'
-    resources :attribute_categories, only: [:create, :update, :destroy]
-    resources :attribute_fields,     only: [:create, :update, :destroy]
+    resources :attribute_categories, only: [:create, :update, :destroy, :edit] do
+      get :suggest, on: :collection
+    end
+    resources :attribute_fields,     only: [:create, :update, :destroy, :edit] do
+      get :suggest, on: :collection
+    end
 
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
@@ -309,6 +411,8 @@ Rails.application.routes.draw do
 
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
+    get ':content_type/template/export', to: 'content#export_template', as: :export_template
+    delete ':content_type/template/reset', to: 'content#reset_template', as: :reset_template
   end
 
   # For non-API API endpoints
@@ -318,12 +422,17 @@ Rails.application.routes.draw do
     patch '/text_field_update/:field_id',     to: 'content#text_field_update',     as: :text_field_update
     patch '/tags_field_update/:field_id',     to: 'content#tags_field_update',     as: :tags_field_update
     patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
+    patch '/sort/categories',                 to: 'attribute_categories#sort',     as: :sort_categories_internal
+    patch '/sort/fields',                     to: 'attribute_fields#sort',         as: :sort_fields_internal
+    patch '/sort/timeline_events',            to: 'timeline_events#sort',          as: :sort_timeline_events_internal
   end
 
   get 'search/', to: 'search#results'
+  get 'search/autocomplete', to: 'search#autocomplete'
 
   authenticate :user, lambda { |u| u.site_administrator? || Rails.env.development? } do
     scope 'admin' do
+      get '/hub',                  to: 'admin#hub', as: :admin_hub
       get '/stats',                to: 'admin#dashboard', as: :admin_dashboard
       get '/content_type/:type',   to: 'admin#content_type', as: :admin_content_type
       get '/attributes',           to: 'admin#attributes', as: :admin_attributes
@@ -331,14 +440,25 @@ Rails.application.routes.draw do
       get '/unsubscribe',          to: 'admin#unsubscribe', as: :mass_unsubscribe
       get '/images',               to: 'admin#images', as: :image_audit
       get '/promos',               to: 'admin#promos', as: :admin_promos
-      get '/shares/reported',      to: 'admin#reported_shares'
-      get '/churn',                to: 'admin#churn'
+      get '/shares/reported',             to: 'admin#reported_shares', as: :admin_reported_shares
+      delete '/shares/:id',               to: 'admin#destroy_share', as: :admin_destroy_share
+      delete '/users/:id',                to: 'admin#destroy_user', as: :admin_destroy_user
+      post '/shares/:id/dismiss_reports', to: 'admin#dismiss_share_reports', as: :admin_dismiss_share_reports
+      get '/churn',                to: 'admin#churn', as: :admin_churn
       get '/hatewatch/:matchlist', to: 'admin#hate'
       get '/spamwatch',            to: 'admin#spam'
       get '/notifications',        to: 'admin#notifications'
+      get '/notifications/:reference_code', to: 'admin#notification_reference', as: :admin_notification_reference
       post '/perform_unsubscribe', to: 'admin#perform_unsubscribe', as: :perform_unsubscribe
     end
     mount RailsAdmin::Engine => '/admin', as: 'rails_admin'
+  end
+
+  # Moderation hub for forum moderators
+  authenticate :user, lambda { |u| u.forum_moderator? || Rails.env.development? } do
+    scope 'moderation' do
+      get '/', to: 'moderation#hub', as: :moderation_hub
+    end
   end
 
   # Browse global content routes
@@ -350,9 +470,14 @@ Rails.application.routes.draw do
   scope '/worldbuilding' do
     Rails.application.config.content_types[:all].each do |content_type|
       get content_type.name.downcase.pluralize, to: "information##{content_type.name.downcase.pluralize}", as: "#{content_type.name.downcase}_worldbuilding_info"
-      # TODO: documents info page
-      # TODO: timelines info page
     end
+  end
+
+  # Writing tools info pages (separate from worldbuilding content types)
+  scope '/writing' do
+    get 'books', to: 'information#books', as: 'book_worldbuilding_info'
+    get 'documents', to: 'information#documents', as: 'document_worldbuilding_info'
+    get 'timelines', to: 'information#timelines', as: 'timeline_worldbuilding_info'
   end
 
   scope '/scene/:scene_id' do
@@ -371,7 +496,7 @@ Rails.application.routes.draw do
     end
       
     get '/',             to: 'api_docs#index'
-    get '/docs',         to: 'api_docs#docs'
+    get '/docs',         to: 'api_docs#docs', as: :documentation
     # get '/applications', to: 'api_docs#applications'
     get '/approvals',    to: 'api_docs#approvals'
     get '/integrations', to: 'api_docs#integrations'
@@ -393,10 +518,21 @@ Rails.application.routes.draw do
       end
       scope '/fields' do
         get '/suggest/:entity_type/:category',    to: 'attribute_fields#suggest'
+        get '/:id/edit',                         to: 'attributes#field_edit'
+      end
+      scope '/categories' do
+        get '/suggest/:entity_type',              to: 'attribute_categories#suggest'
+        get '/:id/edit',                         to: 'attributes#category_edit'
+      end
+      scope '/content' do
+        put '/sort',                             to: 'attributes#sort'
       end
       scope '/answers' do
         get '/suggest/:entity_type/:field_label', to: 'attributes#suggest'
       end
+      
+      # Page name lookup
+      get '/page_name', to: 'page_names#show'
 
       # Content index path
       Rails.application.config.content_types[:all].each do |content_type|

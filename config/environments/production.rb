@@ -57,6 +57,17 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
+  # File store cache with size limits and automatic expiration
+  config.cache_store = :file_store, Rails.root.join("tmp", "cache"), {
+    size: 256.megabytes,  # Maximum cache size (256MB should be plenty)
+    compress: true,       # Compress cached data to save space
+    compress_threshold: 1.kilobyte  # Compress anything over 1KB
+  }
+
+  # Set cache expiration for fragment caching
+  config.action_controller.perform_caching = true
+  config.action_controller.enable_fragment_cache_logging = false
+
   # Use a real queuing backend for Active Job (and separate queues per environment)
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "notebook_#{Rails.env}"

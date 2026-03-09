@@ -2,11 +2,11 @@
 
   User.find_each do |user|
     user.notifications.create(
-      message_html:     "<strong class='text-darken-4 black-text'>Worldbuilding Competitions:</strong> We're sponsoring two government-building competitions right now. Click for more details.",
+      message_html:     "<div class='text-darken-4 black-text'><strong>2022 is winding to a close...</strong></div>Clear here to see your Year in Review!",
       icon:             'event_available',
-      icon_color:       'orange',
+      icon_color:       'blue',
       happened_at:      DateTime.current,
-      passthrough_link: "https://medium.com/indent-labs/utopian-dream-or-dystopian-rule-93abf25ad4eb",
-      reference_code:   "thanksgoving-2022"
+      passthrough_link: "https://www.notebook.ai/my/data/yearly/2022",
+      reference_code:   "year-in-review-2022"
     )
   end

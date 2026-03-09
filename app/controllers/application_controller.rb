@@ -30,7 +30,7 @@ class ApplicationController < ActionController::Base
 
   def set_metadata
     @page_title       ||= ''
-    @page_keywords    ||= %w[writing author nanowrimo novel character fiction fantasy universe creative dnd roleplay game design]
+    @page_keywords    ||= %w[writing author novel character fiction fantasy universe creative dnd roleplay game design]
     @page_description ||= 'Notebook.ai is a set of tools for writers and roleplayers to create magnificent universes — and everything within them.'
   end
 
@@ -79,6 +79,7 @@ class ApplicationController < ActionController::Base
     cache_current_user_content
     cache_notifications
     cache_recently_edited_pages
+    cache_most_edited_pages
   end
 
   def cache_activated_content_types
@@ -113,13 +114,15 @@ class ApplicationController < ActionController::Base
       @current_user_content[content_type] ||= []
     end
 
-    # Likewise, we should also always cache Timelines & Documents
+    # Likewise, we should also always cache Timelines, Documents, & Books
     if @universe_scope
       @current_user_content['Timeline'] = current_user.timelines.where(universe_id: @universe_scope.try(:id)).to_a
-      @current_user_content['Document'] = current_user.documents.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
+      @current_user_content['Document'] = current_user.documents.unarchived.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
+      @current_user_content['Book'] = current_user.books.unarchived.where(universe_id: @universe_scope.try(:id)).order('updated_at DESC').to_a
     else
       @current_user_content['Timeline'] = current_user.timelines.to_a
-      @current_user_content['Document'] = current_user.documents.order('updated_at DESC').to_a
+      @current_user_content['Document'] = current_user.documents.unarchived.order('updated_at DESC').to_a
+      @current_user_content['Book'] = current_user.books.unarchived.order('updated_at DESC').to_a
     end
   end
 
@@ -157,6 +160,34 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def cache_most_edited_pages(amount=50)
+    cache_current_user_content
+
+    @most_edited_pages ||= if user_signed_in?
+      # Get all user's content
+      all_content = @current_user_content.values.flatten
+
+      # Fetch all edit counts in a single query (fixes N+1)
+      edit_counts = ContentChangeEvent.where(user_id: current_user.id)
+                                      .group(:content_type, :content_id)
+                                      .count
+
+      # Map content to their edit counts using hash lookup
+      content_with_edit_counts = all_content.map do |content_page|
+        edit_count = edit_counts[[content_page.page_type, content_page.id]] || 0
+        [content_page, edit_count]
+      end
+      
+      # Sort by edit count (descending) and take the top pages
+      # Keep both content page and edit count for the view
+      content_with_edit_counts
+        .sort_by { |content_page, edit_count| -edit_count }
+        .first(amount)
+    else
+      []
+    end
+  end
+
   def cache_forums_unread_counts
     @unread_threads ||= if user_signed_in?
       Thredded::Topic.unread_followed_by(current_user).count
@@ -185,11 +216,13 @@ class ApplicationController < ActionController::Base
   end
 
   def cache_linkable_content_for_each_content_type
+    return unless user_signed_in?
+
     cache_contributable_universe_ids
     cache_current_user_content
     
     linkable_classes = @activated_content_types
-    linkable_classes += %w(Document Timeline)
+    linkable_classes += %w(Document Timeline Book)
 
     @linkables_cache = {} # Cache is list of [[page_name, page_id], [page_name, page_id], ...]
     @linkables_raw   = {} # Raw is list of objects [#{page}, #{page}, ...]

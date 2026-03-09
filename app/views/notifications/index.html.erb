@@ -1,22 +1,48 @@
-<h1 style="font-size: 2rem">Your notifications</h1>
-<% @notifications.each do |notification| %>
-  <%= link_to notification, class: 'black-text text-lighten-3' do %>
-    <div class="hoverable card <%= 'blue lighten-5' unless notification.viewed_at? %>">
-      <div class="card-content">
-        <div class="card-title">
-          <i class="material-icons left <%= notification.icon_color %>-text"><%= notification.icon %></i>
-          <%= notification.message_html.html_safe %>
-        </div>
-        <div>
-          <small class="grey-text"><%= time_ago_in_words notification.happened_at %> ago</small>
-        </div>
-      </div>
+<section class="max-w-3xl mt-8 mx-auto">
+  <div class="md:flex md:items-center md:justify-between">
+    <div class="flex-1 min-w-0">
+      <h2 class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">Your notifications</h2>
+    </div>
+    <!--
+    <div class="mt-4 flex md:mt-0 md:ml-4">
+      <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Edit</button>
+      <button type="button" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Publish</button>
+    </div>
+    -->
+  </div>
+
+  <% if @notifications.empty? %>
+    <p class="bg-blue-100 dark:bg-blue-900 border border-notebook-blue dark:border-blue-800 p-4 my-4 rounded dark:text-white">
+      Notifications will appear here as soon as you have any!
+    </p>
+    <div>
+      <%= link_to 'Back to your dashboard', dashboard_path, class: 'text-notebook-blue' %>
     </div>
   <% end %>
-<% end %>
 
-<% if @notifications.empty? %>
-  <div class="card-panel">
-    Notifications will appear here whenever you receive any. You'll also be able to view them directly from the bell dropdown at the top of the page.
-  </div>
-<% end %>
+  <% if @notifications.any? %>
+    <div class="bg-white dark:bg-gray-800 border-notebook-blue dark:border-gray-700 rounded mt-4">
+      <%# todo this is copy-pasted from tailwind template and can be partialized to reuse styling %>
+      <% @notifications.each do |notification| %>
+        <%= link_to main_app.notification_path(notification), class: 'flex items-center px-4 py-3 border-b dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 -mx-2' do %>
+          <i class="material-icons bg-<%= notification.icon_color %>-500 text-white rounded-full p-1 h-8 w-8 mx-1"><%= notification.icon %></i>                
+          <div class="text-black dark:text-white text-sm mx-2 flex-grow <%= 'font-bold' unless notification.viewed_at? %>">
+            <%= notification.message_html.html_safe %>
+          </div>
+          <div class="text-gray-400 text-xs">
+            <%= time_ago_in_words notification.happened_at %> ago
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="my-2 space-y-2">
+      <%= link_to main_app.mark_all_read_path, class: 'block bg-blue-100 hover:bg-blue-50 dark:bg-blue-900 dark:hover:bg-blue-800 text-black dark:text-white text-center py-2' do %>
+        Mark all notifications read
+      <% end %>
+      <%= link_to main_app.notifications_path, class: 'block bg-notebook-blue hover:bg-blue-500 text-white text-center font-bold py-2' do %>
+        See all notifications
+      <% end %>
+    </div>
+  <% end %>
+</section>

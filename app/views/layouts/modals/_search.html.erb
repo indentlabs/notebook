@@ -6,10 +6,32 @@
       anything you've typed in any of those pages' fields as well. For example, searching "bald" will show you all your characters
       that you've entered "bald" in for their hair style.
     </p>
-    <%= form_tag main_app.search_path, method: :get do %>
-      <input type="search" name="q" value="" placeholder="search your notebook" />
-      <button type="submit" class="btn btn-primary blue">Search everything</button>
+    <%= form_tag main_app.search_path, method: :get, id: 'notebook-search-form' do %>
+      <input type="search" name="q" value="" placeholder="search your notebook" id="search-query" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <div class="row">
+        <div class="col s6">
+          <button type="submit" class="btn btn-primary blue waves-effect waves-light" style="width: 100%;">
+            <i class="material-icons left">search</i>
+            Search notebook
+          </button>
+        </div>
+        <div class="col s6">
+          <button type="button" class="btn blue lighten-1 waves-effect waves-light" style="width: 100%;" onclick="searchForums()">
+            <i class="material-icons left">forum</i>
+            Search forums
+          </button>
+        </div>
+      </div>
     <% end %>
+    
+    <script>
+      function searchForums() {
+        var query = document.getElementById('search-query').value;
+        if (query) {
+          window.location.href = '/forum/?q=' + encodeURIComponent(query);
+        }
+      }
+    </script>
   </div>
   <div class="modal-footer">
     <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>

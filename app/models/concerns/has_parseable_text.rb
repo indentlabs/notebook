@@ -38,7 +38,29 @@ module HasParseableText
     end
 
     def words
-      @words ||= plaintext.downcase.gsub(/[^\s\w\d']/, '').split(' ')
+      @words ||= begin
+        text = plaintext.downcase
+
+        # Split on forward slashes (matches WordCountService behavior)
+        # Preserve dates like 01/02/2024 by temporarily replacing them
+        text = text.gsub(/(\d{1,2})\/(\d{1,2})(\/\d{2,4})?/) { |m| m.gsub('/', '-SLASH-') }
+        text = text.gsub('/', ' ')
+        text = text.gsub('-SLASH-', '/')
+
+        # Split on backslashes
+        text = text.gsub('\\', ' ')
+
+        # Remove dotted lines, dashed lines, underscores (standalone)
+        text = text.gsub(/\.{2,}/, ' ')  # ... or ....
+        text = text.gsub(/-{2,}/, ' ')   # -- or ---
+        text = text.gsub(/_{2,}/, ' ')   # __ or ___
+
+        # Remove non-word characters except apostrophes (for contractions)
+        text = text.gsub(/[^\s\w\d']/, '')
+
+        # Split on whitespace and filter empty strings
+        text.split(/\s+/).reject(&:blank?)
+      end
     end
 
     def pages

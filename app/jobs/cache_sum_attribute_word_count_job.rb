@@ -1,6 +1,8 @@
 class CacheSumAttributeWordCountJob < ApplicationJob
   queue_as :cache
 
+  MAX_RETRY_ATTEMPTS = 3
+
   def perform(*args)
     entity_type = args.shift
     entity_id   = args.shift
@@ -18,14 +20,31 @@ class CacheSumAttributeWordCountJob < ApplicationJob
     # Cache the total word count onto the model, too
     entity.update(cached_word_count: sum_attribute_word_count)
 
-    # Create or re-use an existing WordCountUpdate for today
-    update = entity.word_count_updates.find_or_initialize_by(
-      for_date: DateTime.current,
-    )
-    update.word_count = sum_attribute_word_count
-    update.user_id  ||= entity.user_id
+    # Determine the user's date based on their timezone at enqueue time (not job execution time)
+    user = entity.user
+    enqueue_time = enqueued_at || Time.current
+    user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
-    # Save!
-    update.save!
+    # Create or re-use an existing WordCountUpdate for today (in user's timezone)
+    retry_count = 0
+    begin
+      update = entity.word_count_updates.find_or_initialize_by(
+        for_date: user_date,
+      )
+      update.word_count = sum_attribute_word_count
+      update.user_id  ||= entity.user_id
+
+      # Save!
+      update.save!
+    rescue ActiveRecord::RecordNotUnique
+      # Unique index exists and found a duplicate via race condition - retry to find the existing record
+      retry_count += 1
+      if retry_count <= MAX_RETRY_ATTEMPTS
+        retry
+      else
+        Rails.logger.error("CacheSumAttributeWordCountJob: max retries exceeded for #{entity.class.name}##{entity.id} on #{user_date}")
+        raise # Let Sidekiq handle with its retry mechanism
+      end
+    end
   end
 end

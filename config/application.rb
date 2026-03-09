@@ -21,6 +21,9 @@ module Notebook
     config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
     config.autoload_paths += Dir[Rails.root.join('app', 'services', '{*/}')]
     
+    # Ensure authorizers are properly loaded
+    config.eager_load_paths += Dir[Rails.root.join('app', 'authorizers')]
+    
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 
     # Initialize configuration defaults for originally generated Rails version.

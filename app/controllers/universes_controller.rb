@@ -1,4 +1,7 @@
 class UniversesController < ContentController
+  def hub
+    @universes = @current_user_content.fetch('Universe', []).sort_by(&:name)
+  end
 
   # TODO: pull list of content types out from some centralized list somewhere
   (Rails.application.config.content_types[:all_non_universe] + [Timeline]).each do |content_type|

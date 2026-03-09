@@ -9,6 +9,10 @@ ENV["BUNDLE_GEMFILE"] ||= File.expand_path("../../Gemfile",
 
 require "bundler/setup"
 
+# Fix for Ruby 3.2+ with Rails 6.1 and Webpacker
+# Resolves: uninitialized constant ActiveSupport::LoggerThreadSafeLevel::Logger
+require "logger"
+
 require "webpacker"
 require "webpacker/webpack_runner"
 

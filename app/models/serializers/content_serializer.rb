@@ -8,11 +8,13 @@ class ContentSerializer
   attr_accessor :documents
 
   attr_accessor :raw_model
-  attr_accessor :class_name, :class_color, :class_icon
+  attr_accessor :class_name, :class_color, :class_text_color, :class_icon
 
   attr_accessor :cached_word_count
+  attr_accessor :created_at, :updated_at
 
   attr_accessor :data
+  attr_accessor :viewing_user
   # name: 'blah,
   # categories: [
   #  {
@@ -24,13 +26,14 @@ class ContentSerializer
   #   }]
   # }
 
-  def initialize(content)
+  def initialize(content, viewing_user: nil)
     # One query per table; lets not muck with joins yet
     # self.attribute_values = Attribute.where(entity_type: content.page_type, entity_id: content.id)
     # self.fields           = AttributeField.where(id: self.attribute_values.pluck(:attribute_field_id).uniq)
     self.categories       = content.class.attribute_categories(content.user)
     self.fields           = AttributeField.where(attribute_category_id: self.categories.map(&:id))
     self.attribute_values = Attribute.where(attribute_field_id: self.fields.map(&:id), entity_type: content.page_type, entity_id: content.id)
+    self.viewing_user     = viewing_user
 
     self.id               = content.id
     self.name             = content.name
@@ -41,12 +44,15 @@ class ContentSerializer
 
     self.class_name       = content.class.name
     self.class_color      = content.class.color
+    self.class_text_color = content.class.text_color
     self.class_icon       = content.class.icon
 
     self.page_tags        = content.page_tags.pluck(:tag) || []
     self.documents        = content.documents || []
 
     self.cached_word_count = content.cached_word_count
+    self.created_at = content.created_at
+    self.updated_at = content.updated_at
 
     self.data = {
       name: content.try(:name),
@@ -62,6 +68,14 @@ class ContentSerializer
           icon:   category.icon,
           hidden: !!category.hidden,
           fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
+            # Check if this is a private field (e.g., private_notes)
+            is_private_field = field.old_column_source == 'private_notes'
+            # Only the content owner can see private fields
+            viewer_is_owner = self.viewing_user.present? && content.user_id == self.viewing_user.id
+
+            # Skip private fields entirely if viewer is not the owner
+            next nil if is_private_field && !viewer_is_owner
+
             {
               internal_id:       field.id,
               id:                field.name,
@@ -71,10 +85,11 @@ class ContentSerializer
               position:          field.position,
               value:             value_for(field, content),
               options:           field.field_options,
-              migrated_link:     field.migrated_from_legacy,    
-              old_column_source: field.old_column_source
+              migrated_link:     field.migrated_from_legacy,
+              old_column_source: field.old_column_source,
+              private:           is_private_field
             }
-          }.sort do |a, b|
+          }.compact.sort do |a, b|
             if a[:position] && b[:position]
               a[:position] <=> b[:position]
 

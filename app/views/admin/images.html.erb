@@ -1,17 +1,98 @@
-<% @images.each do |image| %>
-  <div class="card" style="display: inline-block">
-    <div class="card-content">
-      <%= link_to image.src(:original) do %>
-        <%= image_tag image.src(:medium), alt: image.id %>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Image Uploads</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Browse uploaded images across all content
+      <% if params[:content_type].present? %>
+        <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200">
+          <%= params[:content_type] %>
+        </span>
       <% end %>
-      <br />
-      <%= link_to "#{image.content.try(:name).presence || 'Page'} (#{image.content.try(:privacy)})", image.content, class: (image.content.class.try(:color).presence || 'black') + '-text' %>
+    </p>
+  </div>
+
+  <!-- Image Grid -->
+  <% if @images.any? %>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      <% @images.each do |image| %>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden group">
+          <!-- Image -->
+          <div class="aspect-square bg-gray-100 dark:bg-gray-700 overflow-hidden">
+            <%= link_to image.src(:original), target: '_blank', rel: 'noopener noreferrer' do %>
+              <%= image_tag image.src(:medium),
+                  alt: "Image #{image.id}",
+                  class: 'w-full h-full object-cover group-hover:opacity-75 transition-opacity',
+                  loading: 'lazy' %>
+            <% end %>
+          </div>
+          <!-- Content Link -->
+          <div class="p-3">
+            <% if image.content.present? %>
+              <%= link_to image.content, class: 'text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline truncate block' do %>
+                <%= image.content.try(:name).presence || 'Untitled' %>
+              <% end %>
+              <div class="flex items-center mt-1 space-x-2">
+                <span class="text-xs text-gray-500 dark:text-gray-400"><%= image.content.class.name.demodulize %></span>
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium
+                  <% case image.content.try(:privacy) %>
+                  <% when 'public' %>
+                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                  <% when 'private' %>
+                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                  <% else %>
+                    bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300
+                  <% end %>
+                ">
+                  <%= image.content.try(:privacy) || 'unknown' %>
+                </span>
+              </div>
+            <% else %>
+              <span class="text-sm text-gray-400 dark:text-gray-500">No linked content</span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      </svg>
+      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">No images found</p>
+    </div>
+  <% end %>
+
+  <!-- Pagination -->
+  <div class="mt-8 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 pt-6">
+    <div class="flex-1 flex justify-between sm:justify-start space-x-3">
+      <% if params[:page].to_i > 0 %>
+        <%= link_to 'Previous',
+            params.permit(:page, :content_type).merge(page: params[:page].to_i - 1),
+            class: 'inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600' %>
+      <% else %>
+        <span class="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-lg text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 cursor-not-allowed">
+          Previous
+        </span>
+      <% end %>
+
+      <% if @images.size == 500 %>
+        <%= link_to 'Next',
+            params.permit(:page, :content_type).merge(page: params[:page].to_i + 1),
+            class: 'inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600' %>
+      <% else %>
+        <span class="inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-lg text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 cursor-not-allowed">
+          Next
+        </span>
+      <% end %>
+    </div>
+    <div class="hidden sm:block">
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Page <span class="font-medium"><%= params[:page].to_i + 1 %></span>
+        <% if @images.any? %>
+          &middot; Showing <span class="font-medium"><%= @images.size %></span> images
+        <% end %>
+      </p>
     </div>
   </div>
-<% end %>
-
-<hr />
-<h3 class="center" style="margin-bottom: 400px;">
-  <%= link_to 'Previous page', params.permit(:page, :content_type).merge({page: params[:page].to_i - 1}) %> |
-  <%= link_to 'Next page', params.permit(:page, :content_type).merge({page: params[:page].to_i + 1}) %>
-</h3>
+</div>

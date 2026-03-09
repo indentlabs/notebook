@@ -26,9 +26,9 @@ class SmokeTest
       # puts "#{url_name}: #{url}"
       ActionDispatch::IntegrationTest.test "should get #{url_name}" do
         get(url)
-        # Root URL redirects authenticated users to /my/content
+        # Root URL redirects authenticated users to /my/dashboard
         if url_name.to_s == 'root_url' && response.status == 302
-          assert_redirected_to 'http://notebook.ai/my/content'
+          assert_redirected_to 'http://notebook.ai/my/dashboard'
         else
           assert_response(:success)
         end
