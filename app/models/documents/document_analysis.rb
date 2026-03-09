@@ -14,6 +14,7 @@ class DocumentAnalysis < ApplicationRecord
 
   # usage: analysis.pos_percentage(:adjective) => 23.4
   def pos_percentage(pos_symbol)
+    return 0.0 if word_count.nil? || word_count == 0
     (send(pos_symbol.to_s + '_count').to_f / word_count * 100).round(2)
   end
 

@@ -6,13 +6,14 @@ module Documents
       }
 
       def self.count(word)
-        word.downcase.gsub!(/[^a-z]/, '')
+        word = word.downcase.gsub(/[^a-z]/, '')
 
         return 1 if word.length <= 3
         return SYLLABLE_COUNT_OVERRIDES[word] if SYLLABLE_COUNT_OVERRIDES.key?(word)
 
-        word.sub(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').sub!(/^y/, '')
-        word.scan(/[aeiouy]{1,2}/).length
+        word = word.sub(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').sub(/^y/, '')
+        count = word.scan(/[aeiouy]{1,2}/).length
+        count > 0 ? count : 1
       end
     end
   end
