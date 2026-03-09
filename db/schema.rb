@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_02_22_003455) do
+ActiveRecord::Schema.define(version: 2026_03_09_033957) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -564,6 +564,7 @@ ActiveRecord::Schema.define(version: 2026_02_22_003455) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["content_id", "content_type"], name: "index_content_change_events_on_content_id_and_content_type"
+    t.index ["user_id", "content_type", "content_id"], name: "index_cce_on_user_content_type_content_id"
     t.index ["user_id"], name: "index_content_change_events_on_user_id"
   end
 
