@@ -23,10 +23,20 @@ class BasilController < ApplicationController
   def content
     # Fetch the content page from our already-queried cache of current user content
     @content_type = params[:content_type].humanize
-    @content      = @current_user_content[@content_type].detect do |page|
+    @content      = @current_user_content.fetch(@content_type, []).detect do |page|
       page.id == params[:id].to_i
     end
-    raise "No content found for #{params[:content_type]} with ID #{params[:id]} for user #{current_user.id}" if @content.nil?
+
+    # If the content wasn't in the universe-filtered cache, fall back to a direct lookup
+    # so users can use Basil on content from any universe regardless of active filter.
+    if @content.nil?
+      @content = @content_type.constantize.find_by(id: params[:id], user: current_user)
+    end
+
+    if @content.nil?
+      redirect_to basil_path, notice: "That content could not be found."
+      return
+    end
 
     # Fetch any existing Basil configurations/guidance for this character
     @guidance   = BasilFieldGuidance.find_or_initialize_by(
@@ -470,9 +480,21 @@ class BasilController < ApplicationController
     end
 
     # Fetch the related content
-    @content = @current_user_content[commission_params.fetch(:entity_type)]
-                  .find { |c| c.id == commission_params.fetch(:entity_id).to_i }
-    return raise "Invalid content commission params" if @content.nil?
+    entity_type = commission_params.fetch(:entity_type)
+    entity_id   = commission_params.fetch(:entity_id).to_i
+    @content = @current_user_content.fetch(entity_type, [])
+                  .find { |c| c.id == entity_id }
+
+    # If the content wasn't in the universe-filtered cache, fall back to a direct lookup
+    # so users can use Basil on content from any universe regardless of active filter.
+    if @content.nil?
+      @content = entity_type.constantize.find_by(id: entity_id, user: current_user)
+    end
+
+    if @content.nil?
+      redirect_back fallback_location: basil_path, notice: "That content could not be found."
+      return
+    end
 
     current_queue_size = current_user.basil_commissions.where(completed_at: nil).where(entity: @content).count
     if current_queue_size >= BasilService::MAX_JOB_QUEUE_SIZE
