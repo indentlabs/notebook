@@ -294,7 +294,11 @@ class ContentController < ApplicationController
 
   def edit
     content_type_class = content_type_from_controller(self.class)
-    @content = content_type_class.find_by(id: params[:id])
+    eager_load_associations = [:user, :page_tags, :image_uploads, :basil_commissions]
+    eager_load_associations << :universe if content_type_class.reflect_on_association(:universe)
+    @content = content_type_class
+      .includes(eager_load_associations)
+      .find_by(id: params[:id])
     if @content.nil?
       return redirect_to(root_path,
         notice: "Either this #{content_type_class.name.downcase} doesn't exist, or you don't have access to view it."
