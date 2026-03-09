@@ -4,7 +4,9 @@ class BooksController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
-    @books = current_user.books.unarchived.order(favorite: :desc, updated_at: :desc)
+    @books = current_user.books.unarchived
+    @books = @books.where(universe_id: @universe_scope.id) if @universe_scope.present?
+    @books = @books.order(favorite: :desc, updated_at: :desc)
   end
 
   def show
