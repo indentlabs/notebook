@@ -67,6 +67,12 @@ class Book < ApplicationRecord
     Book.hex_color
   end
 
+  # Returns the default book header image since Books don't have image uploads
+  # This stub method provides compatibility with HasImageUploads interface
+  def random_image_including_private(format: :medium)
+    header_asset_for('Book')
+  end
+
   def archive!
     update(archived_at: Time.current)
   end
@@ -81,4 +87,14 @@ class Book < ApplicationRecord
 
   scope :unarchived, -> { where(archived_at: nil) }
   scope :archived, -> { where.not(archived_at: nil) }
+
+  private
+
+  def header_asset_for(class_name)
+    asset_filename = "card-headers/#{class_name.downcase.pluralize}.webp"
+
+    Rails.env.production? ?
+      "https://www.notebook.ai" + ActionController::Base.helpers.asset_url(asset_filename) :
+      ActionController::Base.helpers.asset_path(asset_filename)
+  end
 end
