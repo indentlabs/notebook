@@ -53,14 +53,15 @@ class ContentController < ApplicationController
     end
 
     # Sort content with favorites always first, then by selected sort option
+    # Use negative timestamp to sort newest-first without reversing (which would undo favorite ordering)
     sort_option = params[:sort] || 'updated_at'
     sorted_content = case sort_option
                      when 'alphabetical'
                        @content.sort_by { |x| [x.favorite? ? 0 : 1, x.name.downcase] }
                      when 'created_at'
-                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.created_at] }.reverse
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, -x.created_at.to_i] }
                      else # 'updated_at' or default
-                       @content.sort_by { |x| [x.favorite? ? 0 : 1, x.updated_at] }.reverse
+                       @content.sort_by { |x| [x.favorite? ? 0 : 1, -x.updated_at.to_i] }
                      end
     
     # Implement pagination manually since @content is an array
