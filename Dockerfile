@@ -14,7 +14,7 @@ RUN groupadd --system --gid 1000 notebookai && \
 
 # Install system dependencies (including curl which is needed for Node download, and git for Bundler)
 RUN apt-get update -qq && \
-    apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl git && \
+    apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl git libjemalloc2 && \
     rm --recursive --force /var/lib/apt/lists/*
 
 # Install Node.js 16.x explicitly and support both ARM and x64 architectures
@@ -55,6 +55,9 @@ EXPOSE 3000/tcp
 
 # Run unprivileged
 USER notebookai
+
+# Enable jemalloc to drastically reduce memory fragmentation and usage
+ENV LD_PRELOAD="libjemalloc.so.2"
 
 # Configure the main process to run when running the image
 ENTRYPOINT ["./docker-entrypoint.sh"]
