@@ -12,15 +12,21 @@ ENV RAILS_ENV=${RAILS_ENV}
 RUN groupadd --system --gid 1000 notebookai && \
     useradd --system --home-dir /home/notebookai --gid notebookai --uid 1000 --shell /bin/bash notebookai
 
-# Install system dependencies (including curl which is needed for Node download)
+# Install system dependencies (including curl which is needed for Node download, and git for Bundler)
 RUN apt-get update -qq && \
-    apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl && \
+    apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl git && \
     rm --recursive --force /var/lib/apt/lists/*
 
-# Install Node.js 16.x explicitly (NodeSource dropped support for it)
-RUN curl -fsSLO https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.gz && \
-    tar -xzf node-v16.20.2-linux-x64.tar.gz -C /usr/local --strip-components=1 && \
-    rm node-v16.20.2-linux-x64.tar.gz
+# Install Node.js 16.x explicitly and support both ARM and x64 architectures
+RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" && \
+    case "${dpkgArch##*-}" in \
+      amd64) ARCH='x64';; \
+      arm64) ARCH='arm64';; \
+      *) echo "unsupported architecture"; exit 1 ;; \
+    esac && \
+    curl -fsSLO "https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-$ARCH.tar.gz" && \
+    tar -xzf "node-v16.20.2-linux-$ARCH.tar.gz" -C /usr/local --strip-components=1 && \
+    rm "node-v16.20.2-linux-$ARCH.tar.gz"
 
 # Install yarn via npm (matches local tools specification)
 RUN npm install -g yarn@1.22.22
