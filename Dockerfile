@@ -13,9 +13,9 @@ RUN groupadd --system --gid 1000 notebookai && \
     useradd --system --home-dir /home/notebookai --gid notebookai --uid 1000 --shell /bin/bash notebookai
 
 # Install system dependencies
-RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get update -qq && \
-    apt-get install -y build-essential libpq-dev nodejs imagemagick libmagickwand-dev curl && \
+    apt-get install -y build-essential libpq-dev nodejs npm imagemagick libmagickwand-dev curl && \
     rm --recursive --force /var/lib/apt/lists/*
 
 # Install yarn via npm (avoids the deprecated apt-key approach)
