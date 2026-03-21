@@ -48,7 +48,8 @@ COPY . .
 RUN chown -R notebookai:notebookai /home/notebookai
 
 # Precompile assets during docker build to prevent OOM memory spikes at runtime
-RUN SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
+# We strictly limit Node.js memory to 1GB to prevent Railway's Builder container from OOMing
+RUN NODE_OPTIONS="--max_old_space_size=1024" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # This image should expose port 3000.
 EXPOSE 3000/tcp
