@@ -8,7 +8,7 @@ class ImageUpload < ApplicationRecord
 
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
   has_attached_file :src,
-    path: 'content/uploads/:style/:filename',
+    **(Rails.env.production? ? { path: 'content/uploads/:style/:filename' } : {}),
     styles: {
       thumb:  '100x100>',
       small:  '190x190#',
