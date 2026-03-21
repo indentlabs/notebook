@@ -47,15 +47,15 @@ COPY . .
 # Adjust permissions on all copied files to match the system user
 RUN chown -R notebookai:notebookai /home/notebookai
 
+# Drop down to the unprivileged user before running Rake, so any files it generates (like logs) are owned correctly
+USER notebookai
+
 # Precompile assets during docker build to prevent OOM memory spikes at runtime
 # We strictly limit Node.js memory to 1GB to prevent Railway's Builder container from OOMing
 RUN NODE_OPTIONS="--max_old_space_size=1024" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # This image should expose port 3000.
 EXPOSE 3000/tcp
-
-# Run unprivileged
-USER notebookai
 
 # Enable jemalloc to drastically reduce memory fragmentation and usage
 ENV LD_PRELOAD="libjemalloc.so.2"
