@@ -24,6 +24,7 @@ gem 'filesize'
 gem 'paperclip' # TODO: we want to migrate off this game to ActiveStorage
 gem 'rmagick'
 gem 'image_processing'
+gem 'mini_magick'
 gem 'active_storage_validations'
 
 # Authentication
