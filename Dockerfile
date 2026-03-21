@@ -1,5 +1,5 @@
 # The image to build from.
-FROM ruby:3.2.1
+FROM ruby:3.2.1-slim
 
 # Properties/labels for the image.
 LABEL maintainer="Notebook.ai Contributors"
@@ -42,6 +42,9 @@ EXPOSE 3000/tcp
 
 # Run unprivileged
 USER notebookai
+
+# Configure the main process to run when running the image
+ENTRYPOINT ["./docker-entrypoint.sh"]
 
 # Start the server using Puma!
 CMD ["bundle", "exec", "puma", "-C", "config/puma.rb", "-e", "development", "-b", "tcp://0.0.0.0:3000"]
