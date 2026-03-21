@@ -1,272 +1,310 @@
-<div id="index-banner" class="hero">
-    <div class="section no-pad-bot">
-      <div class="container">
-        <h1 class="header center blue-text text-lighten-2 light bordered-text">
-          <%= t('marketing.landing_page.promo_header') %>
-        </h1>
-        <div class="row center bordered-text">
-          <h2 class="header col s12 light">
+<section class="min-h-[60vh] md:min-h-[78vh]">
+  <div class="h-full flex shadow-lg bg-cover bg-center border-b bg-notebook-blue border-notebook-blue bg-no-repeat py-32 relative"
+       id="hero-section">
+
+    <!-- Responsive hero background image -->
+    <picture class="absolute inset-0 w-full h-full">
+      <source type="image/webp"
+              media="(min-width: 1440px)"
+              srcset="<%= asset_path 'landing/notebook-hero-1-1920.webp' %>">
+      <source type="image/webp"
+              media="(min-width: 768px)"
+              srcset="<%= asset_path 'landing/notebook-hero-1-1440.webp' %>">
+      <source type="image/webp"
+              srcset="<%= asset_path 'landing/notebook-hero-1-828.webp' %>">
+      <img src="<%= asset_path 'landing/notebook-hero-1.png' %>"
+           alt="Notebook hero background"
+           class="w-full h-full object-cover">
+    </picture>
+
+    <!-- Hidden video element -->
+    <video id="hero-video"
+           class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 pointer-events-none"
+           muted
+           loop
+           playsinline
+           preload="none">
+      <source src="<%= asset_path 'landing/digital-notebook-active.mp4' %>" type="video/mp4">
+    </video>
+
+    <div class="container mx-auto p-4 flex items-center py-16 md:pb-24 z-10 relative">
+      <div class="text-center w-full">
+        <div class="text-white py-4 px-5 my-5">
+          <div class="mb-3 text-4xl md:text-6xl" style="text-shadow: black 0px 0px 10px;">
+            The <span class="text-blue-100" style="text-shadow: indigo 0px 0px 10px;">smart</span> notebook<br class="hidden sm:block" />
+            for <span class="text-blue-100" style="text-shadow: indigo 0px 0px 10px;">smart</span> worldbuilders
+          </div>
+          <div class="leading-normal text-2xl" style="text-shadow: black 0px 0px 10px;">
             <%= t('marketing.landing_page.promo_subheader') %>
-          </h2>
-        </div>
-        <div class="row center">
-          <%= link_to t('marketing.landing_page.cta.get_yours'),
-                      new_user_registration_path,
-                      class: 'btn-large waves-effect waves-light blue lighten-1 hoverable' %>
-          <br />
-          <br />
-          <div class="bordered-text">
-            <%= t('marketing.landing_page.promo_subtext') %>
           </div>
         </div>
-        <br />
-        <br />
+        <div class="cta clear-left px-5">
+          <%= link_to new_user_registration_path,
+              class: 'no-underline px-4 py-4 rounded-lg block sm:inline-block global-transition text-white bg-notebook-blue hover:bg-blue-400 hover:shadow-lg',
+              id: 'start-worldbuilding-btn' do %>
+            <div class="flex justify-center items-center">
+              <span>Start worldbuilding</span>
+              <span class="fa fa-xs fa-arrow-right ml-4"></span>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
-    <%= image_tag 'landing/planet-header.webp', class: 'hero-image' %>
   </div>
+</section>
 
-  <div class="container">
-    <div class="section audience-section">
-      <div class="row">
-        <div class="col s12 m6">
-          <div class="icon-block center hoverable">
-            <div class="h2-size blue-text"><i class="material-icons">create</i></div>
-            <h3 class="h5-size"><%= t('marketing.landing_page.cta.writers.header') %></h3>
-            <p class="light">
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('hero-video');
+    const button = document.getElementById('start-worldbuilding-btn');
+
+    // Detect mobile devices
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // Skip video functionality entirely on mobile
+    if (isMobile) {
+      return;
+    }
+
+    // Preload video after a short delay (let page load first) - desktop only
+    setTimeout(() => {
+      video.preload = 'auto';
+      video.load();
+    }, 1000);
+
+    // Show video on button hover
+    button.addEventListener('mouseenter', function() {
+      video.style.opacity = '1';
+      video.play().catch(err => console.log('Video play failed:', err));
+    });
+
+    // Hide video on button leave
+    button.addEventListener('mouseleave', function() {
+      video.style.opacity = '0';
+      setTimeout(() => {
+        video.pause();
+        video.currentTime = 0; // Reset to start
+      }, 500); // Wait for fade out
+    });
+  });
+</script>
+
+<section class="bg-gray-50 py-16">
+  <div class="container mx-auto px-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+        <div class="flex items-start">
+          <div class="w-16 h-16 inline-flex items-center justify-center rounded-full bg-blue-100 text-notebook-blue flex-shrink-0">
+            <i class="material-icons text-4xl">create</i>
+          </div>
+          <div class="ml-6 flex-grow">
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">
+              <%= t('marketing.landing_page.cta.writers.header') %>
+            </h3>
+            <p class="leading-relaxed text-gray-600 mb-4">
               <%= t('marketing.landing_page.cta.writers.body') %>
             </p>
-            <%= link_to t('marketing.landing_page.cta.writers.button'),
-                        writers_landing_path,
-                        class: 'btn blue' %>
+            <%= link_to writers_landing_path, class: 'inline-flex items-center text-notebook-blue hover:text-blue-600 font-medium transition-colors duration-200' do %>
+              <%= t('marketing.landing_page.cta.writers.button') %>
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            <% end %>
           </div>
         </div>
+      </div>
 
-        <div class="col s12 m6">
-          <div class="icon-block center hoverable">
-            <div class="h2-size blue-text"><i class="material-icons">gavel</i></div>
-            <h3 class="h5-size"><%= t('marketing.landing_page.cta.roleplayers.header') %></h3>
-            <p class="light">
+      <div class="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+        <div class="flex items-start">
+          <div class="w-16 h-16 inline-flex items-center justify-center rounded-full bg-blue-100 text-notebook-blue flex-shrink-0">
+            <i class="material-icons text-4xl">gavel</i>
+          </div>
+          <div class="ml-6 flex-grow">
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">
+              <%= t('marketing.landing_page.cta.roleplayers.header') %>
+            </h3>
+            <p class="leading-relaxed text-gray-600 mb-4">
               <%= t('marketing.landing_page.cta.roleplayers.body') %>
             </p>
-            <%= link_to t('marketing.landing_page.cta.roleplayers.button'),
-                        roleplayers_landing_path,
-                        class: 'btn blue' %>
+            <%= link_to roleplayers_landing_path, class: 'inline-flex items-center text-notebook-blue hover:text-blue-600 font-medium transition-colors duration-200' do %>
+              <%= t('marketing.landing_page.cta.roleplayers.button') %>
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            <% end %>
           </div>
         </div>
       </div>
     </div>
   </div>
+</section>
 
-  <div class="container">
-    <div class="section perks-section">
-      <h2 class="h5-size">Create rich worlds with your free worldbuilding notebook</h2>
-      <div class="row">
-        <div class="col s12 m12 l12">
-          With a free account, you'll have access to the core building blocks of fictional universes (characters, locations, and items), personalized writing prompts set 
-          in your world, unlimited document storage, access to a thriving <%= link_to 'community', thredded_path %> of other worldbuilders, and more.
-        </div>
-      </div>
-      <div class="row">
-        <div class="col l3 m6 s12">
-          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Universe } %>
-        </div>
-        <div class="col l3 m6 s12">
-          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Character } %>
-        </div>
-        <div class="col l3 m6 s12">
-          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Location } %>
-        </div>
-        <div class="col l3 m6 s12">
-          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Item } %>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">face</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.characters.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.characters.text') %>
-            </p>
+<section class="min-h-screen relative overflow-hidden border-t border-notebook-blue">
+  <div class="absolute inset-0 bg-right-bottom bg-cover shadow-lg" style="background-image: url(<%= image_path 'https://images.unsplash.com/photo-1520299607509-dcd935f9a839?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1631&q=80' %>);"></div>
+  
+  <div class="relative py-32">
+    <div class="container mx-auto px-5">
+      <div class="w-full mb-20 bg-white px-8 py-12 rounded-lg shadow-xl">
+        <div class="flex flex-wrap">
+          <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
+            <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
+              Create rich, fictional worlds with your<br class="hidden xl:block" />
+              smart notebook &mdash; for free
+            </h1>
           </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">public</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.locations.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.locations.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">list</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.organization.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.organization.text') %>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">group</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.sharing.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.sharing.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">cloud</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.backups.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.backups.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size orange-text"><i class="material-icons">security</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.ads.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.ads.text') %>
-            </p>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="section perks-section">
-      <h2 class="h5-size">Write smarter with integrated novel-writing software</h2>
-      <div class="row">
-        <div class="col s12 m12 l12">
-          Cross-reference notebook pages and documents you write to build a rich network of connections that makes your world feel
-          like a wiki that manages itself.
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">bubble_chart</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.creativity.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.creativity.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">assignment_turned_in</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.continuity.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.continuity.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">search</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.search.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.search.text') %>
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">schedule</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.speed.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.speed.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">bar_chart</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.quality.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.quality.text') %>
-            </p>
-          </div>
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block center">
-            <div class="h2-size teal-text"><i class="material-icons">settings_ethernet</i></div>
-            <h3 class="h6-size"><%= t('marketing.landing_page.benefits.growth.title') %></h3>
-            <p class="light">
-              <%= t('marketing.landing_page.benefits.growth.text') %>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="section">
-      <div class="row">
-        <div class="col s12">
-          <h2 class="h5-size">Go the extra mile with premium notebook pages</h2>
-          <p>
-            Notebook.ai's free tier was intentionally designed to be enough for most worlds, but if you want to support the site and
-            take your worldbuilding to a new level, a premium subscription is available that unlocks
-            <%= Rails.application.config.content_types[:premium].count %> additional page templates to use. Each template is customizable and
-            comes with its own set of writing prompts.
+          <p class="lg:w-1/2 w-full leading-relaxed text-gray-500">
+            With a free account, you'll have access to the core building blocks of fictional worlds, personalized writing prompts set
+            in your universe, unlimited document storage, access to a thriving <%= link_to 'community', thredded_path %> of other worldbuilders, and more.
           </p>
         </div>
       </div>
 
-      <div class="row">
-        <% (Rails.application.config.content_types[:premium]).each do |content_type| %>
-          <div class="col l3 m6 s12">
-            <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: content_type } %>
-          </div>
-        <% end %>
-
-        <div class="col l3 m6 s12">
-          <div class="card hoverable" style="min-height: 330px;">
-            <div class="card-image">
-              <%= image_tag "card-headers/timelines.webp", height: 300, width: 300, style: 'object-fit: cover' %>
-              <h3 class="card-title bordered-text">Create timelines</h3>
+      <div class="flex flex-wrap -m-4">
+        <div class="xl:w-1/4 md:w-1/2 p-4">
+          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Universe } %>
+        </div>
+        <div class="xl:w-1/4 md:w-1/2 p-4">
+          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Character } %>
+        </div>
+        <div class="xl:w-1/4 md:w-1/2 p-4">
+          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Location } %>
+        </div>
+        <div class="xl:w-1/4 md:w-1/2 p-4">
+          <%= render partial: 'cards/intros/content_type_intro', locals: { content_type: Item } %>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-16">
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">face</i>
             </div>
-            <div class="card-content fixed-card-content">
-              <p>
-                <%= t("content_descriptions.timeline") %>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.characters.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.characters.text') %>
               </p>
             </div>
           </div>
         </div>
-
-        <div class="col l3 m6 s12">
-          <div class="card hoverable" style="min-height: 330px;">
-            <div class="card-image">
-              <%= image_tag "card-headers/pagecollections.webp", height: 300, width: 300, style: 'object-fit: cover' %>
-              <h3 class="card-title bordered-text">Create collections</h3>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">bubble_chart</i>
             </div>
-            <div class="card-content fixed-card-content">
-              <p>
-                <%= t("content_descriptions.pagecollection") %>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.creativity.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.creativity.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%"><%= Document.icon %></i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.speed.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.speed.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">list</i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.organization.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.organization.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">search</i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.search.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.search.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">settings_ethernet</i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.growth.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.growth.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">group</i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.sharing.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.sharing.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">cloud</i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.backups.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.backups.text') %>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="h-full bg-white flex flex-nowrap flex-row border-gray-200 border p-4 rounded-lg">
+            <div class="text-center w-12 h-12 flex-shrink-0">
+              <i class="material-icons mr-4 text-5xl text-notebook-blue" style="font-size: 240%">security</i>
+            </div>
+            <div class="flex-grow">
+              <h2 class="text-gray-900 title-font font-medium mb-2">
+                <%= t('marketing.landing_page.benefits.ads.title') %>
+              </h2>
+              <p class="text-gray-500">
+                <%= t('marketing.landing_page.benefits.ads.text') %>
               </p>
             </div>
           </div>
@@ -274,118 +312,530 @@
       </div>
     </div>
   </div>
+</section>
 
-  <div class="hero valign-wrapper">
-    <div class="container center">
-      <h5 class="header light">
-        <strong>"<%= t('marketing.landing_page.quote.text') %>"</strong>
-        <br />
-        <br />
-        &mdash;
-        <%= t('marketing.landing_page.quote.attribution') %>
-      </h5>
-    </div>
-    <%= image_tag 'landing/screenshot.webp', class: 'hero-image'%>
-  </div>
-
-  <div class="container" style="margin-top: 50px; margin-bottom: 75px;">
-    <h2 class="h3-size header center blue-text"><%= t('marketing.landing_page.pricing.title') %></h2>
-    <div class="row center" style="clear: both">
-      <div class="card-panel green white-text" width="200px;">
-        <%= t('marketing.landing_page.pricing.subtitle') %>
-        <%= link_to t('marketing.landing_page.pricing.cta.link'),
-                    new_user_registration_path,
-                    class: 'light-blue-text text-lighten-4' %>
+<section class="text-gray-600 body-font">
+  <div class="container px-5 py-24 mx-auto flex flex-wrap items-center">
+    <div class="lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0 pr-0">
+      <h1 class="title-font font-medium text-3xl text-gray-900">
+        It takes a just few seconds to sign up and start materializing the wonderful worlds in your head.
+      </h1>
+      <p class="leading-relaxed my-4">
+        Once you've signed up, you can immediately start creating universes and filling them with your characters,
+        locations, and items. The worlds you create are private, owned by you, and always available on any
+        device, any time you need them.
+      </p>
+      <p class="mb-8">
+        Our
+        <span class="text-indigo-700">
+          <%= number_with_delimiter User.last.try(:id) || 0 %> <%= 'worldbuilders'.pluralize(User.last.try(:id) || 0) %>
+        </span>
+        have created
+        <span class="text-red-700">
+          <%= number_with_delimiter Character.last.try(:id) || 0 %> <%= 'character'.pluralize(Character.last.try(:id) || 0) %>,
+        </span>
+        <span class="text-green-700">
+          <%= number_with_delimiter Location.last.try(:id) || 0 %> <%= 'location'.pluralize(Location.last.try(:id) || 0) %>,
+        </span>
+        and
+        <span class="text-yellow-600">
+          <%= number_with_delimiter Item.last.try(:id) || 0 %> <%= 'item'.pluralize(Item.last.try(:id) || 0) %>
+        </span>
+        in
+        <span class="text-purple-600">
+          <%= number_with_delimiter Universe.last.try(:id) || 0 %> <%= 'fictional universe'.pluralize(Universe.last.try(:id) || 0) %>
+        </span>
+        since 2016.
+      </p>
+      <div>
+        <a href="https://www.producthunt.com/posts/notebook-ai?utm_source=badge-top-post-badge&utm_medium=badge&utm_souce=badge-notebook-ai" target="_blank">
+          <img src="https://api.producthunt.com/widgets/embed-image/v1/top-post-badge.svg?post_id=77889&theme=light&period=daily" alt="Notebook.ai - A smart notebook that grows and collaborates with you | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" />
+        </a>
       </div>
     </div>
-    <div class="row">
-        <div class="col s12 m6">
-            <div class="card card-avatar center">
-                <div class="center brown-text"><br /><i class="material-icons" style="font-size: 250%">class</i></div>
-                <div class="card-content">
-                    <span class="card-title activator">
-                      <%= t('marketing.landing_page.pricing.starter_plan.title') %>
-                      <br />
-                      <small><em><a class="red-text text-darken-1">
-                        <%= t('marketing.landing_page.pricing.free') %>
-                      </a></em></small>
-                    </span>
-                    <ul class="plan-features">
-                      <% Rails.application.config.content_types[:free].each do |content_type| %>
-                        <li>
-                          <i class="material-icons <%= content_type.text_color %>">
-                            <%= content_type.icon %>
-                          </i>
-                          <%= t("marketing.landing_page.pricing.starter_plan.#{content_type.name.downcase.pluralize}_html") %>
-                        </li>
-                      <% end %>
-                      <li>
-                        <i class="material-icons black-text">cloud_upload</i>
-                        <%= t('marketing.landing_page.pricing.starter_plan.upload_html') %>
-                      </li>
-                    </ul>
-                    <div class="row center">
-                      <%= link_to t('marketing.landing_page.pricing.cta.button'),
-                                  new_user_registration_path,
-                                  class: 'btn-large waves-effect waves-light white black-text' %>
-                    </div>
-                </div>
-            </div>
+    <div class="lg:w-2/6 md:w-1/2 bg-white border-blue-500 border shadow-lg rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0">
+      <h2 class="text-gray-900 text-lg font-medium title-font mb-5 tracking-wide">Sign up for Notebook.ai</h2>
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+        <div class="relative mb-4">
+          <%= f.label 'Your name', class: 'leading-7 text-sm text-gray-600' %>
+          <%= f.text_field :name, class: 'w-full bg-white rounded border border-gray-300 focus:border-notebook-blue focus:ring-2 focus:ring-notebook-blue text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out' %>
         </div>
-        <div class="col s12 m6">
-            <div class="card card-avatar">
-                <div class="center brown-text">
-                  <br />
-                  <i class="material-icons" style="font-size: 250%">book</i>
-                </div>
-                <div class="card-content center">
-                  <span class="card-title">
-                    <%= t('marketing.landing_page.pricing.premium_plan.title') %>
-                    <br />
-                    <small><em class="red-text text-darken-1">
-                      <%= t('marketing.landing_page.pricing.premium_plan.price') %> or cheaper
-                    </em></small>
-                  </span>
-                  <div class="row plan-features">
-                    <div>Create <strong>unlimited</strong>...</div>
-                    <% Rails.application.config.content_types[:all].each_with_index do |content_type, i| %>
-                      <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path"), class: 'content-type-container' do %>
-                        <i class="material-icons <%= content_type.text_color %> medium">
-                          <%= content_type.icon %>
-                        </i>
-                        <div class="black-text">
-                          <%= content_type.name.pluralize %>
-                        </div>
-                      <% end %>
-                    <% end %>
-                    <span class="content-type-container">
-                      <i class="material-icons <%= Timeline.text_color %> medium">
-                        <%= Timeline.icon %>
-                      </i><br />
-                      <%= Timeline.name.pluralize %>
-                    </span>
-                    <span class="content-type-container">
-                      <i class="material-icons <%= PageCollection.text_color %> medium">
-                        <%= PageCollection.icon %>
-                      </i><br />
-                      Collections
-                    </span>
-                    <div>
-                      and...
-                    </div>
-                    <div>
-                      <i class="material-icons black-text">cloud_upload</i>
-                      <%= t('marketing.landing_page.pricing.premium_plan.upload_html') %>
-                    </div>
-                  </div>
-                  <div class="row center">
-                    <%= link_to t('marketing.landing_page.pricing.cta.button'),
-                                new_user_registration_path,
-                                class: 'btn-large waves-effect waves-light blue lighten-1' %>
-                  </div>
 
-                </div>
-            </div>
+        <div class="relative mb-4">
+          <%= f.label :email, class: 'leading-7 text-sm text-gray-600' %>
+          <em class="text-sm">(This is the email you will log in with)</em>
+          <%= f.email_field :email, class: 'w-full bg-white rounded border border-gray-300 focus:border-notebook-blue focus:ring-2 focus:ring-notebook-blue text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out' %>
         </div>
+
+        <div class="relative mb-4">
+          <%= f.label :password, class: 'leading-7 text-sm text-gray-600' %>
+          <% if @minimum_password_length %>
+            <em>(<%= @minimum_password_length %> characters minimum)</em>
+          <% end %><br />
+          <%= f.password_field :password, autocomplete: "off", class: 'w-full bg-white rounded border border-gray-300 focus:border-notebook-blue focus:ring-2 focus:ring-notebook-blue text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out' %>
+        </div>
+
+        <div class="relative mb-4">
+          <%= f.label :password_confirmation, class: 'leading-7 text-sm text-gray-600' %><br />
+          <%= f.password_field :password_confirmation, autocomplete: "off", class: 'w-full bg-white rounded border border-gray-300 focus:border-notebook-blue focus:ring-2 focus:ring-notebook-blue text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out' %>
+        </div>
+
+        <div class="relative mb-4">
+          <%= f.label :email_updates do %>
+            <%= f.check_box :email_updates, checked: 'false' %>
+            <span>
+              We're always working to improve Notebook.ai. Please check this box if you'd like to receive occasional updates about
+              what's new.
+            </span>
+          <% end %>
+        </div>
+
+        <%
+          if params.key?('referral') ||  session.key?('referral')
+            referral_code = params['referral'] || session['referral']
+            referrer = ReferralCode.where(code: referral_code).first
+            if referrer.present?
+        %>
+            <div class="row">
+              <div class="col s12 m6">
+                <div class="field">
+                  <%= f.label :referral_code %><br />
+                  <%= f.text_field :referral_code, value: referral_code, readonly: true %>
+                </div>
+              </div>
+              <div class="col s12 m6">
+                <%= f.label 'The following user will receive credit for referring you' %><br />
+                <%= f.text_field :referral_user, value: referrer.user.name.split('@').first, disabled: "disabled" %>
+              </div>
+            </div>
+        <%
+            end
+          end
+        %>
+
+        <%= f.submit "Sign up", class: 'w-full text-white bg-notebook-blue border-0 py-2 px-8 focus:outline-none hover:bg-blue-600 rounded text-lg cursor-pointer' %>
+      <% end %>
     </div>
   </div>
+</section>
+
+<section class="text-green-900 min-h-screen">
+  <div class="min-h-screen bg-right-bottom bg-cover shadow-lg py-32" style="background-image: url(<%= image_path 'https://images.unsplash.com/photo-1594312915251-48db9280c8f1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80' %>);">
+    <div class="container mx-auto px-5">
+      <div class="w-full mb-20 bg-white px-6 py-12 rounded-lg">
+        <div class="flex flex-wrap">
+          <div class="lg:w-1/2 w-full mb-6 lg:mb-0">
+            <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">
+              Take your world to the
+              <span class="text-notebook-blue">next level</span>
+              <br class="hidden sm:block" />
+              with powerful Premium features
+            </h1>
+          </div>
+          <p class="lg:w-1/2 w-full leading-relaxed text-gray-500">
+            More advanced features are available with a Premium subscription.
+            Upgrade or downgrade your account any time to be ready when inspiration strikes.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <div class="bg-white h-full flex flex-row p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div class="w-16 h-16 inline-flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 flex-shrink-0 mr-6">
+                <i class="material-icons text-4xl">public</i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 font-bold mb-3 text-xl">
+                  <%= t('marketing.landing_page.benefits.locations.title') %>
+                </h2>
+                <p class="text-gray-500 my-2">
+                  <%= t('marketing.landing_page.benefits.locations.text') %>
+                </p>
+                <a href="#premium-content-types" class="text-notebook-blue font-medium hover:text-blue-600 transition-colors inline-block" onclick="event.preventDefault(); document.getElementById('premium-content-types').scrollIntoView({ behavior: 'smooth' });">
+                  See the full list below ↓
+                </a>
+              </div>
+            </div>
+        </div>
+
+        <div>
+          <div class="bg-white h-full flex flex-row p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div class="w-16 h-16 inline-flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 flex-shrink-0 mr-6">
+                <i class="material-icons text-4xl"><%= Timeline.icon %></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 font-bold mb-3 text-xl">
+                  Build timelines
+                </h2>
+                <p class="text-gray-500">
+                  Link events together with the characters, locations, and anything else that's relevant &mdash; then see your world's stories
+                  at a glance.
+                </p>
+              </div>
+            </div>
+        </div>
+
+        <div>
+          <div class="bg-white h-full flex flex-row p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div class="w-16 h-16 inline-flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 flex-shrink-0 mr-6">
+                <i class="material-icons text-4xl"><%= Document.icon %></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 font-bold mb-3 text-xl">
+                  Document analysis
+                </h2>
+                <p class="text-gray-500">
+                  Our artificial intelligence can analyze your documents for feedback on style, structure,
+                  readability, flow, and more.
+                </p>
+              </div>
+            </div>
+        </div>
+
+        <div>
+          <div class="bg-white h-full flex flex-row p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+              <div class="w-16 h-16 inline-flex items-center justify-center rounded-full bg-yellow-100 text-yellow-600 flex-shrink-0 mr-6">
+                <i class="material-icons text-4xl"><%= PageCollection.icon %></i>
+              </div>
+              <div class="flex-grow">
+                <h2 class="text-gray-900 font-bold mb-3 text-xl">
+                  Start collections
+                </h2>
+                <p class="text-gray-500">
+                  Collections are a new way to organize your worldbuilding &mdash; or open them up for content submissions from
+                  other users!
+                </p>
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="text-gray-600 body-font" id="premium-content-types">
+  <div class="container px-5 pb-24 pt-8 mx-auto">
+    <div class="flex flex-wrap -m-4">
+
+      <% (Rails.application.config.content_types[:premium]).each do |content_type| %>
+        <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+          <%= link_to send("#{content_type.name.downcase}_worldbuilding_info_path") do %>
+            <div class="block relative h-48 rounded overflow-hidden hover:shadow-lg">
+              <%= image_tag "card-headers/#{content_type.name.downcase.pluralize}.webp", class: 'h-full w-full rounded w-full object-cover object-center' %>
+            </div>
+            <div class="title-font text-lg font-medium text-center <%= content_type.text_color %>">
+              <%= content_type.name.pluralize %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="lg:w-1/2 md:w-full p-4 w-full">
+        <div class="block relative h-48 rounded overflow-hidden border border-blue-500 bg-blue-700 text-white p-6">
+          <div class="font-bold mb-2">Want even more page types?</div>
+          Of course, we recognize these pages aren't one-size-fits-all for every world! Every template is fully customizable and
+          new page types are added as soon as they're ready.
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+</section>
+
+<section class="text-gray-600 body-font overflow-hidden">
+  <div class="container px-5 py-24 mx-auto">
+    <div class="flex flex-col text-center w-full mb-20">
+      <h1 class="sm:text-4xl text-3xl font-medium title-font mb-2 text-gray-900">Pricing</h1>
+      <p class="lg:w-2/3 mx-auto leading-relaxed text-base text-gray-500">
+        Accounts can be freely upgraded or downgraded at any time with no hidden fees or penalties.
+      </p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Starter Plan -->
+      <div class="h-full p-6 rounded-lg border-2 border-gray-300 bg-white flex flex-col relative overflow-hidden">
+        <h2 class="text-sm tracking-widest title-font mb-1 font-medium">STARTER</h2>
+        <h1 class="text-5xl text-gray-900 pb-4 mb-4 border-b border-gray-200 leading-none">
+          Free
+          <span class="text-lg block mt-2 font-normal text-gray-500">forever</span>
+        </h1>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create up to <span class="font-bold mx-1">5</span> universes
+          </p>
+
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Upload <span class="font-bold mx-1">50MB</span> of images 
+          </p>
+          <p class="flex items-center text-gray-600 mb-6">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Create <span class="font-bold mx-1">3 core</span> worldbuilding pages
+          </p>
+          <div class="flex justify-center space-x-1 mb-4">
+            <% (Rails.application.config.content_types[:free]).each do |content_class| %>
+              <% next if content_class.name == "Universe" %>
+              <i class="material-icons <%= content_class.text_color %> tooltipped text-3xl" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                <%= content_class.icon %>
+              </i>
+            <% end %>
+          </div>
+          <p class="flex items-center text-gray-600 mb-2">
+            <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </span>
+            Write <span class="font-bold mx-1">unlimited</span> documents
+          </p>
+          <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+            <button class="flex items-center mt-auto text-white bg-gray-400 border-0 py-2 px-4 w-full focus:outline-none hover:bg-gray-500 rounded">
+              Sign up
+              <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"></path>
+              </svg>
+            </button>
+          <% end %>
+        </div>
+
+      <!-- Monthly Plan -->
+      <div class="h-full p-6 rounded-lg border-2 border-gray-300 bg-white flex flex-col relative overflow-hidden">
+        <h2 class="text-sm tracking-widest title-font mb-1 font-medium">PREMIUM</h2>
+        <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+          <span>$9</span>
+          <span class="text-lg ml-1 font-normal text-gray-500 whitespace-nowrap">per month</span>
+        </h1>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create <span class="font-bold mx-1">unlimited</span> universes
+              </p>
+
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Upload <span class="font-bold mx-1">10GB</span> of images 
+              </p>
+              <p class="flex items-center text-gray-600 mb-6">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create <span class="font-bold mx-1">all <%= Rails.application.config.content_types[:all].count %></span> worldbuilding pages
+              </p>
+              <div class="flex flex-wrap justify-center gap-1 mb-4">
+                <% (Rails.application.config.content_types[:all]).each do |content_class| %>
+                  <% next if content_class.name == "Universe" %>
+                  <i class="material-icons <%= content_class.text_color %> tooltipped text-2xl" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                    <%= content_class.icon %>
+                  </i>
+                <% end %>
+              </div>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Write and analyze documents
+              </p>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create timelines
+              </p>
+              <p class="flex items-center text-gray-600 mb-6">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create collections
+              </p>
+              <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+                <button class="flex items-center mt-auto text-white bg-gray-400 border-0 py-2 px-4 w-full focus:outline-none hover:bg-gray-500 rounded">
+                  Sign up
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              <% end %>
+            </div>
+
+          <!-- Quarterly Plan -->
+          <div class="h-full p-6 rounded-lg border-2 border-notebook-blue flex flex-col bg-white relative overflow-hidden">
+            <span class="bg-notebook-blue text-white px-3 py-1 tracking-widest text-xs absolute right-0 top-0 rounded-bl">MOST POPULAR</span>
+            <h2 class="text-sm tracking-widest title-font mb-1 font-medium">PREMIUM</h2>
+            <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+              <span>$24</span>
+              <span class="text-lg ml-1 font-normal text-gray-500 whitespace-nowrap">per 3 months</span>
+            </h1>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create <span class="font-bold mx-1">unlimited</span> universes
+              </p>
+
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Upload <span class="font-bold mx-1">10GB</span> of images 
+              </p>
+              <p class="flex items-center text-gray-600 mb-6">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create <span class="font-bold mx-1">all <%= Rails.application.config.content_types[:all].count %></span> worldbuilding pages
+              </p>
+              <div class="flex flex-wrap justify-center gap-1 mb-4">
+                <% (Rails.application.config.content_types[:all]).each do |content_class| %>
+                  <% next if content_class.name == "Universe" %>
+                  <i class="material-icons <%= content_class.text_color %> tooltipped text-2xl" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                    <%= content_class.icon %>
+                  </i>
+                <% end %>
+              </div>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Write and analyze documents
+              </p>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create timelines
+              </p>
+              <p class="flex items-center text-gray-600 mb-6">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create collections
+              </p>
+              <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+                <button class="flex items-center mt-auto text-white bg-notebook-blue border-0 py-2 px-4 w-full focus:outline-none hover:bg-blue-500 rounded">
+                  Sign up
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              <% end %>
+            </div>
+
+          <!-- Yearly Plan -->
+          <div class="h-full p-6 rounded-lg border-2 border-gray-300 bg-white flex flex-col relative overflow-hidden">
+            <h2 class="text-sm tracking-widest title-font mb-1 font-medium">PREMIUM</h2>
+            <h1 class="text-5xl text-gray-900 leading-none flex items-center pb-4 mb-4 border-b border-gray-200">
+              <span>$84</span>
+              <span class="text-lg ml-1 font-normal text-gray-500 whitespace-nowrap">per year</span>
+            </h1>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create <span class="font-bold mx-1">unlimited</span> universes
+              </p>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Upload <span class="font-bold mx-1">10GB</span> of images 
+              </p>
+              <p class="flex items-center text-gray-600 mb-6">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create <span class="font-bold mx-1">all <%= Rails.application.config.content_types[:all].count %></span> worldbuilding pages
+              </p>
+              <div class="flex flex-wrap justify-center gap-1 mb-4">
+                <% (Rails.application.config.content_types[:all]).each do |content_class| %>
+                  <% next if content_class.name == "Universe" %>
+                  <i class="material-icons <%= content_class.text_color %> tooltipped text-2xl" data-position="bottom" data-delay="0" data-tooltip="Create unlimited <%= content_class.name.pluralize %>">
+                    <%= content_class.icon %>
+                  </i>
+                <% end %>
+              </div>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Write and analyze documents
+              </p>
+              <p class="flex items-center text-gray-600 mb-2">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create timelines
+              </p>
+              <p class="flex items-center text-gray-600 mb-6">
+                <span class="w-4 h-4 mr-2 inline-flex items-center justify-center bg-gray-400 text-white rounded-full flex-shrink-0">
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" class="w-3 h-3" viewBox="0 0 24 24">
+                    <path d="M20 6L9 17l-5-5"></path>
+                  </svg>
+                </span>
+                Create collections
+              </p>
+              <%= link_to new_user_registration_path, class: 'mt-auto' do %>
+                <button class="flex items-center mt-auto text-white bg-gray-400 border-0 py-2 px-4 w-full focus:outline-none hover:bg-gray-500 rounded">
+                  Sign up
+                  <svg fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-4 h-4 ml-auto" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              <% end %>
+            </div>
+    </div>
+    <div class="text-gray-500 text-center text-sm mt-8">
+      All Premium plans provide the same benefits, but there are three different billing options.
+      Prepaying and PayPal are also available.
+    </div>
+  </div>
+</section>

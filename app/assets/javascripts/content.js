@@ -34,10 +34,19 @@ $(document).ready(function () {
     return false;
   });
 
-  $('.modal').modal();
+  // Check if modal plugin is available
+  if (typeof $.fn.modal !== 'undefined') {
+    $('.modal').modal();
+  } else {
+    console.warn('modal plugin not loaded, skipping modal initialization');
+  }
 
   $('.share').click(function () {
-    $('#share-modal').modal('open');
+    if (typeof $.fn.modal !== 'undefined') {
+      $('#share-modal').modal('open');
+    } else {
+      console.warn('modal plugin not loaded, cannot open share modal');
+    }
   });
 
   $('.expand').click(function () {

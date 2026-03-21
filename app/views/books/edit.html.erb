@@ -1,0 +1,811 @@
+<%
+  status_options = [
+    ['Writing', 'writing'],
+    ['Revising', 'revising'],
+    ['Submitting', 'submitting'],
+    ['Published', 'published']
+  ]
+%>
+
+<div x-data="{
+  showLeftSidebar: true,
+  showRightSidebar: false,
+  showAllDocs: false,
+  isDesktop: window.innerWidth >= 1024,
+  searchQuery: '',
+  showAddDocument: false,
+  showNewDocumentModal: false,
+  newDocumentTitle: '',
+  isCreatingDocument: false,
+
+  init() {
+    window.addEventListener('resize', () => {
+      this.isDesktop = window.innerWidth >= 1024;
+    });
+  },
+
+  toggleLeftSidebar() {
+    this.showLeftSidebar = !this.showLeftSidebar;
+  },
+
+  toggleRightSidebar() {
+    this.showRightSidebar = !this.showRightSidebar;
+  },
+
+  async createDocument() {
+    this.isCreatingDocument = true;
+    try {
+      const response = await fetch('<%= create_document_book_path(@book) %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content
+        },
+        body: JSON.stringify({ title: this.newDocumentTitle })
+      });
+      if (response.ok) {
+        window.location.reload();
+      }
+    } finally {
+      this.isCreatingDocument = false;
+      this.showNewDocumentModal = false;
+    }
+  }
+}" class="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+
+  <!-- Header (always at top) -->
+  <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <!-- Mobile menu toggle -->
+        <button @click="showLeftSidebar = true"
+                class="lg:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                aria-label="Open book details">
+          <i class="material-icons">menu</i>
+        </button>
+        <%= link_to books_path, class: "text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" do %>
+          <i class="material-icons">arrow_back</i>
+        <% end %>
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-lg <%= Book.color %> flex items-center justify-center">
+            <i class="material-icons text-white"><%= Book.icon %></i>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @book.name %></h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              <%= @book.status.humanize %> • <%= pluralize @book.documents.count, 'document' %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile analytics toggle -->
+      <button @click="showRightSidebar = true"
+              class="lg:hidden p-2 -mr-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+              aria-label="Open analytics">
+        <i class="material-icons">analytics</i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Desktop Collapsed Left Sidebar Toggle Tab -->
+  <div x-show="!showLeftSidebar && isDesktop" x-cloak
+       class="hidden lg:block fixed top-28 z-30 transition-all duration-300">
+    <button @click="toggleLeftSidebar()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-r-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-right"
+            data-tooltip="Show Book Details"
+            aria-label="Show Book Details">
+      <i class="material-icons text-base">menu_book</i>
+      <i class="material-icons text-base">chevron_right</i>
+    </button>
+  </div>
+
+  <!-- Desktop Collapsed Right Sidebar Toggle Tab -->
+  <div x-show="!showRightSidebar && isDesktop" x-cloak
+       class="hidden lg:block fixed right-0 top-28 z-40">
+    <button @click="toggleRightSidebar()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-l-md shadow-lg transition-all duration-300 flex items-center gap-1 tooltip-left"
+            data-tooltip="Show Analytics"
+            aria-label="Show Analytics">
+      <i class="material-icons text-base">chevron_left</i>
+      <i class="material-icons text-base">analytics</i>
+    </button>
+  </div>
+
+  <!-- Content area with sidebar -->
+  <div class="flex-1 flex flex-row overflow-hidden">
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col order-2 overflow-auto">
+      <!-- Table of Contents -->
+    <div class="flex-1 p-6 lg:p-8 overflow-auto">
+      <div class="max-w-3xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Table of Contents</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Drag to reorder documents in your book</p>
+          </div>
+
+          <% if @book_documents.any? %>
+            <ul id="book-documents-list" class="divide-y divide-gray-200 dark:divide-gray-700">
+              <% @book_documents.each_with_index do |book_document, index| %>
+                <%= render 'book_document_row', book_document: book_document, index: index %>
+              <% end %>
+            </ul>
+          <% else %>
+            <div class="px-6 py-12 text-center">
+              <div class="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                <i class="material-icons text-gray-400 text-2xl">description</i>
+              </div>
+              <h3 class="text-sm font-medium text-gray-900 dark:text-white">No documents yet</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Add documents to build your table of contents</p>
+            </div>
+          <% end %>
+
+          <!-- Add Document Section -->
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            <div x-show="!showAddDocument" class="flex items-center space-x-2">
+              <button
+                @click="showAddDocument = true; $nextTick(() => $refs.documentSearchInput.focus())"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <i class="material-icons text-lg mr-2">add</i>
+                Add Document
+              </button>
+              <button
+                @click="showNewDocumentModal = true"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white <%= Book.color %> rounded-lg hover:opacity-90"
+              >
+                <i class="material-icons text-lg mr-2">note_add</i>
+                Create Document
+              </button>
+            </div>
+
+            <div x-show="showAddDocument" x-transition class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white">Select a document to add</h4>
+                <button @click="showAddDocument = false" class="text-gray-400 hover:text-gray-600">
+                  <i class="material-icons text-lg">close</i>
+                </button>
+              </div>
+
+              <!-- Search Documents -->
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="material-icons text-gray-400 text-lg">search</i>
+                </div>
+                <input
+                  x-model="searchQuery"
+                  x-ref="documentSearchInput"
+                  type="text"
+                  placeholder="Search documents..."
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                />
+              </div>
+
+              <!-- Available Documents List -->
+              <div class="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                <% documents_not_in_book = @available_documents.reject { |d| @book.document_ids.include?(d.id) } %>
+                <% if documents_not_in_book.any? %>
+                  <% documents_not_in_book.each do |document| %>
+                    <div
+                      x-show="searchQuery === '' || '<%= document.title.to_s.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())"
+                      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                    >
+                      <div class="flex items-center space-x-3 min-w-0">
+                        <i class="material-icons text-gray-400 text-lg">description</i>
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate"><%= document.title.presence || 'Untitled' %></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400"><%= number_with_delimiter(document.word_count) %> <%= 'word'.pluralize(document.word_count) %></p>
+                        </div>
+                      </div>
+                      <%= button_to add_document_book_path(@book, document_id: document.id), method: :post, class: "flex-shrink-0 inline-flex items-center px-3 py-1.5 text-xs font-medium text-white #{Book.color} rounded-lg hover:opacity-90" do %>
+                        <i class="material-icons text-sm mr-1">add</i>
+                        Add
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                    <p class="text-sm">All documents are already in this book</p>
+                    <%= link_to new_document_path, class: "text-sm #{Book.text_color} hover:underline mt-2 inline-block" do %>
+                      Create a new document
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile Overlay Background -->
+  <div x-show="showLeftSidebar && !isDesktop" x-cloak
+       x-transition:enter="transition-opacity ease-linear duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition-opacity ease-linear duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       @click="showLeftSidebar = false"
+       class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+       role="presentation"
+       aria-hidden="true">
+  </div>
+
+  <!-- Mobile Left Sidebar -->
+  <aside x-show="showLeftSidebar && !isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="lg:hidden fixed inset-y-0 left-0 w-80 max-w-full bg-white dark:bg-gray-800 z-50 shadow-xl overflow-y-auto flex flex-col"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobile-sidebar-title">
+
+    <!-- Header with clickable toggle -->
+    <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:hidden">
+      <button @click="showLeftSidebar = false"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+              aria-label="Close Book Details">
+        <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+        <i class="material-icons text-gray-600 text-lg mr-1.5">menu_book</i>
+        <h2 id="mobile-sidebar-title" class="text-sm font-semibold text-gray-900 dark:text-white">Book Details</h2>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <%= form_with model: @book, local: false, html: { class: 'space-y-6' } do |f| %>
+
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <%= f.text_field :name, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+        <!-- Subtitle -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label>
+          <%= f.text_field :subtitle, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave", placeholder: "Optional subtitle" %>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <%= f.select :status, status_options, {}, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+          <%= f.text_area :description, rows: 3, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-autosave", placeholder: "What's this book about?" %>
+        </div>
+
+        <!-- Blurb -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Back Cover Blurb</label>
+          <%= f.text_area :blurb, rows: 4, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-autosave", placeholder: "The hook for readers..." %>
+        </div>
+
+        <!-- Universe -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Universe</label>
+          <%= f.collection_select :universe_id, current_user.universes.order(:name), :id, :name, { include_blank: 'No universe' }, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+      <% if @book.archived? %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">unarchive</i>
+          Unarchive Book
+        <% end %>
+      <% else %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">archive</i>
+          Archive Book
+        <% end %>
+      <% end %>
+
+      <%= button_to book_path(@book), method: :delete, data: { confirm: 'Are you sure you want to delete this book? This cannot be undone.' }, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900" do %>
+        <i class="material-icons text-lg mr-2">delete</i>
+        Delete Book
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Desktop Left Sidebar -->
+  <aside x-show="showLeftSidebar && isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         class="hidden lg:flex w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex-col order-1 max-h-screen overflow-hidden">
+
+    <!-- Header with clickable toggle -->
+    <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <button @click="toggleLeftSidebar()"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+              title="Hide Book Details"
+              aria-label="Hide Book Details">
+        <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+        <i class="material-icons text-gray-600 text-lg mr-1.5">menu_book</i>
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Book Details</h2>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <%= form_with model: @book, local: false, html: { class: 'space-y-6' } do |f| %>
+
+        <!-- Title -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+          <%= f.text_field :name, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+        <!-- Subtitle -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subtitle</label>
+          <%= f.text_field :subtitle, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave", placeholder: "Optional subtitle" %>
+        </div>
+
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+          <%= f.select :status, status_options, {}, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+          <%= f.text_area :description, rows: 3, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-autosave", placeholder: "What's this book about?" %>
+        </div>
+
+        <!-- Blurb -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Back Cover Blurb</label>
+          <%= f.text_area :blurb, rows: 4, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none js-autosave", placeholder: "The hook for readers..." %>
+        </div>
+
+        <!-- Universe -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Universe</label>
+          <%= f.collection_select :universe_id, current_user.universes.order(:name), :id, :name, { include_blank: 'No universe' }, class: "block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white js-autosave" %>
+        </div>
+
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="p-6 border-t border-gray-200 dark:border-gray-700 space-y-3">
+      <% if @book.archived? %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">unarchive</i>
+          Unarchive Book
+        <% end %>
+      <% else %>
+        <%= button_to toggle_archive_book_path(@book), method: :post, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600" do %>
+          <i class="material-icons text-lg mr-2">archive</i>
+          Archive Book
+        <% end %>
+      <% end %>
+
+      <%= button_to book_path(@book), method: :delete, data: { confirm: 'Are you sure you want to delete this book? This cannot be undone.' }, class: "w-full inline-flex justify-center items-center px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-700 border border-red-300 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900" do %>
+        <i class="material-icons text-lg mr-2">delete</i>
+        Delete Book
+      <% end %>
+    </div>
+  </aside>
+
+  <!-- Mobile Overlay Background (Right) -->
+  <div x-show="showRightSidebar && !isDesktop" x-cloak
+       x-transition:enter="transition-opacity ease-linear duration-200"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition-opacity ease-linear duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       @click="showRightSidebar = false"
+       class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+       role="presentation"
+       aria-hidden="true">
+  </div>
+
+  <%
+    # Calculate analytics stats
+    total_words = @book_documents.sum { |bd| bd.document&.word_count.to_i }
+    doc_count = @book_documents.count
+    avg_words = doc_count > 0 ? (total_words / doc_count) : 0
+    est_pages = (total_words / 250.0).ceil
+    reading_mins = (total_words / 200.0).ceil
+
+    # Find longest/shortest documents
+    docs_with_counts = @book_documents.map do |bd|
+      { title: bd.document&.title.presence || 'Untitled', words: bd.document&.word_count.to_i }
+    end
+    longest_doc = docs_with_counts.max_by { |d| d[:words] }
+    shortest_doc = docs_with_counts.min_by { |d| d[:words] }
+    max_words = docs_with_counts.map { |d| d[:words] }.max || 1
+
+    # Novel length category
+    length_category = case total_words
+      when 0..999 then 'Flash Fiction'
+      when 1000..7499 then 'Short Story'
+      when 7500..17499 then 'Novelette'
+      when 17500..39999 then 'Novella'
+      when 40000..99999 then 'Novel'
+      else 'Epic Novel'
+    end
+
+    # Last updated
+    last_updated = @book_documents.map { |bd| bd.document&.updated_at }.compact.max
+  %>
+
+  <!-- Mobile Right Sidebar -->
+  <aside x-show="showRightSidebar && !isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="lg:hidden fixed inset-y-0 right-0 w-80 max-w-full bg-gray-50 dark:bg-gray-800 z-50 shadow-xl overflow-y-auto flex flex-col"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="mobile-analytics-title">
+
+    <!-- Header with clickable toggle -->
+    <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:hidden">
+      <button @click="showRightSidebar = false"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+              aria-label="Close Analytics">
+        <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+        <i class="material-icons text-gray-600 text-lg mr-1.5">analytics</i>
+        <h2 id="mobile-analytics-title" class="text-sm font-semibold text-gray-900 dark:text-white">Analytics</h2>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+      <!-- Word Count Stats -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Word Counts</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Total Words</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter(total_words) %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Documents</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= doc_count %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Avg per Doc</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter(avg_words) %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reading Estimates -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Estimates</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Est. Pages</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= est_pages %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Reading Time</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= reading_mins %> min</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Length</span>
+            <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400"><%= length_category %></span>
+          </div>
+        </div>
+      </div>
+
+      <% if doc_count > 0 %>
+      <!-- Document Breakdown -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Documents</h3>
+        <div class="space-y-2">
+          <% if longest_doc %>
+          <div class="text-sm">
+            <span class="text-gray-500 dark:text-gray-400">Longest:</span>
+            <span class="text-gray-900 dark:text-white"><%= truncate(longest_doc[:title], length: 20) %></span>
+            <span class="text-gray-500 dark:text-gray-400">(<%= number_with_delimiter(longest_doc[:words]) %>)</span>
+          </div>
+          <% end %>
+          <% if shortest_doc && doc_count > 1 %>
+          <div class="text-sm">
+            <span class="text-gray-500 dark:text-gray-400">Shortest:</span>
+            <span class="text-gray-900 dark:text-white"><%= truncate(shortest_doc[:title], length: 20) %></span>
+            <span class="text-gray-500 dark:text-gray-400">(<%= number_with_delimiter(shortest_doc[:words]) %>)</span>
+          </div>
+          <% end %>
+        </div>
+
+        <!-- Word Distribution -->
+        <div class="mt-4 space-y-2">
+          <!-- First 5 documents (always shown) -->
+          <% docs_with_counts.first(5).each do |doc| %>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-600 dark:text-gray-400 truncate mr-2"><%= truncate(doc[:title], length: 18) %></span>
+                <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter(doc[:words]) %></span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <%= max_words > 0 ? (doc[:words].to_f / max_words * 100).round : 0 %>%"></div>
+              </div>
+            </div>
+          <% end %>
+          <% if doc_count > 5 %>
+            <!-- Remaining documents (shown when expanded) -->
+            <template x-if="showAllDocs">
+              <div class="space-y-2">
+                <% docs_with_counts.drop(5).each do |doc| %>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-gray-600 dark:text-gray-400 truncate mr-2"><%= truncate(doc[:title], length: 18) %></span>
+                      <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter(doc[:words]) %></span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                      <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <%= max_words > 0 ? (doc[:words].to_f / max_words * 100).round : 0 %>%"></div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </template>
+            <!-- Toggle button -->
+            <button @click="showAllDocs = !showAllDocs"
+                    class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 italic cursor-pointer">
+              <span x-show="!showAllDocs">+ <%= doc_count - 5 %> more documents</span>
+              <span x-show="showAllDocs">Show less</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+      <% end %>
+
+      <!-- Book Metadata -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Book Info</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Status</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= @book.status.humanize %></span>
+          </div>
+          <% if @book.universe.present? %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Universe</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white truncate ml-2"><%= truncate(@book.universe.name, length: 15) %></span>
+          </div>
+          <% end %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Created</span>
+            <span class="text-sm text-gray-900 dark:text-white"><%= @book.created_at.strftime('%b %d, %Y') %></span>
+          </div>
+          <% if last_updated %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Last Updated</span>
+            <span class="text-sm text-gray-900 dark:text-white"><%= time_ago_in_words(last_updated) %> ago</span>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Desktop Right Sidebar -->
+  <aside x-show="showRightSidebar && isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="hidden lg:flex w-72 bg-gray-50 dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 flex-col order-3 max-h-screen overflow-hidden">
+
+    <!-- Header with clickable toggle -->
+    <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+      <button @click="toggleRightSidebar()"
+              class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+              title="Hide Analytics"
+              aria-label="Hide Analytics">
+        <i class="material-icons text-gray-500 text-lg mr-1">chevron_right</i>
+        <i class="material-icons text-gray-600 text-lg mr-1.5">analytics</i>
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Analytics</h2>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-6">
+      <!-- Word Count Stats -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Word Counts</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Total Words</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter(total_words) %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Documents</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= doc_count %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Avg per Doc</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter(avg_words) %></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reading Estimates -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Estimates</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Est. Pages</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= est_pages %></span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Reading Time</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= reading_mins %> min</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Length</span>
+            <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400"><%= length_category %></span>
+          </div>
+        </div>
+      </div>
+
+      <% if doc_count > 0 %>
+      <!-- Document Breakdown -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Documents</h3>
+        <div class="space-y-2">
+          <% if longest_doc %>
+          <div class="text-sm">
+            <span class="text-gray-500 dark:text-gray-400">Longest:</span>
+            <span class="text-gray-900 dark:text-white"><%= truncate(longest_doc[:title], length: 20) %></span>
+            <span class="text-gray-500 dark:text-gray-400">(<%= number_with_delimiter(longest_doc[:words]) %>)</span>
+          </div>
+          <% end %>
+          <% if shortest_doc && doc_count > 1 %>
+          <div class="text-sm">
+            <span class="text-gray-500 dark:text-gray-400">Shortest:</span>
+            <span class="text-gray-900 dark:text-white"><%= truncate(shortest_doc[:title], length: 20) %></span>
+            <span class="text-gray-500 dark:text-gray-400">(<%= number_with_delimiter(shortest_doc[:words]) %>)</span>
+          </div>
+          <% end %>
+        </div>
+
+        <!-- Word Distribution -->
+        <div class="mt-4 space-y-2">
+          <!-- First 5 documents (always shown) -->
+          <% docs_with_counts.first(5).each do |doc| %>
+            <div>
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-600 dark:text-gray-400 truncate mr-2"><%= truncate(doc[:title], length: 18) %></span>
+                <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter(doc[:words]) %></span>
+              </div>
+              <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <%= max_words > 0 ? (doc[:words].to_f / max_words * 100).round : 0 %>%"></div>
+              </div>
+            </div>
+          <% end %>
+          <% if doc_count > 5 %>
+            <!-- Remaining documents (shown when expanded) -->
+            <template x-if="showAllDocs">
+              <div class="space-y-2">
+                <% docs_with_counts.drop(5).each do |doc| %>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-gray-600 dark:text-gray-400 truncate mr-2"><%= truncate(doc[:title], length: 18) %></span>
+                      <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter(doc[:words]) %></span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+                      <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <%= max_words > 0 ? (doc[:words].to_f / max_words * 100).round : 0 %>%"></div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            </template>
+            <!-- Toggle button -->
+            <button @click="showAllDocs = !showAllDocs"
+                    class="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 italic cursor-pointer">
+              <span x-show="!showAllDocs">+ <%= doc_count - 5 %> more documents</span>
+              <span x-show="showAllDocs">Show less</span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+      <% end %>
+
+      <!-- Book Metadata -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Book Info</h3>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Status</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white"><%= @book.status.humanize %></span>
+          </div>
+          <% if @book.universe.present? %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Universe</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white truncate ml-2"><%= truncate(@book.universe.name, length: 15) %></span>
+          </div>
+          <% end %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Created</span>
+            <span class="text-sm text-gray-900 dark:text-white"><%= @book.created_at.strftime('%b %d, %Y') %></span>
+          </div>
+          <% if last_updated %>
+          <div class="flex justify-between items-center">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Last Updated</span>
+            <span class="text-sm text-gray-900 dark:text-white"><%= time_ago_in_words(last_updated) %> ago</span>
+          </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </aside>
+  </div><!-- end content area with sidebar -->
+
+  <%= render 'new_document_modal' %>
+</div>
+
+<!-- JavaScript for drag-and-drop sorting -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const list = document.getElementById('book-documents-list');
+  if (!list) return;
+
+  // Update all position numbers to match current order
+  function updatePositionNumbers() {
+    const items = list.querySelectorAll('li');
+    items.forEach((item, index) => {
+      const positionNumber = item.querySelector('.position-number');
+      if (positionNumber) {
+        positionNumber.textContent = index + 1;
+      }
+    });
+  }
+
+  // Check if jQuery UI Sortable is available
+  if (typeof $ !== 'undefined' && $.fn.sortable) {
+    $(list).sortable({
+      handle: '.drag-handle',
+      placeholder: 'bg-emerald-50 dark:bg-emerald-900 border-2 border-dashed border-emerald-300 dark:border-emerald-600 rounded-lg',
+      update: function(event, ui) {
+        const bookDocumentId = ui.item.data('book-document-id');
+        const newPosition = ui.item.index();
+
+        fetch('<%= sort_document_book_path(@book) %>', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({
+            book_document_id: bookDocumentId,
+            position: newPosition
+          })
+        }).then(() => {
+          updatePositionNumbers();
+        }).catch(error => {
+          console.error('Error sorting:', error);
+          $(list).sortable('cancel');
+        });
+      }
+    });
+  }
+});
+</script>

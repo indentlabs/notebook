@@ -25,11 +25,14 @@ class User < ApplicationRecord
     length: { maximum: 20 },
   if: Proc.new { |user| user.forums_badge_text_changed? }
 
+  validates :time_zone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_nil: false
+
   has_many :folders
   has_many :subscriptions, dependent: :destroy
   has_many :billing_plans, through: :subscriptions
   def on_premium_plan?
-    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id) || active_promo_codes.any?
+    # Use Ruby filtering on eager-loaded promotions to avoid N+1 queries
+    BillingPlan::PREMIUM_IDS.include?(self.selected_billing_plan_id) || promotions.any?(&:active?)
   end
   has_many :promotions, dependent: :destroy
   has_many :paypal_invoices
@@ -49,21 +52,22 @@ class User < ApplicationRecord
 
   has_many :user_followings,              dependent: :destroy
   has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
+  has_many :inverse_user_followings, class_name: 'UserFollowing', foreign_key: :followed_user_id, dependent: :destroy
   # has_many :followed_by_users,            through: :user_followings, source: :user # todo unsure how to actually write this, so we do it manually below
   def followed_by_users
-    User.where(id: UserFollowing.where(followed_user_id: self.id).pluck(:user_id)) 
+    User.joins(:user_followings).where(user_followings: { followed_user_id: self.id })
   end
   def followed_by?(user)
-    followed_by_users.pluck(:id).include?(user.id)
+    UserFollowing.exists?(user_id: user.id, followed_user_id: self.id)
   end
 
   has_many :user_blockings,               dependent: :destroy
   has_many :blocked_users,                through: :user_blockings, source: :blocked_user
   def blocked_by_users
-    @cached_blocked_by_users ||= User.where(id: UserBlocking.where(blocked_user_id: self.id).pluck(:user_id))
+    @cached_blocked_by_users ||= User.joins(:user_blockings).where(user_blockings: { blocked_user_id: self.id })
   end
   def blocked_by?(user)
-    blocked_by_users.pluck(:id).include?(user.id)
+    UserBlocking.exists?(user_id: user.id, blocked_user_id: self.id)
   end
 
   has_many :content_page_shares,           dependent: :destroy
@@ -92,6 +96,9 @@ class User < ApplicationRecord
 
   has_many :notifications,                 dependent: :destroy
   has_many :notice_dismissals,             dependent: :destroy
+
+  has_many :word_count_updates,            dependent: :destroy
+  has_many :writing_goals,                 dependent: :destroy
 
   has_many :page_settings_overrides,       dependent: :destroy
   has_one_attached :avatar
@@ -156,7 +163,7 @@ class User < ApplicationRecord
       universe_id IN (#{(my_universe_ids + contributable_universe_ids + [-1]).uniq.join(',')})
         OR
       (universe_id IS NULL AND user_id = #{self.id.to_i})
-    """).includes([:user])
+    """).where(archived_at: nil).includes([:user])
   end
 
   def linkable_timelines
@@ -168,6 +175,7 @@ class User < ApplicationRecord
   end
 
   has_many :documents, dependent: :destroy
+  has_many :books, dependent: :destroy
 
   after_create :initialize_stripe_customer, unless: -> { Rails.env == 'test' }
   after_create :initialize_referral_code
@@ -180,6 +188,35 @@ class User < ApplicationRecord
 
   def createable_content_types
     Rails.application.config.content_types[:all].select { |c| can_create? c }
+  end
+
+  # Returns the current date in the user's configured timezone
+  def current_date_in_time_zone
+    Time.current.in_time_zone(time_zone).to_date
+  end
+
+  def words_written_today
+    WordCountUpdate.words_written_on_date(self, current_date_in_time_zone)
+  end
+
+  def current_writing_goals
+    writing_goals.current
+  end
+
+  # Deprecated: use current_writing_goals instead
+  def current_writing_goal
+    writing_goals.current.first
+  end
+
+  # Returns the user's daily word goal: the maximum of all active writing goals,
+  # or a default of 1,000 words if no active goals exist or all goals have nil/0 values
+  DEFAULT_DAILY_WORD_GOAL = 1000
+  def daily_word_goal
+    goals = current_writing_goals
+    return DEFAULT_DAILY_WORD_GOAL if goals.empty?
+
+    calculated = goals.map(&:daily_goal).compact.max
+    calculated.to_i > 0 ? calculated : DEFAULT_DAILY_WORD_GOAL
   end
 
   # as_json creates a hash structure, which you then pass to ActiveSupport::json.encode to actually encode the object as a JSON string.
@@ -205,26 +242,24 @@ class User < ApplicationRecord
     self[:name].blank? && self.persisted? ? 'Anonymous author' : self[:name]
   end
 
-  def image_url(size=80)
-    @cached_user_image_url ||= if avatar.attached? # manually-uploaded avatar
-      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_limit: [size, size]).processed, only_path: true)
-
+  def image_url(size: 80)
+    if avatar.attached? # manually-uploaded avatar
+      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_fill: [size, size]).processed, only_path: true)
     else # otherwise, grab the default from Gravatar for this email address
-      gravatar_fallback_url(size)
+      gravatar_fallback_url(size: size)
     end
-
   rescue ActiveStorage::FileNotFoundError
-    gravatar_fallback_url(size)
-
+    gravatar_fallback_url(size: size)
   rescue ImageProcessing::Error
-    gravatar_fallback_url(size)
+    gravatar_fallback_url(size: size)
   end
 
-  def gravatar_fallback_url(size=80)
+  def gravatar_fallback_url(size: 80)
     require 'digest/md5' # todo do we actually need to require this all the time?
     email_md5 = Digest::MD5.hexdigest(email.downcase)
     "https://www.gravatar.com/avatar/#{email_md5}?d=identicon&s=#{size}".html_safe
   end
+
 
   # TODO these (3) can probably all be scopes on the related object, no?
   def active_subscriptions
@@ -355,11 +390,11 @@ class User < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-600'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-600'
   end
 
   def favorite_page_type_color

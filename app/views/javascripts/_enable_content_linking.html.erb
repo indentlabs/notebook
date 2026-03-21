@@ -1,0 +1,62 @@
+<%# Easy wrapper to enable content linking on any text field %>
+<%# Usage: <%= render 'javascripts/enable_content_linking', container_id: 'my-container' %> %>
+
+<% container_id ||= 'content-linking-container' %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Find all elements that should have content linking enabled
+    const containers = document.querySelectorAll('[data-enable-linking="true"]');
+    
+    containers.forEach(container => {
+      // Check if Alpine component is already initialized
+      if (!container._x_dataStack) {
+        // Wrap the element if needed
+        if (!container.parentElement.hasAttribute('x-data')) {
+          const wrapper = document.createElement('div');
+          wrapper.setAttribute('x-data', 'contentLinking()');
+          wrapper.className = 'relative';
+          
+          container.parentElement.insertBefore(wrapper, container);
+          wrapper.appendChild(container);
+          
+          // Add the dropdown template
+          const dropdownHtml = `
+            <div x-show="showDropdown"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="linkables-dropdown-container absolute mt-2 w-96 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
+              <div class="linkables-dropdown max-h-80 overflow-y-auto">
+                <template x-for="(item, index) in filteredResults" :key="item.value">
+                  <div @click="selectItem(item)"
+                       :class="{ 'bg-blue-50': index === selectedIndex }"
+                       class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors">
+                    <div class="flex items-center space-x-3">
+                      <div :class="[getIconColorClass(item.color), getBackgroundColor(item.color)]" 
+                           class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center">
+                        <i class="material-icons text-sm" x-text="item.icon"></i>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="font-medium text-gray-900 truncate" x-text="item.name"></div>
+                        <div class="text-xs text-gray-500" x-text="item.type"></div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <div x-show="filteredResults.length === 0" class="px-4 py-3 text-gray-500 text-sm">
+                  No matching content found
+                </div>
+              </div>
+            </div>
+          `;
+          
+          wrapper.insertAdjacentHTML('beforeend', dropdownHtml);
+        }
+      }
+    });
+  });
+</script>

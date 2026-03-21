@@ -1,0 +1,187 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Configure Category</h3>
+    <button @click="selectedCategory = null" class="p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-800">
+      <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Tab Navigation -->
+  <div x-data="{ activeTab: 'general' }">
+    <div class="border-b border-gray-200 dark:border-slate-700">
+      <nav class="-mb-px flex space-x-6">
+        <button @click="activeTab = 'general'" 
+                :style="activeTab === 'general' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'general' ? '' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          General
+        </button>
+        <button @click="activeTab = 'advanced'" 
+                :style="activeTab === 'advanced' ? 'border-color: <%= content_type_class.hex_color %>; color: <%= content_type_class.hex_color %>;' : ''"
+                :class="activeTab === 'advanced' ? '' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-slate-600'"
+                class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Advanced
+        </button>
+      </nav>
+    </div>
+    
+    <!-- General Tab -->
+    <div x-show="activeTab === 'general'" class="py-4 space-y-4">
+      <%= form_for(category, url: "/plan/attribute_categories/#{category.id}", method: :put, html: {class: 'space-y-4', 'data-type': 'json'}, remote: true) do |f| %>
+        <%= f.hidden_field :name %>
+        <%= f.hidden_field :entity_type %>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category Name</label>
+          <%= f.text_field :label, class: "shadow-sm block w-full sm:text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon</label>
+          <div class="grid grid-cols-8 gap-2 max-h-80 overflow-y-auto border border-gray-200 dark:border-slate-600 rounded-md p-4 bg-gray-50 dark:bg-slate-900" x-data="{ selectedIcon: '<%= category.icon %>' }">
+            <% MATERIAL_ICONS.each do |icon| %>
+              <div class="aspect-square">
+                <button type="button"
+                        class="w-full h-full flex items-center justify-center rounded-md transition-colors border"
+                        :class="selectedIcon === '<%= icon %>' ? 'bg-white shadow-sm' : 'hover:bg-white dark:hover:bg-slate-600 hover:shadow-sm bg-gray-100 dark:bg-slate-800'"
+                        :style="selectedIcon === '<%= icon %>' ? 'border-color: <%= content_type_class.hex_color %>; background-color: <%= content_type_class.hex_color %>10;' : 'border-color: transparent;'"
+                        @click="selectedIcon = '<%= icon %>'; document.getElementById('attribute_category_icon').value = '<%= icon %>'; updateCategoryIconPreview(<%= category.id %>, '<%= icon %>')"
+                        title="<%= icon.humanize %>">
+                  <i class="material-icons text-2xl transition-colors"
+                     :class="selectedIcon === '<%= icon %>' ? '' : 'text-gray-600 dark:text-gray-400'"
+                     :style="selectedIcon === '<%= icon %>' ? 'color: <%= content_type_class.hex_color %>;' : ''"><%= icon %></i>
+                </button>
+              </div>
+            <% end %>
+          </div>
+          <%= f.hidden_field :icon, id: 'attribute_category_icon' %>
+        </div>
+        
+        
+        <div class="pt-2">
+          <%= f.submit 'Save Changes', class: "px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+        </div>
+      <% end %>
+    </div>
+    
+    
+    <!-- Advanced Tab -->
+    <div x-show="activeTab === 'advanced'" class="py-4 space-y-4">
+      <div class="space-y-6">
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Display Order</h6>
+          <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-md border border-gray-200 dark:border-slate-700">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              Categories are displayed in order on content pages. Lower numbers appear first.
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <strong>Tip:</strong> Use drag & drop in the template editor for easier reordering. This manual control is for fine-tuning.
+            </p>
+            <%= form_for(category, url: "/plan/attribute_categories/#{category.id}", method: :put, html: {class: 'space-y-3', 'data-type': 'json'}, remote: true) do |f| %>
+              <div class="flex items-center space-x-3">
+                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Position:</label>
+                <%= f.number_field :position, class: "w-20 shadow-sm border-gray-300 dark:border-slate-600 dark:bg-slate-900 dark:text-white rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color}; border-color: #{content_type_class.hex_color};" %>
+                <%= f.submit 'Update', class: "px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <div>
+          <h6 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Archives</h6>
+          <div class="bg-gray-50 dark:bg-slate-800 p-4 rounded-md border border-gray-200 dark:border-slate-700">
+            <%= form_for(category, url: "/plan/attribute_categories/#{category.id}", method: :put, html: {class: 'inline', 'data-type': 'json'}, remote: true) do |f| %>
+              <%= f.hidden_field :name %>
+              <%= f.hidden_field :entity_type %>
+              <%= f.hidden_field :hidden, value: !category.hidden %>
+              <% if category.hidden? %>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-amber-600">archive</i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">This category is currently archived</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">It's hidden from your workspace but can be restored anytime.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Restore this category', class: "px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% else %>
+                <div class="flex items-center mb-3">
+                  <div class="flex-shrink-0 mr-3">
+                    <i class="material-icons text-green-600">check_circle</i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm text-gray-700 dark:text-gray-300">This category is currently active</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">It appears in your template and content pages.</p>
+                  </div>
+                </div>
+                <%= f.submit 'Archive this category', class: "px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2", style: "--tw-ring-color: #{content_type_class.hex_color};" %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+        
+        <!-- Category Deletion -->
+        <div>
+          <h6 class="text-sm font-medium text-red-700 dark:text-red-400 mb-2 flex items-center">
+            <i class="material-icons text-red-600 text-sm mr-1">warning</i>
+            Danger Zone
+          </h6>
+          <div class="bg-red-50 dark:bg-red-900 p-4 rounded-md border border-red-200 dark:border-red-700">
+            <p class="text-sm text-red-800 dark:text-red-200 font-medium mb-1">Delete this category</p>
+            <p class="text-xs text-red-600 dark:text-red-400 mb-1">
+              This will permanently delete the category, all <%= pluralize(category.attribute_fields.count, 'field') %> in it, 
+              and all content data stored in these fields across your <%= content_type.titleize.downcase %> pages.
+            </p>
+            <p class="text-xs text-red-600 dark:text-red-400 font-medium mb-3">
+              This action cannot be undone.
+            </p>
+            
+            <div x-data="{ confirmDelete: false }" class="space-y-3">
+              <div x-show="!confirmDelete">
+                <button @click="confirmDelete = true" 
+                        type="button"
+                        class="w-full px-3 py-1.5 bg-red-600 border border-red-600 rounded-md text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  Delete Category
+                </button>
+              </div>
+              
+              <div x-show="confirmDelete" 
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 transform scale-95"
+                   x-transition:enter-end="opacity-100 transform scale-100"
+                   class="space-y-3">
+                <p class="text-sm text-red-800 dark:text-red-300 font-medium">
+                  Are you absolutely sure? Type "<strong><%= category.label %></strong>" to confirm:
+                </p>
+                
+                <%= form_for(category, url: "/plan/attribute_categories/#{category.id}", method: :delete, html: {class: 'space-y-3', 'data-type': 'json', 'x-data': '{ confirmText: "" }'}, remote: true) do |f| %>
+                  <input type="text" 
+                         x-model="confirmText"
+                         placeholder="<%= category.label %>"
+                         class="shadow-sm block w-full sm:text-sm border-red-300 dark:border-red-700 dark:bg-slate-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                  
+                  <div class="space-y-2">
+                    <button type="submit"
+                            :disabled="confirmText !== '<%= category.label %>'"
+                            :class="confirmText === '<%= category.label %>' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                            class="w-full px-3 py-1.5 border border-transparent rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                      <i class="material-icons text-sm mr-1">delete_forever</i>
+                      Permanently Delete
+                    </button>
+                    <button @click="confirmDelete = false" 
+                            type="button"
+                            class="w-full px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600">
+                      Cancel
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

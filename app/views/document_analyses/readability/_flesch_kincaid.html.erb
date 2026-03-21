@@ -1,149 +1,153 @@
 <% if analysis.flesch_kincaid_reading_ease %>
-  <div class="row">
-    <div class="col s12 m12 l12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">
-            <span class="right"><%= analysis.flesch_kincaid_reading_ease.try(:round) %> / 100</span>
-            <i class="left material-icons orange-text">bubble_chart</i>
-            Flesh-Kincaid Reading Ease
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+    <div class="p-6">
+      <!-- Header with score -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4M9,8.5A1.5,1.5 0 0,0 7.5,10A1.5,1.5 0 0,0 9,11.5A1.5,1.5 0 0,0 10.5,10A1.5,1.5 0 0,0 9,8.5M15,8.5A1.5,1.5 0 0,0 13.5,10A1.5,1.5 0 0,0 15,11.5A1.5,1.5 0 0,0 16.5,10A1.5,1.5 0 0,0 15,8.5"/>
+            </svg>
           </div>
-          <div class="progress">
-            <div class="determinate" style="width: <%= 100 * analysis.flesch_kincaid_reading_ease.try(:round) / 100 %>%"></div>
-          </div>
-          <div class="row">
-            <div class="col s12 m12 l7">
-              <p>
-                According to this scale, your document scores 
-                <strong>
-                  <%=
-                    case analysis.flesch_kincaid_reading_ease.try(:round)
-                    when 90..500
-                      'Very easy to read. Easily understood by an average 11-year-old student.'
-                    when 80..90
-                      'Easy to read. Conversational English for consumers.'
-                    when 70..80
-                      'Fairly easy to read.'
-                    when 60..70
-                      'Plain English. Easily understood by 13- to 15-year-old students.'
-                    when 50..60
-                      'Fairly difficult to read.'
-                    when 30..50
-                      'Difficult to read.'
-                    when 10..30
-                      'Very difficult to read. Best understood by university graduates.'
-                    when -500..10
-                      'Extremely difficult to read. Best understood by university graduates.'
-                    else
-                      analysis.flesch_kincaid_reading_ease.try(:round)
-                    end                  
-                  %>
-                </strong>
-              </p>
-              <br />
-              <p>
-                The Flesch–Kincaid scale is a readability test designed to indicate how difficult a passage in English is to understand.
-                It was originally designed by Rudolf Flesch and J. Peter Kincaid for the U.S. Navy, but is commonly used to this day to
-                measure and ensure some legal documents are written at no higher than a ninth-grade reading level.
-              </p>
-              <br />
-              <p>
-                The readability test is backed up by a separate test called the Flesch–Kincaid Grade Level which measures readability in
-                the same way, but weights those measurements in a slightly different way. This is the scale used by Microsoft Word and 
-                Grammarly to calculate the reading level of a document.
-              </p>
-              <br />
-              <p>
-                A <strong>higher score</strong> on this scale indicates a document is <strong class="green-text">easier to understand</strong>.
-              </p>
-            </div>
-            <div class="col s12 m12 l4 offset-l1">
-              <p class="green-text text-darken-3">
-                To <strong>raise</strong> your score on this scale:
-              </p>
-              <ul>
-                <li>
-                  <i class="material-icons left green-text">arrow_drop_up</i>
-                  Use shorter words.
-                </li>
-                <li class="clearfix">
-                  <i class="material-icons left green-text">arrow_drop_up</i>
-                  Use shorter sentences.
-                </li>
-              </ul>
-              <br />
-              <p class="red-text text-darken-4">
-                To <strong>lower</strong> your score on this scale:
-              </p>
-              <ul>
-                <li>
-                  <i class="material-icons left red-text">arrow_drop_down</i>
-                  Use longer words.
-                </li>
-                <li class="clearfix">
-                  <i class="material-icons left red-text">arrow_drop_down</i>
-                  Use longer sentences.
-                </li>
-              </ul>
-              <br />
-            </div>
-          </div>
-          
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Flesch-Kincaid Reading Ease</h3>
         </div>
-        <div class="card-action">
-          <%= link_to 'Compare to other works', '#', class: 'activator orange-text text-darken-3' %>
-        </div>
+        <span class="text-lg font-bold text-gray-900 dark:text-gray-100"><%= analysis.flesch_kincaid_reading_ease.try(:round) %> / 100</span>
+      </div>
 
-        <div class="card-reveal">
-          <div class="card-title">
-            <i class="material-icons right">close</i>
-            <span class="right"><%= analysis.flesch_kincaid_reading_ease.try(:round) %> / 100</span>
-            <i class="left material-icons orange-text">bubble_chart</i>
-            Flesh-Kincaid Reading Ease
-          </div>
-          <div class="progress">
-            <div class="determinate" style="width: <%= 100 * analysis.flesch_kincaid_reading_ease.try(:round) / 100 %>%"></div>
-          </div>
+      <!-- Progress bar -->
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
+        <div class="bg-orange-500 h-2 rounded-full" style="width: <%= (analysis.flesch_kincaid_reading_ease.try(:round) || 0) %>%"></div>
+      </div>
 
-          <div class="col s12 m12 l12">
-            <table>
-              <tr>
-                <th>Work</th>
-                <th>Score</th>
-              </tr>
-              <%
-                [
-                  ["<strong class='orange-text text-darken-3'>This document</strong>", analysis.flesch_kincaid_reading_ease.try(:round)],
-                  ["<em>Reader's Digest</em> magazine", 65],
-                  ["<em>Time</em> magazine", 52],
-                  ["An average sixth grade student's written assignment", 60],
-                  ["<em>Harvard Law Review</em>", 30],
-                  ["<em>Moby Dick</em>, by Herman Melville", 57.9],
-                  ["<em>Harry Potter and the Philosopher's Stone</em>, by J. K. Rowling", 83.7],
-                  ["The Affordable Care Act", 12],
-                ].sort_by(&:second).reverse.each do |work, score|
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Description -->
+        <div class="lg:col-span-2 space-y-4 text-gray-600 dark:text-gray-400">
+          <p>
+            According to this scale, your document scores
+            <strong class="text-gray-900 dark:text-gray-100">
+              <%=
+                case analysis.flesch_kincaid_reading_ease.try(:round)
+                when 90..500
+                  'Very easy to read. Easily understood by an average 11-year-old student.'
+                when 80..90
+                  'Easy to read. Conversational English for consumers.'
+                when 70..80
+                  'Fairly easy to read.'
+                when 60..70
+                  'Plain English. Easily understood by 13- to 15-year-old students.'
+                when 50..60
+                  'Fairly difficult to read.'
+                when 30..50
+                  'Difficult to read.'
+                when 10..30
+                  'Very difficult to read. Best understood by university graduates.'
+                when -500..10
+                  'Extremely difficult to read. Best understood by university graduates.'
+                else
+                  analysis.flesch_kincaid_reading_ease.try(:round)
+                end
               %>
-                <tr>
-                  <td><%= work.html_safe %></td>
-                  <td style="font-size: 1.5em;">
-                    <%=
-                      if score > analysis.flesch_kincaid_reading_ease.try(:round)
-                        '<span class="green-text">'.html_safe
-                      elsif score < analysis.flesch_kincaid_reading_ease.try(:round)
-                        '<span class="red-text">'.html_safe
-                      else
-                        '<span class="orange-text">'.html_safe
-                      end
-                    %>
-                      <%= score %>
-                    </span>
-                  </td>
-                </tr>
-              <% end %>
-            </table>
+            </strong>
+          </p>
+          <p>
+            The Flesch–Kincaid scale is a readability test designed to indicate how difficult a passage in English is to understand.
+            It was originally designed by Rudolf Flesch and J. Peter Kincaid for the U.S. Navy, but is commonly used to this day to
+            measure and ensure some legal documents are written at no higher than a ninth-grade reading level.
+          </p>
+          <p>
+            The readability test is backed up by a separate test called the Flesch–Kincaid Grade Level which measures readability in
+            the same way, but weights those measurements in a slightly different way. This is the scale used by Microsoft Word and
+            Grammarly to calculate the reading level of a document.
+          </p>
+          <p>
+            A <strong class="text-gray-900 dark:text-gray-100">higher score</strong> on this scale indicates a document is <strong class="text-green-600 dark:text-green-400">easier to understand</strong>.
+          </p>
+        </div>
+
+        <!-- Tips -->
+        <div class="space-y-4">
+          <div class="p-4 bg-green-50 dark:bg-green-900 rounded-lg">
+            <p class="text-green-700 dark:text-green-300 font-medium mb-2">To raise your score:</p>
+            <ul class="text-sm text-green-600 dark:text-green-400 space-y-1">
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,15L12,10L17,15H7Z"/></svg>
+                Use shorter words.
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,15L12,10L17,15H7Z"/></svg>
+                Use shorter sentences.
+              </li>
+            </ul>
+          </div>
+          <div class="p-4 bg-red-50 dark:bg-red-900 rounded-lg">
+            <p class="text-red-700 dark:text-red-300 font-medium mb-2">To lower your score:</p>
+            <ul class="text-sm text-red-600 dark:text-red-400 space-y-1">
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,10L12,15L17,10H7Z"/></svg>
+                Use longer words.
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,10L12,15L17,10H7Z"/></svg>
+                Use longer sentences.
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Expandable comparison section -->
+    <details class="border-t border-gray-200 dark:border-gray-700">
+      <summary class="px-6 py-4 cursor-pointer text-orange-600 dark:text-orange-400 hover:underline font-medium flex items-center gap-2">
+        <svg class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+        </svg>
+        Compare to other works
+      </summary>
+      <div class="px-6 pb-6">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Work</th>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Score</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <%
+                [
+                  ["This document", analysis.flesch_kincaid_reading_ease.try(:round), true],
+                  ["Reader's Digest magazine", 65, false],
+                  ["Time magazine", 52, false],
+                  ["An average sixth grade student's written assignment", 60, false],
+                  ["Harvard Law Review", 30, false],
+                  ["Moby Dick, by Herman Melville", 57.9, false],
+                  ["Harry Potter and the Philosopher's Stone, by J. K. Rowling", 83.7, false],
+                  ["The Affordable Care Act", 12, false],
+                ].sort_by { |_, score, _| -score }.each do |work, score, is_current|
+              %>
+                <tr class="<%= is_current ? 'bg-orange-50 dark:bg-orange-900' : '' %>">
+                  <td class="px-4 py-3 text-sm <%= is_current ? 'font-bold text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-gray-100' %>">
+                    <%= is_current ? work : work.gsub(/^(.*)$/) { |m| "<em class='text-gray-600 dark:text-gray-400'>#{m}</em>" }.html_safe %>
+                  </td>
+                  <td class="px-4 py-3 text-lg font-bold">
+                    <%
+                      color_class = if score > analysis.flesch_kincaid_reading_ease.try(:round)
+                        'text-green-600 dark:text-green-400'
+                      elsif score < analysis.flesch_kincaid_reading_ease.try(:round)
+                        'text-red-600 dark:text-red-400'
+                      else
+                        'text-orange-600 dark:text-orange-400'
+                      end
+                    %>
+                    <span class="<%= color_class %>"><%= score %></span>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
   </div>
 <% end %>

@@ -84,5 +84,19 @@ module IsContentPage
     #     self.color
     #   end
     # end
+
+    # Instance methods that delegate to class methods
+    # This allows templates to call content_page.color instead of content_page.class.color
+    def color
+      self.class.color
+    end
+
+    def text_color
+      self.class.text_color
+    end
+
+    def icon
+      self.class.icon
+    end
   end
 end

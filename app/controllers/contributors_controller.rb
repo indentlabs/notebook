@@ -1,4 +1,31 @@
 class ContributorsController < ApplicationController
+  before_action :authenticate_user!
+  
+  def create
+    universe = Universe.find(params[:universe_id])
+    
+    # Check if the current user is the owner of the universe
+    unless universe.user_id == current_user.id
+      redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'Only the universe owner can add contributors.'
+      return
+    end
+    
+    email = params[:contributor][:email]&.downcase
+    
+    # Check if this email is already a contributor
+    if universe.contributors.exists?(email: email)
+      redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'This user is already a contributor.'
+      return
+    end
+    
+    # Use the ContributorService to handle the invitation
+    ContributorService.invite_contributor_to_universe(universe: universe, email: email)
+    
+    redirect_to edit_universe_path(universe, anchor: 'contributors'), notice: 'Contributor invitation sent!'
+  rescue StandardError => e
+    redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'Failed to add contributor. Please try again.'
+  end
+  
   def destroy
     contributor = Contributor.find(params[:id])
     relevant_universe = Universe.find(contributor.universe_id)
@@ -30,8 +57,18 @@ class ContributorsController < ApplicationController
       #todo send "you've been removed as a contributor" email
     end
 
+    # Set a flash message for feedback
+    if user.present? && user.id == current_user.id
+      # User removed themselves
+      flash[:notice] = "You have left the universe '#{relevant_universe.name}'"
+    else
+      # Owner removed a contributor
+      flash[:notice] = "Contributor removed successfully"
+    end
+
     # A 303 status is required here so the browser doesn't redirect with a DELETE action
     # https://stackoverflow.com/questions/14598703/rails-redirect-after-delete-using-delete-instead-of-get
-    redirect_to universes_path, status: 303
+    # Redirect back to the universe edit page with contributors anchor
+    redirect_to edit_universe_path(relevant_universe, anchor: 'contributors'), status: 303
   end
 end

@@ -1,12 +1,21 @@
 class AdminController < ApplicationController
-  layout 'admin'
-  layout 'application', only: [:unsubscribe, :perform_unsubscribe]
-
   before_action :authenticate_user!
   before_action :require_admin_access, unless: -> { Rails.env.development? }
 
   def dashboard
+    @days = params.fetch(:days, 30).to_i
+    @days = 30 unless [1, 7, 30, 90].include?(@days)
     @reports = EndOfDayAnalyticsReport.order('day DESC')
+  end
+
+  def hub
+    @sidekiq_stats = Sidekiq::Stats.new
+    @basil_queue_count = BasilCommission.where(completed_at: nil).count
+    @basil_today_count = BasilCommission.where('completed_at >= ?', Time.current.beginning_of_day).count
+
+    # Words written stats (aggregate across all users)
+    @words_written_today = calculate_words_written_for_date(Date.current)
+    @words_written_this_week = calculate_words_written_in_range(Date.current.beginning_of_week..Date.current)
   end
 
   def content_type
@@ -52,18 +61,189 @@ class AdminController < ApplicationController
     reported_share_ids = ContentPageShareReport.where(approved_at: nil).pluck(:content_page_share_id)
     @feed = ContentPageShare.where(id: reported_share_ids)
       .order('created_at DESC')
-      .includes([:content_page, :user, :share_comments])
-      .limit(100)
+      .includes([:content_page, :user, :share_comments, content_page_share_reports: :user])
+      .paginate(page: params[:page], per_page: 100)
+  end
+
+  def destroy_share
+    share = ContentPageShare.find(params[:id])
+    share.destroy
+    redirect_to '/admin/shares/reported', notice: 'Share deleted successfully.'
+  end
+
+  def destroy_user
+    user = User.find(params[:id])
+    user.destroy
+    redirect_to '/admin/shares/reported', notice: 'User and all their content deleted.'
+  end
+
+  def dismiss_share_reports
+    share = ContentPageShare.find(params[:id])
+    share.content_page_share_reports.update_all(approved_at: Time.current)
+    redirect_to '/admin/shares/reported', notice: 'Reports dismissed.'
   end
   
   def churn
+    @timespan = params[:timespan]
+    @timespan = nil unless %w[30 90 365].include?(@timespan)
+
+    @start_date = @timespan.present? ? @timespan.to_i.days.ago.to_date : nil
+  end
+
+  def attributes
+    @total_attributes = AttributeField.count
+    @total_users = AttributeField.distinct.count(:user_id)
+    @avg_per_user = @total_users > 0 ? (@total_attributes.to_f / @total_users).round(1) : 0
+
+    @by_content_type = AttributeCategory
+      .joins(:attribute_fields)
+      .group(:entity_type)
+      .count
   end
 
   def notifications
-    @clicked_notifications = Notification.where.not(viewed_at: nil)
-    @notifications = Notification.all.order(:reference_code)
+    # Pre-aggregate stats by reference_code in a single query (top 50 by volume)
+    @code_stats = Notification
+      .select(
+        'reference_code',
+        'COUNT(*) as total_count',
+        'COUNT(viewed_at) as clicked_count'
+      )
+      .group(:reference_code)
+      .order('total_count DESC')
+      .limit(50)
 
-    @codes = Notification.distinct.order('reference_code').pluck(:reference_code)
+    # Get list of codes for search autocomplete (use top 50 codes already fetched, not all codes)
+    @codes = @code_stats.map(&:reference_code).compact
+
+    # Overall stats using database aggregation
+    @total_count = Notification.count
+    @clicked_count = Notification.where.not(viewed_at: nil).count
+
+    # Time-to-click stats calculated in SQL (avoid loading all rows into memory)
+    # Use database-specific syntax for date diff calculation
+    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
+      @avg_seconds = Notification
+        .where.not(viewed_at: nil)
+        .where.not(happened_at: nil)
+        .average('EXTRACT(EPOCH FROM (viewed_at - happened_at))')
+        &.to_i
+    else
+      # SQLite: use strftime to calculate seconds
+      @avg_seconds = Notification
+        .where.not(viewed_at: nil)
+        .where.not(happened_at: nil)
+        .average("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+    end
+
+    # Pre-aggregate link stats (top 50 by volume)
+    @link_stats = Notification
+      .where.not(passthrough_link: [nil, ''])
+      .select(
+        'passthrough_link',
+        'COUNT(*) as total_count',
+        'COUNT(viewed_at) as clicked_count'
+      )
+      .group(:passthrough_link)
+      .order('total_count DESC')
+      .limit(50)
+
+    # Pre-calculate chart data (last 12 months) - avoid running in view
+    twelve_months_ago = 12.months.ago
+    @sent_by_month = Notification
+      .where('created_at > ?', twelve_months_ago)
+      .group_by_month(:created_at)
+      .count
+
+    @clicked_by_month = Notification
+      .where.not(viewed_at: nil)
+      .where('created_at > ?', twelve_months_ago)
+      .group_by_month(:created_at)
+      .count
+  end
+
+  def notification_reference
+    @reference_code = params[:reference_code]
+    @notifications = Notification.where(reference_code: @reference_code)
+
+    # Basic counts (all done in SQL)
+    @total_sent = @notifications.count
+    @total_clicked = @notifications.where.not(viewed_at: nil).count
+    @click_rate = @total_sent > 0 ? (@total_clicked / @total_sent.to_f * 100).round(1) : 0
+    @unique_users = @notifications.distinct.count(:user_id)
+
+    # Time to click calculations - done entirely in SQL (avoid loading all rows into Ruby)
+    clicked_with_times = @notifications.where.not(viewed_at: nil).where.not(happened_at: nil)
+
+    if ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
+      # PostgreSQL: use EXTRACT and PERCENTILE_CONT for all stats in one query
+      time_stats = clicked_with_times.select(
+        'COUNT(*) as stat_count',
+        'AVG(EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as avg_seconds',
+        'MIN(EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as min_seconds',
+        'MAX(EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as max_seconds',
+        'PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM (viewed_at - happened_at)))::integer as median_seconds'
+      ).take
+
+      if time_stats && time_stats.stat_count.to_i > 0
+        @avg_seconds = time_stats.avg_seconds
+        @median_seconds = time_stats.median_seconds
+        @fastest_seconds = time_stats.min_seconds
+        @slowest_seconds = time_stats.max_seconds
+      end
+    else
+      # SQLite: no PERCENTILE_CONT, calculate separately
+      @avg_seconds = clicked_with_times
+        .average("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+
+      @fastest_seconds = clicked_with_times
+        .minimum("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+
+      @slowest_seconds = clicked_with_times
+        .maximum("(julianday(viewed_at) - julianday(happened_at)) * 86400")
+        &.to_i
+
+      # For median in SQLite, we need a subquery approach (approximation using LIMIT/OFFSET)
+      total_clicked_with_times = clicked_with_times.count
+      if total_clicked_with_times > 0
+        median_row = clicked_with_times
+          .select("(julianday(viewed_at) - julianday(happened_at)) * 86400 as diff_seconds")
+          .order('diff_seconds')
+          .offset(total_clicked_with_times / 2)
+          .limit(1)
+          .first
+        @median_seconds = median_row&.diff_seconds&.to_i
+      end
+    end
+
+    # Date range (single row queries with index)
+    @first_notification = @notifications.order(:created_at).limit(1).first
+    @last_notification = @notifications.order(created_at: :desc).limit(1).first
+
+    # Sample message
+    @sample_notification = @notifications.where.not(message_html: [nil, '']).order(created_at: :desc).limit(1).first
+
+    # Pre-aggregate link stats for this reference code (avoid N+1 in view)
+    @link_stats = @notifications
+      .where.not(passthrough_link: [nil, ''])
+      .select(
+        'passthrough_link',
+        'COUNT(*) as total_count',
+        'COUNT(viewed_at) as clicked_count'
+      )
+      .group(:passthrough_link)
+      .order('total_count DESC')
+      .limit(50)
+
+    # Pre-calculate chart data (avoid running queries in view)
+    @sent_by_month = @notifications.group_by_month(:created_at).count
+    @clicked_by_month = @notifications.where.not(viewed_at: nil).group_by_month(:created_at).count
+
+    # Flag for whether we have time stats to display
+    @has_time_stats = @avg_seconds.present?
   end
 
   def hate
@@ -73,7 +253,7 @@ class AdminController < ApplicationController
 
   def spam
     @posts = Thredded::PrivatePost
-      .where('content ILIKE ?', "%http%")
+      .where(Thredded::PrivatePost.arel_table[:content].matches('%http%'))
       .order('id DESC')
       .limit(params.fetch(:limit, 500))
       .includes(:postable)
@@ -96,5 +276,79 @@ class AdminController < ApplicationController
 
   def promos
     @codes = PageUnlockPromoCode.all.includes(:promotions)
+  end
+
+  private
+
+  # Calculate total words written across all users for a specific date
+  # Uses delta calculation: today's count - previous day's count for each entity
+  def calculate_words_written_for_date(target_date)
+    # Get all records for the target date grouped by entity
+    today_totals = WordCountUpdate.where(for_date: target_date)
+      .group(:entity_type, :entity_id)
+      .maximum(:word_count)
+
+    return 0 if today_totals.empty?
+
+    # Get the previous record for each entity (day before target_date or earlier)
+    prev_totals = {}
+    today_totals.keys.each do |entity_key|
+      entity_type, entity_id = entity_key
+      prev_record = WordCountUpdate
+        .where(entity_type: entity_type, entity_id: entity_id)
+        .where('for_date < ?', target_date)
+        .order(for_date: :desc)
+        .limit(1)
+        .pluck(:word_count)
+        .first
+      prev_totals[entity_key] = prev_record || 0
+    end
+
+    # Calculate deltas (only count positive deltas)
+    total_delta = 0
+    today_totals.each do |entity_key, today_count|
+      prev_count = prev_totals[entity_key] || 0
+      delta = today_count - prev_count
+      total_delta += delta if delta > 0
+    end
+
+    total_delta
+  end
+
+  # Calculate total words written across all users for a date range
+  def calculate_words_written_in_range(date_range)
+    start_date = date_range.first
+    end_date = date_range.last
+
+    # Get the latest word count for each entity within the range
+    latest_in_range = WordCountUpdate.where(for_date: date_range)
+      .group(:entity_type, :entity_id)
+      .maximum(:word_count)
+
+    return 0 if latest_in_range.empty?
+
+    # Get the previous record for each entity (before range started)
+    prev_totals = {}
+    latest_in_range.keys.each do |entity_key|
+      entity_type, entity_id = entity_key
+      prev_record = WordCountUpdate
+        .where(entity_type: entity_type, entity_id: entity_id)
+        .where('for_date < ?', start_date)
+        .order(for_date: :desc)
+        .limit(1)
+        .pluck(:word_count)
+        .first
+      prev_totals[entity_key] = prev_record || 0
+    end
+
+    # Calculate deltas
+    total_delta = 0
+    latest_in_range.each do |entity_key, current_count|
+      prev_count = prev_totals[entity_key] || 0
+      delta = current_count - prev_count
+      total_delta += delta if delta > 0
+    end
+
+    total_delta
   end
 end

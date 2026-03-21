@@ -35,11 +35,11 @@ class Religion < ApplicationRecord
   end
 
   def self.color
-    'indigo'
+    'indigo bg-amber-600'
   end
 
   def self.text_color
-    'indigo-text'
+    'indigo-text text-amber-600'
   end
 
   def self.hex_color

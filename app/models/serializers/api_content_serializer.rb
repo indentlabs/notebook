@@ -42,7 +42,10 @@ class ApiContentSerializer
           id:     category.id,
           label:  category.label,
           icon:   category.icon,
-          fields: category.attribute_fields.order(:position).map { |field|
+          fields: category.attribute_fields.order(:position).reject { |field|
+            # Filter out private fields from API responses
+            field.old_column_source == 'private_notes'
+          }.map { |field|
             {
               id:     field.id,
               label:  field.label,

@@ -1,0 +1,140 @@
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8 overflow-hidden">
+  <div class="p-6">
+    <!-- Top row: Daily progress and countdown -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
+      <!-- Daily Goal Progress -->
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <i class="material-icons mr-2 text-green-500">today</i>
+            Today's Progress
+            <% unless @active_goals.any? %>
+              <span class="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400">(default goal)</span>
+            <% end %>
+          </h2>
+          <div class="text-right">
+            <span class="text-2xl font-bold text-gray-900 dark:text-white"><%= number_with_delimiter(@words_today) %></span>
+            <span class="text-gray-500 dark:text-gray-400"> / <%= number_with_delimiter(@max_daily_goal) %> words</span>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div class="absolute inset-0 h-full rounded-full transition-all duration-500 ease-out <%= @daily_progress_percentage >= 100 ? 'bg-green-500' : 'bg-blue-500' %>"
+               style="width: <%= @daily_progress_percentage %>%">
+          </div>
+          <% if @daily_progress_percentage >= 100 %>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <i class="material-icons text-white text-sm">check</i>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex items-center justify-between mt-2 text-sm">
+          <% if @words_remaining_today > 0 %>
+            <span class="text-gray-600 dark:text-gray-400">
+              <span class="font-medium text-gray-900 dark:text-white"><%= number_with_delimiter(@words_remaining_today) %></span> words to go
+            </span>
+          <% else %>
+            <span class="text-green-600 dark:text-green-400 font-medium flex items-center">
+              <i class="material-icons text-sm mr-1">celebration</i>
+              Daily goal complete!
+            </span>
+          <% end %>
+          <span class="text-gray-500 dark:text-gray-400"><%= number_with_precision(@daily_progress_percentage, precision: 0) %>%</span>
+        </div>
+      </div>
+
+      <!-- Time Remaining Today -->
+      <div class="lg:w-48 flex-shrink-0">
+        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 rounded-lg p-4 text-center border border-indigo-100 dark:border-indigo-800">
+          <div class="text-xs uppercase tracking-wide text-indigo-600 dark:text-indigo-400 font-medium mb-1">Time Left Today</div>
+          <div class="text-2xl font-bold text-indigo-700 dark:text-indigo-300"
+               data-controller="countdown"
+               data-countdown-target="display"
+               data-countdown-timezone-value="<%= current_user.time_zone %>">
+            --:--:--
+          </div>
+          <div class="text-xs text-indigo-500 dark:text-indigo-400 mt-1">until midnight</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+          <div class="text-xl font-bold text-gray-900 dark:text-white">
+            <%= number_with_delimiter(@total_words_period) %>
+          </div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Total Words (<%= @chart_days %> days)</div>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+          <div class="text-xl font-bold text-green-600 dark:text-green-400">
+            <%= @days_goal_met %>/<%= @daily_word_counts_30_days.size %>
+          </div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Days Goal Met</div>
+        </div>
+        <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-center">
+          <div class="text-xl font-bold text-indigo-600 dark:text-indigo-400">
+            <%= @current_streak %>
+          </div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">Day Streak</div>
+        </div>
+      </div>
+
+      <!-- Chart Header with Time Toggle -->
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+          <i class="material-icons text-sm mr-2 text-gray-400">show_chart</i>
+          Words Written
+          <span class="ml-3 text-xs text-gray-500 dark:text-gray-400 flex items-center">
+            <span class="inline-block w-3 h-3 bg-blue-500 rounded mr-1"></span>
+            Words
+            <span class="inline-block w-4 ml-3 mr-1" style="border-top: 2px dashed #10B981;"></span>
+            Goal
+          </span>
+        </h3>
+        <div class="flex items-center space-x-1">
+          <% [7, 14, 30, 90].each do |days| %>
+            <%= link_to "#{days}d", writing_goals_path(days: days),
+                class: "px-2 py-1 text-xs rounded #{@chart_days == days ? 'bg-blue-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}" %>
+          <% end %>
+        </div>
+      </div>
+
+      <div>
+        <%
+          # Format dates as "Dec 1" for readability
+          formatted_word_counts = @daily_word_counts_30_days.transform_keys { |date| date.strftime("%b %-d") }
+        %>
+        <%= column_chart formatted_word_counts,
+            colors: ["#3B82F6"],
+            height: "280px",
+            library: {
+              plugins: {
+                legend: { display: false },
+                annotation: {
+                  annotations: {
+                    goalLine: {
+                      type: 'line',
+                      yMin: @max_daily_goal,
+                      yMax: @max_daily_goal,
+                      borderColor: '#10B981',
+                      borderWidth: 2,
+                      borderDash: [5, 5],
+                      label: {
+                        display: false
+                      }
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: { ticks: { maxTicksLimit: 8, maxRotation: 45 } }
+              }
+            } %>
+      </div>
+    </div>
+  </div>
+</div>
