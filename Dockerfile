@@ -12,15 +12,15 @@ ENV RAILS_ENV=${RAILS_ENV}
 RUN groupadd --system --gid 1000 notebookai && \
     useradd --system --home-dir /home/notebookai --gid notebookai --uid 1000 --shell /bin/bash notebookai
 
+# Install system dependencies (including curl which is needed for Node download)
+RUN apt-get update -qq && \
+    apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl && \
+    rm --recursive --force /var/lib/apt/lists/*
+
 # Install Node.js 16.x explicitly (NodeSource dropped support for it)
 RUN curl -fsSLO https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-x64.tar.gz && \
     tar -xzf node-v16.20.2-linux-x64.tar.gz -C /usr/local --strip-components=1 && \
     rm node-v16.20.2-linux-x64.tar.gz
-
-# Install system dependencies
-RUN apt-get update -qq && \
-    apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl && \
-    rm --recursive --force /var/lib/apt/lists/*
 
 # Install yarn via npm (matches local tools specification)
 RUN npm install -g yarn@1.22.22
