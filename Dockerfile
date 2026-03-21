@@ -47,6 +47,9 @@ COPY . .
 # Adjust permissions on all copied files to match the system user
 RUN chown -R notebookai:notebookai /home/notebookai
 
+# Precompile assets during docker build to prevent OOM memory spikes at runtime
+RUN SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
+
 # This image should expose port 3000.
 EXPOSE 3000/tcp
 
