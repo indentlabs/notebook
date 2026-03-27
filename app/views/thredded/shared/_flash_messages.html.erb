@@ -1,0 +1,24 @@
+<% [:success, :error, :notice, :alert].each do |key| %>
+  <% if flash[key] %>
+    <% 
+      color_classes = case key.to_sym
+                      when :success then "bg-green-50 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/50"
+                      when :error, :alert then "bg-red-50 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50"
+                      when :warning then "bg-yellow-50 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800/50"
+                      else "bg-blue-50 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50"
+                      end
+      icon = case key.to_sym
+             when :success then "check_circle"
+             when :error, :alert then "error"
+             when :warning then "warning"
+             else "info"
+             end
+    %>
+    <div class="flex items-center p-4 mb-4 text-sm border rounded-lg <%= color_classes %>" role="alert" data-thredded-flash-message>
+      <i class="material-icons flex-shrink-0 inline mr-3" style="font-size: 20px;"><%= icon %></i>
+      <div class="font-medium">
+        <%= flash[key] %>
+      </div>
+    </div>
+  <% end %>
+<% end %>

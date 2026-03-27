@@ -4,13 +4,18 @@
 
 <%= thredded_page do %>
   <div class="thredded--main-section mt-6">
+    <%
+      pending_review_count = Thredded::Post.pending_moderation.count
+      approved_today_count = Thredded::Post.where(moderation_state: :approved).where('updated_at >= ?', Time.zone.now.beginning_of_day).count
+      blocked_today_count  = Thredded::Post.where(moderation_state: :blocked).where('updated_at >= ?', Time.zone.now.beginning_of_day).count
+    %>
     <!-- Moderation Stats Dashboard -->
-    <div class="moderation-dashboard grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="moderation-dashboard grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
       <div class="stat-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center text-center">
         <div class="stat-icon pending text-3xl mb-2 text-amber-500">
           <i class="material-icons text-current text-3xl">pending_actions</i>
         </div>
-        <div class="stat-value text-3xl font-bold dark:text-white"><%= @posts.try(:total_count) || 0 %></div>
+        <div class="stat-value text-3xl font-bold dark:text-white"><%= pending_review_count %></div>
         <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Pending Review</div>
       </div>
       
@@ -18,7 +23,7 @@
         <div class="stat-icon approved text-3xl mb-2 text-emerald-500">
           <i class="material-icons text-current text-3xl">check_circle</i>
         </div>
-        <div class="stat-value text-3xl font-bold dark:text-white">--</div>
+        <div class="stat-value text-3xl font-bold dark:text-white"><%= approved_today_count %></div>
         <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Approved Today</div>
       </div>
       
@@ -26,17 +31,10 @@
         <div class="stat-icon blocked text-3xl mb-2 text-red-500">
           <i class="material-icons text-current text-3xl">block</i>
         </div>
-        <div class="stat-value text-3xl font-bold dark:text-white">--</div>
+        <div class="stat-value text-3xl font-bold dark:text-white"><%= blocked_today_count %></div>
         <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Blocked Today</div>
       </div>
       
-      <div class="stat-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center text-center">
-        <div class="stat-icon users text-3xl mb-2 text-blue-500">
-          <i class="material-icons text-current text-3xl">group</i>
-        </div>
-        <div class="stat-value text-3xl font-bold dark:text-white">--</div>
-        <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Active Users</div>
-      </div>
     </div>
     
     <!-- Last Moderated Notice -->
