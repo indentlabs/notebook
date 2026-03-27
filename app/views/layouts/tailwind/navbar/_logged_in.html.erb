@@ -26,34 +26,31 @@
   <!-- right-hand side of navbar -->
   <div class="pr-4 lg:pr-6 flex items-center justify-end space-x-2 sm:space-x-3 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false, mobileSearchOpen: false }">
     <% if user_signed_in? %>
-      <!-- Mobile Search Toggle -->
-      <button @click.stop="mobileSearchOpen = true; $nextTick(() => document.getElementById('navbar-search-input').focus())" 
-              x-show="!mobileSearchOpen"
-              class="md:hidden w-10 h-10 flex items-center justify-center bg-white bg-opacity-20 border-white border-opacity-30 border-2 hover:bg-opacity-30 rounded-full transition-all duration-200 focus:outline-none text-white">
-        <i class="material-icons">search</i>
-      </button>
-
       <!-- Dynamic Autocomplete Search -->
-      <div class="items-center relative"
-           :class="{ 'hidden md:inline-flex': !mobileSearchOpen, 'flex fixed top-0 left-0 w-full h-14 z-50 bg-white dark:bg-gray-800 px-2 items-center': mobileSearchOpen }"
+      <div class="items-center relative flex transition-all duration-300"
+           :class="{ 'fixed top-0 left-0 w-full h-14 z-50 px-2 sm:px-4 flex items-center bg-notebook-blue dark:bg-gray-900 shadow-md': mobileSearchOpen, 'inline-flex': !mobileSearchOpen }"
+           :style="mobileSearchOpen ? 'background-color: <%= @navbar_color.presence || '#2196F3' %>' : ''"
            @keydown.escape.window="mobileSearchOpen = false"
            x-data="searchAutocomplete()"
            x-init="init()"
            @click.away="closeDropdown(); mobileSearchOpen = false">
 
-
+        <!-- Back button when mobile search is open -->
+        <button x-show="mobileSearchOpen" @click.stop="mobileSearchOpen = false; closeDropdown()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 mr-2 transition-colors focus:outline-none flex-shrink-0" style="display: none;">
+          <i class="material-icons">arrow_back</i>
+        </button>
 
         <!-- Wrap in form to isolate autocomplete context -->
-        <form onsubmit="return false;" autocomplete="off" class="w-full md:w-auto">
-          <input class="border-2 border-white border-opacity-50 dark:border-gray-400 text-notebook-blue dark:text-blue-400 focus:border-white focus:border-opacity-80 dark:focus:border-gray-300 bg-white dark:bg-gray-800 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                 :class="{ 'w-full h-10': mobileSearchOpen, 'w-64 lg:w-80 xl:w-96 h-11': !mobileSearchOpen }"
+        <form onsubmit="return false;" autocomplete="off" class="transition-all duration-300" :class="{ 'flex-1 w-full': mobileSearchOpen, 'w-24 sm:w-32 md:w-auto': !mobileSearchOpen }">
+          <input class="border-2 border-white border-opacity-50 dark:border-gray-400 text-notebook-blue dark:text-blue-400 focus:border-white focus:border-opacity-80 dark:focus:border-gray-300 bg-white dark:bg-gray-800 px-3 text-sm rounded focus:outline-none placeholder:text-gray-500 dark:placeholder:text-gray-400 transition-all duration-300"
+                 :class="{ 'w-full h-10': mobileSearchOpen, 'w-full h-10 md:h-11 md:w-64 lg:w-80 xl:w-96': !mobileSearchOpen }"
                  type="search"
                  id="navbar-search-input"
                  name="navbar_search_query"
                  x-model="query"
                  @input="handleInput()"
                  @keydown="handleKeydown($event)"
-                 @focus="handleFocus()"
+                 @focus="if(window.innerWidth < 768) mobileSearchOpen = true; handleFocus()"
                  placeholder="Search your notebook"
                  autocomplete="new-password"
                  autocorrect="off"
