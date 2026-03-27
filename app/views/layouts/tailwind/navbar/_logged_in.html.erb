@@ -27,8 +27,8 @@
   <div class="pr-4 lg:pr-6 flex items-center justify-end space-x-2 sm:space-x-3 ml-auto h-14" x-data="{ notificationsDropdownOpen: false, accountDropdownOpen: false, mobileSearchOpen: false }">
     <% if user_signed_in? %>
       <!-- Dynamic Autocomplete Search -->
-      <div class="items-center relative flex transition-all duration-300"
-           :class="{ 'fixed top-0 left-0 w-full h-14 z-50 px-2 sm:px-4 flex items-center bg-notebook-blue dark:bg-gray-900 shadow-md': mobileSearchOpen, 'inline-flex': !mobileSearchOpen }"
+      <div class="items-center transition-all duration-300"
+           :class="{ 'absolute top-0 left-0 w-full h-14 z-50 px-2 sm:px-4 flex items-center bg-notebook-blue dark:bg-gray-900 shadow-md': mobileSearchOpen, 'relative inline-flex': !mobileSearchOpen }"
            :style="mobileSearchOpen ? 'background-color: <%= @navbar_color.presence || '#2196F3' %>' : ''"
            @keydown.escape.window="mobileSearchOpen = false"
            x-data="searchAutocomplete()"
@@ -50,7 +50,7 @@
                  x-model="query"
                  @input="handleInput()"
                  @keydown="handleKeydown($event)"
-                 @focus="if(window.innerWidth < 768) mobileSearchOpen = true; handleFocus()"
+                 @focus="if(window.innerWidth < 768) { mobileSearchOpen = true; showSidebar = false; }; handleFocus()"
                  placeholder="Search your notebook"
                  autocomplete="new-password"
                  autocorrect="off"
