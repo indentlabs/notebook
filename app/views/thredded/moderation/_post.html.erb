@@ -1,19 +1,80 @@
 <% post, content = post_and_content if local_assigns.key?(:post_and_content) %>
-<%= content_tag :article, id: dom_id(post), class: 'thredded--post thredded--post-moderation' do %>
-  <%= render 'thredded/posts_common/actions', post: post %>
-  <%= render 'thredded/posts_common/header_with_user_and_topic',
-             post:           post,
-             post_user_link: if post.user
-                               link_to(post.user.thredded_display_name, user_moderation_path(post.user.id), class: User.text_color)
-                             else
-                               content_tag :em, t('thredded.null_user_name')
-                             end
-  %>
-  <%= content || render('thredded/posts/content', post: post) %>
+<%= content_tag :article, id: dom_id(post), class: 'thredded--post thredded--post-moderation bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm mb-6 overflow-hidden' do %>
+  <div class="p-4 border-b border-stone-100 dark:border-gray-700/50">
+    <div class="flex items-start justify-between">
+      <div class="flex items-center gap-3">
+        <% topic = post.to_model.postable %>
+        <% if post.user %>
+          <div class="relative flex-shrink-0">
+            <%= image_tag post.user.image_url(size: 40),
+                class: 'h-10 w-10 rounded-xl border border-stone-200 dark:border-gray-600 object-cover' %>
+            <% if post.user.try(:favorite_page_type).present? %>
+              <span class="absolute -bottom-1 -right-1 block h-5 w-5 rounded-md <%= content_class_from_name(post.user.favorite_page_type).color %> border border-white dark:border-gray-800 flex items-center justify-center">
+                <i class="material-icons text-white" style="font-size: 10px;"><%= content_class_from_name(post.user.favorite_page_type).icon %></i>
+              </span>
+            <% end %>
+          </div>
+
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 text-sm sm:text-base">
+              <span class="font-semibold text-stone-900 dark:text-gray-100">
+                <%= link_to post.user.thredded_display_name, user_moderation_path(post.user.id), class: "hover:underline #{User.text_color}" %>
+              </span>
+              <span class="text-stone-500 dark:text-gray-400 text-sm">
+                <% if post.to_model.first_post_in_topic? %>
+                  started
+                <% else %>
+                  replied in
+                <% end %>
+                <%= link_to truncate(topic.title, length: 60), topic_path(topic), class: "font-medium text-blue-600 dark:text-blue-400 hover:underline" %>
+              </span>
+            </div>
+            <div class="text-xs text-stone-400 dark:text-gray-500 mt-0.5">
+              <%= time_ago post.created_at %>
+            </div>
+          </div>
+        <% else %>
+          <div class="h-10 w-10 rounded-xl bg-stone-200 dark:bg-gray-700 flex items-center justify-center">
+            <i class="material-icons text-stone-400 dark:text-gray-500">person_off</i>
+          </div>
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:gap-1.5 text-sm sm:text-base">
+              <span class="font-semibold text-stone-500 dark:text-gray-400">
+                <%= content_tag :em, t('thredded.null_user_name') %>
+              </span>
+              <span class="text-stone-500 dark:text-gray-400 text-sm">
+                <% if post.to_model.first_post_in_topic? %>
+                  started
+                <% else %>
+                  replied in
+                <% end %>
+                <%= link_to truncate(topic.title, length: 60), topic_path(topic), class: "font-medium text-blue-600 dark:text-blue-400 hover:underline" %>
+              </span>
+            </div>
+            <div class="text-xs text-stone-400 dark:text-gray-500 mt-0.5">
+              <%= time_ago post.created_at %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="flex items-center text-stone-400">
+        <%= render 'thredded/posts_common/actions', post: post %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="p-4 prose dark:prose-invert max-w-none">
+    <%= content || render('thredded/posts/content', post: post) %>
+  </div>
+  
   <% if post.blocked? %>
-    <p class="thredded--alert thredded--alert-danger">
+    <p class="bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 p-4 text-sm border-l-4 border-red-500 mx-4 mb-4 rounded-r">
       <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
     </p>
   <% end %>
-  <%= render 'post_moderation_actions', post: post %>
+  
+  <div class="bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-700">
+    <%= render 'post_moderation_actions', post: post %>
+  </div>
 <% end %>

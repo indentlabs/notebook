@@ -3,54 +3,56 @@
 <%= render 'nav' %>
 
 <%= thredded_page do %>
-  <div class="thredded--main-section">
+  <div class="thredded--main-section mt-6">
     <!-- Moderation Stats Dashboard -->
-    <div class="moderation-dashboard">
-      <div class="stat-card">
-        <div class="stat-icon pending">
-          <i class="material-icons">pending_actions</i>
+    <div class="moderation-dashboard grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="stat-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center text-center">
+        <div class="stat-icon pending text-3xl mb-2 text-amber-500">
+          <i class="material-icons text-current text-3xl">pending_actions</i>
         </div>
-        <div class="stat-value"><%= @posts.try(:total_count) || 0 %></div>
-        <div class="stat-label">Pending Review</div>
+        <div class="stat-value text-3xl font-bold dark:text-white"><%= @posts.try(:total_count) || 0 %></div>
+        <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Pending Review</div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-icon approved">
-          <i class="material-icons">check_circle</i>
+      <div class="stat-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center text-center">
+        <div class="stat-icon approved text-3xl mb-2 text-emerald-500">
+          <i class="material-icons text-current text-3xl">check_circle</i>
         </div>
-        <div class="stat-value">--</div>
-        <div class="stat-label">Approved Today</div>
+        <div class="stat-value text-3xl font-bold dark:text-white">--</div>
+        <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Approved Today</div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-icon blocked">
-          <i class="material-icons">block</i>
+      <div class="stat-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center text-center">
+        <div class="stat-icon blocked text-3xl mb-2 text-red-500">
+          <i class="material-icons text-current text-3xl">block</i>
         </div>
-        <div class="stat-value">--</div>
-        <div class="stat-label">Blocked Today</div>
+        <div class="stat-value text-3xl font-bold dark:text-white">--</div>
+        <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Blocked Today</div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-icon users">
-          <i class="material-icons">group</i>
+      <div class="stat-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 flex flex-col items-center text-center">
+        <div class="stat-icon users text-3xl mb-2 text-blue-500">
+          <i class="material-icons text-current text-3xl">group</i>
         </div>
-        <div class="stat-value">--</div>
-        <div class="stat-label">Active Users</div>
+        <div class="stat-value text-3xl font-bold dark:text-white">--</div>
+        <div class="stat-label text-sm text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-1">Active Users</div>
       </div>
     </div>
     
     <!-- Last Moderated Notice -->
     <% if @last_moderated_record %>
-      <div class="thredded--moderated-notice">
-        <i class="material-icons">check_circle</i>
-        <div class="notice-content">
-          <div class="notice-title">Successfully moderated</div>
-          <div class="notice-text">
-            <%= render_post_moderation_records([@last_moderated_record]) %>
+      <div class="thredded--moderated-notice bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 p-4 rounded-lg mb-8 flex justify-between items-start shadow-sm transition-all">
+        <div class="flex">
+          <i class="material-icons text-emerald-500 mr-3 mt-0.5">check_circle</i>
+          <div class="notice-content">
+            <div class="notice-title font-bold mb-1">Successfully moderated</div>
+            <div class="notice-text text-sm">
+              <%= render_post_moderation_records([@last_moderated_record]) %>
+            </div>
           </div>
         </div>
-        <button class="notice-dismiss" onclick="this.parentElement.style.display='none'">
-          <i class="material-icons">close</i>
+        <button class="notice-dismiss text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors p-1" onclick="this.parentElement.style.display='none'">
+          <i class="material-icons text-sm">close</i>
         </button>
       </div>
     <% end %>
@@ -58,32 +60,36 @@
     <!-- Posts List -->
     <% if @posts.present? %>
       <div class="moderation-posts">
-        <div class="moderation-posts-header">
-          <h3>
-            <i class="material-icons">forum</i>
+        <div class="moderation-posts-header flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+          <h3 class="text-xl font-bold text-slate-800 dark:text-white flex items-center mb-4 sm:mb-0">
+            <i class="material-icons mr-2 text-slate-400 dark:text-slate-500">forum</i>
             Posts Awaiting Review
           </h3>
-          <div class="filter-buttons">
-            <button class="active">All</button>
-            <button>Topics</button>
-            <button>Replies</button>
-            <button>Reports</button>
+          <div class="filter-buttons flex flex-wrap gap-2">
+            <button class="active px-4 py-1.5 text-sm rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium border border-blue-200 dark:border-blue-800 transition-colors">All</button>
+            <button class="px-4 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium border border-transparent transition-colors">Topics</button>
+            <button class="px-4 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium border border-transparent transition-colors">Replies</button>
+            <button class="px-4 py-1.5 text-sm rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-medium border border-transparent transition-colors">Reports</button>
           </div>
         </div>
         
-        <%= render_posts @posts,
-                         partial: 'thredded/moderation/post',
-                         content_partial: 'thredded/posts/content' %>
+        <div class="space-y-6">
+          <%= render_posts @posts,
+                           partial: 'thredded/moderation/post',
+                           content_partial: 'thredded/posts/content' %>
+        </div>
       </div>
       
-      <%= paginate @posts %>
+      <div class="mt-8 flex justify-center">
+        <%= paginate @posts %>
+      </div>
     <% else %>
-      <div class="thredded--empty">
-        <div class="empty-icon">
-          <i class="material-icons">inbox</i>
+      <div class="thredded--empty bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 py-16 px-6 text-center mt-8">
+        <div class="empty-icon text-slate-300 dark:text-slate-600 mb-4 inline-block">
+          <i class="material-icons" style="font-size: 48px;">inbox</i>
         </div>
-        <h3 class="thredded--empty--title"><%= t 'thredded.moderation.pending.empty.title' %></h3>
-        <p><%= t 'thredded.moderation.pending.empty.content' %></p>
+        <h3 class="thredded--empty--title text-xl font-bold text-slate-800 dark:text-white mb-2"><%= t 'thredded.moderation.pending.empty.title' %></h3>
+        <p class="text-slate-500 dark:text-slate-400 max-w-md mx-auto"><%= t 'thredded.moderation.pending.empty.content' %></p>
       </div>
     <% end %>
   </div>

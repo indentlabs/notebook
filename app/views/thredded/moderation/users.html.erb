@@ -3,28 +3,28 @@
 <%= render 'nav' %>
 
 <%= thredded_page do %>
-  <div class="thredded--main-section">
+  <div class="thredded--main-section mt-6">
     <!-- Users Header -->
-    <div class="users-header">
-      <div class="users-title">
-        <i class="material-icons">group</i>
+    <div class="users-header flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-700 gap-4">
+      <div class="users-title flex items-center text-2xl font-bold dark:text-white">
+        <i class="material-icons text-3xl mr-3 text-slate-400 dark:text-slate-500">group</i>
         <h2>User Management</h2>
       </div>
       
       <!-- Search Form -->
-      <div class="users-search">
+      <div class="users-search relative w-full md:w-auto">
         <%= form_tag users_moderation_path,
                      method: 'get',
-                     class: 'search-form',
+                     class: 'search-form flex w-full',
                      'data-thredded-turboform' => true do %>
-          <div class="search-input-wrapper">
-            <i class="material-icons">search</i>
+          <div class="search-input-wrapper relative w-full flex items-center">
+            <i class="material-icons absolute left-3 text-slate-400">search</i>
             <%= text_field_tag :q, @query,
                                type: 'search',
-                               class: 'search-input',
+                               class: 'search-input w-full md:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-l-md text-sm focus:ring-blue-500 focus:border-blue-500 dark:text-white placeholder-slate-400 dark:placeholder-slate-500',
                                autofocus: @query.presence && !@users.presence,
                                placeholder: t('thredded.moderation.search_users.form_placeholder') %>
-            <button type="submit" class="search-button">
+            <button type="submit" class="search-button px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-r-md transition-colors border border-blue-600 hover:border-blue-700">
               Search
             </button>
           </div>
@@ -34,98 +34,114 @@
     
     <% if @users.present? %>
       <% if @query.present? %>
-        <div class="search-results-notice">
-          <i class="material-icons">info</i>
+        <div class="search-results-notice flex items-center p-4 mb-6 text-blue-800 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-800">
+          <i class="material-icons mr-2">info</i>
           <span>Showing results for "<%= @query %>"</span>
         </div>
       <% end %>
       
       <!-- Users Table -->
-      <div class="users-table-container">
-        <table class="users-table">
-          <caption class="table-caption">
-            <%= page_entries_info @users %>
-          </caption>
-          <thead>
-            <tr>
-              <th class="user-column">
-                <i class="material-icons">person</i>
-                <%= t 'thredded.moderation.user.name' %>
-              </th>
-              <th class="status-column">
-                <i class="material-icons">security</i>
-                <%= t 'thredded.moderation.moderation_state.name' %>
-              </th>
-              <th class="updated-column">
-                <i class="material-icons">update</i>
-                Last Updated
-              </th>
-              <th class="actions-column">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @users.each do |user| %>
-              <% user_detail = user.thredded_user_detail %>
-              <tr class="user-row">
-                <td class="user-cell">
-                  <div class="user-info">
-                    <%= image_tag user.image_url(size: 40), class: 'user-avatar' %>
-                    <div class="user-details">
-                      <%= link_to user.thredded_display_name, 
-                                  user_moderation_path(user.id), 
-                                  class: "user-name #{User.text_color}" %>
-                      <span class="user-meta">
-                        Member since <%= user.created_at.strftime('%b %Y') %>
-                      </span>
-                    </div>
+      <div class="users-table-container bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-8">
+        <div class="overflow-x-auto">
+          <table class="users-table w-full text-left border-collapse">
+            <caption class="table-caption text-sm text-slate-500 dark:text-slate-400 text-left p-4 bg-slate-50/50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+              <%= page_entries_info @users %>
+            </caption>
+            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="user-column px-6 py-3 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <i class="material-icons text-[18px] mr-2 text-slate-400">person</i>
+                    <%= t 'thredded.moderation.user.name' %>
                   </div>
-                </td>
-                <td class="status-cell">
-                  <span class="moderation-badge <%= user_detail.moderation_state %>">
-                    <% case user_detail.moderation_state.to_s %>
-                    <% when 'approved' %>
-                      <i class="material-icons">check_circle</i>
-                    <% when 'blocked' %>
-                      <i class="material-icons">block</i>
-                    <% when 'pending_moderation' %>
-                      <i class="material-icons">schedule</i>
-                    <% else %>
-                      <i class="material-icons">help</i>
-                    <% end %>
-                    <%= user_detail.moderation_state.to_s.humanize %>
-                  </span>
-                </td>
-                <td class="updated-cell">
-                  <%= time_ago user_detail.moderation_state_changed_at, default: 'Never' %>
-                </td>
-                <td class="actions-cell">
-                  <%= link_to user_moderation_path(user.id), 
-                              class: 'action-button view' do %>
-                    <i class="material-icons">visibility</i>
-                    View
-                  <% end %>
-                </td>
+                </th>
+                <th class="status-column px-6 py-3 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <i class="material-icons text-[18px] mr-2 text-slate-400">security</i>
+                    <%= t 'thredded.moderation.moderation_state.name' %>
+                  </div>
+                </th>
+                <th class="updated-column px-6 py-3 whitespace-nowrap hidden sm:table-cell">
+                  <div class="flex items-center">
+                    <i class="material-icons text-[18px] mr-2 text-slate-400">update</i>
+                    Last Updated
+                  </div>
+                </th>
+                <th class="actions-column px-6 py-3 text-right">Actions</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
-        
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-700/50">
+              <% @users.each do |user| %>
+                <% user_detail = user.thredded_user_detail %>
+                <tr class="user-row hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <td class="user-cell px-6 py-4">
+                    <div class="user-info flex items-center">
+                      <%= image_tag user.image_url(size: 40), class: 'user-avatar w-10 h-10 rounded-full mr-3 border border-slate-200 dark:border-slate-700' %>
+                      <div class="user-details flex flex-col">
+                        <%= link_to user.thredded_display_name, 
+                                    user_moderation_path(user.id), 
+                                    class: "user-name font-medium hover:underline #{User.text_color}" %>
+                        <span class="user-meta text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          Member since <%= user.created_at.strftime('%b %Y') %>
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="status-cell px-6 py-4">
+                    <% badge_class = case user_detail.moderation_state.to_s
+                                     when 'approved' then 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
+                                     when 'blocked' then 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                                     when 'pending_moderation' then 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'
+                                     else 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                     end %>
+                    <span class="moderation-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= badge_class %>">
+                      <% case user_detail.moderation_state.to_s %>
+                      <% when 'approved' %>
+                        <i class="material-icons text-[14px] mr-1">check_circle</i>
+                      <% when 'blocked' %>
+                        <i class="material-icons text-[14px] mr-1">block</i>
+                      <% when 'pending_moderation' %>
+                        <i class="material-icons text-[14px] mr-1">schedule</i>
+                      <% else %>
+                        <i class="material-icons text-[14px] mr-1">help</i>
+                      <% end %>
+                      <%= user_detail.moderation_state.to_s.humanize %>
+                    </span>
+                  </td>
+                  <td class="updated-cell px-6 py-4 text-sm text-slate-500 dark:text-slate-400 hidden sm:table-cell">
+                    <%= time_ago user_detail.moderation_state_changed_at, default: 'Never' %>
+                  </td>
+                  <td class="actions-cell px-6 py-4 text-right">
+                    <%= link_to user_moderation_path(user.id), 
+                                class: 'action-button view inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-md transition-colors' do %>
+                      <i class="material-icons text-[16px] mr-1">visibility</i>
+                      View
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="flex justify-center mt-8">
         <%= paginate @users %>
       </div>
     <% else %>
-      <div class="no-results">
-        <div class="no-results-icon">
-          <i class="material-icons">search_off</i>
+      <div class="no-results bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 py-16 px-6 text-center mt-8">
+        <div class="no-results-icon text-slate-300 dark:text-slate-600 mb-4 inline-block">
+          <i class="material-icons text-[48px]">search_off</i>
         </div>
-        <h3>No users found</h3>
+        <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-2">No users found</h3>
         <% if @query.present? %>
-          <p>No users match your search for "<%= @query %>"</p>
-          <%= link_to users_moderation_path, class: 'clear-search-btn' do %>
-            <i class="material-icons">clear</i>
+          <p class="text-slate-500 dark:text-slate-400 mb-6">No users match your search for "<%= @query %>"</p>
+          <%= link_to users_moderation_path, class: 'clear-search-btn inline-flex items-center px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors' do %>
+            <i class="material-icons mr-2 text-[18px]">clear</i>
             Clear search
           <% end %>
         <% else %>
-          <p>There are no users to display.</p>
+          <p class="text-slate-500 dark:text-slate-400">There are no users to display.</p>
         <% end %>
       </div>
     <% end %>

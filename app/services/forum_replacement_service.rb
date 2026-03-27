@@ -577,7 +577,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 0
+    gremlins_phase = 3
     replaced_text = text.dup
 
     # Page tag replacements
@@ -635,6 +635,7 @@ class ForumReplacementService < Service
   end
 
   def self.wrapped(text, tooltip, color='blue')
-    "<span class='bg-#{color}-100 text-#{color}-900 p-1 rounded tooltip-top inline-block cursor-help' data-tooltip='#{tooltip}'>#{text}</span>"
+    # Flat, simple, soft highlight reflecting the site aesthetic (avoiding malware link vibes)
+    "<span class='bg-#{color}-100 text-#{color}-900 px-1 rounded-md tooltip-top cursor-help hover:bg-#{color}-200 transition-colors' data-tooltip='#{tooltip}'>#{text}</span>"
   end
 end
