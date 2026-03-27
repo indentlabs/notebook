@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_03_09_033957) do
+ActiveRecord::Schema.define(version: 2026_03_21_082539) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -1298,7 +1298,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "folder_id"
     t.integer "cached_word_count"
     t.datetime "archived_at"
-    t.integer "status", default: 0
+    t.integer "status", default: 2
     t.index ["archived_at"], name: "index_documents_on_archived_at"
     t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
     t.index ["deleted_at", "universe_id"], name: "index_documents_on_deleted_at_and_universe_id"
@@ -1725,6 +1725,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "src_file_size"
     t.datetime "src_updated_at"
     t.integer "position"
+    t.text "notes"
     t.index ["content_type", "content_id", "pinned"], name: "index_image_uploads_on_content_pinned"
     t.index ["content_type", "content_id", "position"], name: "index_image_uploads_on_content_type_and_content_id_and_position"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
@@ -3521,7 +3522,6 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.string "notes"
     t.string "private_notes"
     t.boolean "favorite", default: false
-    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id", "privacy", "deleted_at"], name: "index_timelines_on_user_privacy_deleted"
     t.index ["user_id"], name: "index_timelines_on_user_id"
