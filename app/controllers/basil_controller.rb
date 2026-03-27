@@ -822,12 +822,18 @@ class BasilController < ApplicationController
     )
 
     if @commission.nil?
-      render json: { error: "Commission not found" }, status: :not_found
+      respond_to do |format|
+        format.html { redirect_back fallback_location: root_path, alert: 'Commission not found.' }
+        format.all { render json: { error: "Commission not found" }, status: :not_found }
+      end
       return
     end
 
     @commission.destroy!
-    render json: { success: true }, status: 200
+    respond_to do |format|
+      format.html { redirect_back fallback_location: root_path, notice: 'Image successfully deleted.' }
+      format.all { render json: { success: true }, status: 200 }
+    end
   end
 
   private

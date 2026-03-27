@@ -67,9 +67,15 @@
                     <% end %>
                   </div>
                   <div class="p-3 border-t border-gray-100 dark:border-gray-700">
-                    <span class="text-xs text-gray-500">
-                      <%= Filesize.from("#{image_data.src_file_size}B").to_f('KB').round(2) %> KB
-                    </span>
+                    <div class="mb-2">
+                      <span class="text-xs text-gray-500">
+                        <%= Filesize.from("#{image_data.src_file_size}B").to_f('KB').round(2) %> KB
+                      </span>
+                    </div>
+                    <textarea class="w-full text-sm p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 js-image-notes" rows="2" placeholder="Add descriptions, creation date, or notes..." data-image-id="<%= image_id %>"><%= image_data.notes %></textarea>
+                    <div class="text-right mt-1">
+                      <button class="btn-small text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded js-save-image-notes" style="display: none;">Save Notes</button>
+                    </div>
                   </div>
                   
                   <!-- Pin button -->
@@ -305,6 +311,88 @@ function initializeGalleryEvents() {
       handlePinClick(pinButton);
       return;
     }
+
+    // Handle save notes button
+    var saveNotesButton = e.target.closest('.js-save-image-notes');
+    if (saveNotesButton) {
+      e.preventDefault();
+      e.stopPropagation();
+      var textarea = saveNotesButton.closest('.p-3').querySelector('.js-image-notes');
+      if (textarea) handleNotesSave(textarea, saveNotesButton);
+      return;
+    }
+  });
+
+  // Handle textarea focus/blur
+  gallery.addEventListener('focusin', function(e) {
+    if (e.target.classList.contains('js-image-notes')) {
+      var saveBtn = e.target.closest('.p-3').querySelector('.js-save-image-notes');
+      if (saveBtn) saveBtn.style.display = 'inline-block';
+    }
+  });
+
+  gallery.addEventListener('focusout', function(e) {
+    if (e.target.classList.contains('js-image-notes')) {
+      // Small delay to allow clicking the button without instantly hiding it
+      var saveBtn = e.target.closest('.p-3').querySelector('.js-save-image-notes');
+      if (saveBtn) {
+        setTimeout(function() {
+          handleNotesSave(e.target, saveBtn);
+        }, 200);
+      }
+    }
+  });
+}
+
+// Handle notes save
+function handleNotesSave(textarea, button) {
+  var imageId = textarea.getAttribute('data-image-id');
+  var notes = textarea.value;
+
+  if (button && button.classList.contains('processing')) return;
+  if (button) {
+    button.classList.add('processing');
+    button.textContent = 'Saving...';
+  }
+
+  var csrfToken = document.querySelector('meta[name="csrf-token"]');
+  if (!csrfToken) {
+    console.error('CSRF token not found');
+    return;
+  }
+
+  fetch('/image_uploads/' + imageId, {
+    method: 'PATCH',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': csrfToken.content,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({ image_upload: { notes: notes } }),
+    credentials: 'same-origin'
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Failed to save notes');
+    return response.json();
+  })
+  .then(data => {
+    if (button) {
+      button.classList.remove('processing');
+      button.textContent = 'Saved!';
+      setTimeout(function() {
+        button.style.display = 'none';
+        button.textContent = 'Save Notes';
+      }, 1500);
+    }
+  })
+  .catch(error => {
+    console.error('Error saving notes:', error);
+    if (button) {
+      button.classList.remove('processing');
+      button.textContent = 'Error';
+    }
+    showNotification('Failed to save notes', 'error');
   });
 }
 
