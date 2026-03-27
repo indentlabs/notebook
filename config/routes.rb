@@ -50,7 +50,17 @@ Rails.application.routes.draw do
 
     scope :talk do
       get '/',                      to: 'conversation#character_index',   as: :conversation
-      get '/to/:character_id',      to: 'conversation#character_landing', as: :talk
+      get '/to/:character_id',      to: 'character_chats#index',          as: :talk
+      
+      resources :characters, path: 'to', only: [] do
+        resources :chats, controller: 'character_chats', param: :uid, only: [:index, :show, :create, :destroy] do
+          member do
+            post :messages, to: 'character_chats#message'
+            get  :latest,   to: 'character_chats#latest'
+          end
+        end
+      end
+
       post '/export/:character_id', to: 'conversation#export',            as: :export_character
     end
   end
