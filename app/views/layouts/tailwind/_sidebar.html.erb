@@ -330,31 +330,4 @@
 
     <!-- sidebar backdrop on mobile -->
     <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show="showSidebar" @click="showSidebar = false" @touchmove.prevent x-cloak></div>
-
-    <!-- Sidebar tooltip (positioned via JS to escape overflow containers) -->
-    <div id="sidebar-tooltip"></div>
-    <script>
-      (function() {
-        var tooltip = document.getElementById('sidebar-tooltip');
-        if (!tooltip) return;
-
-        document.querySelectorAll('.sidebar-tooltip').forEach(function(el) {
-          el.addEventListener('mouseenter', function(e) {
-            var text = el.getAttribute('data-tooltip');
-            if (!text) return;
-
-            tooltip.textContent = text;
-            var rect = el.getBoundingClientRect();
-            tooltip.style.left = (rect.right + 8) + 'px';
-            tooltip.style.top = (rect.top + rect.height / 2) + 'px';
-            tooltip.style.transform = 'translateY(-50%)';
-            tooltip.classList.add('visible');
-          });
-
-          el.addEventListener('mouseleave', function() {
-            tooltip.classList.remove('visible');
-          });
-        });
-      })();
-    </script>
   <% end %>
