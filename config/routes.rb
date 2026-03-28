@@ -48,21 +48,22 @@ Rails.application.routes.draw do
       post '/:content_type/:id', to: 'basil#commission', as: :basil_commission
     end
 
-    scope :talk do
-      get '/',                      to: 'conversation#character_index',   as: :conversation
-      get '/to/:character_id',      to: 'character_chats#index',          as: :talk
-      
-      resources :characters, path: 'to', only: [] do
-        resources :chats, controller: 'character_chats', param: :uid, only: [:index, :show, :create, :destroy] do
-          member do
-            post :messages, to: 'character_chats#message'
-            get  :latest,   to: 'character_chats#latest'
-          end
+  end
+
+  scope :talk do
+    get '/',                      to: 'conversation#character_index',   as: :conversation
+    get '/to/:character_id',      to: 'character_chats#index',          as: :talk
+    
+    resources :characters, path: 'to', only: [] do
+      resources :chats, controller: 'character_chats', param: :uid, path: '', only: [:index, :show, :create, :destroy] do
+        member do
+          post :messages, to: 'character_chats#message'
+          get  :latest,   to: 'character_chats#latest'
         end
       end
-
-      post '/export/:character_id', to: 'conversation#export',            as: :export_character
     end
+
+    post '/export/:character_id', to: 'conversation#export',            as: :export_character
   end
 
   # Temporary landing path for jams (nice URL)

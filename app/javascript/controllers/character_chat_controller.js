@@ -42,7 +42,7 @@ export default class extends Controller {
     // 3. Send to server
     const token = document.querySelector('meta[name="csrf-token"]').content
     try {
-      const response = await fetch(`/ai/talk/to/${this.characterIdValue}/chats/${this.chatUidValue}/messages`, {
+      const response = await fetch(`/talk/to/${this.characterIdValue}/${this.chatUidValue}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export default class extends Controller {
 
   async pollLatest() {
     try {
-      const response = await fetch(`/ai/talk/to/${this.characterIdValue}/chats/${this.chatUidValue}/latest?since=${this.latestTimestampValue}`, {
+      const response = await fetch(`/talk/to/${this.characterIdValue}/${this.chatUidValue}/latest?since=${this.latestTimestampValue}`, {
         headers: { 'Accept': 'application/json' }
       })
       
