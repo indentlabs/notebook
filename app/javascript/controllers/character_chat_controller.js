@@ -121,20 +121,21 @@ export default class extends Controller {
     }
 
     const div = document.createElement('div')
-    div.className = `flex w-full mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`
+    div.className = `flex w-full mb-4 items-end ${msg.role === 'user' ? 'justify-end pl-12' : 'justify-start pr-12'}`
     
     const bubble = document.createElement('div')
     
     if (msg.role === 'user') {
-      bubble.className = "bg-blue-600 text-white rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%] whitespace-pre-wrap"
+      bubble.className = "bg-blue-600 text-white rounded-2xl px-4 py-2 shadow-sm whitespace-pre-wrap text-sm sm:text-base leading-snug relative group break-words max-w-sm lg:max-w-md xl:max-w-lg inline-block"
       bubble.innerText = msg.content
     } else if (msg.role === 'ai') {
-      bubble.className = "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl rounded-bl-sm px-4 py-2 max-w-[80%] whitespace-pre-wrap"
+      // In JS we omit the avatar for simplicity (it auto-corrects on page reload anyway)
+      bubble.className = "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 shadow-sm rounded-2xl px-4 py-2 whitespace-pre-wrap break-words text-sm sm:text-base leading-snug max-w-sm lg:max-w-md xl:max-w-lg inline-block"
       bubble.innerText = msg.content
     } else {
        // System error msg
-      bubble.className = "bg-red-50 text-red-600 rounded-2xl px-4 py-2 max-w-[80%] italic text-sm text-center mx-auto whitespace-pre-wrap"
-      bubble.innerText = msg.content
+      bubble.className = "bg-red-50 border border-red-100 text-red-600 rounded-xl px-4 py-2 flex items-center shadow-sm text-sm font-medium mx-auto inline-block"
+      bubble.innerHTML = `<i class="material-icons text-red-500 mr-2 text-lg">error_outline</i> ${msg.content}`
     }
 
     div.appendChild(bubble)
@@ -143,7 +144,10 @@ export default class extends Controller {
   }
 
   scrollToBottom() {
-    this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    })
   }
 
   setLoadingState(isLoading) {

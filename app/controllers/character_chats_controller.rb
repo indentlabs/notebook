@@ -2,6 +2,7 @@ class CharacterChatsController < ApplicationController
   before_action :authenticate_user!,       only: [:index, :show, :create, :message, :latest]
   before_action :set_character
   before_action :ensure_character_privacy
+  before_action { @navbar_color = Character.hex_color }
 
   def index
     @chats = CharacterSystemChat.where(user: current_user).includes(:character).order(updated_at: :desc)
