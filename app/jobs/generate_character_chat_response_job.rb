@@ -16,11 +16,13 @@ class GenerateCharacterChatResponseJob < ApplicationJob
 
     if result[:success]
       chat.messages << { 'role' => 'ai', 'content' => result[:content], 'timestamp' => Time.current.to_f }
+      chat.touch
       chat.save
     else
       # If there's an error, inform the user with a system message
       error_msg = "The character could not reply due to a connection error. Please try sending a new message."
       chat.messages << { 'role' => 'system', 'content' => error_msg, 'timestamp' => Time.current.to_f }
+      chat.touch
       chat.save
     end
   end

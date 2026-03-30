@@ -29,7 +29,6 @@ class CharacterChatsController < ApplicationController
   def show
     @chat = CharacterSystemChat.find_by!(uid: params[:uid], character: @character)
     @chats = CharacterSystemChat.where(user: current_user).includes(:character).order(updated_at: :desc)
-    @chat.touch # Bump updated_at so it stays at the top of the sidebar
   end
 
   def destroy
@@ -49,6 +48,7 @@ class CharacterChatsController < ApplicationController
         'content' => user_content,
         'timestamp' => Time.current.to_f
       }
+      @chat.touch # Bump updated_at so it stays at the top of the sidebar only when active
       @chat.save!
       
       # Enqueue the background job to fetch the AI's response
