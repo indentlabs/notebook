@@ -4,7 +4,7 @@
                 description: page_description.truncate(160)
 %>
 
-<div class="min-h-screen bg-gray-50 dark:bg-gray-900" 
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-10" 
      x-data="editPageController()" 
      x-init="init()">
   
@@ -18,9 +18,16 @@
     current_page: :edit 
   } %>
 
-  <!-- Main responsive layout - pt-10 accounts for fixed breadcrumb header height (~40px) -->
+  <!-- Hero Image Header -->
+  <%= render partial: 'content/hero_header', locals: { 
+    content: @content, 
+    serialized_content: @serialized_content,
+    height_classes: 'h-32 md:h-40 lg:h-48'
+  } %>
+
+  <!-- Main responsive layout -->
   <!-- Note: Main navbar space is handled by site layout; this is only for the breadcrumb -->
-  <div class="max-w-full mx-auto pt-10">
+  <div class="max-w-full mx-auto">
     <div class="flex relative">
 
       <!-- Left Column - Navigation (Desktop) -->
