@@ -27,7 +27,7 @@
     
     <!-- Regular uploaded images -->
     <% content_images.each do |image| %>
-      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= image.src.url if image.src.present? %>', '<%= escape_javascript(image.src_file_name || 'Image') %>')">
+      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= image.src.url if image.src.present? %>', '<%= escape_javascript(image.notes.presence || image.src_file_name || 'Image') %>')">
         <div class="relative">
           <% if image.src.present? %>
             <%= image_tag image.src.url, 
@@ -60,7 +60,7 @@
                       asset_path("missing-image.jpg")
                     end
       %>
-      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= basil_url %>', 'Generated with Basil')">
+      <div class="gallery-item group cursor-pointer" onclick="openImageModal('<%= basil_url %>', '<%= escape_javascript(basil.notes.presence || 'Generated with Basil') %>')">
         <div class="relative">
           <% if basil.image.attached? %>
             <%= image_tag basil_url, 
