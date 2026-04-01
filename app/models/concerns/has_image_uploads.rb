@@ -129,6 +129,14 @@ module HasImageUploads
       random_image_including_private(format: format)
     end
 
+    # Returns a custom user image (pinned, uploaded, or basil generated)
+    # but explicitly returns nil instead of the generic header placeholder.
+    # Useful for UI elements that should fallback to an icon instead of a generic header image.
+    def custom_thumbnail_url(format: :medium)
+      url = pinned_or_random_image_including_private(format: format)
+      url == header_asset_for(self.class.name) ? nil : url
+    end
+
     def header_asset_for(class_name)
       # Since we use this as a fallback image on SEO content (for example, Twitter cards for shared notebook pages),
       # we need to include the full protocol + domain + path to ensure they will display the image. A relative path
