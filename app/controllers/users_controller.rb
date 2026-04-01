@@ -21,9 +21,8 @@ class UsersController < ApplicationController
     define_method content_type_name do
       set_user
 
-      # We double up on the same returns from set_user here since we're calling set_user manually instead of a before_action
-      return if @user.nil?
-      return if @user.private_profile?
+      # We return early if set_user already rendered or redirected
+      return if performed?
 
       # Optimized: Only load images for content that will be displayed
       @content_type = content_type
@@ -53,8 +52,7 @@ class UsersController < ApplicationController
   # Timeline isn't in content_types[:all] but some users have it as favorite_page_type
   def timelines
     set_user
-    return if @user.nil?
-    return if @user.private_profile?
+    return if performed?
 
     @content_type = Timeline
     @content_list = @user.timelines
