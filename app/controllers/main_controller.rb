@@ -167,7 +167,7 @@ class MainController < ApplicationController
         days_since_created: (Date.current - content_page.created_at.to_date).to_i,
         days_since_updated: (Date.current - content_page.updated_at.to_date).to_i,
         word_count: content_page.try(:cached_word_count) || 0,
-        has_image: content_page.random_image_including_private.present?
+        has_image: content_page.respond_to?(:custom_thumbnail_url) && content_page.custom_thumbnail_url.present?
       }
     end
     
