@@ -37,6 +37,12 @@ class ContentPage < ApplicationRecord
     || ActionController::Base.helpers.asset_path("card-headers/#{self.page_type.downcase.pluralize}.webp")
   end
 
+  def custom_thumbnail_url(format: :small)
+    url = random_image_including_private(format: format)
+    fallback_url = ActionController::Base.helpers.asset_path("card-headers/#{self.page_type.downcase.pluralize}.webp")
+    url == fallback_url ? nil : url
+  end
+
   def icon
     self.page_type.constantize.icon
   end
