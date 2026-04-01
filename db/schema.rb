@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_03_21_082539) do
+ActiveRecord::Schema.define(version: 2026_04_01_171734) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -204,6 +204,7 @@ ActiveRecord::Schema.define(version: 2026_03_21_082539) do
     t.integer "basil_version", default: 2
     t.boolean "pinned", default: false
     t.integer "position"
+    t.text "notes"
     t.index ["entity_type", "entity_id", "pinned"], name: "index_basil_commissions_on_entity_pinned"
     t.index ["entity_type", "entity_id", "position"], name: "index_basil_commissions_on_entity_position"
     t.index ["entity_type", "entity_id", "saved_at"], name: "basil_commissions_ees"
@@ -456,6 +457,18 @@ ActiveRecord::Schema.define(version: 2026_03_21_082539) do
     t.index ["character_id"], name: "index_character_magics_on_character_id"
     t.index ["magic_id"], name: "index_character_magics_on_magic_id"
     t.index ["user_id"], name: "index_character_magics_on_user_id"
+  end
+
+  create_table "character_system_chats", force: :cascade do |t|
+    t.integer "character_id"
+    t.integer "user_id"
+    t.string "uid"
+    t.json "messages", default: []
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["character_id"], name: "index_character_system_chats_on_character_id"
+    t.index ["uid"], name: "index_character_system_chats_on_uid", unique: true
+    t.index ["user_id"], name: "index_character_system_chats_on_user_id"
   end
 
   create_table "character_technologies", force: :cascade do |t|

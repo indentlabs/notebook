@@ -836,6 +836,24 @@ class BasilController < ApplicationController
     end
   end
 
+  def update_commission
+    @commission = BasilCommission.find_by(
+      id:   params[:id],
+      user: current_user
+    )
+
+    if @commission.nil?
+      render json: { error: "Commission not found" }, status: :not_found
+      return
+    end
+
+    if @commission.update(update_commission_params)
+      render json: { success: true }, status: 200
+    else
+      render json: { error: @commission.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   # Cache user content for Basil without universe filtering
@@ -861,5 +879,9 @@ class BasilController < ApplicationController
 
   def jam_params
     params.require(:commission).permit(:name, :age, features: [])
+  end
+
+  def update_commission_params
+    params.require(:basil_commission).permit(:notes)
   end
 end
