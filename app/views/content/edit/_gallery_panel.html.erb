@@ -374,11 +374,11 @@ function handleNotesSave(textarea, button) {
     return;
   }
 
-  var endpointUrl = '/image_uploads/' + imageId;
+  var endpointUrl = "<%= image_upload_path('ID_PLACEHOLDER') %>".replace('ID_PLACEHOLDER', imageId);
   var payload = { image_upload: { notes: notes } };
   
   if (imageType === 'basil_commission') {
-    endpointUrl = '/ai/basil/commission/' + imageId;
+    endpointUrl = "<%= basil_commission_update_path('ID_PLACEHOLDER') %>".replace('ID_PLACEHOLDER', imageId);
     payload = { basil_commission: { notes: notes } };
   }
 
