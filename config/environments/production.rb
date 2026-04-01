@@ -4,6 +4,9 @@ Rails.application.configure do
   # Allow PR environments on Railway (auto-deployed dynamic domains)
   config.hosts << /.*\.up\.railway\.app/
   config.hosts << ENV["RAILWAY_PUBLIC_DOMAIN"] if ENV["RAILWAY_PUBLIC_DOMAIN"].present?
+  config.hosts << "notebook.ai"
+  config.hosts << "www.notebook.ai"
+  config.hosts << "new.notebook.ai"
 
   # Code is not reloaded between requests.
   config.cache_classes = true
