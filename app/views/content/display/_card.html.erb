@@ -7,6 +7,7 @@
   show_stats = local_assigns.fetch(:show_stats, true)
   show_footer = local_assigns.fetch(:show_footer, true)
   action = local_assigns.fetch(:action, nil)
+  show_private_images = local_assigns.fetch(:show_private_images, false)
 
   # Determine class for color/icon
   # If content_page is a content_type string (e.g. from keys), we can't use it directly. 
@@ -26,12 +27,20 @@
       
       <!-- Card Image Area -->
       <div class="relative h-48 flex-shrink-0 overflow-hidden">
-        <% if content_page.respond_to?(:first_public_image) && content_page.first_public_image.present? %>
-          <%= image_tag content_page.first_public_image, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
+        <% 
+          card_image_url = nil
+          if show_private_images && content_page.respond_to?(:random_image_including_private)
+            card_image_url = content_page.random_image_including_private
+          elsif content_page.respond_to?(:first_public_image)
+            card_image_url = content_page.first_public_image
+          end
+        %>
+        <% if card_image_url.present? %>
+          <%= image_tag card_image_url, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
         <% else %>
-          <%= image_tag "card-headers/#{content_page.page_type.downcase.pluralize}.webp",
+          <%= image_tag "card-headers/#{content_page.try(:page_type)&.downcase&.pluralize || 'universes'}.webp",
               class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
-              alt: "#{content_page.page_type} placeholder" %>
+              alt: "placeholder" %>
         <% end %>
         
         <!-- Protection Gradient -->
