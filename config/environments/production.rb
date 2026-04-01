@@ -1,7 +1,9 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
-  # Allow PR environments on Railway (auto-deployed dynamic domains)
+  # Allow production and PR environment domains
+  config.hosts << "notebook.ai"
+  config.hosts << "www.notebook.ai"
   config.hosts << /.*\.up\.railway\.app/
   config.hosts << ENV["RAILWAY_PUBLIC_DOMAIN"] if ENV["RAILWAY_PUBLIC_DOMAIN"].present?
 
