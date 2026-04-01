@@ -2,21 +2,21 @@
   <% @recently_edited_pages.first(7).each do |page| %>
     <%# Timelines and Documents use edit_polymorphic_path, while ContentPages uses edit_path -- gross %>
     <%= link_to page.try(:edit_path) || edit_polymorphic_path(page), class: 'block w-full group' do %>
-      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-sm transition-all duration-200">
-        <div class="flex items-center space-x-3">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-sm transition-all duration-200">
+        <div class="flex items-stretch">
           <!-- Content Type Icon or Image -->
-          <div class="flex-shrink-0">
+          <div class="flex-shrink-0 w-20 flex">
             <% if page.respond_to?(:custom_thumbnail_url) && page.custom_thumbnail_url.present? %>
-              <%= image_tag page.custom_thumbnail_url, class: "w-10 h-10 object-cover rounded-lg" %>
+              <%= image_tag page.custom_thumbnail_url, class: "w-full h-full object-cover" %>
             <% else %>
-              <div class="w-10 h-10 <%= page.color %> rounded-lg flex items-center justify-center">
-                <i class="material-icons text-white text-lg"><%= page.icon %></i>
+              <div class="w-full h-full <%= page.color %> flex items-center justify-center">
+                <i class="material-icons text-white text-2xl"><%= page.icon %></i>
               </div>
             <% end %>
           </div>
           
           <!-- Content Info -->
-          <div class="flex-1 min-w-0">
+          <div class="flex-1 min-w-0 p-4 pl-3 flex flex-col justify-center">
             <h4 class="font-medium text-gray-900 dark:text-white line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               <%= page.name %>
             </h4>
@@ -32,7 +32,7 @@
           </div>
           
           <!-- Quick Edit Arrow -->
-          <div class="flex-shrink-0">
+          <div class="flex-shrink-0 pr-4 flex items-center justify-center">
             <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">arrow_forward</i>
           </div>
         </div>
