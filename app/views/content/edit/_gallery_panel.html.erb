@@ -113,7 +113,18 @@
                     <% end %>
                   </div>
                   <div class="p-3 border-t border-gray-100 dark:border-gray-700">
-                    <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Generated with Basil</span>
+                    <div class="mb-2 flex items-center justify-between">
+                      <span class="text-xs text-purple-600 dark:text-purple-400 font-medium">Generated with Basil</span>
+                      <% if image_data.image.attached? %>
+                        <span class="text-xs text-gray-500">
+                          <%= Filesize.from("#{image_data.image.byte_size}B").to_f('KB').round(2) %> KB
+                        </span>
+                      <% end %>
+                    </div>
+                    <textarea class="w-full text-sm p-2 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 js-image-notes" rows="2" placeholder="Add descriptions, creation date, or notes..." data-image-id="<%= image_id %>"><%= image_data.notes %></textarea>
+                    <div class="text-right mt-1">
+                      <button class="btn-small text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded js-save-image-notes" style="display: none;">Save Notes</button>
+                    </div>
                   </div>
                   
                   <!-- Pin button -->
@@ -347,6 +358,8 @@ function initializeGalleryEvents() {
 // Handle notes save
 function handleNotesSave(textarea, button) {
   var imageId = textarea.getAttribute('data-image-id');
+  var imageItem = textarea.closest('.gallery-sortable-item');
+  var imageType = imageItem ? imageItem.getAttribute('data-image-type') : 'image_upload';
   var notes = textarea.value;
 
   if (button && button.classList.contains('processing')) return;
@@ -361,7 +374,15 @@ function handleNotesSave(textarea, button) {
     return;
   }
 
-  fetch('/image_uploads/' + imageId, {
+  var endpointUrl = '/image_uploads/' + imageId;
+  var payload = { image_upload: { notes: notes } };
+  
+  if (imageType === 'basil_commission') {
+    endpointUrl = '/ai/basil/commission/' + imageId;
+    payload = { basil_commission: { notes: notes } };
+  }
+
+  fetch(endpointUrl, {
     method: 'PATCH',
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
@@ -369,7 +390,7 @@ function handleNotesSave(textarea, button) {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: JSON.stringify({ image_upload: { notes: notes } }),
+    body: JSON.stringify(payload),
     credentials: 'same-origin'
   })
   .then(response => {

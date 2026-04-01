@@ -36,6 +36,7 @@ Rails.application.routes.draw do
       post   '/:id/save',        to: 'basil#save',     as: :basil_save
       delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
       get    '/commission/:jobid', to: 'basil#commission_info', as: :basil_commission_info
+      patch  '/commission/:id',    to: 'basil#update_commission', as: :basil_commission_update
 
       # Landing pages
       get  '/jam',               to: 'basil#jam',        as: :basil_jam
