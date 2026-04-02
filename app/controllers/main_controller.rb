@@ -53,28 +53,38 @@ class MainController < ApplicationController
   end
 
   def table_of_contents
-    @toc_scope = @universe_scope || current_user
-    @toc_user  = @universe_scope.try(:user) || current_user
+    @universe = Universe.find(params[:id])
 
-    # Get content list - handle differently depending on whether we're scoped to a universe or a user
-    content_list = if @toc_scope.is_a?(Universe)
-      # For a Universe, we need to get content from the user that's in this universe
-      user_content = @toc_user.content_list(page_scoping: { user_id: @toc_user.id })
-      universe_id = @toc_scope.id
-      user_content.select { |page| page['universe_id']&.to_i == universe_id || page['page_type'] == 'Universe' && page['id'] == universe_id }
-    else
-      # For a User, we can directly use their content_list method
-      @toc_scope.content_list
+    unless @universe.public_content?
+      raise ActiveRecord::RecordNotFound
     end
 
-    # Sort the content list by name
-    content_list = content_list.sort_by { |page| page['name'] }
+    @toc_user  = @universe.user
+    @page_title = "#{@universe.name} — Table of Contents"
 
-    @starred_pages = content_list.select { |page| page['favorite'] == 1 }
-    @other_pages   = content_list.select { |page| page['favorite'] == 0 }
-
+    # Gather all public, non-deleted content in this universe
+    all_pages = []
     @page_type_counts = Hash.new(0)
-    content_list.each { |page| @page_type_counts[page['page_type']] += 1 }
+
+    Rails.application.config.content_types[:all_non_universe].each do |content_type|
+      relation = content_type.name.downcase.pluralize.to_sym
+      pages = @universe.send(relation)
+                       .is_public
+                       .where(deleted_at: nil, archived_at: nil)
+      pages.each do |page|
+        all_pages << page
+        @page_type_counts[content_type.name] += 1
+      end
+    end
+
+    all_pages.sort_by!(&:name)
+    @starred_pages = all_pages.select { |p| p.try(:favorite) }
+    @other_pages   = all_pages.reject { |p| p.try(:favorite) }
+
+    # Statistics
+    @total_pages = all_pages.size
+    @total_words = all_pages.sum { |p| p.try(:cached_word_count).to_i }
+    @content_type_count = @page_type_counts.keys.size
   end
 
   def infostack
