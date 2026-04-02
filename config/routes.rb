@@ -286,6 +286,8 @@ Rails.application.routes.draw do
   post 'universes/:universe_id/contributors', to: 'contributors#create', as: :universe_contributors
   get '/unsubscribe/emails/:code', to: 'emails#one_click_unsubscribe'
 
+  get '/universes/:id/contents', to: 'main#table_of_contents', as: :universe_contents
+
   get '/paper', to: redirect('https://www.notebook-paper.com')
 
   # Help Center - Public routes
