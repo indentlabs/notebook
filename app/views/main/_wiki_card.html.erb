@@ -1,0 +1,31 @@
+<% return unless local_assigns[:content_page] %>
+
+<%= link_to polymorphic_path(content_page.page_type.downcase, id: content_page.id), class: "block h-full group" do %>
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden h-full flex flex-col">
+    <!-- Image Section -->
+    <div class="relative h-48 flex-shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-900">
+      <% card_image_url = content_page.respond_to?(:first_public_image) ? content_page.first_public_image : nil %>
+      <% if card_image_url.present? %>
+        <%= image_tag card_image_url, class: "w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out" %>
+      <% else %>
+        <%= image_tag "card-headers/#{content_page.page_type.downcase.pluralize}.webp",
+            class: "w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out opacity-90" %>
+      <% end %>
+      
+      <!-- Gradient overlay -->
+      <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-900 to-transparent opacity-80"></div>
+      
+      <!-- Type Badge Icon Only -->
+      <div class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-white <%= content_class_from_name(content_page.page_type).color %> shadow-lg ring-2 ring-white ring-opacity-30">
+        <i class="material-icons" style="font-size: 16px;"><%= content_page.icon %></i>
+      </div>
+
+      <!-- Title Area -->
+      <div class="absolute bottom-4 left-4 right-4">
+        <h3 class="font-extrabold text-xl text-white drop-shadow-md leading-tight line-clamp-2">
+          <%= content_page.name %>
+        </h3>
+      </div>
+    </div>
+  </div>
+<% end %>

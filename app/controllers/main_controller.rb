@@ -55,7 +55,7 @@ class MainController < ApplicationController
   def table_of_contents
     @universe = Universe.find(params[:id])
 
-    unless @universe.public_content?
+    unless (current_user || User.new).can_read?(@universe)
       raise ActiveRecord::RecordNotFound
     end
 
@@ -80,6 +80,7 @@ class MainController < ApplicationController
     all_pages.sort_by!(&:name)
     @starred_pages = all_pages.select { |p| p.try(:favorite) }
     @other_pages   = all_pages.reject { |p| p.try(:favorite) }
+    @pages_by_type = @other_pages.group_by(&:page_type)
 
     # Statistics
     @total_pages = all_pages.size

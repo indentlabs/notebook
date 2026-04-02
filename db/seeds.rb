@@ -38,6 +38,30 @@ Location.create(name: 'The Shire',
                 user: tolkien,
                 universe: middleearth)
 
+rowling = User.find_by(email: 'rowling@example.com') || User.create(
+  name: 'JKRowling',
+  email: 'rowling@example.com',
+  password: 'Alohomora'
+)
+
+hp_universe = Universe.create(
+  name: 'The Harry Potter Universe',
+  user: rowling,
+  privacy: 'public'
+)
+
+['Harry Potter', 'Hermione Granger', 'Ron Weasley', 'Albus Dumbledore', 'Lord Voldemort'].each do |character_name|
+  Character.create(name: character_name, user: rowling, universe: hp_universe)
+end
+
+['Hogwarts', 'Diagon Alley', 'The Burrow', 'Hogsmeade'].each do |location_name|
+  Location.create(name: location_name, user: rowling, universe: hp_universe)
+end
+
+['Elder Wand', 'Invisibility Cloak', 'Resurrection Stone'].each do |item_name|
+  Item.create(name: item_name, user: rowling, universe: hp_universe)
+end
+
 if ENV.fetch('DATA', '').upcase == 'LOTS'
   puts "Creating lots o' data"
 
