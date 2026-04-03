@@ -209,6 +209,20 @@ class ContentController < ApplicationController
       # ContentPageShare model might not exist
     end
 
+    # Universe-specific counts
+    if @content.is_a?(Universe)
+      @documents_count = @content.documents.count
+      @books_count = @content.books.count
+
+      # Universes contain timelines as well as being referenced by them
+      @timelines_count += @content.timelines.count
+
+      @in_this_universe_count = 0
+      Rails.application.config.content_types[:all_non_universe].each do |content_type|
+        @in_this_universe_count += @content.send(content_type.name.downcase.pluralize).count
+      end
+    end
+
     if (current_user || User.new).can_read?(@content)
       respond_to do |format|
         format.html { render 'content/show', locals: { content: @content } }
@@ -816,7 +830,11 @@ class ContentController < ApplicationController
     attribute_value.value = text
     attribute_value.save!
 
-    UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
+    begin
+      UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
+    rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+      Rails.logger.error "[Mentions] Redis unavailable - mention jobs not enqueued for Attribute##{attribute_value.id}: #{e.message}"
+    end
 
     respond_to do |format|
       format.html { redirect_back(fallback_location: root_path, notice: "#{attribute_value.entity.name}'s #{@attribute_field.label.downcase} updated!") }
