@@ -23,7 +23,8 @@ Thredded.user_display_name_method = :forum_username
 # When linking to a user, Thredded will use this lambda to spit out
 # the path or url to your user. This lambda is evaluated in the view context.
 Thredded.user_path = lambda do |user|
-  return nil if user && user.private_profile?
+  return nil unless user.is_a?(User)
+  return nil if user.private_profile?
 
   user_path = :"#{Thredded.user_class_name.underscore}_path"
   main_app.respond_to?(user_path) ? main_app.send(user_path, user) : "/users/#{user.to_param}"

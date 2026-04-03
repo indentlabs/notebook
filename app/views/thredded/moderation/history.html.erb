@@ -1,0 +1,166 @@
+<% content_for :thredded_page_title,
+               safe_join([t('thredded.nav.moderation'), t('thredded.nav.moderation_history')], ': ') %>
+<% content_for :thredded_page_id, 'thredded--moderation-history' %>
+<%= render 'nav' %>
+
+<%= thredded_page do %>
+  <div class="thredded--main-section mt-6">
+    <!-- History Header with Filters -->
+    <div class="moderation-history-header flex flex-col md:flex-row md:items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-700 gap-4">
+      <div class="history-title flex items-center text-2xl font-bold dark:text-white">
+        <i class="material-icons text-3xl mr-3 text-slate-400 dark:text-slate-500">history</i>
+        <h2>Moderation History</h2>
+      </div>
+      
+      <div class="history-filters flex flex-wrap gap-4">
+        <div class="filter-group flex items-center gap-2">
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">Status:</label>
+          <select class="filter-select text-sm border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1.5 pl-3 pr-8">
+            <option value="all">All Actions</option>
+            <option value="approved">Approved</option>
+            <option value="blocked">Blocked</option>
+            <option value="deleted">Deleted</option>
+          </select>
+        </div>
+        
+        <div class="filter-group flex items-center gap-2">
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">Period:</label>
+          <select class="filter-select text-sm border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1.5 pl-3 pr-8">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+        
+        <div class="filter-group flex items-center gap-2">
+          <label class="text-sm font-medium text-slate-600 dark:text-slate-400">Moderator:</label>
+          <select class="filter-select text-sm border-slate-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-1.5 pl-3 pr-8">
+            <option value="all">All Moderators</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    
+    <% if @post_moderation_records.present? %>
+      <!-- Timeline Container -->
+      <div class="moderation-timeline relative ml-4 md:ml-8 border-l-2 border-slate-200 dark:border-slate-700 pb-8 space-y-8">
+        <% @post_moderation_records.each_with_index do |record, index| %>
+          <% 
+            post = record.post
+            post_view = Thredded::PostView.new(post, policy(post)) if post
+          %>
+          
+          <div class="timeline-item relative pl-8 <%= record.moderation_state %>">
+            <!-- Timeline Marker -->
+            <div class="timeline-marker absolute -left-[17px] top-1.5 w-8 h-8 rounded-full flex items-center justify-center bg-white dark:bg-[#1e293b] ring-4 ring-white dark:ring-[#1e293b]">
+              <% if record.approved? %>
+                <i class="material-icons text-emerald-500">check_circle</i>
+              <% elsif record.blocked? %>
+                <i class="material-icons text-red-500">block</i>
+              <% else %>
+                <i class="material-icons text-slate-400">radio_button_unchecked</i>
+              <% end %>
+            </div>
+            
+            <!-- Timeline Content -->
+            <div class="timeline-content bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+              <!-- Action Header -->
+              <div class="action-header px-5 py-3 bg-slate-50/50 dark:bg-slate-800/80 border-b border-slate-100 dark:border-slate-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="action-info flex flex-wrap items-center gap-2">
+                  <% state_color_class = if record.approved? 
+                                           'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
+                                         elsif record.blocked?
+                                           'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800/50'
+                                         else
+                                           'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                                         end %>
+                  <span class="action-type px-2.5 py-0.5 rounded text-xs font-medium uppercase tracking-wider <%= state_color_class %>">
+                    <%= record.moderation_state.capitalize %>
+                  </span>
+                  <span class="action-meta text-sm text-slate-600 dark:text-slate-400 flex items-center">
+                    <span class="mr-1">by</span>
+                    <span class="font-medium text-slate-900 dark:text-slate-200"><%= user_link(record.moderator) %></span>
+                    <span class="separator mx-2 text-slate-300 dark:text-slate-600">•</span>
+                    <%= time_ago(record.created_at) %>
+                  </span>
+                </div>
+                
+                <% if post %>
+                  <div class="action-links shrink-0">
+                    <a href="<%= post_permalink_path(post) %>" class="view-post-link inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" target="_blank">
+                      <i class="material-icons text-[16px] mr-1">open_in_new</i>
+                      View Post
+                    </a>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Post Preview -->
+              <div class="post-preview p-5">
+                <div class="post-author flex items-center mb-4">
+                  <% if record.post_user %>
+                    <%= image_tag record.post_user.try(:image_url, size: 40) || 'user-placeholder.png', 
+                                  class: 'author-avatar w-10 h-10 rounded-full mr-3' %>
+                    <div class="author-info">
+                      <div class="author-name font-medium text-slate-900 dark:text-white">
+                        <%= link_to record.post_user.thredded_display_name, 
+                                    user_moderation_path(record.post_user.id),
+                                    class: "hover:underline #{User.text_color}" %>
+                      </div>
+                      <div class="post-location text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center">
+                        <% if post %>
+                          <span class="mr-1">in</span>
+                          <%= link_to truncate(post.postable.title, length: 60), topic_path(post.postable), class: 'text-blue-600 dark:text-blue-400 hover:underline' %>
+                        <% else %>
+                          <em class="text-red-500 dark:text-red-400">Post deleted</em>
+                        <% end %>
+                      </div>
+                    </div>
+                  <% else %>
+                    <div class="author-info">
+                      <div class="author-name font-medium text-slate-900 dark:text-white">
+                        <%= record.post_user_name || content_tag(:em, t('thredded.null_user_name'), class: 'text-slate-500') %>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+                
+                <div class="post-content-preview">
+                  <% if post && post.content != record.post_content %>
+                    <div class="content-changed-notice flex items-start p-3 mb-4 rounded bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-sm">
+                      <i class="material-icons text-amber-500 mr-2 mt-0.5 text-[18px]">info</i>
+                      Content has been modified since moderation
+                    </div>
+                  <% end %>
+                  
+                  <div class="content-text text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-md border border-slate-100 dark:border-slate-700/50 text-sm italic">
+                    "<%= truncate(strip_tags(record.post_content), length: 200) %>"
+                  </div>
+                </div>
+                
+                <% if post %>
+                  <div class="post-actions mt-5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <%= render 'post_moderation_actions', post: post %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="flex justify-center mt-8">
+        <%= paginate @post_moderation_records %>
+      </div>
+    <% else %>
+      <div class="thredded--empty bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 py-16 px-6 text-center mt-8">
+        <div class="empty-icon text-slate-300 dark:text-slate-600 mb-4 inline-block">
+          <i class="material-icons text-[48px]">history</i>
+        </div>
+        <h3 class="thredded--empty--title text-xl font-bold text-slate-800 dark:text-white mb-2">No moderation history</h3>
+        <p class="text-slate-500 dark:text-slate-400">There are no moderation actions to display.</p>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -36,7 +36,7 @@ class ForumReplacementService < Service
 
   # gremlin replacements
   GREMLINS_WORD_REPLACEMENTS = {
-    '<3'                => "<span class='red-text'>&heart;</span>",
+    '<3'                => "<span class='text-red-500'>&heart;</span>",
     '$5'                => '[̲̅$̲̅(̲̅5̲̅)̲̅$̲̅]',
     '0 Kelvin'          => 'absolute frosty',
     '0/10'              => '10/10',
@@ -335,7 +335,7 @@ class ForumReplacementService < Service
     'shrimp'            => 'chill krill',
     'shrimps'           => 'chill krills',
     'skydiving'         => 'falling out of the sky',
-    'smol'              => '<span style="font-size: 5px">smol</span>',
+    'smol'              => '<span class="text-[5px]">smol</span>',
     'snake'             => 'slippery dippery long mover',
     'snakes'            => 'slippery dippery long movers',
     'snail'             => 'slime racer',
@@ -393,7 +393,7 @@ class ForumReplacementService < Service
     'whales'            => 'blubberbutt watermutts',
     'wheeze'            => 'sneeze',
     'wheezing'          => 'sneezing',
-    'why is everyone yelling' => 'why is everyone yelling<span style="text-transform:uppercase">',
+    'why is everyone yelling' => 'why is everyone yelling<span class="uppercase">',
     'window'            => 'see-through wall',
     'worm'              => 'wriggly wiggly',
     "writer's block"    => 'imagination traffic jam',
@@ -406,7 +406,7 @@ class ForumReplacementService < Service
     'years'             => 'orbit parties',
     'yeet'              => 'defenestrate',
     'yoga'              => 'bendy business',
-    'yuge'              => '<span style="font-size: 40px">yuge</span>',
+    'yuge'              => '<span class="text-[40px] leading-none">yuge</span>',
     'zalgo'             => 'H̶̛̼̼̪̝̞͓̞͕͇̯͚͎͚̘̳͕̱̤̠̗͔͇̙̣̰͓̖̰̯̀̓̐̑̇͊͂̀͋̒̐̓͒̒͊͊̕͜͝ͅE̴̡̧̨̨̲̥̯͎̭̻̩̞̘̞̪̞̗̭͖̻͙͕͎̮͕̺͕̲̘̻̣͚̳̥͍̙͈͚͍͉̗͙̱͖͚̾̂̇͛̉͋͊̾͛̆̀́͑͛̅̋͊̕͘͜͜͜͝ͅͅͅͅ ̸̡̡̨̡̨̛̞͎̹̩̬̗̗̞̬̰̮̙̪̖͈̣̹͔̺̫̰̓̔̉̋̈̈́͐́̿̈̀͊̿̈̉̅̃̊̽͗̈̿̈́̓̈́̎͌̄̀̆̌̎͗̋͒̋̿̋̊̈́͆̋̾̈̏̈́̋̿̕̕̚͝͝͠͠ͅͅͅC̵̛̘̳͙̪̭͖̲̞̯̰̜͇̈̾̈́͋̌̉̽̽͑̎͌̾̈́͌̑͊̊̔̀͆̌̀̇̓͊̀̂̇̿̃͑́̈́̆͂̈́̾̓́̂̂̓̂̍̍͛͆͌͌̽̎̍̀̒̆̀͗͋͘͘͘͝͠͝͝͠͝͝Ǫ̸͕̻̞̝̜͚̗̮̼͎̤͔̤̱͔̫͂̄̉̋̈͊͐͂̇̀̌̎́͑̐̀̈́͋̓̾̅͒̒̄͑̒̆̑̾͜͝͝͝͝M̷̧̧̡̨̛̛̩̭̞͍̼̝̗͕̖͇̣̣̩͆̿̑͒́̉̅̓̌̆̈́͐͒̾̐̂̿̓̚͘̚͜E̵̡̨̢̧̢̢̡̢̨̛̠̱̻̺̦͚̹͓̬͔̪̟̼̥̯̠̘͚̫̯͍̺͔̫̟͇̱̦̟̪͚͉̣̳͓͍̬̙̲͔̘͙͔̤̰̜͍̠̩͉͐̂̊̏̐̿̊̋͑̿̇̊̈́͗̎̋́́̉̓̂̐͑̇̐̐͋́̒̈́͛͑͒̂͒̂̔̀̄̈́̓͂͆̈́͒̌͆̓͗̋͐̔̑͐̕͘ͅͅͅŞ̴̧̧̡̢̧̡̢͕̝͚̝̖͚̣̞̫̻̯͔̳̗̝̰̗̰̰̥̭͕̜̜̫͍̪̳̘̣̺̠͉̗̟͕̹͇̬̘̘̪͆͗̎̕',
     'antagonist'        => 'plot troublemaker',
     'character arc'     => 'protagonist pilgrimage',
@@ -577,7 +577,7 @@ class ForumReplacementService < Service
   }
 
   def self.replace_for(text, user)
-    gremlins_phase = 0
+    gremlins_phase = 3
     replaced_text = text.dup
 
     # Page tag replacements
@@ -635,6 +635,7 @@ class ForumReplacementService < Service
   end
 
   def self.wrapped(text, tooltip, color='blue')
-    "<span class='#{color} lighten-5 tooltipped black-text' style='padding: 4px' data-tooltip='#{tooltip}'>#{text}</span>"
+    # Flat, simple, soft highlight reflecting the site aesthetic (avoiding malware link vibes)
+    "<span class='bg-#{color}-100 text-#{color}-900 px-1 rounded-md tooltip-top cursor-help hover:bg-#{color}-200 transition-colors' data-tooltip='#{tooltip}'>#{text}</span>"
   end
 end

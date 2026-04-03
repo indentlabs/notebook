@@ -1,0 +1,132 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+  <!-- Hero Section -->
+  <div class="relative w-full bg-gray-900 overflow-hidden" style="height: 32rem; min-height: 450px;">
+    <% 
+      regular_images = @universe.image_uploads.ordered.to_a
+      unless user_signed_in? && @universe.user_id == current_user.id
+        regular_images = regular_images.select { |img| img.privacy == 'public' }
+      end
+      basil_images = @universe.basil_commissions.where.not(saved_at: nil).ordered.to_a
+      preview_image = get_preview_image(regular_images, basil_images)
+    %>
+    <% if preview_image.present? %>
+      <% image_type = preview_image[:type] %>
+      <% image_data = preview_image[:data] %>
+      <% if image_type == 'image_upload' %>
+        <%= image_tag image_data.src.url, class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
+      <% elsif image_type == 'basil_commission' %>
+        <% if image_data.image.attached? %>
+          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "absolute inset-0 w-full h-full object-cover" %>
+        <% else %>
+          <%= image_tag "card-headers/universes.webp", class: "absolute inset-0 w-full h-full object-cover" %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= image_tag "card-headers/universes.webp", class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
+    <% end %>
+
+    <main class="absolute inset-0 pb-12 flex flex-col items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center drop-shadow-lg w-full">
+      <div class="max-w-4xl w-full p-8 md:p-12 rounded-3xl bg-gray-900 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-white border-opacity-10 shadow-2xl">
+        <h1 class="text-4xl sm:text-5xl md:text-7xl tracking-tight font-black text-white drop-shadow-xl" style="text-shadow: 0 4px 16px rgba(0,0,0,0.8);">
+          <%= @universe.name %>
+        </h1>
+        
+        <div class="mt-6 inline-flex items-center space-x-2">
+          <span class="text-gray-200 font-medium tracking-wide text-lg drop-shadow-md">Universe crafted by</span>
+          <%= link_to @toc_user.display_name, @toc_user, class: "font-black #{User.text_color} text-lg hover:opacity-80 transition-opacity", style: "text-shadow: 0 2px 8px rgba(0,0,0,0.6);" %>
+        </div>
+
+        <% if @universe.description.present? %>
+          <div class="w-16 h-1 bg-white bg-opacity-20 mx-auto mt-8 rounded-full"></div>
+          <p class="mt-6 text-lg md:text-xl text-gray-100 leading-relaxed line-clamp-3 drop-shadow-md font-medium px-4">
+            <%= @universe.description %>
+          </p>
+        <% end %>
+      </div>
+    </main>
+  </div>
+
+  <!-- Stats Bar (overlapping the gradient edge) -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 flex flex-wrap justify-between items-center backdrop-blur-md">
+      <div class="flex items-center space-x-8">
+        <div class="text-center px-4">
+          <div class="text-3xl font-black text-gray-900 dark:text-white"><%= number_with_delimiter @total_pages %></div>
+          <div class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">Pages</div>
+        </div>
+        <div class="text-center px-4 border-l border-gray-200 dark:border-gray-700">
+          <div class="text-3xl font-black text-gray-900 dark:text-white"><%= number_with_delimiter @total_words %></div>
+          <div class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">Words</div>
+        </div>
+      </div>
+
+      <div class="mt-4 sm:mt-0 px-4 flex-shrink-0 w-full sm:w-auto">
+        <%= link_to @universe, class: "flex items-center justify-center px-6 py-3 #{Universe.color} hover:opacity-90 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5" do %>
+          <i class="material-icons mr-2 text-sm"><%= Universe.icon %></i>
+          About <%= @universe.name %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured / Starred Pages Section -->
+  <% if @starred_pages.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+      <div class="flex items-center mb-8 border-b-2 border-yellow-400 pb-2 inline-flex">
+        <i class="material-icons text-3xl text-yellow-400 mr-3">star</i>
+        <h2 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">Featured Articles</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <% @starred_pages.each do |page| %>
+          <%= render partial: 'main/wiki_card', locals: { content_page: page } %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Content Categories Grid -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 space-y-32">
+    <% @pages_by_type.keys.sort.each do |page_type| %>
+      <% pages = @pages_by_type[page_type] %>
+      <div id="category-<%= page_type.parameterize %>" class="scroll-mt-24">
+        <div class="flex items-center justify-between mb-8 pb-4">
+          <div class="flex items-center">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center <%= content_class_from_name(page_type).color %> mr-5 shadow-lg text-white">
+              <i class="material-icons text-3xl"><%= content_class_from_name(page_type).icon %></i>
+            </div>
+            <h2 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+              <%= page_type.pluralize %>
+            </h2>
+            <span class="ml-5 bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-4 py-1.5 rounded-full text-base font-black shadow-inner">
+              <%= number_with_delimiter pages.count %>
+            </span>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <% pages.first(7).each do |page| %>
+            <%= render partial: 'main/wiki_card', locals: { content_page: page } %>
+          <% end %>
+          
+          <%= link_to send("#{page_type.downcase.pluralize}_universe_path", @universe), class: "block h-full group" do %>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 hover:-translate-y-1 transition-all duration-300 h-48 flex flex-col items-center justify-center p-8 text-center">
+              <div class="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center <%= content_class_from_name(page_type).color %> bg-opacity-10 mb-4 transition-colors">
+                <i class="material-icons text-3xl <%= content_class_from_name(page_type).text_color %>"><%= content_class_from_name(page_type).icon %></i>
+              </div>
+              <h3 class="font-bold text-lg text-gray-700 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                <% if pages.count > 7 %>
+                  Browse <%= pages.count - 7 %> more <%= page_type.pluralize.downcase %>
+                <% else %>
+                  Browse all <%= page_type.pluralize.downcase %>
+                <% end %>
+              </h3>
+              <div class="inline-flex items-center mt-3 text-sm font-medium text-blue-500 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300">
+                View all <i class="material-icons text-sm ml-1 transition-transform group-hover:translate-x-1">arrow_forward</i>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

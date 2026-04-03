@@ -1,0 +1,33 @@
+<!-- Full Grid of Content Types -->
+<div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 p-2 max-w-7xl mx-auto">
+  <% 
+    content_types_to_show = @activated_content_types + ["Document"]
+    content_types_to_show << "Timeline" if current_user.can_create?(Timeline)
+  %>
+  <% content_types_to_show.each do |content_type| %>
+    <% klass = content_class_from_name(content_type) %>
+    <%= link_to send("new_#{content_type.downcase}_path"), class: "block" do %>
+      <div class="<%= klass.color %> text-white rounded-lg p-2 sm:p-4 hover:opacity-90 hover:shadow-md transition-all duration-200 text-center group">
+        <div class="relative">
+          <i class="material-icons text-3xl mb-1 transition-all duration-200 opacity-100 group-hover:opacity-0"><%= klass.icon %></i>
+          <i class="material-icons text-3xl mb-1 transition-all duration-200 absolute inset-0 opacity-0 group-hover:opacity-100">add</i>
+        </div>
+        <div class="text-xs font-medium">
+          <%= content_type %>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+
+  <%= link_to customization_content_types_path, class: "block" do %>
+    <div class="bg-gray-500 dark:bg-gray-700 text-white rounded-lg p-2 sm:p-4 hover:bg-gray-600 dark:hover:bg-gray-600 hover:shadow-md transition-all duration-200 text-center group">
+      <div class="relative">
+        <i class="material-icons text-3xl mb-1 transition-all duration-200 opacity-100 group-hover:opacity-0">add</i>
+        <i class="material-icons text-3xl mb-1 transition-all duration-200 absolute inset-0 opacity-0 group-hover:opacity-100">arrow_forward</i>
+      </div>
+      <div class="text-xs font-medium">
+        More...
+      </div>
+    </div>
+  <% end %>
+</div>

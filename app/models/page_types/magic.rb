@@ -22,11 +22,11 @@ class Magic < ApplicationRecord
   end
 
   def self.color
-    'orange'
+    'orange bg-yellow-500'
   end
 
   def self.text_color
-    'orange-text'
+    'orange-text text-yellow-500'
   end
 
   def self.hex_color

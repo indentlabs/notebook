@@ -1,5 +1,8 @@
 /*
-  Usage:
+  DEPRECATED: This component uses MaterializeCSS and appears to be unused.
+  All document views have been migrated to TailwindCSS.
+  
+  Original Usage:
   <%=
     react_component("DocumentEntitiesSidebar", {
       document_id:     3,

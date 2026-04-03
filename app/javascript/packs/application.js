@@ -15,6 +15,16 @@
 // const images = require.context('../images', true)
 // const imagePath = (name) => images(name, true)
 
+import "../application.css";
+import 'controllers'
+import '../page_name_loader'
+import '../settings'
+import '../content_edit_sidebar'
+
+// Import Rails UJS for remote forms, CSRF tokens, and confirm dialogs
+import Rails from '@rails/ujs'
+Rails.start()
+
 // Support component names relative to this directory:
 var componentRequireContext = require.context("components", true);
 var ReactRailsUJS = require("react_ujs");

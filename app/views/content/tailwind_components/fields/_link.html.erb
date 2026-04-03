@@ -1,0 +1,16 @@
+<%# Link field display - dispatches to style-specific partial %>
+<% return if field[:value].blank? %>
+
+<%
+  display_style = field.dig(:options, 'display_style') || 'tags'
+
+  style_partials = {
+    'list'  => 'content/tailwind_components/fields/link_styles/list',
+    'tags'  => 'content/tailwind_components/fields/link_styles/tags',
+    'cards' => 'content/tailwind_components/fields/link_styles/cards'
+  }
+
+  partial_path = style_partials.fetch(display_style, style_partials['tags'])
+%>
+
+<%= render partial: partial_path, locals: { field: field } %>

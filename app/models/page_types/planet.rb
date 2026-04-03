@@ -31,11 +31,11 @@ class Planet < ApplicationRecord
   end
 
   def self.color
-    'text-lighten-2 blue'
+    'text-lighten-2 blue bg-lime-500'
   end
 
   def self.text_color
-    'text-lighten-2 blue-text'
+    'text-lighten-2 blue-text text-lime-500'
   end
 
   def self.hex_color

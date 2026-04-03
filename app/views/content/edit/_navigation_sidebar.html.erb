@@ -1,0 +1,129 @@
+<div class="h-full flex flex-col overflow-hidden">
+  <!-- Header with Toggle Button -->
+  <div class="hidden lg:flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <button @click="toggleLeftSidebar()"
+            class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+            title="Hide Table of Contents"
+            aria-label="Hide Table of Contents">
+      <i class="material-icons text-gray-500 text-lg mr-1">chevron_left</i>
+      <i class="material-icons text-gray-600 text-lg mr-1.5">menu</i>
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Table of Contents</h2>
+    </button>
+  </div>
+
+  <!-- Navigation Content -->
+  <div class="flex-1 overflow-y-auto pt-6">
+    
+    <!-- Categories Section for Details View -->
+    <div class="px-4 pb-4 border-b border-gray-200 dark:border-gray-700">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Edit Sections</h3>
+        <button @click="switchView('details'); showAllCategories()" 
+                :class="currentView === 'details' && isExpandAllActive() ? '<%= content.class_color %> text-white' : 'text-gray-400 hover:text-gray-600'"
+                class="p-1 rounded text-xs transition-colors"
+                title="Show all sections">
+          <i class="material-icons text-sm" 
+             :class="currentView === 'details' && isExpandAllActive() ? 'text-white' : ''">unfold_more</i>
+        </button>
+      </div>
+      
+      <nav class="space-y-0.5">
+        <!-- Category sections -->
+        <% content.data[:categories].each do |category| %>
+          <% next if category[:label] == 'Gallery' %>
+          <% next if category[:label] == 'Contributors' && raw_content.class.name == 'Universe' %>
+          <% has_content = category[:fields].any? { |field| field[:value].present? } %>
+          
+          <button @click="switchView('details'); showCategory('<%= category[:label] %>')" 
+                  :class="currentView === 'details' && isCategoryActive('<%= category[:label] %>') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                  class="group flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+            <div class="flex items-center">
+              <i class="material-icons text-lg mr-3" 
+                 :class="currentView === 'details' && isCategoryActive('<%= category[:label] %>') ? 'text-white' : '<%= content.class_text_color %>'"><%= category[:icon] %></i>
+              <span><%= category[:label] %></span>
+            </div>
+            <% if category[:percent_complete].present? && category[:percent_complete] > 0 %>
+              <span class="text-xs" 
+                    :class="currentView === 'details' && isCategoryActive('<%= category[:label] %>') ? 'text-white opacity-80' : 'text-gray-500'">
+                <%= category[:percent_complete] %>%
+              </span>
+            <% elsif !has_content %>
+              <span class="text-xs"
+                    :class="currentView === 'details' && isCategoryActive('<%= category[:label] %>') ? 'text-white opacity-60' : 'text-gray-400'">
+                Empty
+              </span>
+            <% end %>
+          </button>
+        <% end %>
+      </nav>
+    </div>
+
+    <!-- Edit Tools Section -->
+    <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
+      <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Page Management</h3>
+      <nav class="space-y-0.5">
+        <!-- Gallery Tab -->
+        <button @click="switchView('gallery')" 
+                :class="isViewActive('gallery') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('gallery') ? 'text-white' : 'text-pink-500'">photo_library</i>
+          Gallery
+          <% 
+            image_count = raw_content.image_uploads.count rescue 0
+            basil_count = raw_content.basil_commissions.where.not(saved_at: nil).count rescue 0
+            total_images = image_count + basil_count
+          %>
+          <% if total_images > 0 %>
+            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                  :class="isViewActive('gallery') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+              <%= total_images %>
+            </span>
+          <% end %>
+        </button>
+        
+        <!-- Privacy Tab -->
+        <button @click="switchView('privacy')" 
+                :class="isViewActive('privacy') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('privacy') ? 'text-white' : '<%= content.class_text_color %>'">
+            <%= raw_content.privacy == 'public' ? 'public' : 'lock' %>
+          </i>
+          Privacy & Sharing
+        </button>
+        
+        <!-- Contributors Tab (Universe only) -->
+        <% if raw_content.class.name == 'Universe' %>
+          <button @click="switchView('contributors')" 
+                  :class="isViewActive('contributors') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                  class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+            <i class="material-icons text-lg mr-3" 
+               :class="isViewActive('contributors') ? 'text-white' : 'text-purple-500'">group_add</i>
+            Contributors
+            <% contributor_count = raw_content.contributors.count rescue 0 %>
+            <% if contributor_count > 0 %>
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('contributors') ? 'bg-white bg-opacity-20 text-white' : 'bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300'">
+                <%= contributor_count %>
+              </span>
+            <% end %>
+          </button>
+        <% end %>
+        
+        <!-- Settings Tab -->
+        <button @click="switchView('settings')" 
+                :class="isViewActive('settings') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+          <i class="material-icons text-lg mr-3" 
+             :class="isViewActive('settings') ? 'text-white' : 'text-gray-500 dark:text-gray-400'">settings</i>
+          Settings
+        </button>
+      </nav>
+    </div>
+
+    <!-- Universe Card (if assigned) -->
+    <%= render partial: 'content/shared/universe_card', locals: { raw_content: raw_content } %>
+
+  </div>
+</div>

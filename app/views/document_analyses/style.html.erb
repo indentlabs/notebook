@@ -1,280 +1,408 @@
-<h5 class="grey-text">Style</h5>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <%= render partial: 'document_analyses/header', locals: { page_title: 'Style' } %>
 
-<style>
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1.5px;
-}
-.zoom {
-  cursor: move;
-  fill: none;
-  pointer-events: all;
-}
-span.sentence {
-  padding: 0.25em 0.5em;
-  line-height: 1.9em;
-  color: black;
-}
-</style>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content spaced-paragraphs">
-        <div class="card-title">Most-used words</div>
+    <style>
+      .line {
+        fill: none;
+        stroke: #14b8a6;
+        stroke-width: 1.5px;
+      }
+      .zoom {
+        cursor: move;
+        fill: none;
+        pointer-events: all;
+      }
+      span.sentence {
+        padding: 0.25em 0.5em;
+        line-height: 1.9em;
+        border-radius: 0.25em;
+      }
+      .dark span.sentence {
+        color: #1f2937;
+      }
+      .sentence-yellow { background-color: #fef9c3; }
+      .sentence-blue { background-color: #dbeafe; }
+      .sentence-red { background-color: #fecaca; }
+      .sentence-green { background-color: #dcfce7; }
+      .sentence-purple { background-color: #f3e8ff; }
+      .dark .line { stroke: #5eead4; }
+      #words-per-sentence text { fill: #374151; }
+      .dark #words-per-sentence text { fill: #9ca3af; }
+      #words-per-sentence .domain, #words-per-sentence .tick line { stroke: #d1d5db; }
+      .dark #words-per-sentence .domain, .dark #words-per-sentence .tick line { stroke: #4b5563; }
+    </style>
 
-        <p>
-          There are a lot of pros and cons to reusing words. For more complex words, reuse is a great way to ensure your reader
-          picks up on definition and tone with each context. On the other hand, reusing simpler or more repetitive words can
-          also have a negative impact on some readers.
-        </p>
-        <p>
-          The following tables show your most-used words in various categories. Each table excludes the most common 175 words
-          (a, an, and, as, but, <em>etc.</em>) in the English language, known as "stop words".
-        </p>
-      </div>
-      <div class="card-tabs">
-        <ul class="tabs tabs-fixed-width">
-          <li class="tab"><a href="#mu-all-words" class="red-text">All words</a></li>
-          <li class="tab"><a href="#mu-nouns" class="blue-text">Nouns</a></li>
-          <li class="tab"><a href="#mu-verbs" class="orange-text">Verbs</a></li>
-          <li class="tab"><a href="#mu-adjectives" class="green-text">Adjectives</a></li>
-          <li class="tab"><a href="#mu-adverbs" class="purple-text">Adverbs</a></li>
-        </ul>
-      </div>
-      <div class="card-content black-text grey lighten-4">
-        <div id="mu-all-words">
-          <table>
-            <tr>
-              <th>Word</th>
-              <th>Times used</th>
-            </tr>
-            <% @analysis.most_used_words.each do |word, count| %>
-              <tr>
-                <td><span class="badge red lighten-4 black-text"><%= word %></span></td>
-                <td><%= count %></td>
-              </tr>
-            <% end %>
-          </table>
-        </div>
-        <div id="mu-nouns">
-          <table>
-            <tr>
-              <th>Word</th>
-              <th>Times used</th>
-            </tr>
-            <% @analysis.most_used_nouns.each do |word, count| %>
-              <tr>
-                <td><span class="badge blue lighten-4 black-text"><%= word %></span></td>
-                <td><%= count %></td>
-              </tr>
-            <% end %>
-          </table>
-        </div>
-        <div id="mu-verbs">
-          <table>
-            <tr>
-              <th>Word</th>
-              <th>Times used</th>
-            </tr>
-            <% @analysis.most_used_verbs.each do |word, count| %>
-              <tr>
-                <td><span class="badge orange lighten-4 black-text"><%= word %></span></td>
-                <td><%= count %></td>
-              </tr>
-            <% end %>
-          </table>
-        </div>
-        <div id="mu-adjectives">
-          <table>
-            <tr>
-              <th>Word</th>
-              <th>Times used</th>
-            </tr>
-            <% @analysis.most_used_adjectives.each do |word, count| %>
-              <tr>
-                <td><span class="badge green lighten-4 black-text"><%= word %></span></td>
-                <td><%= count %></td>
-              </tr>
-            <% end %>
-          </table>
-        </div>
-        <div id="mu-adverbs">
-          <table>
-            <tr>
-              <th>Word</th>
-              <th>Times used</th>
-            </tr>
-            <% @analysis.most_used_adverbs.each do |word, count| %>
-              <tr>
-                <td><span class="badge purple lighten-4 black-text"><%= word %></span></td>
-                <td><%= count %></td>
-              </tr>
-            <% end %>
-          </table>
+    <!-- Most-used Words Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+      <div class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Most-used Words</h3>
+        <div class="text-gray-600 dark:text-gray-400 space-y-2 mb-4">
+          <p>
+            There are a lot of pros and cons to reusing words. For more complex words, reuse is a great way to ensure your reader
+            picks up on definition and tone with each context. On the other hand, reusing simpler or more repetitive words can
+            also have a negative impact on some readers.
+          </p>
+          <p>
+            The following tables show your most-used words in various categories. Each table excludes the most common 175 words
+            (a, an, and, as, but, <em class="text-gray-700 dark:text-gray-300">etc.</em>) in the English language, known as "stop words".
+          </p>
         </div>
       </div>
-      <div class="card-content grey-text text-darken-3">
+
+      <!-- Tailwind Tabs -->
+      <div x-data="{ activeTab: 'all' }">
+        <div class="border-b border-gray-200 dark:border-gray-700 px-6">
+          <nav class="flex gap-4 overflow-x-auto" aria-label="Word type tabs">
+            <button @click="activeTab = 'all'" :class="activeTab === 'all' ? 'border-red-500 text-red-600 dark:text-red-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition">
+              All words
+            </button>
+            <button @click="activeTab = 'nouns'" :class="activeTab === 'nouns' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition">
+              Nouns
+            </button>
+            <button @click="activeTab = 'verbs'" :class="activeTab === 'verbs' ? 'border-orange-500 text-orange-600 dark:text-orange-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition">
+              Verbs
+            </button>
+            <button @click="activeTab = 'adjectives'" :class="activeTab === 'adjectives' ? 'border-green-500 text-green-600 dark:text-green-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition">
+              Adjectives
+            </button>
+            <button @click="activeTab = 'adverbs'" :class="activeTab === 'adverbs' ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition">
+              Adverbs
+            </button>
+          </nav>
+        </div>
+
+        <div class="p-6 bg-gray-50 dark:bg-gray-700">
+          <!-- All Words Tab -->
+          <div x-show="activeTab === 'all'" x-cloak>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Word</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Times used</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                  <% @analysis.most_used_words.each do |word, count| %>
+                    <tr>
+                      <td class="px-4 py-2"><span class="inline-block px-2 py-1 text-sm font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded"><%= word %></span></td>
+                      <td class="px-4 py-2 text-gray-900 dark:text-gray-100"><%= count %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Nouns Tab -->
+          <div x-show="activeTab === 'nouns'" x-cloak>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Word</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Times used</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                  <% @analysis.most_used_nouns.each do |word, count| %>
+                    <tr>
+                      <td class="px-4 py-2"><span class="inline-block px-2 py-1 text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded"><%= word %></span></td>
+                      <td class="px-4 py-2 text-gray-900 dark:text-gray-100"><%= count %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Verbs Tab -->
+          <div x-show="activeTab === 'verbs'" x-cloak>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Word</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Times used</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                  <% @analysis.most_used_verbs.each do |word, count| %>
+                    <tr>
+                      <td class="px-4 py-2"><span class="inline-block px-2 py-1 text-sm font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded"><%= word %></span></td>
+                      <td class="px-4 py-2 text-gray-900 dark:text-gray-100"><%= count %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Adjectives Tab -->
+          <div x-show="activeTab === 'adjectives'" x-cloak>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Word</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Times used</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                  <% @analysis.most_used_adjectives.each do |word, count| %>
+                    <tr>
+                      <td class="px-4 py-2"><span class="inline-block px-2 py-1 text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded"><%= word %></span></td>
+                      <td class="px-4 py-2 text-gray-900 dark:text-gray-100"><%= count %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Adverbs Tab -->
+          <div x-show="activeTab === 'adverbs'" x-cloak>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Word</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Times used</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
+                  <% @analysis.most_used_adverbs.each do |word, count| %>
+                    <tr>
+                      <td class="px-4 py-2"><span class="inline-block px-2 py-1 text-sm font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded"><%= word %></span></td>
+                      <td class="px-4 py-2 text-gray-900 dark:text-gray-100"><%= count %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700">
         Note: many words can be used in many different forms and contexts (and often <em>are</em> within the same document!), so
         some words in each category may or may not always be used as that particular part of speech. Instead, words are included
         in each part-of-speech category if they <em>can</em> be used in that form.
       </div>
     </div>
+
+    <% if @analysis.sentence_count > 1 %>
+      <!-- Words per Sentence Chart -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Words per Sentence</h3>
+        <div id="words-per-sentence"></div>
+      </div>
+
+      <!-- Sentence Length Explanation -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="text-gray-600 dark:text-gray-400 space-y-4">
+            <p>
+              Sentence length can be a powerful tool in your writing and you should
+              use it purposefully. Longer sentences can lure a reader in, while shorter,
+              more staccato sentences keep that attention with fast-paced action.
+            </p>
+            <p>
+              This chart shows the length, in words, of each sentence through your
+              document. Groups of shorter sentences likely read faster, while groups
+              of longer sentences may be dense or hard to read.
+            </p>
+            <p>
+              Selecting an area on the chart will zoom in to focus on just that area.
+              Double-clicking the chart will reset the zoom back to your entire document.
+            </p>
+          </div>
+          <div>
+            <blockquote class="text-gray-700 dark:text-gray-300 border-l-4 border-teal-500 pl-4 italic">
+              <p class="mb-4">
+                <span class="sentence-red">This sentence has five words.</span>
+                <span class="sentence-red">Here are five more words.</span>
+                <span class="sentence-red">Five-word sentences are fine.</span>
+                <span class="sentence-red">But several together become monotonous.</span>
+                <span class="sentence-red">Listen to what is happening.</span>
+                <span class="sentence-red">The writing is getting boring.</span>
+                <span class="sentence-red">The sound of it drones.</span>
+                <span class="sentence-red">It's like a stuck record.</span>
+                <span class="sentence-red">The ear demands some variety.</span>
+              </p>
+              <p class="mb-4">
+                <span class="sentence-yellow">Now listen.</span>
+                <span class="sentence-green">I vary the sentence length, and I create music.</span>
+                <span class="sentence-yellow">Music.</span>
+                <span class="sentence-blue">The writing sings.</span>
+                <span class="sentence-green">It has a pleasant rhythm, a lilt, a harmony.</span>
+                <span class="sentence-blue">I use short sentences.</span>
+                <span class="sentence-green">And I use sentences of medium length.</span>
+                <span class="sentence-purple">And sometimes, when I am certain the reader is rested, I will engage him with a sentence of considerable length,
+                a sentence that burns with energy and builds with all the impetus of a crescendo,
+                the roll of the drums, the crash of the cymbals–sounds that say listen to this, it is important.</span>
+              </p>
+              <p class="mb-4">
+                <span class="sentence-green">So write with a combination of short, medium, and long sentences.</span>
+                <span class="sentence-green">Create a sound that pleases the reader's ear.</span>
+                <span class="sentence-blue">Don't just write words.</span>
+                <span class="sentence-yellow">Write music.</span>
+              </p>
+              <p class="text-right not-italic text-gray-500 dark:text-gray-400">
+                — Gary Provost, <em>100 Ways to Improve Your Writing</em>
+              </p>
+            </blockquote>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colorized Document Section -->
+      <details class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+        <summary class="px-6 py-4 cursor-pointer bg-teal-500 text-white font-medium flex items-center gap-2 hover:bg-teal-600 transition">
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8A1.5,1.5 0 0,1 13,6.5A1.5,1.5 0 0,1 14.5,5A1.5,1.5 0 0,1 16,6.5A1.5,1.5 0 0,1 14.5,8M9.5,8A1.5,1.5 0 0,1 8,6.5A1.5,1.5 0 0,1 9.5,5A1.5,1.5 0 0,1 11,6.5A1.5,1.5 0 0,1 9.5,8M6.5,12A1.5,1.5 0 0,1 5,10.5A1.5,1.5 0 0,1 6.5,9A1.5,1.5 0 0,1 8,10.5A1.5,1.5 0 0,1 6.5,12M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A1.5,1.5 0 0,0 13.5,19.5C13.5,19.11 13.35,18.76 13.11,18.5C12.88,18.23 12.73,17.88 12.73,17.5A1.5,1.5 0 0,1 14.23,16H16A5,5 0 0,0 21,11C21,6.58 16.97,3 12,3Z"/>
+          </svg>
+          View this document with colorized lengths
+        </summary>
+        <div class="p-6">
+          <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4"><%= @document.title %></h4>
+          <div class="leading-loose">
+            <% @document.sentences_with_newlines.each_with_index do |sentence, i| %>
+              <span class="sentence" data-sentence-id="<%= i + 1 %>" title=""><%= sentence.gsub("\n", "<br />").html_safe %></span>
+            <% end %>
+          </div>
+        </div>
+      </details>
+
+      <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('span.sentence').forEach(function (el, sentence_id) {
+            var word_count = el.textContent.trim().split(' ').length;
+            switch(word_count) {
+              case 0:
+                break;
+              case 1:
+              case 2:
+                el.classList.add('sentence-yellow');
+                break;
+              case 3:
+              case 4:
+                el.classList.add('sentence-blue');
+                break;
+              case 5:
+              case 6:
+                el.classList.add('sentence-red');
+                break;
+              case 7:
+              case 8:
+              case 9:
+              case 10:
+              case 11:
+                el.classList.add('sentence-green');
+                break;
+              default:
+                el.classList.add('sentence-purple');
+                break;
+            }
+            el.setAttribute('title', word_count + ' word' + (word_count == 1 ? '' : 's') + ' (sentence #' + (1 + sentence_id) + ')');
+          });
+        });
+      </script>
+    <% end %>
+
+    <!-- Words per Sentence Comparison -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Words per Sentence Baseline Comparison</h3>
+      <%=
+        column_chart([
+          ['This document',       (@analysis.word_count.to_f / @analysis.sentence_count).round],
+          ['The Grapes of Wrath', 11],
+          ["Typical Writing",     16],
+          ['The Great Gatsby',    17],
+          ["Swann's Way",         36],
+          ["Green Eggs and Ham",  5.7]
+        ].sort_by(&:second), colors: [Document.hex_color])
+      %>
+    </div>
+
+    <!-- Parts of Speech Stats Grid -->
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Parts of Speech</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <%
+        pos_data = [
+          { name: 'Adjectives', key: :adjective, count_method: :adjective_count },
+          { name: 'Nouns', key: :noun, count_method: :noun_count },
+          { name: 'Verbs', key: :verb, count_method: :verb_count },
+          { name: 'Pronouns', key: :pronoun, count_method: :pronoun_count },
+          { name: 'Proper nouns', key: :proper_noun, count_method: :proper_noun_count },
+          { name: 'Conjunctions', key: :conjunction, count_method: :conjunction_count },
+          { name: 'Adverbs', key: :adverb, count_method: :adverb_count },
+          { name: 'Interrogatives', key: :interrogative, count_method: :interrogative_count }
+        ]
+      %>
+      <% pos_data.each do |pos| %>
+        <%
+          percentage = @analysis.pos_percentage(pos[:key])
+          count = @analysis.send(pos[:count_method])
+          intensity = (percentage / 5).clamp(1, 3)
+          bg_class = case intensity
+            when 1 then 'bg-blue-400 dark:bg-blue-500'
+            when 2 then 'bg-blue-500 dark:bg-blue-600'
+            when 3 then 'bg-blue-600 dark:bg-blue-700'
+          end
+        %>
+        <div class="<%= bg_class %> rounded-xl p-4 text-center text-white">
+          <div class="text-3xl font-bold"><%= percentage %>%</div>
+          <div class="font-semibold"><%= pos[:name] %></div>
+          <div class="text-sm opacity-90 mt-2">
+            ~<%= (count.to_f / @analysis.sentence_count).round %> per sentence
+          </div>
+          <div class="text-sm opacity-90">
+            ~<%= (count.to_f / @analysis.paragraph_count).round %> per paragraph
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Stylistic Baseline Comparison -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Stylistic Baseline Comparison</h3>
+      <%=
+        column_chart([
+          { name: 'This document',   data: [
+            ['% Adjectives', @analysis.pos_percentage(:adjective)],
+            ['% Adverbs',    @analysis.pos_percentage(:adverb)],
+            ['% Nouns',      @analysis.pos_percentage(:noun)],
+            ['% Pronouns',   @analysis.pos_percentage(:pronoun)],
+            ['% Verbs',      @analysis.pos_percentage(:verb)]
+          ] },
+          { name: 'Average writing', data: [
+            ['% Adjectives', 8],
+            ['% Adverbs', 5],
+            ['% Nouns', 25],
+            ['% Pronouns', 5],
+            ['% Verbs', 17]
+          ] },
+          { name: 'Hemingway',       data: [
+            ['% Adjectives', 5],
+            ['% Adverbs', 7],
+            ['% Nouns', 18],
+            ['% Pronouns', 12],
+            ['% Verbs', 23]
+          ] }
+        ])
+      %>
+    </div>
+
   </div>
 </div>
 
 <% if @analysis.sentence_count > 1 %>
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Words per sentence</div>
-        <div id="words-per-sentence" ></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12">
-    <div class="card-panel">
-      <div class="row">
-        <div class="col s12 m6 l4">
-          <p>
-            Sentence length can be a powerful tool in your writing and you should
-            use it purposefully. Longer sentences can lure a reader in, while shorter,
-            more stacatto sentences keep that attention with fast-paced action.
-          </p>
-          <p>
-            This chart shows the length, in words, of each sentence through your
-            document. Groups of shorter sentences likely read faster, while groups
-            of longer sentences may be dense or hard to read.
-          </p>
-          <p>
-            Selecting an area on the chart will zoom in to focus on just that area.
-            Double-clicking the chart will reset the zoom back to your entire document.
-          </p>
-        </div>
-        <div class="col s12 m6 l7 offset-l1">
-          <blockquote style="font-size: 110%">
-            <p>
-              <span class="black-text red lighten-4">This sentence has five words.</span>
-              <span class="black-text red lighten-4">Here are five more words.</span>
-              <span class="black-text red lighten-4">Five-word sentences are fine.</span>
-              <span class="black-text red lighten-4">But several together become monotonous.</span>
-              <span class="black-text red lighten-4">Listen to what is happening.</span>
-              <span class="black-text red lighten-4">The writing is getting boring.</span>
-              <span class="black-text red lighten-4">The sound of it drones.</span>
-              <span class="black-text red lighten-4">It’s like a stuck record.</span>
-              <span class="black-text red lighten-4">The ear demands some variety.</span>
-            </p>
-
-            <p>
-              <span class="black-text yellow lighten-4">Now listen.</span>
-              <span class="black-text green lighten-4">I vary the sentence length, and I create music.</span>
-              <span class="black-text yellow lighten-4">Music.</span>
-              <span class="black-text blue lighten-4">The writing sings.</span>
-              <span class="black-text green lighten-4">It has a pleasant rhythm, a lilt, a harmony.</span>
-              <span class="black-text blue lighten-4">I use short sentences.</span>
-              <span class="black-text green lighten-4">And I use sentences of medium length.</span>
-
-              <span class="black-text purple lighten-4">And sometimes, when I am certain the reader is rested, I will engage him with a sentence of considerable length, 
-              a sentence that burns with energy and builds with all the impetus of a crescendo, 
-              the roll of the drums, the crash of the cymbals–sounds that say listen to this, it is important.</span>
-            </p>
-
-            <p>
-              <span class="black-text green lighten-4">So write with a combination of short, medium, and long sentences.</span>
-              <span class="black-text green lighten-4">Create a sound that pleases the reader's ear.</span>
-              <span class="black-text blue lighten-4">Don't just write words.</span>
-              <span class="black-text yellow lighten-4">Write music.</span>
-            </p>
-
-            <p class="right-align">
-              &mdash; Gary Provost, <em>100 Ways to Improve Your Writing</em>
-            </p>
-          </blockquote>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12">
-    <ul class="collapsible">
-      <li>
-        <div class="collapsible-header <%= Document.color %> white-text"><i class="material-icons">palette</i> View this document with colorized lengths</div>
-        <div class="collapsible-body">
-          <h5><%= @document.title %></h5>
-          <% @document.sentences_with_newlines.each_with_index do |sentence, i| %>
-            <span class="sentence" data-sentence-id="<%= i + 1 %>"><%= sentence.gsub("\n", "<br />").html_safe %></span>
-          <% end %>        
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <script type="text/javascript">
-    $(document).ready(function () {
-      $('span.sentence').each(function (sentence_id) {
-        var word_count = $(this).text().trim().split(' ').length;
-        switch(word_count) {
-          case 0:
-            break;
-          case 1:
-          case 2:
-            $(this).addClass('yellow lighten-4');
-            break;
-          case 3:
-          case 4:
-            $(this).addClass('blue lighten-4');
-            break;
-          case 5:
-          case 6:
-            $(this).addClass('red lighten-4');
-            break;
-          case 7:
-          case 8:
-          case 9:
-          case 10:
-          case 11:
-            $(this).addClass('green lighten-4');
-            break;
-          default:
-            $(this).addClass('purple lighten-4');
-            break;
-        }
-        // Also add word counts on hover
-        $(this).addClass('tooltipped').attr('data-tooltip', word_count + ' word' + (word_count == 1 ? '' : 's') + ' (sentence #' + (1 + sentence_id) + ')').attr('data-position', 'right');
-      });
-      $('.tooltipped').tooltip();
-    });
-  </script>
-</div>
-<% end %>
-
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Words per sentence baseline comparison</div>
-
-        <%= 
-          column_chart([
-            ['This document',       (@analysis.word_count.to_f / @analysis.sentence_count).round],
-            ['The Grapes of Wrath', 11],
-            ["Typical Writing",     16],
-            ['The Great Gatsby',    17],
-            ["Swann's Way",         36],
-            ["Green Eggs and Ham",  5.7]
-          ].sort_by(&:second), colors: [Document.hex_color])
-        %>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script type="text/javascript">
-  $(document).ready(function () {
-    var word_count_data = $.map(<%= @analysis.words_per_sentence %>, function( val, i ) {
+  document.addEventListener('DOMContentLoaded', function () {
+    var word_count_data = <%= @analysis.words_per_sentence %>.map(function(val, i) {
       return { sentence_index: i, value: val };
     });
 
@@ -282,7 +410,6 @@ span.sentence {
         width = 1100 - margin.left - margin.right,
         height = 400 - margin.top - margin.bottom;
 
-    // append the svg object to the body of the page
     var svg = d3.select("#words-per-sentence")
       .append("svg")
         .attr("width", '100%')
@@ -292,22 +419,19 @@ span.sentence {
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Add X axis --> it is a date format
     var x = d3.scaleLinear()
       .domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
       .range([ 0, width ]);
-    xAxis = svg.append("g")
+    var xAxis = svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
-    // Add Y axis
     var y = d3.scaleLinear()
       .domain([0, d3.max(word_count_data, function(d) { return +d.value; })])
       .range([ height, 0 ]);
-    yAxis = svg.append("g")
+    var yAxis = svg.append("g")
       .call(d3.axisLeft(y));
 
-    // Add a clipPath: everything out of this area won't be drawn.
     var clip = svg.append("defs").append("svg:clipPath")
         .attr("id", "clip")
         .append("svg:rect")
@@ -316,229 +440,61 @@ span.sentence {
         .attr("x", 0)
         .attr("y", 0);
 
-    // Add brushing
-    var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
-        .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+    var brush = d3.brushX()
+        .extent( [ [0,0], [width,height] ] )
+        .on("end", updateChart);
 
-    // Create the line variable: where both the line and the brush take place
     var line = svg.append('g')
-      .attr("clip-path", "url(#clip)")
+      .attr("clip-path", "url(#clip)");
 
-    // Add the line
     line.append("path")
       .datum(word_count_data)
-      .attr("class", "line")  // I add the class line to be able to modify this line later on.
+      .attr("class", "line")
       .attr("fill", "none")
-      .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
         .x(function(d) { return x(d.sentence_index) })
         .y(function(d) { return y(d.value) })
-        )
+      );
 
-    // Add the brushing
-    line
-      .append("g")
-        .attr("class", "brush")
-        .call(brush);
+    line.append("g")
+      .attr("class", "brush")
+      .call(brush);
 
-    // A function that set idleTimeOut to null
-    var idleTimeout
+    var idleTimeout;
     function idled() { idleTimeout = null; }
 
-    // A function that update the chart for given boundaries
-    function updateChart() {
+    function updateChart(event) {
+      var extent = event.selection;
 
-      // What are the selected boundaries?
-      extent = d3.event.selection
-
-      // If no selection, back to initial coordinate. Otherwise, update X axis domain
       if(!extent){
-        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
-        x.domain([ 4,8])
-      }else{
-        x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
-        line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350);
+        x.domain([ 4,8]);
+      } else {
+        x.domain([ x.invert(extent[0]), x.invert(extent[1]) ]);
+        line.select(".brush").call(brush.move, null);
       }
 
-      // Update axis and line position
-      xAxis.transition().duration(1000).call(d3.axisBottom(x))
-      line
-          .select('.line')
-          .transition()
-          .duration(1000)
-          .attr("d", d3.line()
-            .x(function(d) { return x(d.sentence_index) })
-            .y(function(d) { return y(d.value) })
-          )
+      xAxis.transition().duration(1000).call(d3.axisBottom(x));
+      line.select('.line')
+        .transition()
+        .duration(1000)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.sentence_index) })
+          .y(function(d) { return y(d.value) })
+        );
     }
 
-    // If user double click, reinitialize the chart
     svg.on("dblclick",function(){
-      x.domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
-      xAxis.transition().call(d3.axisBottom(x))
-      line
-        .select('.line')
+      x.domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }));
+      xAxis.transition().call(d3.axisBottom(x));
+      line.select('.line')
         .transition()
         .attr("d", d3.line()
           .x(function(d) { return x(d.sentence_index) })
           .y(function(d) { return y(d.value) })
-      )
+        );
     });
   });
 </script>
-
-
-
-
-  <%# TODO: Order these cards by % %>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adjective).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:adjective) %>%
-          </div>
-          <strong>Adjectives</strong>
-        </span>
-        <p>~<%= (@analysis.adjective_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.adjective_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:noun).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:noun) %>%
-          </div>
-          <strong>Nouns</strong>
-        </span>
-        <p>~<%= (@analysis.noun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.noun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:verb).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:verb) %>%
-          </div>
-          <strong>Verbs</strong>
-        </span>
-        <p>~<%= (@analysis.verb_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.verb_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:pronoun).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:pronoun) %>%
-          </div>
-          <strong>Pronouns</strong>
-        </span>
-        <p>~<%= (@analysis.pronoun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.pronoun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:proper_noun).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:proper_noun) %>%
-          </div>
-          <strong>Proper nouns</strong>
-        </span>
-        <p>~<%= (@analysis.proper_noun_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.proper_noun_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:conjunction).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:conjunction) %>%
-          </div>
-          <strong>Conjunctions</strong>
-        </span>
-        <p>~<%= (@analysis.conjunction_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.conjunction_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:adverb).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:adverb) %>%
-          </div>
-          <strong>Adverbs</strong>
-        </span>
-        <p>~<%= (@analysis.adverb_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.adverb_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-  <div class="col s12 m3">
-    <div class="card blue lighten-<%= 4 - (@analysis.pos_percentage(:interrogative).round / 5).clamp(1, 3) %>">
-      <div class="card-content white-text center">
-        <span class="card-title">
-          <div class="white-text">
-            <%= @analysis.pos_percentage(:interrogative) %>%
-          </div>
-          <strong>Interrogatives</strong>
-        </span>
-        <p>~<%= (@analysis.interrogative_count.to_f / @analysis.sentence_count).round %> per sentence</p>
-        <p>~<%= (@analysis.interrogative_count.to_f / @analysis.paragraph_count).round %> per paragraph</p>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Stylistic baseline comparison</div>
-      </div>
-
-      <%= 
-        column_chart([
-          { name: 'This document',   data: [
-            ['% Adjectives', @analysis.pos_percentage(:adjective)],
-            ['% Adverbs',    @analysis.pos_percentage(:adverb)],
-            ['% Nouns',      @analysis.pos_percentage(:noun)],
-            ['% Pronouns',   @analysis.pos_percentage(:pronoun)],
-            ['% Verbs',      @analysis.pos_percentage(:verb)]
-          ] }, 
-          { name: 'Average writing', data: [
-            ['% Adjectives', 8],
-            ['% Adverbs', 5],
-            ['% Nouns', 25],
-            ['% Pronouns', 5], 
-            ['% Verbs', 17]
-          ] }, 
-          { name: 'Hemingway',       data: [
-            ['% Adjectives', 5],
-            ['% Adverbs', 7],
-            ['% Nouns', 18],
-            ['% Pronouns', 12], 
-            ['% Verbs', 23]
-          ] }
-        ])
-      %>
-    </div>
-  </div>
-
-
-</div>
+<% end %>

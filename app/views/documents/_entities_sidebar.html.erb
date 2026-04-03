@@ -1,0 +1,111 @@
+<%# Entities sidebar content - shared between desktop and mobile %>
+<%# Requires: @document, @linked_entities, and documentEntitiesSidebar() Alpine component %>
+
+<!-- Sidebar content -->
+<div class="flex flex-col h-full overflow-hidden">
+  <!-- Link new entity section -->
+  <div class="p-4">
+    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link a page to this document</h4>
+    <div class="relative">
+      <input
+        type="text"
+        id="entity-search-input"
+        placeholder="Search pages to link..."
+        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+        autocomplete="off"
+        x-model="searchQuery"
+        @input="filterSearchResults"
+        @focus="showSearchDropdown = searchQuery.length > 0"
+        @blur="setTimeout(() => showSearchDropdown = false, 200)"
+      >
+      <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+        <i class="material-icons text-gray-400">search</i>
+      </div>
+
+      <!-- Search results dropdown -->
+      <div x-show="showSearchDropdown && filteredSearchResults.length > 0"
+           x-transition:enter="transition ease-out duration-200"
+           x-transition:enter-start="opacity-0 scale-95"
+           x-transition:enter-end="opacity-100 scale-100"
+           x-transition:leave="transition ease-in duration-150"
+           x-transition:leave-start="opacity-100 scale-100"
+           x-transition:leave-end="opacity-0 scale-95"
+           class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+        <template x-for="result in filteredSearchResults" :key="`${result.type}-${result.id}`">
+          <button @click="linkEntity(result)"
+                  type="button"
+                  class="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center space-x-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+            <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center"
+                 :class="getEntityColorClass(result.type)">
+              <i class="material-icons text-xs"
+                 :class="getEntityTextColorClass(result.type)"
+                 x-text="getEntityIcon(result.type)"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" x-text="result.name"></p>
+              <p class="text-xs text-gray-500 dark:text-gray-400" x-text="result.type"></p>
+            </div>
+          </button>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linked pages section with filter -->
+  <div class="flex-1 overflow-y-auto p-4 pt-0">
+    <!-- Filter tabs - only show if there are multiple types -->
+    <% linked_types = @linked_entities.map(&:entity_type).uniq.sort %>
+    <% if linked_types.length > 1 %>
+      <div class="mb-3 overflow-x-auto whitespace-nowrap">
+        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">Filter by type</p>
+        <div class="flex space-x-2" id="entity-filter-buttons">
+          <!-- All filter (always visible) -->
+          <button
+            @click="filterByType('all')"
+            :class="activeTab === 'all' ? 'bg-notebook-blue text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+            class="p-2 rounded-md text-xs font-medium transition-colors"
+            title="All pages"
+          >
+            <i class="material-icons text-sm">apps</i>
+          </button>
+
+          <% linked_types.each do |entity_type| %>
+            <% entity_class = content_class_from_name(entity_type) %>
+            <% next unless entity_class %>
+
+            <button
+              @click="filterByType('<%= entity_type %>')"
+              :class="activeTab === '<%= entity_type %>' ? 'bg-notebook-blue text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
+              class="p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1"
+              title="<%= entity_type.pluralize %>"
+              data-filter-type="<%= entity_type %>"
+            >
+              <i class="material-icons text-sm"><%= entity_class.icon %></i>
+              <span class="text-xs filter-count">
+                (<%= @linked_entities.select { |e| e.entity_type == entity_type }.count %>)
+              </span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Entity list with collapsible previews -->
+    <div class="space-y-2" id="linked-entities-list">
+      <% if @linked_entities.any? %>
+        <% @linked_entities.each do |document_entity| %>
+          <%= render 'documents/linked_entity_card', document_entity: document_entity %>
+        <% end %>
+      <% else %>
+        <!-- Empty state when no entities are linked -->
+        <div class="flex flex-col items-center justify-center py-8 text-center">
+          <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+            <i class="material-icons text-gray-400 text-xl">link_off</i>
+          </div>
+          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No linked pages yet</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Type @ in the editor or search above to link pages</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

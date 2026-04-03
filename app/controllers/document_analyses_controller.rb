@@ -1,16 +1,51 @@
 class DocumentAnalysesController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_document
-  before_action :authorize_user_for_document
-  before_action :set_document_analysis
+  before_action :authenticate_user!,          except: [:index, :landing]
+  before_action :set_document,                except: [:index, :landing, :hub]
+  before_action :authorize_user_for_document, except: [:index, :landing, :hub]
+  before_action :set_document_analysis,       except: [:index, :landing, :hub]
 
   before_action :set_navbar_color
   before_action :set_sidenav_expansion
-  before_action :set_navbar_actions
+  # before_action :set_navbar_actions
 
-  # def index
-  #   @document_analyses = DocumentAnalysis.all
-  # end
+  # Document analysis landing page for logged out users
+  def landing
+    redirect_to analysis_hub_path if user_signed_in?
+    
+    # Set SEO metadata
+    set_meta_tags title: "Document Analysis - Notebook.ai",
+                 description: "Analyze your writing for readability, style, sentiment, and more with Notebook.ai's AI-powered document analysis tools.",
+                 keywords: "document analysis, writing analysis, readability, style analysis, sentiment analysis, AI writing tools"
+  end
+
+  # Document analysis hub for logged in users
+  def hub
+    redirect_to landing_path unless user_signed_in?
+    
+    # Get the user's recent documents
+    @recent_documents = current_user.documents.order(updated_at: :desc).limit(5) if user_signed_in?
+    
+    # Get the user's recent analyses
+    @recent_analyses = DocumentAnalysis.joins(:document)
+                                     .where(documents: { user_id: current_user.id })
+                                     .where.not(completed_at: nil)
+                                     .order(completed_at: :desc)
+                                     .limit(5) if user_signed_in?
+    
+    # Get overall analysis stats
+    @total_analyses_count = DocumentAnalysis.joins(:document)
+                                          .where(documents: { user_id: current_user.id })
+                                          .where.not(completed_at: nil)
+                                          .count if user_signed_in?
+  end
+
+  def index
+    if user_signed_in?
+      @document_analyses = DocumentAnalysis.joins(:document).where(documents: { user_id: current_user.id })
+    else
+      @document_analyses = DocumentAnalysis.joins(:document).where(documents: { privacy: 'public' })
+    end
+  end
 
   def show
     @navbar_actions = [] unless @analysis.present?
@@ -26,13 +61,18 @@ class DocumentAnalysesController < ApplicationController
   # end
 
   def sentiment
-    @document_sentiment_color = (@analysis.sentiment_score < 0) ? 'blue' : 'green'
+    unless @analysis&.has_sentiment_scores?
+      redirect_to analysis_document_path(@document), notice: "Sentiment data is not yet available for this document."
+      return
+    end
+
+    @document_sentiment_color = (@analysis.sentiment_score.to_f < 0) ? 'blue' : 'green'
     @document_emotion_data = Hash[{
-      "Anger"   => (100 * @analysis.anger_score).round(1),
-      "Fear"    => (100 * @analysis.fear_score).round(1),
-      "Sadness" => (100 * @analysis.sadness_score).round(1),
-      "Disgust" => (100 * @analysis.disgust_score).round(1),
-      "Joy"     => (100 * @analysis.joy_score).round(1)
+      "Anger"   => (100 * (@analysis.anger_score || 0)).round(1),
+      "Fear"    => (100 * (@analysis.fear_score || 0)).round(1),
+      "Sadness" => (100 * (@analysis.sadness_score || 0)).round(1),
+      "Disgust" => (100 * (@analysis.disgust_score || 0)).round(1),
+      "Joy"     => (100 * (@analysis.joy_score || 0)).round(1)
     }.sort_by(&:second).reverse]
     @document_dominant_emotion  = @document_emotion_data.keys.first
     @document_secondary_emotion = @document_emotion_data.keys.second

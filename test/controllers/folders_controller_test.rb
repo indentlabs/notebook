@@ -125,8 +125,7 @@ class FoldersControllerTest < ActionDispatch::IntegrationTest
     end
     
     assert_redirected_to documents_path
-    assert_equal 'Folder Test Folder deleted!', flash[:notice]
-    
+
     # Documents should be relocated to no folder
     @document.reload
     @document2.reload

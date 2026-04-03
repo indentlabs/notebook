@@ -1,10 +1,11 @@
 # Controller for top-level pages of the site that do not have
 # an associated model
 class MainController < ApplicationController
-  layout 'landing', only: [:index, :about_notebook, :for_writers, :for_roleplayers, :for_friends]
+  #layout 'landing', only: [:about_notebook, :for_writers, :for_roleplayers, :for_friends]
 
   before_action :authenticate_user!, only: [:dashboard, :prompts, :notes, :recent_content]
   before_action :cache_linkable_content_for_each_content_type, only: [:dashboard, :prompts]
+  before_action :set_page_meta_tags
 
   before_action do
     if !user_signed_in? && params[:referral]
@@ -14,6 +15,10 @@ class MainController < ApplicationController
 
   def index
     redirect_to(:dashboard) if user_signed_in?
+
+    @resource ||= User.new
+    @resource_name = :user
+    @devise_mapping ||= Devise.mappings[:user]
   end
 
   def about_notebook
@@ -25,18 +30,62 @@ class MainController < ApplicationController
   def dashboard
     @page_title = "My notebook"
 
+    # Trending = topics with most posts in the last 30 days
     messageboard_ids_to_exclude = [38, 26, 31, 32, 30, 33, 27]
-    most_recent_posts = Thredded::Post.where.not(messageboard_id: messageboard_ids_to_exclude)
-                                      .where(moderation_state: "approved")
-                                      .order('id DESC')
-                                      .limit(300)
-                                      .shuffle
-                                      .first(3)
-    @most_recent_threads = Thredded::Topic.where(id: most_recent_posts.pluck(:postable_id))
-                                          .where(moderation_state: "approved")
-                                          .includes(:posts, :messageboard)
+    @most_recent_threads = Thredded::Topic
+      .joins(:posts)
+      .where.not(messageboard_id: messageboard_ids_to_exclude)
+      .where(moderation_state: "approved")
+      .where('thredded_posts.created_at > ?', 30.days.ago)
+      .group('thredded_topics.id')
+      .order('COUNT(thredded_posts.id) DESC')
+      .includes(:messageboard)
+      .limit(6)
+    
+    # Check if user has any content for null state detection
+    cache_current_user_content
+    @user_has_content = @current_user_content.values.flatten.any?
     
     set_questionable_content # for questions
+    generate_dashboard_analytics # for activity chart and streak
+
+    @sidenav_expansion = 'worldbuilding'
+  end
+
+  def table_of_contents
+    @universe = Universe.find(params[:id])
+
+    unless (current_user || User.new).can_read?(@universe)
+      raise ActiveRecord::RecordNotFound
+    end
+
+    @toc_user  = @universe.user
+    @page_title = "#{@universe.name} — Table of Contents"
+
+    # Gather all public, non-deleted content in this universe
+    all_pages = []
+    @page_type_counts = Hash.new(0)
+
+    Rails.application.config.content_types[:all_non_universe].each do |content_type|
+      relation = content_type.name.downcase.pluralize.to_sym
+      pages = @universe.send(relation)
+                       .is_public
+                       .where(deleted_at: nil, archived_at: nil)
+      pages.each do |page|
+        all_pages << page
+        @page_type_counts[content_type.name] += 1
+      end
+    end
+
+    all_pages.sort_by!(&:name)
+    @starred_pages = all_pages.select { |p| p.try(:favorite) }
+    @other_pages   = all_pages.reject { |p| p.try(:favorite) }
+    @pages_by_type = @other_pages.group_by(&:page_type)
+
+    # Statistics
+    @total_pages = all_pages.size
+    @total_words = all_pages.sum { |p| p.try(:cached_word_count).to_i }
+    @content_type_count = @page_type_counts.keys.size
   end
 
   def infostack
@@ -54,12 +103,35 @@ class MainController < ApplicationController
 
     @per_page_savings = {}
 
-    (Rails.application.config.content_types[:all] + [Timeline, Document]).each do |content_type|
-      physical_page_equivalent = GreenService.total_physical_pages_equivalent(content_type)
+    content_types = Rails.application.config.content_types[:all] + [Timeline, Document]
+
+    # Batch-fetch all max IDs upfront to avoid N+1 queries
+    max_ids = GreenService.max_ids_for_content_types(content_types)
+
+    content_types.each do |content_type|
+      # Determine the max_id for this content type
+      max_id = case content_type.name
+        when 'Timeline'
+          max_ids['TimelineEvent']
+        when 'Document'
+          nil # Document uses word count calculation, not max ID
+        else
+          max_ids[content_type.name]
+        end
+
+      physical_page_equivalent = GreenService.total_physical_pages_equivalent(content_type, max_id: max_id)
       tree_equivalent          = physical_page_equivalent.to_f / GreenService::SHEETS_OF_PAPER_PER_TREE
 
+      # Use the same max_id for digital count (avoiding duplicate query)
+      digital_count = case content_type.name
+        when 'Document'
+          max_ids['Document']
+        else
+          max_id || 0
+        end
+
       @per_page_savings[content_type.name] = {
-        digital: content_type.last.try(:id) || 0,
+        digital: digital_count,
         pages:   physical_page_equivalent,
         trees:   tree_equivalent
       }
@@ -84,6 +156,233 @@ class MainController < ApplicationController
   end
 
   def recent_content
+    @page_title = "Recent Activity"
+    
+    # Get base content with enhanced data
+    cache_current_user_content
+    all_content = @current_user_content.values.flatten
+
+    # Fetch all edit counts in a single query (fixes N+1)
+    edit_counts = ContentChangeEvent.where(user_id: current_user.id)
+                                    .group(:content_type, :content_id)
+                                    .count
+
+    # Add enhanced data to each content item
+    @enhanced_content = all_content.map do |content_page|
+      edit_count = edit_counts[[content_page.page_type, content_page.id]] || 0
+
+      {
+        page: content_page,
+        edit_count: edit_count,
+        action: content_page.created_at == content_page.updated_at ? 'created' : 'updated',
+        days_since_created: (Date.current - content_page.created_at.to_date).to_i,
+        days_since_updated: (Date.current - content_page.updated_at.to_date).to_i,
+        word_count: content_page.try(:cached_word_count) || 0,
+        has_image: content_page.respond_to?(:custom_thumbnail_url) && content_page.custom_thumbnail_url.present?
+      }
+    end
+    
+    # Apply filters
+    apply_content_filters
+    
+    # Apply sorting
+    apply_content_sorting
+    
+    # Generate activity analytics
+    generate_activity_analytics
+    
+    # Pagination
+    @page = params[:page]&.to_i || 1
+    @per_page = params[:per_page]&.to_i || 24
+    @total_pages = (@filtered_content.length.to_f / @per_page).ceil
+    @paginated_content = @filtered_content.slice((@page - 1) * @per_page, @per_page) || []
+    
+    # View mode
+    @view_mode = params[:view] || 'grid'
+    @view_mode = 'grid' unless %w[grid list timeline].include?(@view_mode)
+  end
+
+  private
+
+  def apply_content_filters
+    @filtered_content = @enhanced_content
+    
+    # Search filter
+    if params[:search].present?
+      search_term = params[:search].downcase
+      @filtered_content = @filtered_content.select do |item|
+        item[:page].name.downcase.include?(search_term)
+      end
+    end
+    
+    # Content type filter
+    if params[:content_type].present? && params[:content_type] != 'all'
+      @filtered_content = @filtered_content.select do |item|
+        item[:page].page_type == params[:content_type]
+      end
+    end
+    
+    # Date range filter
+    if params[:date_range].present?
+      case params[:date_range]
+      when 'today'
+        @filtered_content = @filtered_content.select { |item| item[:days_since_updated] == 0 }
+      when 'week'
+        @filtered_content = @filtered_content.select { |item| item[:days_since_updated] <= 7 }
+      when 'month'
+        @filtered_content = @filtered_content.select { |item| item[:days_since_updated] <= 30 }
+      when 'year'
+        @filtered_content = @filtered_content.select { |item| item[:days_since_updated] <= 365 }
+      end
+    end
+    
+    # Action filter (created vs updated)
+    if params[:action_filter].present? && params[:action_filter] != 'all'
+      @filtered_content = @filtered_content.select do |item|
+        item[:action] == params[:action_filter]
+      end
+    end
+  end
+
+  def apply_content_sorting
+    sort_by = params[:sort] || 'updated_at'
+    sort_direction = params[:direction] || 'desc'
+    
+    @filtered_content = @filtered_content.sort_by do |item|
+      case sort_by
+      when 'name'
+        item[:page].name.downcase
+      when 'created_at'
+        item[:page].created_at
+      when 'updated_at'
+        item[:page].updated_at
+      when 'content_type'
+        item[:page].page_type
+      when 'edit_count'
+        item[:edit_count]
+      when 'word_count'
+        item[:word_count]
+      else
+        item[:page].updated_at
+      end
+    end
+    
+    @filtered_content.reverse! if sort_direction == 'desc'
+  end
+
+  def generate_activity_analytics
+    @total_content = @enhanced_content.length
+    @total_edits = @enhanced_content.sum { |item| item[:edit_count] }
+    @total_words = @enhanced_content.sum { |item| item[:word_count] }
+    
+    # Content type breakdown
+    @content_type_stats = @enhanced_content.group_by { |item| item[:page].page_type }
+      .transform_values(&:count)
+      .sort_by { |_, count| -count }
+    
+    # Activity over time (last 7 days for recent content page)
+    @daily_activity = (0..6).map do |days_ago|
+      date = Date.current - days_ago.days
+      activity_count = @enhanced_content.count do |item|
+        item[:page].updated_at.to_date == date
+      end
+      [date.strftime('%m/%d'), activity_count]
+    end.reverse
+    
+    # Most active content types
+    @most_active_types = @enhanced_content.group_by { |item| item[:page].page_type }
+      .transform_values { |items| items.sum { |item| item[:edit_count] } }
+      .sort_by { |_, edits| -edits }
+      .first(5)
+      
+    # Recent activity summary
+    @recent_summary = {
+      today: @enhanced_content.count { |item| item[:days_since_updated] == 0 },
+      this_week: @enhanced_content.count { |item| item[:days_since_updated] <= 7 },
+      this_month: @enhanced_content.count { |item| item[:days_since_updated] <= 30 }
+    }
+  end
+
+  def generate_dashboard_analytics
+    return unless user_signed_in?
+
+    cache_current_user_content
+
+    # Use user's timezone for date calculations
+    user_today = current_user.current_date_in_time_zone
+
+    # 30-Day Activity Chart for Dashboard
+    # Batch fetch all 30 days of word counts in a single efficient query
+    dates = (0..29).map { |days_ago| user_today - days_ago.days }
+    @word_counts_by_date = WordCountUpdate.batch_words_written_on_dates(current_user, dates)
+
+    @dashboard_daily_activity = dates.map do |date|
+      [date.strftime('%m/%d'), @word_counts_by_date[date] || 0]
+    end.reverse
+
+    # Calculate Writing Streak (uses separate batch query for 365 days)
+    calculate_writing_streak
+
+    # Words written today - reuse data from the batch query
+    @words_written_today = @word_counts_by_date[user_today] || 0
+
+    # Daily word goal (max of active goals or default 1,000)
+    @daily_word_goal = current_user.daily_word_goal
+
+    # Words written this week (actual delta from end of last week)
+    @words_written_this_week = WordCountUpdate.words_written_in_range(
+      current_user,
+      user_today.beginning_of_week..user_today
+    )
+  end
+
+  def calculate_writing_streak
+    # Use user's timezone for date calculations
+    user_today = current_user.current_date_in_time_zone
+
+    # Fetch all dates with writing activity in last 365 days in a single efficient query
+    dates_with_activity = WordCountUpdate.dates_with_writing_activity(
+      current_user,
+      user_today - 365.days,
+      user_today
+    )
+
+    # Calculate current streak from the set of dates
+    @current_streak = 0
+    check_date = user_today
+
+    # Allow for "today has no activity yet" case - start checking from yesterday
+    check_date -= 1.day unless dates_with_activity.include?(user_today)
+
+    while dates_with_activity.include?(check_date) && @current_streak < 365
+      @current_streak += 1
+      check_date -= 1.day
+    end
+
+    # Calculate total words written in current streak
+    @streak_total_words = 0
+    if @current_streak > 0
+      streak_start = check_date + 1.day # check_date is now one day before streak started
+      @streak_total_words = WordCountUpdate.words_written_in_range(
+        current_user,
+        streak_start..user_today
+      )
+    end
+
+    # Generate last 7 days for streak visualization
+    # Reuse data from @word_counts_by_date (30-day batch) if available, otherwise fetch
+    last_7_days = (0..6).map { |days_ago| user_today - days_ago.days }
+    word_counts_7_days = @word_counts_by_date || WordCountUpdate.batch_words_written_on_dates(current_user, last_7_days)
+
+    @streak_days = last_7_days.map do |day_date|
+      words = word_counts_7_days[day_date] || 0
+      {
+        date: day_date,
+        has_activity: words > 0,
+        word_count: words,
+        day_name: day_date.strftime('%a')[0] # First letter of day name
+      }
+    end.reverse
   end
 
   def for_writers
@@ -104,7 +403,27 @@ class MainController < ApplicationController
   private
 
   def set_questionable_content
-    @content = @current_user_content.except(*%w(Timeline Document)).values.flatten.sample
-    @attribute_field_to_question = SerendipitousService.question_for(@content)
+    content_pool = @current_user_content.except(*%w(Timeline Document)).values.flatten.shuffle
+
+    # Try to find content with an unanswered question
+    content_pool.each do |content|
+      question = SerendipitousService.question_for(content)
+      if question.present?
+        @content = content
+        @attribute_field_to_question = question
+        return
+      end
+    end
+
+    # No unanswered questions found - set flags for empty state
+    @content = nil
+    @attribute_field_to_question = nil
+  end
+
+  def set_page_meta_tags
+    set_meta_tags(
+      site: "The smart notebook for worldbuilders - Notebook.ai",
+      page: ''
+    )
   end
 end

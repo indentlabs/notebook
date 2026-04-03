@@ -1,5 +1,5 @@
 # The image to build from.
-FROM ruby:3.2.1-slim
+FROM ruby:3.2.3-slim
 
 # Properties/labels for the image.
 LABEL maintainer="Notebook.ai Contributors"
