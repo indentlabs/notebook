@@ -22,7 +22,7 @@ module Documents
         analysis.save!
       end
 
-      def self.adult_content?(matchlist=:hate, content)
+      def self.adult_content?(content, matchlist: :hate)
         LanguageFilter::Filter.new(matchlist: matchlist.to_sym).matched(content)
       end
     end

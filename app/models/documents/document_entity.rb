@@ -53,15 +53,15 @@ class DocumentEntity < ApplicationRecord
   end
 
   def dominant_emotion
-    return { unknown: 1 } if emotions.values.uniq == [0]
+    return [[:unknown, 1]] if emotions.values.compact.empty? || emotions.values.uniq == [0]
 
-    emotions.sort_by { |emotion, score| score }.reverse
+    emotions.sort_by { |emotion, score| score.to_f }.reverse
   end
 
   def recessive_emotion
-    return { unknown: 1 } if emotions.values.uniq == [0]
+    return [[:unknown, 1]] if emotions.values.compact.empty? || emotions.values.uniq == [0]
 
-    emotions.sort_by { |emotion, score| score }
+    emotions.sort_by { |emotion, score| score.to_f }
   end
 
   def emotions
