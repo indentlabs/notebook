@@ -13,11 +13,11 @@
       preview_image = get_preview_image(regular_images, basil_images)
     %>
     
-    <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+    <div class="<%= raw_content.class.name == 'Universe' ? 'pb-4' : 'pb-4 border-b border-gray-200 dark:border-gray-700' %>">
       <button @click="switchView('gallery')" 
-              class="block group w-full text-left" 
+              class="block group w-full text-center" 
               title="View full gallery">
-        <div class="relative aspect-square rounded-xl overflow-hidden shadow-lg ring-1 ring-gray-200 dark:ring-gray-700 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100 dark:bg-gray-800">
+        <div class="relative aspect-square rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100 dark:bg-gray-800">
           <% if preview_image.present? %>
             <% image_type = preview_image[:type] %>
             <% image_data = preview_image[:data] %>
@@ -45,7 +45,7 @@
           
           <!-- Overlay on hover -->
           <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 flex items-center justify-center">
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full w-12 h-12 flex items-center justify-center">
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-90 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
               <i class="material-icons text-gray-700 text-xl">photo_library</i>
             </div>
           </div>
@@ -53,10 +53,41 @@
         
         <div class="mt-3 text-center">
           <p class="text-sm font-medium text-gray-900 dark:text-white">View Gallery</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Click to see all images</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"><%= raw_content.class.name == 'Universe' ? 'All images' : 'Click to see all images' %></p>
         </div>
       </button>
     </div>
+
+    <!-- Table of Contents / Encyclopedia (Universe only) -->
+    <% if raw_content.class.name == 'Universe' %>
+      <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
+        <%= link_to "/universes/#{raw_content.id}/contents", class: "group block relative h-24 sm:h-28 w-full rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-2 hover:ring-purple-500 transition-all duration-200" do %>
+          <!-- Background Image -->
+          <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", class: "absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" %>
+          
+          <!-- Gradient Overlay -->
+          <div class="absolute inset-0 transition-colors bg-black/40 group-hover:bg-black/30 dark:bg-black/60 dark:group-hover:bg-black/50 <%= Universe.color rescue 'bg-purple-900' %> mix-blend-multiply opacity-80 group-hover:opacity-60"></div>
+          
+          <!-- Content -->
+          <div class="absolute inset-0 flex items-center justify-between px-5">
+            <div class="flex items-center space-x-4">
+              <div class="w-12 h-12 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner group-hover:bg-white/20 transition-colors">
+                <i class="material-icons text-2xl text-white drop-shadow-sm"><%= Universe.icon rescue 'language' %></i>
+              </div>
+              <div class="text-left">
+                <h3 class="text-base font-bold text-white tracking-tight drop-shadow-md">Encyclopedia</h3>
+                <p class="text-xs text-purple-50 font-medium mt-0.5 drop-shadow-md group-hover:text-white transition-colors">Explore this universe</p>
+              </div>
+            </div>
+            
+            <!-- Arrow -->
+            <div class="w-8 h-8 flex items-center justify-center translate-x-0 group-hover:translate-x-1 transition-transform duration-300">
+              <i class="material-icons text-white/70 group-hover:text-white transition-colors">arrow_forward</i>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
     <!-- Universe Card -->
     <%= render partial: 'content/shared/universe_card', locals: { raw_content: raw_content, wrapper_classes: "pb-4 border-b border-gray-200 dark:border-gray-700" } %>

@@ -54,6 +54,21 @@
       <div class="px-4 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Dive Deeper</h3>
         <nav class="space-y-0.5">
+          <!-- In This Universe View -->
+          <% if raw_content.class.name == 'Universe' && @in_this_universe_count && @in_this_universe_count > 0 %>
+            <button @click="switchView('in_this_universe')"
+                    :class="isViewActive('in_this_universe') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('in_this_universe') ? 'text-white' : '<%= content.class_text_color %>'">language</i>
+              In This Universe
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('in_this_universe') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @in_this_universe_count %>
+              </span>
+            </button>
+          <% end %>
+
           <!-- Gallery View -->
           <% if @gallery_count && @gallery_count > 0 %>
             <button @click="switchView('gallery')"
@@ -123,6 +138,36 @@
               <i class="material-icons text-lg mr-3"
                  :class="isViewActive('feedback') ? 'text-white' : '<%= content.class_text_color %>'">chat</i>
               Feedback
+            </button>
+          <% end %>
+
+          <!-- Documents View (Universe only) -->
+          <% if raw_content.class.name == 'Universe' && @documents_count && @documents_count > 0 %>
+            <button @click="switchView('documents')"
+                    :class="isViewActive('documents') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('documents') ? 'text-white' : '<%= content.class_text_color %>'">description</i>
+              Documents
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('documents') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @documents_count %>
+              </span>
+            </button>
+          <% end %>
+
+          <!-- Books View (Universe only) -->
+          <% if raw_content.class.name == 'Universe' && @books_count && @books_count > 0 %>
+            <button @click="switchView('books')"
+                    :class="isViewActive('books') ? '<%= content.class_color %> text-white' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                    class="group flex items-center px-3 py-2 text-sm font-medium rounded-md w-full text-left transition-colors">
+              <i class="material-icons text-lg mr-3"
+                 :class="isViewActive('books') ? 'text-white' : '<%= content.class_text_color %>'">book</i>
+              Books
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
+                    :class="isViewActive('books') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                <%= @books_count %>
+              </span>
             </button>
           <% end %>
 
