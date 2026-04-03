@@ -35,6 +35,18 @@ class ContentSerializer
     self.attribute_values = Attribute.where(attribute_field_id: self.fields.map(&:id), entity_type: content.page_type, entity_id: content.id)
     self.viewing_user     = viewing_user
 
+    # Preload associations for old link columns to avoid N+1 queries during fallback serialization
+    link_fields_with_old_assoc = self.fields.select { |f| f.field_type == 'link' && f.old_column_source.present? }
+    if link_fields_with_old_assoc.any?
+      associations_to_preload = link_fields_with_old_assoc.map(&:old_column_source).map(&:to_sym).select do |assoc|
+        content.class.reflect_on_association(assoc).present?
+      end
+      
+      if associations_to_preload.any?
+        ActiveRecord::Associations::Preloader.new.preload([content], associations_to_preload.uniq)
+      end
+    end
+
     self.id               = content.id
     self.name             = content.name
     self.user             = content.user
