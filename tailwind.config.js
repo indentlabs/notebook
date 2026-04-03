@@ -2,7 +2,7 @@ const colors = require('tailwindcss/colors');
 
 module.exports = {
   darkMode: 'class',
-  purge: [
+  content: [
     'app/views/**/*.html.erb',
     'app/models/**/*.rb',
     'app/javascript/**/*.js',
@@ -39,9 +39,7 @@ module.exports = {
     'lighten-2',
     'teal',
     'teal-text',
-    // Ensure pseudo-element classes aren't purged if used elsewhere
-    { pattern: /^after:/ },
-    { pattern: /^peer/ },
+
     // Safelist all color variations that might be used dynamically
     { pattern: /^bg-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|brown)-(50|100|200|300|400|500|600|700|800|900)$/ },
     { pattern: /^text-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|brown)-(50|100|200|300|400|500|600|700|800|900)$/ },
@@ -62,10 +60,10 @@ module.exports = {
       purple: colors.purple,
       pink: colors.pink,
       // Add extended colors that content types use
-      slate: colors.blueGray,
-      zinc: colors.gray,
-      neutral: colors.trueGray,
-      stone: colors.warmGray,
+      slate: colors.slate,
+      zinc: colors.zinc,
+      neutral: colors.neutral,
+      stone: colors.stone,
       orange: colors.orange,
       amber: colors.amber,
       lime: colors.lime,
@@ -106,7 +104,6 @@ module.exports = {
   },
   plugins: [
     require('@tailwindcss/forms'),
-    require('@tailwindcss/line-clamp'),
     function({ addUtilities }) {
       addUtilities({
         '.text-shadow': {
