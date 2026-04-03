@@ -16,7 +16,8 @@ class ImageUploadController < ApplicationController
     end
 
     #todo authorizer for ImageUploads
-    if current_user.nil? || current_user.id != image.user.id
+    owner_id = image.user_id || image.content&.user_id
+    if current_user.nil? || current_user.id != owner_id
       respond_to do |format|
         format.html { redirect_back fallback_location: root_path, alert: 'Unauthorized.' }
         format.all { render json: { error: 'Unauthorized' }, status: 401 }

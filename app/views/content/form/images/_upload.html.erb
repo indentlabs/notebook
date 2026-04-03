@@ -1,69 +1,10 @@
-<div class="nested-fields mb-4">
+<% if f.object.image_uploads.build %>
   <%= f.fields_for :image_uploads do |upload_form| %>
-    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
-      <div class="flex items-start gap-4">
-        <!-- File upload area -->
-        <div class="flex-1">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Select an image to upload
-          </label>
-          
-          <div class="relative">
-            <!-- Hidden file input -->
-            <%= upload_form.file_field :src, 
-                name: "image_uploads[]", 
-                class: "absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10",
-                accept: "image/*",
-                onchange: "updateFileName(this)" %>
-            
-            <!-- Visible upload button and file name display -->
-            <div class="flex items-center gap-3">
-              <div class="flex-shrink-0">
-                <div class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors cursor-pointer flex items-center">
-                  <i class="material-icons text-sm mr-2">folder_open</i>
-                  <span>Choose File</span>
-                </div>
-              </div>
-              
-              <!-- File name display -->
-              <div class="flex-1">
-                <input type="text" 
-                       class="file-name-display w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed" 
-                       placeholder="No file selected" 
-                       readonly
-                       disabled>
-              </div>
-            </div>
-          </div>
-          
-          <!-- File preview area (hidden by default) -->
-          <div class="file-preview mt-3 hidden">
-            <div class="relative inline-block">
-              <img class="preview-image h-24 w-auto rounded-lg shadow-sm border border-gray-200 dark:border-gray-700" />
-              <div class="preview-info mt-2 text-xs text-gray-500 dark:text-gray-400">
-                <span class="file-size"></span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Help text -->
-          <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Supported formats: JPG, PNG, GIF, WebP. Max file size varies based on your plan.
-          </p>
-        </div>
-        
-        <!-- Remove button -->
-        <div class="flex-shrink-0">
-          <%= link_to_remove_association f, 
-              class: "p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors",
-              title: "Remove this upload" do %>
-            <i class="material-icons">delete</i>
-          <% end %>
-        </div>
-      </div>
-    </div>
+    <% if upload_form.object.new_record? %>
+      <%= render 'content/form/images/upload_fields', f: upload_form %>
+    <% end %>
   <% end %>
-</div>
+<% end %>
 
 <script>
 // Update file name display when a file is selected

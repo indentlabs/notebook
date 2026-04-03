@@ -2,6 +2,13 @@ class ImageUpload < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
 
+  # Inherit user_id from parent content when created through nested attributes
+  before_validation :inherit_user_id, on: :create
+  
+  def inherit_user_id
+    self.user_id ||= content&.user_id
+  end
+
   # Add scopes for image ordering
   scope :pinned, -> { where(pinned: true) }
   scope :ordered, -> { order(:position) }

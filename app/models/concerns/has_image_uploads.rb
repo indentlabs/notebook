@@ -5,6 +5,7 @@ module HasImageUploads
 
   included do
     has_many :image_uploads, as: :content
+    accepts_nested_attributes_for :image_uploads, allow_destroy: true
     # todo: dependent: :destroy_async
     # todo: destroy from s3 on destroy
 
@@ -70,6 +71,12 @@ module HasImageUploads
       
       # Fall back to random public image
       public_image_uploads.sample.try(:src, format).presence || header_asset_for(self.class.name)
+    end
+
+    def custom_public_thumbnail_url(format: :medium)
+      url = first_public_image(format)
+      fallback_url = header_asset_for(self.class.name)
+      url == fallback_url ? nil : url
     end
     
     # Returns the pinned image upload (or nil if none pinned)
