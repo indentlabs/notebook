@@ -1,5 +1,18 @@
 class UniversesController < ContentController
   def hub
+    # If the user came from a local page that is NOT the multiverse hub itself, store it as the return_to target
+    if request.referer.present?
+      begin
+        referer_uri = URI(request.referer)
+        # Verify the referer is from our domain and isn't just the multiverse page reloaded
+        if referer_uri.host == request.host && referer_uri.path != multiverse_path
+          @return_to = request.referer
+        end
+      rescue URI::InvalidURIError
+        # ignore invalid referers
+      end
+    end
+
     @universes = @current_user_content.fetch('Universe', []).sort_by(&:name)
   end
 

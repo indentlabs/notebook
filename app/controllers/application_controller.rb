@@ -43,6 +43,16 @@ class ApplicationController < ActionController::Base
         found_universe = nil unless found_universe.user_id == current_user.id || found_universe.contributors.pluck(:user_id).include?(current_user.id)
         session[:universe_id] = found_universe.id if found_universe
       end
+
+      # Safely intercept and redirect back if requested, preventing Open Redirects
+      if params[:return_to].present?
+        is_safe_local_path = params[:return_to].start_with?('/') && !params[:return_to].start_with?('//')
+        is_safe_absolute_url = params[:return_to].start_with?(request.base_url)
+
+        if is_safe_local_path || is_safe_absolute_url
+          redirect_to params[:return_to], allow_other_host: false and return
+        end
+      end
     end
   end
 

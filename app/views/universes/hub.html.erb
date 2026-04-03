@@ -87,7 +87,7 @@
     <!-- All Universes Card -->
     <li class="col-span-1 flex flex-col">
       <% active_class = @universe_scope.nil? ? 'universe-active border-purple-500' : 'border-gray-200 dark:border-gray-700' %>
-      <%= link_to dashboard_path(universe: 'all'), class: "universe-card universe-card-link flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg border #{active_class} relative" do %>
+      <%= link_to dashboard_path(universe: 'all', return_to: @return_to), class: "universe-card universe-card-link flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg border #{active_class} relative" do %>
         <% if @universe_scope.nil? %>
           <div class="absolute top-3 right-3 z-10">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
@@ -114,7 +114,7 @@
     <% @universes.each do |universe| %>
       <li class="col-span-1 flex flex-col">
         <% active_class = @universe_scope&.id == universe.id ? 'universe-active border-purple-500' : 'border-gray-200 dark:border-gray-700' %>
-        <%= link_to dashboard_path(universe: universe.id), class: "universe-card universe-card-link flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg border #{active_class} relative" do %>
+        <%= link_to dashboard_path(universe: universe.id, return_to: @return_to), class: "universe-card universe-card-link flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg border #{active_class} relative" do %>
           <% if @universe_scope&.id == universe.id %>
             <div class="absolute top-3 right-3 z-10">
               <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
