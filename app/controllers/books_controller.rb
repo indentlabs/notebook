@@ -1,6 +1,6 @@
 class BooksController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_book, except: [:index, :new, :create]
+  before_action :authenticate_user!, except: [:show]
+  before_action :set_book, except: [:index, :new, :create, :show]
   before_action :set_sidenav_expansion
 
   def index
@@ -10,8 +10,19 @@ class BooksController < ApplicationController
   end
 
   def show
-    # Public view (to be implemented later)
-    redirect_to edit_book_path(@book)
+    @book = Book.find_by(id: params[:id])
+    
+    if @book.nil?
+      return redirect_to root_path, notice: "That book doesn't exist!"
+    end
+
+    unless (current_user || User.new).can_read?(@book)
+      return redirect_to root_path, notice: "You don't have permission to view that book."
+    end
+
+    @book_documents = @book.book_documents.includes(:document).order(position: :asc)
+    @total_words = @book_documents.sum { |bd| bd.document&.word_count.to_i }
+    @est_reading_time = (@total_words / 200.0).ceil
   end
 
   def new
@@ -98,7 +109,11 @@ class BooksController < ApplicationController
       @book.book_documents.create(document: document)
     end
 
+    @available_documents = current_user.documents.unarchived.order(:title)
+    @book_documents = @book.book_documents.includes(:document).order(position: :asc)
+
     respond_to do |format|
+      format.js
       format.html { redirect_to edit_book_path(@book) }
       format.json { render json: { status: 'ok' } }
     end
@@ -107,7 +122,11 @@ class BooksController < ApplicationController
   def remove_document
     @book.book_documents.find_by(document_id: params[:document_id])&.destroy
 
+    @available_documents = current_user.documents.unarchived.order(:title)
+    @book_documents = @book.book_documents.includes(:document).order(position: :asc)
+
     respond_to do |format|
+      format.js
       format.html { redirect_to edit_book_path(@book) }
       format.json { render json: { status: 'ok' } }
     end
