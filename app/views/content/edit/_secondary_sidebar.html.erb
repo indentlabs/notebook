@@ -5,6 +5,20 @@
     <!-- Tools -->
   <div class="pb-4 border-b border-gray-200 dark:border-gray-700">
     <div class="w-full space-y-2">
+      <% if raw_content.class.name == 'Universe' %>
+        <%= link_to "/universes/#{raw_content.id}/contents",
+                    target: "_blank",
+                    class: "group flex items-center justify-between p-3 w-full rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200 bg-gray-50 dark:bg-gray-800" do %>
+          <div class="flex items-center">
+            <i class="material-icons text-xl text-gray-400 dark:text-gray-500 group-hover:text-purple-500 mr-3"><%= Universe.icon rescue 'language' %></i>
+            <div class="text-left">
+              <div class="text-sm font-medium text-gray-900 dark:text-white">Encyclopedia</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">Explore this universe</div>
+            </div>
+          </div>
+          <i class="material-icons text-gray-400 dark:text-gray-500 group-hover:text-purple-500 text-lg">open_in_new</i>
+        <% end %>
+      <% end %>
       <% if BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name) %>
         <%= link_to basil_content_path(raw_content.class.name, raw_content.id),
                     target: "_blank",
