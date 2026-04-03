@@ -11,6 +11,7 @@ class Book < ApplicationRecord
   include HasPrivacy
   include HasPageTags
   include BelongsToUniverse
+  include HasImageUploads
 
   include Authority::Abilities
   self.authorizer_name = 'BookAuthorizer'
@@ -30,6 +31,8 @@ class Book < ApplicationRecord
 
   def enqueue_word_count_update
     CacheBookWordCountJob.perform_later(self.id)
+  rescue StandardError => e
+    Rails.logger.error("Failed to enqueue CacheBookWordCountJob: #{e.message}")
   end
 
   # Display helpers (like Timeline/Document patterns)
@@ -67,11 +70,7 @@ class Book < ApplicationRecord
     Book.hex_color
   end
 
-  # Returns the default book header image since Books don't have image uploads
-  # This stub method provides compatibility with HasImageUploads interface
-  def random_image_including_private(format: :medium)
-    header_asset_for('Book')
-  end
+
 
   def archive!
     update(archived_at: Time.current)

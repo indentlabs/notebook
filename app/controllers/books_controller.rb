@@ -4,7 +4,7 @@ class BooksController < ApplicationController
   before_action :set_sidenav_expansion
 
   def index
-    @books = current_user.books.unarchived
+    @books = current_user.books.unarchived.includes(:image_uploads)
     @books = @books.where(universe_id: @universe_scope.id) if @universe_scope.present?
     @books = @books.order(favorite: :desc, updated_at: :desc)
   end
@@ -15,7 +15,10 @@ class BooksController < ApplicationController
   end
 
   def new
-    @book = current_user.books.create!(name: 'Untitled Book')
+    attrs = { name: 'Untitled Book' }
+    attrs[:universe_id] = @universe_scope.id if @universe_scope.present?
+
+    @book = current_user.books.create!(attrs)
     respond_to do |format|
       format.html { redirect_to edit_book_path(@book) }
       format.json { render json: { status: 'ok', book: { id: @book.id, name: @book.name } } }
@@ -25,6 +28,7 @@ class BooksController < ApplicationController
   def create
     @book = current_user.books.new(book_params)
     @book.name = 'Untitled Book' if @book.name.blank?
+    @book.universe_id ||= @universe_scope.id if @universe_scope.present?
 
     if @book.save
       respond_to do |format|
@@ -136,6 +140,6 @@ class BooksController < ApplicationController
   end
 
   def book_params
-    params.require(:book).permit(:name, :subtitle, :description, :blurb, :status, :privacy, :universe_id)
+    params.require(:book).permit(:name, :subtitle, :description, :blurb, :status, :privacy, :universe_id, image_uploads_attributes: [:id, :src, :privacy, :_destroy])
   end
 end

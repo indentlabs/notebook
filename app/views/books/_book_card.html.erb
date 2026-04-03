@@ -16,23 +16,29 @@
   <%= link_to edit_book_path(book), class: "block" do %>
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700">
       <!-- Book Cover Area -->
-      <div class="h-48 w-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center relative">
-        <div class="text-center">
-          <i class="material-icons text-white text-5xl opacity-80"><%= Book.icon %></i>
-        </div>
+      <div class="h-48 w-full relative bg-gray-100 dark:bg-gray-800">
+        <%
+          # custom_thumbnail_url returns nil if no images are uploaded, letting us use the view's asset_path natively for the fallback
+          cover_image = book.custom_thumbnail_url(format: :medium) || asset_path('card-headers/books.webp')
+        %>
+        <%= image_tag cover_image, class: 'absolute inset-0 w-full h-full object-cover' %>
+        
+        <!-- Dark gradient overlay for better icon/text visibility -->
+        <div class="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
         <!-- Favorite Button -->
         <button
           @click.prevent="async function() { isLoading = true; try { const result = await window.toggleBookFavorite('<%= book.id %>'); if (result.success) { isFavorite = !isFavorite; } } finally { isLoading = false; } }()"
           :disabled="isLoading"
-          class="absolute top-3 left-3 w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-90 dark:bg-gray-800 backdrop-blur-sm shadow-sm hover:bg-opacity-100"
+          class="absolute top-3 left-3 w-9 h-9 flex items-center justify-center rounded-full bg-white bg-opacity-90 dark:bg-gray-800 backdrop-blur-sm shadow-sm hover:bg-opacity-100 z-10"
           :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
           title="Toggle favorite"
         >
           <i class="material-icons text-xl" :class="isFavorite ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-400'" x-text="isFavorite ? 'star' : 'star_outline'"></i>
         </button>
         <!-- Status Badge -->
-        <div class="absolute top-3 right-3">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_color %>">
+        <div class="absolute top-3 right-3 z-10">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= status_color %> shadow-sm">
             <%= book.status.humanize %>
           </span>
         </div>
