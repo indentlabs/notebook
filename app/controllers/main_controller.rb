@@ -62,6 +62,12 @@ class MainController < ApplicationController
     @toc_user  = @universe.user
     @page_title = "#{@universe.name} — Table of Contents"
 
+    # Fetch books that belong to this universe for the Book shelf
+    @books = @universe.books
+                      .is_public
+                      .where(deleted_at: nil, archived_at: nil)
+                      .order(:name)
+
     # Gather all public, non-deleted content in this universe
     all_pages = []
     @page_type_counts = Hash.new(0)

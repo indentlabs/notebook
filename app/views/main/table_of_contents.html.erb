@@ -84,6 +84,77 @@
     </div>
   <% end %>
 
+  <!-- Books Shelf Section -->
+  <% if @books.any? %>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+      <div class="flex items-center mb-8 pb-4">
+        <div class="w-14 h-14 rounded-2xl flex items-center justify-center <%= Book.color %> mr-5 shadow-lg text-white">
+          <i class="material-icons text-3xl"><%= Book.icon %></i>
+        </div>
+        <h2 class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+          Books in this Universe
+        </h2>
+        <span class="ml-5 bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-4 py-1.5 rounded-full text-base font-black shadow-inner">
+          <%= number_with_delimiter @books.count %>
+        </span>
+      </div>
+
+      <!-- Horizontally scrolling shelf container -->
+      <div class="flex overflow-x-auto space-x-6 pb-10 pt-4 px-4 -mx-4 snap-x snap-mandatory hide-scrollbars no-scrollbar">
+        <% @books.each do |book| %>
+          <%= link_to book_path(book), class: "group block shrink-0 snap-start h-full" do %>
+            <div class="w-56 h-80 bg-gray-100 dark:bg-gray-800 rounded-r-xl rounded-l-md shadow-lg border border-gray-300 dark:border-gray-700 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:-translate-y-2 transition-all duration-300 overflow-hidden relative group">
+              
+              <!-- Book Spine Decoration (Left Edge) -->
+              <div class="absolute left-0 top-0 bottom-0 w-6 <%= Book.color %> mix-blend-multiply opacity-80 z-10 shadow-[inset_-2px_0_5px_rgba(0,0,0,0.2)] dark:opacity-60"></div>
+              <div class="absolute left-0 top-0 bottom-0 w-px bg-white/30 z-10"></div>
+              <div class="absolute left-5 top-0 bottom-0 w-px bg-black/20 z-10"></div>
+
+              <!-- Cover Image Area -->
+              <div class="absolute inset-0 z-0 overflow-hidden rounded-r-xl rounded-l-md">
+                <%
+                  header_url = nil
+                  header_url = book.custom_public_thumbnail_url(format: :medium) if book.respond_to?(:custom_public_thumbnail_url)
+                  header_url ||= asset_path("card-headers/books.webp")
+                %>
+                <%= image_tag header_url, class: "absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out opacity-90" %>
+                <div class="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"></div>
+                
+                <!-- Floating Type Badge -->
+                <div class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-md text-white <%= Book.color %> shadow-lg ring-1 ring-white/30 backdrop-blur-sm bg-opacity-90 z-20">
+                  <i class="material-icons" style="font-size: 16px;"><%= Book.icon %></i>
+                </div>
+
+                <!-- Book Title Area (Centered) -->
+                <div class="absolute inset-0 ml-6 p-4 z-20 flex flex-col items-center justify-center text-center">
+                  <h3 class="font-extrabold text-white text-2xl leading-snug drop-shadow-xl" style="text-shadow: 0 4px 8px rgba(0,0,0,0.9);">
+                    <%= book.name %>
+                  </h3>
+                  <% if book.description.present? %>
+                    <p class="text-sm text-gray-200 mt-3 line-clamp-3 font-medium" style="text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+                      <%= truncate(book.description, length: 120) %>
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+      
+      <!-- Custom CSS to hide scrollbars for cleaner look -->
+      <style>
+        .hide-scrollbars::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbars {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      </style>
+    </div>
+  <% end %>
+
   <!-- Content Categories Grid -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 space-y-32">
     <% @pages_by_type.keys.sort.each do |page_type| %>
