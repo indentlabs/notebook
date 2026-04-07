@@ -211,6 +211,10 @@ class MainController < ApplicationController
     @total_pages = (@filtered_content.length.to_f / @per_page).ceil
     @paginated_content = @filtered_content.slice((@page - 1) * @per_page, @per_page) || []
     
+    # Eager load image uploads for only the items being rendered
+    pages_to_preload = @paginated_content.map { |item| item[:page] }.select { |p| p.respond_to?(:image_uploads) }
+    ActiveRecord::Associations::Preloader.new.preload(pages_to_preload, :image_uploads) if pages_to_preload.any?
+    
     # View mode
     @view_mode = params[:view] || 'grid'
     @view_mode = 'grid' unless %w[grid list timeline].include?(@view_mode)
