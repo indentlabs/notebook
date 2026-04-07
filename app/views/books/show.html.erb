@@ -1,9 +1,9 @@
 <%
   set_meta_tags title:       @book.name,
                 description: @book.blurb.presence || @book.description.presence || "A book by #{@book.user.display_name}",
-                image_src:   @book.first_public_image,
+                image_src:   image_url(@book.first_public_image),
                 og:          { type: 'book' },
-                twitter:     { card: 'photo', image: @book.first_public_image }
+                twitter:     { card: 'photo', image: image_url(@book.first_public_image) }
 
   valid_cover = @book.image_uploads.find { |upload| upload.src_file_name.present? }
 %>

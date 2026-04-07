@@ -145,22 +145,7 @@ module HasImageUploads
     end
 
     def header_asset_for(class_name)
-      # Since we use this as a fallback image on SEO content (for example, Twitter cards for shared notebook pages),
-      # we need to include the full protocol + domain + path to ensure they will display the image. A relative path
-      # will not work.
-      # 
-      # For direct view rendering, we use the relative asset path which works better with image_tag
-      asset_filename = "card-headers/#{class_name.downcase.pluralize}.webp"
-      
-      if Rails.env.production?
-        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url(asset_filename)
-      else
-        result = ActionController::Base.helpers.asset_path(asset_filename)
-        # In development, ensure we have an absolute path starting with /assets/ so the Sprockets middleware serves it natively
-        # and image_tag doesn't interpret it as a pure relative path like /card-headers/...
-        result = "/assets/#{asset_filename}" if result == "/#{asset_filename}"
-        result
-      end
+      "card-headers/#{class_name.downcase.pluralize}.webp"
     end
   end
 end
