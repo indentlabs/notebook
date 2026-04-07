@@ -152,12 +152,15 @@ module HasImageUploads
       # For direct view rendering, we use the relative asset path which works better with image_tag
       asset_filename = "card-headers/#{class_name.downcase.pluralize}.webp"
       
-      result = Rails.env.production? ? 
-        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url(asset_filename) :
-        ActionController::Base.helpers.asset_path(asset_filename)
-      
-      # Ensure we never return nil - provide a fallback
-      result.presence || (Rails.env.production? ? "https://www.notebook.ai/assets/#{asset_filename}" : "/assets/#{asset_filename}")
+      if Rails.env.production?
+        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url(asset_filename)
+      else
+        result = ActionController::Base.helpers.asset_path(asset_filename)
+        # In development, ensure we have an absolute path starting with /assets/ so the Sprockets middleware serves it natively
+        # and image_tag doesn't interpret it as a pure relative path like /card-headers/...
+        result = "/assets/#{asset_filename}" if result == "/#{asset_filename}"
+        result
+      end
     end
   end
 end

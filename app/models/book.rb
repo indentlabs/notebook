@@ -88,12 +88,4 @@ class Book < ApplicationRecord
   scope :archived, -> { where.not(archived_at: nil) }
 
   private
-
-  def header_asset_for(class_name)
-    asset_filename = "card-headers/#{class_name.downcase.pluralize}.webp"
-
-    Rails.env.production? ?
-      "https://www.notebook.ai" + ActionController::Base.helpers.asset_url(asset_filename) :
-      ActionController::Base.helpers.asset_path(asset_filename)
-  end
 end
