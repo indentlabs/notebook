@@ -65,7 +65,9 @@ class Timeline < ApplicationRecord
   end
 
   def initialize_first_event
-    timeline_events.create(title: "Untitled Event", position: 1)
+    event = timeline_events.build(title: "Untitled Event", position: 1)
+    event.skip_word_count_update = true
+    event.save
   end
 
   def total_word_count

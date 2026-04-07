@@ -9,6 +9,7 @@ class TimelineEvent < ApplicationRecord
   include HasPageTags
 
   acts_as_list scope: [:timeline_id]
+  attr_accessor :skip_word_count_update
 
   # Event type definitions with narrative focus and Material Icons
   EVENT_TYPES = {
@@ -40,8 +41,8 @@ class TimelineEvent < ApplicationRecord
   end
 
   def enqueue_word_count_update
-    # Skip enqueueing a job for the default event created during timeline initialization
-    return if title == "Untitled Event" && description.blank? && saved_change_to_id?
+    # Skip enqueueing a job if explicitly flagged (like during timeline initialization)
+    return if skip_word_count_update
 
     CacheTimelineEventWordCountJob.perform_later(self.id)
   end
