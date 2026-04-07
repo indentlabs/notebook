@@ -40,6 +40,9 @@ class TimelineEvent < ApplicationRecord
   end
 
   def enqueue_word_count_update
+    # Skip enqueueing a job for the default event created during timeline initialization
+    return if title == "Untitled Event" && description.blank? && saved_change_to_id?
+
     CacheTimelineEventWordCountJob.perform_later(self.id)
   end
 
