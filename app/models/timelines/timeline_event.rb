@@ -4,7 +4,7 @@ class TimelineEvent < ApplicationRecord
   belongs_to :timeline, touch: true
 
   has_many :timeline_event_entities, dependent: :destroy
-  has_many :word_count_updates, as: :entity, dependent: :destroy
+  has_many :word_count_updates, as: :entity
 
   include HasPageTags
 

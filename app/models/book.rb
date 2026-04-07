@@ -6,7 +6,7 @@ class Book < ApplicationRecord
 
   has_many :book_documents, -> { order(position: :asc) }, dependent: :destroy
   has_many :documents, through: :book_documents
-  has_many :word_count_updates, as: :entity, dependent: :destroy
+  has_many :word_count_updates, as: :entity
 
   include HasPrivacy
   include HasPageTags

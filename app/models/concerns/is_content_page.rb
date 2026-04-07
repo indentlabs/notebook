@@ -20,7 +20,7 @@ module IsContentPage
 
     has_many :basil_commissions,           as: :entity, dependent: :destroy
 
-    has_many :word_count_updates, as: :entity, dependent: :destroy
+    has_many :word_count_updates, as: :entity
     def latest_word_count_cache
       word_count_updates.order('for_date DESC').limit(1).first.try(:word_count) ||  0
     end
