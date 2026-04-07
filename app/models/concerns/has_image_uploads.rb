@@ -14,6 +14,25 @@ module HasImageUploads
       self.image_uploads.first.presence || [header_asset_for(self.class.name)]
     end
 
+    def extract_image_url(upload, format = :medium)
+      return nil unless upload
+      
+      # Fast Paperclip check: ensure an underlying file is recorded in the DB
+      # before asking for a URL, dodging the default 'missing.png' return.
+      if upload.respond_to?(:src_file_name) && upload.src_file_name.blank?
+        return nil
+      end
+
+      # Future-proofing for upcoming ActiveStorage transition
+      if upload.respond_to?(:upload) && upload.upload.respond_to?(:attached?) && !upload.upload.attached?
+        return nil
+      end
+
+      url = upload.try(:src, format).to_s
+      return nil if url.blank? || url.include?('missing.png')
+      url
+    end
+
     def public_image_uploads
       self.image_uploads.where(privacy: 'public').presence || [header_asset_for(self.class.name)]
     end
@@ -32,7 +51,7 @@ module HasImageUploads
       
       # If no pinned image, fall back to random selection
       if result.nil?
-        result = image_uploads.sample.try(:src, format)
+        result = extract_image_url(image_uploads.sample, format)
         
         # If we don't have any uploaded images, we look for saved Basil commissions
         if result.nil? && respond_to?(:basil_commissions)
@@ -61,7 +80,7 @@ module HasImageUploads
       return pinned if pinned.present?
       
       # Fall back to first public image
-      public_image_uploads.first.try(:src, format).presence || header_asset_for(self.class.name)
+      extract_image_url(public_image_uploads.first, format).presence || header_asset_for(self.class.name)
     end
 
     def random_public_image(format = :medium)
@@ -70,7 +89,7 @@ module HasImageUploads
       return pinned if pinned.present?
       
       # Fall back to random public image
-      public_image_uploads.sample.try(:src, format).presence || header_asset_for(self.class.name)
+      extract_image_url(public_image_uploads.sample, format).presence || header_asset_for(self.class.name)
     end
 
     def custom_public_thumbnail_url(format: :medium)
@@ -83,7 +102,10 @@ module HasImageUploads
     def pinned_image_upload(format = :medium)
       # First check standard image uploads
       pinned_upload = image_uploads.pinned.first
-      return pinned_upload.try(:src, format) if pinned_upload.present?
+      if pinned_upload.present?
+        url = extract_image_url(pinned_upload, format)
+        return url if url.present?
+      end
       
       # Then check basil commissions
       if respond_to?(:basil_commissions)
@@ -107,7 +129,10 @@ module HasImageUploads
     # Returns the pinned public image (or nil if none pinned)
     def pinned_public_image(format = :medium)
       pinned_upload = image_uploads.pinned.where(privacy: 'public').first
-      return pinned_upload.try(:src, format) if pinned_upload.present?
+      if pinned_upload.present?
+        url = extract_image_url(pinned_upload, format)
+        return url if url.present?
+      end
       
       if respond_to?(:basil_commissions)
         pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first

@@ -168,14 +168,22 @@ class MainController < ApplicationController
     cache_current_user_content
     all_content = @current_user_content.values.flatten
 
-    # Fetch all edit counts in a single query (fixes N+1)
-    edit_counts = ContentChangeEvent.where(user_id: current_user.id)
-                                    .group(:content_type, :content_id)
-                                    .count
+    # Count edits on the objects directly (if we ever use ContentChangeEvent for non-Attributes)
+    direct_edit_counts = ContentChangeEvent.where(user_id: current_user.id)
+                                           .where.not(content_type: 'Attribute')
+                                           .group(:content_type, :content_id)
+                                           .count
+
+    # Count edits on their Attributes
+    attribute_edit_counts = ContentChangeEvent.where(user_id: current_user.id, content_type: 'Attribute')
+                                              .joins("INNER JOIN attributes ON attributes.id = content_change_events.content_id")
+                                              .group('attributes.entity_type', 'attributes.entity_id')
+                                              .count
 
     # Add enhanced data to each content item
     @enhanced_content = all_content.map do |content_page|
-      edit_count = edit_counts[[content_page.page_type, content_page.id]] || 0
+      key = [content_page.page_type, content_page.id]
+      edit_count = (direct_edit_counts[key] || 0) + (attribute_edit_counts[key] || 0)
 
       {
         page: content_page,
