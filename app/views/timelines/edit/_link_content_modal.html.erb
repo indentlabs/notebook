@@ -236,7 +236,7 @@
                      x-transition:leave-start="opacity-100 translate-y-0"
                      x-transition:leave-end="opacity-0 -translate-y-2"
                      class="space-y-2">
-                  <% content_list.each_with_index do |content, index| %>
+                  <% content_list.sort_by { |c| c.updated_at || Time.at(0) }.reverse.each_with_index do |content, index| %>
                     <% content_name = content.name.presence || "Untitled #{content_type}" %>
                     <button type="button"
                             class="js-link-entity-selection w-full text-left px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors flex items-center justify-between group"
