@@ -75,7 +75,9 @@
             <i class="material-icons text-white"><%= Book.icon %></i>
           </div>
           <div>
-            <h1 class="text-lg font-semibold text-gray-900 dark:text-white"><%= @book.name %></h1>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
+              <%= link_to @book.name, @book, class: "hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" %>
+            </h1>
             <p class="text-sm text-gray-500 dark:text-gray-400">
               <%= @book.status.humanize %> • <%= pluralize @book.documents.count, 'document' %>
             </p>
@@ -83,18 +85,26 @@
         </div>
       </div>
 
-      <!-- Mobile sidebars toggle -->
-      <div class="lg:hidden flex items-center space-x-1">
-        <button @click="toggleRightSidebar('analytics')"
-                class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
-                aria-label="Open analytics">
-          <i class="material-icons">analytics</i>
-        </button>
-        <button @click="toggleRightSidebar('settings')"
-                class="p-2 -mr-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
-                aria-label="Open settings">
-          <i class="material-icons">settings</i>
-        </button>
+      <!-- Right actions -->
+      <div class="flex items-center space-x-2">
+        <%= link_to @book, class: "bg-gray-600 border border-gray-600 rounded-md shadow-sm px-3 py-1.5 flex items-center text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors" do %>
+          <i class="material-icons text-base mr-2">visibility</i>
+          <span class="hidden sm:inline">Done Editing</span>
+        <% end %>
+
+        <!-- Mobile sidebars toggle -->
+        <div class="lg:hidden flex items-center space-x-1">
+          <button @click="toggleRightSidebar('analytics')"
+                  class="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                  aria-label="Open analytics">
+            <i class="material-icons">analytics</i>
+          </button>
+          <button @click="toggleRightSidebar('settings')"
+                  class="p-2 -mr-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                  aria-label="Open settings">
+            <i class="material-icons">settings</i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
