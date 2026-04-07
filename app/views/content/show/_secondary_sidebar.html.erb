@@ -11,78 +11,85 @@
       end
       basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered.to_a
       preview_image = get_preview_image(regular_images, basil_images)
+
+      has_images = regular_images.any? || basil_images.any?
+      has_encyclopedia = raw_content.class.name == 'Universe'
     %>
     
     <!-- Actions (Gallery & Encyclopedia) -->
-    <div class="pb-6 border-b border-gray-200 dark:border-gray-700 space-y-4">
-      <!-- Gallery Card -->
-      <button @click="switchView('gallery')" 
-              class="block group w-full text-left" 
-              title="View full gallery">
-        <div class="relative aspect-square rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100 dark:bg-gray-800">
-          <% if preview_image.present? %>
-            <% image_type = preview_image[:type] %>
-            <% image_data = preview_image[:data] %>
-            
-            <% if image_type == 'image_upload' %>
-              <%= image_tag image_data.src.url, 
-                            class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                            alt: "#{content.name} preview" %>
-            <% elsif image_type == 'basil_commission' %>
-              <% if image_data.image.attached? %>
-                <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
-                              class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                              alt: "#{content.name} preview" %>
+    <% if has_images || has_encyclopedia %>
+      <div class="pb-6 border-b border-gray-200 dark:border-gray-700 space-y-4">
+        <% if has_images %>
+          <!-- Gallery Card -->
+          <button @click="switchView('gallery')" 
+                  class="block group w-full text-left" 
+                  title="View full gallery">
+            <div class="relative aspect-square rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100 dark:bg-gray-800">
+              <% if preview_image.present? %>
+                <% image_type = preview_image[:type] %>
+                <% image_data = preview_image[:data] %>
+                
+                <% if image_type == 'image_upload' %>
+                  <%= image_tag image_data.src.url, 
+                                class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
+                                alt: "#{content.name} preview" %>
+                <% elsif image_type == 'basil_commission' %>
+                  <% if image_data.image.attached? %>
+                    <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
+                                  class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
+                                  alt: "#{content.name} preview" %>
+                  <% else %>
+                    <%= image_tag asset_path("content/card-headers/#{raw_content.class.name.downcase.pluralize}.jpg"), 
+                                  class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
+                                  alt: "#{content.name} preview" %>
+                  <% end %>
+                <% end %>
               <% else %>
-                <%= image_tag asset_path("content/card-headers/#{raw_content.class.name.downcase.pluralize}.jpg"), 
+                <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
                               class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
                               alt: "#{content.name} preview" %>
               <% end %>
-            <% end %>
-          <% else %>
-            <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
-                          class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                          alt: "#{content.name} preview" %>
-          <% end %>
-          
-          <!-- Gradient Overlay -->
-          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-300 pointer-events-none"></div>
+              
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-300 pointer-events-none"></div>
 
-          <!-- Content -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div class="w-14 h-14 rounded-xl bg-white bg-opacity-10 backdrop-filter backdrop-blur-md flex items-center justify-center border border-white border-opacity-20 shadow-inner transition-all duration-300 mb-3 transform scale-95 group-hover:scale-110">
-              <i class="material-icons text-3xl text-white drop-shadow-sm">photo_library</i>
-            </div>
-            <h3 class="text-xl font-bold text-white tracking-tight drop-shadow-md text-center leading-tight transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">View Gallery</h3>
-          </div>
-        </div>
-      </button>
-
-      <!-- Table of Contents / Encyclopedia (Universe only) -->
-      <% if raw_content.class.name == 'Universe' %>
-        <%= link_to "/universes/#{raw_content.id}/contents", class: "group block relative h-24 sm:h-28 w-full rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-2 hover:ring-purple-500 transition-all duration-200" do %>
-          <!-- Background Image -->
-          <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", class: "absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" %>
-          
-          <!-- Gradient Overlay -->
-          <div class="absolute inset-0 transition-colors pointer-events-none <%= Universe.color rescue 'bg-purple-900' %> bg-opacity-80 group-hover:bg-opacity-60"></div>
-          <div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
-          
-          <!-- Content -->
-          <div class="absolute inset-0 flex items-center px-4 sm:px-5">
-            <div class="flex items-center space-x-4 w-full">
-              <div class="w-12 h-12 rounded-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md flex items-center justify-center border border-white border-opacity-20 shadow-inner group-hover:bg-opacity-20 transition-colors flex-shrink-0">
-                <i class="material-icons text-2xl text-white drop-shadow-sm"><%= Universe.icon rescue 'language' %></i>
-              </div>
-              <div class="text-left flex-1">
-                <h3 class="text-base font-bold text-white tracking-tight drop-shadow-md">Encyclopedia</h3>
-                <p class="text-xs text-purple-50 font-medium mt-0.5 drop-shadow-md group-hover:text-white transition-colors leading-tight">Explore this universe</p>
+              <!-- Content -->
+              <div class="absolute inset-0 flex flex-col items-center justify-center p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="w-14 h-14 rounded-xl bg-white bg-opacity-10 backdrop-filter backdrop-blur-md flex items-center justify-center border border-white border-opacity-20 shadow-inner transition-all duration-300 mb-3 transform scale-95 group-hover:scale-110">
+                  <i class="material-icons text-3xl text-white drop-shadow-sm">photo_library</i>
+                </div>
+                <h3 class="text-xl font-bold text-white tracking-tight drop-shadow-md text-center leading-tight transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">View Gallery</h3>
               </div>
             </div>
-          </div>
+          </button>
         <% end %>
-      <% end %>
-    </div>
+
+        <!-- Table of Contents / Encyclopedia (Universe only) -->
+        <% if has_encyclopedia %>
+          <%= link_to "/universes/#{raw_content.id}/contents", class: "group block relative h-24 sm:h-28 w-full rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-2 hover:ring-purple-500 transition-all duration-200" do %>
+            <!-- Background Image -->
+            <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", class: "absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500" %>
+            
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 transition-colors pointer-events-none <%= Universe.color rescue 'bg-purple-900' %> bg-opacity-80 group-hover:bg-opacity-60"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-gray-900 to-transparent opacity-40 group-hover:opacity-20 transition-opacity duration-300 pointer-events-none"></div>
+            
+            <!-- Content -->
+            <div class="absolute inset-0 flex items-center px-4 sm:px-5">
+              <div class="flex items-center space-x-4 w-full">
+                <div class="w-12 h-12 rounded-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-md flex items-center justify-center border border-white border-opacity-20 shadow-inner group-hover:bg-opacity-20 transition-colors flex-shrink-0">
+                  <i class="material-icons text-2xl text-white drop-shadow-sm"><%= Universe.icon rescue 'language' %></i>
+                </div>
+                <div class="text-left flex-1">
+                  <h3 class="text-base font-bold text-white tracking-tight drop-shadow-md">Encyclopedia</h3>
+                  <p class="text-xs text-purple-50 font-medium mt-0.5 drop-shadow-md group-hover:text-white transition-colors leading-tight">Explore this universe</p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
 
     <!-- Universe Card -->
     <%= render partial: 'content/shared/universe_card', locals: { raw_content: raw_content, wrapper_classes: "pb-4 border-b border-gray-200 dark:border-gray-700" } %>
