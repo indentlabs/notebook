@@ -50,6 +50,17 @@ class MainController < ApplicationController
     generate_dashboard_analytics # for activity chart and streak
 
     @sidenav_expansion = 'worldbuilding'
+
+    # Eager load image uploads for dashboard sections that render visual cards
+    if @most_edited_pages
+      pages_to_preload = @most_edited_pages.first(20).map { |page, _| page }.select { |p| p.respond_to?(:image_uploads) }
+      ActiveRecord::Associations::Preloader.new.preload(pages_to_preload, :image_uploads) if pages_to_preload.any?
+    end
+
+    if @recently_edited_pages
+      pages_to_preload = @recently_edited_pages.first(7).select { |p| p.respond_to?(:image_uploads) }
+      ActiveRecord::Associations::Preloader.new.preload(pages_to_preload, :image_uploads) if pages_to_preload.any?
+    end
   end
 
   def table_of_contents
