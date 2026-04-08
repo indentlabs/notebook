@@ -80,4 +80,13 @@ if (sassLoaderConfig) {
   }
 }
 
+// Prevent cssnano (OptimizeCssAssetsWebpackPlugin) from stripping empty CSS variables
+// Tailwind v3 relies on empty variables like `--tw-gradient-from-position: ;` for fallbacks.
+const optimizeCss = environment.plugins.get('OptimizeCSSAssets')
+if (optimizeCss) {
+  optimizeCss.options.cssProcessorPluginOptions = {
+    preset: ['default', { discardEmpty: false }]
+  }
+}
+
 module.exports = environment
