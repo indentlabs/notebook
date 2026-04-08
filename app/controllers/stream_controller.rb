@@ -87,6 +87,7 @@ class StreamController < ApplicationController
                              .where(deleted_at: nil)
                              .order(last_post_at: :desc)
                              .limit(5)
+                             .includes(:messageboard)
   rescue => e
     Rails.logger.error "Error loading recent forum topics: #{e.message}"
     @recent_forum_topics = []
