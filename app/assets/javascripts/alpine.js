@@ -35,88 +35,87 @@ function alpineMultiSelectController() {
         this.options[index].selected = true;
         this.options[index].element = event.target;
         this.selected.push(index);
-
       } else {
         this.selected.splice(this.selected.lastIndexOf(index), 1);
         this.options[index].selected = false;
       }
-
-      // Update the original select element's selected options
-      const originalSelect = document.getElementById(this.sourceFieldId);
-      for (let i = 0; i < originalSelect.options.length; i++) {
-        originalSelect.options[i].selected = this.options[i].selected;
-      }
-
-      // Trigger autosave via jQuery (required for delegated event handlers)
-      $(originalSelect).trigger('change');
+      this.syncSelect();
     },
     remove(index, option) {
       this.options[option].selected = false;
       this.selected.splice(index, 1);
-
-      // We also want to manually remove the `selected` attribute from the
-      // original select element's option.
+      this.syncSelect();
+    },
+    syncSelect() {
       const originalSelect = document.getElementById(this.sourceFieldId);
-      originalSelect.options[option].selected = false;
-
-      // Trigger autosave via jQuery (required for delegated event handlers)
+      originalSelect.innerHTML = '';
+      
+      this.options.filter(opt => opt.selected).forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.value;
+        optionEl.text = opt.text;
+        optionEl.selected = true;
+        originalSelect.appendChild(optionEl);
+      });
+      
       $(originalSelect).trigger('change');
     },
-    loadOptions(fieldId) {
+    loadOptions(fieldId, validTypes) {
       this.sourceFieldId = fieldId;
       const select = document.getElementById(fieldId);
-      const optgroups = select.getElementsByTagName('optgroup');
-
-      // Since we're effectively resetting indices per optgroup, we need to track
-      // a single running index throughout all optgroups to use as an index for
-      // each option for events, etc.
-      let runningOptionIndex = 0;
-
-      // For each optgroup (page type)...
-      for (let i = 0; i < optgroups.length; i++) {
-        const groupOptions = optgroups[i].getElementsByTagName('option');
-
-        // Prepare the `options` array for this optgroup
-        const optionsForThisOptGroup = [];
-        for (let j = 0; j < groupOptions.length; j++) {
-          const option = groupOptions[j];
-          const imageUrl = option.getAttribute('data-image-url');
       
-          optionsForThisOptGroup.push({
-            index: runningOptionIndex++,
-            value: option.value,
-            text: option.textContent.trim(),
-            imageUrl: imageUrl,
-            icon: option.getAttribute('data-icon'),
-            icon_color: option.getAttribute('data-icon-color'),
-            selected: !!option.selected
+      const preSelectedValues = Array.from(select.options).map(opt => opt.value);
+      
+      let runningOptionIndex = 0;
+      const grouped = {};
+      const allLinkables = window.notebookLinkables || [];
+      
+      allLinkables.forEach(linkable => {
+        if (validTypes && !validTypes.includes(linkable.type)) {
+          return;
+        }
+        
+        if (!grouped[linkable.type]) {
+          grouped[linkable.type] = [];
+        }
+        
+        const isSelected = preSelectedValues.includes(linkable.raw_value);
+        
+        const optionData = {
+          index: runningOptionIndex++,
+          value: linkable.raw_value,
+          text: linkable.name,
+          imageUrl: linkable.imageUrl || '',
+          icon: linkable.icon,
+          icon_color: linkable.textColor,
+          selected: isSelected
+        };
+        
+        grouped[linkable.type].push(optionData);
+        this.options.push(optionData);
+        
+        if (isSelected) {
+          this.selected.push(optionData.index);
+        }
+      });
+      
+      Object.keys(grouped).forEach(type => {
+        const typeOptions = grouped[type];
+        if (typeOptions.length > 0) {
+          let typeData = window.ContentTypeData ? window.ContentTypeData[type] : null;
+          
+          this.optgroups.push({
+            label: type,
+            icon: typeData ? typeData.icon : typeOptions[0].icon,
+            color: typeData ? typeData.color : '',
+            textColor: typeData ? typeData.text_color : typeOptions[0].icon_color,
+            iconColor: typeData ? typeData.text_color : typeOptions[0].icon_color,
+            plural: typeData ? typeData.plural : type + 's',
+            options: typeOptions,
+            filteredOptions: typeOptions
           });
-
-          if (!!option.selected) {
-            this.selected.push(runningOptionIndex - 1);
-          }
         }
-
-        // Finally, add it as a valid optgroup with options
-        if (optionsForThisOptGroup.length > 0) {
-          const optgroupData = {
-            label: optgroups[i].label,
-            icon: window.ContentTypeData[optgroups[i].label].icon,
-            color: window.ContentTypeData[optgroups[i].label].color,
-            textColor: window.ContentTypeData[optgroups[i].label].text_color || 'text-gray-600',
-            iconColor: window.ContentTypeData[optgroups[i].label].text_color || 'text-gray-600',
-            plural: window.ContentTypeData[optgroups[i].label].plural,
-            options: optionsForThisOptGroup,
-            filteredOptions: optionsForThisOptGroup // Initialize with all options
-          };
-          this.optgroups.push(optgroupData);
-
-          // And also track all the options in a flat array so we can reference them with a single index
-          for (let j = 0; j < optionsForThisOptGroup.length; j++) {
-            this.options.push(optionsForThisOptGroup[j]);
-          }
-        }
-      }
+      });
     },
     selectedValues(){
       // Return all this.options where selected=true

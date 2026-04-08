@@ -10,21 +10,10 @@
   linkable_types.map! { |class_name| content_class_from_name(class_name) }
 %>
 
-<div x-data="alpineMultiSelectController()" x-init="loadOptions('<%= field_uuid %>')">
+<div x-data="alpineMultiSelectController()" x-init="loadOptions('<%= field_uuid %>', <%= linkable_types.map(&:name).to_json %>)">
   <select name="attribute_field[linked_pages][]" multiple class="hidden js-autosave" id="<%= field_uuid %>">
-    <% linkable_types.each do |page_type| %>
-      <optgroup label="<%= page_type.name %>">
-        <% @linkables_raw.fetch(page_type.name, []).each do |linkable| %>
-          <option value="<%= page_type %>-<%= linkable.id %>"
-            data-image-url="<%= linkable.primary_image %>"
-            data-icon="<%= page_type.icon %>"
-            data-icon-color="<%= page_type.text_color %>"
-            <%= 'selected' if field[:value].include?("#{page_type}-#{linkable.id}") %>
-          >
-            <%= linkable.name %>
-          </option>
-        <% end %>
-      </optgroup>
+    <% field[:value].each do |selected_val| %>
+      <option value="<%= selected_val %>" selected="selected"><%= selected_val %></option>
     <% end %>
   </select>
 
