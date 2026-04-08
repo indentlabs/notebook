@@ -52,6 +52,10 @@ class TimelineEvent < ApplicationRecord
     EVENT_TYPES[event_type] || EVENT_TYPES['general']
   end
 
+  def name
+    title
+  end
+
   def event_type_icon
     event_type_info[:icon]
   end
