@@ -1,4 +1,17 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+  <% if user_signed_in? && (current_user == @universe.user || Contributor.exists?(user_id: current_user.id, universe_id: @universe.id)) %>
+    <div class="bg-blue-600 dark:bg-blue-800 text-white px-4 py-3 text-center text-sm sm:text-base font-medium shadow flex items-center justify-center space-x-2 relative z-50">
+      <i class="material-icons text-xl">security</i>
+      <span>
+        <% if @universe.privacy == 'private' %>
+          <strong>This universe is private.</strong> Only you and your contributors can see this encyclopedia and its contents.
+        <% else %>
+          <strong>You're viewing this as a contributor.</strong> You can see all pages here, but public visitors will only see content explicitly marked as public.
+        <% end %>
+      </span>
+    </div>
+  <% end %>
+
   <!-- Hero Section -->
   <div class="relative w-full bg-gray-900 overflow-hidden" style="height: 32rem; min-height: 450px;">
     <% 
