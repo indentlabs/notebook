@@ -198,7 +198,7 @@
           <% end %>
         </div>
         <div class="px-6 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 text-center">
-          <%= link_to "Manage Word Counts Manually →", word_count_updates_path, class: "text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300" %>
+          <%= link_to "Adjust Word Counts →", word_count_updates_path, class: "text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300" %>
         </div>
       </div>
 
@@ -253,12 +253,58 @@
       </div>
     </div>
 
-    <!-- Link to Writing Goals -->
-    <div class="mt-8 text-center">
-      <%= link_to writing_goals_path, class: "inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors" do %>
-        <i class="material-icons mr-2 text-sm">flag</i>
-        Set Writing Goals
-      <% end %>
-    </div>
+    <!-- Writing Goals CTA -->
+    <% if current_user.writing_goals.any? %>
+      <div class="mt-8">
+        <%= link_to writing_goals_path, class: "block bg-notebook-blue rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 text-white" do %>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <i class="material-icons text-3xl mr-4 text-white text-opacity-70">flag</i>
+              <div>
+                <h3 class="font-bold text-lg">View Writing Goals</h3>
+                <p class="text-white text-opacity-80 text-sm">Track your writing goals and daily habit progress</p>
+              </div>
+            </div>
+            <i class="material-icons text-white text-opacity-70">arrow_forward</i>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="mt-8">
+        <%= link_to writing_goals_path, class: "group block relative overflow-hidden rounded-2xl bg-notebook-blue shadow-md hover:shadow-xl transition-all duration-300" do %>
+          <!-- Decorative background elements -->
+          <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 rounded-full bg-white opacity-10 mix-blend-overlay blur-3xl group-hover:opacity-20 transition-opacity duration-500"></div>
+          <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-white opacity-5 mix-blend-overlay blur-3xl group-hover:opacity-10 transition-opacity duration-500"></div>
+          
+          <div class="relative px-6 py-8 sm:px-12 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start md:items-center gap-6 text-center sm:text-left">
+              <div class="flex-shrink-0 bg-white/10 ring-1 ring-white/20 p-4 rounded-2xl group-hover:bg-white/20 group-hover:scale-105 transition-all duration-300">
+                <i class="material-icons text-white text-4xl leading-none">flag</i>
+              </div>
+              <div>
+                <% if @words_written > 0 %>
+                  <h3 class="text-2xl font-bold text-white mb-2">Ready for your next writing challenge?</h3>
+                  <p class="text-white text-opacity-90 max-w-xl text-base sm:text-lg">You're making great progress! Take it to the next level by setting a custom sprint or project target to hit your next big milestone.</p>
+                <% else %>
+                  <h3 class="text-2xl font-bold text-white mb-2">Ready to build a consistent writing habit?</h3>
+                  <p class="text-white text-opacity-90 max-w-xl text-base sm:text-lg">Set a daily or project-specific goal to hold yourself accountable. We'll track your streaks and progress over time to help you stay on track!</p>
+                <% end %>
+              </div>
+            </div>
+            
+            <div class="flex-shrink-0 w-full sm:w-auto mt-4 md:mt-0">
+              <span class="inline-flex w-full sm:w-auto items-center justify-center px-8 py-3.5 border border-transparent text-base font-bold rounded-xl text-notebook-blue bg-white hover:bg-gray-50 shadow-sm group-hover:shadow transition-all duration-300 group-hover:-translate-y-0.5">
+                <% if @words_written > 0 %>
+                  Create Custom Goal
+                <% else %>
+                  Set a Goal
+                <% end %>
+                <i class="material-icons ml-2 text-xl group-hover:translate-x-1 transition-transform">arrow_forward</i>
+              </span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 </div>
