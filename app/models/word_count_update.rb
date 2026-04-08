@@ -1,8 +1,13 @@
 class WordCountUpdate < ApplicationRecord
   belongs_to :user
-  belongs_to :entity, polymorphic: true
+  belongs_to :entity, polymorphic: true, optional: true
+  validates :entity, presence: true, unless: :is_manual_adjustment?
 
   after_commit :check_daily_word_goal, on: [:create, :update]
+
+  def is_manual_adjustment?
+    entity_type == 'ManualAdjustment'
+  end
 
   private
 
@@ -70,7 +75,9 @@ class WordCountUpdate < ApplicationRecord
     today_records.each do |record|
       prev_count = prev_word_counts[[record.entity_type, record.entity_id]] || 0
       delta = record.word_count - prev_count
-      total_delta += delta if delta > 0
+      if record.entity_type == 'ManualAdjustment' || delta > 0
+        total_delta += delta
+      end
     end
 
     total_delta
@@ -116,7 +123,9 @@ class WordCountUpdate < ApplicationRecord
 
         prev_count = prev_record&.word_count || 0
         delta = today_record.word_count - prev_count
-        total_delta += delta if delta > 0
+        if today_record.entity_type == 'ManualAdjustment' || delta > 0
+          total_delta += delta
+        end
       end
 
       result[target_date] = total_delta
@@ -212,7 +221,9 @@ class WordCountUpdate < ApplicationRecord
       current = current_word_counts[key] || 0
       prev = prev_word_counts[key] || 0
       delta = current - prev
-      total_delta += delta if delta > 0
+      if key[0] == 'ManualAdjustment' || delta > 0
+        total_delta += delta
+      end
     end
 
     total_delta

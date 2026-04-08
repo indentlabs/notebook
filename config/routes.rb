@@ -209,6 +209,7 @@ Rails.application.routes.draw do
     end
 
     get 'writing-activity', to: 'writing_activity#index', as: :writing_activity
+    resources :word_count_updates, only: [:index, :create, :update, :destroy]
 
     get '/multiverse',      to: 'universes#hub', as: :multiverse
 

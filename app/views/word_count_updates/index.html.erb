@@ -1,0 +1,283 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Header -->
+  <div class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+          <i class="material-icons mr-3 text-blue-500">edit_note</i>
+          Word Count Logs
+        </h1>
+        <%= link_to writing_activity_path, class: "text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-gray-700 dark:text-gray-300 font-medium transition-colors inline-flex items-center" do %>
+          <i class="material-icons text-sm mr-1">arrow_back</i> Return to Activity
+        <% end %>
+      </div>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-3xl">
+        Keep your writing stats perfectly tuned! Log words you've written in other apps, adjust your daily totals, or clean up your tracking history here.
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- New Adjustment Form -->
+      <div class="lg:col-span-1">
+        <div class="sticky top-6 space-y-6">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+              <i class="material-icons text-green-500 mr-2 text-lg">add_circle</i>
+              Add Manual Adjustment
+            </h3>
+          </div>
+          <div class="p-6">
+            <%= form_with model: @new_update, url: word_count_updates_path, local: true do |f| %>
+              <div class="mb-4">
+                <%= f.label :for_date, "Date", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" %>
+                <%= f.date_field :for_date, class: "block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white" %>
+              </div>
+              
+              <div class="mb-5">
+                <%= f.label :word_count, "Words (+ / -)", class: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" %>
+                <div class="flex rounded-md shadow-sm">
+                  <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gray-500 dark:text-gray-300 sm:text-sm">
+                    #
+                  </span>
+                  <%= f.number_field :word_count, class: "flex-1 min-w-0 block w-full rounded-none rounded-r-md sm:text-sm border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white", placeholder: "e.g., 500 or -200" %>
+                </div>
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  Enter a negative number to offset tracked words or a positive number for untracked writing.
+                </p>
+              </div>
+
+              <%= f.submit "Save Adjustment", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer transition-colors" %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg p-5 shadow-sm">
+          <div class="flex">
+            <i class="material-icons text-blue-500 mr-3 mt-0.5">favorite</i>
+            <p class="text-sm text-blue-800 dark:text-blue-200">
+              <strong>It's not a competition!</strong><br />
+              Tracking your words is entirely on the honor system. Feel free to tweak your stats however best fuels your own personal writing journey. 😉
+            </p>
+          </div>
+        </div>
+        
+        </div>
+      </div>
+
+      <!-- Activity Charts & Raw Records List -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- 30-Day Activity Chart -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+          <h4 class="text-sm font-semibold mb-6">
+            <%= link_to writing_activity_path(period: '30d'), class: "flex items-center text-gray-900 dark:text-gray-100 hover:text-purple-600 dark:hover:text-purple-400 transition-colors" do %>
+              <i class="material-icons mr-1 text-purple-600 dark:text-purple-400 text-base">show_chart</i>
+              30-Day Activity
+            <% end %>
+          </h4>
+          <div class="relative mb-6">
+            <!-- Chart Container -->
+            <div id="wordcount-activity-chart" class="flex items-end justify-between h-32 space-x-0.5 relative overflow-hidden">
+              <% if @dashboard_daily_activity %>
+                <%
+                  max_count = @dashboard_daily_activity.map { |_, count| count }.max || 1
+                  max_count = 1 if max_count == 0
+                  max_height = 120 # leaving some room at the top
+                %>
+                <% @dashboard_daily_activity.each_with_index do |(date, count), index| %>
+                  <% bar_height = count > 0 ? [(count.to_f / max_count * max_height).round, 2].max : 2 %>
+                  <div class="flex-1 rounded-t transition-all duration-200 cursor-pointer <%= count > 0 ? 'bg-purple-500 hover:bg-purple-600' : 'bg-gray-200 dark:bg-gray-700 opacity-50 hover:bg-gray-300 dark:hover:bg-gray-600' %>"
+                       style="height: <%= bar_height %>px;"
+                       data-date="<%= date %>"
+                       data-count="<%= count %>"
+                       onmouseenter="showActivityTooltip(this)"
+                       onmouseleave="hideActivityTooltip()">
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+
+            <!-- Custom Tooltip -->
+            <div id="wordcount-chart-tooltip" class="absolute pointer-events-none opacity-0 transition-all duration-150 z-20">
+              <div class="bg-gray-900 text-white text-xs rounded-md px-2 py-1 shadow-lg">
+                <div class="font-semibold" id="wordcount-tooltip-date"></div>
+                <div id="wordcount-tooltip-count"></div>
+                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0" style="border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #111827;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart Legend -->
+          <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+            <span>30 days ago</span>
+            <span>Today</span>
+          </div>
+        </div>
+
+        <!-- Raw Records List -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/80">
+            <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+              <i class="material-icons text-blue-500 mr-2 text-lg">list_alt</i>
+              Tracking Logs
+            </h3>
+            <span class="text-xs text-gray-500 dark:text-gray-400">Showing up to 200 recent records</span>
+          </div>
+          
+          <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <% if @updates.any? %>
+              <% @updates.group_by(&:for_date).each do |date, records| %>
+                <!-- Date Header -->
+                <div class="px-6 py-2 bg-gray-100 dark:bg-gray-900 border-y border-gray-200 dark:border-gray-700">
+                  <span class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">
+                    <%= date.strftime('%A, %B %d, %Y') %>
+                  </span>
+                </div>
+                
+                <% records.each do |update| %>
+                  <div class="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group" x-data="{ editing: false }">
+                    <div class="flex items-center justify-between">
+                      <!-- Left: Icon & Info -->
+                      <div class="flex items-center min-w-0">
+                        <div class="flex-shrink-0 mr-4">
+                          <% if update.is_manual_adjustment? %>
+                            <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
+                              <i class="material-icons text-blue-600 dark:text-blue-400">tune</i>
+                            </div>
+                          <% else %>
+                            <% entity_class = update.entity_type.constantize rescue nil %>
+                            <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                              <i class="material-icons <%= entity_class.try(:text_color) || 'text-gray-500' %>"><%= entity_class.try(:icon) || 'description' %></i>
+                            </div>
+                          <% end %>
+                        </div>
+                        
+                        <div class="min-w-0">
+                          <% if update.is_manual_adjustment? %>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">Manual Adjustment</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                              Added on <%= (update.created_at.in_time_zone(current_user.timezone || 'UTC') rescue update.created_at).strftime("%b %e, %Y") %>
+                            </p>
+                          <% else %>
+                            <% entity = entity_class.find_by(id: update.entity_id) if entity_class %>
+                            <% entity_name = entity&.name || entity&.title || "Deleted #{update.entity_type}" %>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              <%= entity ? link_to(entity_name, edit_polymorphic_path(entity), class: "hover:underline") : entity_name %>
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                              <%= update.entity_type %> Record
+                            </p>
+                          <% end %>
+                        </div>
+                      </div>
+
+                      <!-- Right: Values & Actions -->
+                      <div class="flex items-center space-x-4">
+                        <!-- Value Display -->
+                        <div x-show="!editing" class="text-right">
+                          <% if update.is_manual_adjustment? %>
+                            <div class="text-sm font-bold <%= update.word_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+                              <%= update.word_count > 0 ? '+' : '' %><%= number_with_delimiter update.word_count %> words
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">delta</div>
+                          <% else %>
+                            <div class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                              <%= number_with_delimiter update.word_count %>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">total document size</div>
+                          <% end %>
+                        </div>
+
+                        <!-- Edit Form (Only for manual adjustments) -->
+                        <% if update.is_manual_adjustment? %>
+                          <div x-show="editing" x-cloak class="flex items-center">
+                            <%= form_with model: update, url: word_count_update_path(update), method: :patch, local: true, class: "flex items-center space-x-2" do |f| %>
+                              <%= f.number_field :word_count, class: "w-24 text-sm rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-1 px-2" %>
+                              <button type="submit" class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300">
+                                <i class="material-icons text-sm">check_circle</i>
+                              </button>
+                              <button type="button" @click="editing = false" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                                <i class="material-icons text-sm">cancel</i>
+                              </button>
+                            <% end %>
+                          </div>
+                        <% end %>
+                        
+                        <!-- Actions Dropdown or Buttons -->
+                        <div x-show="!editing" class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <% if update.is_manual_adjustment? %>
+                            <button type="button" @click="editing = true" class="p-1 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" title="Edit value">
+                              <i class="material-icons text-sm">edit</i>
+                            </button>
+                            
+                            <%= button_to word_count_update_path(update), method: :delete, data: { confirm: 'Are you sure you want to delete this log entry?' }, class: "p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center", title: "Delete entry" do %>
+                              <i class="material-icons text-sm">delete</i>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            <% else %>
+              <div class="p-12 text-center text-gray-500 dark:text-gray-400">
+                <i class="material-icons text-4xl mb-3 opacity-50">receipt_long</i>
+                <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">No word count logs found</p>
+                <p class="text-sm">Logs will appear here once you start writing on Notebook.ai.</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showActivityTooltip(el) {
+      const tooltip = document.getElementById('wordcount-chart-tooltip');
+      const dateEl = document.getElementById('wordcount-tooltip-date');
+      const countEl = document.getElementById('wordcount-tooltip-count');
+      const container = document.getElementById('wordcount-activity-chart');
+      
+      const date = el.dataset.date;
+      const count = parseInt(el.dataset.count);
+      
+      // Update content
+      dateEl.textContent = date;
+      const formattedCount = count.toLocaleString();
+      countEl.textContent = count === 0 ? 'No activity' : 
+        (count === 1 ? '1 word' : `${formattedCount} words`);
+      
+      // Position
+      const rect = el.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const tooltipLeft = rect.left - containerRect.left + (rect.width / 2);
+      
+      tooltip.style.left = `${tooltipLeft}px`;
+      tooltip.style.bottom = `${container.offsetHeight + 10}px`;
+      tooltip.style.opacity = '1';
+      tooltip.style.transform = 'translateX(-50%) translateY(0)';
+      
+      if (count > 0) {
+        el.style.transform = 'scaleY(1.1)';
+        el.style.transformOrigin = 'bottom';
+      }
+    }
+    
+    function hideActivityTooltip() {
+      const tooltip = document.getElementById('wordcount-chart-tooltip');
+      tooltip.style.opacity = '0';
+      tooltip.style.transform = 'translateX(-50%) translateY(-4px)';
+      
+      const bars = document.querySelectorAll('#wordcount-activity-chart > div');
+      bars.forEach(bar => {
+        bar.style.transform = '';
+      });
+    }
+  </script>
+</div>

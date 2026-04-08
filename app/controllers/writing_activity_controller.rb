@@ -94,6 +94,7 @@ class WritingActivityController < ApplicationController
     # We need to calculate deltas, not totals
     updates_in_range = current_user.word_count_updates
       .where(for_date: @date_range)
+      .where.not(entity_type: 'ManualAdjustment')
       .select(:entity_type, :entity_id, :word_count, :for_date)
       .order(:entity_type, :entity_id, :for_date)
 
