@@ -82,17 +82,11 @@ class StreamController < ApplicationController
   private
 
   def load_recent_forum_topics
-    # Get the 5 most recent forum posts and their topics
-    recent_posts = Thredded::Post.joins(:topic)
-                                 .where(deleted_at: nil)
-                                 .order(created_at: :desc)
-                                 .limit(10)
-                                 .includes(:topic, :user)
-
-    # Get unique topics from recent posts, limited to 5
-    @recent_forum_topics = recent_posts.map(&:topic)
-                                      .uniq { |topic| topic.id }
-                                      .first(5)
+    # Get the 5 most recently active forum topics
+    @recent_forum_topics = Thredded::Topic
+                             .where(deleted_at: nil)
+                             .order(last_post_at: :desc)
+                             .limit(5)
   rescue => e
     Rails.logger.error "Error loading recent forum topics: #{e.message}"
     @recent_forum_topics = []
