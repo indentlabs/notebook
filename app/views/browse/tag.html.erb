@@ -78,9 +78,9 @@
 </dialog>
 
 <!-- Premium Hero Header -->
-<div class="relative overflow-hidden mb-8 shadow-xl bg-notebook-blue group">
+<div class="relative overflow-hidden mb-8 bg-notebook-blue w-full">
   <!-- Content -->
-  <div class="relative z-10 p-8 md:p-12 lg:p-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 bg-black bg-opacity-10 max-w-[1600px] mx-auto">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 py-8 md:py-12 lg:py-16 flex flex-col md:flex-row items-center md:items-end justify-between gap-6 w-full">
     <div class="flex-1 text-center md:text-left">
       <div class="inline-flex items-center px-3 py-1 bg-white bg-opacity-10 backdrop-blur-md rounded-full text-white text-opacity-90 text-sm font-medium mb-4 border border-white border-opacity-20 shadow-inner">
         <i class="material-icons text-sm mr-1.5"><%= PageTag.icon %></i>
@@ -110,7 +110,7 @@
 </div>
 
 <div class="sticky top-0 z-20 bg-gray-50 bg-opacity-95 dark:bg-gray-900 dark:bg-opacity-95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 py-3 mb-8 w-full transition-all shadow-sm block">
-  <div class="max-w-[1600px] mx-auto px-8 md:px-12 lg:px-16 flex flex-col md:flex-row items-center justify-between gap-4">
+  <div class="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4 w-full">
     
     <!-- Left: Filters scrolling container -->
     <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto scrollbar-hide snap-x">
@@ -162,7 +162,7 @@
   </div>
 </div>
 
-<div class="max-w-[1600px] mx-auto px-8 md:px-12 lg:px-16">
+<div class="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 w-full pb-16">
 
 <!-- Masonry Grid -->
 <% if all_content.empty? %>
@@ -221,24 +221,22 @@
             target: (content.is_a?(Document) ? '_blank' : nil),
             class: "block relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 shadow-sm transition-all duration-300 ease-out hover:shadow-xl hover:scale-[1.02] hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-purple-500 ring-opacity-50" do %>
 
-          <!-- Image with overlay gradient -->
+          <!-- Image with fallback styling -->
           <div class="relative overflow-hidden aspect-[3/4]">
             <img src="<%= content_image %>"
                  alt="<%= content_name %>"
                  class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
                  loading="lazy">
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/95 via-gray-950/40 to-transparent opacity-70 group-hover:opacity-95 transition-opacity duration-300"></div>
           </div>
 
           <!-- Content type badge (top-right) -->
-          <div class="absolute top-3 right-3 px-2.5 py-1 bg-black bg-opacity-40 backdrop-blur-md rounded-full text-white text-[10px] font-bold uppercase tracking-wider flex items-center border border-white border-opacity-10 shadow-sm opacity-90 group-hover:opacity-100 transition-opacity">
-            <i class="material-icons text-[12px] mr-1"><%= content_icon %></i>
-            <%= content_type %>
+          <div class="absolute top-3 right-3 w-8 h-8 bg-black bg-opacity-60 backdrop-blur-md rounded-full flex items-center justify-center border border-white border-opacity-20 shadow-md opacity-90 group-hover:opacity-100 transition-opacity">
+            <i class="material-icons text-base <%= content.class.text_color %>"><%= content_icon %></i>
           </div>
 
           <!-- Bottom details -->
-          <div class="absolute inset-x-0 bottom-0 p-4 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
-            <h3 class="text-white text-base font-bold line-clamp-2 mb-2 leading-snug drop-shadow-md">
+          <div class="absolute inset-x-0 bottom-0 p-4 pt-12 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300 rounded-b-2xl" style="background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.4) 70%, rgba(0,0,0,0));">
+            <h3 class="text-white text-base font-bold line-clamp-2 mb-2 leading-snug drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               <%= ContentFormatterService.show(text: content_name, viewing_user: current_user) %>
             </h3>
             
