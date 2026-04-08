@@ -124,6 +124,8 @@ class ContentPageSharesController < ApplicationController
     # Get the 5 most recent forum posts and their topics
     recent_posts = Thredded::Post.joins(:topic)
                                  .where(deleted_at: nil)
+                                 .where.not(moderation_state: :blocked)
+                                 .where("thredded_topics.moderation_state != ?", 2)
                                  .order(created_at: :desc)
                                  .limit(10)
                                  .includes(:topic, :user)

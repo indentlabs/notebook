@@ -85,6 +85,7 @@ class StreamController < ApplicationController
     # Get the 5 most recently active forum topics
     @recent_forum_topics = Thredded::Topic
                              .where(deleted_at: nil)
+                             .where.not(moderation_state: :blocked)
                              .order(last_post_at: :desc)
                              .limit(5)
                              .includes(:messageboard)
