@@ -135,16 +135,16 @@
     </div>
 
     <!-- Two Column Layout: Activity Log and Top Pages -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
       <!-- Activity Log -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
           <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
             <i class="material-icons text-green-500 mr-2 text-lg">history</i>
             Recent Activity
           </h3>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700 max-h-96 overflow-y-auto">
+        <div class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[40rem] overflow-y-auto flex-1">
           <% if @recent_updates.any? %>
             <% @recent_updates.group_by { |u| u[:for_date] }.each do |date, updates| %>
               <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900 sticky top-0">
@@ -197,17 +197,20 @@
             </div>
           <% end %>
         </div>
+        <div class="px-6 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 text-center">
+          <%= link_to "Manage Word Counts Manually →", word_count_updates_path, class: "text-sm text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300" %>
+        </div>
       </div>
 
       <!-- Top Growing Pages -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
           <h3 class="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
             <i class="material-icons text-orange-500 mr-2 text-lg">trending_up</i>
             Top Growing Pages
           </h3>
         </div>
-        <div class="divide-y divide-gray-100 dark:divide-gray-700">
+        <div class="divide-y divide-gray-100 dark:divide-gray-700 max-h-[40rem] overflow-y-auto flex-1">
           <% if @top_growing_pages.any? %>
             <% @top_growing_pages.each_with_index do |page, index| %>
               <% entity = page[:entity] %>

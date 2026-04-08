@@ -124,6 +124,7 @@ class WritingActivityController < ApplicationController
     # Get recent word count updates with their entities and calculate deltas
     updates = current_user.word_count_updates
       .where(for_date: @date_range)
+      .where.not(entity_type: 'ManualAdjustment')
       .includes(:entity)
       .order(for_date: :desc, updated_at: :desc)
 
@@ -158,6 +159,7 @@ class WritingActivityController < ApplicationController
     # Calculate which pages grew the most in the date range
     updates_in_range = current_user.word_count_updates
       .where(for_date: @date_range)
+      .where.not(entity_type: 'ManualAdjustment')
       .select(:entity_type, :entity_id, :word_count, :for_date)
 
     # Calculate delta for each entity
