@@ -80,4 +80,9 @@ if (sassLoaderConfig) {
   }
 }
 
+// Remove Webpacker's CSS minifier entirely.
+// cssnano v4 (bundled) recursively removes spaces in empty variables (like `--tw-gradient-from-position: ;` -> `tw-gradient-from-position:;`)
+// which causes modern CSS engines to invalidate the entire declaration, breaking Tailwind v3 gradients completely.
+environment.plugins.delete('OptimizeCSSAssets')
+
 module.exports = environment
