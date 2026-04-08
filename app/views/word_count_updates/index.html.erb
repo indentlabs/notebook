@@ -164,7 +164,13 @@
                             </p>
                           <% else %>
                             <% entity = entity_class.find_by(id: update.entity_id) if entity_class %>
-                            <% entity_name = entity&.name || entity&.title || "Deleted #{update.entity_type}" %>
+                            <% 
+                              entity_name = if entity
+                                entity.try(:name).presence || entity.try(:title).presence || "Untitled #{update.entity_type}"
+                              else
+                                "Deleted #{update.entity_type}"
+                              end 
+                            %>
                             <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
                               <%= entity ? link_to(entity_name, edit_polymorphic_path(entity), class: "hover:underline") : entity_name %>
                             </p>
