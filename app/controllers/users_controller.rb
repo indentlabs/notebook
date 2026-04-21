@@ -134,7 +134,7 @@ class UsersController < ApplicationController
 
   def followers
     @followers = @user.followed_by_users
-                      .includes(:avatar_attachment, :thredded_user_detail)
+                      .includes(:avatar_attachment, :thredded_user_detail, :promotions)
                       .paginate(page: params[:page], per_page: 100)
   end
 
@@ -317,10 +317,7 @@ class UsersController < ApplicationController
     @following_count = @user.respond_to?(:following_count) ? @user.following_count : @user.followed_users.count
     
     # Optimized: Use includes to prevent N+1
-    @followers = User.joins(:user_followings)
-                     .where(user_followings: { followed_user_id: @user.id })
-                     .includes(:avatar_attachment)
-                     .limit(12)
+    @followers = @user.followed_by_users.includes(:avatar_attachment).limit(12)
     @following = @user.followed_users.includes(:avatar_attachment).limit(12)
     
     # Optimized: Check follows and blocks efficiently
