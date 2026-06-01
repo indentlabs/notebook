@@ -122,7 +122,7 @@ class WordCountUpdate < ApplicationRecord
           .max_by(&:for_date)
 
         prev_count = prev_record&.word_count || 0
-        delta = today_record.word_count - prev_count
+        delta = (today_record.word_count || 0) - prev_count
         if today_record.entity_type == 'ManualAdjustment' || delta > 0
           total_delta += delta
         end
