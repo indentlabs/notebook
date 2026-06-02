@@ -200,4 +200,32 @@ class WordCountUpdateTest < ActiveSupport::TestCase
     assert_not result.include?(Date.current - 1.day), "Day with only deletions should not be active"
     assert result.include?(Date.current), "Day with 100 word addition should be active"
   end
+
+  test "blank word count is stored as zero" do
+    update = WordCountUpdate.create!(
+      user: @user,
+      entity: @document,
+      word_count: nil,
+      for_date: Date.current
+    )
+
+    assert_equal 0, update.reload.word_count
+  end
+
+  test "batch_words_written_on_dates tolerates pre-existing nil word counts" do
+    # Simulate a legacy/dirty row that already has a nil word_count in the DB,
+    # bypassing the before_validation normalization with update_column.
+    record = WordCountUpdate.create!(
+      user: @user,
+      entity: @document,
+      word_count: 0,
+      for_date: Date.current
+    )
+    record.update_column(:word_count, nil)
+
+    assert_nothing_raised do
+      result = WordCountUpdate.batch_words_written_on_dates(@user, [Date.current])
+      assert_equal 0, result[Date.current]
+    end
+  end
 end
