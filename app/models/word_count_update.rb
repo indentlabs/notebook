@@ -3,6 +3,11 @@ class WordCountUpdate < ApplicationRecord
   belongs_to :entity, polymorphic: true, optional: true
   validates :entity, presence: true, unless: :is_manual_adjustment?
 
+  # A blank word count means zero words written, never "unknown".
+  # Normalize here so a blank manual-adjustment form submission (which
+  # typecasts to nil for an integer column) is stored as 0.
+  before_validation { self.word_count ||= 0 }
+
   after_commit :check_daily_word_goal, on: [:create, :update]
 
   def is_manual_adjustment?
@@ -31,7 +36,7 @@ class WordCountUpdate < ApplicationRecord
     # Keep the record with the highest word_count per entity
     today_records = today_records
       .group_by { |r| [r.entity_type, r.entity_id] }
-      .transform_values { |records| records.max_by(&:word_count) }
+      .transform_values { |records| records.max_by { |r| r.word_count || 0 } }
       .values
 
     # Get the previous record for each entity in a single query using a subquery
@@ -74,7 +79,7 @@ class WordCountUpdate < ApplicationRecord
     total_delta = 0
     today_records.each do |record|
       prev_count = prev_word_counts[[record.entity_type, record.entity_id]] || 0
-      delta = record.word_count - prev_count
+      delta = (record.word_count || 0) - prev_count
       if record.entity_type == 'ManualAdjustment' || delta > 0
         total_delta += delta
       end
