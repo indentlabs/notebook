@@ -162,15 +162,17 @@ class ContentSerializer
         end
 
       else
-        # Use new link system
+        # Use new link system. This must always return an array since link
+        # fields are iterated over in views; a non-array value (e.g. an error
+        # string) would crash the page render.
         begin
-          JSON.parse(page_links.value)
+          parsed = JSON.parse(page_links.value)
+          parsed.is_a?(Array) ? parsed : []
         rescue
-          if page_links.value == ""
-            []
-          else
-            "Error loading Attribute ID #{page_links.id}"
+          unless page_links.value == ""
+            Sentry.capture_message("Error loading Attribute ID #{page_links.id}")
           end
+          []
         end
       end
 
