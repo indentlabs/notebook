@@ -67,7 +67,13 @@ class User < ApplicationRecord
     @cached_blocked_by_users ||= User.joins(:user_blockings).where(user_blockings: { blocked_user_id: self.id })
   end
   def blocked_by?(user)
-    UserBlocking.exists?(user_id: user.id, blocked_user_id: self.id)
+    return false if user.nil?
+    # Use a memoized set of the blocking user's blocked IDs to avoid N+1 queries
+    # when checking many users against the same current_user (e.g. forum topics).
+    user.blocked_user_ids_set.include?(self.id)
+  end
+  def blocked_user_ids_set
+    @blocked_user_ids_set ||= user_blockings.pluck(:blocked_user_id).to_set
   end
 
   has_many :content_page_shares,           dependent: :destroy
