@@ -32,6 +32,55 @@ function calculateScrollSpeed(distanceFromEdge) {
   return minScrollSpeed + (maxScrollSpeed - minScrollSpeed) * normalized;
 }
 
+// Serialize timeline reorder requests so acts_as_list never processes two
+// concurrent position changes for the same timeline. Firing move/sort requests
+// in parallel let their position shuffles interleave on the server, which could
+// leave events with duplicate or garbled positions that only surfaced as a
+// scattered order after a page refresh.
+let timelineReorderChain = Promise.resolve();
+function enqueueTimelineReorder(taskFn) {
+  const result = timelineReorderChain.then(() => taskFn());
+  // Keep the chain alive even if a task rejects, so one failed reorder doesn't
+  // permanently stall every subsequent one.
+  timelineReorderChain = result.catch(() => {});
+  return result;
+}
+
+// Persist the timeline's full event order. Reads the current DOM order and
+// sends the complete list of event IDs to the server, which authoritatively
+// rewrites every position in one transaction. Both drag-and-drop and the move
+// menu use this, so there is a single, race-proof code path for reordering.
+// The request is queued so overlapping reorders run one-at-a-time (and the last
+// one always reflects the final DOM order).
+function persistTimelineOrder() {
+  const eventsContainer = document.querySelector('.timeline-events-container');
+  if (!eventsContainer) return Promise.resolve();
+
+  const timelineId = eventsContainer.dataset.timelineId;
+  const orderedIds = Array.from(eventsContainer.children)
+    .filter(el =>
+      el.classList.contains('timeline-event-container') &&
+      !el.classList.contains('timeline-event-template'))
+    .map(el => el.dataset.eventId)
+    .filter(id => id && id !== '-1');
+
+  return enqueueTimelineReorder(function() {
+    return fetch('/internal/reorder/timeline_events', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: JSON.stringify({ timeline_id: timelineId, ordered_ids: orderedIds })
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error('Reorder request failed with status ' + response.status);
+      }
+      return response.json();
+    });
+  });
+}
+
 // Initialize timeline events sortable functionality
 function initTimelineEventsSortable() {
   // Check if jQuery UI is available
@@ -77,73 +126,35 @@ function initTimelineEventsSortable() {
       }
     },
     update: function(event, ui) {
-      const eventId = ui.item.attr('data-event-id');
-      const originalPosition = ui.item.data('original-position');
-
-      // Count only the event containers before this one (not timeline header/rail)
-      const allEvents = $('.timeline-events-container .timeline-event-container:not(.timeline-event-template)');
-      const newPosition = allEvents.index(ui.item);
-
-      if (!eventId) {
-        console.error('Event ID not found');
-        return;
-      }
-
-      // Send the position directly - backend will convert to 1-based indexing
-      const targetPosition = newPosition;
-
-      // Show loading state
+      // jQuery UI has already moved the item in the DOM by this point, so we
+      // just persist the new full ordering of the timeline.
       const alpineEl = document.querySelector('[x-data]');
       if (alpineEl) {
         Alpine.$data(alpineEl).autoSaveStatus = 'saving';
       }
 
-      // AJAX request to update position using new internal endpoint
-      $.ajax({
-        url: '/internal/sort/timeline_events',
-        type: 'PATCH',
-        contentType: 'application/json',
-        headers: {
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        data: JSON.stringify({
-          content_id: eventId,
-          intended_position: targetPosition
-        }),
-        success: function(data) {
-          console.log('Timeline event position updated successfully:', data);
-
-          // Update Alpine.js save status
+      persistTimelineOrder()
+        .then(data => {
           if (alpineEl) {
             Alpine.$data(alpineEl).autoSaveStatus = 'saved';
-            setTimeout(() => {
-              if (Alpine.$data(alpineEl).autoSaveStatus === 'saved') {
-                Alpine.$data(alpineEl).autoSaveStatus = 'saved';
-              }
-            }, 2000);
           }
-
-          if (data.message) {
-            showTimelineSuccessMessage(data.message);
-          }
-        },
-        error: function(xhr, status, error) {
+          showTimelineSuccessMessage((data && data.message) || 'New position saved');
+        })
+        .catch(error => {
           console.error('Error updating timeline event position:', error);
 
-          // Update Alpine.js save status
           if (alpineEl) {
             Alpine.$data(alpineEl).autoSaveStatus = 'error';
           }
 
-          // Revert to original position
+          // Revert to original position on failure
           const originalPosition = ui.item.data('original-position');
           if (typeof originalPosition !== 'undefined') {
             revertEventPosition(ui.item, originalPosition);
           }
 
           showTimelineErrorMessage('Failed to reorder events. Please try again.');
-        }
-      });
+        });
     },
     stop: function(event, ui) {
       // Remove visual feedback
@@ -837,36 +848,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!eventId || eventId === '-1') return;
 
-    let endpoint = null;
+    let action = null;
     if (event.target.closest('.js-move-event-to-top')) {
-      endpoint = `/plan/timeline_events/${eventId}/move/top`;
+      action = 'top';
     } else if (event.target.closest('.js-move-event-up')) {
-      endpoint = `/plan/timeline_events/${eventId}/move/up`;
+      action = 'up';
     } else if (event.target.closest('.js-move-event-down')) {
-      endpoint = `/plan/timeline_events/${eventId}/move/down`;
+      action = 'down';
     } else if (event.target.closest('.js-move-event-to-bottom')) {
-      endpoint = `/plan/timeline_events/${eventId}/move/bottom`;
+      action = 'bottom';
     }
 
-    if (endpoint) {
-      event.preventDefault();
-      fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-        }
-      })
-      .then(() => {
-        moveEventInDOM(eventContainer, endpoint);
-        showSuccessMessage('Event moved successfully!');
-      })
+    if (!action) return;
+
+    event.preventDefault();
+
+    // Move the card in the DOM first, then persist the new full ordering.
+    // persistTimelineOrder reads the resulting DOM order, so the server always
+    // receives the complete, authoritative sequence.
+    const moved = moveEventInDOM(eventContainer, action);
+    if (!moved) return;
+
+    persistTimelineOrder()
+      .then(() => showSuccessMessage('Event moved successfully!'))
       .catch(error => {
+        console.error('Error moving event:', error);
         showErrorMessage('Error moving event. Please try again.');
       });
-    }
   });
 
-  function moveEventInDOM(eventContainer, endpoint) {
+  // Reorder a single event card within the timeline DOM. Returns true if the
+  // card actually moved. The visual move happens synchronously so the caller can
+  // immediately read the new ordering; the scale/shadow animation runs after.
+  function moveEventInDOM(eventContainer, action) {
     const eventsContainer = eventContainer.parentElement;
     const allEvents = Array.from(eventsContainer.children).filter(el =>
       el.classList.contains('timeline-event-container') &&
@@ -874,55 +888,52 @@ document.addEventListener('DOMContentLoaded', function() {
     );
 
     const currentIndex = allEvents.indexOf(eventContainer);
-    let newIndex;
+    let newIndex = currentIndex;
 
     // Determine new position based on action
-    if (endpoint.includes('/top')) {
+    if (action === 'top') {
       newIndex = 0;
-    } else if (endpoint.includes('/bottom')) {
+    } else if (action === 'bottom') {
       newIndex = allEvents.length - 1;
-    } else if (endpoint.includes('/up')) {
+    } else if (action === 'up') {
       newIndex = Math.max(0, currentIndex - 1);
-    } else if (endpoint.includes('/down')) {
+    } else if (action === 'down') {
       newIndex = Math.min(allEvents.length - 1, currentIndex + 1);
     }
 
     // Only move if position actually changes
-    if (newIndex !== currentIndex) {
-      // Add animation class
-      eventContainer.style.transition = 'all 0.3s ease-out';
-      eventContainer.style.transform = 'scale(1.02)';
-      eventContainer.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+    if (newIndex === currentIndex) return false;
 
-      setTimeout(() => {
-        // Move in DOM
-        if (newIndex === 0) {
-          eventsContainer.insertBefore(eventContainer, allEvents[0]);
-        } else if (newIndex === allEvents.length - 1) {
-          eventsContainer.appendChild(eventContainer);
-        } else {
-          const referenceEvent = allEvents[newIndex];
-          if (currentIndex < newIndex) {
-            eventsContainer.insertBefore(eventContainer, referenceEvent.nextSibling);
-          } else {
-            eventsContainer.insertBefore(eventContainer, referenceEvent);
-          }
-        }
-
-        // Reset animation
-        setTimeout(() => {
-          eventContainer.style.transform = 'scale(1)';
-          eventContainer.style.boxShadow = '';
-
-          setTimeout(() => {
-            eventContainer.style.transition = '';
-          }, 300);
-        }, 50);
-
-        // Scroll into view
-        eventContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 150);
+    // Move in DOM synchronously
+    if (newIndex === 0) {
+      eventsContainer.insertBefore(eventContainer, allEvents[0]);
+    } else if (newIndex === allEvents.length - 1) {
+      eventsContainer.appendChild(eventContainer);
+    } else {
+      const referenceEvent = allEvents[newIndex];
+      if (currentIndex < newIndex) {
+        eventsContainer.insertBefore(eventContainer, referenceEvent.nextSibling);
+      } else {
+        eventsContainer.insertBefore(eventContainer, referenceEvent);
+      }
     }
+
+    // Animate the moved card
+    eventContainer.style.transition = 'all 0.3s ease-out';
+    eventContainer.style.transform = 'scale(1.02)';
+    eventContainer.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+    setTimeout(() => {
+      eventContainer.style.transform = 'scale(1)';
+      eventContainer.style.boxShadow = '';
+      setTimeout(() => {
+        eventContainer.style.transition = '';
+      }, 300);
+    }, 50);
+
+    // Scroll into view
+    eventContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    return true;
   }
 
   // Global function for unlinking from sidebar
