@@ -131,19 +131,19 @@ class TimelineEventsController < ApplicationController
 
   # Move functions
   def move_up
-    @timeline_event.move_higher if @timeline_event.can_be_modified_by?(current_user)
+    reorder_timeline_event { @timeline_event.move_higher }
   end
 
   def move_down
-    @timeline_event.move_lower if @timeline_event.can_be_modified_by?(current_user)
+    reorder_timeline_event { @timeline_event.move_lower }
   end
 
   def move_to_top
-    @timeline_event.move_to_top if @timeline_event.can_be_modified_by?(current_user)
+    reorder_timeline_event { @timeline_event.move_to_top }
   end
 
   def move_to_bottom
-    @timeline_event.move_to_bottom if @timeline_event.can_be_modified_by?(current_user)
+    reorder_timeline_event { @timeline_event.move_to_bottom }
   end
 
   # Drag and drop sorting endpoint (internal API)
@@ -239,6 +239,25 @@ class TimelineEventsController < ApplicationController
   end
 
   private
+
+  # Shared helper for the move_* actions. Authorizes the change, performs the
+  # acts_as_list move, and renders a JSON result so the client can confirm the
+  # new order actually persisted. Previously these actions rendered no template,
+  # which raised MissingTemplate (HTTP 500) even when the move succeeded, so the
+  # client could never tell a real failure from a success.
+  def reorder_timeline_event
+    unless @timeline_event.can_be_modified_by?(current_user)
+      return render json: { error: "You don't have permission to reorder that timeline event" }, status: :forbidden
+    end
+
+    yield
+
+    render json: {
+      status: 'success',
+      message: 'New position saved',
+      timeline_event: { id: @timeline_event.id, position: @timeline_event.reload.position }
+    }
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_timeline_event

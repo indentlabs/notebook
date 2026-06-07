@@ -32,6 +32,20 @@ function calculateScrollSpeed(distanceFromEdge) {
   return minScrollSpeed + (maxScrollSpeed - minScrollSpeed) * normalized;
 }
 
+// Serialize timeline reorder requests so acts_as_list never processes two
+// concurrent position changes for the same timeline. Firing move/sort requests
+// in parallel let their position shuffles interleave on the server, which could
+// leave events with duplicate or garbled positions that only surfaced as a
+// scattered order after a page refresh.
+let timelineReorderChain = Promise.resolve();
+function enqueueTimelineReorder(taskFn) {
+  const result = timelineReorderChain.then(() => taskFn());
+  // Keep the chain alive even if a task rejects, so one failed reorder doesn't
+  // permanently stall every subsequent one.
+  timelineReorderChain = result.catch(() => {});
+  return result;
+}
+
 // Initialize timeline events sortable functionality
 function initTimelineEventsSortable() {
   // Check if jQuery UI is available
@@ -98,8 +112,10 @@ function initTimelineEventsSortable() {
         Alpine.$data(alpineEl).autoSaveStatus = 'saving';
       }
 
-      // AJAX request to update position using new internal endpoint
-      $.ajax({
+      // AJAX request to update position using new internal endpoint.
+      // Queued so it can't race other reorder requests (see enqueueTimelineReorder).
+      enqueueTimelineReorder(function() {
+        return $.ajax({
         url: '/internal/sort/timeline_events',
         type: 'PATCH',
         contentType: 'application/json',
@@ -143,6 +159,7 @@ function initTimelineEventsSortable() {
 
           showTimelineErrorMessage('Failed to reorder events. Please try again.');
         }
+        });
       });
     },
     stop: function(event, ui) {
@@ -850,15 +867,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (endpoint) {
       event.preventDefault();
-      fetch(endpoint, {
-        method: 'GET',
-        headers: {
-          'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-        }
-      })
-      .then(() => {
-        moveEventInDOM(eventContainer, endpoint);
-        showSuccessMessage('Event moved successfully!');
+      // Queue the move so rapid, consecutive clicks can't race each other on the
+      // server. Only update the DOM once the server confirms the move persisted.
+      enqueueTimelineReorder(function() {
+        return fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+          }
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Move request failed with status ' + response.status);
+          }
+          moveEventInDOM(eventContainer, endpoint);
+          showSuccessMessage('Event moved successfully!');
+        });
       })
       .catch(error => {
         showErrorMessage('Error moving event. Please try again.');
