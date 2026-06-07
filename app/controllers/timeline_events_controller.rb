@@ -1,7 +1,6 @@
 class TimelineEventsController < ApplicationController
   before_action :set_timeline_event, only: [
     :show, :edit, :update, :destroy,
-    :move_up, :move_to_top, :move_down, :move_to_bottom,
     :link_entity, :unlink_entity, :add_tag, :remove_tag
   ]
 
@@ -129,52 +128,47 @@ class TimelineEventsController < ApplicationController
     end
   end
 
-  # Move functions
-  def move_up
-    reorder_timeline_event { @timeline_event.move_higher }
-  end
+  # Reorder endpoint (internal API). Accepts the full, authoritative ordering of
+  # a timeline's events and rewrites every position in a single transaction.
+  #
+  # Both drag-and-drop and the move menu funnel through here. Rewriting the whole
+  # sequence at once (rather than asking acts_as_list to shuffle one row at a
+  # time) makes the operation idempotent and immune to the races that previously
+  # left events with duplicate/garbled positions: whatever order the client
+  # sends last simply wins, as a clean 1..N sequence.
+  def reorder
+    return render json: { error: 'Not authorized' }, status: :forbidden unless user_signed_in?
 
-  def move_down
-    reorder_timeline_event { @timeline_event.move_lower }
-  end
+    timeline = current_user.timelines.find_by(id: params[:timeline_id])
+    return render json: { error: 'Timeline not found' }, status: :not_found unless timeline
 
-  def move_to_top
-    reorder_timeline_event { @timeline_event.move_to_top }
-  end
+    ordered_ids = Array(params[:ordered_ids]).map(&:to_i)
+    events_by_id = timeline.timeline_events.index_by(&:id)
 
-  def move_to_bottom
-    reorder_timeline_event { @timeline_event.move_to_bottom }
-  end
+    position = 0
+    TimelineEvent.transaction do
+      # Apply the client-provided order first.
+      ordered_ids.each do |id|
+        event = events_by_id.delete(id)
+        next unless event
 
-  # Drag and drop sorting endpoint (internal API)
-  def sort
-    content_id = params[:content_id]
-    intended_position = params[:intended_position].to_i
-    
-    timeline_event = TimelineEvent.find_by(id: content_id)
-    
-    unless timeline_event
-      render json: { error: "Timeline event not found" }, status: :not_found
-      return
+        position += 1
+        # update_column writes the position directly, skipping acts_as_list's
+        # shuffle callbacks (we are assigning the entire sequence ourselves).
+        event.update_column(:position, position)
+      end
+
+      # Defensively place any events the client didn't mention after the rest,
+      # preserving their existing order, so positions stay a clean 1..N.
+      events_by_id.values.sort_by { |e| [e.position || Float::INFINITY, e.id] }.each do |event|
+        position += 1
+        event.update_column(:position, position)
+      end
+
+      timeline.touch
     end
-    
-    unless timeline_event.can_be_modified_by?(current_user)
-      render json: { error: "You don't have permission to reorder that timeline event" }, status: :forbidden
-      return
-    end
-    
-    # Use acts_as_list to move to the intended position
-    timeline_event.insert_at(intended_position + 1) # acts_as_list is 1-indexed
-    
-    render json: { 
-      success: true, 
-      message: "New position saved", # "Timeline event moved to position #{intended_position + 1}"
-      timeline_event: {
-        id: timeline_event.id,
-        position: timeline_event.position,
-        title: timeline_event.title
-      }
-    }, status: :ok
+
+    render json: { status: 'success', message: 'New position saved' }
   end
 
   def add_tag
@@ -239,25 +233,6 @@ class TimelineEventsController < ApplicationController
   end
 
   private
-
-  # Shared helper for the move_* actions. Authorizes the change, performs the
-  # acts_as_list move, and renders a JSON result so the client can confirm the
-  # new order actually persisted. Previously these actions rendered no template,
-  # which raised MissingTemplate (HTTP 500) even when the move succeeded, so the
-  # client could never tell a real failure from a success.
-  def reorder_timeline_event
-    unless @timeline_event.can_be_modified_by?(current_user)
-      return render json: { error: "You don't have permission to reorder that timeline event" }, status: :forbidden
-    end
-
-    yield
-
-    render json: {
-      status: 'success',
-      message: 'New position saved',
-      timeline_event: { id: @timeline_event.id, position: @timeline_event.reload.position }
-    }
-  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_timeline_event
