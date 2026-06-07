@@ -964,7 +964,13 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).except(:page_tags, :_destroy).permit(content_param_list + [:deleted_at, :document_entity_id])
+    params.require(content_class).except(:page_tags, :_destroy).permit(
+      content_param_list + [
+        :deleted_at,
+        :document_entity_id,
+        { image_uploads_attributes: [:id, :src, :privacy, :_destroy] }
+      ]
+    )
   end
 
   def page_tag_params
