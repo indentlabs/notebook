@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_03_09_033957) do
+ActiveRecord::Schema.define(version: 2026_06_08_120000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3062,6 +3062,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.string "event_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_stripe_event_logs_on_event_id", unique: true
   end
 
   create_table "subgroupships", force: :cascade do |t|
@@ -3077,7 +3078,9 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.datetime "end_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stripe_subscription_id"
     t.index ["billing_plan_id"], name: "index_subscriptions_on_billing_plan_id"
+    t.index ["stripe_subscription_id"], name: "index_subscriptions_on_stripe_subscription_id"
     t.index ["user_id", "start_date", "end_date"], name: "index_subscriptions_on_user_id_and_start_date_and_end_date"
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end

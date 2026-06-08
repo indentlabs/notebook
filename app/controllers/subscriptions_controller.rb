@@ -113,6 +113,8 @@ class SubscriptionsController < ApplicationController
     elsif result == :failed_card
       flash[:alert] = "We couldn't upgrade you to Premium because your card was denied. Please double check that your information is correct."
       return redirect_to payment_info_path(plan: new_plan_id)
+    elsif result == :already_subscribed
+      redirect_to(subscription_path, notice: "You're already on that plan.")
     else
       redirect_to(subscription_path, notice: "Your plan was successfully changed.")
     end
@@ -230,8 +232,13 @@ class SubscriptionsController < ApplicationController
       return
     end      
 
-    # If it looks like a valid code and quacks like a valid code, it's probably a valid code
-    code.activate!(current_user)
+    # If it looks like a valid code and quacks like a valid code, it's probably a valid code.
+    # activate! is the authoritative, atomic gate: if it returns false the code was exhausted or
+    # already redeemed by this user (e.g. a concurrent double-submit), so don't grant anything.
+    unless code.activate!(current_user)
+      redirect_back(fallback_location: subscription_path, alert: "This promo code couldn't be activated. It may have expired or already been used.")
+      return
+    end
 
     # Also, give the user the Premium upload bandwidth
     # TODO we should probably use SubscriptionService#recalculate_bandwidth_for() here so we can reduce
@@ -280,12 +287,9 @@ class SubscriptionsController < ApplicationController
   end
 
   def process_plan_change(user, new_plan_id)
-    # General flow we're going to take here:
-    # 1. Cancel all existing plans, reversing their benefits
-    SubscriptionService.cancel_all_existing_subscriptions(user)
-
-    # 2. Add a new plan, adding its benefits
-    SubscriptionService.add_subscription(user, new_plan_id)
+    # Cancel existing plans and add the new one as a single, locked, atomic operation so that
+    # concurrent/duplicate requests can't create two subscriptions (and double-bill the user).
+    SubscriptionService.change_plan(user, new_plan_id)
   end
 
   def set_sidenav_expansion
