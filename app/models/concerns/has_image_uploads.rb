@@ -34,7 +34,12 @@ module HasImageUploads
     end
 
     def public_image_uploads
-      self.image_uploads.where(privacy: 'public').presence || [header_asset_for(self.class.name)]
+      uploads = if image_uploads.loaded?
+        image_uploads.select { |upload| upload.privacy == 'public' }
+      else
+        self.image_uploads.where(privacy: 'public')
+      end
+      uploads.presence || [header_asset_for(self.class.name)]
     end
 
     def private_image_uploads
@@ -55,7 +60,11 @@ module HasImageUploads
         
         # If we don't have any uploaded images, we look for saved Basil commissions
         if result.nil? && respond_to?(:basil_commissions)
-          basil_image = basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
+          basil_image = if basil_commissions.loaded?
+            basil_commissions.select { |commission| commission.saved_at.present? }.sample.try(:image)
+          else
+            basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
+          end
           # Handle Active Storage attachments properly
           if basil_image.present? && basil_image.respond_to?(:url)
             begin
@@ -101,15 +110,23 @@ module HasImageUploads
     # Returns the pinned image upload (or nil if none pinned)
     def pinned_image_upload(format = :medium)
       # First check standard image uploads
-      pinned_upload = image_uploads.pinned.first
+      pinned_upload = if image_uploads.loaded?
+        image_uploads.select(&:pinned?).min_by(&:id)
+      else
+        image_uploads.pinned.first
+      end
       if pinned_upload.present?
         url = extract_image_url(pinned_upload, format)
         return url if url.present?
       end
-      
+
       # Then check basil commissions
       if respond_to?(:basil_commissions)
-        pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
+        pinned_commission = if basil_commissions.loaded?
+          basil_commissions.select { |commission| commission.pinned? && commission.saved_at.present? }.min_by(&:id)
+        else
+          basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
+        end
         if pinned_commission.present?
           basil_image = pinned_commission.try(:image)
           # Handle Active Storage attachments properly
@@ -128,14 +145,22 @@ module HasImageUploads
     
     # Returns the pinned public image (or nil if none pinned)
     def pinned_public_image(format = :medium)
-      pinned_upload = image_uploads.pinned.where(privacy: 'public').first
+      pinned_upload = if image_uploads.loaded?
+        image_uploads.select { |upload| upload.pinned? && upload.privacy == 'public' }.min_by(&:id)
+      else
+        image_uploads.pinned.where(privacy: 'public').first
+      end
       if pinned_upload.present?
         url = extract_image_url(pinned_upload, format)
         return url if url.present?
       end
-      
+
       if respond_to?(:basil_commissions)
-        pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
+        pinned_commission = if basil_commissions.loaded?
+          basil_commissions.select { |commission| commission.pinned? && commission.saved_at.present? }.min_by(&:id)
+        else
+          basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
+        end
         if pinned_commission.present?
           basil_image = pinned_commission.try(:image)
           # Handle Active Storage attachments properly
