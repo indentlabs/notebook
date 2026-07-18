@@ -9,7 +9,57 @@
       <p class="text-red-600 dark:text-red-200">You've blocked this user and cannot view their content.</p>
     </div>
   <% else %>
-    
+
+    <!-- About Section: bio details and profile tidbits -->
+    <%
+      about_fields = [
+        { field: :other_names,     label: 'Also known as',   icon: 'badge',          icon_bg: 'bg-amber-100 dark:bg-amber-900',     icon_text: 'text-amber-600 dark:text-amber-200' },
+        { field: :interests,       label: 'Interests',       icon: 'interests',      icon_bg: 'bg-rose-100 dark:bg-rose-900',       icon_text: 'text-rose-600 dark:text-rose-200' },
+        { field: :favorite_genre,  label: 'Favorite genre',  icon: 'theater_comedy', icon_bg: 'bg-purple-100 dark:bg-purple-900',   icon_text: 'text-purple-600 dark:text-purple-200' },
+        { field: :favorite_author, label: 'Favorite author', icon: 'history_edu',    icon_bg: 'bg-blue-100 dark:bg-blue-900',       icon_text: 'text-blue-600 dark:text-blue-200' },
+        { field: :favorite_book,   label: 'Favorite book',   icon: 'menu_book',      icon_bg: 'bg-emerald-100 dark:bg-emerald-900', icon_text: 'text-emerald-600 dark:text-emerald-200' },
+        { field: :inspirations,    label: 'Inspirations',    icon: 'emoji_objects',  icon_bg: 'bg-orange-100 dark:bg-orange-900',   icon_text: 'text-orange-600 dark:text-orange-200' }
+      ].select { |f| @user.send(f[:field]).present? }
+    %>
+    <% if about_fields.any? || @user.favorite_quote.present? %>
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center">
+          <i class="material-icons mr-3 text-teal-600 text-3xl">person</i>
+          About <%= @user.name || @user.display_name %>
+        </h2>
+
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 space-y-6">
+          <% if @user.favorite_quote.present? %>
+            <blockquote class="border-l-4 border-indigo-400 dark:border-indigo-500 bg-indigo-50 dark:bg-slate-700 rounded-r-lg px-5 py-4">
+              <div class="flex items-start">
+                <i class="material-icons text-indigo-400 dark:text-indigo-300 mr-3">format_quote</i>
+                <div class="min-w-0 flex-1">
+                  <p class="text-gray-800 dark:text-gray-100 italic whitespace-pre-line break-words"><%= @user.favorite_quote %></p>
+                  <div class="text-xs font-semibold uppercase tracking-wide text-indigo-500 dark:text-indigo-300 mt-2">Favorite quote</div>
+                </div>
+              </div>
+            </blockquote>
+          <% end %>
+
+          <% if about_fields.any? %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <% about_fields.each do |f| %>
+                <div class="flex items-start space-x-3">
+                  <div class="p-2 <%= f[:icon_bg] %> rounded-lg flex-shrink-0">
+                    <i class="material-icons <%= f[:icon_text] %>"><%= f[:icon] %></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"><%= f[:label] %></div>
+                    <div class="text-gray-900 dark:text-gray-100 mt-1 break-words whitespace-pre-line"><%= @user.send(f[:field]) %></div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Welcome Message for New/Empty Profiles -->
     <% if @total_public_pages == 0 %>
       <div class="bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-blue-900 rounded-lg p-8 text-center">

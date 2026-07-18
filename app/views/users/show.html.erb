@@ -71,8 +71,14 @@
                 <p class="text-lg text-gray-500 dark:text-gray-400 mt-1">@<%= @user.username %></p>
               <% end %>
               
-              <% if @user.bio.present? %>
-                <p class="text-gray-700 dark:text-gray-300 mt-3 max-w-2xl line-clamp-2"><%= @user.bio %></p>
+              <% if @user.bio.present? && !@is_blocked %>
+                <div class="mt-3 max-w-3xl">
+                  <p id="profile-bio" class="text-gray-700 dark:text-gray-300 whitespace-pre-line line-clamp-3"><%= @user.bio %></p>
+                  <button type="button" id="profile-bio-toggle" class="hidden mt-1 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-flex items-center">
+                    <span>Show more</span>
+                    <i class="material-icons text-sm ml-1">expand_more</i>
+                  </button>
+                </div>
               <% end %>
               
               <!-- User Details -->
@@ -301,6 +307,25 @@
 <!-- JavaScript for Tab Navigation -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Expandable bio: only show the toggle when the bio is actually truncated
+  const bio = document.getElementById('profile-bio');
+  const bioToggle = document.getElementById('profile-bio-toggle');
+  if (bio && bioToggle) {
+    const revealToggleIfClamped = function() {
+      if (bio.classList.contains('line-clamp-3') && bio.scrollHeight > bio.clientHeight + 1) {
+        bioToggle.classList.remove('hidden');
+      }
+    };
+    revealToggleIfClamped();
+    window.addEventListener('resize', revealToggleIfClamped);
+
+    bioToggle.addEventListener('click', function() {
+      const nowExpanded = bio.classList.toggle('line-clamp-3') === false;
+      bioToggle.querySelector('span').textContent = nowExpanded ? 'Show less' : 'Show more';
+      bioToggle.querySelector('i').textContent = nowExpanded ? 'expand_less' : 'expand_more';
+    });
+  }
+
   const tabs = document.querySelectorAll('.profile-tab');
   const tabContents = document.querySelectorAll('.tab-content');
   
