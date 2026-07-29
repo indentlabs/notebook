@@ -71,7 +71,7 @@ Thredded.messageboards_order = :last_post_at_desc
 
 # ==> Email Configuration
 # Email "From:" field will use the following
-Thredded.email_from = 'notebook@indentlabs.com'
+Thredded.email_from = 'hello@notebook.ai'
 
 # Emails going out will prefix the "Subject:" with the following string
 Thredded.email_outgoing_prefix = '[Notebook.ai] '

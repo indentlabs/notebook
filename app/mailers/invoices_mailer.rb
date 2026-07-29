@@ -1,5 +1,5 @@
 class InvoicesMailer < ApplicationMailer
-  default from: "billing@notebook.ai"
+  default from: "Notebook.ai Billing <hello@notebook.ai>"
 
   def dispatch_invoice(user_id)
     @user = User.find_by(id: user_id)
