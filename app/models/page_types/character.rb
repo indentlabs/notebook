@@ -40,8 +40,12 @@ class Character < ApplicationRecord
   relates :magics,           with: :character_magics
   relates :enemies,          with: :character_enemies
 
+  def self.description_attribute_label
+    'Role'
+  end
+
   def description
-    overview_field_value('Role')
+    overview_field_value(self.class.description_attribute_label)
   end
 
   def self.content_name
