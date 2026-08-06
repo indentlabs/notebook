@@ -63,8 +63,12 @@ class Lore < ActiveRecord::Base
     'lore'
   end
 
+  def self.description_attribute_label
+    'Summary'
+  end
+
   def description
-    overview_field_value('Summary')
+    overview_field_value(self.class.description_attribute_label)
   end
 end
     

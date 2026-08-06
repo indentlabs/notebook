@@ -182,6 +182,56 @@ module HasAttributes
       end
     end
 
+    # The overview field label that #description reads, used for batch preloading
+    def self.description_attribute_label
+      'Description'
+    end
+
+    # Preloads overview field values for a collection of records in a constant
+    # number of queries, so per-record #overview_field_value calls (e.g. via
+    # #description) don't each run their own category/field/value lookups.
+    def self.preload_overview_field_values(records, label = description_attribute_label)
+      records = Array(records)
+      return records if records.empty? || label.nil?
+
+      records.group_by(&:user_id).each do |user_id, user_records|
+        category_ids = AttributeCategory.where(
+          user_id:     user_id,
+          entity_type: name.downcase
+        ).pluck(:id)
+
+        field = AttributeField.find_by(
+          user_id:               user_id,
+          attribute_category_id: category_ids,
+          label:                 label,
+          hidden:                [nil, false]
+        )
+
+        if field.nil?
+          user_records.each { |record| record.cache_overview_field_value(label, nil) }
+          next
+        end
+
+        values = field.attribute_values
+                      .where(entity_id: user_records.map(&:id))
+                      .order('created_at desc')
+                      .to_a
+
+        user_records.each do |record|
+          value = values.detect { |v| v.entity_id == record.id }&.value.presence ||
+                  (record.respond_to?(label.downcase) ? record.read_attribute(label.downcase) : nil)
+          record.cache_overview_field_value(label, value)
+        end
+      end
+
+      records
+    end
+
+    def cache_overview_field_value(label, value)
+      @overview_field_value_cache ||= {}
+      @overview_field_value_cache[label] = value
+    end
+
     # All of these helpers are spooky and rife for N+1s
     def name_field
       category_ids = AttributeCategory.where(
@@ -274,10 +324,13 @@ module HasAttributes
     end
 
     def overview_field_value(label)
-      field_cache = overview_field(label)
-      return nil if field_cache.nil?
+      @overview_field_value_cache ||= {}
+      return @overview_field_value_cache[label] if @overview_field_value_cache.key?(label)
 
-      field_cache
+      field_cache = overview_field(label)
+      return @overview_field_value_cache[label] = nil if field_cache.nil?
+
+      @overview_field_value_cache[label] = field_cache
         .attribute_values
         .order('created_at desc')
         .detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)
