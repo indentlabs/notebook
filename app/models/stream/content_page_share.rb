@@ -14,6 +14,23 @@ class ContentPageShare < ApplicationRecord
     user.content_page_share_followings.create({content_page_share: self})
   end
 
+  # Human-readable label for the shared page's type, e.g. "character" or
+  # "topic" (rather than raw class names like "Thredded::Topic").
+  def content_page_type_label
+    self.class.page_type_label(content_page)
+  end
+
+  def secondary_content_page_type_label
+    self.class.page_type_label(secondary_content_page)
+  end
+
+  def self.page_type_label(page)
+    return 'page' if page.nil?
+    return page.class.content_name if page.class.respond_to?(:content_name)
+
+    page.class.name.demodulize.underscore.humanize.downcase
+  end
+
   def followed_by?(user)
     return false if user.nil?
     
