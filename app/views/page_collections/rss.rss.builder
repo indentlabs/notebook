@@ -9,7 +9,7 @@ xml.rss version: "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom", "xmlns:cont
     xml.ttl 60
     xml.lastBuildDate @pages.first&.accepted_at&.rfc822 || Time.current.rfc822
     xml.generator "Notebook.ai Collections"
-    xml.webMaster "noreply@notebook.ai (Notebook.ai)"
+    xml.webMaster "hello@notebook.ai (Notebook.ai)"
     xml.managingEditor "#{@page_collection.user.email} (#{@page_collection.user.display_name})"
     
     # Add collection image if available
