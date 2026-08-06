@@ -30,6 +30,10 @@ namespace :daily do
     # Destroy all stream comments from blocked users and nil users
     ShareComment.where(user_id: blocked_user_ids).destroy_all
     ShareComment.where(user_id: nil).destroy_all
+
+    # Destroy stream comments left behind by users deleted before comments
+    # cascaded on user deletion (user_id set, but the user is soft-deleted)
+    ShareComment.where(user_id: User.only_deleted.select(:id)).destroy_all
   end
 
   desc "Run end-of-day-analytics reporter"
