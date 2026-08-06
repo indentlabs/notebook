@@ -48,6 +48,20 @@ module ApplicationHelper
     user_signed_in? && current_user.notice_dismissals.where(notice_id: id).none?
   end
 
+  # Abbreviates large counts (e.g. 1190921 => "1.19M") so stat displays keep
+  # a predictable width; counts under 10,000 keep their full delimited form.
+  def compact_number(number)
+    number = number.to_i
+    return number_with_delimiter(number) if number < 10_000
+
+    number_to_human(number,
+                    format: '%n%u',
+                    precision: 3,
+                    significant: true,
+                    round_mode: :down,
+                    units: { thousand: 'K', million: 'M', billion: 'B', trillion: 'T' })
+  end
+
   # Combines and sorts gallery images from both ImageUploads and BasilCommissions
   # for consistent display across all gallery views in the application.
   # @param regular_images [Array<ImageUpload>] regular image uploads
