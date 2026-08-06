@@ -334,17 +334,17 @@
         <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Documents</h3>
         <div class="space-y-2">
           <% if longest_doc %>
-          <div class="text-sm">
-            <span class="text-gray-500 dark:text-gray-400">Longest:</span>
-            <span class="text-gray-900 dark:text-white"><%= truncate(longest_doc[:title], length: 20) %></span>
-            <span class="text-gray-500 dark:text-gray-400">(<%= number_with_delimiter(longest_doc[:words]) %>)</span>
+          <div class="text-sm flex items-baseline min-w-0">
+            <span class="text-gray-500 dark:text-gray-400 flex-shrink-0">Longest:</span>
+            <span class="text-gray-900 dark:text-white truncate mx-1" title="<%= longest_doc[:title] %>"><%= longest_doc[:title] %></span>
+            <span class="text-gray-500 dark:text-gray-400 flex-shrink-0">(<%= number_with_delimiter(longest_doc[:words]) %>)</span>
           </div>
           <% end %>
           <% if shortest_doc && doc_count > 1 %>
-          <div class="text-sm">
-            <span class="text-gray-500 dark:text-gray-400">Shortest:</span>
-            <span class="text-gray-900 dark:text-white"><%= truncate(shortest_doc[:title], length: 20) %></span>
-            <span class="text-gray-500 dark:text-gray-400">(<%= number_with_delimiter(shortest_doc[:words]) %>)</span>
+          <div class="text-sm flex items-baseline min-w-0">
+            <span class="text-gray-500 dark:text-gray-400 flex-shrink-0">Shortest:</span>
+            <span class="text-gray-900 dark:text-white truncate mx-1" title="<%= shortest_doc[:title] %>"><%= shortest_doc[:title] %></span>
+            <span class="text-gray-500 dark:text-gray-400 flex-shrink-0">(<%= number_with_delimiter(shortest_doc[:words]) %>)</span>
           </div>
           <% end %>
         </div>
@@ -355,8 +355,8 @@
           <% docs_with_counts.first(5).each do |doc| %>
             <div>
               <div class="flex justify-between text-xs mb-1">
-                <span class="text-gray-600 dark:text-gray-400 truncate mr-2"><%= truncate(doc[:title], length: 18) %></span>
-                <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter(doc[:words]) %></span>
+                <span class="text-gray-600 dark:text-gray-400 truncate min-w-0 mr-2" title="<%= doc[:title] %>"><%= doc[:title] %></span>
+                <span class="text-gray-500 dark:text-gray-400 flex-shrink-0"><%= number_with_delimiter(doc[:words]) %></span>
               </div>
               <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                 <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <%= max_words > 0 ? (doc[:words].to_f / max_words * 100).round : 0 %>%"></div>
@@ -370,8 +370,8 @@
                 <% docs_with_counts.drop(5).each do |doc| %>
                   <div>
                     <div class="flex justify-between text-xs mb-1">
-                      <span class="text-gray-600 dark:text-gray-400 truncate mr-2"><%= truncate(doc[:title], length: 18) %></span>
-                      <span class="text-gray-500 dark:text-gray-400"><%= number_with_delimiter(doc[:words]) %></span>
+                      <span class="text-gray-600 dark:text-gray-400 truncate min-w-0 mr-2" title="<%= doc[:title] %>"><%= doc[:title] %></span>
+                      <span class="text-gray-500 dark:text-gray-400 flex-shrink-0"><%= number_with_delimiter(doc[:words]) %></span>
                     </div>
                     <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                       <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <%= max_words > 0 ? (doc[:words].to_f / max_words * 100).round : 0 %>%"></div>
@@ -402,7 +402,7 @@
           <% if @book.universe.present? %>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600 dark:text-gray-400">Universe</span>
-            <span class="text-sm font-semibold text-gray-900 dark:text-white truncate ml-2"><%= truncate(@book.universe.name, length: 15) %></span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white truncate min-w-0 ml-2" title="<%= @book.universe.name %>"><%= @book.universe.name %></span>
           </div>
           <% end %>
           <div class="flex justify-between items-center">
