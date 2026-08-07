@@ -1,6 +1,8 @@
 require 'test_helper'
 
 class DocumentTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   def setup
     @user = users(:one)
     @document = documents(:one)
@@ -61,9 +63,9 @@ class DocumentTest < ActiveSupport::TestCase
     assert_equal expected, Document.statuses.keys
   end
 
-  test "status defaults to idea" do
+  test "status defaults to writing" do
     doc = Document.new
-    assert_equal "idea", doc.status
+    assert_equal "writing", doc.status
   end
 
   test "status can be set via string" do
