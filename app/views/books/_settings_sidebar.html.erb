@@ -144,7 +144,7 @@
               </div>
               <div class="ml-2 flex-1">
                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-0.5">Public</div>
-                <div class="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">Anyone with the link can view this book.</div>
+                <div class="text-[11px] text-gray-600 dark:text-gray-400 leading-snug">Anyone with the link can view this book, including all of its chapters.</div>
               </div>
               <div x-show="selectedPrivacy === 'public'" class="text-emerald-500 flex-shrink-0 ml-1">
                 <i class="material-icons text-base">check_circle</i>
@@ -152,6 +152,21 @@
             </div>
           </div>
         </label>
+      <% end %>
+
+      <% private_chapter_count = @book.documents.where("documents.privacy IS NULL OR documents.privacy != 'public'").count %>
+      <% if private_chapter_count > 0 %>
+        <div x-show="selectedPrivacy === 'public'"
+             class="mt-3 border border-amber-300 dark:border-amber-800 rounded-lg p-3 bg-amber-50 dark:bg-amber-900 bg-opacity-100 dark:bg-opacity-30">
+          <div class="flex items-start">
+            <i class="material-icons text-amber-600 dark:text-amber-400 text-base mr-2">visibility</i>
+            <p class="text-xs text-amber-800 dark:text-amber-200 leading-snug">
+              This book contains <%= pluralize(private_chapter_count, 'private chapter') %>.
+              While the book is public, anyone who can view it can also read those chapters.
+              Making the book private again restores their privacy.
+            </p>
+          </div>
+        </div>
       <% end %>
     </div>
 
