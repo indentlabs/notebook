@@ -117,6 +117,28 @@
             </div>
           <% end %>
 
+          <% exposing_books = @document.privacy == 'public' ? [] : @document.containing_public_books.to_a %>
+          <% if exposing_books.any? %>
+            <div class="mb-4 p-3 rounded-md border bg-yellow-50 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800">
+              <div class="flex items-center">
+                <div class="flex-shrink-0 mr-3">
+                  <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-800 flex items-center justify-center">
+                    <i class="material-icons text-sm text-yellow-600 dark:text-yellow-400">warning</i>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    This document is a chapter in
+                    <%= exposing_books.map { |book| link_to("\"#{book.name}\"", book_path(book), class: 'underline') }.to_sentence.html_safe %>
+                  </p>
+                  <p class="text-xs text-yellow-600 dark:text-yellow-400">
+                    <%= exposing_books.count == 1 ? 'That book is' : 'Those books are' %> <strong>public</strong>, so anyone who can view <%= exposing_books.count == 1 ? 'it' : 'them' %> can read this document regardless of its own setting. Remove it from the book or make the book private to restore privacy.
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
           <%= form_for(@document, remote: true, html: { id: 'document-privacy-form', data: { turbo: false } }) do |f| %>
             <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
               <%= f.hidden_field :privacy, value: @document.privacy, id: 'document_privacy_field' %>
