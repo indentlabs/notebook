@@ -98,13 +98,15 @@ class ContentControllerPinEdgeCasesTest < ActionDispatch::IntegrationTest
 
     threads.each(&:join)
 
-    # Both requests should complete without database lock errors
-    # Only one should be pinned
+    # Both requests should complete without database lock errors.
+    # Depending on interleaving, toggling the already-pinned image can land as an
+    # unpin (0 pinned) or a re-pin (1 pinned) — the invariant the controller
+    # guarantees is only that two images are never pinned simultaneously.
     image1.reload
     image2.reload
 
     pinned_count = [image1, image2].count(&:pinned)
-    assert_equal 1, pinned_count, "Exactly one image should be pinned after concurrent requests"
+    assert_operator pinned_count, :<=, 1, "At most one image should be pinned after concurrent requests"
   end
 
   test "mixed type unpinning works correctly" do
