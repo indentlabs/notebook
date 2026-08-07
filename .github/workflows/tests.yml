@@ -5,9 +5,9 @@ name: Tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, tailwind-redesign ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, tailwind-redesign ]
 
 jobs:
   test:
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install native dependencies
       run: sudo apt-get update && sudo apt-get install -y libmagickwand-dev
     - name: Set up Ruby
@@ -24,10 +24,18 @@ jobs:
         ruby-version: 3.2
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - name: Set up Node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
-        node-version: 14.15.0
+        node-version: 22
+        cache: yarn
+    - name: Install JS dependencies
+      run: yarn install --frozen-lockfile
     - name: Compile JS
       run: RAILS_ENV=test bundle exec rake assets:precompile
+      env:
+        # webpack 4 uses OpenSSL's legacy md4 hash, removed by default in Node 17+
+        NODE_OPTIONS: --openssl-legacy-provider
     - name: Run tests
       run: RAILS_ENV=test bundle exec rails test
+      env:
+        NODE_OPTIONS: --openssl-legacy-provider
