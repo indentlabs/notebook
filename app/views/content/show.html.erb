@@ -185,9 +185,14 @@ function showPageController() {
     showLeftSidebar: false,
 
     init() {
-      // Set initial view from URL hash if present
+      // Set initial view from URL hash if present. Universe-only views are included
+      // conditionally because their markup only renders for Universe pages.
       const hash = window.location.hash.substring(1);
-      if (['overview', 'details', 'gallery', 'associations', 'collections', 'timelines', 'feedback', 'contributors', 'privacy', 'shares'].includes(hash)) {
+      const validViews = ['overview', 'gallery', 'associations', 'collections', 'timelines', 'feedback', 'contributors', 'privacy', 'shares'];
+      <% if @content.class.name == 'Universe' %>
+        validViews.push('in_this_universe', 'documents', 'books');
+      <% end %>
+      if (validViews.includes(hash)) {
         this.currentView = hash;
         if (hash !== 'overview') {
           this.currentCategory = null;
