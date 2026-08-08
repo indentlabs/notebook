@@ -407,13 +407,19 @@ function timelineEditor() {
         this.updateSidebarLinkedContent(eventId);
       });
 
-      if (eventData && eventData.tags) {
-        this.eventTags[eventId] = eventData.tags;
-        if (eventData.tags.length > 0) {
-          this.updateMainPanelTags(eventId);
+      // eventData.tags comes from the @click handler baked into the card's HTML
+      // at page-render time, so it goes stale as soon as tags change in this
+      // session. Only use it to seed an empty cache — never to overwrite live
+      // state, which made freshly added tags vanish on re-click.
+      if (!this.eventTags[eventId]) {
+        if (eventData && eventData.tags) {
+          this.eventTags[eventId] = eventData.tags;
+          if (eventData.tags.length > 0) {
+            this.updateMainPanelTags(eventId);
+          }
+        } else {
+          this.getEventTags(eventId);
         }
-      } else {
-        this.getEventTags(eventId);
       }
 
       const inspectorContent = document.querySelector('.w-96 .overflow-y-auto');

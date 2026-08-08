@@ -78,6 +78,17 @@ class TimelineEventsReorderTest < ActionDispatch::IntegrationTest
     assert_equal (@event_ids - [moved]), result[1..], "Omitted events keep their relative order"
   end
 
+  test "rejects an empty ordered_ids payload instead of silently no-opping" do
+    # A client bug that fails to read the event cards from the DOM sends an
+    # empty list; that must be an error, not a fake "position saved" success.
+    sign_in @owner
+
+    reorder([])
+
+    assert_response :unprocessable_entity
+    assert_equal @event_ids, ordered_event_ids, "Order must be unchanged"
+  end
+
   test "rejects reordering a timeline the user does not own" do
     sign_in @other
     original = ordered_event_ids

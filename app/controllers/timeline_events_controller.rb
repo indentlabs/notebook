@@ -143,6 +143,13 @@ class TimelineEventsController < ApplicationController
     return render json: { error: 'Timeline not found' }, status: :not_found unless timeline
 
     ordered_ids = Array(params[:ordered_ids]).map(&:to_i)
+    # An empty list means the client failed to read the event cards from the
+    # DOM (or sent a malformed request). Applying it would be a silent no-op
+    # that the client reports as "saved", so reject it loudly instead.
+    if ordered_ids.empty?
+      return render json: { status: 'error', message: 'No event ids provided' }, status: :unprocessable_entity
+    end
+
     events_by_id = timeline.timeline_events.index_by(&:id)
 
     position = 0
@@ -177,13 +184,20 @@ class TimelineEventsController < ApplicationController
     tag_name = params[:tag_name]&.strip
     return render json: { error: 'Tag name is required' }, status: :bad_request if tag_name.blank?
     
-    # Check if tag already exists for this event
+    # Adding a tag that's already on the event is a no-op, not an error: the
+    # editor adds tags optimistically and rolls the tag back out of the UI when
+    # the server reports failure, so treating a duplicate as an error made
+    # re-adding an existing tag look like tags weren't saving at all.
     existing_tag = @timeline_event.page_tags.find_by(tag: tag_name)
     if existing_tag
-      return render json: { 
-        status: 'error', 
-        message: 'Tag already exists for this event' 
-      }, status: :unprocessable_entity
+      return render json: {
+        status: 'success',
+        message: 'Tag already exists for this event',
+        tag: {
+          id: existing_tag.id,
+          name: existing_tag.tag
+        }
+      }
     end
     
     # Create the tag

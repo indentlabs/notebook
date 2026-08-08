@@ -225,7 +225,7 @@
 
           <!-- Timeline Events Section with Spine -->
           <% if @timeline.timeline_events.any? %>
-            <div class="relative">
+            <div class="relative timeline-events-list">
               <!-- Timeline Rail - Only for events -->
               <div class="absolute top-0 bottom-0 w-0.5 bg-gray-300 dark:bg-gray-700 timeline-spine rounded-full" style="left: 38px;"></div>
 
@@ -851,16 +851,21 @@ function timelineEditor() {
         this.updateSidebarLinkedContent(eventId);
       });
 
-      // Load tags for this event - use provided tags or ensure they're cached
-      if (eventData && eventData.tags) {
-        this.eventTags[eventId] = eventData.tags;
-        // Only update tag display if tags were actually provided
-        if (eventData.tags.length > 0) {
-          this.updateMainPanelTags(eventId);
+      // Load tags for this event. eventData.tags comes from the @click handler
+      // baked into the card's HTML at page-render time, so it goes stale as soon
+      // as tags are added or removed in this session. Only use it to seed an
+      // empty cache — never to overwrite live state, which made freshly added
+      // tags vanish whenever an event card was re-clicked.
+      if (!this.eventTags[eventId]) {
+        if (eventData && eventData.tags) {
+          this.eventTags[eventId] = eventData.tags;
+          if (eventData.tags.length > 0) {
+            this.updateMainPanelTags(eventId);
+          }
+        } else {
+          // getEventTags() will handle caching from DOM if needed
+          this.getEventTags(eventId);
         }
-      } else {
-        // getEventTags() will handle caching from DOM if needed
-        this.getEventTags(eventId);
       }
 
       // Scroll inspector panel to top
