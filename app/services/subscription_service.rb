@@ -11,14 +11,13 @@ class SubscriptionService < Service
     related_plan = BillingPlan.find_by(stripe_plan_id: plan_id, available: true)
     raise "Plan #{plan_id} not available for user #{user.id}" if related_plan.nil?
 
-    # Sync with Stripe (todo pipe into StripeService)
-    unless Rails.env.test?
-      begin
-        sync_stripe_subscriptions_to_plan(user, plan_id)
-      rescue Stripe::CardError => e
-        return :failed_card
-      end
-    end
+    # Sync with Stripe (todo pipe into StripeService).
+    #
+    # Stripe::CardError is deliberately NOT rescued here. It has to propagate
+    # out of the caller's transaction so the local downgrade that precedes this
+    # call rolls back; otherwise a declined card would strip the user of the
+    # plan and bandwidth they already had.
+    sync_stripe_subscriptions_to_plan(user, plan_id) unless Rails.env.test?
 
     # Add any bonus bandwidth granted by the plan
     user.update(
@@ -165,10 +164,25 @@ class SubscriptionService < Service
     subscription.update(end_date: DateTime.now)
   end
 
+  # Ends the user's subscriptions in OUR database and reverses their benefits.
+  # This does not touch Stripe: on a plan change, add_subscription switches the
+  # existing Stripe subscription's price in place (preserving the user's billing
+  # anchor). Callers that are cancelling outright, rather than switching plans,
+  # must also call cancel_stripe_subscriptions! or the customer keeps getting
+  # billed.
   def self.cancel_all_existing_subscriptions(user)
     user.update(selected_billing_plan_id: 1)
     user.active_subscriptions.each do |subscription|
       remove_subscription(user, subscription)
+    end
+  end
+
+  # Cancels every billable subscription on Stripe outright. Use this for true
+  # cancellations (admin unsubscribes, account deletion) — NOT for plan changes,
+  # where the subscription should be re-priced in place instead.
+  def self.cancel_stripe_subscriptions!(user)
+    billable_stripe_subscriptions(user.stripe_customer_id).each do |subscription|
+      Stripe::Subscription.cancel(subscription.id)
     end
   end
 

@@ -152,6 +152,22 @@ class SubscriptionServiceTest < ActiveSupport::TestCase
     assert_not_requested :delete, %r{#{STRIPE_BASE}/subscriptions/sub_active}
   end
 
+  test "cancel_stripe_subscriptions! cancels every billable subscription outright" do
+    stub_subscription_list([
+      stripe_subscription_json('sub_a', 'premium'),
+      stripe_subscription_json('sub_b', 'starter'),
+      stripe_subscription_json('sub_dead', 'premium', status: 'canceled')
+    ])
+    cancel_a = stub_request(:delete, "#{STRIPE_BASE}/subscriptions/sub_a").to_return(status: 200, body: { id: 'sub_a' }.to_json)
+    cancel_b = stub_request(:delete, "#{STRIPE_BASE}/subscriptions/sub_b").to_return(status: 200, body: { id: 'sub_b' }.to_json)
+
+    SubscriptionService.cancel_stripe_subscriptions!(@user)
+
+    assert_requested cancel_a
+    assert_requested cancel_b
+    assert_not_requested :delete, "#{STRIPE_BASE}/subscriptions/sub_dead"
+  end
+
   test "subscription_period_end falls back to item-level period ends" do
     subscription = Stripe::Subscription.construct_from(
       id: 'sub_x',

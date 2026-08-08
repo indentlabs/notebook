@@ -282,7 +282,11 @@ class SubscriptionsController < ApplicationController
     # Serialize plan changes per user with a row lock, so repeated clicks on a
     # slow page (or two racing requests) can't both act on stale subscription
     # state and double-subscribe the user on Stripe.
-    user.with_lock do
+    # requires_new gives us our own savepoint, so a declined card rolls back the
+    # local downgrade below even if we're ever called inside another transaction.
+    user.transaction(requires_new: true) do
+      user.lock!
+
       # General flow we're going to take here:
       # 1. Cancel all existing plans, reversing their benefits
       SubscriptionService.cancel_all_existing_subscriptions(user)
@@ -290,6 +294,11 @@ class SubscriptionsController < ApplicationController
       # 2. Add a new plan, adding its benefits
       SubscriptionService.add_subscription(user, new_plan_id)
     end
+  rescue Stripe::CardError
+    # with_lock runs in a transaction, so letting the error escape it rolled the
+    # local downgrade back: the user keeps the plan and bandwidth they had
+    # before their card was declined.
+    :failed_card
   end
 
   def set_sidenav_expansion
