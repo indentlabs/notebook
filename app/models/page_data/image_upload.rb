@@ -33,7 +33,9 @@ class ImageUpload < ApplicationRecord
     s3_protocol: 'https'
   # has_one_attached :upload
 
-  validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
+  validates_attachment_content_type :src,
+    content_type: /\Aimage\/.*\Z/,
+    message: "must be an image file (like a jpg, png, gif, or webp)"
   # TODO add size validation
 
   before_destroy :delete_s3_image
