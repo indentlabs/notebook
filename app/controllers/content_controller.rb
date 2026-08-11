@@ -521,14 +521,14 @@ class ContentController < ApplicationController
   end
 
   def upload_files image_uploads_list, content_type, content_id
+    upload_errors = []
+    out_of_bandwidth = false
+
     image_uploads_list.each do |image_data|
       image_size_kb = File.size(image_data.tempfile.path) / 1000.0
 
       if current_user.upload_bandwidth_kb < image_size_kb
-        flash[:alert] = [
-          "At least one of your images failed to upload because you do not have enough upload bandwidth.",
-          "<a href='#{subscription_path}' class='btn white black-text center-align'>Get more</a>"
-        ].map { |p| "<p>#{p}</p>" }.join
+        out_of_bandwidth = true
         next
       else
         current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb - image_size_kb)
@@ -541,7 +541,23 @@ class ContentController < ApplicationController
         src: image_data,
         privacy: 'public'
       )
+
+      next if related_image.persisted?
+
+      # Nothing was stored, so hand the bandwidth we just charged back over.
+      current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb + image_size_kb)
+
+      filename = ERB::Util.html_escape(image_data.original_filename.presence || 'Your image')
+      reason   = related_image.errors[:src].first.presence || "couldn't be uploaded"
+      upload_errors << "#{filename} #{reason}."
     end
+
+    if out_of_bandwidth
+      upload_errors << "At least one of your images failed to upload because you do not have enough upload bandwidth."
+      upload_errors << "<a href='#{subscription_path}' class='btn white black-text center-align'>Get more</a>"
+    end
+
+    flash[:alert] = upload_errors.map { |p| "<p>#{p}</p>" }.join if upload_errors.any?
   end
 
   def destroy
