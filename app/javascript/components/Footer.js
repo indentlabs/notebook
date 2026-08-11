@@ -23,6 +23,10 @@ class Footer extends React.Component {
                 <a href="https://discord.gg/7WCuGxY3AW" target="_blank">
                   <i className="fa fa-comments blue-text"></i> Discord
                 </a>
+                &nbsp;&middot;&nbsp; 
+                <a href="https://stats.uptimerobot.com/wRa8XlrpBJ" target="_blank">
+                  <i className="fa fa-heartbeat green-text"></i> Status
+                </a>
               </div>
             </div>
 
