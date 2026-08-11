@@ -57,12 +57,20 @@ function persistTimelineOrder() {
   if (!eventsContainer) return Promise.resolve();
 
   const timelineId = eventsContainer.dataset.timelineId;
-  const orderedIds = Array.from(eventsContainer.children)
-    .filter(el =>
-      el.classList.contains('timeline-event-container') &&
-      !el.classList.contains('timeline-event-template'))
+  // The event cards are nested inside a wrapper div (the one carrying the
+  // timeline spine), not direct children of the container, so query descendants.
+  // querySelectorAll returns them in document order, which is the visual order.
+  const orderedIds = Array.from(
+      eventsContainer.querySelectorAll('.timeline-event-container:not(.timeline-event-template)'))
     .map(el => el.dataset.eventId)
     .filter(id => id && id !== '-1');
+
+  // Never send an empty list: the server would have nothing to apply and the
+  // move would silently not persist. If we found no cards, something about the
+  // DOM is wrong — fail loudly so the UI shows an error instead of "saved".
+  if (orderedIds.length === 0) {
+    return Promise.reject(new Error('No timeline events found to reorder'));
+  }
 
   return enqueueTimelineReorder(function() {
     return fetch('/internal/reorder/timeline_events', {
@@ -612,8 +620,11 @@ document.addEventListener('DOMContentLoaded', function() {
       emptyState.style.display = 'none';
     }
 
-    // Insert the server-rendered HTML
-    eventsContainer.insertAdjacentHTML('beforeend', html);
+    // Insert the server-rendered HTML inside the events wrapper (the div that
+    // carries the timeline spine) so the new card sits alongside the other
+    // event cards; fall back to the container when the timeline was empty.
+    const eventsList = eventsContainer.querySelector('.timeline-events-list') || eventsContainer;
+    eventsList.insertAdjacentHTML('beforeend', html);
 
     // Get reference to the newly added event
     const newEvent = eventsContainer.querySelector(`[data-event-id="${eventId}"]`);
