@@ -33,6 +33,14 @@ class UniversesController < ContentController
 
       @content_list = @content_list.order(:name)
 
+      # Preload gallery images so preview cards don't query per-page
+      if @content_type.reflect_on_association(:image_uploads)
+        @content_list = @content_list.includes(:image_uploads)
+      end
+      if @content_type.reflect_on_association(:basil_commissions)
+        @content_list = @content_list.includes(basil_commissions: { image_attachment: :blob })
+      end
+
       render :content_list
     end
   end
