@@ -389,12 +389,6 @@ Rails.application.routes.draw do
       post :toggle_favorite, on: :member
     end
     resources :timeline_events do
-      scope '/move', as: :move do
-        get 'up',     to: 'timeline_events#move_up',        on: :member
-        get 'down',   to: 'timeline_events#move_down',      on: :member
-        get 'top',    to: 'timeline_events#move_to_top',    on: :member
-        get 'bottom', to: 'timeline_events#move_to_bottom', on: :member
-      end
       post 'link',              to: 'timeline_events#link_entity',    on: :member
       post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
       post 'tags',              to: 'timeline_events#add_tag',        on: :member, as: :add_tag
@@ -429,7 +423,7 @@ Rails.application.routes.draw do
     patch '/universe_field_update/:field_id', to: 'content#universe_field_update', as: :universe_field_update
     patch '/sort/categories',                 to: 'attribute_categories#sort',     as: :sort_categories_internal
     patch '/sort/fields',                     to: 'attribute_fields#sort',         as: :sort_fields_internal
-    patch '/sort/timeline_events',            to: 'timeline_events#sort',          as: :sort_timeline_events_internal
+    patch '/reorder/timeline_events',         to: 'timeline_events#reorder',       as: :reorder_timeline_events_internal
   end
 
   get 'search/', to: 'search#results'

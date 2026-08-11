@@ -47,7 +47,7 @@ class ContentPageSharesController < ApplicationController
       # Notify the content creator if they're different from the sharer
       content_owner = @share.content_page.user
       if content_owner != current_user && content_owner.notification_updates?
-        content_type_name = @share.content_page.class.name.downcase
+        content_type_name = @share.content_page_type_label
         content_type_color = @share.content_page.class.respond_to?(:color) ? @share.content_page.class.color : 'bg-blue-500'
 
         content_owner.notifications.create(

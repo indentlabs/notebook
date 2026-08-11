@@ -16,8 +16,15 @@
   <!-- Document Info -->
   <div class="flex-1 min-w-0">
     <%= link_to edit_document_path(book_document.document), class: "block group-hover:text-emerald-600 dark:group-hover:text-emerald-400" do %>
-      <h3 class="text-sm font-medium <%= Document.text_color %> line-clamp-2">
-        <%= book_document.document.title.presence || 'Untitled' %>
+      <h3 class="text-sm font-medium <%= Document.text_color %> line-clamp-2 flex items-center">
+        <span><%= book_document.document.title.presence || 'Untitled' %></span>
+        <% if book_document.book.effectively_public? && book_document.document.privacy != 'public' %>
+          <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 flex-shrink-0"
+                title="This document is private, but because this book is public, anyone who can view the book can read it.">
+            <i class="material-icons text-xs mr-1">visibility</i>
+            Readable via book
+          </span>
+        <% end %>
       </h3>
       <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
         <%= number_with_delimiter(book_document.document.word_count) %> <%= 'word'.pluralize(book_document.document.word_count) %>

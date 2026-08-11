@@ -20,6 +20,13 @@ class Book < ApplicationRecord
 
   validates :name, presence: true
 
+  # A book is effectively public when anyone can view it: either its own
+  # privacy is public, or it belongs to a public universe (which makes the
+  # book readable per BookAuthorizer).
+  def effectively_public?
+    privacy == 'public' || universe.try(:privacy) == 'public'
+  end
+
   # Track word count changes for description and blurb fields
   WORD_COUNT_TRACKED_FIELDS = %w[description blurb].freeze
 

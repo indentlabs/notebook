@@ -31,10 +31,9 @@ class ShareCommentsController < ApplicationController
   end
 
   # DELETE /share_comments/1
-  # TODO this
   def destroy
     share = @share_comment.content_page_share
-    unless user_signed_in? && (share.user == current_user || @share_comment.user == current_user)
+    unless user_signed_in? && (share.user == current_user || @share_comment.user == current_user || current_user.site_administrator?)
       return raise "Tried to delete comment without authorization"
     end
 

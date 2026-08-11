@@ -54,7 +54,7 @@
       <div class="flex flex-wrap gap-3 justify-center">
         <% @popular_tags.each do |tag| %>
           <div class="tag-item" data-name="<%= tag.tag.downcase %>" data-usage="<%= tag.usage_count %>">
-            <% tag_path = @user.username.present? ? user_tag_path(username: @user.username, tag_slug: tag.slug) : user_id_tag_path(id: @user.id, tag_slug: tag.slug) %>
+            <% tag_path = user_tag_path_for(@user, tag.slug) %>
             <%= link_to tag_path, {
                        class: "inline-flex items-center px-4 py-2 rounded-full font-medium transition-all duration-200 hover:scale-105 hover:shadow-md tag-link",
                        style: "font-size: #{[12 + (tag.usage_count * 2), 24].min}px;",
@@ -85,8 +85,8 @@
       <div class="divide-y divide-gray-200">
         <% @popular_tags.each do |tag| %>
           <div class="tag-list-item" data-name="<%= tag.tag.downcase %>" data-usage="<%= tag.usage_count %>">
-            <% tag_path = @user.username.present? ? user_tag_path(username: @user.username, tag_slug: tag.slug) : user_id_tag_path(id: @user.id, tag_slug: tag.slug) %>
-            <%= link_to tag_path, 
+            <% tag_path = user_tag_path_for(@user, tag.slug) %>
+            <%= link_to tag_path,
                        { class: "block px-6 py-4 hover:bg-gray-50 transition-colors duration-200" } do %>
               
               <div class="flex items-center justify-between">

@@ -23,11 +23,11 @@
               <span class="text-gray-500 dark:text-gray-400">shared a</span>
               <% if share.content_page.class.respond_to?(:hex_color) %>
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium" style="background-color: <%= share.content_page.class.hex_color %>20; color: <%= share.content_page.class.hex_color %>;">
-                  <%= share.content_page.class.name.downcase %>
+                  <%= share.content_page_type_label %>
                 </span>
               <% else %>
                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                  <%= share.content_page.class.name.downcase %>
+                  <%= share.content_page_type_label %>
                 </span>
               <% end %>
             <% else %>
@@ -58,7 +58,7 @@
         <!-- Dropdown Menu -->
         <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 focus:outline-none z-10 border border-gray-200 dark:border-gray-700">
           <%= link_to "View details", [share.user, share], class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" %>
-          <% if current_user == share.user || current_user.site_administrator? %>
+          <% if current_user == share.user || current_user&.site_administrator? %>
             <%= link_to "Delete", [share.user, share], method: :delete, data: { confirm: "Are you sure?" }, class: "block px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700" %>
           <% end %>
           <% if current_user != share.user %>
@@ -151,11 +151,25 @@
         <div class="space-y-4">
           <% share.share_comments.limit(2).each do |comment| %>
             <div class="flex space-x-3">
-              <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full flex-shrink-0" %>
+              <% if comment.user.present? %>
+                <%= link_to comment.user, class: "flex-shrink-0" do %>
+                  <%= image_tag comment.user.image_url(size: 32), class: "h-8 w-8 rounded-full" %>
+                <% end %>
+              <% else %>
+                <div class="h-8 w-8 rounded-full flex-shrink-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <i class="material-icons text-gray-400 text-sm">person</i>
+                </div>
+              <% end %>
               <div class="flex-1 min-w-0">
                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2">
                   <div class="flex items-center space-x-2 mb-1">
-                    <span class="font-medium text-sm text-gray-900 dark:text-white"><%= comment.user.display_name %></span>
+                    <% if comment.user.present? %>
+                      <%= link_to comment.user, class: "font-medium text-sm text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors" do %>
+                        <%= comment.user.display_name %>
+                      <% end %>
+                    <% else %>
+                      <span class="font-medium text-sm text-gray-500 dark:text-gray-400">Deleted User</span>
+                    <% end %>
                     <span class="text-xs text-gray-500 dark:text-gray-400"><%= time_ago_in_words comment.created_at %> ago</span>
                   </div>
                   <div class="text-sm text-gray-700 dark:text-gray-300">

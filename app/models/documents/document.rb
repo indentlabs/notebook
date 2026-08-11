@@ -65,6 +65,35 @@ class Document < ApplicationRecord
 
   KEYS_TO_TRIGGER_REVISION_ON_CHANGE = %w(title body synopsis notes_text)
 
+  # Books (by the same author) that expose this document to the public:
+  # either the book itself is public, or the book is in a public universe.
+  # Scoped to the document owner's own books so another user's book can
+  # never publish this document.
+  PUBLIC_BOOK_CONDITION = <<~SQL.squish.freeze
+    books.privacy = 'public'
+    OR books.universe_id IN (SELECT universes.id FROM universes WHERE universes.privacy = 'public')
+  SQL
+
+  def containing_public_books
+    books.where(user_id: user_id).where(PUBLIC_BOOK_CONDITION)
+  end
+
+  # Mirrors the universe convention: a public container makes its contents
+  # readable. Purely additive and computed at read time, so toggling the
+  # book (or removing the document from it) instantly reverts visibility.
+  def readable_via_public_book?
+    return false if new_record?
+
+    containing_public_books.exists?
+  end
+
+  # Overrides HasPrivacy#public_content? to reflect *effective* visibility,
+  # including exposure through a public book.
+  def public_content?
+    universe_is_public = universe.present? && universe.public_content?
+    privacy == 'public' || universe_is_public || readable_via_public_book?
+  end
+
   # Archive scopes and methods (matching IsContentPage pattern)
   scope :unarchived, -> { where(archived_at: nil) }
   scope :archived, -> { where.not(archived_at: nil) }

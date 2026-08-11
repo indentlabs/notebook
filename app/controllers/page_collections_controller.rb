@@ -111,6 +111,8 @@ class PageCollectionsController < ApplicationController
   Rails.application.config.content_types[:all].each do |content_type|
     define_method(content_type.name.downcase.pluralize.to_sym) do
       set_page_collection
+      return if performed?
+
       set_submittable_content
 
       @show_page_type_highlight = true
@@ -172,7 +174,9 @@ class PageCollectionsController < ApplicationController
   # AJAX endpoint for infinite scrolling
   def pages
     set_page_collection
-    
+    return if performed?
+
+
     unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
       return render json: { error: "Not authorized" }, status: :unauthorized
     end

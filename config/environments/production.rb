@@ -116,20 +116,23 @@ Rails.application.configure do
   # Devise default url options
   config.action_mailer.default_url_options = { host: 'www.notebook.ai' }
   config.active_job.default_url_options    = { host: 'www.notebook.ai' }
+
+  # Amazon SES, via its SMTP interface.
+  #
+  # SES_SMTP_USERNAME / SES_SMTP_PASSWORD are *SES SMTP credentials*, which are
+  # generated in the SES console and are NOT the same as the AWS_ACCESS_KEY_ID /
+  # AWS_SECRET_ACCESS_KEY pair used for S3 below. Generating SMTP credentials
+  # creates an IAM user with ses:SendRawEmail permission and derives an SMTP
+  # password from its secret key; the two are not interchangeable.
+  config.action_mailer.delivery_method = :smtp
   ActionMailer::Base.smtp_settings = {
-    :address        => "smtp.sendgrid.net",
+    :address        => ENV.fetch('SES_SMTP_ADDRESS', "email-smtp.#{ENV.fetch('AWS_REGION', 'us-east-1')}.amazonaws.com"),
     :port           => 587,
-    :authentication => :plain,
-    :user_name      => ENV['SENDGRID_USERNAME'],
-    :password       => ENV['SENDGRID_PASSWORD'],
-    :domain         => ENV['SENDGRID_DOMAIN'],
+    :authentication => :login,
+    :user_name      => ENV['SES_SMTP_USERNAME'],
+    :password       => ENV['SES_SMTP_PASSWORD'],
     :enable_starttls_auto => true
   }
-
-  # Settings for API key usage:
-  # authentication: :plain,
-  # user_name:      'apikey',
-  # password:       ENV['SENDGRID_API_KEY']
 
   # S3 settings for Paperclip uploads
   config.paperclip_defaults = {

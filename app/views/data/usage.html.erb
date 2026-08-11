@@ -109,7 +109,7 @@
             end
           %>
           <h3 class="text-2xl font-bold mt-1 truncate">
-            <%= most_active_type.pluralize %>
+            <%= most_active_type ? most_active_type.pluralize : "None yet" %>
           </h3>
         </div>
         <div class="bg-white bg-opacity-20 rounded-full p-2">
@@ -117,7 +117,11 @@
         </div>
       </div>
       <div class="mt-4 text-sm text-amber-100">
-        <span class="font-medium"><%= number_with_delimiter most_active_count %> pages</span> of this type
+        <% if most_active_type %>
+          <span class="font-medium"><%= number_with_delimiter most_active_count %> <%= 'page'.pluralize(most_active_count) %></span> of this type
+        <% else %>
+          Create a page to see your most active type
+        <% end %>
       </div>
     </div>
   </div>

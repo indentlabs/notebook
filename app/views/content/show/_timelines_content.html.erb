@@ -168,18 +168,24 @@
     
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
       <!-- Browse timelines -->
-      <%= link_to "/timelines", 
+      <%= link_to timelines_path,
                   class: "inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
         <i class="material-icons text-lg mr-2">explore</i>
         Browse Timelines
       <% end %>
-      
-      <!-- Create timeline (if user can) -->
-      <% if current_user %>
-        <%= link_to "/timelines/new", 
+
+      <!-- Create timeline, or upgrade for users whose plan can't -->
+      <% if current_user&.can_create?(Timeline) %>
+        <%= link_to new_timeline_path,
                     class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white #{content.class_color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" do %>
           <i class="material-icons text-lg mr-2">add</i>
           Create Timeline
+        <% end %>
+      <% elsif current_user %>
+        <%= link_to subscription_path,
+                    class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-400 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" do %>
+          <i class="material-icons text-lg mr-2">star</i>
+          Upgrade to create Timelines
         <% end %>
       <% end %>
     </div>

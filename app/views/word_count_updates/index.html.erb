@@ -160,7 +160,7 @@
                           <% if update.is_manual_adjustment? %>
                             <p class="text-sm font-medium text-gray-900 dark:text-white truncate">Manual Adjustment</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                              Added on <%= (update.created_at.in_time_zone(current_user.timezone || 'UTC') rescue update.created_at).strftime("%b %e, %Y") %>
+                              Added on <%= (update.created_at.in_time_zone(current_user.time_zone || 'UTC') rescue update.created_at).strftime("%b %e, %Y") %>
                             </p>
                           <% else %>
                             <% entity = entity_class.find_by(id: update.entity_id) if entity_class %>
@@ -185,14 +185,15 @@
                       <div class="flex items-center space-x-4">
                         <!-- Value Display -->
                         <div x-show="!editing" class="text-right">
+                          <% word_count = update.word_count || 0 %>
                           <% if update.is_manual_adjustment? %>
-                            <div class="text-sm font-bold <%= update.word_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
-                              <%= update.word_count > 0 ? '+' : '' %><%= number_with_delimiter update.word_count %> words
+                            <div class="text-sm font-bold <%= word_count > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+                              <%= word_count > 0 ? '+' : '' %><%= number_with_delimiter word_count %> words
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">delta</div>
                           <% else %>
                             <div class="text-sm font-bold text-gray-700 dark:text-gray-300">
-                              <%= number_with_delimiter update.word_count %>
+                              <%= number_with_delimiter word_count %>
                             </div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">total document size</div>
                           <% end %>

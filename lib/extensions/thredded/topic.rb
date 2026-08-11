@@ -13,6 +13,10 @@ module Extensions
 
         acts_as_paranoid
 
+        def self.content_name
+          'topic'
+        end
+
         def self.icon
           'forum'
         end

@@ -676,14 +676,18 @@ class BasilController < ApplicationController
     # Prepare our prompt components
     prompt_components = []
     commission_params.fetch(:field).each do |field_id, field_data|
-      label      = field_data[:label].strip
-      value      = field_data[:value].gsub(',',  '')
+      label      = field_data[:label].to_s.strip
+      value      = field_data[:value].to_s
+                                     .gsub(',',  '')
                                      .gsub("\r", '')
                                      .gsub('(',  '')
                                      .gsub(')',  '')
                                      .gsub("\n", ' ')
                                      .strip
       importance = field_data[:importance].to_f
+
+      # Skip fields that didn't submit a label or value at all
+      next if label.empty? && value.empty?
 
       # Field skips
       next if label_value_pairs_to_skip_entirely.include?([label.downcase, value.downcase])

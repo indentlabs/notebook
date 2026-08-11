@@ -32,8 +32,12 @@ class UsersController < ApplicationController
                            .order(:name)
                            .paginate(page: params[:page], per_page: 20)
 
+      # Preload the overview field values backing #description in one batch so
+      # rendering each card doesn't run its own attribute lookups
+      content_type.preload_overview_field_values(@content_list.to_a)
+
       # Only load public images for the content being displayed
-      content_ids = @content_list.pluck(:id)
+      content_ids = @content_list.map(&:id)
       @random_image_including_private_pool_cache = ImageUpload
         .where(user_id: @user.id, content_type: content_type.name, content_id: content_ids)
         .where(privacy: 'public')
