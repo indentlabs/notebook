@@ -1,0 +1,27 @@
+<% if configured_oauth_providers.any? %>
+  <div class="oauth-buttons">
+    <% if configured_oauth_providers.include?(:google_oauth2) %>
+      <%= button_to omniauth_authorize_path(:user, :google_oauth2),
+            form_class: 'w-full mb-3',
+            class: 'w-full inline-flex items-center justify-center px-4 py-3 bg-white text-blueGray-700 text-sm font-bold uppercase rounded shadow hover:shadow-md border border-blueGray-200 outline-none focus:outline-none ease-linear transition-all duration-150 cursor-pointer' do %>
+        <span class="w-5 h-5 mr-2 flex-shrink-0"><%= render 'devise/shared/provider_icon', provider: :google_oauth2 %></span>
+        Continue with Google
+      <% end %>
+    <% end %>
+
+    <% if configured_oauth_providers.include?(:discord) %>
+      <%= button_to omniauth_authorize_path(:user, :discord),
+            form_class: 'w-full mb-3',
+            class: 'w-full inline-flex items-center justify-center px-4 py-3 bg-[#5865F2] text-white text-sm font-bold uppercase rounded shadow hover:shadow-md hover:bg-[#4752c4] outline-none focus:outline-none ease-linear transition-all duration-150 cursor-pointer' do %>
+        <span class="w-5 h-5 mr-2 flex-shrink-0"><%= render 'devise/shared/provider_icon', provider: :discord, fill: 'currentColor' %></span>
+        Continue with Discord
+      <% end %>
+    <% end %>
+
+    <div class="flex items-center my-4">
+      <hr class="flex-1 border-b-1 border-blueGray-300">
+      <span class="px-3 text-xs uppercase text-blueGray-400 font-semibold">or</span>
+      <hr class="flex-1 border-b-1 border-blueGray-300">
+    </div>
+  </div>
+<% end %>
