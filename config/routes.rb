@@ -98,7 +98,12 @@ Rails.application.routes.draw do
   post 'customization/toggle_content_type'
 
   # User-centric stuff
-  devise_for :users, :controllers => { registrations: 'registrations', sessions: 'sessions' }
+  devise_for :users, :controllers => {
+    registrations: 'registrations',
+    sessions: 'sessions',
+    omniauth_callbacks: 'omniauth_callbacks'
+  }
+  resources :user_authentications, only: [:destroy]
   resources :users do
     devise_scope :user do
       get 'preferences',  to: 'registrations#preferences'
