@@ -50,6 +50,12 @@ class User < ApplicationRecord
   # be safely matched to an existing account by email alone.
   EMAIL_VERIFIED_OAUTH_PROVIDERS = %w(google_oauth2 discord).freeze
 
+  # Set when from_omniauth creates a brand-new account, so callers can run
+  # new-account onboarding. (previously_new_record? can't be used for this:
+  # after_create hooks like initialize_secure_code update the row again,
+  # which resets it.)
+  attr_accessor :new_oauth_signup
+
   # Finds (or creates) the user for an OmniAuth callback. Returns a persisted
   # user with the authentication linked, or an unpersisted user (with errors)
   # when account creation fails (e.g. the provider sent no email).
@@ -71,7 +77,7 @@ class User < ApplicationRecord
         password:                   Devise.friendly_token[0, 20],
         password_automatically_set: true
       )
-      user.save
+      user.new_oauth_signup = user.save
     end
 
     user.user_authentications.create(provider: auth.provider, uid: auth.uid) if user.persisted?

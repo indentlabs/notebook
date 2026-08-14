@@ -6,10 +6,13 @@ class UserOnboardingService < Service
   def self.link_pending_contributor_invites(user)
     return unless user.persisted?
 
-    potential_contributor_records = Contributor.where(email: user.email.downcase, user_id: nil)
+    # Load the records up front: after update_all below, the user_id: nil
+    # condition no longer matches them, so re-running the query would find
+    # nothing to notify about.
+    potential_contributor_records = Contributor.where(email: user.email.downcase, user_id: nil).to_a
     return unless potential_contributor_records.any?
 
-    potential_contributor_records.update_all(user_id: user.id)
+    Contributor.where(id: potential_contributor_records.map(&:id)).update_all(user_id: user.id)
 
     # Create a notification letting the user know about each collaboration!
     potential_contributor_records.each do |contributorship|
