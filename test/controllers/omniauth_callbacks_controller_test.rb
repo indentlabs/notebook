@@ -26,15 +26,18 @@ class OmniauthCallbacksControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
   end
 
+  def assert_signed_in(user)
+    assert_equal [user.id], session['warden.user.user.key']&.first,
+      "Expected #{user.email} to be signed in"
+  end
+
   test "signs in a user whose authentication is already linked" do
     authentication = user_authentications(:user_one_google)
     mock_oauth(uid: authentication.uid, email: 'anything@example.com')
 
     complete_oauth_flow
     assert_redirected_to root_path
-
-    get user_more_actions_path(authentication.user)
-    assert_response :success
+    assert_signed_in authentication.user
   end
 
   test "signs in an existing user by verified email and links the authentication" do
@@ -46,6 +49,7 @@ class OmniauthCallbacksControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to root_path
+    assert_signed_in user
     assert user.user_authentications.exists?(provider: 'google_oauth2', uid: 'fresh-google-uid')
   end
 
@@ -60,6 +64,7 @@ class OmniauthCallbacksControllerTest < ActionDispatch::IntegrationTest
 
     new_user = User.find_by(email: 'brand.new@example.com')
     assert new_user.present?
+    assert_signed_in new_user
     assert new_user.password_automatically_set?
     assert new_user.user_authentications.exists?(provider: 'google_oauth2', uid: 'new-user-uid')
   end

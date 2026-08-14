@@ -19,7 +19,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     user = User.from_omniauth(auth)
 
     if user.persisted?
-      if user.previously_new_record?
+      if user.new_oauth_signup
         UserOnboardingService.link_pending_contributor_invites(user)
         UserOnboardingService.record_referral(user, session.delete(:referral))
       end
