@@ -80,8 +80,10 @@ class ContentSerializer
           icon:   category.icon,
           hidden: !!category.hidden,
           fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
-            # Check if this is a private field (e.g., private_notes)
-            is_private_field = field.old_column_source == 'private_notes'
+            # Private fields are marked with the `privacy` column from the template
+            # editor. `private_notes` predates that column, so it stays private
+            # regardless of what its column says.
+            is_private_field = field.private? || field.old_column_source == 'private_notes'
             # Only the content owner can see private fields
             viewer_is_owner = self.viewing_user.present? && content.user_id == self.viewing_user.id
 

@@ -413,6 +413,7 @@ Rails.application.routes.draw do
     # Attributes
     get ':content_type/attributes', to: 'content#attributes', as: :attribute_customization
     get ':content_type/template/export', to: 'content#export_template', as: :export_template
+    post ':content_type/template/import', to: 'content#import_template', as: :import_template
     delete ':content_type/template/reset', to: 'content#reset_template', as: :reset_template
   end
 

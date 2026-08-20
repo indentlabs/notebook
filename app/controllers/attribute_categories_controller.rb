@@ -92,7 +92,7 @@ class AttributeCategoriesController < ContentController
     respond_to do |format|
       format.html { 
         redirect_to(
-          attribute_customization_tailwind_path(content_type: category_entity_type),
+          attribute_customization_path(content_type: category_entity_type),
           notice: "#{category_label} category deleted!"
         )
       }
@@ -164,7 +164,7 @@ class AttributeCategoriesController < ContentController
   def successful_response(record, notice)
     respond_to do |format|
       format.html { 
-        redirect_to attribute_customization_tailwind_path(content_type: record.entity_type), notice: notice 
+        redirect_to attribute_customization_path(content_type: record.entity_type), notice: notice 
       }
       format.json { 
         response_data = { 

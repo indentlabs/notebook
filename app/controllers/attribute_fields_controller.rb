@@ -42,7 +42,7 @@ class AttributeFieldsController < ContentController
     # Respond with success
     respond_to do |format|
       format.html { 
-        redirect_to attribute_customization_tailwind_path(content_type: related_category.entity_type), 
+        redirect_to attribute_customization_path(content_type: related_category.entity_type), 
                    notice: "#{field_label} field deleted successfully" 
       }
       format.json { 
@@ -82,10 +82,17 @@ class AttributeFieldsController < ContentController
       cleaned_params[:field_options][:linkable_types] = cleaned_params[:field_options][:linkable_types].reject(&:blank?)
     end
 
+    # Privacy is a free-text column, so only ever let it become one of the two
+    # values the editor knows how to render.
+    if cleaned_params.key?(:privacy)
+      cleaned_params[:privacy] = cleaned_params[:privacy].to_s == 'private' ? 'private' : 'public'
+    end
+
     # Track what actually changed
     original_hidden = @attribute_field.hidden
     original_position = @attribute_field.position
-    
+    original_privacy = @attribute_field.privacy
+
     if @attribute_field.update(cleaned_params.merge({ migrated_from_legacy: true }))
       @content = @attribute_field
       
@@ -95,6 +102,12 @@ class AttributeFieldsController < ContentController
           "#{@attribute_field.label} field is now hidden"
         else
           "#{@attribute_field.label} field is now visible"
+        end
+      elsif @attribute_field.privacy != original_privacy
+        if @attribute_field.private?
+          "#{@attribute_field.label} is now private to you"
+        else
+          "#{@attribute_field.label} is now visible on shared pages"
         end
       elsif @attribute_field.position != original_position
         "#{@attribute_field.label} field moved to position #{@attribute_field.position}"
@@ -209,7 +222,7 @@ class AttributeFieldsController < ContentController
   def content_creation_redirect_url
     if @content.present?
       category = @content.attribute_category
-      attribute_customization_tailwind_path(content_type: category.entity_type)
+      attribute_customization_path(content_type: category.entity_type)
     else
       :back
     end
@@ -218,7 +231,7 @@ class AttributeFieldsController < ContentController
   def successful_response(record, notice)
     respond_to do |format|
       format.html { 
-        redirect_to attribute_customization_tailwind_path(content_type: record.attribute_category.entity_type), notice: notice 
+        redirect_to attribute_customization_path(content_type: record.attribute_category.entity_type), notice: notice 
       }
       format.json { 
         # Get the content type class for the partial
@@ -283,6 +296,7 @@ class AttributeFieldsController < ContentController
       :attribute_category,
       :name, :field_type,
       :label, :description,
+      :privacy,
       :entity_type,
       :attribute_category_id,
       :hidden, :position,

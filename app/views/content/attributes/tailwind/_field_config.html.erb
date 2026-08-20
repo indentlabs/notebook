@@ -391,12 +391,14 @@
               </div>
             </div>
             <div class="flex items-center space-x-2 mb-3">
-              <input type="checkbox" 
-                     <%= "checked" if field.label.start_with?('Private') %>
-                     id="field_private"
-                     class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
+              <input type="checkbox"
+                     <%= "checked" if field.private? %>
+                     id="field_private_<%= field.id %>"
+                     data-private="<%= field.private? %>"
+                     @change="toggleFieldPrivacy(<%= field.id %>, $el.checked)"
+                     class="field-privacy-toggle h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
                      style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
-              <label for="field_private" class="text-sm text-gray-700 dark:text-gray-300">Private: For my eyes only</label>
+              <label for="field_private_<%= field.id %>" class="text-sm text-gray-700 dark:text-gray-300">Private: For my eyes only</label>
             </div>
             <p class="text-xs text-gray-500 dark:text-gray-400">Private fields (and their answers) are only visible to you, even when your pages are shared publicly.</p>
           </div>

@@ -91,8 +91,8 @@
           </div>
         </div>
         
-        <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden" x-data="{ importOpen: false }">
-          <button @click="importOpen = !importOpen" 
+        <div class="border border-gray-200 dark:border-slate-600 rounded-lg overflow-hidden" x-data="templateImportComponent()">
+          <button @click="importOpen = !importOpen"
                   class="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-left">
             <div class="flex items-center">
               <i class="material-icons text-gray-600 dark:text-gray-400 mr-3">file_upload</i>
@@ -111,21 +111,132 @@
                x-transition:leave="transition ease-in duration-150"
                x-transition:leave-start="opacity-100 transform scale-100"
                x-transition:leave-end="opacity-0 transform scale-95"
-               class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 p-4">
-            <div class="text-center py-6">
-              <div class="text-gray-400 dark:text-gray-500 mb-3">
-                <i class="material-icons text-4xl">construction</i>
-              </div>
-              <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Coming Soon!</h4>
-              <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                Template import functionality is currently in development. Soon you'll be able to:
+               class="border-t border-gray-200 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 p-4 space-y-4">
+
+            <!-- File Picker -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template file</label>
+              <input type="file"
+                     accept=".yml,.yaml,.json,.csv"
+                     @change="selectFile($event)"
+                     class="template-import-file block w-full text-sm text-gray-700 dark:text-gray-300">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Accepts the YAML, JSON, and CSV files produced by Export Template.
               </p>
-              <ul class="text-sm text-gray-600 dark:text-gray-300 text-left space-y-1 mb-4 max-w-md mx-auto">
-                <li>• Import YAML/JSON template files</li>
-                <li>• Share templates with other users</li>
-                <li>• Load community-created templates</li>
-                <li>• Restore from template backups</li>
-              </ul>
+            </div>
+
+            <!-- Import Mode -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">How should we apply it?</label>
+              <div class="space-y-2">
+                <label class="flex items-start p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md cursor-pointer">
+                  <input type="radio" name="template_import_mode" value="merge" x-model="mode" @change="analysis = null"
+                         class="h-4 w-4 mt-0.5 mr-2 border-gray-300 dark:border-slate-500"
+                         style="color: var(--content-type-color);">
+                  <span>
+                    <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">Merge</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">Add anything missing and update what matches. Nothing is deleted.</span>
+                  </span>
+                </label>
+                <label class="flex items-start p-2 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-md cursor-pointer">
+                  <input type="radio" name="template_import_mode" value="replace" x-model="mode" @change="analysis = null"
+                         class="h-4 w-4 mt-0.5 mr-2 border-gray-300 dark:border-slate-500"
+                         style="color: var(--content-type-color);">
+                  <span>
+                    <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">Replace</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400">Make this template match the file exactly. Fields you have that aren't in the file are deleted.</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Loading -->
+            <div x-show="loading" class="text-center py-4">
+              <div class="animate-spin rounded-full h-6 w-6 border-b-2 mx-auto mb-2" style="border-color: var(--content-type-color);"></div>
+              <p class="text-sm text-gray-600 dark:text-gray-300" x-text="importing ? 'Importing template...' : 'Reading template...'"></p>
+            </div>
+
+            <!-- Error -->
+            <div x-show="error" class="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md p-3">
+              <p class="text-sm text-red-800 dark:text-red-200" x-text="error"></p>
+            </div>
+
+            <!-- Preview -->
+            <div x-show="analysis && !loading" class="space-y-3">
+              <div class="bg-white dark:bg-slate-800 rounded-md p-3 border border-gray-200 dark:border-slate-600">
+                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center">
+                  <i class="material-icons text-gray-600 dark:text-gray-400 mr-2 text-lg">preview</i>
+                  Import Preview
+                </h4>
+                <div class="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                  <p x-show="analysis?.counts?.categories_created > 0">
+                    <strong x-text="analysis?.counts?.categories_created"></strong> new categories
+                  </p>
+                  <p x-show="analysis?.counts?.fields_created > 0">
+                    <strong x-text="analysis?.counts?.fields_created"></strong> new fields
+                  </p>
+                  <p x-show="analysis?.counts?.categories_updated > 0 || analysis?.counts?.fields_updated > 0">
+                    <strong x-text="(analysis?.counts?.categories_updated || 0) + (analysis?.counts?.fields_updated || 0)"></strong> existing items updated
+                  </p>
+                  <p x-show="analysis?.counts?.fields_removed > 0" class="text-red-700 dark:text-red-300 font-medium">
+                    <strong x-text="analysis?.counts?.fields_removed"></strong> fields removed
+                  </p>
+                  <p x-show="isNoop()" class="text-gray-500 dark:text-gray-400">
+                    This file already matches your template — nothing would change.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Warnings -->
+              <template x-for="warning in (analysis?.warnings || [])" :key="warning">
+                <div class="bg-amber-50 dark:bg-slate-800 border border-amber-200 dark:border-amber-700 rounded-md p-3">
+                  <p class="text-sm text-amber-800 dark:text-amber-200" x-text="warning"></p>
+                </div>
+              </template>
+
+              <!-- Data loss -->
+              <div x-show="analysis?.filled_answers_at_risk > 0"
+                   class="bg-red-50 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded-md p-3">
+                <h5 class="font-medium text-red-900 dark:text-red-100 mb-1">⚠️ Data Loss Warning</h5>
+                <p class="text-sm text-red-800 dark:text-red-200">
+                  <strong x-text="analysis?.filled_answers_at_risk"></strong> written answers across
+                  <strong x-text="analysis?.affected_pages_count"></strong> pages will be permanently deleted.
+                </p>
+                <div class="text-xs text-red-800 dark:text-red-200 mt-2 space-y-0.5 max-h-32 overflow-y-auto">
+                  <template x-for="removal in (analysis?.fields_to_remove || [])" :key="removal.category + removal.field">
+                    <p x-show="removal.filled_count > 0">
+                      <strong x-text="removal.category"></strong> → <span x-text="removal.field"></span>
+                      (<span x-text="removal.filled_count"></span> answers)
+                    </p>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end space-x-2">
+              <button type="button" @click="reset()"
+                      class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600">
+                Cancel
+              </button>
+              <button type="button"
+                      x-show="!analysis"
+                      @click="analyzeImport()"
+                      :disabled="!file || loading"
+                      :class="(!file || loading) ? 'opacity-50 cursor-not-allowed' : ''"
+                      class="px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white focus:outline-none"
+                      style="background-color: var(--content-type-color);">
+                Preview Import
+              </button>
+              <button type="button"
+                      x-show="analysis"
+                      @click="performImport()"
+                      :disabled="loading || isNoop()"
+                      :class="(loading || isNoop()) ? 'opacity-50 cursor-not-allowed' : ''"
+                      class="px-3 py-1.5 border border-transparent rounded-md text-sm font-medium text-white focus:outline-none"
+                      :style="analysis?.filled_answers_at_risk > 0 ? 'background-color: #dc2626;' : 'background-color: var(--content-type-color);'">
+                <span x-text="analysis?.filled_answers_at_risk > 0 ? 'Import & Delete Answers' : 'Apply Import'"></span>
+              </button>
             </div>
           </div>
         </div>

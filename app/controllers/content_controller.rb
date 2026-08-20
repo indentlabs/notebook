@@ -12,7 +12,7 @@ class ContentController < ApplicationController
 
   before_action :cache_linkable_content_for_each_content_type, only: [:new, :show, :edit, :index]
 
-  before_action :set_attributes_content_type, only: [:attributes, :export_template, :reset_template]
+  before_action :set_attributes_content_type, only: [:attributes, :export_template, :import_template, :reset_template]
 
   before_action :set_navbar_color, except: [:api_sort]
   before_action :set_navbar_actions, except: [:deleted, :api_sort]
@@ -628,6 +628,39 @@ class ContentController < ApplicationController
     end
   end
   
+  def import_template
+    upload = params[:template_file]
+
+    if upload.blank? || !upload.respond_to?(:read)
+      return render json: { success: false, error: 'Choose a template file to import.' },
+                    status: :unprocessable_entity
+    end
+
+    if upload.size.to_i > TemplateImportService::MAX_CONTENT_LENGTH
+      return render json: {
+        success: false,
+        error: "That file is too large (max #{TemplateImportService::MAX_CONTENT_LENGTH / 1.megabyte}MB)."
+      }, status: :unprocessable_entity
+    end
+
+    service = TemplateImportService.new(
+      current_user,
+      @content_type,
+      upload.read,
+      filename: upload.original_filename
+    )
+
+    mode = params[:mode].presence || 'merge'
+
+    result = if params[:confirm] == 'true'
+      service.import!(mode: mode)
+    else
+      service.analyze(mode: mode)
+    end
+
+    render json: result, status: result[:success] ? :ok : :unprocessable_entity
+  end
+
   def reset_template
     service = TemplateResetService.new(current_user, @content_type)
     

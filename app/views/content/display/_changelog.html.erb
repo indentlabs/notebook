@@ -38,7 +38,7 @@
           new_value = change.second.blank? ? ContentChangeEvent::BLANK_PLACEHOLDER : change.second.to_s
 
           visible_change = true
-          if related_field.label.start_with?('Private') # todo actual privacy flag on attributes
+          if related_field.private? || related_field.label.start_with?('Private')
             visible_change = user_signed_in? && (
               (content.raw_model.is_a?(Universe) && content.user == current_user) ||
               (content.respond_to?(:universe) && content.universe      && content.universe.user == current_user) ||

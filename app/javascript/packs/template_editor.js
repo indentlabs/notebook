@@ -179,6 +179,104 @@ window.templateResetComponent = function() {
   };
 };
 
+// Template Import Component function for Alpine.js (define before DOM ready)
+window.templateImportComponent = function() {
+  return {
+    importOpen: false,
+    file: null,
+    mode: 'merge',
+    analysis: null,
+    error: null,
+    loading: false,
+    importing: false,
+
+    selectFile(event) {
+      this.file = event.target.files[0] || null;
+      this.analysis = null;
+      this.error = null;
+    },
+
+    reset() {
+      this.importOpen = false;
+      this.file = null;
+      this.analysis = null;
+      this.error = null;
+      this.loading = false;
+      this.importing = false;
+      const input = this.$el.querySelector('input[type="file"]');
+      if (input) input.value = '';
+    },
+
+    // True when the preview says the file wouldn't change anything.
+    isNoop() {
+      const counts = this.analysis && this.analysis.counts;
+      if (!counts) return false;
+      return Object.values(counts).every(count => !count);
+    },
+
+    submit(confirm) {
+      const contentType = document.querySelector('.attributes-editor').dataset.contentType;
+      const body = new FormData();
+      body.append('template_file', this.file);
+      body.append('mode', this.mode);
+      if (confirm) body.append('confirm', 'true');
+
+      this.loading = true;
+      this.importing = confirm;
+      this.error = null;
+
+      return fetch(`/plan/${contentType}/template/import`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Accept': 'application/json'
+        },
+        body: body
+      })
+      .then(response => response.json())
+      .finally(() => {
+        this.loading = false;
+        this.importing = false;
+      });
+    },
+
+    analyzeImport() {
+      if (!this.file) return;
+
+      this.submit(false)
+        .then(data => {
+          if (data.success) {
+            this.analysis = data;
+          } else {
+            this.error = data.error || 'We could not read that template file.';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.error = 'We could not read that template file.';
+        });
+    },
+
+    performImport() {
+      if (!this.file || this.isNoop()) return;
+
+      this.submit(true)
+        .then(data => {
+          if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            this.error = data.error || 'Failed to import template';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          this.error = 'Failed to import template';
+        });
+    }
+  };
+};
+
 // Initialize Alpine component data (global function)
 window.initTemplateEditor = function() {
   return {
@@ -1689,6 +1787,46 @@ function showSuggestionsLoadingAnimation(container) {
   container.innerHTML = '';
   container.appendChild(loadingIndicator);
 }
+
+// Privacy toggle for a single field
+window.toggleFieldPrivacy = function(fieldId, isPrivate) {
+  const checkbox = document.getElementById(`field_private_${fieldId}`);
+
+  if (checkbox) checkbox.disabled = true;
+
+  fetch(`/plan/attribute_fields/${fieldId}`, {
+    method: 'PUT',
+    headers: {
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      attribute_field: {
+        privacy: isPrivate ? 'private' : 'public'
+      }
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success || data.message) {
+      if (checkbox) checkbox.dataset.private = isPrivate;
+      showNotification(data.message || 'Field privacy updated', 'success');
+    } else {
+      // Roll the checkbox back so it keeps showing the saved state
+      if (checkbox) checkbox.checked = !isPrivate;
+      showNotification(data.error || 'Failed to update field privacy', 'error');
+    }
+  })
+  .catch(error => {
+    console.error('Error toggling field privacy:', error);
+    if (checkbox) checkbox.checked = !isPrivate;
+    showNotification('Failed to update field privacy', 'error');
+  })
+  .finally(() => {
+    if (checkbox) checkbox.disabled = false;
+  });
+};
 
 // Archive/restore functionality for fields
 window.toggleFieldArchive = function(fieldId, isArchived) {
