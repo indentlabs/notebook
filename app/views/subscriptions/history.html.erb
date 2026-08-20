@@ -180,7 +180,7 @@
                         action_color = line_item.amount < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-gray-200'
                         
                         if line_item.description.nil?
-                          plan_name = line_item.plan&.nickname || line_item.plan&.id || 'subscription'
+                          plan_name = line_item.try(:plan)&.nickname || line_item.try(:plan)&.id || 'subscription'
                           description = "#{plan_name.titleize} (#{Time.at(line_item.period.start).strftime('%b %d')} - #{Time.at(line_item.period.end).strftime('%b %d, %Y')})"
                         else
                           description = line_item.description
@@ -197,7 +197,7 @@
                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                   <%= number_to_currency(invoice.amount_due / 100) %>
                 </div>
-                <% if invoice.paid %>
+                <% if invoice.status == 'paid' %>
                   <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">
                     Paid
                   </span>
