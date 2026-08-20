@@ -19,8 +19,8 @@ class TimelineAuthorizer < ContentAuthorizer
 
   def updatable_by?(user)
     return true if user && resource.user_id == user.id
-    return true if user && resource.universe.present? && resource.universe.contributors.pluck(:user_id).include?(user.id)
-    
+    return true if user && resource.universe.present? && resource.universe.contributors.where(role: Contributor::EDITING_ROLES).pluck(:user_id).include?(user.id)
+
     return false
   end
 

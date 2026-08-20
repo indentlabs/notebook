@@ -11,21 +11,56 @@ class ContributorsController < ApplicationController
     end
     
     email = params[:contributor][:email]&.downcase
-    
+    role  = params[:contributor][:role]
+    role  = 'full' unless Contributor::ROLES.key?(role)
+
     # Check if this email is already a contributor
     if universe.contributors.exists?(email: email)
       redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'This user is already a contributor.'
       return
     end
-    
+
     # Use the ContributorService to handle the invitation
-    ContributorService.invite_contributor_to_universe(universe: universe, email: email)
-    
+    ContributorService.invite_contributor_to_universe(universe: universe, email: email, role: role)
+
     redirect_to edit_universe_path(universe, anchor: 'contributors'), notice: 'Contributor invitation sent!'
   rescue StandardError => e
     redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'Failed to add contributor. Please try again.'
   end
-  
+
+  def update
+    contributor = Contributor.find(params[:id])
+    universe = contributor.universe
+
+    # Only the universe owner can change contributor roles
+    unless universe.user_id == current_user.id
+      redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'Only the universe owner can change contributor roles.'
+      return
+    end
+
+    role = params.dig(:contributor, :role)
+    unless Contributor::ROLES.key?(role)
+      redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'That is not a valid contributor role.'
+      return
+    end
+
+    if contributor.update(role: role)
+      # Let the contributor know their access level changed
+      contributor.user.notifications.create(
+        message_html:     "<div>Your role in the <span class='#{Universe.text_color}'>#{universe.name}</span> universe has been changed to <strong>#{contributor.role_label}</strong>.</div>",
+        icon:             Universe.icon,
+        icon_color:       Universe.color,
+        happened_at:      DateTime.current,
+        passthrough_link: Rails.application.routes.url_helpers.universe_path(universe),
+        reference_code:   'contributor-role-changed'
+      ) if contributor.user.present?
+
+      redirect_to edit_universe_path(universe, anchor: 'contributors'), notice: "#{contributor.user&.display_name || contributor.email} is now a #{contributor.role_label}."
+    else
+      redirect_to edit_universe_path(universe, anchor: 'contributors'), alert: 'Failed to update contributor role. Please try again.'
+    end
+  end
+
   def destroy
     contributor = Contributor.find(params[:id])
     relevant_universe = Universe.find(contributor.universe_id)

@@ -131,12 +131,27 @@ class User < ApplicationRecord
     @cached_user_contributable_universes ||= Universe.where(id: contributable_universe_ids)
   end
 
+  # Universes this user has any level of contributor access to (read access at minimum)
   def contributable_universe_ids
     # TODO: email confirmation needs to happen for data safety / privacy (only verified emails)
     @contributable_universe_ids ||= Contributor.where('email = ? OR user_id = ?', self.email, self.id).pluck(:universe_id)
     @contributable_universe_ids +=  Contributor.where(universe_id: my_universe_ids).pluck(:universe_id)
 
     @contributable_universe_ids.uniq
+  end
+
+  # Universes this user can edit existing content in (full contributors and editors)
+  def editable_universe_ids
+    @editable_universe_ids ||= contributor_universe_ids_with_roles(Contributor::EDITING_ROLES)
+  end
+
+  # Universes this user can create new content in (full contributors only)
+  def creatable_universe_ids
+    @creatable_universe_ids ||= contributor_universe_ids_with_roles(Contributor::CREATING_ROLES)
+  end
+
+  def creatable_universes
+    @cached_user_creatable_universes ||= Universe.where(id: creatable_universe_ids)
   end
 
   # TODO: rename this to #{content_type}_shared_with_me
@@ -414,6 +429,17 @@ class User < ApplicationRecord
   end
 
   private
+
+  # Universe IDs where this user is a contributor with one of the given roles,
+  # plus universes this user owns that have contributors (owners retain full access)
+  def contributor_universe_ids_with_roles(roles)
+    ids = Contributor.where('email = ? OR user_id = ?', self.email, self.id)
+                     .where(role: roles)
+                     .pluck(:universe_id)
+    ids += Contributor.where(universe_id: my_universe_ids).pluck(:universe_id)
+
+    ids.uniq
+  end
 
   # Attributes that are non-public, and should be blacklisted from any public
   # export (ex. in the JSON api, or SEO meta info about the user)

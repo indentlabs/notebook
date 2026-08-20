@@ -12,8 +12,19 @@ class PermissionService < Service
     content.respond_to?(:universe) && content.universe.present? && user_owns_content?(user: user, content: content.universe)
   end
 
+  # Read-level access: the user is a contributor (of any role) to this universe
   def self.user_can_contribute_to_universe?(user:, universe:)
     user.present? && user.contributable_universes.pluck(:id).include?(universe.id)
+  end
+
+  # Edit-level access: the user is a Full Contributor or Editor in this universe
+  def self.user_can_edit_universe_content?(user:, universe:)
+    user.present? && user.editable_universe_ids.include?(universe.id)
+  end
+
+  # Create-level access: the user is a Full Contributor in this universe
+  def self.user_can_create_universe_content?(user:, universe:)
+    user.present? && user.creatable_universe_ids.include?(universe.id)
   end
 
   def self.content_is_public?(content:)
@@ -24,10 +35,11 @@ class PermissionService < Service
     content.respond_to?(:universe) && content.universe.present? && self.content_is_public?(content: content.universe)
   end
 
+  # Read-level access to the universe containing this content (contributor of any role)
   def self.user_can_contribute_to_containing_universe?(user:, content:)
     # Early return if no user is provided
     return false if user.nil?
-    
+
     # Special case for attribute-related content
     return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
 
@@ -36,6 +48,21 @@ class PermissionService < Service
 
     # Check if user can contribute to this universe
     return true if user.respond_to?(:contributable_universe_ids) && user.contributable_universe_ids.include?(content.universe_id)
+    return true if user.respond_to?(:universes) && user.universes.pluck(:id).include?(content.universe_id)
+
+    return false
+  end
+
+  # Edit-level access to the universe containing this content (Full Contributor or Editor)
+  def self.user_can_edit_containing_universe_content?(user:, content:)
+    return false if user.nil?
+
+    # Special case for attribute-related content, mirroring user_can_contribute_to_containing_universe?
+    return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
+
+    return false if content.universe_id.nil?
+
+    return true if user.respond_to?(:editable_universe_ids) && user.editable_universe_ids.include?(content.universe_id)
     return true if user.respond_to?(:universes) && user.universes.pluck(:id).include?(content.universe_id)
 
     return false
@@ -61,7 +88,9 @@ class PermissionService < Service
   end
 
   def self.user_can_collaborate_in_universe_that_allows_extended_content?(user:)
-    user.contributable_universes.any? do |universe|
+    # Only universes the user can create new content in count here, since this
+    # permission gates creating extended content types
+    user.creatable_universes.any? do |universe|
       universe.user.on_premium_plan?
 #      billing_plan_allows_extended_content?(user: universe.user) || user_has_active_promotion_for_this_content_type(user: universe.user, content_type: Universe)
     end
@@ -73,7 +102,7 @@ class PermissionService < Service
   end
 
   def self.user_can_collaborate_in_universe_that_allows_collective_content?(user:)
-    user.contributable_universes.any? do |universe|
+    user.creatable_universes.any? do |universe|
       universe.user.on_premium_plan?
 #      billing_plan_allows_collective_content?(user: universe.user) || user_has_active_promotion_for_this_content_type(user: universe.user, content_type: Universe)
     end

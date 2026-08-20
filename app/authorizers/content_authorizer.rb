@@ -18,12 +18,12 @@ class ContentAuthorizer < ApplicationAuthorizer
 
   def updatable_by? user
     return true if PermissionService.user_owns_any_containing_universe?(user: user, content: resource)
-    return true if PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource)
+    return true if PermissionService.user_can_edit_containing_universe_content?(user: user, content: resource)
     return true if [
       PermissionService.content_has_no_containing_universe?(content: resource),
       PermissionService.user_owns_content?(user: user, content: resource)
     ].all?
-    
+
     return false
   end
 
@@ -34,7 +34,7 @@ class ContentAuthorizer < ApplicationAuthorizer
       PermissionService.user_owns_content?(user: user, content: resource)
     ].all?
     return true if [
-      PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource),
+      PermissionService.user_can_edit_containing_universe_content?(user: user, content: resource),
       PermissionService.user_owns_content?(user: user, content: resource)
     ].all?
 

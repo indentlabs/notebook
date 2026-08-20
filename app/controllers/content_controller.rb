@@ -18,6 +18,10 @@ class ContentController < ApplicationController
   before_action :set_navbar_actions, except: [:deleted, :api_sort]
   before_action :set_sidenav_expansion, except: [:api_sort]
 
+  before_action :verify_entity_edit_permission, only: [
+    :link_field_update, :name_field_update, :text_field_update, :tags_field_update, :universe_field_update
+  ]
+
   def index
     @content_type_class = content_type_from_controller(self.class)
     @content_type_name  = @content_type_class.name
@@ -264,6 +268,14 @@ class ContentController < ApplicationController
         content.universe_id = @universe_scope.try(:id) if content.respond_to?(:universe_id)
       }
 
+    # Contributors without create permissions (Editors, Read-Only) can't add new pages to a universe
+    if @content.respond_to?(:universe_id) && !user_can_create_content_in_universe?(@content.universe_id)
+      return redirect_back(
+        fallback_location: root_path,
+        notice: "You don't have permission to create new pages in that universe."
+      )
+    end
+
     current_users_categories_and_fields = @content.class.attribute_categories(current_user)
     if current_users_categories_and_fields.empty?
       content_type_from_controller(self.class).create_default_attribute_categories(current_user)
@@ -276,7 +288,7 @@ class ContentController < ApplicationController
       # For users who are creating premium content in a collaborated universe without premium of their own
       # we want to default that content into one of their collaborated unvierses.
       if !current_user.on_premium_plan? && Rails.application.config.content_types[:premium].map(&:name).include?(@content.class.name)
-        @content.universe_id = current_user.contributable_universes.first.try(:id)
+        @content.universe_id = current_user.creatable_universes.first.try(:id)
       end
 
       if params.key?(:document_entity)
@@ -347,8 +359,16 @@ class ContentController < ApplicationController
 
     unless current_user.can_create?(content_type) \
       || PermissionService.user_has_active_promotion_for_this_content_type(user: current_user, content_type: content_type.name)
-      
+
       return redirect_back(fallback_location: root_path, notice: "Creating this type of page requires an active Premium subscription.")
+    end
+
+    # Contributors without create permissions (Editors, Read-Only) can't add new pages to a universe
+    if @content.respond_to?(:universe_id) && !user_can_create_content_in_universe?(@content.universe_id)
+      return redirect_back(
+        fallback_location: root_path,
+        notice: "You don't have permission to create new pages in that universe."
+      )
     end
 
     # Default names to untitled until one has been set
@@ -683,11 +703,11 @@ class ContentController < ApplicationController
       return render json: { error: 'Content not found for this image' }, status: 422
     end
 
-    # Need to check if user owns or contributes to the content directly
+    # Need to check if user owns or has edit access to the content directly
     unless content.user_id == current_user.id ||
            (content.respond_to?(:universe_id) &&
             content.universe_id.present? &&
-            current_user.contributable_universe_ids.include?(content.universe_id))
+            current_user.editable_universe_ids.include?(content.universe_id))
       return render json: { error: 'Unauthorized' }, status: 403
     end
 
@@ -904,6 +924,34 @@ class ContentController < ApplicationController
   end
 
   private
+
+  # Whether the current user is allowed to create new pages inside the given universe.
+  # Content outside of any universe is only limited by the usual ownership/billing checks.
+  def user_can_create_content_in_universe?(universe_id)
+    return true if universe_id.blank?
+
+    universe = Universe.find_by(id: universe_id)
+    return true if universe.nil?
+    return true if universe.user_id == current_user.id
+
+    current_user.creatable_universe_ids.include?(universe.id)
+  end
+
+  # Guards the per-field update endpoints so only users with edit access to the
+  # entity (owner, universe owner, or a contributor with an editing role) can write to it
+  def verify_entity_edit_permission
+    entity_type = entity_params.fetch(:entity_type, nil)
+    unless entity_type.present? && valid_content_types.include?(entity_type)
+      return render json: { error: 'Invalid entity type' }, status: 422
+    end
+
+    entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id, nil).to_i)
+    return render json: { error: 'Not found' }, status: 404 if entity.nil?
+
+    unless entity.updatable_by?(current_user)
+      render json: { error: 'Unauthorized' }, status: 403
+    end
+  end
 
   def group_events_by_date(events)
     # Group events by date for timeline display

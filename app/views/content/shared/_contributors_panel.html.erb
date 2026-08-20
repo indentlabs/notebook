@@ -49,18 +49,31 @@
                 <div class="ml-3">
                   <div class="text-sm font-medium text-gray-900 dark:text-white">
                     <%= contributor.user&.display_name || contributor.email %>
+                    <% if contributor.user.nil? %>
+                      <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xxs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300">
+                        Invitation pending
+                      </span>
+                    <% end %>
                   </div>
                   <div class="text-xs text-gray-500 dark:text-gray-400">
-                    <% if contributor.user.present? %>
-                      Can edit all content in this universe
-                    <% else %>
-                      Invitation pending
-                    <% end %>
+                    <%= contributor.role_description %>
                   </div>
                 </div>
               </div>
-              
-              <%= button_to remove_contributor_path(contributor.id),
+
+              <div class="flex items-center gap-2">
+                <%= form_with url: update_contributor_role_path(contributor.id), method: :patch, local: true, html: { class: "inline-block" } do %>
+                  <select name="contributor[role]"
+                          onchange="this.form.submit()"
+                          aria-label="Contributor role"
+                          class="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <% Contributor::ROLES.each do |role_key, role_label| %>
+                      <option value="<%= role_key %>" <%= 'selected' if contributor.role == role_key %>><%= role_label %></option>
+                    <% end %>
+                  </select>
+                <% end %>
+
+                <%= button_to remove_contributor_path(contributor.id),
                           method: :delete,
                           form: { 
                             class: "inline-block",
@@ -68,8 +81,9 @@
                           },
                           class: "text-red-500 hover:bg-red-50 dark:hover:bg-red-900 p-2 rounded transition-colors",
                           data: { turbo: false } do %>
-                <i class="material-icons text-sm">remove_circle</i>
-              <% end %>
+                  <i class="material-icons text-sm">remove_circle</i>
+                <% end %>
+              </div>
             </div>
           <% end %>
         </div>
@@ -93,15 +107,23 @@
         <div class="flex">
           <i class="material-icons text-blue-600 dark:text-blue-400 text-sm mr-2 mt-0.5">info</i>
           <div class="text-sm text-blue-800 dark:text-blue-200">
-            <p class="font-medium mb-1">About Contributors</p>
+            <p class="font-medium mb-1">About Contributor Roles</p>
             <ul class="space-y-1 text-xs">
               <li class="flex items-start">
                 <span class="mr-1">•</span>
-                <span>Contributors can edit all content within this universe</span>
+                <span><strong>Full Contributor:</strong> can view, edit, and create content in this universe</span>
               </li>
               <li class="flex items-start">
                 <span class="mr-1">•</span>
-                <span>They cannot delete the universe or manage other contributors</span>
+                <span><strong>Editor:</strong> can view and edit existing content, but not create new pages</span>
+              </li>
+              <li class="flex items-start">
+                <span class="mr-1">•</span>
+                <span><strong>Read-Only:</strong> can view all content in this universe, but not edit anything</span>
+              </li>
+              <li class="flex items-start">
+                <span class="mr-1">•</span>
+                <span>Contributors can never delete the universe or manage other contributors</span>
               </li>
               <li class="flex items-start">
                 <span class="mr-1">•</span>
@@ -127,6 +149,13 @@
                    spellcheck="false"
                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
           </div>
+          <select name="contributor[role]"
+                  aria-label="Contributor role"
+                  class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+            <% Contributor::ROLES.each do |role_key, role_label| %>
+              <option value="<%= role_key %>"><%= role_label %></option>
+            <% end %>
+          </select>
           <button type="submit"
                   class="inline-flex items-center px-4 py-2 bg-purple-600 text-white border border-purple-600 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
             <i class="material-icons text-sm mr-2">person_add</i>
@@ -143,10 +172,15 @@
         <div class="flex items-start">
           <i class="material-icons text-yellow-600 dark:text-yellow-500 mr-3 mt-0.5">info</i>
           <div>
-            <h4 class="text-sm font-medium text-yellow-900 dark:text-yellow-100 mb-2">You are a contributor</h4>
+            <% my_role = contributors.find { |c| c.user_id == current_user.id } %>
+            <h4 class="text-sm font-medium text-yellow-900 dark:text-yellow-100 mb-2">
+              You are a <%= my_role&.role_label || 'contributor' %>
+            </h4>
             <p class="text-sm text-yellow-800 dark:text-yellow-200 mb-3">
-              You have been invited to collaborate on this universe. You can edit all content within it, 
-              but cannot manage other contributors.
+              You have been invited to collaborate on this universe as a
+              <%= my_role&.role_label || 'contributor' %>:
+              <%= (my_role&.role_description || 'you can view content in this universe').downcase %>.
+              You cannot manage other contributors.
             </p>
             <p class="text-sm text-yellow-800 dark:text-yellow-200 mb-4">
               If you leave this universe, you will lose access to all its content and will need to be 
@@ -192,7 +226,7 @@
                 </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
                   <% if contributor.user.present? %>
-                    Collaborator
+                    <%= contributor.role_label %>
                   <% else %>
                     Invitation pending
                   <% end %>
