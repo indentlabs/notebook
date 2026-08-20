@@ -27,6 +27,10 @@ class ContentSerializer
   # }
 
   def initialize(content, viewing_user: nil)
+    # Callers sometimes look up the page they're serializing (and can come back empty-handed),
+    # so fail loudly here instead of raising a mystery NoMethodError on nil further down.
+    raise ArgumentError, "ContentSerializer was given a nil content page" if content.nil?
+
     # One query per table; lets not muck with joins yet
     # self.attribute_values = Attribute.where(entity_type: content.page_type, entity_id: content.id)
     # self.fields           = AttributeField.where(id: self.attribute_values.pluck(:attribute_field_id).uniq)

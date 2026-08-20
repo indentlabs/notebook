@@ -6,7 +6,13 @@
 
 <%# todo extract "sidebar" and call it with @content, then also do the same in documents/components/smart_sidebar %>
 <%
+  # This can come back nil if the page has been deleted or archived since the cached
+  # ContentPage list this partial is rendered from was built, so we can't assume it's here.
   raw_model = content.page_type.constantize.find_by(id: content.id, user: current_user)
+%>
+
+<% if raw_model.present? %>
+<%
   serialized_entity = ContentSerializer.new(raw_model)
 %>
 
@@ -106,3 +112,4 @@
     <% end %>
   </li>
 </ul>
+<% end %>
