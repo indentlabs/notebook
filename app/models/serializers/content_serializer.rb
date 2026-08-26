@@ -27,11 +27,19 @@ class ContentSerializer
   # }
 
   def initialize(content, viewing_user: nil)
+    # Callers sometimes look up the page they're serializing (and can come back empty-handed),
+    # so fail loudly here instead of raising a mystery NoMethodError on nil further down.
+    raise ArgumentError, "ContentSerializer was given a nil content page" if content.nil?
+
     # One query per table; lets not muck with joins yet
     # self.attribute_values = Attribute.where(entity_type: content.page_type, entity_id: content.id)
     # self.fields           = AttributeField.where(id: self.attribute_values.pluck(:attribute_field_id).uniq)
     self.categories       = content.class.attribute_categories(content.user)
-    self.fields           = AttributeField.where(attribute_category_id: self.categories.map(&:id))
+    # Archived (hidden) fields stay out of every page view; their answers aren't
+    # touched, so restoring the field in the template editor brings them back.
+    # The name field is always kept, since pages are built around having one.
+    category_fields       = AttributeField.where(attribute_category_id: self.categories.map(&:id))
+    self.fields           = category_fields.where(hidden: [false, nil]).or(category_fields.where(field_type: 'name'))
     self.attribute_values = Attribute.where(attribute_field_id: self.fields.map(&:id), entity_type: content.page_type, entity_id: content.id)
     self.viewing_user     = viewing_user
 

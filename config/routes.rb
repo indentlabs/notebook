@@ -233,7 +233,10 @@ Rails.application.routes.draw do
       get '/subscription',       to: 'subscriptions#new', as: :subscription
       get '/history',            to: 'subscriptions#history', as: :billing_history
 
-      get '/to/:stripe_plan_id', to: 'subscriptions#change', as: :change_subscription
+      # Plan changes mutate billing state, so links submit them via POST. The
+      # GET route remains for legacy links/bookmarks; the change action itself
+      # is idempotent either way.
+      match '/to/:stripe_plan_id', to: 'subscriptions#change', via: [:get, :post], as: :change_subscription
 
       get '/information',        to: 'subscriptions#information',        as: :payment_info
       post '/information',       to: 'subscriptions#information_change', as: :process_payment_info

@@ -59,11 +59,33 @@
     [data-sidebar-initial] header {
       transition: none !important;
     }
+
+    /*
+      Page-level off-canvas sidebars (table of contents, quick access, etc.) and
+      their toggle tabs are positioned against the viewport, so without an offset
+      they slide underneath the fixed site navigation rail.
+
+      Only tablet widths need the offset: below 768px the site nav is off-canvas,
+      and from 1024px up those page sidebars are laid out in-flow instead.
+    */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      /* Before Alpine boots, the rail is sized by the [data-sidebar-initial] rules above */
+      [data-sidebar-initial="collapsed"] .site-nav-offset-left { left: 4rem; }
+      [data-sidebar-initial="open"] .site-nav-offset-left { left: 14rem; }
+
+      /* Once Alpine owns the rail, its expanded width comes from `sm:w-60` at this breakpoint */
+      body.site-nav-collapsed .site-nav-offset-left { left: 4rem; }
+      body.site-nav-open .site-nav-offset-left { left: 15rem; }
+    }
   </style>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      :class="{ 'overflow-hidden': showSidebar && !isDesktop }"
+      :class="{
+        'overflow-hidden': showSidebar && !isDesktop<% if user_signed_in? %>,
+        'site-nav-open': showSidebar && isDesktop,
+        'site-nav-collapsed': !showSidebar && isDesktop<% end %>
+      }"
       x-data="{
         isDesktop: window.innerWidth >= 768,
         showSidebar: (() => {
