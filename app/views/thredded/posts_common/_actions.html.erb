@@ -1,35 +1,47 @@
 <% actions ||= {} %>
-<% actions_html = capture do %>
-  <%= view_hooks.post_common.actions.render self, post: post do %>
-    <%# Primary actions %>
-    <div class="py-1">
-      <% if actions[:quote] && post.can_reply? %>
-        <%= render 'thredded/posts_common/actions/quote', post: post %>
-      <% end  %>
-      <% if post.can_update? %>
-        <%= render 'thredded/posts_common/actions/edit', post: post %>
-      <% end %>
-      <% if post.can_destroy? %>
-        <%= render 'thredded/posts_common/actions/delete', post: post %>
-      <% end %>
-      <% if post.read_state %>
-        <%= view_hooks.post_common.mark_as_unread.render self, post: post do %>
-          <%= render 'thredded/posts_common/actions/mark_as_unread', post: post %>
+<%# Every action in this menu requires an account, so logged-out visitors get no menu at all. %>
+<% actions_html = nil %>
+<% if user_signed_in? %>
+  <% can_quote          = actions[:quote] && post.can_reply? %>
+  <% can_moderate_post  = current_user.forum_moderator? && post.to_model.is_a?(Thredded::Post) %>
+  <% has_primary_actions = can_quote || post.can_update? || post.can_destroy? || post.read_state.present? %>
+  <% has_danger_actions  = post.can_report? || can_moderate_post %>
+
+  <% if has_primary_actions || has_danger_actions %>
+    <% actions_html = capture do %>
+      <%= view_hooks.post_common.actions.render self, post: post do %>
+        <%# Primary actions %>
+        <% if has_primary_actions %>
+          <div class="py-1">
+            <% if can_quote %>
+              <%= render 'thredded/posts_common/actions/quote', post: post %>
+            <% end  %>
+            <% if post.can_update? %>
+              <%= render 'thredded/posts_common/actions/edit', post: post %>
+            <% end %>
+            <% if post.can_destroy? %>
+              <%= render 'thredded/posts_common/actions/delete', post: post %>
+            <% end %>
+            <% if post.read_state %>
+              <%= view_hooks.post_common.mark_as_unread.render self, post: post do %>
+                <%= render 'thredded/posts_common/actions/mark_as_unread', post: post %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%# Moderation/dangerous actions %>
+        <% if has_danger_actions %>
+          <div class="py-1 <%= 'border-t border-gray-100 dark:border-gray-700' if has_primary_actions %>">
+            <% if post.can_report? %>
+              <%= render 'thredded/posts_common/actions/report', post: post %>
+            <% end %>
+            <% if can_moderate_post %>
+              <%= render 'thredded/moderation/post_moderation_actions', post: post %>
+            <% end %>
+          </div>
         <% end %>
       <% end %>
-    </div>
-    
-    <%# Moderation/dangerous actions %>
-    <% can_moderate_post = user_signed_in? && current_user.forum_moderator? && post.to_model.is_a?(Thredded::Post) %>
-    <% if post.can_report? || can_moderate_post %>
-      <div class="py-1 border-t border-gray-100 dark:border-gray-700">
-        <% if post.can_report? %>
-          <%= render 'thredded/posts_common/actions/report', post: post %>
-        <% end %>
-        <% if can_moderate_post %>
-          <%= render 'thredded/moderation/post_moderation_actions', post: post %>
-        <% end %>
-      </div>
     <% end %>
   <% end %>
 <% end %>
@@ -41,7 +53,7 @@
         <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
       </svg>
     </button>
-    <div x-show="open" 
+    <div x-show="open"
          x-transition:enter="transition ease-out duration-100"
          x-transition:enter-start="transform opacity-0 scale-95"
          x-transition:enter-end="transform opacity-100 scale-100"
