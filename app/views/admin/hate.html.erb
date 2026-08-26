@@ -1,35 +1,137 @@
-<table>
-  <tr>
-    <th>Thread</th>
-    <th>Trigger words</th>
-    <th>Full text</th>
-  </tr>
-  <tr>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Content Moderation</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Scanning private messages for flagged content
+      <% if @list.present? %>
+        using <span class="font-medium text-gray-700 dark:text-gray-300"><%= @list %></span> filter
+      <% end %>
+    </p>
+  </div>
 
-  <% @posts.each do |post| %>
-    <tr>
-        <% triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content) %>
-        <% next unless triggers.any? %>
-        <td>
-          <%= post.postable.title %><br />
-          (<%= link_to post.postable.slug, '/forum/private-topics/' + post.postable.slug %>)<br />
-          <%= post.postable.created_at.strftime("%m/%d/%Y") %> (<%= time_ago_in_words post.postable.created_at %> ago)
-        </td>
-        <td>
-          <% triggers.each do |trigger| %>
-            <span class="badge red white-text"><%= trigger %></span>
-          <% end %>
-        </td>
-        <td>
-          <%
-            content = post.content
-            triggers.each do |trigger|
-              content.gsub!(trigger, "<span class='badge red white-text'>#{trigger}</span>")
-            end
-          %>
+  <%
+    # Pre-filter posts to only those with triggers
+    flagged_posts = @posts.filter_map do |post|
+      triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content)
+      next unless triggers.any?
+      { post: post, triggers: triggers }
+    end
+  %>
 
-          <%= content.html_safe %>
-        </td>
-    </tr>
+  <!-- Summary Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+          <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Posts Scanned</p>
+          <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter @posts.count %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-red-100 dark:bg-red-900 rounded-lg">
+          <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Flagged Posts</p>
+          <p class="text-2xl font-semibold text-red-600 dark:text-red-400"><%= number_with_delimiter flagged_posts.count %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+          <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Clean Rate</p>
+          <p class="text-2xl font-semibold text-green-600 dark:text-green-400">
+            <%= @posts.count > 0 ? (100 - (flagged_posts.count / @posts.count.to_f * 100)).round(1) : 100 %>%
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flagged Posts -->
+  <% if flagged_posts.any? %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Flagged Messages</h2>
+      </div>
+
+      <div class="divide-y divide-gray-200 dark:divide-gray-700">
+        <% flagged_posts.each do |item| %>
+          <% post = item[:post] %>
+          <% triggers = item[:triggers] %>
+          <div class="p-6">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:space-x-6">
+              <!-- Thread Info -->
+              <div class="flex-shrink-0 lg:w-64 mb-4 lg:mb-0">
+                <h3 class="font-medium text-gray-900 dark:text-white mb-1">
+                  <%= post.postable.title %>
+                </h3>
+                <%= link_to '/forum/private-topics/' + post.postable.slug, class: "text-sm text-blue-600 dark:text-blue-400 hover:underline" do %>
+                  View thread
+                <% end %>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  <%= post.postable.created_at.strftime("%b %d, %Y") %>
+                  <span class="text-gray-400 dark:text-gray-500">·</span>
+                  <%= time_ago_in_words post.postable.created_at %> ago
+                </p>
+              </div>
+
+              <!-- Triggers -->
+              <div class="flex-shrink-0 lg:w-48 mb-4 lg:mb-0">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Triggers</p>
+                <div class="flex flex-wrap gap-1">
+                  <% triggers.each do |trigger| %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200">
+                      <%= trigger %>
+                    </span>
+                  <% end %>
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Content</p>
+                <div class="text-sm text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-48 overflow-y-auto">
+                  <%
+                    content = post.content.dup
+                    triggers.each do |trigger|
+                      content.gsub!(trigger, "<mark class='bg-red-200 dark:bg-red-800 text-red-900 dark:text-red-100 px-0.5 rounded'>#{trigger}</mark>")
+                    end
+                  %>
+                  <%= content.html_safe %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <!-- Empty state -->
+    <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <svg class="mx-auto h-16 w-16 text-green-400 dark:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">All clear!</h3>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No flagged content found in the last <%= number_with_delimiter @posts.count %> posts.</p>
+    </div>
   <% end %>
-</table>
+</div>

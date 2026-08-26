@@ -1,49 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="<%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>">
 <head>
-  <title><%= yield :thredded_page_title %> | Notebook.ai</title>
-  <%= render 'layouts/common_head' %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <%= csrf_meta_tags %>
 
-  <%= stylesheet_link_tag 'thredded', 'data-turbolinks-track': 'reload' %>
-  <%= csrf_meta_tag %>
-  <%# javascript_include_tag :application %>
-  <%= javascript_include_tag 'thredded',
-                             async: !Rails.application.config.assets.debug,
-                             defer: true %>
-  <%== RailsGravatar.prefetch_dns_tag %>
+  <%= stylesheet_link_tag 'application', media: 'all' %>
+  <%= stylesheet_pack_tag 'application', media: 'all' %>
+  <!--
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" integrity="sha256-rByPlHULObEjJ6XQxW/flG2r+22R5dKiAoef+aXWfik=" crossorigin="anonymous" />
+  -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+  <%= render 'layouts/favicon' %>
+  <%= javascript_include_tag 'application' %>
+  <%= javascript_include_tag 'thredded' %>
+  <%= javascript_pack_tag 'application' %>
+  <%= render 'layouts/seo' %>
+  <script defer type="text/javascript" src="https://js.stripe.com/v2/"></script>
+  
+  <!-- Simplified stylesheet and script section for debugging -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body data-in-app="true" class="<%= 'has-fixed-sidenav' if user_signed_in? %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>">
-  <%= render 'layouts/sidenav' if user_signed_in? %>
-  <%= render 'layouts/recent_edits_sidenav' if user_signed_in? %>
-  <%= render 'layouts/navbar' %>
+<body data-in-app="true"
+      class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
+      x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 768' : 'false' %>, isDesktop: window.innerWidth >= 768 }"
+>
+  <%= render 'layouts/tailwind/navbar' %>
 
-  <main>
-    <%= yield :full_width_page_header %>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col s12">
-          <%# todo: move these to toasts and/or make dismissable %>
-          <%= render 'cards/ui/alert' %>
-          <%= render 'cards/ui/notice' %>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col s12">
-          <%= yield %>
-        </div>
-      </div>
-    </div>
+  <%= render 'layouts/tailwind/sidebar' %>
 
-    <%= render 'layouts/ganalytics' %>
+  <% unless content_for?(:messenger_fullscreen) %>
+    <!-- forum navigation & breadcrumbs -->
+    <nav class="thredded-nav bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-14 z-40 overflow-hidden <%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
+      <ol role="list" class="flex-1 flex space-x-4 pl-12 pr-4 py-2 min-w-0 overflow-hidden">
+        <%= render('thredded/redesigned/breadcrumbs') %>
+      </ol>
+      <ul class="flex items-center h-full divide-x divide-gray-200 dark:divide-gray-700">
+        <li><!-- Included to always force a left-border on whatever action is left-most --></li>
+        <%= render 'thredded/shared/nav/moderation' %>
+        <%= render 'thredded/shared/nav/notification_preferences' %>
+      </ul>
+    </nav>
+  <% end %>
+
+  <!-- main content -->
+  <main class="pt-14 <%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
+    <%= yield %>
   </main>
 
-  <%= react_component("Footer") unless defined?(@show_footer) && !@show_footer %>
-  <%= render 'layouts/quick_add_fab' unless defined?(@show_footer) && !@show_footer %>
-  <%= render partial: 'content/keyboard_controls_help_modal' %>
+  <% unless content_for?(:messenger_fullscreen) %>
+    <%= render 'layouts/footer' %>
+  <% end %>
 
   <script type="text/javascript">
-    <%= yield :javascript %>
+    <% if user_signed_in? %>
+      DISABLE_KEYBOARD_SHORTCUTS = <%= !current_user.keyboard_shortcuts_preference %>;
+    <% end %>
+
+    document.addEventListener('DOMContentLoaded', function() {
+      <%= yield :javascript %>
+    });
   </script>
 
+  <%= render 'layouts/ganalytics' %>
 </body>
 </html>

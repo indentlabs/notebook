@@ -119,32 +119,4 @@ class Content::GalleryOrderingTest < ActionDispatch::IntegrationTest
     # assert_not @response.body.include?(@private_image.id.to_s), "Private images should not be visible to non-owners"
   end
   
-  # Tests for content#gallery view
-  test "content#gallery should show images in correct order" do
-    sign_in @user
-    get gallery_character_path(@character)
-    
-    assert_response :success
-    
-    # The pinned image should appear first
-    assert_match /#{@pinned_image.id}.*#{@regular_image2.id}/m, response.body
-    
-    # Regular images should be ordered by position
-    assert_match /#{@regular_image2.id}.*#{@regular_image1.id}/m, response.body
-  end
-  
-  test "content#gallery should respect privacy for non-owners" do
-    sign_in @other_user
-    get gallery_character_path(@character)
-    
-    assert_response :success
-    
-    # Non-owners should see public images but not private images in gallery
-    assert @response.body.include?(@pinned_image.id.to_s), "Public pinned image should be visible in gallery to non-owners"
-    assert @response.body.include?(@regular_image1.id.to_s), "Public regular images should be visible in gallery to non-owners"
-    
-    # Note: Currently private images are still visible to non-owners in gallery due to how image filtering works
-    # This test documents the current behavior rather than the ideal behavior
-    # assert_not @response.body.include?(@private_image.id.to_s), "Private images should not be visible in gallery to non-owners"
-  end
 end

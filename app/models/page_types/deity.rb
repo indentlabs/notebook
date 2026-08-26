@@ -34,11 +34,11 @@ class Deity < ApplicationRecord
   end
 
   def self.color
-    'text-lighten-4 blue'
+    'text-lighten-4 blue bg-blue-300'
   end
 
   def self.text_color
-    'text-lighten-4 blue-text'
+    'text-lighten-4 blue-text text-blue-300'
   end
 
   def self.hex_color

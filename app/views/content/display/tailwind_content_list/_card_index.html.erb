@@ -1,0 +1,34 @@
+<div class="flex flex-wrap mb-32 px-2 container mx-auto">
+  <% content.each do |content| %>
+    <div class="md:w-1/2 lg:w-1/3 2xl:w-1/4 p-2 group">
+      <div class="bg-white hover:shadow-lg rounded-lg transition overflow-hidden">
+        <!-- Image - clickable to View -->
+        <%= link_to (content.respond_to?(:view_path) ? content.view_path : content), class: "block" do %>
+          <%= image_tag content.random_image_including_private(format: :small), class: 'h-64 w-full object-cover object-center' %>
+        <% end %>
+
+        <!-- Content -->
+        <div class="p-4">
+          <h3 class="tracking-widest <%= content.text_color %> text-xs uppercase font-medium title-font mb-1">
+            <%= content.page_type %>
+          </h3>
+          <h2 class="text-lg text-gray-900 font-medium title-font mb-3">
+            <%= content.name %>
+          </h2>
+
+          <!-- Action Buttons Footer -->
+          <div class="flex items-center gap-2 pt-3 border-t border-gray-100">
+            <%= link_to (content.respond_to?(:view_path) ? content.view_path : content), class: "flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-white #{content.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+              <i class="material-icons text-sm mr-1.5">visibility</i>
+              View
+            <% end %>
+            <%= link_to (content.respond_to?(:edit_path) ? content.edit_path : edit_polymorphic_path(content)), class: "flex-1 inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all" do %>
+              <i class="material-icons text-sm mr-1.5">edit</i>
+              Edit
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

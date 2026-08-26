@@ -4,24 +4,32 @@
   raw_model = content.is_a?(Universe) ? content : content.raw_model
 %>
 
-<div id="contributors_panel" class="panel">
+<div id="contributors_panel" class="mb-6">
   <% if raw_model.contributors.any? %>
-    <ul class="collection with-header">
-      <li class="collection-header purple white-text">
-        <i class="material-icons left"><%= User.icon %></i>
-        Owner
-      </li>
-      <li class="collection-item avatar">
-        <i class="material-icons circle white-text <%= User.color %>"><%= User.icon %></i>
-        <span class="title">
-          <%= link_to(content.user.name, content.user) %>
-        </span>
-        <p class="grey-text">
-          Created universe <%= time_ago_in_words content.created_at %> ago
-        </p>
-        <span class="secondary-content"><i class="material-icons grey-text"><%= User.icon %></i></span>
-      </li>
-    </ul>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
+      <div class="px-4 py-3 bg-purple-600 text-white flex items-center">
+        <i class="material-icons mr-2"><%= User.icon %></i>
+        <span class="font-medium">Owner</span>
+      </div>
+      <div class="p-4 flex items-start">
+        <div class="flex-shrink-0 mr-4">
+          <div class="h-10 w-10 rounded-full bg-<%= User.color %> flex items-center justify-center text-white">
+            <i class="material-icons"><%= User.icon %></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+            <%= link_to(content.user.name, content.user, class: "hover:underline") %>
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Created universe <%= time_ago_in_words content.created_at %> ago
+          </p>
+        </div>
+        <div class="ml-4 flex-shrink-0">
+          <i class="material-icons text-gray-400 dark:text-gray-500"><%= User.icon %></i>
+        </div>
+      </div>
+    </div>
   <% end %>
 
   <%= render partial: 'content/display/contributors_user_list', locals: { content: content, raw_model: raw_model } %>

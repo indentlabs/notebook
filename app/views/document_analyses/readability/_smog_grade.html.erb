@@ -1,78 +1,81 @@
 <% if analysis.smog_grade %>
-  <div class="row">
-    <div class="col s12 m12 l12">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-title">
-            <span class="right"><%= analysis.smog_grade.try(:round) %> / 16</span>
-            <i class="left material-icons orange-text">bubble_chart</i>
-            SMOG grade
+  <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden mb-6">
+    <div class="p-6">
+      <!-- Header with score -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900 flex items-center justify-center">
+            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4M9,8.5A1.5,1.5 0 0,0 7.5,10A1.5,1.5 0 0,0 9,11.5A1.5,1.5 0 0,0 10.5,10A1.5,1.5 0 0,0 9,8.5M15,8.5A1.5,1.5 0 0,0 13.5,10A1.5,1.5 0 0,0 15,11.5A1.5,1.5 0 0,0 16.5,10A1.5,1.5 0 0,0 15,8.5"/>
+            </svg>
           </div>
-          <div class="progress">
-            <div class="determinate" style="width: <%= 100 * analysis.smog_grade.try(:round) / 16 %>%"></div>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">SMOG Grade</h3>
+        </div>
+        <span class="text-lg font-bold text-gray-900 dark:text-gray-100"><%= analysis.smog_grade.try(:round) %> / 16</span>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-6">
+        <div class="bg-orange-500 h-2 rounded-full" style="width: <%= (100 * (analysis.smog_grade.try(:round) || 0) / 16.0).round %>%"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Description -->
+        <div class="lg:col-span-2 space-y-4 text-gray-600 dark:text-gray-400">
+          <p>
+            According to this scale, your document is
+            <% if analysis.smog_grade.round > 12 %>
+              <strong class="text-gray-900 dark:text-gray-100">
+                Understandable by a <%= (analysis.smog_grade.round - 12).ordinalize %>-year college student.
+              </strong>
+            <% else %>
+              <strong class="text-gray-900 dark:text-gray-100">
+                Understandable by a <%= analysis.smog_grade.round.ordinalize %>-grade reader.
+              </strong>
+            <% end %>
+          </p>
+          <p>
+            Don't let the silly acronym (The Simple Measure of Gobbledygook) sidetrack you; the SMOG readability formula was first
+            published by Dr. G. Harry McLaughlin in 1969 as an improvement to the Fog index. Like other readability scales, SMOG aims
+            to measure at what U.S. grade level a reader will fully understand a work of text.
+          </p>
+          <p>
+            SMOG has been validated against reading comprehension tests, predicting with 98.5% accuracy (and a standard error of 1.5%)
+            which students had a 100% comprehension rate on a given piece of text.
+          </p>
+          <p>
+            A <strong class="text-gray-900 dark:text-gray-100">higher score</strong> on this scale indicates a document is <strong class="text-red-600 dark:text-red-400">harder to understand</strong>.
+          </p>
+        </div>
+
+        <!-- Tips -->
+        <div class="space-y-4">
+          <div class="p-4 bg-red-50 dark:bg-red-900 rounded-lg">
+            <p class="text-red-700 dark:text-red-300 font-medium mb-2">To raise your score:</p>
+            <ul class="text-sm text-red-600 dark:text-red-400 space-y-1">
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,15L12,10L17,15H7Z"/></svg>
+                Use more words of at least three syllables.
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,15L12,10L17,15H7Z"/></svg>
+                Use more sentences.
+              </li>
+            </ul>
           </div>
-          <div class="row">
-            <div class="col s12 m12 l7">
-              <p>
-                According to this scale, your document is
-                <% if analysis.smog_grade.round > 12 %>
-                  <strong>
-                    Understandable by a <%= (analysis.smog_grade.round - 12).ordinalize %>-year college student.
-                  </strong>
-                <% else %>
-                  <strong>
-                    Understandable by a <%= analysis.smog_grade.round.ordinalize %>-grade reader.
-                  </strong>
-                <% end %>
-              </p>
-              <br />
-              <p>
-                Don't let the silly acryonym (The Simple Measure of Gobbledygook) sidetrack you; the SMOG readability formula was first
-                published by Dr. G. Harry McLaughlin in 1969 as an improvement to the Fog index. Like other readability scales, SMOG aims
-                to measure at what U.S. grade level a reader will fully understand a work of text.
-              </p>
-              <br />
-              <p>
-                SMOG has been validated against reading comprehension tests, predicting with 98.5% accuracy (and a standard error of 1.5%)
-                which students had a 100% comprehension rate on a given piece of text.
-              </p>
-              <br />
-              <p>
-                A <strong>higher score</strong> on this scale indicates a document is <strong class="red-text">harder to understand</strong>.
-              </p>
-            </div>
-            <div class="col s12 m12 l4 offset-l1">
-              <p class="red-text text-darken-3">
-                To <strong>raise</strong> your score on this scale:
-              </p>
-              <ul>
-                <li>
-                  <i class="material-icons left red-text">arrow_drop_up</i>
-                  Use more words of at least three syllables.
-                </li>
-                <li class="clearfix">
-                  <i class="material-icons left red-text">arrow_drop_up</i>
-                  Use more sentences.
-                </li>
-              </ul>
-              <br />
-              <p class="green-text text-darken-4">
-                To <strong>lower</strong> your score on this scale:
-              </p>
-              <ul>
-                <li>
-                  <i class="material-icons left green-text">arrow_drop_down</i>
-                  Use more one- and two-syllable words.
-                </li>
-                <li class="clearfix">
-                  <i class="material-icons left green-text">arrow_drop_up</i>
-                  Use fewer sentences.
-                </li>
-              </ul>
-              <br />
-            </div>
+          <div class="p-4 bg-green-50 dark:bg-green-900 rounded-lg">
+            <p class="text-green-700 dark:text-green-300 font-medium mb-2">To lower your score:</p>
+            <ul class="text-sm text-green-600 dark:text-green-400 space-y-1">
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,10L12,15L17,10H7Z"/></svg>
+                Use more one- and two-syllable words.
+              </li>
+              <li class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M7,10L12,15L17,10H7Z"/></svg>
+                Use fewer sentences.
+              </li>
+            </ul>
           </div>
-          
         </div>
       </div>
     </div>

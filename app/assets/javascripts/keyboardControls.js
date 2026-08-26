@@ -24,6 +24,12 @@ function keyboardControlManager ( keyboardControls ) {
 			return;
 		}
 
+		// must ignore if currently focused in a contenteditable element (e.g. MediumEditor)
+		var activeEl = document.activeElement;
+		if (activeEl && (activeEl.isContentEditable || activeEl.closest('[contenteditable="true"]'))) {
+			return;
+		}
+
 		// if not modifier, continue
 		stackManager.add({
 			"key" : event.keyCode,

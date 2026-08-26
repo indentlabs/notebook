@@ -14,11 +14,11 @@ class Tradition < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'text-lighten-3 lighten-3 red'
+    'text-lighten-3 lighten-3 red bg-rose-300'
   end
 
   def self.text_color
-    'text-lighten-3 red-text'
+    'text-lighten-3 red-text text-rose-300'
   end
 
   def self.hex_color

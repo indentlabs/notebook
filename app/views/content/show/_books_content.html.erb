@@ -1,0 +1,63 @@
+<% if raw_content.books.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <% raw_content.books.each do |book| %>
+      <div class="book-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
+        <%= link_to book_path(book), class: "block p-6" do %>
+          <div class="flex items-start space-x-4">
+            <!-- Book Icon -->
+            <div class="flex-shrink-0 mt-1">
+              <div class="w-12 h-12 <%= Book.color rescue 'bg-green-500' %> rounded-lg flex items-center justify-center shadow-sm">
+                <i class="material-icons text-white text-lg"><%= Book.icon rescue 'book' %></i>
+              </div>
+            </div>
+            
+            <!-- Book Info -->
+            <div class="flex-1 min-w-0">
+              <h4 class="text-base font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                <%= book.name.presence || "Untitled Book" %>
+              </h4>
+              
+              <% if book.respond_to?(:description) && book.description.present? %>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                  <%= truncate(strip_tags(book.description).squish, length: 120) %>
+                </p>
+              <% end %>
+              
+              <div class="flex items-center justify-between">
+                <p class="text-xs <%= Book.text_color rescue 'text-green-600 dark:text-green-400' %> font-medium">Book</p>
+                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                  <i class="material-icons text-sm mr-1">access_time</i>
+                  <%= time_ago_in_words(book.updated_at) %> ago
+                </div>
+              </div>
+            </div>
+            
+            <!-- Arrow -->
+            <div class="flex-shrink-0 mt-1">
+              <i class="material-icons text-gray-400 dark:text-gray-500">chevron_right</i>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <!-- Empty books state -->
+  <div class="text-center py-12">
+    <div class="mx-auto h-16 w-16 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-4">
+      <i class="material-icons text-2xl text-gray-400 dark:text-gray-500">book</i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No books yet</h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+      This universe doesn't have any attached books. Use books to plan your narrative structure and organize chapters.
+    </p>
+    
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <%= link_to "/books/new?universe=#{raw_content.id}", 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white #{defined?(Book.color) ? Book.color : 'bg-green-600'} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200" do %>
+        <i class="material-icons text-lg mr-2">add</i>
+        Create Book
+      <% end %>
+    </div>
+  </div>
+<% end %>

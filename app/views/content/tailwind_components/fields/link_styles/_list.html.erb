@@ -1,0 +1,14 @@
+<ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+  <% field[:value].each do |link_code| %>
+    <% klass, id = link_code.split('-') %>
+    <% content = resolve_link_content(klass, id) %>
+
+    <li data-klass="<%= klass %>" data-id="<%= id %>"
+        class="<%= 'js-load-page-name' if content.nil? %>">
+      <%= link_to send("#{klass.downcase}_path", id),
+                  class: "hover:underline #{content_class_from_name(klass).text_color}" do %>
+        <%= content.try(:name) || "<em>Loading #{klass}</em>".html_safe %>
+      <% end %>
+    </li>
+  <% end %>
+</ul>

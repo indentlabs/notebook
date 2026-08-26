@@ -1,36 +1,81 @@
-<table style="max-width: 100%">
-  <tr>
-    <th>Thread</th>
-    <th>Links</th>
-    <th>Images</th>
-    <th>Full text</th>
-  </tr>
-  <tr>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Spam Watch</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Private posts containing links that may be spam
+    </p>
+  </div>
 
-  <% @posts.each do |post| %>
-    <% links = post.content.scan(/([htp]+?s?:?\/\/[^\s\)"']*)/i) %>
-    <% next unless links.any? %>
-    <tr>
-        <td style="max-width: 200px">
-          <%= post.postable.title %> (<%= post.postable.slug %>)
-        </td>
-        <td style="max-width: 200px; overflow-x: scroll">
-          <ul>
-            <% links.each do |url| %>
-              <%= link_to url.first, url.first %>
-            <% end %>
-          </ul>
-        </td>
-        <td>
-          <% links.each do |url| %>
-            <%= link_to url.first do %>
-              <%= image_tag url.first, class: 'left', style: "height: 200px; width: 200px" %>
+  <!-- Results Table -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-900">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Thread
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Links
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Images
+            </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              Full Text
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <% posts_with_links = @posts.select { |post| post.content.scan(/([htp]+?s?:?\/\/[^\s\)"']*)/i).any? } %>
+          <% if posts_with_links.empty? %>
+            <tr>
+              <td colspan="4" class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
+                No posts with links found
+              </td>
+            </tr>
+          <% else %>
+            <% posts_with_links.each do |post| %>
+              <% links = post.content.scan(/([htp]+?s?:?\/\/[^\s\)"']*)/i) %>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-top" style="max-width: 200px;">
+                  <div class="font-medium"><%= post.postable.title %></div>
+                  <div class="text-gray-500 dark:text-gray-400 text-xs mt-1"><%= post.postable.slug %></div>
+                </td>
+                <td class="px-6 py-4 text-sm align-top" style="max-width: 250px;">
+                  <ul class="space-y-1">
+                    <% links.each do |url| %>
+                      <li class="truncate">
+                        <%= link_to url.first, url.first, class: 'text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:underline', target: '_blank', rel: 'noopener noreferrer' %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </td>
+                <td class="px-6 py-4 align-top">
+                  <div class="flex flex-wrap gap-2">
+                    <% links.each do |url| %>
+                      <%= link_to url.first, target: '_blank', rel: 'noopener noreferrer' do %>
+                        <%= image_tag url.first, class: 'h-24 w-24 object-cover rounded-lg border border-gray-200 dark:border-gray-600 hover:opacity-75 transition-opacity', onerror: "this.style.display='none'" %>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 align-top" style="max-width: 400px;">
+                  <div class="max-h-48 overflow-y-auto">
+                    <p class="whitespace-pre-wrap break-words"><%= post.content %></p>
+                  </div>
+                </td>
+              </tr>
             <% end %>
           <% end %>
-        </td>
-        <td style="max-width: 800px; overflow-x: scroll">
-          <%= post.content %>
-        </td>
-    </tr>
-  <% end %>
-</table>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+    Showing <%= posts_with_links.count %> post<%= posts_with_links.count == 1 ? '' : 's' %> with links
+  </div>
+</div>

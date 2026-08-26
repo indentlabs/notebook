@@ -2,13 +2,20 @@ class ImageUpload < ApplicationRecord
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
 
+  # Inherit user_id from parent content when created through nested attributes
+  before_validation :inherit_user_id, on: :create
+  
+  def inherit_user_id
+    self.user_id ||= content&.user_id
+  end
+
   # Add scopes for image ordering
   scope :pinned, -> { where(pinned: true) }
   scope :ordered, -> { order(:position) }
 
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
   has_attached_file :src,
-    path: 'content/uploads/:style/:filename',
+    **(Rails.env.production? ? { path: 'content/uploads/:style/:filename' } : {}),
     styles: {
       thumb:  '100x100>',
       small:  '190x190#',
@@ -26,7 +33,9 @@ class ImageUpload < ApplicationRecord
     s3_protocol: 'https'
   # has_one_attached :upload
 
-  validates_attachment_content_type :src, content_type: /\Aimage\/.*\Z/
+  validates_attachment_content_type :src,
+    content_type: /\Aimage\/.*\Z/,
+    message: "must be an image file (like a jpg, png, gif, or webp)"
   # TODO add size validation
 
   before_destroy :delete_s3_image

@@ -1,7 +1,6 @@
 <style>
 .line {
   fill: none;
-  stroke: steelblue;
   stroke-width: 1.5px;
 }
 .zoom {
@@ -9,99 +8,122 @@
   fill: none;
   pointer-events: all;
 }
+/* D3 chart dark mode support */
+.dark #words-per-sentence text {
+  fill: #9ca3af;
+}
+.dark #words-per-sentence .line {
+  stroke: #14b8a6;
+}
+.dark #words-per-sentence .domain,
+.dark #words-per-sentence .tick line {
+  stroke: #4b5563;
+}
+#words-per-sentence text {
+  fill: #374151;
+}
+#words-per-sentence .line {
+  stroke: #0d9488;
+}
+#words-per-sentence .domain,
+#words-per-sentence .tick line {
+  stroke: #d1d5db;
+}
 </style>
 
-<h5 class="grey-text">Style</h5>
-
-<% if analysis.sentence_count > 1 %>
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Words per sentence</div>
-        <div id="words-per-sentence" ></div>
-      </div>
-      <div class="card-action">
-        <a class="activator blue-text text-darken-4">
-          How to use this chart
-        </a>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title">
-          Words per sentence
-          <i class="material-icons right">close</i>
-        </span>
-        <div class="row">
-          <div class="col s12 m6 l4">
-            <p>
-              Sentence length can be a powerful tool in your writing and you should
-              use it purposefully. Longer sentences can lure a reader in, while shorter,
-              more stacatto sentences keep that attention with fast-paced action.
-            </p>
-            <p>
-              This chart shows the length, in words, of each sentence through your
-              document. Groups of shorter sentences likely read faster, while groups
-              of longer sentences may be dense or hard to read.
-            </p>
-            <p>
-              Selecting an area on the chart will zoom in to focus on just that area.
-              Double-clicking the chart will reset the zoom back to your entire document.
-            </p>
-          </div>
-          <div class="col s12 m6 l7 offset-l1">
-            <blockquote style="font-size: 110%">
-              <p>
-                <span class="black-text red lighten-4">This sentence has five words.</span>
-                <span class="black-text red lighten-4">Here are five more words.</span>
-                <span class="black-text red lighten-4">Five-word sentences are fine.</span>
-                <span class="black-text red lighten-4">But several together become monotonous.</span>
-                <span class="black-text red lighten-4">Listen to what is happening.</span>
-                <span class="black-text red lighten-4">The writing is getting boring.</span>
-                <span class="black-text red lighten-4">The sound of it drones.</span>
-                <span class="black-text red lighten-4">It’s like a stuck record.</span>
-                <span class="black-text red lighten-4">The ear demands some variety.</span>
-              </p>
-
-              <p>
-                <span class="black-text yellow lighten-4">Now listen.</span>
-                <span class="black-text green lighten-4">I vary the sentence length, and I create music.</span>
-                <span class="black-text yellow lighten-4">Music.</span>
-                <span class="black-text blue lighten-4">The writing sings.</span>
-                <span class="black-text green lighten-4">It has a pleasant rhythm, a lilt, a harmony.</span>
-                <span class="black-text blue lighten-4">I use short sentences.</span>
-                <span class="black-text green lighten-4">And I use sentences of medium length.</span>
-
-                <span class="black-text purple lighten-4">And sometimes, when I am certain the reader is rested, I will engage him with a sentence of considerable length, 
-                a sentence that burns with energy and builds with all the impetus of a crescendo, 
-                the roll of the drums, the crash of the cymbals–sounds that say listen to this, it is important.</span>
-              </p>
-
-              <p>
-                <span class="black-text green lighten-4">So write with a combination of short, medium, and long sentences.</span>
-                <span class="black-text green lighten-4">Create a sound that pleases the reader's ear.</span>
-                <span class="black-text blue lighten-4">Don't just write words.</span>
-                <span class="black-text yellow lighten-4">Write music.</span>
-              </p>
-
-              <p class="right-align">
-                &mdash; Gary Provost, <em>100 Ways to Improve Your Writing</em>
-              </p>
-            </blockquote>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Writing Style</h2>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Analyze sentence length patterns and compare to famous authors</p>
   </div>
-</div>
-<% end %>
 
-<div class="row">
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Words per sentence baseline comparison</div>
+  <div class="p-6 space-y-8">
+    <% if analysis.sentence_count > 1 %>
+      <!-- Words per sentence chart -->
+      <div>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">Words per Sentence</h3>
+        </div>
 
-        <%= 
+        <div id="words-per-sentence" class="w-full overflow-hidden"></div>
+
+        <details class="mt-4 group">
+          <summary class="cursor-pointer flex items-center gap-2 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11,18H13V16H11V18M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,6A4,4 0 0,0 8,10H10A2,2 0 0,1 12,8A2,2 0 0,1 14,10C14,12 11,11.75 11,15H13C13,12.75 16,12.5 16,10A4,4 0 0,0 12,6Z" />
+            </svg>
+            <span>How to use this chart</span>
+            <svg class="w-4 h-4 group-open:rotate-180 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+            </svg>
+          </summary>
+
+          <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                <p>
+                  Sentence length can be a powerful tool in your writing and you should
+                  use it purposefully. Longer sentences can lure a reader in, while shorter,
+                  more staccato sentences keep that attention with fast-paced action.
+                </p>
+                <p>
+                  This chart shows the length, in words, of each sentence through your
+                  document. Groups of shorter sentences likely read faster, while groups
+                  of longer sentences may be dense or hard to read.
+                </p>
+                <p>
+                  <strong class="text-gray-700 dark:text-gray-300">Tip:</strong> Select an area on the chart to zoom in. Double-click to reset.
+                </p>
+              </div>
+
+              <div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                <blockquote class="text-sm leading-relaxed">
+                  <p class="mb-3">
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">This sentence has five words.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">Here are five more words.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">Five-word sentences are fine.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">But several together become monotonous.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">Listen to what is happening.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">The writing is getting boring.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">The sound of it drones.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">It's like a stuck record.</span>
+                    <span class="bg-red-100 dark:bg-red-900 text-gray-800 dark:text-gray-200 px-1 rounded">The ear demands some variety.</span>
+                  </p>
+
+                  <p class="mb-3">
+                    <span class="bg-yellow-100 dark:bg-yellow-900 text-gray-800 dark:text-gray-200 px-1 rounded">Now listen.</span>
+                    <span class="bg-green-100 dark:bg-green-900 text-gray-800 dark:text-gray-200 px-1 rounded">I vary the sentence length, and I create music.</span>
+                    <span class="bg-yellow-100 dark:bg-yellow-900 text-gray-800 dark:text-gray-200 px-1 rounded">Music.</span>
+                    <span class="bg-blue-100 dark:bg-blue-900 text-gray-800 dark:text-gray-200 px-1 rounded">The writing sings.</span>
+                    <span class="bg-green-100 dark:bg-green-900 text-gray-800 dark:text-gray-200 px-1 rounded">It has a pleasant rhythm, a lilt, a harmony.</span>
+                    <span class="bg-blue-100 dark:bg-blue-900 text-gray-800 dark:text-gray-200 px-1 rounded">I use short sentences.</span>
+                    <span class="bg-green-100 dark:bg-green-900 text-gray-800 dark:text-gray-200 px-1 rounded">And I use sentences of medium length.</span>
+                    <span class="bg-purple-100 dark:bg-purple-900 text-gray-800 dark:text-gray-200 px-1 rounded">And sometimes, when I am certain the reader is rested, I will engage him with a sentence of considerable length, a sentence that burns with energy and builds with all the impetus of a crescendo, the roll of the drums, the crash of the cymbals–sounds that say listen to this, it is important.</span>
+                  </p>
+
+                  <p class="mb-3">
+                    <span class="bg-green-100 dark:bg-green-900 text-gray-800 dark:text-gray-200 px-1 rounded">So write with a combination of short, medium, and long sentences.</span>
+                    <span class="bg-green-100 dark:bg-green-900 text-gray-800 dark:text-gray-200 px-1 rounded">Create a sound that pleases the reader's ear.</span>
+                    <span class="bg-blue-100 dark:bg-blue-900 text-gray-800 dark:text-gray-200 px-1 rounded">Don't just write words.</span>
+                    <span class="bg-yellow-100 dark:bg-yellow-900 text-gray-800 dark:text-gray-200 px-1 rounded">Write music.</span>
+                  </p>
+
+                  <footer class="text-right text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    — Gary Provost, <em>100 Ways to Improve Your Writing</em>
+                  </footer>
+                </blockquote>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    <% end %>
+
+    <!-- Baseline comparison chart -->
+    <div>
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Compared to Famous Authors</h3>
+      <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+        <%=
           column_chart([
             ['This document',       (analysis.word_count.to_f / analysis.sentence_count).round],
             ['The Grapes of Wrath', 11],
@@ -109,9 +131,19 @@
             ["Typical Writing",     16],
             ['The Great Gatsby',    17],
             ["Swann's Way",         36],
-          ], colors: [Document.hex_color])
+          ], colors: [Document.hex_color], library: {
+            chart: { backgroundColor: 'transparent' },
+            legend: { labels: { fontColor: '#9ca3af' } },
+            scales: {
+              yAxes: [{ ticks: { fontColor: '#9ca3af' } }],
+              xAxes: [{ ticks: { fontColor: '#9ca3af' } }]
+            }
+          })
         %>
       </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        Average words per sentence compared to well-known literary works.
+      </p>
     </div>
   </div>
 </div>
@@ -122,21 +154,23 @@
       return { sentence_index: i, value: val };
     });
 
-    var margin = {top: 10, right: 0, bottom: 30, left: 80},
-        width = 1100 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+    var container = document.getElementById('words-per-sentence');
+    if (!container) return;
 
-    // append the svg object to the body of the page
+    var containerWidth = container.clientWidth || 800;
+    var margin = {top: 10, right: 20, bottom: 30, left: 50},
+        width = containerWidth - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
     var svg = d3.select("#words-per-sentence")
       .append("svg")
         .attr("width", '100%')
-        .attr("height", height)
-        .attr('viewBox','0 0 ' + Math.min(width, height) + ' ' + Math.min(width, height + margin.bottom))
-        .attr('preserveAspectRatio', 'xMinYMin')
+        .attr("height", height + margin.top + margin.bottom)
+        .attr('viewBox', '0 0 ' + (width + margin.left + margin.right) + ' ' + (height + margin.top + margin.bottom))
+        .attr('preserveAspectRatio', 'xMinYMin meet')
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Add X axis --> it is a date format
     var x = d3.scaleLinear()
       .domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
       .range([ 0, width ]);
@@ -144,14 +178,12 @@
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
 
-    // Add Y axis
     var y = d3.scaleLinear()
       .domain([0, d3.max(word_count_data, function(d) { return +d.value; })])
       .range([ height, 0 ]);
     yAxis = svg.append("g")
       .call(d3.axisLeft(y));
 
-    // Add a clipPath: everything out of this area won't be drawn.
     var clip = svg.append("defs").append("svg:clipPath")
         .attr("id", "clip")
         .append("svg:rect")
@@ -160,53 +192,42 @@
         .attr("x", 0)
         .attr("y", 0);
 
-    // Add brushing
-    var brush = d3.brushX()                   // Add the brush feature using the d3.brush function
-        .extent( [ [0,0], [width,height] ] )  // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+    var brush = d3.brushX()
+        .extent( [ [0,0], [width,height] ] )
+        .on("end", updateChart)
 
-    // Create the line variable: where both the line and the brush take place
     var line = svg.append('g')
       .attr("clip-path", "url(#clip)")
 
-    // Add the line
     line.append("path")
       .datum(word_count_data)
-      .attr("class", "line")  // I add the class line to be able to modify this line later on.
+      .attr("class", "line")
       .attr("fill", "none")
-      .attr("stroke", "steelblue")
       .attr("stroke-width", 1.5)
       .attr("d", d3.line()
         .x(function(d) { return x(d.sentence_index) })
         .y(function(d) { return y(d.value) })
         )
 
-    // Add the brushing
     line
       .append("g")
         .attr("class", "brush")
         .call(brush);
 
-    // A function that set idleTimeOut to null
     var idleTimeout
     function idled() { idleTimeout = null; }
 
-    // A function that update the chart for given boundaries
     function updateChart() {
-
-      // What are the selected boundaries?
       extent = d3.event.selection
 
-      // If no selection, back to initial coordinate. Otherwise, update X axis domain
       if(!extent){
-        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+        if (!idleTimeout) return idleTimeout = setTimeout(idled, 350);
         x.domain([ 4,8])
       }else{
         x.domain([ x.invert(extent[0]), x.invert(extent[1]) ])
-        line.select(".brush").call(brush.move, null) // This remove the grey brush area as soon as the selection has been done
+        line.select(".brush").call(brush.move, null)
       }
 
-      // Update axis and line position
       xAxis.transition().duration(1000).call(d3.axisBottom(x))
       line
           .select('.line')
@@ -218,7 +239,6 @@
           )
     }
 
-    // If user double click, reinitialize the chart
     svg.on("dblclick",function(){
       x.domain(d3.extent(word_count_data, function(d) { return d.sentence_index; }))
       xAxis.transition().call(d3.axisBottom(x))

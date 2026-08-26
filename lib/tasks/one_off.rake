@@ -36,7 +36,7 @@ namespace :one_off do
 
     User.find_each do |user|
       user.notifications.create(
-        message_html: "<div>Your #{year} Year in Review is now available!</div><div class='blue-text text-darken-3'>Look back on your year on Notebook.ai.</div>",
+        message_html: "<div>Happy holidays! Your #{year} Year in Review is now available!</div><div class='blue-text text-darken-3'>Look back on your year on Notebook.ai.</div>",
         icon:         'event',
         icon_color:   'blue',
         happened_at:  DateTime.current,

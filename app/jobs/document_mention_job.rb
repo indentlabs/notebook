@@ -21,7 +21,8 @@ class DocumentMentionJob < ApplicationJob
         # by the document owner, or else people could add arbitrary pages to quick reference
         # to view them.
         next unless Rails.application.config.content_types[:all].map(&:name).include?(entity_type)
-        related_page = entity_type.constantize.find(id)
+        related_page = entity_type.constantize.find_by(id: id)
+        next unless related_page.present?
         # todo we could also work off privacy here, so people could add public pages to quick ference
         # -- we'd have to delete those quick-references whenever a page went private though
         next unless related_page.user_id == document.user_id

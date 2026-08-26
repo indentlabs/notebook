@@ -4,6 +4,9 @@ module ApplicationHelper
     # If we pass in a class (e.g. Character instead of "Character") by mistake, just return it
     return class_name if class_name.is_a?(Class)
 
+    # Extra whitelisting for some other classes we don't necessarily want in the content_types array
+    return Folder if class_name == Folder.name
+
     Rails.application.config.content_types_by_name[class_name]
   end
 
@@ -43,6 +46,20 @@ module ApplicationHelper
 
   def show_notice?(id: nil)
     user_signed_in? && current_user.notice_dismissals.where(notice_id: id).none?
+  end
+
+  # Abbreviates large counts (e.g. 1190921 => "1.19M") so stat displays keep
+  # a predictable width; counts under 10,000 keep their full delimited form.
+  def compact_number(number)
+    number = number.to_i
+    return number_with_delimiter(number) if number < 10_000
+
+    number_to_human(number,
+                    format: '%n%u',
+                    precision: 3,
+                    significant: true,
+                    round_mode: :down,
+                    units: { thousand: 'K', million: 'M', billion: 'B', trillion: 'T' })
   end
 
   # Combines and sorts gallery images from both ImageUploads and BasilCommissions
@@ -100,8 +117,8 @@ module ApplicationHelper
   # @return [Hash] The best image to use as a preview (pinned if available)
   def get_preview_image(regular_images, basil_images)
     # First look for pinned images
-    pinned_regular = regular_images.find { |img| img.respond_to?(:pinned?) && img.pinned? }
-    pinned_basil = basil_images.find { |img| img.respond_to?(:pinned?) && img.pinned? }
+    pinned_regular = regular_images.find(&:pinned?)
+    pinned_basil = basil_images.find(&:pinned?)
     
     # Use the first pinned image found (prioritize regular uploads if both exist)
     if pinned_regular.present?
@@ -125,5 +142,18 @@ module ApplicationHelper
     
     # Return the first sorted image, or nil if none available
     combined.first
+  end
+
+  def unread_inbox_count
+    return 0 unless user_signed_in?
+    
+    @unread_inbox_count ||= begin
+      Thredded::PrivateTopic
+        .for_user(current_user)
+        .unread(current_user)
+        .count
+    rescue
+      0
+    end
   end
 end

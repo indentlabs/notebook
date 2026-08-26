@@ -4,6 +4,9 @@ Rails.application.configure do
   # Allow PR environments on Railway (auto-deployed dynamic domains)
   config.hosts << /.*\.up\.railway\.app/
   config.hosts << ENV["RAILWAY_PUBLIC_DOMAIN"] if ENV["RAILWAY_PUBLIC_DOMAIN"].present?
+  config.hosts << "notebook.ai"
+  config.hosts << "www.notebook.ai"
+  config.hosts << "new.notebook.ai"
 
   # Code is not reloaded between requests.
   config.cache_classes = true
@@ -61,6 +64,17 @@ Rails.application.configure do
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
 
+  # File store cache with size limits and automatic expiration
+  config.cache_store = :file_store, Rails.root.join("tmp", "cache"), {
+    size: 256.megabytes,  # Maximum cache size (256MB should be plenty)
+    compress: true,       # Compress cached data to save space
+    compress_threshold: 1.kilobyte  # Compress anything over 1KB
+  }
+
+  # Set cache expiration for fragment caching
+  config.action_controller.perform_caching = true
+  config.action_controller.enable_fragment_cache_logging = false
+
   # Use a real queuing backend for Active Job (and separate queues per environment)
   # config.active_job.queue_adapter     = :resque
   # config.active_job.queue_name_prefix = "notebook_#{Rails.env}"
@@ -102,20 +116,23 @@ Rails.application.configure do
   # Devise default url options
   config.action_mailer.default_url_options = { host: 'www.notebook.ai' }
   config.active_job.default_url_options    = { host: 'www.notebook.ai' }
+
+  # Amazon SES, via its SMTP interface.
+  #
+  # SES_SMTP_USERNAME / SES_SMTP_PASSWORD are *SES SMTP credentials*, which are
+  # generated in the SES console and are NOT the same as the AWS_ACCESS_KEY_ID /
+  # AWS_SECRET_ACCESS_KEY pair used for S3 below. Generating SMTP credentials
+  # creates an IAM user with ses:SendRawEmail permission and derives an SMTP
+  # password from its secret key; the two are not interchangeable.
+  config.action_mailer.delivery_method = :smtp
   ActionMailer::Base.smtp_settings = {
-    :address        => "smtp.sendgrid.net",
+    :address        => ENV.fetch('SES_SMTP_ADDRESS', "email-smtp.#{ENV.fetch('AWS_REGION', 'us-east-1')}.amazonaws.com"),
     :port           => 587,
-    :authentication => :plain,
-    :user_name      => ENV['SENDGRID_USERNAME'],
-    :password       => ENV['SENDGRID_PASSWORD'],
-    :domain         => ENV['SENDGRID_DOMAIN'],
+    :authentication => :login,
+    :user_name      => ENV['SES_SMTP_USERNAME'],
+    :password       => ENV['SES_SMTP_PASSWORD'],
     :enable_starttls_auto => true
   }
-
-  # Settings for API key usage:
-  # authentication: :plain,
-  # user_name:      'apikey',
-  # password:       ENV['SENDGRID_API_KEY']
 
   # S3 settings for Paperclip uploads
   config.paperclip_defaults = {

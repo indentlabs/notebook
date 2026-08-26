@@ -1,0 +1,227 @@
+<%
+  set_meta_tags title:       @book.name,
+                description: @book.blurb.presence || @book.description.presence || "A book by #{@book.user.display_name}",
+                image_src:   image_url(@book.first_public_image),
+                og:          { type: 'book' },
+                twitter:     { card: 'photo', image: image_url(@book.first_public_image) }
+
+  valid_cover = @book.image_uploads.find { |upload| upload.src_file_name.present? }
+%>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
+  
+  <!-- Hero Section (Mirrors content/_hero_header.html.erb) -->
+  <div class="relative h-64 md:h-80 lg:h-96 bg-gray-900 overflow-hidden">
+    <% if valid_cover.present? %>
+      <%= image_tag valid_cover.src(:large), 
+                    class: "w-full h-full object-cover",
+                    alt: "#{@book.name} banner image" %>
+    <% else %>
+      <%= image_tag "card-headers/books.webp", 
+                    class: "w-full h-full object-cover opacity-70",
+                    alt: "#{@book.name} banner image" %>
+    <% end %>
+
+    <!-- Gradient overlay for legibility if needed, but we rely on the glass box -->
+    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+
+    <!-- Glassmorphic content overlay -->
+    <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+      <div class="max-w-5xl mx-auto">
+        <div class="bg-gray-900 bg-opacity-60 backdrop-blur-xl rounded-2xl px-6 py-4 border border-white border-opacity-10 shadow-2xl">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            
+            <div class="flex items-center space-x-4 min-w-0">
+              <!-- Book Icon -->
+              <div class="flex-shrink-0 hidden sm:block">
+                <div class="w-14 h-14 <%= Book.color %> rounded-xl flex items-center justify-center shadow-lg ring-2 ring-white ring-opacity-20">
+                  <i class="material-icons text-white text-2xl font-light"><%= Book.icon %></i>
+                </div>
+              </div>
+              
+              <!-- Book Title & Subtitle -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-3 mb-1">
+                  <h1 class="text-2xl lg:text-3xl font-semibold text-white truncate tracking-tight leading-tight page-title">
+                    <%= @book.name %>
+                  </h1>
+                </div>
+                
+                <% if @book.subtitle.present? %>
+                  <div class="text-gray-300 text-sm lg:text-base truncate"><%= @book.subtitle %></div>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- Author info -->
+            <%= link_to user_path(@book.user), class: "flex-shrink-0 flex items-center space-x-3 bg-white bg-opacity-10 hover:bg-opacity-20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-out shadow-sm hover:shadow-md rounded-full pl-2 pr-4 py-1.5 border border-white border-opacity-10 hover:border-opacity-30 group" do %>
+              <% if @book.user.image_url.present? %>
+                 <%= image_tag @book.user.image_url, class: "w-6 h-6 rounded-full ring-2 ring-white ring-opacity-20 group-hover:ring-opacity-40 transition-all" %>
+              <% else %>
+                 <div class="w-6 h-6 rounded-full <%= Book.color %> flex items-center justify-center text-white text-xs font-bold ring-2 ring-white ring-opacity-20 group-hover:ring-opacity-40 transition-all"><%= @book.user.display_name.first %></div>
+              <% end %>
+              <span class="text-white text-sm font-medium group-hover:text-amber-50 drop-shadow-sm">by <%= @book.user.display_name %></span>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+      
+      <!-- Main Content Container -->
+      <div class="flex-1 min-w-0 space-y-8">
+        
+        <!-- About / Description -->
+        <% if @book.description.present? || @book.blurb.present? %>
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <% if @book.blurb.present? %>
+              <div class="bg-gray-50 dark:bg-gray-800/80 p-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 italic font-medium leading-relaxed">
+                  <%= simple_format @book.blurb %>
+                </div>
+              </div>
+            <% end %>
+            
+            <% if @book.description.present? %>
+              <div class="p-6">
+                <h3 class="text-sm font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase mb-4">About the Book</h3>
+                <div class="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200">
+                  <%= simple_format @book.description %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <!-- Table of Contents -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/80">
+            <h3 class="text-sm font-semibold tracking-wider text-gray-700 dark:text-gray-300 uppercase flex items-center">
+              <i class="material-icons text-base mr-2 text-gray-400">format_list_numbered</i>
+              Table of Contents
+            </h3>
+            <span class="text-xs font-medium text-gray-500 bg-white dark:bg-gray-700 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600">
+              <%= pluralize(@book_documents.count, 'Chapter') %>
+            </span>
+          </div>
+          
+          <div class="divide-y divide-gray-100 dark:divide-gray-700">
+            <% if @book_documents.any? %>
+              <% @book_documents.each_with_index do |bd, idx| %>
+                <%= link_to document_path(bd.document), class: "group block hover:bg-gray-50 dark:hover:bg-gray-700/50 transition duration-150 ease-in-out" do %>
+                  <div class="px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center min-w-0">
+                      <span class="text-gray-400 dark:text-gray-500 font-mono text-sm w-8 flex-shrink-0 group-hover:text-emerald-500 transition-colors">
+                        <%= (idx + 1).to_s.rjust(2, '0') %>.
+                      </span>
+                      <p class="text-base font-medium text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+                        <%= bd.document.title.presence || 'Untitled Chapter' %>
+                      </p>
+                    </div>
+                    <div class="ml-4 flex-shrink-0 flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                      <span class="hidden sm:inline-flex items-center">
+                        <i class="material-icons text-[16px] mr-1 opacity-70">text_snippet</i>
+                        <%= number_with_delimiter(bd.document.word_count || 0) %> words
+                      </span>
+                      <span class="inline-flex items-center">
+                        <i class="material-icons text-[16px] mr-1 opacity-70">timer</i>
+                        <%= ((bd.document.word_count || 0) / 200.0).ceil %> min
+                      </span>
+                      <i class="material-icons text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 transition-colors">chevron_right</i>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            <% else %>
+               <div class="px-6 py-12 text-center">
+                <i class="material-icons text-5xl text-gray-300 dark:text-gray-600 mb-3">auto_stories</i>
+                <p class="text-gray-500 dark:text-gray-400">No chapters have been published yet.</p>
+               </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="lg:w-80 flex-shrink-0 space-y-6">
+        
+        <% if @book.updatable_by?(current_user) %>
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
+            <h4 class="text-blue-800 dark:text-blue-300 font-semibold mb-2 flex items-center text-sm">
+              <i class="material-icons text-[18px] mr-1.5 opacity-80">edit</i> Author Controls
+            </h4>
+            <p class="text-xs text-blue-600/80 dark:text-blue-400/80 mb-4 leading-relaxed">
+              <% if @book.privacy == 'public' %>
+                You are currently viewing the public layout. This is what readers will see.
+              <% elsif @book.effectively_public? %>
+                You are currently viewing the public layout. This book is set to private, but it belongs to the public
+                universe <%= link_to @book.universe.name, universe_path(@book.universe), class: "underline" %>, so anyone
+                can see it — this is what readers will see.
+              <% else %>
+                You are currently viewing the reader layout. This book is private, so only you and collaborators can see it.
+              <% end %>
+            </p>
+            <%= link_to edit_book_path(@book), class: "w-full flex justify-center items-center px-4 py-2 text-sm font-medium rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 dark:text-blue-200 dark:bg-blue-800 dark:hover:bg-blue-700 transition duration-150 ease-in-out" do %>
+              Return to Editing
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+            <h3 class="text-sm font-semibold tracking-wider text-gray-700 dark:text-gray-300 uppercase">Book Details</h3>
+          </div>
+          <div class="p-5">
+            <dl class="space-y-4">
+              <% if @universe.present? %>
+                <div class="flex flex-col">
+                  <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Universe</dt>
+                  <dd class="mt-1 text-sm font-medium text-gray-900 dark:text-white">
+                    <%= link_to @universe.name, universe_path(@universe), class: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" %>
+                  </dd>
+                </div>
+              <% end %>
+              <div class="flex justify-between items-center">
+                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Word Count</dt>
+                <dd class="text-sm font-medium text-gray-900 dark:text-white"><%= number_with_delimiter(@total_words) %></dd>
+              </div>
+              <div class="flex justify-between items-center">
+                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Reading Time</dt>
+                <dd class="text-sm font-medium text-gray-900 dark:text-white"><%= @est_reading_time %> minutes</dd>
+              </div>
+              <div class="flex justify-between items-center">
+                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Updated</dt>
+                <dd class="text-sm font-medium text-gray-900 dark:text-white"><%= time_ago_in_words(@book.updated_at) %> ago</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        
+      </div>
+      
+    </div>
+  </div>
+  <!-- Floating action buttons -->
+  <div class="fixed bottom-8 right-8 z-20 flex flex-col space-y-3" x-data>
+    <!-- Share to Stream button -->
+    <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
+            class="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-80 backdrop-blur-sm shadow-lg text-gray-600 hover:text-green-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-green-400 dark:hover:bg-gray-700 dark:border-gray-700 tooltip-left"
+            data-tooltip="Share with community">
+      <i class="material-icons">campaign</i>
+    </button>
+  </div>
+
+  <!-- Share to Stream Modal -->
+  <%= render 'shared/share_to_stream_modal',
+             content: @book,
+             content_type: @book.class.name,
+             content_id: @book.id,
+             content_name: @book.name,
+             content_owner: @book.user %>
+
+</div>

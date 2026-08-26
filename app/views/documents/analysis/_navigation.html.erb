@@ -1,0 +1,31 @@
+<%
+  # Determine current page from the path
+  current_path = request.path
+
+  nav_items = [
+    { label: 'Overview', path: analysis_document_path(document), icon: 'M3,13H5V11H3V13M3,17H5V15H3V17M3,9H5V7H3V9M7,13H21V11H7V13M7,17H21V15H7V17M7,7V9H21V7H7Z' },
+    { label: 'Readability', path: analysis_readability_document_path(document), icon: 'M21,5C19.89,4.65 18.67,4.5 17.5,4.5C15.55,4.5 13.45,4.9 12,6C10.55,4.9 8.45,4.5 6.5,4.5C4.55,4.5 2.45,4.9 1,6V20.65C1,20.9 1.25,21.15 1.5,21.15C1.6,21.15 1.65,21.1 1.75,21.1C3.1,20.45 5.05,20 6.5,20C8.45,20 10.55,20.4 12,21.5C13.35,20.65 15.8,20 17.5,20C19.15,20 20.85,20.3 22.25,21.05C22.35,21.1 22.4,21.1 22.5,21.1C22.75,21.1 23,20.85 23,20.6V6C22.4,5.55 21.75,5.25 21,5M21,18.5C19.9,18.15 18.7,18 17.5,18C15.8,18 13.35,18.65 12,19.5V8C13.35,7.15 15.8,6.5 17.5,6.5C18.7,6.5 19.9,6.65 21,7V18.5Z' },
+    { label: 'Style', path: analysis_style_document_path(document), icon: 'M2,2H11V11H2V2M17.5,2C20,2 22,4 22,6.5C22,9 20,11 17.5,11C15,11 13,9 13,6.5C13,4 15,2 17.5,2M6.5,14L11,22H2L6.5,14M19,17H22V19H19V22H17V19H14V17H17V14H19V17Z' },
+    { label: 'Sentiment', path: analysis_sentiment_document_path(document), icon: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M7,9.5C7,8.7 7.7,8 8.5,8C9.3,8 10,8.7 10,9.5C10,10.3 9.3,11 8.5,11C7.7,11 7,10.3 7,9.5M12,17.23C9.97,17.23 8.16,16.5 6.76,15.36L8.67,13.45C9.66,14.13 10.81,14.54 12,14.54C13.19,14.54 14.34,14.13 15.33,13.45L17.24,15.36C15.84,16.5 14.03,17.23 12,17.23M15.5,11C14.7,11 14,10.3 14,9.5C14,8.7 14.7,8 15.5,8C16.3,8 17,8.7 17,9.5C17,10.3 16.3,11 15.5,11Z' }
+  ]
+%>
+
+<nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center gap-1 overflow-x-auto">
+      <% nav_items.each do |item| %>
+        <%
+          is_active = current_path == item[:path]
+          base_classes = "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition whitespace-nowrap"
+          active_classes = is_active ? "border-teal-500 text-teal-600 dark:text-teal-400" : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600"
+        %>
+        <%= link_to item[:path], class: "#{base_classes} #{active_classes}" do %>
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="<%= item[:icon] %>" />
+          </svg>
+          <%= item[:label] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</nav>

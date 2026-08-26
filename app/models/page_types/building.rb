@@ -23,11 +23,11 @@ class Building < ActiveRecord::Base
   relates :district_schools, with: :building_schools
 
   def self.color
-    'blue-grey'
+    'blue-grey bg-gray-600'
   end
 
   def self.text_color
-    'blue-grey-text'
+    'blue-grey-text text-gray-600'
   end
 
   def self.hex_color

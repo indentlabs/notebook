@@ -62,7 +62,7 @@ Rails.application.configure do
 
   # Use an evented file watcher to asynchronously detect changes in source code,
   # routes, locales, etc. This feature depends on the listen gem.
-  config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+  # config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
   # Whitelist HashWithIndifferentAccess/TimeWithZone for changelog serialization
   # config.active_record.yaml_column_permitted_classes = [HashWithIndifferentAccess, ActiveSupport::TimeWithZone, Time]
@@ -77,14 +77,11 @@ Rails.application.configure do
 
   # Paperclip config for image uploads
   config.paperclip_defaults = {
-    storage: :s3,
-    s3_credentials: {
-      bucket:            ENV.fetch('S3_BUCKET_NAME',        'notebook-content-uploads'),
-      s3_region:         ENV.fetch('AWS_REGION',            'us-east-1'),
-      access_key_id:     ENV.fetch('AWS_ACCESS_KEY_ID',     ''),
-      secret_access_key: ENV.fetch('AWS_SECRET_ACCESS_KEY', '')
-    }
+    storage: :filesystem
   }
+
+  # Use the async adapter in development so Redis isn't strictly required
+  config.active_job.queue_adapter = :async
 
   Bullet.enable = true
   # Bullet.sentry = true

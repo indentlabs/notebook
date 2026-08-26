@@ -11,6 +11,74 @@
  *= require_self
  *= require material_icons
  *= require font-awesome
- *= require tribute
  *= require_tree .
 */
+
+/* Alpine.js x-cloak - hide elements until Alpine loads */
+[x-cloak] {
+  display: none !important;
+}
+
+/* Instant CSS Tooltips - Reusable across the site */
+/* Usage: Add class="tooltip-left" (or tooltip-right/top/bottom) and data-tooltip="Your text here" to any element */
+.tooltip-left,
+.tooltip-right,
+.tooltip-top,
+.tooltip-bottom {
+  position: relative;
+}
+
+.tooltip-left::after,
+.tooltip-right::after,
+.tooltip-top::after,
+.tooltip-bottom::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  padding: 8px 12px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: white;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease-in-out;
+  z-index: 1000;
+}
+
+/* Left tooltip - appears to the left of the element */
+.tooltip-left::after {
+  top: 50%;
+  right: calc(100% + 8px);
+  transform: translateY(-50%);
+}
+
+/* Right tooltip - appears to the right of the element */
+.tooltip-right::after {
+  top: 50%;
+  left: calc(100% + 8px);
+  transform: translateY(-50%);
+}
+
+/* Top tooltip - appears above the element */
+.tooltip-top::after {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Bottom tooltip - appears below the element */
+.tooltip-bottom::after {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Show tooltip on hover */
+.tooltip-left:hover::after,
+.tooltip-right:hover::after,
+.tooltip-top:hover::after,
+.tooltip-bottom:hover::after {
+  opacity: 1;
+}

@@ -5,8 +5,23 @@ $(document).ready(function () {
     
     $.ajax({
       dataType: "json",
-      url: "/api/v1/categories/suggest/" + content_type,
+      url: "/plan/attribute_categories/suggest?content_type=" + content_type,
       success: function (data) {
+        console.log('Categories suggestion data received:', data);
+        console.log('Data type:', typeof data);
+        console.log('Is array:', Array.isArray(data));
+        
+        // If data is a string, try to parse it as JSON
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+            console.log('Parsed data:', data);
+          } catch (e) {
+            console.error('Failed to parse JSON:', e);
+            return;
+          }
+        }
+        
         var existing_categories = $('.js-category-label').map(function(){
           return $.trim($(this).text());
         }).get();
@@ -45,7 +60,7 @@ $(document).ready(function () {
 
     $.ajax({
       dataType: "json",
-      url: "/api/v1/fields/suggest/" + content_type + "/" + category_label,
+      url: "/plan/attribute_fields/suggest?content_type=" + content_type + "&category=" + category_label,
       success: function (data) {
         // console.log("new fields");
         // console.log(data);

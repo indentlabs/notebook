@@ -1,45 +1,124 @@
-<% if @content_list.any? %>
-  <div class="row">
-    <div class="col s12">
-      <div class="card">
-        <div class="card-image", style="height: 260px; overflow-y: hidden;">
-          <%= image_tag "card-headers/#{@content_type.to_s.downcase.pluralize}.webp" %>
-          <span class="card-title black lighten-3">
-            <i class="material-icons <%= @content_type.text_color %>"><%= @content_type.icon %></i>
-            <%= @content_type.to_s.capitalize.pluralize %>
-            in
-            &nbsp;
-            <i class="material-icons <%= Universe.text_color %>"><%= Universe.icon %></i>
-            <%= link_to @universe.name, @universe, class: 'light-blue-text' %>
-          </span>
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
+  <!-- Hero Section -->
+  <div class="relative w-full bg-gray-900 overflow-hidden" style="height: 32rem; min-height: 450px;">
+    <% 
+      regular_images = @universe.image_uploads.ordered.to_a
+      unless user_signed_in? && @universe.user_id == current_user.id
+        regular_images = regular_images.select { |img| img.privacy == 'public' }
+      end
+      basil_images = @universe.basil_commissions.where.not(saved_at: nil).ordered.to_a
+      preview_image = get_preview_image(regular_images, basil_images)
+      can_edit_universe = user_signed_in? && (current_user == @universe.user || Contributor.exists?(user_id: current_user.id, universe_id: @universe.id))
+    %>
+    <% if preview_image.present? %>
+      <% image_type = preview_image[:type] %>
+      <% image_data = preview_image[:data] %>
+      <% if image_type == 'image_upload' %>
+        <%= image_tag image_data.src.url, class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
+      <% elsif image_type == 'basil_commission' %>
+        <% if image_data.image.attached? %>
+          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "absolute inset-0 w-full h-full object-cover" %>
+        <% else %>
+          <%= image_tag "card-headers/universes.webp", class: "absolute inset-0 w-full h-full object-cover" %>
+        <% end %>
+      <% end %>
+    <% else %>
+      <%= image_tag "card-headers/universes.webp", class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
+    <% end %>
+
+    <main class="absolute inset-0 pb-12 flex flex-col items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center drop-shadow-lg w-full">
+      <div class="max-w-4xl w-full p-8 md:p-12 rounded-3xl bg-gray-900 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-white border-opacity-10 shadow-2xl">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl tracking-tight font-black text-white drop-shadow-xl" style="text-shadow: 0 4px 16px rgba(0,0,0,0.8);">
+          <%= link_to @universe.name, universe_contents_path(@universe), class: "hover:opacity-80 transition-opacity" %>
+        </h1>
+        
+        <h2 class="mt-4 flex flex-wrap items-center justify-center gap-3 text-2xl sm:text-3xl md:text-4xl font-bold <%= @content_type.text_color %> drop-shadow-lg" style="text-shadow: 0 2px 8px rgba(0,0,0,0.6);">
+          <%= @content_type.name.pluralize %>
+        </h2>
+
+        <div class="w-16 h-1 bg-white bg-opacity-20 mx-auto mt-8 rounded-full"></div>
+        <p class="mt-6 text-lg md:text-xl text-gray-100 leading-relaxed line-clamp-2 drop-shadow-md font-medium px-4">
+          <%= t("content_descriptions.#{@content_type.name.downcase}") %>
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Content Layout -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 pb-16">
+    <div class="flex items-center justify-between mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+      <div class="text-gray-600 dark:text-gray-300 font-semibold text-lg flex items-center gap-2">
+        <i class="material-icons text-gray-400">filter_list</i>
+        Listing <%= pluralize(@content_list.count, @content_type.name) %>
+      </div>
+      <% if can_edit_universe && current_user.can_create?(@content_type) %>
+        <%= link_to new_polymorphic_path(@content_type, universe_id: @universe.id), class: "inline-flex items-center px-4 py-2 #{@content_type.color} hover:opacity-90 text-white font-semibold rounded-lg shadow-md transition-colors" do %>
+          <i class="material-icons mr-2 text-sm">add</i>
+          Create New
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if @content_list.any? %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+        <% @content_list.each do |page| %>
+          <%= render partial: 'main/wiki_card', locals: { content_page: page } %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-12 text-center mt-6">
+        <div class="mx-auto w-20 h-20 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+          <i class="material-icons text-4xl text-gray-400 dark:text-gray-500">search_off</i>
         </div>
-        <div class="card-content">
-          <%= render partial: 'content/list/list', locals: { content_list: @content_list, content_type: @content_type } %>
-        </div>
-        <div class="card-action">
-          <%= link_to @universe do %>
-            <i class="material-icons left">arrow_left</i>
-            Back to the <%= @universe.name %> universe
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No <%= @content_type.name.downcase.pluralize %> found</h3>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">This universe doesn't have any <%= @content_type.name.downcase.pluralize %> yet.</p>
+        
+        <% if can_edit_universe && current_user.can_create?(@content_type) %>
+          <%= link_to new_polymorphic_path(@content_type, universe_id: @universe.id), class: "inline-flex items-center px-6 py-3 rounded-lg #{@content_type.color} hover:opacity-90 text-white font-semibold shadow-md transition-colors" do %>
+            <i class="material-icons mr-2 text-sm">add</i>
+            Create <%= @content_type.name %>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Universe Advertisement / CTA Section -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 pb-20 relative z-20">
+    <div class="rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 relative bg-gray-900 flex flex-col md:flex-row items-stretch min-h-[24rem]">
+      <!-- Background Image -->
+      <div class="absolute inset-0">
+        <% if preview_image.present? && image_type == 'image_upload' %>
+          <%= image_tag image_data.src.url, class: "w-full h-full object-cover opacity-40", alt: "#{@universe.name} banner" %>
+        <% elsif preview_image.present? && image_type == 'basil_commission' && image_data.image.attached? %>
+          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "w-full h-full object-cover opacity-40" %>
+        <% else %>
+          <%= image_tag "card-headers/universes.webp", class: "w-full h-full object-cover opacity-40", alt: "#{@universe.name} banner" %>
+        <% end %>
+        <!-- Overlay Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-gray-900 via-gray-900/90 to-gray-900/10"></div>
+      </div>
+
+      <!-- Content Side -->
+      <div class="relative w-full p-8 md:p-16 z-10 flex flex-col justify-center lg:w-2/3">
+        <h3 class="text-sm font-black tracking-widest text-<%= Universe.color.split('-')[1] %>-400 uppercase mb-3 flex items-center">
+          <i class="material-icons text-base mr-2"><%= Universe.icon %></i>
+          Explore the Universe
+        </h3>
+        <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg"><%= @universe.name %></h2>
+        <% if @universe.description.present? %>
+          <p class="text-gray-300 text-lg md:text-xl mb-10 line-clamp-3 drop-shadow"><%= @universe.description %></p>
+        <% else %>
+          <p class="text-gray-300 text-lg md:text-xl mb-10 drop-shadow">Join the adventure! Discover all the incredible characters, locations, items, and lore waiting to be explored in this world.</p>
+        <% end %>
+
+        <div>
+          <%= link_to universe_contents_path(@universe), class: "inline-flex items-center justify-center px-8 py-4 bg-white text-gray-900 hover:bg-gray-100 font-bold rounded-xl shadow-xl transition-all transform hover:-translate-y-1 hover:shadow-2xl sm:w-auto w-full group" do %>
+            <i class="material-icons mr-3 text-<%= Universe.color.split('-')[1] %>-600 transition-transform group-hover:-translate-x-1">arrow_back</i>
+            Back to <%= @universe.name %> Hub
           <% end %>
         </div>
       </div>
     </div>
   </div>
-<% else %>
-  <div class="center" style="margin: 50px 0">
-    <h4>
-      <i class="material-icons <%= Universe.text_color %>"><%= Universe.icon %></i>
-      <%= link_to @universe.name, @universe %>
-      doesn't contain any
-      <%= @content_type.name.downcase.pluralize %> yet!
-    </h4>
-    <h1>
-      <i class="material-icons <%= @content_type.text_color %>" style="font-size: 200%">
-        <%= @content_type.icon %>
-      </i>
-    </h1>
-    <p>
-      <%= t("content_descriptions.#{@content_type.name.downcase}") %>
-    </p>
-  </div>
-<% end %>
+</div>

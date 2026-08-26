@@ -1,0 +1,194 @@
+<% content_for :thredded_page_title, t('thredded.topics.search.page_title') %>
+<% content_for :thredded_page_id, 'thredded--topic-search-results' %>
+<% content_for :thredded_breadcrumbs, render('thredded/shared/breadcrumbs') %>
+
+<%= thredded_page do %>
+  <!-- Search Header -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-white">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full">
+            <i class="material-icons text-blue-600 text-xl">search</i>
+          </div>
+          <div>
+            <h1 class="text-xl font-semibold text-gray-900">Search Results</h1>
+            <p class="text-sm text-gray-600 mt-0.5">
+              Searching for "<span class="font-medium text-gray-900"><%= @query %></span>"
+            </p>
+          </div>
+        </div>
+        
+        <!-- New Search Form -->
+        <%= form_tag messageboards_search_path, method: :get, class: 'flex items-center space-x-2' do %>
+          <input type="search" 
+                 name="q" 
+                 value="<%= @query %>" 
+                 placeholder="Search forums..." 
+                 class="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-48">
+          <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors duration-150 flex items-center">
+            <i class="material-icons text-base">search</i>
+          </button>
+        <% end %>
+      </div>
+    </div>
+    
+    <% if @topics.present? %>
+      <!-- Results Count -->
+      <div class="px-6 py-3 bg-green-50 border-b border-green-100">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <i class="material-icons text-green-600 text-base">check_circle</i>
+            <span class="text-sm text-green-800">
+              <% if messageboard_or_nil %>
+                Found results in <span class="font-medium"><%= messageboard.name %></span>
+              <% else %>
+                Found <span class="font-medium"><%= @topics.size %></span> matching <%= 'topic'.pluralize(@topics.size) %>
+              <% end %>
+            </span>
+          </div>
+          
+          <% if messageboard_or_nil %>
+            <a href="<%= messageboards_search_path(q: @query) %>" 
+               class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center space-x-1">
+              <span><%= t('thredded.topics.search.search_in_all_messageboards_btn') %></span>
+              <i class="material-icons text-base">arrow_forward</i>
+            </a>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @topics.present? %>
+    <!-- Search Results -->
+    <div class="space-y-3">
+      <% @topics.each do |topic| %>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
+          <%= link_to topic.path, class: 'block p-4 hover:bg-gray-50 transition-colors duration-150' do %>
+            <div class="flex items-start justify-between">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2 mb-2">
+                  <% if topic.sticky? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <i class="material-icons text-xs mr-0.5">push_pin</i>
+                      Pinned
+                    </span>
+                  <% end %>
+                  <% if topic.locked? %>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700">
+                      <i class="material-icons text-xs mr-0.5">lock</i>
+                      Locked
+                    </span>
+                  <% end %>
+                  <% if topic.categories.any? %>
+                    <% topic.categories.each do |category| %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" 
+                            style="background-color: <%= category.color %>20; color: <%= category.color %>;">
+                        <%= category.name %>
+                      </span>
+                    <% end %>
+                  <% end %>
+                </div>
+                
+                <h3 class="text-base font-medium text-gray-900 mb-1">
+                  <%= topic.title %>
+                </h3>
+                
+                <div class="flex items-center space-x-4 text-sm text-gray-600">
+                  <div class="flex items-center space-x-1">
+                    <% if topic.user %>
+                      <% if topic.user.respond_to?(:image_url) %>
+                        <img src="<%= topic.user.image_url(size: 40) %>"
+                             alt="<%= topic.user.respond_to?(:display_name) ? topic.user.display_name : topic.user.thredded_display_name %>"
+                             class="w-5 h-5 rounded-full">
+                      <% else %>
+                        <i class="material-icons text-base">person</i>
+                      <% end %>
+                      <span><%= topic.user.respond_to?(:display_name) ? topic.user.display_name : topic.user.thredded_display_name %></span>
+                    <% else %>
+                      <i class="material-icons text-base">person</i>
+                      <span>Anonymous</span>
+                    <% end %>
+                  </div>
+                  
+                  <div class="flex items-center space-x-1">
+                    <i class="material-icons text-base">schedule</i>
+                    <span><%= time_ago_in_words(topic.created_at) %> ago</span>
+                  </div>
+                  
+                  <div class="flex items-center space-x-1">
+                    <i class="material-icons text-base">forum</i>
+                    <span><%= pluralize(topic.posts_count, 'reply', 'replies') %></span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="ml-4 flex-shrink-0 text-right">
+                <div class="text-sm text-gray-500">
+                  <% if topic.last_user %>
+                    <div class="flex items-center justify-end space-x-1 mb-1">
+                      <span>Last by</span>
+                      <% if topic.last_user.respond_to?(:image_url) %>
+                        <img src="<%= topic.last_user.image_url(size: 32) %>"
+                             alt="<%= topic.last_user.respond_to?(:display_name) ? topic.last_user.display_name : topic.last_user.thredded_display_name %>"
+                             class="w-4 h-4 rounded-full">
+                      <% else %>
+                        <span class="text-xs"><%= topic.last_user.respond_to?(:display_name) ? topic.last_user.display_name : topic.last_user.thredded_display_name %></span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                  <div class="text-xs text-gray-400">
+                    <%= time_ago_in_words(topic.last_post_at) %> ago
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="mt-6">
+      <%= paginate @topics %>
+    </div>
+    
+  <% else %>
+    <!-- No Results -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+      <div class="flex justify-center mb-4">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+          <i class="material-icons text-gray-400 text-3xl">search_off</i>
+        </div>
+      </div>
+      
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No results found</h3>
+      
+      <p class="text-gray-600 mb-6">
+        <% if messageboard_or_nil %>
+          No topics found matching "<%= @query %>" in <span class="font-medium"><%= messageboard.name %></span>
+        <% else %>
+          No topics found matching "<%= @query %>"
+        <% end %>
+      </p>
+      
+      <div class="space-y-3">
+        <% if messageboard_or_nil %>
+          <a href="<%= messageboards_search_path(q: @query) %>" 
+             class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors duration-150">
+            <i class="material-icons text-base mr-1">search</i>
+            <%= t('thredded.topics.search.search_in_all_messageboards_btn') %>
+          </a>
+        <% end %>
+        
+        <div class="text-sm text-gray-500">
+          <p>Try adjusting your search terms or browse the forums:</p>
+          <a href="<%= thredded.root_path %>" class="text-blue-600 hover:text-blue-800 font-medium">
+            View all forums →
+          </a>
+        </div>
+      </div>
+    </div>
+  <% end %>
+<% end %>

@@ -1,121 +1,166 @@
-<div class="row">
-  <div class="col s12">
-    <div class="green card">
-      <div class="card-content">
-        <div class="row">
-          <div class="col s12 m3 white-text center">
-            <h2><%= @analysis.readability_score %></h2>
-            READABILITY
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <%= render partial: 'document_analyses/header', locals: { page_title: 'Readability' } %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Hero Readability Score Card -->
+    <%
+      score = @analysis.readability_score || 0
+      score_color = case score
+        when 66..100 then 'green'
+        when 36..65 then 'yellow'
+        else 'red'
+      end
+      bg_class = case score_color
+        when 'green' then 'bg-green-500 dark:bg-green-600'
+        when 'yellow' then 'bg-yellow-500 dark:bg-yellow-600'
+        else 'bg-red-500 dark:bg-red-600'
+      end
+    %>
+    <div class="<%= bg_class %> rounded-xl shadow-sm overflow-hidden mb-8">
+      <div class="p-6">
+        <div class="flex flex-col md:flex-row md:items-center gap-6">
+          <div class="text-center md:text-left">
+            <div class="text-6xl font-bold text-white"><%= score %></div>
+            <div class="text-white text-opacity-90 font-medium mt-1">READABILITY</div>
           </div>
-          <div class="col s12 m9 white-text">
-            <h4>
-              <% Documents::Analysis::ReadabilityService.readability_score_category(@analysis.readability_score) %>
+          <div class="flex-1 text-white">
+            <h4 class="text-xl font-semibold mb-2">
+              <%= Documents::Analysis::ReadabilityService.readability_score_category(@analysis.readability_score) %>
             </h4>
-            <p>
+            <p class="text-white text-opacity-90">
               <%= Documents::Analysis::ReadabilityService.readability_score_text(@analysis) %>
             </p>
           </div>
         </div>
       </div>
-      <div class="card-action green lighten-1">
-        <a class="activator white-text text-darken-4">
-          How is this calculated?
-        </a>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title">
-          Readability scales
-          <i class="material-icons right">close</i>
-        </span>
-        <p>
-          In order to provide you with a generalized score in Notebook.ai, we compute
-          several of the most well-known readability scores on your text. 
-          For all scales other than the Flesch-Kincaid reading ease, a higher score means
-          a greater difficulty reading. Conversely, lower scores mean text is easier to read.
-        </p>
-        <p>
-          We take a weighted composite score of all readability scales to give you a singular readability score.
-        </p>
-        <ul>
-          <% if @analysis.flesch_kincaid_reading_ease %>
-            <li>
-              Flesch-Kincaid reading ease: <%= @analysis.flesch_kincaid_reading_ease.try(:round) %> / 100
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.flesch_kincaid_reading_ease.try(:round) / 100 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.flesch_kincaid_grade_level %>
-            <li>
-              Flesch-Kincaid grade level: <%= @analysis.flesch_kincaid_grade_level.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.flesch_kincaid_grade_level.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.flesch_kincaid_age_minimum %>
-            <li>
-              Flesch-Kincaid age minimum: <%= @analysis.flesch_kincaid_age_minimum.try(:round) %> / 20
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.flesch_kincaid_age_minimum.try(:round) / 20 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.forcast_grade_level %>
-            <li>
-              Forcast grade level: <%= @analysis.forcast_grade_level.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.forcast_grade_level.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.coleman_liau_index %>
-            <li>
-              Coleman liau index: <%= @analysis.coleman_liau_index.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.coleman_liau_index.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.automated_readability_index %>
-            <li>
-              Automated readability index: <%= @analysis.automated_readability_index.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.automated_readability_index.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.gunning_fog_index %>
-            <li>
-              Gunning fog index: <%= @analysis.gunning_fog_index.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.gunning_fog_index.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.smog_grade %>
-            <li>
-              SMOG grade: <%= @analysis.smog_grade.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.smog_grade.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if @analysis.combined_average_reading_level %>
-            <li>
-              Combined average reading level: <%= @analysis.combined_average_reading_level.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * @analysis.combined_average_reading_level.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
 
-<h5 class="grey-text">Readability scales</h5>
+      <!-- Expandable details section -->
+      <details class="border-t border-white border-opacity-20">
+        <summary class="px-6 py-4 cursor-pointer text-white text-opacity-90 hover:text-opacity-100 font-medium flex items-center gap-2">
+          <svg class="w-4 h-4 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
+          </svg>
+          How is this calculated?
+        </summary>
+        <div class="px-6 pb-6 bg-white bg-opacity-10">
+          <div class="text-white text-opacity-90 space-y-4">
+            <p>
+              In order to provide you with a generalized score in Notebook.ai, we compute
+              several of the most well-known readability scores on your text.
+              For all scales other than the Flesch-Kincaid reading ease, a higher score means
+              a greater difficulty reading. Conversely, lower scores mean text is easier to read.
+            </p>
+            <p>
+              We take a weighted composite score of all readability scales to give you a singular readability score.
+            </p>
+            <div class="space-y-3 mt-4">
+              <% if @analysis.flesch_kincaid_reading_ease %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Flesch-Kincaid reading ease</span>
+                    <span><%= @analysis.flesch_kincaid_reading_ease.try(:round) %> / 100</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (@analysis.flesch_kincaid_reading_ease.try(:round) || 0) %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.flesch_kincaid_grade_level %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Flesch-Kincaid grade level</span>
+                    <span><%= @analysis.flesch_kincaid_grade_level.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.flesch_kincaid_grade_level.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.flesch_kincaid_age_minimum %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Flesch-Kincaid age minimum</span>
+                    <span><%= @analysis.flesch_kincaid_age_minimum.try(:round) %> / 20</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.flesch_kincaid_age_minimum.try(:round) || 0) / 20.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.forcast_grade_level %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Forcast grade level</span>
+                    <span><%= @analysis.forcast_grade_level.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.forcast_grade_level.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.coleman_liau_index %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Coleman-Liau index</span>
+                    <span><%= @analysis.coleman_liau_index.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.coleman_liau_index.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.automated_readability_index %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Automated readability index</span>
+                    <span><%= @analysis.automated_readability_index.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.automated_readability_index.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.gunning_fog_index %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Gunning fog index</span>
+                    <span><%= @analysis.gunning_fog_index.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.gunning_fog_index.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.smog_grade %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>SMOG grade</span>
+                    <span><%= @analysis.smog_grade.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.smog_grade.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+              <% if @analysis.combined_average_reading_level %>
+                <div>
+                  <div class="flex justify-between text-sm mb-1">
+                    <span>Combined average reading level</span>
+                    <span><%= @analysis.combined_average_reading_level.try(:round) %> / 16</span>
+                  </div>
+                  <div class="w-full bg-white bg-opacity-30 rounded-full h-2">
+                    <div class="bg-white h-2 rounded-full" style="width: <%= (100 * (@analysis.combined_average_reading_level.try(:round) || 0) / 16.0).round %>%"></div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Readability Scales Section -->
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Readability Scales</h2>
 <%= render partial: 'document_analyses/readability/flesch_kincaid',              locals: { analysis: @analysis } %>
 <%= render partial: 'document_analyses/readability/smog_grade',                  locals: { analysis: @analysis } %>
 <%= render partial: 'document_analyses/readability/coleman_liau',                locals: { analysis: @analysis } %>
@@ -125,255 +170,276 @@
 <%= render partial: 'document_analyses/readability/linsear_write',               locals: { analysis: @analysis } %>
 <%= render partial: 'document_analyses/readability/forcast',                     locals: { analysis: @analysis } %>
 
-<h5 class="grey-text">Lexical richness</h5>
-<div class="row">
-  <div class="col s12 m6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Word variety</div>
-        <p>Number of unique words used...</p>
-        <%= 
-          pie_chart({
-            'exactly once'   => @analysis.words_used_once_count, 
-            'multiple times' => @analysis.words_used_repeatedly_count
-          }, colors: ["#FF6977", Document.hex_color])
-        %>
+    <!-- Lexical Richness Section -->
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 mt-8">Lexical Richness</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <!-- Word Variety Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Word Variety</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Number of unique words used...</p>
+          <%=
+            pie_chart({
+              'exactly once'   => @analysis.words_used_once_count,
+              'multiple times' => @analysis.words_used_repeatedly_count
+            }, colors: ["#FF6977", Document.hex_color])
+          %>
+        </div>
+        <details class="border-t border-gray-200 dark:border-gray-700">
+          <summary class="px-6 py-3 cursor-pointer text-teal-600 dark:text-teal-400 hover:underline text-sm font-medium">
+            Why is this important?
+          </summary>
+          <div class="px-6 pb-4 text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <p>
+              The higher percentage of reused words you have, the more likely a reader will
+              be able to understand new words from context alone, as they'll have more instances
+              in which they can infer a meaning from that word's surroundings.
+            </p>
+            <p>
+              Having a higher number of reused words can make text much easier to read and understand,
+              but a limited vocabulary may result in repetition and bland writing. Having a higher
+              number of unique words may indicate more effective word choice, but can also be indicative
+              of jargon.
+            </p>
+          </div>
+        </details>
       </div>
-      <div class="card-action">
-        <a class="activator blue-text text-darken-4">
-          Why is this important?
-        </a>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title">
-          Why is this important?
-          <i class="material-icons right">close</i>
-        </span>
-        <p>
-          The higher percentage of reused words you have, the more likely a reader will
-          be able to understand new words from context alone, as they'll have more instances
-          in which they can infer a meaning from that word's surroundings.
-        </p>
-        <p>
-          Having a higher number of reused words can make text much easier to read and understand,
-          but a limited vocabularity may result in repetition and bland writing. Having a higher
-          number of unique words may indicate more effective word choice, but can also be indicative
-          of jargon.
-        </p>
+
+      <!-- Word Complexity Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Word Complexity</h3>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Of all your words...</p>
+          <%=
+            pie_chart({
+              "simple words (#{(@analysis.simple_words_count.to_f / @analysis.word_count * 100).round}%)"  => @analysis.simple_words_count,
+              "complex words (#{(@analysis.complex_words_count.to_f / @analysis.word_count * 100).round}%)" => @analysis.complex_words_count,
+            }, colors: [Document.hex_color, "#FF6977"])
+          %>
+        </div>
+        <details class="border-t border-gray-200 dark:border-gray-700">
+          <summary class="px-6 py-3 cursor-pointer text-teal-600 dark:text-teal-400 hover:underline text-sm font-medium">
+            Why is this important?
+          </summary>
+          <div class="px-6 pb-4 text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <p>
+              A <em class="text-gray-700 dark:text-gray-300">complex word</em> is a word made up of at least three morphemes, or <em class="text-gray-700 dark:text-gray-300">parts</em>.
+              Conversely, a <em class="text-gray-700 dark:text-gray-300">simple word</em> consists of only one.
+              For example, "bookishness" is a complex word with morphemes "book", "ish", and "ness";
+              while "math" is a simple word with just one morpheme: "math".
+            </p>
+            <p>
+              Having a healthy mixture of simple and complex words is an important aspect of variety
+              in your writing. Replacing complex words with simple words can make your story easier
+              to understand, while replacing simple words with complex words can enable you to more
+              efficiently pack more context and information into the words you choose to use.
+            </p>
+          </div>
+        </details>
       </div>
     </div>
-  </div>
 
-  <div class="col s12 m6">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Word complexity</div>
-        <p>Of all your words...</p>
-        <%=
-          pie_chart({
-            "simple words (#{(@analysis.simple_words_count.to_f / @analysis.word_count * 100).round}%)"  => @analysis.simple_words_count,
-            "complex words (#{(@analysis.complex_words_count.to_f / @analysis.word_count * 100).round}%)" => @analysis.complex_words_count,
-          }, colors: [Document.hex_color, "#FF6977"])
-        %>
-        <!--
-        <ul>
-          <li><%= pluralize @analysis.unique_simple_words_count, 'unique simple word' %> used</li>
-          <li><%= pluralize @analysis.unique_complex_words_count, 'unique complex word' %> used</li>
-        </ul>
-        -->
-      </div>
-      <div class="card-action">
-        <a class="activator blue-text text-darken-4">
-          Why is this important?
-        </a>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title">
-          Why is this important?
-          <i class="material-icons right">close</i>
-        </span>
-        <p>
-          A <em>complex word</em> is a word made up of at least three morphemes, or <em>parts</em>.
-          Conversely, a <em>simple word</em> consists of only one. 
-          For example, "bookishness" is a complex word with morphemes "book", "ish", and "ness";
-          while "math" is a simple word with just one morpheme: "math".
-        </p>
-        <p>
-          Having a healthy mixture of simple and complex words is an important aspect of variety
-          in your writing. Replacing complex words with simple words can make your story easier
-          to understand, while replacing simple words with complex words can enable you to more 
-          efficiently pack more context and information into the words you choose to use.
-        </p>
-      </div>
+    <!-- N-Syllable Words Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Number of N-syllable Words</h3>
+      <%=
+        column_chart(
+          @analysis.n_syllable_words.map { |k, v| [k.to_s + "-syllable words", v] },
+          colors: [Document.hex_color]
+        )
+      %>
     </div>
-  </div>
 
-
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Number of N-syllable words</div>
-        <%= 
-          column_chart(
-            @analysis.n_syllable_words.map { |k, v| [k.to_s + "-syllable words", v] },
-            colors: [Document.hex_color],
-            # todo more readable tooltips
-          ) 
-        %>
-      </div>
+    <!-- Lexical Richness Comparison Chart -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Lexical Richness: % Unique Words per Passage</h3>
+      <%=
+        column_chart([
+          ['This document',       @analysis.pos_percentage(:words_used_once)],
+          ['Hemingway',           12.5],
+          ['The Grapes of Wrath', 14.5],
+          ['The Great Gatsby',    16],
+          ["Swann's Way",         17],
+          ["Typical Writing",     22]
+        ], colors: [Document.hex_color])
+      %>
     </div>
-  </div>
 
-<div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Lexical richness: % unique words per passage</div>
-
-        <%= 
-          column_chart([
-            ['This document',       @analysis.pos_percentage(:words_used_once)],
-            ['Hemingway',           12.5],
-            ['The Grapes of Wrath', 14.5],
-            ['The Great Gatsby',    16],
-            ["Swann's Way",         17],
-            ["Typical Writing",     22]
-          ], colors: [Document.hex_color])
-        %>
-      </div>
-    </div>
-  </div>
-
-  <div class="col s12">
-    <div class="card">
-      <div class="card-content">
-        <div class="card-title">Averaged structure ratios</div>
-        <table>
-          <tr>
-            <th></th>
-            <th>... per word</th>
-            <th>... per sentence</th>
-            <th>... per paragraph</th>
-          </tr>
-          <tr>
-            <th>Letters...</th>
-            <td><%= (@analysis.character_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.character_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.character_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Words...</th>
-            <td><%= (@analysis.word_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.word_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.word_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Simple words...</th>
-            <td><%= (@analysis.simple_words_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.simple_words_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.simple_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Complex words...</th>
-            <td><%= (@analysis.complex_words_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.complex_words_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.complex_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Sentences...</th>
-            <td><%= (@analysis.sentence_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.sentence_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.sentence_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
-          <tr>
-            <th>Paragraphs...</th>
-            <td><%= (@analysis.paragraph_count.to_f / @analysis.word_count).round(4) %></td>
-            <td><%= (@analysis.paragraph_count.to_f / @analysis.sentence_count).round(4) %></td>
-            <td><%= (@analysis.paragraph_count.to_f / @analysis.paragraph_count).round(4) %></td>
-          </tr>
+    <!-- Averaged Structure Ratios Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Averaged Structure Ratios</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"></th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">... per word</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">... per sentence</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">... per paragraph</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">Letters...</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.character_count.to_f / @analysis.word_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.character_count.to_f / @analysis.sentence_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.character_count.to_f / @analysis.paragraph_count).round(4) %></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">Words...</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.word_count.to_f / @analysis.word_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.word_count.to_f / @analysis.sentence_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.word_count.to_f / @analysis.paragraph_count).round(4) %></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">Simple words...</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.simple_words_count.to_f / @analysis.word_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.simple_words_count.to_f / @analysis.sentence_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.simple_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">Complex words...</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.complex_words_count.to_f / @analysis.word_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.complex_words_count.to_f / @analysis.sentence_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.complex_words_count.to_f / @analysis.paragraph_count).round(4) %></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">Sentences...</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.sentence_count.to_f / @analysis.word_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.sentence_count.to_f / @analysis.sentence_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.sentence_count.to_f / @analysis.paragraph_count).round(4) %></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">Paragraphs...</td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.paragraph_count.to_f / @analysis.word_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.paragraph_count.to_f / @analysis.sentence_count).round(4) %></td>
+              <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400"><%= (@analysis.paragraph_count.to_f / @analysis.paragraph_count).round(4) %></td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
-  </div>
 
-  <div class="col s12">
-    <div class="card <%= @analysis.adult_content_flag? ? 'yellow' : 'green' %> lighten-4 black-text">
-      <div class="card-content">
-        <div class="card-title black-text">
-          <% if @analysis.adult_content_flag? %>
+    <!-- Adult Content Detection Card -->
+    <%
+      adult_bg = @analysis.adult_content_flag? ? 'bg-yellow-50 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800' : 'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-800'
+    %>
+    <div class="<%= adult_bg %> rounded-xl border shadow-sm p-6">
+      <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+        <% if @analysis.adult_content_flag? %>
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+            </svg>
             Potential adult content detected
-          <% else %>
+          </span>
+        <% else %>
+          <span class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+            </svg>
             No adult content detected
-          <% end %>
-        </div>
+          </span>
+        <% end %>
+      </h3>
 
-        <div class="col s12 m12 l6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Profanity -->
+        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg">
           <% if @analysis.profanity_content_flag? %>
-            <div>
-              <i class="material-icons left yellow-text text-darken-3">warning</i>
-              <%= pluralize @analysis.profanity_trigger_words.count, 'potentially profane word' %> detected:
+            <div class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+              </svg>
+              <span class="font-medium"><%= pluralize @analysis.profanity_trigger_words.count, 'potentially profane word' %> detected:</span>
             </div>
-            <% @analysis.profanity_trigger_words.each do |word| %>
-              <span class="red lighten-4 badge left"><%= word %></span>
-            <% end %>
-            <div class="clearfix"></div>
+            <div class="flex flex-wrap gap-1">
+              <% @analysis.profanity_trigger_words.each do |word| %>
+                <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded"><%= word %></span>
+              <% end %>
+            </div>
           <% else %>
-            <i class="material-icons left green-text">check</i>
-            No profane words detected.
+            <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+              </svg>
+              <span>No profane words detected.</span>
+            </div>
           <% end %>
-          <br />
         </div>
 
-        <div class="col s12 m12 l6">
+        <!-- Violence -->
+        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg">
           <% if @analysis.violence_content_flag? %>
-            <div>
-              <i class="material-icons left yellow-text text-darken-3">warning</i>
-              <%= pluralize @analysis.violence_trigger_words.count, 'potentially violent word' %> detected:
+            <div class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+              </svg>
+              <span class="font-medium"><%= pluralize @analysis.violence_trigger_words.count, 'potentially violent word' %> detected:</span>
             </div>
-            <% @analysis.violence_trigger_words.each do |word| %>
-              <span class="red lighten-4 badge left"><%= word %></span>
-            <% end %>
-            <div class="clearfix"></div>
+            <div class="flex flex-wrap gap-1">
+              <% @analysis.violence_trigger_words.each do |word| %>
+                <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded"><%= word %></span>
+              <% end %>
+            </div>
           <% else %>
-            <i class="material-icons left green-text">check</i>
-            No violent words detected.
+            <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+              </svg>
+              <span>No violent words detected.</span>
+            </div>
           <% end %>
-          <br />
         </div>
 
-        <div class="col s12 m12 l6">
+        <!-- Hate -->
+        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg">
           <% if @analysis.hate_content_flag? %>
-            <div>
-              <i class="material-icons left yellow-text text-darken-3">warning</i>
-              <%= pluralize @analysis.hate_trigger_words.count, 'potentially hateful word' %> detected:
+            <div class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+              </svg>
+              <span class="font-medium"><%= pluralize @analysis.hate_trigger_words.count, 'potentially hateful word' %> detected:</span>
             </div>
-            <% @analysis.hate_trigger_words.each do |word| %>
-              <span class="red lighten-4 badge left"><%= word %></span>
-            <% end %>
-            <div class="clearfix"></div>
+            <div class="flex flex-wrap gap-1">
+              <% @analysis.hate_trigger_words.each do |word| %>
+                <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded"><%= word %></span>
+              <% end %>
+            </div>
           <% else %>
-            <i class="material-icons left green-text">check</i>
-            No hateful words detected.
+            <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+              </svg>
+              <span>No hateful words detected.</span>
+            </div>
           <% end %>
-          <br />
         </div>
 
-        <div class="col s12 m12 l6">
+        <!-- Sexual -->
+        <div class="p-4 bg-white dark:bg-gray-800 rounded-lg">
           <% if @analysis.sex_content_flag? %>
-            <div>
-              <i class="material-icons left yellow-text text-darken-3">warning</i>
-              <%= pluralize @analysis.sex_trigger_words.count, 'potentially sexual word' %> detected:
+            <div class="flex items-center gap-2 text-yellow-600 dark:text-yellow-400 mb-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13,14H11V10H13M13,18H11V16H13M1,21H23L12,2L1,21Z" />
+              </svg>
+              <span class="font-medium"><%= pluralize @analysis.sex_trigger_words.count, 'potentially sexual word' %> detected:</span>
             </div>
-            <% @analysis.sex_trigger_words.each do |word| %>
-              <span class="red lighten-4 badge left"><%= word %></span>
-            <% end %>
-            <div class="clearfix"></div>
+            <div class="flex flex-wrap gap-1">
+              <% @analysis.sex_trigger_words.each do |word| %>
+                <span class="inline-block px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded"><%= word %></span>
+              <% end %>
+            </div>
           <% else %>
-            <i class="material-icons left green-text">check</i>
-            No sexual words detected.
+            <div class="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+              </svg>
+              <span>No sexual words detected.</span>
+            </div>
           <% end %>
-          <br />
         </div>
-        <div class="clearfix"></div>
       </div>
     </div>
   </div>

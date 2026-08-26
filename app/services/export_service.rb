@@ -147,9 +147,10 @@ class ExportService < Service
                   formatted_names = json_list.map do |link_code|
                     link_type, link_id = link_code.split('-')
                     page_ref = query_link_code_with_cache(link_type, link_id)
+                    next if page_ref.nil?
 
                     "[#{page_ref.name}](https://www.notebook.ai/plan/#{link_type.downcase.pluralize}/#{link_id})"
-                  end
+                  end.compact
 
                   export_text << "#### #{field.label}\n#{formatted_names.to_sentence}\n"
                 else
@@ -232,12 +233,13 @@ class ExportService < Service
                   formatted_name_objects = json_list.map do |link_code|
                     link_type, link_id = link_code.split('-')
                     page_ref = query_link_code_with_cache(link_type, link_id)
+                    next if page_ref.nil?
 
                     name_object = {
                       name: page_ref.name,
                       id:   page_ref.id,
                     }
-                  end
+                  end.compact
 
                   page_object[category.label][field.label] = formatted_name_objects
                 else
@@ -307,10 +309,12 @@ class ExportService < Service
       return @content_cache[cache_key]
     end
 
-    # TODO: we should probably whitelist content_type from valid page types here
+    # Unknown content types (e.g. malformed or legacy link codes) can't be resolved
+    content_class = class_from_name(content_type_name)
+    return nil if content_class.nil?
 
     # If there's no cache, we unfortunately need to do a query to resolve the link code
-    content = class_from_name(content_type_name).find_by(id: content_id)
+    content = content_class.find_by(id: content_id)
     @content_cache[cache_key] = content if content.present?
 
     return content

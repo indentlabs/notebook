@@ -34,11 +34,11 @@ class Country < ApplicationRecord
   end
 
   def self.color
-    'lighten-2 text-lighten-2 brown'
+    'lighten-2 text-lighten-2 brown bg-brown-700'
   end
 
   def self.text_color
-    'text-lighten-2 brown-text'
+    'text-lighten-2 brown-text text-brown-700'
   end
 
   def self.hex_color

@@ -8,4 +8,8 @@ class Promotion < ApplicationRecord
   end
 
   scope :active, -> { where('expires_at > ?', DateTime.now) }
+
+  def active?
+    expires_at > DateTime.now
+  end
 end

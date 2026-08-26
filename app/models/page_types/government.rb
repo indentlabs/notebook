@@ -24,11 +24,11 @@ class Government < ApplicationRecord
   end
 
   def self.color
-    'darken-2 green'
+    'darken-2 green bg-amber-600'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-amber-600'
   end
 
   def self.hex_color

@@ -49,31 +49,76 @@ class GreenService < Service
   end
 
   def self.total_document_pages_equivalent
-    total_pages = 0
+    # Use a single query with conditional aggregation instead of 3 separate queries
+    result = Document.with_deleted
+      .where.not(cached_word_count: nil)
+      .select(
+        'COUNT(CASE WHEN cached_word_count <= 500 THEN 1 END) as small_docs_count',
+        'SUM(CASE WHEN cached_word_count > 500 THEN cached_word_count ELSE 0 END) as large_docs_word_count',
+        'COUNT(CASE WHEN cached_word_count > 500 THEN 1 END) as large_docs_count'
+      ).take
+
+    small_docs_count = result.small_docs_count || 0
+    large_docs_word_count = result.large_docs_word_count || 0
+    large_docs_count = result.large_docs_count || 0
 
     # Treat all <1-page documents as 1 page per document, since they'd print on separate pages
-    total_pages += Document.with_deleted.where('cached_word_count <= ?', AVERAGE_WORDS_PER_PAGE).count
+    total_pages = small_docs_count
 
     # For all >1-page documents, do a quick estimate of word count sum + num docs to also cover EOD page breaks
-    docs = Document.with_deleted.where.not(cached_word_count: nil).where('cached_word_count > ?', AVERAGE_WORDS_PER_PAGE)
-    total_pages += (docs.sum(:cached_word_count) / AVERAGE_WORDS_PER_PAGE.to_f).round
-    total_pages += docs.count
+    total_pages += (large_docs_word_count / AVERAGE_WORDS_PER_PAGE.to_f).round
+    total_pages += large_docs_count
 
     total_pages
   end
 
-  def self.total_timeline_pages_equivalent
-    ((TimelineEvent.last.try(:id) || 0) / AVERAGE_TIMELINE_EVENTS_PER_PAGE.to_f).to_i
+  def self.total_timeline_pages_equivalent(max_timeline_event_id = nil)
+    max_id = max_timeline_event_id || (TimelineEvent.last.try(:id) || 0)
+    (max_id / AVERAGE_TIMELINE_EVENTS_PER_PAGE.to_f).to_i
   end
 
-  def self.total_physical_pages_equivalent(content_type)
+  def self.total_physical_pages_equivalent(content_type, max_id: nil)
     case content_type.name
       when 'Timeline'
-        GreenService.total_timeline_pages_equivalent
+        GreenService.total_timeline_pages_equivalent(max_id)
       when 'Document'
         GreenService.total_document_pages_equivalent
       else
-        GreenService.physical_pages_equivalent_for(content_type.name) * (content_type.last.try(:id) || 0)
+        fetched_max_id = max_id || (content_type.last.try(:id) || 0)
+        GreenService.physical_pages_equivalent_for(content_type.name) * fetched_max_id
+    end
+  end
+
+  # Batch-fetch max IDs for all content types in a single query
+  # Returns a hash mapping content_type.name => max_id
+  def self.max_ids_for_content_types(content_types)
+    return {} if content_types.empty?
+
+    queries = content_types.map do |content_type|
+      case content_type.name
+      when 'Timeline'
+        # Timeline uses TimelineEvent's max ID from timeline_events table
+        "SELECT 'TimelineEvent' as content_type, COALESCE(MAX(id), 0) as max_id FROM timeline_events"
+      when 'Document'
+        # Document table - include all records for total count
+        "SELECT 'Document' as content_type, COALESCE(MAX(id), 0) as max_id FROM documents"
+      else
+        # Standard content types use pluralized lowercase table names
+        table_name = content_type.name.downcase.pluralize
+        "SELECT '#{content_type.name}' as content_type, COALESCE(MAX(id), 0) as max_id FROM #{table_name}"
+      end
+    end
+
+    sql = queries.join(' UNION ALL ')
+    results = ActiveRecord::Base.connection.execute(sql)
+
+    # Convert to hash, handling both SQLite (hash) and MySQL (array) result formats
+    results.to_a.each_with_object({}) do |row, hash|
+      if row.is_a?(Hash)
+        hash[row['content_type']] = row['max_id'].to_i
+      else
+        hash[row[0]] = row[1].to_i
+      end
     end
   end
 

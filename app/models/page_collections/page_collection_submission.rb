@@ -12,6 +12,12 @@ class PageCollectionSubmission < ApplicationRecord
   after_create :cache_content_name
 
   scope :accepted, -> { where.not(accepted_at: nil).uniq(&:page_collection_id) }
+  scope :editor_picks, -> { where.not(editor_pick_position: nil) }
+
+  validates :editor_pick_position, 
+            inclusion: { in: 1..6 }, 
+            uniqueness: { scope: :page_collection_id },
+            allow_nil: true
 
   def accept!
     update(accepted_at: DateTime.current)
@@ -84,6 +90,10 @@ class PageCollectionSubmission < ApplicationRecord
         reference_code:   'collection-has-submission'
       )
     end
+  end
+
+  def editor_pick?
+    editor_pick_position.present?
   end
 
   private

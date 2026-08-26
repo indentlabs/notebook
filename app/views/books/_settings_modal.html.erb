@@ -1,0 +1,251 @@
+<div x-show="showSettingsModal"
+     class="fixed inset-0 z-[60] overflow-y-auto"
+     aria-labelledby="settings-modal-title"
+     role="dialog"
+     aria-modal="true"
+     x-cloak
+     x-data="{
+       settingsTab: 'privacy',
+       selectedPrivacy: '<%= @book.privacy || 'private' %>',
+       isDark: document.documentElement.classList.contains('dark'),
+       isLoading: false,
+       showToast: false,
+       toastMessage: '',
+       confirmText: '',
+
+       savePrivacySettings() {
+         this.isLoading = true;
+         const form = document.getElementById('book-privacy-form');
+         if (form) {
+           const radioButton = form.querySelector('input[value=' + JSON.stringify(this.selectedPrivacy) + ']');
+           if (radioButton) radioButton.checked = true;
+
+           const formData = new FormData(form);
+           fetch(form.action, {
+             method: 'PATCH',
+             body: formData,
+             headers: {
+               'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content,
+               'X-Requested-With': 'XMLHttpRequest',
+               'Accept': 'application/json'
+             }
+           })
+           .then(response => {
+             if (response.ok) {
+               this.showToast = true;
+               this.toastMessage = 'Privacy settings saved';
+               setTimeout(() => this.showToast = false, 3000);
+             } else {
+               throw new Error('Network response was not ok.');
+             }
+           })
+           .catch(error => {
+             this.showToast = true;
+             this.toastMessage = 'Error saving privacy settings';
+             setTimeout(() => this.showToast = false, 3000);
+           })
+           .finally(() => this.isLoading = false);
+         }
+       }
+     }"
+     @keydown.escape.window="showSettingsModal = false">
+  
+  <!-- Backdrop -->
+  <div x-show="showSettingsModal"
+       x-transition:enter="ease-out duration-300"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="ease-in duration-200"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0"
+       class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity"
+       @click="showSettingsModal = false"></div>
+
+  <!-- Toast -->
+  <div x-show="showToast"
+       x-transition
+       class="fixed top-20 right-4 z-[70] bg-emerald-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center">
+    <i class="material-icons text-sm mr-2">check_circle</i>
+    <span x-text="toastMessage"></span>
+  </div>
+
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+    <!-- Modal panel -->
+    <div x-show="showSettingsModal"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+         class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full flex flex-col md:flex-row min-h-[500px]">
+      
+      <!-- Settings Sidebar -->
+      <div class="w-full md:w-64 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 class="text-lg font-semibold text-gray-900 dark:text-white" id="settings-modal-title">Page Settings</h2>
+        </div>
+        <nav class="flex-1 px-2 py-4 space-y-1">
+          <button @click="settingsTab = 'privacy'"
+                  :class="settingsTab === 'privacy' ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                  class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors">
+            <i class="material-icons text-lg mr-3" :class="settingsTab === 'privacy' ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'">lock</i>
+            Privacy
+          </button>
+          
+          <button @click="settingsTab = 'danger'"
+                  :class="settingsTab === 'danger' ? 'bg-white dark:bg-gray-800 text-red-600 dark:text-red-400 shadow-sm' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'"
+                  class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors">
+            <i class="material-icons text-lg mr-3" :class="settingsTab === 'danger' ? 'text-red-600 dark:text-red-400' : 'text-gray-400'">warning</i>
+            Danger Zone
+          </button>
+        </nav>
+      </div>
+
+      <!-- Settings Content -->
+      <div class="flex-1 relative">
+        <!-- Close Button -->
+        <button @click="showSettingsModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+          <i class="material-icons">close</i>
+        </button>
+
+        <!-- Privacy Tab -->
+        <div x-show="settingsTab === 'privacy'" class="p-6">
+          <div class="mb-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Privacy & Sharing</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Manage who can see and access this book.</p>
+          </div>
+
+          <!-- Current Status Overview -->
+          <div class="bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 mb-6">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div :class="selectedPrivacy === 'public' ? (isDark ? 'bg-emerald-900 text-emerald-400' : 'bg-emerald-100 text-emerald-600') : (isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-200 text-gray-600')"
+                     class="w-10 h-10 rounded-lg flex items-center justify-center mr-4 transition-colors duration-200">
+                  <i class="material-icons" x-text="selectedPrivacy === 'public' ? 'public' : 'lock'"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+                    Current Status
+                    <div x-show="isLoading" class="ml-2">
+                      <svg class="animate-spin h-3 w-3 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                  </h4>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">
+                    This book is currently <span class="font-medium" :class="selectedPrivacy === 'public' ? 'text-emerald-600 dark:text-emerald-400' : ''" x-text="selectedPrivacy.charAt(0).toUpperCase() + selectedPrivacy.slice(1)"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <%= form_for @book, remote: true, html: { id: "book-privacy-form", class: "space-y-4" } do |f| %>
+            <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <!-- Private Option -->
+              <label class="group relative cursor-pointer block h-full">
+                <%= f.radio_button :privacy, 'private', class: 'sr-only', 'x-model': 'selectedPrivacy', '@change': 'savePrivacySettings()' %>
+                <div :class="selectedPrivacy === 'private' ? (isDark ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-900 bg-opacity-20 shadow-sm' : 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50 shadow-sm') : (isDark ? 'border-gray-700 hover:border-gray-600 hover:bg-gray-700 hover:bg-opacity-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')"
+                     class="h-full border-2 rounded-lg p-4 transition-all duration-200 relative">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-0.5">
+                      <div :class="selectedPrivacy === 'private' ? 'bg-emerald-500 text-white' : (isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500')"
+                           class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200">
+                        <i class="material-icons text-base">lock</i>
+                      </div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <div class="flex justify-between items-start">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Private</div>
+                        <div x-show="selectedPrivacy === 'private'" class="text-emerald-500">
+                          <i class="material-icons text-lg">check_circle</i>
+                        </div>
+                      </div>
+                      <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Only you and authorized collaborators can see this book.</div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+
+              <!-- Public Option -->
+              <label class="group relative cursor-pointer block h-full">
+                <%= f.radio_button :privacy, 'public', class: 'sr-only', 'x-model': 'selectedPrivacy', '@change': 'savePrivacySettings()' %>
+                <div :class="selectedPrivacy === 'public' ? (isDark ? 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-900 bg-opacity-20 shadow-sm' : 'border-emerald-500 ring-1 ring-emerald-500 bg-emerald-50 shadow-sm') : (isDark ? 'border-gray-700 hover:border-gray-600 hover:bg-gray-700 hover:bg-opacity-50' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50')"
+                     class="h-full border-2 rounded-lg p-4 transition-all duration-200 relative">
+                  <div class="flex items-start">
+                    <div class="flex-shrink-0 mt-0.5">
+                      <div :class="selectedPrivacy === 'public' ? 'bg-emerald-500 text-white' : (isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500')"
+                           class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200">
+                        <i class="material-icons text-base">public</i>
+                      </div>
+                    </div>
+                    <div class="ml-3 flex-1">
+                      <div class="flex justify-between items-start">
+                        <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Public</div>
+                        <div x-show="selectedPrivacy === 'public'" class="text-emerald-500">
+                          <i class="material-icons text-lg">check_circle</i>
+                        </div>
+                      </div>
+                      <div class="text-xs text-gray-600 dark:text-gray-400 leading-snug">Anyone with the link can view this book. Great for sharing.</div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Danger Zone Tab -->
+        <div x-show="settingsTab === 'danger'" class="p-6">
+          <div class="mb-6">
+            <h3 class="text-xl font-bold text-red-600 dark:text-red-400 mb-1">Danger Zone</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Irreversible and destructive actions for this book.</p>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Archive Control -->
+            <div class="border border-yellow-300 dark:border-yellow-800 rounded-lg p-5 bg-yellow-50 dark:bg-yellow-900 bg-opacity-30">
+              <div class="sm:flex sm:items-start sm:justify-between">
+                <div>
+                  <h4 class="text-sm font-semibold text-yellow-800 dark:text-yellow-200 mb-1">
+                    <%= @book.archived? ? 'Un-archive this book' : 'Archive this book' %>
+                  </h4>
+                  <p class="text-xs text-yellow-700 dark:text-yellow-300 max-w-lg mb-3 sm:mb-0">
+                    <%= @book.archived? ? 'Restoring this book will make it visible again in your lists and searches.' : 'Archiving will hide this book from your main lists. It can be restored later.' %>
+                  </p>
+                </div>
+                <div class="mt-2 sm:mt-0 sm:ml-4 sm:flex-shrink-0">
+                  <%= button_to toggle_archive_book_path(@book), method: :post, form: { class: "inline-block w-full" }, class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 text-sm font-medium border border-yellow-600 text-yellow-700 dark:text-yellow-200 dark:border-yellow-500 bg-white dark:bg-gray-800 rounded-md hover:bg-yellow-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors" do %>
+                    <i class="material-icons text-sm mr-2"><%= @book.archived? ? 'unarchive' : 'archive' %></i>
+                    <%= @book.archived? ? 'Un-archive' : 'Archive' %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delete Control -->
+            <div class="border border-red-300 dark:border-red-800 rounded-lg p-5 bg-red-50 dark:bg-red-900 bg-opacity-30">
+              <div class="sm:flex sm:items-start sm:justify-between">
+                <div>
+                  <h4 class="text-sm font-semibold text-red-800 dark:text-red-200 mb-1">Delete this book</h4>
+                  <p class="text-xs text-red-700 dark:text-red-300 max-w-lg mb-3 sm:mb-0">
+                    Once deleted, this book cannot be recovered. All associated table of contents settings and references will be permanently removed. (The internal document pages will remain untouched but unlinked.)
+                  </p>
+                </div>
+                <div class="mt-2 sm:mt-0 sm:ml-4 sm:flex-shrink-0">
+                  <%= button_to book_path(@book), method: :delete, data: { confirm: 'Are you sure you want to permanently delete this book? This action cannot be undone!' }, form: { class: "inline-block w-full" }, class: "w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 text-sm font-medium border border-red-600 text-red-700 dark:text-red-200 dark:border-red-500 bg-white dark:bg-gray-800 rounded-md hover:bg-red-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors" do %>
+                    <i class="material-icons text-sm mr-2">delete_forever</i>
+                    Delete permanently
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

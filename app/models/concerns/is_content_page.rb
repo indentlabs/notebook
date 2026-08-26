@@ -20,7 +20,7 @@ module IsContentPage
 
     has_many :basil_commissions,           as: :entity, dependent: :destroy
 
-    has_many :word_count_updates, as: :entity, dependent: :destroy
+    has_many :word_count_updates, as: :entity
     def latest_word_count_cache
       word_count_updates.order('for_date DESC').limit(1).first.try(:word_count) ||  0
     end
@@ -84,5 +84,19 @@ module IsContentPage
     #     self.color
     #   end
     # end
+
+    # Instance methods that delegate to class methods
+    # This allows templates to call content_page.color instead of content_page.class.color
+    def color
+      self.class.color
+    end
+
+    def text_color
+      self.class.text_color
+    end
+
+    def icon
+      self.class.icon
+    end
   end
 end

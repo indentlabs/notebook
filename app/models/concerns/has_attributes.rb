@@ -11,34 +11,17 @@ module HasAttributes
       # Don't create any attribute categories for AttributeCategories or AttributeFields that share the ContentController
       return [] if ['attribute_category', 'attribute_field'].include?(content_name)
 
-      YAML.load_file(Rails.root.join('config', 'attributes', "#{content_name}.yml")).map do |category_name, defaults|
-        # First, query for the category to see if it already exists
-        category = user.attribute_categories.find_or_initialize_by(
-          entity_type: self.content_name,
-          name:        category_name.to_s
-        )
-        creating_new_category = category.new_record?
-
-        # If the category didn't already exist, go ahead and set defaults on it and save
-        if creating_new_category
-          category.label = defaults[:label]
-          category.icon  = defaults[:icon]
-          category.save!
-        end
-
-        # If we created this category for the first time, we also want to make sure we create its default fields, too
-        if creating_new_category && defaults.key?(:attributes)
-          category.attribute_fields << defaults[:attributes].map do |field|
-            af_field = category.attribute_fields.with_deleted.create!(
-              old_column_source: field[:name],
-              user:              user,
-              field_type:        field[:field_type].presence || "text_area",
-              label:             field[:label].presence      || 'Untitled field'
-            )
-            af_field
-          end
-        end
-      end.compact
+      # Use the new TemplateInitializationService for consistency
+      template_service = TemplateInitializationService.new(user, content_name)
+      
+      # Only create template if it doesn't already exist (for new users)
+      if template_service.template_exists?
+        # Return existing categories
+        user.attribute_categories.where(entity_type: content_name).order(:position)
+      else
+        # Create new default template
+        template_service.initialize_default_template!
+      end
     end
 
     def self.attribute_categories(user, show_hidden: false)
@@ -109,7 +92,7 @@ module HasAttributes
             .user
             .attribute_categories
               .where(entity_type: self.content_name, hidden: acceptable_hidden_values)
-              .eager_load(attribute_fields: :attribute_values)
+              .eager_load(:attribute_fields)
               .order('attribute_categories.position, attribute_categories.created_at, attribute_categories.id')
 
             # We need to do something like this, but... not this.
@@ -197,6 +180,56 @@ module HasAttributes
           d.save!
         end
       end
+    end
+
+    # The overview field label that #description reads, used for batch preloading
+    def self.description_attribute_label
+      'Description'
+    end
+
+    # Preloads overview field values for a collection of records in a constant
+    # number of queries, so per-record #overview_field_value calls (e.g. via
+    # #description) don't each run their own category/field/value lookups.
+    def self.preload_overview_field_values(records, label = description_attribute_label)
+      records = Array(records)
+      return records if records.empty? || label.nil?
+
+      records.group_by(&:user_id).each do |user_id, user_records|
+        category_ids = AttributeCategory.where(
+          user_id:     user_id,
+          entity_type: name.downcase
+        ).pluck(:id)
+
+        field = AttributeField.find_by(
+          user_id:               user_id,
+          attribute_category_id: category_ids,
+          label:                 label,
+          hidden:                [nil, false]
+        )
+
+        if field.nil?
+          user_records.each { |record| record.cache_overview_field_value(label, nil) }
+          next
+        end
+
+        values = field.attribute_values
+                      .where(entity_id: user_records.map(&:id))
+                      .order('created_at desc')
+                      .to_a
+
+        user_records.each do |record|
+          value = values.detect { |v| v.entity_id == record.id }&.value.presence ||
+                  (record.respond_to?(label.downcase) ? record.read_attribute(label.downcase) : nil)
+          record.cache_overview_field_value(label, value)
+        end
+      end
+
+      records
+    end
+
+    def cache_overview_field_value(label, value)
+      @overview_field_value_cache ||= {}
+      @overview_field_value_cache[label] = value
     end
 
     # All of these helpers are spooky and rife for N+1s
@@ -291,10 +324,13 @@ module HasAttributes
     end
 
     def overview_field_value(label)
-      field_cache = overview_field(label)
-      return nil if field_cache.nil?
+      @overview_field_value_cache ||= {}
+      return @overview_field_value_cache[label] if @overview_field_value_cache.key?(label)
 
-      field_cache
+      field_cache = overview_field(label)
+      return @overview_field_value_cache[label] = nil if field_cache.nil?
+
+      @overview_field_value_cache[label] = field_cache
         .attribute_values
         .order('created_at desc')
         .detect { |v| v.entity_id == self.id }&.value.presence || (self.respond_to?(label.downcase) ? self.read_attribute(label.downcase) : nil)

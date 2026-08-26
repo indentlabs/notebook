@@ -1,0 +1,36 @@
+<div class="overflow-x-auto pb-2 -mx-2 px-2">
+  <div class="flex flex-row flex-nowrap gap-3" style="width: max-content;">
+    <% field[:value].each do |link_code| %>
+      <% klass, id = link_code.split('-') %>
+      <% content = resolve_link_content(klass, id) %>
+      <% content_class = content_class_from_name(klass) %>
+
+      <%= link_to send("#{klass.downcase}_path", id),
+                  data: { klass: klass, id: id },
+                  class: "flex-shrink-0 w-40 #{content.nil? ? 'js-load-page-name' : ''}" do %>
+        <div class="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-600 shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer overflow-hidden">
+          <%# Card Image %>
+          <div class="h-20 bg-gray-200 dark:bg-gray-700 overflow-hidden">
+            <% if content.respond_to?(:first_public_image) && content.first_public_image.present? %>
+              <%= image_tag content.first_public_image, class: "w-full h-full object-cover" %>
+            <% else %>
+              <%= image_tag "card-headers/#{klass.downcase.pluralize}.webp",
+                            class: "w-full h-full object-cover", alt: "" %>
+            <% end %>
+          </div>
+
+          <%# Card Content %>
+          <div class="p-2">
+            <div class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+              <%= content.try(:name) || "<em>Loading</em>".html_safe %>
+            </div>
+            <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-1">
+              <i class="material-icons text-xs mr-1 <%= content_class.text_color %>"><%= content_class.icon %></i>
+              <%= klass %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

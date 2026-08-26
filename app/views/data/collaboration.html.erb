@@ -1,184 +1,305 @@
-<h4>
-  <%= link_to data_vault_path, class: 'grey-text tooltipped', style: 'position: relative; top: 4px;', data: {
-        position: 'bottom',
-        enterDelay: '500',
-        tooltip: "Back to your Data Vault"
-      } do %>
-    <i class="material-icons">arrow_back</i>
-  <% end %>
-  Collaboration on Notebook.ai
-</h4>
-
-<div class="row">
-  <div class="col s12 m12 l8">
-
-    <div class="grey-text uppercase">Your shared universes</div>
-    <% if @shared_universes.any? %>
-      <ul class="collapsible">
-        <% @shared_universes.reverse.each do |universe| %>
-          <li>
-            <div class="collapsible-header white-text <%= Universe.color %>">
-              <i class="material-icons"><%= Universe.icon %></i>
-              <%= universe.name %>
-              (<%= pluralize universe.contributors.count, 'collaborator' %>)
-            </div>
-            <div class="collapsible-body">
-              <%= render partial: 'content/display/contributors', locals: { content: universe } %>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <p>None yet!</p>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex items-center mb-8">
+    <%= link_to data_vault_path, class: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 mr-3', title: "Back to your Data Vault" do %>
+      <i class="material-icons">arrow_back</i>
     <% end %>
-
-    <div class="grey-text uppercase">Universes shared with you</div>
-    <% if @collaborating_universes.any? %>
-      <ul class="collapsible">
-        <% @collaborating_universes.each do |universe| %>
-          <li>
-            <div class="collapsible-header white-text <%= Universe.color %>">
-              <i class="material-icons"><%= Universe.icon %></i>
-              <%= universe.name %>
-            </div>
-            <div class="collapsible-body">
-              <%= render partial: 'content/display/contributors', locals: { content: universe } %>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <p>None yet!</p>
-    <% end %>
-
-    <div class="grey-text uppercase">Your collaborators</div>
-    <% if @collaborators.any? %>
-      <ul class="collapsible">
-        <% @collaborators.group_by { |c| c.user }.each do |collaborator, collab_list| %>
-          <% next if collaborator.nil? %>
-          <li>
-            <div class="collapsible-header <%= User.color %> white-text">
-              <i class="material-icons"><%= User.icon %></i>
-              <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
-            </div>
-            <div class="collapsible-body">
-              Contributing on:
-              <ul>
-                <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
-                  <li class="clearfix">
-                    <%= link_to universe, class: "#{Universe.text_color}" do %>
-                      <i class="material-icons left"><%= Universe.icon %></i>
-                      <%= universe.name %>
-                    <% end %>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          </li>
-        <% end %>
-      </ul>
-    <% else %>
-      <p>None yet!</p>
-    <% end %>
-
-    <div class="grey-text uppercase">Frequently-asked questions</div>
-    <ul class="collapsible">
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> How do I invite someone to be a contributor to one of my universes?</div>
-        <div class="collapsible-body">
-          <p>
-            To invite someone to collaborate on a universe with you, simply edit that universe page and click the "Contributors" tab.
-            From there, you'll be able to enter your friend's email address to invite them. They will receive an email letting them know
-            you'd like them to contribute to your universe, and they'll automatically accept if they sign up for an account using that invited
-            email address or if they already have an account with the invited email address.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> How do I remove a contributor from my universe?</div>
-        <div class="collapsible-body">
-          <p>
-            You can remove a contributor to your universes at any time from the same "Contributors" tab you add them from. Simply click
-            "Remove this contributor" to remove them. They will immediately lose access to view and/or edit any pages in that universe.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> What can contributors do in my universe?</div>
-        <div class="collapsible-body">
-          <p>
-            Contributors can view and edit any worldbuilding pages within your universe as if they were the owner. They are, however, unable to
-            edit what universe those pages exist in, change any page privacy settings, or add or remove contributors. They will be able to create new pages and add them
-            to the universe.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> How do I share my Premium subscription with my contributors?</div>
-        <div class="collapsible-body">
-          <p>
-            If you have an active Premium subscription (or are using a Premium Code to unlock Premium features), it will automatically upgrade
-            any collaborators you have in your universes <em>while they are working in your universe</em>. This means your collaborators will be
-            able to view and edit your Premium pages, and they'll also be able to create new Premium pages as long as they are added to your
-            universe.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> How can I see what changes my contributors have made?</div>
-        <div class="collapsible-body">
-          <p>
-            When viewing any worldbuilding page, there is a "Changelog" link you can click that will display all changes that have been made
-            to that page. It will display what field changed, what the old value was, what the new value is after the change, and who made the change.
-            You can use this changelog to recover previous data if a contributor changes something you didn't intend.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> How many collaborators can I add?</div>
-        <div class="collapsible-body">
-          <p>
-            You can have an unlimited number of collaborators per universe.
-          </p>
-        </div>
-      </li>
-      <li>
-        <div class="collapsible-header"><i class="material-icons">info</i> How can I tell what universes I've been invited to collaborate on?</div>
-        <div class="collapsible-body">
-          <p>
-            Universes you've been invited to collaborate on will automatically appear on your universes list.
-            You can also check this page to see a list of universes that you've been invited to collaborate on.
-          </p>
-        </div>
-      </li>
-    </ul>
+    <h1 class="text-3xl font-bold text-gray-700 dark:text-white">Collaboration on Notebook.ai</h1>
   </div>
-  <div class="col s12 m12 l4">
-    <div class="card blue lighten-4">
-      <div class="card-content">
-        <div class="card-title black-text">Collaboration</div>
-        <p class="black-text">
-          Whenever you edit a universe on Notebook.ai, you can add others as collaborators by entering their email address into the "Contributors" tab. 
-          They'll receive an email letting them know they've been invited, and will automatically accept if they sign up for an account with the email 
-          address you invited (or if they already have an account with that email).
-        </p>
-        <br />
-        <p class="black-text">
-          Your universe's collaborators will have full access to view and edit every page within that universe (except for being able to edit what
-          universe those pages are in), even if those pages are set to private. 
-          You can check out the changelog for any page to see what changes your collaborators have made. 
-        </p>
-        <br />
-        <p class="black-text">
-          If you have an active Premium subscription, you'll share it to your contributors for each universe you share. Contributors will be able to
-          create Premium pages within that universe even if they don't have a Premium subscription themselves. This Premium Sharing is great for small
-          groups and classrooms.
-        </p>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2 space-y-8">
+      <!-- Your shared universes -->
+      <div>
+        <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Your shared universes</h2>
+        <% if @shared_universes.any? %>
+          <div class="space-y-4">
+            <% @shared_universes.reverse.each_with_index do |universe, index| %>
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+                <button class="toggle-button w-full flex items-center justify-between p-4 bg-<%= Universe.color %> text-white">
+                  <div class="flex items-center">
+                    <i class="material-icons mr-2"><%= Universe.icon %></i>
+                    <span class="font-medium"><%= universe.name %></span>
+                    <span class="ml-2">(<%= pluralize universe.contributors.count, 'collaborator' %>)</span>
+                  </div>
+                  <svg class="w-5 h-5 transform transition-transform chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <div class="collapsible-content hidden p-4 bg-white dark:bg-gray-800">
+                  <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-600 dark:text-gray-400">None yet!</p>
+        <% end %>
+      </div>
+
+      <!-- Universes shared with you -->
+      <div>
+        <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Universes shared with you</h2>
+        <% if @collaborating_universes.any? %>
+          <div class="space-y-4">
+            <% @collaborating_universes.each_with_index do |universe, index| %>
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+                <button class="toggle-button w-full flex items-center justify-between p-4 bg-<%= Universe.color %> text-white">
+                  <div class="flex items-center">
+                    <i class="material-icons mr-2"><%= Universe.icon %></i>
+                    <span class="font-medium"><%= universe.name %></span>
+                  </div>
+                  <svg class="w-5 h-5 transform transition-transform chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <div class="collapsible-content hidden p-4 bg-white dark:bg-gray-800">
+                  <%= render partial: 'content/display/contributors', locals: { content: universe } %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-600 dark:text-gray-400">None yet!</p>
+        <% end %>
+      </div>
+
+      <!-- Your collaborators -->
+      <div>
+        <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Your collaborators</h2>
+        <% if @collaborators.any? %>
+          <div class="space-y-4">
+            <% @collaborators.group_by { |c| c.user }.each_with_index do |(collaborator, collab_list), index| %>
+              <% next if collaborator.nil? %>
+              <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+                <button class="toggle-button w-full flex items-center justify-between p-4 bg-<%= User.color %> text-white">
+                  <div class="flex items-center">
+                    <i class="material-icons mr-2"><%= User.icon %></i>
+                    <span class="font-medium">
+                      <%= collaborator.name %> <%= "(@#{collaborator.username})" if collaborator.username? %>
+                    </span>
+                  </div>
+                  <svg class="w-5 h-5 transform transition-transform chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <div class="collapsible-content hidden p-4 bg-white dark:bg-gray-800">
+                  <p class="mb-2 font-medium dark:text-gray-200">Contributing on:</p>
+                  <ul class="space-y-2">
+                    <% Universe.where(id: collab_list.pluck(:universe_id)).each do |universe| %>
+                      <li>
+                        <%= link_to universe, class: "flex items-center #{Universe.text_color} hover:underline" do %>
+                          <i class="material-icons mr-2"><%= Universe.icon %></i>
+                          <span><%= universe.name %></span>
+                        <% end %>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-gray-600 dark:text-gray-400">None yet!</p>
+        <% end %>
+      </div>
+
+      <!-- Frequently-asked questions -->
+      <div>
+        <h2 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Frequently-asked questions</h2>
+        <div class="space-y-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">How do I invite someone to be a contributor to one of my universes?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                To invite someone to collaborate on a universe with you, simply edit that universe page and click the "Contributors" tab.
+                From there, you'll be able to enter your friend's email address to invite them. They will receive an email letting them know
+                you'd like them to contribute to your universe, and they'll automatically accept if they sign up for an account using that invited
+                email address or if they already have an account with the invited email address.
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">How do I remove a contributor from my universe?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                You can remove a contributor to your universes at any time from the same "Contributors" tab you add them from. Simply click
+                "Remove this contributor" to remove them. They will immediately lose access to view and/or edit any pages in that universe.
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">What can contributors do in my universe?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                Contributors can view and edit any worldbuilding pages within your universe as if they were the owner. They are, however, unable to
+                edit what universe those pages exist in, change any page privacy settings, or add or remove contributors. They will be able to create new pages and add them
+                to the universe.
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">How do I share my Premium subscription with my contributors?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                If you have an active Premium subscription (or are using a Premium Code to unlock Premium features), it will automatically upgrade
+                any collaborators you have in your universes <em>while they are working in your universe</em>. This means your collaborators will be
+                able to view and edit your Premium pages, and they'll also be able to create new Premium pages as long as they are added to your
+                universe.
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">How can I see what changes my contributors have made?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                When viewing any worldbuilding page, there is a "Changelog" link you can click that will display all changes that have been made
+                to that page. It will display what field changed, what the old value was, what the new value is after the change, and who made the change.
+                You can use this changelog to recover previous data if a contributor changes something you didn't intend.
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">How many collaborators can I add?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                You can have an unlimited number of collaborators per universe.
+              </p>
+            </div>
+          </div>
+          
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden collapsible-section" data-open="false">
+            <button class="toggle-button w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <div class="flex items-center">
+                <i class="material-icons text-gray-500 dark:text-gray-400 mr-2">info</i>
+                <span class="font-medium text-gray-800 dark:text-white">How can I tell what universes I've been invited to collaborate on?</span>
+              </div>
+              <svg class="w-5 h-5 transform transition-transform text-gray-500 chevron-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <div class="collapsible-content hidden p-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+              <p class="text-gray-700 dark:text-gray-300">
+                Universes you've been invited to collaborate on will automatically appear on your universes list.
+                You can also check this page to see a list of universes that you've been invited to collaborate on.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lg:col-span-1">
+      <div class="bg-blue-100 dark:bg-blue-900 rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Collaboration</h2>
+        <div class="space-y-4">
+          <p class="text-gray-700 dark:text-blue-100">
+            Whenever you edit a universe on Notebook.ai, you can add others as collaborators by entering their email address into the "Contributors" tab.
+            They'll receive an email letting them know they've been invited, and will automatically accept if they sign up for an account with the email
+            address you invited (or if they already have an account with that email).
+          </p>
+          
+          <p class="text-gray-700 dark:text-blue-100">
+            Your universe's collaborators will have full access to view and edit every page within that universe (except for being able to edit what
+            universe those pages are in), even if those pages are set to private.
+            You can check out the changelog for any page to see what changes your collaborators have made.
+          </p>
+          
+          <p class="text-gray-700 dark:text-blue-100">
+            If you have an active Premium subscription, you'll share it to your contributors for each universe you share. Contributors will be able to
+            create Premium pages within that universe even if they don't have a Premium subscription themselves. This Premium Sharing is great for small
+            groups and classrooms.
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<%= content_for :javascript do %>
-  $('.panel').show();
-<% end %>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize collapsible sections
+    document.querySelectorAll('.collapsible-section').forEach(section => {
+      const toggleButton = section.querySelector('.toggle-button');
+      const content = section.querySelector('.collapsible-content');
+      const chevron = section.querySelector('.chevron-icon');
+      const isOpen = section.getAttribute('data-open') === 'true';
+      
+      // Set initial state
+      if (isOpen) {
+        content.classList.remove('hidden');
+        chevron.classList.add('rotate-180');
+      } else {
+        content.classList.add('hidden');
+        chevron.classList.remove('rotate-180');
+      }
+      
+      // Add click event listener
+      toggleButton.addEventListener('click', function() {
+        const isCurrentlyOpen = !content.classList.contains('hidden');
+        
+        if (isCurrentlyOpen) {
+          content.classList.add('hidden');
+          chevron.classList.remove('rotate-180');
+          section.setAttribute('data-open', 'false');
+        } else {
+          content.classList.remove('hidden');
+          chevron.classList.add('rotate-180');
+          section.setAttribute('data-open', 'true');
+        }
+      });
+    });
+  });
+</script>

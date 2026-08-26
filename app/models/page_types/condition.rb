@@ -14,11 +14,11 @@ class Condition < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'text-darken-1 lime'
+    'text-darken-1 lime bg-lime-600'
   end
 
   def self.text_color
-    'text-darken-1 lime-text'
+    'text-darken-1 lime-text text-lime-600'
   end
 
   def self.hex_color

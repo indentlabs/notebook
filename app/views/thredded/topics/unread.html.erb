@@ -1,0 +1,78 @@
+<% content_for :thredded_page_title,
+               messageboard_or_nil ?
+                   t('thredded.unread_topics.page_title_in_messageboard', messageboard: messageboard.name) :
+                   t('thredded.unread_topics.page_title') %>
+<% content_for :thredded_page_id, 'thredded--unread-topics' %>
+<% content_for :thredded_breadcrumbs, render('thredded/shared/breadcrumbs') %>
+
+<%= thredded_page do %>
+  <%= define_svg_icons('thredded/follow.svg', 'thredded/unfollow.svg') %>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <%= render 'thredded/redesigned/forum_nav' %>
+
+    <!-- Page Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
+        <i class="material-icons text-amber-500 dark:text-amber-400 mr-3 text-3xl">mark_email_unread</i>
+        Unread Topics
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400 mt-2">
+        Topics with new posts you haven't read yet. Followed topics appear first.
+      </p>
+    </div>
+
+    <!-- Topics List -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+         data-thredded-topics="true"
+         data-thredded-topic-posts-per-page="<%= Thredded.posts_per_page %>">
+
+      <% if @topics.to_a.any? %>
+        <!-- Topics Header -->
+        <div class="bg-gray-50 dark:bg-gray-900 px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            <div class="flex-1">Topic</div>
+            <div class="hidden sm:block w-32 text-center">Replies</div>
+            <div class="hidden md:block w-48 text-right">Last Activity</div>
+          </div>
+        </div>
+
+        <!-- Topics -->
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
+          <%= render partial: 'thredded/topics/topic',
+                     collection: @topics,
+                     locals: {
+                         topics: @topics.to_a,
+                         show_messageboard: !messageboard_or_nil
+                     } %>
+        </div>
+      <% else %>
+        <!-- Empty State -->
+        <div class="text-center py-12">
+          <i class="material-icons text-6xl text-gray-300 dark:text-gray-600 mb-4">check_circle</i>
+          <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2"><%= t 'thredded.unread_topics.empty.title' %></h3>
+          <p class="text-gray-500 dark:text-gray-400 mb-6"><%= t 'thredded.unread_topics.empty.content' %></p>
+          <%= link_to main_app.thredded_path,
+              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors" do %>
+            <i class="material-icons mr-2 text-lg">forum</i>
+            Browse All Forums
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Pagination -->
+    <% if @topics.respond_to?(:total_pages) && @topics.total_pages > 1 %>
+      <footer class="thredded--pagination-bottom">
+        <%= paginate @topics %>
+      </footer>
+    <% end %>
+
+    <!-- Messageboard Actions (if viewing within a specific messageboard) -->
+    <% if messageboard_or_nil %>
+      <div class="mt-8">
+        <%= render 'thredded/messageboards/messageboard_actions', messageboard: messageboard %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

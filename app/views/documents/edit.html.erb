@@ -1,47 +1,1158 @@
-<%#
-  We're using the medium-editor CDN here instead of the rails-medium-editor gem because it broke in the latest
-  version of Chrome, and has been archived for no more changes. Ergo, we gotta move off of it. :)
-%>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/medium-editor/5.23.3/js/medium-editor.min.js" integrity="sha512-5D/0tAVbq1D3ZAzbxOnvpLt7Jl/n8m/YGASscHTNYsBvTcJnrYNiDIJm6We0RPJCpFJWowOPNz9ZJx7Ei+yFiA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/medium-editor/5.23.3/css/medium-editor.min.css" integrity="sha512-zYqhQjtcNMt8/h4RJallhYRev/et7+k/HDyry20li5fWSJYSExP9O07Ung28MUuXDneIFg0f2/U3HJZWsTNAiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/medium-editor/5.23.3/css/themes/beagle.min.css" integrity="sha512-Dp5+M9xB0mzENcNK7ReLOvz/cKvhshdJDb3bEKRAz9lKggT/BtVlthhvusC+IoQQ5lazItTaSDQSeyBa0T5LWA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<%= content_for :full_width_page_header do %>
-  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document } %>
+<div x-data="documentEditController()" x-init="init()" data-document-id="<%= @document.id %>" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col overflow-x-hidden">
 
-  <div class="container" style="max-width: 50em;">
-    <%= form_for @document do |f| %>
-      <%= render partial: 'documents/components/document_name_bar', locals: { document: @document, f: f } %>
-    <% end %>
-  </div>
+  <!-- Main content area - Flex layout -->
+  <main class="flex-1 pt-14">
+    <div class="flex relative">
+    <!-- Center column (editor) - seamless canvas -->
+    <div class="flex-1 pl-4 sm:pl-20 lg:pl-24 xl:pl-36 pr-4 py-12">
+      <!-- Editor container with max width -->
+      <div class="max-w-3xl">
+        <!-- Document title input - Medium style: large, borderless -->
+        <div class="mb-8">
+          <div class="text-xs <%= Document.text_color %> font-medium uppercase tracking-wide mb-2">Editing</div>
+          <%= form_for @document do |f| %>
+            <%= f.text_field :title,
+              id: "document_title",
+              class: "w-full text-3xl md:text-4xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600",
+              placeholder: "Untitled"
+            %>
+          <% end %>
+        </div>
 
-  <div id="editor" class="editable js-can-mention-pages" data-save-url="<%= document_url(@document) %>"><%= @document.body.try(:html_safe) %></div>
-<% end %>
+        <!-- Editor - clean, borderless canvas -->
+        <div class="min-h-[60vh]">
+          <!-- Wrap editor in Alpine component for @mentions -->
+          <div x-data="contentLinking()" class="relative">
+            <!-- Editor content area -->
+            <div id="editor"
+                 class="editable js-can-mention-pages prose prose-lg dark:prose-invert max-w-none min-h-[60vh] focus:outline-none text-gray-900 dark:text-gray-100"
+                 data-save-url="<%= document_url(@document) %>"
+                 x-ref="editor"><%= @document.body.try(:html_safe) %></div>
 
-<div style="clear: both"></div>
-<%= render partial: 'javascripts/content_linking' %>
+            <!-- Include shared dropdown template for @mentions -->
+            <%= render partial: 'javascripts/content_linking_dropdown' %>
 
-<div id="document-notes-modal" class="modal modal-fixed-footer">
-  <%= form_for(@document, remote: true, html: { id: 'document-notes-form' }) do |f| %>
-    <div class="modal-content">
-      <h4>
-        <i class="material-icons medium <%= Document.text_color %> left">
-          <%= Document.icon %>
-        </i>
-        Document notes
-      </h4>
-      <p class="grey-text">This field will automatically expand as you write.</p>
-      <%= f.text_area :notes_text, class: 'materialize-textarea', placeholder: "Write as little or as much as you'd like!", style: 'min-height: 400px; border: 1px solid #ccc; padding: 10px;' %>
-      <p class="grey-text">
-        <strong>To save your notes, please click "Save Changes" below.</strong>
-        Closing this dialog will preserve your unsaved changes until you refresh the page, but to keep your notes you must save them!
-      </p>
+            <!-- Mention Helper Tooltip - dismissable after first use -->
+            <div x-data="{ dismissed: localStorage.getItem('mentionTipDismissed') === 'true' }"
+                 x-show="!dismissed"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="dismissed = true; localStorage.setItem('mentionTipDismissed', 'true')"
+                 class="absolute bottom-4 right-4 text-xs text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 rounded-full cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5 shadow-sm">
+              <span>Press @ to link pages</span>
+              <i class="material-icons text-xs">close</i>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <a href="#!" class="modal-close waves-effect waves-green btn-flat">Ignore changes</a>
-      <%= link_to 'Save changes', "#", onclick: '$("form#document-notes-form").submit()', class: 'modal-close waves-effect waves-green btn-flat lighten-3 ' + Document.color %>
+
+    <!-- Right Column - Desktop Sidebar (Toggleable) -->
+    <div x-show="showRightSidebar && isDesktop" x-cloak
+         x-transition:enter="transform transition ease-in-out duration-200"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transform transition ease-in-out duration-200"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
+         class="fixed right-0 top-14 w-80 h-screen-minus-nav bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
+         role="complementary"
+         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'">
+
+      <!-- Desktop Header - Dynamic based on active panel -->
+      <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <button @click="activeSidebarPanel = null"
+                class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
+                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'"
+                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'">
+          <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
+          <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
+            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
+          </div>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
+        </button>
+      </div>
+
+      <!-- Information Panel -->
+      <div x-show="activeSidebarPanel === 'information'">
+        <%= render partial: 'documents/information_sidebar' %>
+      </div>
+
+      <!-- Linked Pages Panel -->
+      <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()" >
+        <%= render partial: 'documents/entities_sidebar' %>
+      </div>
+
+      <!-- Actions Panel -->
+      <div x-show="activeSidebarPanel === 'actions'">
+        <%= render partial: 'documents/actions_sidebar' %>
+      </div>
+
+      <!-- Books Panel -->
+      <div x-show="activeSidebarPanel === 'books'" x-data="documentBooksSidebar(<%= @document_books.count == 1 ? @document_books.first.id : 'null' %>)">
+        <!-- Create Book Modal -->
+        <div x-show="showCreateModal" x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             @keydown.escape.window="showCreateModal = false">
+          <div class="fixed inset-0 bg-black bg-opacity-50" @click="showCreateModal = false"></div>
+          <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm"
+                 x-show="showCreateModal"
+                 x-transition:enter="ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.stop>
+              <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-base font-medium text-gray-900 dark:text-white flex items-center">
+                    <i class="material-icons text-gray-400 mr-2 text-sm">menu_book</i>
+                    Create New Book
+                  </h3>
+                  <button @click="showCreateModal = false" class="text-gray-400 hover:text-gray-500">
+                    <i class="material-icons text-sm">close</i>
+                  </button>
+                </div>
+              </div>
+              <div class="p-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Book Title</label>
+                <input type="text"
+                       x-model="newBookTitle"
+                       x-ref="newBookInput"
+                       @keydown.enter="createBookWithTitle()"
+                       class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                       placeholder="My New Book">
+              </div>
+              <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
+                <button @click="showCreateModal = false"
+                        class="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+                  Cancel
+                </button>
+                <button @click="createBookWithTitle()"
+                        :disabled="isCreatingBook || !newBookTitle.trim()"
+                        class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span x-show="!isCreatingBook">Create</span>
+                  <span x-show="isCreatingBook">Creating...</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col h-full overflow-hidden">
+          <!-- Books List Section (moved to top) -->
+          <% if @document_books.any? %>
+            <div class="flex-1 overflow-y-auto">
+              <div class="py-1">
+                <%# Header removed - "Books" panel title already provides context %>
+                <div class="divide-y divide-gray-200 dark:divide-gray-700" id="books-accordion">
+                  <% @document_books.each do |book| %>
+                    <div>
+                      <div
+                        @click="toggleBook(<%= book.id %>)"
+                        class="w-full flex items-center py-2 px-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                      >
+                        <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1 transition-transform duration-200"
+                           :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
+                        <i class="material-icons <%= Book.text_color %> text-base mr-1.5"><%= Book.icon %></i>
+                        <div class="min-w-0 flex-1">
+                          <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.name %></h5>
+                          <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize(book.book_documents.count, 'chapter') %></p>
+                        </div>
+                      </div>
+                      <div x-show="isExpanded(<%= book.id %>)" x-collapse>
+                        <div class="sortable-chapters" data-book-id="<%= book.id %>">
+                          <% book.book_documents.order(:position).each do |book_document| %>
+                            <% is_current = book_document.document_id == @document.id %>
+                            <div class="group flex items-center px-2 py-1.5 text-sm transition-colors border-l-4 <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-teal-500' : 'border-transparent hover:bg-gray-100 dark:hover:bg-gray-700' %>"
+                                 data-book-document-id="<%= book_document.id %>">
+                              <div class="drag-handle hidden lg:block cursor-move text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 mr-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="material-icons text-xs">drag_indicator</i>
+                              </div>
+                              <% if is_current %>
+                                <span class="position-number w-4 h-4 flex items-center justify-center rounded-full bg-teal-500 text-xs text-white mr-1.5 flex-shrink-0 font-medium"><%= book_document.position %></span>
+                              <% else %>
+                                <span class="position-number w-4 h-4 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400 mr-1.5 flex-shrink-0 font-medium"><%= book_document.position %></span>
+                              <% end %>
+                              <%= link_to edit_document_path(book_document.document),
+                                  class: "truncate flex-1 #{is_current ? 'text-teal-700 dark:text-teal-300 font-medium' : 'text-gray-700 dark:text-gray-300'}" do %>
+                                <%= book_document.document.title %>
+                              <% end %>
+                              <% if is_current %>
+                                <i class="material-icons text-teal-500 text-xs ml-auto flex-shrink-0">edit</i>
+                              <% end %>
+                            </div>
+                          <% end %>
+                        </div>
+                        <!-- Book Actions -->
+                        <div class="py-1">
+                          <%= link_to edit_book_path(book), class: "flex items-center px-2 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+                            <i class="material-icons text-gray-400 dark:text-gray-500 text-base mr-2">edit</i>
+                            Edit book
+                          <% end %>
+                          <button
+                            @click="removeFromBook(<%= book.id %>)"
+                            class="w-full flex items-center px-2 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+                          >
+                            <i class="material-icons text-gray-400 dark:text-gray-500 text-base mr-2">remove_circle_outline</i>
+                            Remove from book
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- Add to Book Section (moved to bottom) -->
+          <div class="px-2 py-3 border-t border-gray-200 dark:border-gray-700">
+            <% available_books = @user_books.reject { |b| @document_books.include?(b) } %>
+            <% if available_books.any? %>
+              <div class="relative mb-2">
+                <select
+                  x-model="selectedBookId"
+                  @change="addToBook()"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
+                >
+                  <option value="">Add to book...</option>
+                  <% available_books.each do |book| %>
+                    <option value="<%= book.id %>"><%= book.name %></option>
+                  <% end %>
+                </select>
+              </div>
+            <% end %>
+
+            <button
+              @click="createAndAddToBook()"
+              :disabled="isCreatingBook"
+              class="w-full flex items-center justify-center px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md transition-colors text-sm font-medium disabled:opacity-50"
+            >
+              <i class="material-icons text-sm mr-1.5">add</i>
+              Create New Book
+            </button>
+          </div>
+
+          <% if @document_books.empty? %>
+            <!-- Empty state (only shown when no books) -->
+            <div class="flex-1 flex flex-col items-center justify-center py-8 text-center px-4">
+              <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                <i class="material-icons text-gray-400 text-xl">menu_book</i>
+              </div>
+              <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Not in any books yet</h4>
+              <p class="text-xs text-gray-500 dark:text-gray-400">Add this document to a book to organize your writing</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
     </div>
-  <% end %>
-</div>
+
+    </div> <!-- Close flex container -->
+
+    <!-- Sidebar Toggle Tabs -->
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'information', icon: 'info', tooltip: 'Information', top_position: 76, is_desktop: true %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'linked_pages', icon: 'link', tooltip: 'Linked Pages', top_position: 124, is_desktop: true %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'books', icon: 'menu_book', tooltip: 'Books', top_position: 172, is_desktop: true %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'actions', icon: 'bolt', tooltip: 'Actions', top_position: 220, is_desktop: true %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'information', icon: 'info', tooltip: 'Information', top_position: 76, is_desktop: false %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'linked_pages', icon: 'link', tooltip: 'Linked Pages', top_position: 124, is_desktop: false %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'books', icon: 'menu_book', tooltip: 'Books', top_position: 172, is_desktop: false %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'actions', icon: 'bolt', tooltip: 'Actions', top_position: 220, is_desktop: false %>
+
+    <%= render 'documents/mobile_sidebar' %>
+
+    <!-- Modals (fixed position, outside flex layout) -->
+    <div>
+      <%= render partial: 'javascripts/content_linking_alpine' %>
+        
+        <!-- Privacy modal -->
+        <%= render 'documents/privacy_modal' %>
+
+        <%= render 'documents/notes_modal' %>
+        <%= render 'documents/synopsis_modal' %>
+        <%= render 'documents/universe_modal' %>
+        <%= render 'documents/folder_modal' %>
+    </div>
+  </main>
+      
+      <!-- Subtle save status indicator - minimal Medium style -->
+      <div id="save-indicator" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1 transition-all duration-300">
+        <i class="material-icons js-autosave-icon text-gray-400 dark:text-gray-500 mr-1.5 text-xs">cloud_done</i>
+        <span class="js-autosave-status text-xs text-gray-500 dark:text-gray-400">Saved</span>
+      </div>
+
+      <!-- Alpine.js components for Document Editor -->
+      <script>
+        // Main page controller for document edit page
+        function documentEditController() {
+          return {
+            // Sidebar state - null means closed, otherwise shows which panel is active
+            activeSidebarPanel: null, // null, 'linked_pages', 'information', 'actions', or 'books'
+            isDesktop: window.innerWidth >= 1024,
+
+            // Computed property for backwards compatibility
+            get showRightSidebar() {
+              return this.activeSidebarPanel !== null;
+            },
+
+            init() {
+              this.setupResizeListener();
+            },
+
+            togglePanel(panel) {
+              if (this.activeSidebarPanel === panel) {
+                this.activeSidebarPanel = null;
+              } else {
+                this.activeSidebarPanel = panel;
+
+                // Focus search input when opening linked pages panel
+                if (panel === 'linked_pages') {
+                  setTimeout(() => {
+                    const searchInput = document.getElementById('entity-search-input');
+                    if (searchInput) searchInput.focus();
+                  }, 300);
+                }
+              }
+            },
+
+            // Legacy method for backwards compatibility
+            toggleRightSidebar() {
+              this.togglePanel('linked_pages');
+            },
+
+            closeMobileSidebar() {
+              if (!this.isDesktop) {
+                this.activeSidebarPanel = null;
+              }
+            },
+
+            setupResizeListener() {
+              window.addEventListener('resize', () => {
+                const wasDesktop = this.isDesktop;
+                this.isDesktop = window.innerWidth >= 1024;
+
+                // Close sidebar when transitioning between desktop and mobile
+                if (wasDesktop !== this.isDesktop) {
+                  this.activeSidebarPanel = null;
+                }
+              });
+            }
+          }
+        }
+
+        // Global function to unlink entity (accessible from nested Alpine scopes)
+        window.unlinkDocumentEntity = function(documentEntityId) {
+          if (!confirm('Remove this page from the document?')) {
+            return;
+          }
+
+          // Get CSRF token
+          const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+          // Send DELETE request to remove entity
+          const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+          fetch('/documents/' + documentId + '/unlink_entity/' + documentEntityId, {
+            method: 'DELETE',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => response.json().then(data => ({ ok: response.ok, data })))
+          .then(({ ok, data }) => {
+            if (ok) {
+              // Remove from UI (both desktop and mobile sidebars)
+              const entityElements = document.querySelectorAll(`[data-entity-id="${documentEntityId}"]`);
+              let entityType = null;
+              entityElements.forEach(el => {
+                entityType = el.dataset.entityType;
+                el.remove();
+              });
+
+              if (entityElements.length > 0) {
+                // Update total count (in all sidebars)
+                document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                  const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                  countSpan.textContent = `(${Math.max(0, currentCount - 1)})`;
+                });
+
+                // Update filter button count for this entity type (in all sidebars)
+                document.querySelectorAll(`[data-filter-type="${entityType}"] .filter-count`).forEach(filterButton => {
+                  const currentFilterCount = parseInt(filterButton.textContent.replace(/[()]/g, '')) || 0;
+                  const newCount = Math.max(0, currentFilterCount - 1);
+                  if (newCount === 0) {
+                    // Remove the filter button if no more entities of this type
+                    filterButton.closest('button').remove();
+                  } else {
+                    filterButton.textContent = `(${newCount})`;
+                  }
+                });
+
+                // Check if we need to show empty state (in all sidebars)
+                const remainingEntities = document.querySelectorAll('.linked-entity');
+                if (remainingEntities.length === 0) {
+                  document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                    entitiesList.innerHTML = `
+                      <div class="flex flex-col items-center justify-center py-8 text-center">
+                        <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+                          <i class="material-icons text-gray-400 text-xl">link_off</i>
+                        </div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">No linked pages yet</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Type @ in the editor or search above to link pages</p>
+                      </div>
+                    `;
+                  });
+                }
+              }
+
+              // Show success toast
+              if (typeof showToast === 'function') {
+                showToast(data.message || 'Page unlinked from document', 'success');
+              }
+            } else {
+              console.error('Failed to unlink entity:', data);
+              if (typeof showToast === 'function') {
+                showToast('Failed to unlink page', 'error');
+              }
+            }
+          })
+          .catch(error => {
+            console.error('Error unlinking entity:', error);
+            if (typeof showToast === 'function') {
+              showToast('Error unlinking page', 'error');
+            }
+          });
+        };
+
+        // Global function to auto-link entities from @mentions (called once, updates all sidebars)
+        window.autoLinkEntityToDocument = function(entity) {
+          // Create form data for linking
+          const formData = new FormData();
+          const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+          formData.append('document_id', documentId);
+          formData.append('document_analysis_id', '-1');
+          formData.append('entity_type', entity.type);
+          formData.append('entity_id', entity.id);
+          formData.append('document_entity_id', '-1');
+
+          const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+          fetch('/documents/link_entity', {
+            method: 'POST',
+            headers: {
+              'X-CSRF-Token': csrfToken,
+              'Accept': 'application/json'
+            },
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success && !data.already_linked) {
+              // Remove empty state if it exists
+              document.querySelectorAll('#linked-entities-list .flex.flex-col.items-center.justify-center').forEach(el => el.remove());
+
+              // Add the new entity card to all sidebar lists
+              document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                entitiesList.insertAdjacentHTML('afterbegin', data.card_html);
+                const newElement = entitiesList.firstElementChild;
+                if (window.Alpine && newElement) {
+                  window.Alpine.initTree(newElement);
+                }
+              });
+
+              // Update total count
+              document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                countSpan.textContent = `(${currentCount + 1})`;
+              });
+
+              // Show success toast
+              if (typeof showToast === 'function') {
+                showToast(`${entity.name || data.document_entity?.entity?.name} linked to document`, 'success');
+              }
+            }
+            // Silently ignore "already_linked" - no toast needed for auto-links
+          })
+          .catch(error => {
+            // Silently ignore errors for auto-links (e.g., duplicate, network issues)
+            console.debug('Auto-link skipped:', error);
+          });
+        };
+
+        // Entities sidebar component
+        function documentEntitiesSidebar() {
+          return {
+            activeTab: 'all',
+            selectedEntity: null,
+            searchQuery: '',
+            showSearchDropdown: false,
+            filteredSearchResults: [],
+            allLinkables: [],
+            
+            init() {
+              // Load linkables data if available
+              if (window.notebookLinkables) {
+                this.allLinkables = window.notebookLinkables.map(item => ({
+                  id: item.value.match(/\[\[[^\-]+\-([^\]]+)\]\]/)?.[1],
+                  name: item.name,
+                  type: item.type,
+                  value: item.value,
+                  color: item.color,
+                  icon: item.icon,
+                  textColor: item.textColor
+                }));
+              }
+            },
+            
+            filterSearchResults() {
+              if (this.searchQuery.length === 0) {
+                this.filteredSearchResults = [];
+                this.showSearchDropdown = false;
+                return;
+              }
+
+              // Get currently linked entity IDs (type + id combinations)
+              const linkedEntities = new Set();
+              document.querySelectorAll('.linked-entity').forEach(el => {
+                const type = el.dataset.entityType;
+                const entityId = el.dataset.linkedEntityId;
+                if (type && entityId) {
+                  linkedEntities.add(`${type}-${entityId}`);
+                }
+              });
+
+              const query = this.searchQuery.toLowerCase();
+              this.filteredSearchResults = this.allLinkables
+                .filter(item => item.name.toLowerCase().includes(query))
+                .filter(item => !linkedEntities.has(`${item.type}-${item.id}`)) // Exclude already linked
+                .slice(0, 10); // Limit to 10 results
+
+              this.showSearchDropdown = this.filteredSearchResults.length > 0;
+            },
+            
+            linkEntity(entity, silent = false) {
+              // Check if entity is already linked
+              const existingEntity = document.querySelector(`[data-entity-type="${entity.type}"][data-entity-id]`);
+              if (existingEntity) {
+                const existingIds = Array.from(document.querySelectorAll(`[data-entity-type="${entity.type}"]`))
+                  .map(el => el.querySelector('[data-linked-entity-id]')?.dataset.linkedEntityId)
+                  .filter(Boolean);
+
+                if (existingIds.includes(String(entity.id))) {
+                  if (!silent) {
+                    alert('This page is already linked to the document.');
+                  }
+                  return;
+                }
+              }
+              
+              // Create form data for linking
+              const formData = new FormData();
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              formData.append('document_id', documentId);
+              formData.append('document_analysis_id', '-1'); // Create placeholder if needed
+              formData.append('entity_type', entity.type);
+              formData.append('entity_id', entity.id);
+              formData.append('document_entity_id', '-1'); // New entity
+              
+              // Get CSRF token
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              
+              // Send AJAX request to link entity
+              fetch('/documents/link_entity', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Accept': 'application/json'
+                },
+                body: formData
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Handle "already linked" case (skip toast for silent auto-links)
+                  if (data.already_linked) {
+                    if (!silent && typeof showToast === 'function') {
+                      showToast(data.message || 'Page is already linked', 'info');
+                    }
+                    return;
+                  }
+
+                  // Remove empty state if it exists (in all sidebars)
+                  document.querySelectorAll('#linked-entities-list .flex.flex-col.items-center.justify-center').forEach(el => el.remove());
+
+                  // Add the new entity card to all sidebar lists (desktop + mobile)
+                  document.querySelectorAll('#linked-entities-list').forEach(entitiesList => {
+                    // Insert the server-rendered card HTML
+                    entitiesList.insertAdjacentHTML('afterbegin', data.card_html);
+
+                    // Initialize Alpine for the new element
+                    const newElement = entitiesList.firstElementChild;
+                    if (window.Alpine && newElement) {
+                      window.Alpine.initTree(newElement);
+                    }
+                  });
+
+                  // Update total count (in all sidebars)
+                  document.querySelectorAll('#linked-entities-count').forEach(countSpan => {
+                    const currentCount = parseInt(countSpan.textContent.replace(/[()]/g, '')) || 0;
+                    countSpan.textContent = `(${currentCount + 1})`;
+                  });
+
+                  // Update filter buttons if this is a new entity type
+                  this.updateFilterButtons(data.document_entity.entity_type, data.document_entity.entity);
+
+                  // Apply current filter
+                  if (this.activeTab !== 'all') {
+                    this.filterByType(this.activeTab);
+                  }
+
+                  // Show success toast
+                  if (typeof showToast === 'function') {
+                    showToast(`${data.document_entity.entity.name} linked to document`, 'success');
+                  }
+                } else {
+                  console.error('Failed to link entity');
+                  if (typeof showToast === 'function') {
+                    showToast('Failed to link page. Please try again.', 'error');
+                  }
+                }
+              })
+              .catch(error => {
+                console.error('Error linking entity:', error);
+                if (typeof showToast === 'function') {
+                  showToast('An error occurred while linking the page.', 'error');
+                }
+              });
+              
+              // Clear search
+              this.searchQuery = '';
+              this.showSearchDropdown = false;
+              this.filteredSearchResults = [];
+            },
+            
+            unlinkEntity(documentEntityId) {
+              // Call the global unlink function
+              window.unlinkDocumentEntity(documentEntityId);
+            },
+            
+            getEntityColorClass(type) {
+              // Map content types to Tailwind color classes
+              const colorMap = {
+                'Character': 'bg-red-100',
+                'Location': 'bg-green-100',
+                'Item': 'bg-yellow-100',
+                'Creature': 'bg-purple-100',
+                'Flora': 'bg-green-100',
+                'Building': 'bg-gray-100',
+                'Landmark': 'bg-blue-100',
+                'Town': 'bg-orange-100',
+                'Country': 'bg-pink-100',
+                'Planet': 'bg-indigo-100',
+                'Universe': 'bg-blue-100',
+                'Document': 'bg-teal-100'
+              };
+              return colorMap[type] || 'bg-gray-100';
+            },
+            
+            getEntityTextColorClass(type) {
+              // Map content types to text color classes
+              const colorMap = {
+                'Character': 'text-red-600',
+                'Location': 'text-green-600',
+                'Item': 'text-yellow-600',
+                'Creature': 'text-purple-600',
+                'Flora': 'text-green-600',
+                'Building': 'text-gray-600',
+                'Landmark': 'text-blue-600',
+                'Town': 'text-orange-600',
+                'Country': 'text-pink-600',
+                'Planet': 'text-indigo-600',
+                'Universe': 'text-blue-600',
+                'Document': 'text-teal-600'
+              };
+              return colorMap[type] || 'text-gray-600';
+            },
+            
+            getEntityIcon(type) {
+              // Map content types to Material Icons
+              const iconMap = {
+                'Character': 'person',
+                'Location': 'place',
+                'Item': 'category',
+                'Creature': 'pets',
+                'Flora': 'local_florist',
+                'Building': 'home',
+                'Landmark': 'terrain',
+                'Town': 'location_city',
+                'Country': 'flag',
+                'Planet': 'public',
+                'Universe': 'public',
+                'Document': 'description'
+              };
+              return iconMap[type] || 'category';
+            },
+            
+            filterByType(type) {
+              this.activeTab = type;
+              
+              // Get all entity elements
+              const entities = document.querySelectorAll('.linked-entity');
+              
+              entities.forEach(entity => {
+                const entityType = entity.dataset.entityType;
+                
+                if (type === 'all') {
+                  // Show all entities
+                  entity.style.display = 'block';
+                } else {
+                  // Show only matching type
+                  entity.style.display = entityType === type ? 'block' : 'none';
+                }
+              });
+              
+              // Update count in header
+              const visibleCount = type === 'all' 
+                ? entities.length 
+                : document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+              
+              // Update the header count if it exists
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${visibleCount})`;
+              }
+              
+              // Update all filter button counts
+              this.updateAllFilterCounts();
+            },
+            
+            updateAllFilterCounts() {
+              // Update counts for all filter buttons
+              const filterButtons = document.querySelectorAll('[data-filter-type]');
+              filterButtons.forEach(button => {
+                const type = button.dataset.filterType;
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${type}"]`).length;
+                const countSpan = button.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+                
+                // Hide filter button if count is 0 (entity was removed)
+                if (count === 0) {
+                  button.style.display = 'none';
+                } else {
+                  button.style.display = '';
+                }
+              });
+            },
+            
+            createEntityElement(documentEntity) {
+              const entity = documentEntity.entity;
+              const colorClass = entity.class_color.replace('bg-', 'bg-').replace('-500', '-100');
+              
+              // Build attributes HTML based on entity type
+              let attributesHtml = '';
+              if (documentEntity.entity_type === 'Character') {
+                if (entity.role) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Role</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.role)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Location') {
+                if (entity.type_of) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.type_of)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else if (documentEntity.entity_type === 'Item') {
+                if (entity.item_type) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Type</h4>
+                      <p class="text-sm">${this.escapeHtml(entity.item_type)}</p>
+                    </div>`;
+                }
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                }
+              } else {
+                // Generic fallback
+                if (entity.description) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Description</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.description, 150))}</p>
+                    </div>`;
+                } else if (entity.summary) {
+                  attributesHtml += `
+                    <div>
+                      <h4 class="text-xs font-medium text-gray-500 uppercase">Summary</h4>
+                      <p class="text-sm">${this.escapeHtml(this.truncate(entity.summary, 150))}</p>
+                    </div>`;
+                }
+              }
+              
+              return `
+                <div x-data="{ expanded: false }" 
+                     class="border rounded-md overflow-hidden linked-entity"
+                     data-entity-type="${documentEntity.entity_type}"
+                     data-entity-id="${documentEntity.id}"
+                     data-linked-entity-id="${entity.id}">
+                  <!-- Entity header (always visible) -->
+                  <div
+                    @click="expanded = !expanded"
+                    :class="expanded ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                    class="p-3 cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full ${colorClass} flex items-center justify-center mr-2">
+                          <i class="material-icons ${entity.class_text_color} text-xs">${entity.class_icon}</i>
+                        </div>
+                        <div>
+                          <span class="text-sm font-medium">${this.escapeHtml(entity.name)}</span>
+                          <p class="text-xs text-gray-500">${entity.class_name}</p>
+                        </div>
+                      </div>
+                      <div class="flex items-center space-x-1">
+                        <!-- Unlink button -->
+                        <button @click.stop="unlinkEntity(${documentEntity.id})"
+                                class="p-1 hover:bg-red-50 rounded transition-colors"
+                                title="Remove from document">
+                          <i class="material-icons text-red-400 hover:text-red-600 text-sm">link_off</i>
+                        </button>
+                        <i class="material-icons text-gray-400 text-sm" :class="{ 'transform rotate-180': expanded }">expand_more</i>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Expandable preview section -->
+                  <div x-show="expanded" x-collapse class="border-t border-gray-200 bg-gray-50 p-3">
+                    <div class="flex items-center justify-between mb-2">
+                      <h4 class="text-xs font-medium text-gray-700">Quick reference</h4>
+                      <a href="${entity.view_path}" 
+                         class="text-xs text-blue-600 hover:text-blue-800"
+                         target="_blank">
+                        View full page
+                      </a>
+                    </div>
+                    
+                    <div class="space-y-2">
+                      ${attributesHtml}
+                    </div>
+                  </div>
+                </div>
+              `;
+            },
+            
+            updateEntityCount() {
+              const entities = document.querySelectorAll('.linked-entity');
+              const countElement = document.querySelector('#linked-entities-count');
+              if (countElement) {
+                countElement.textContent = `(${entities.length})`;
+              }
+            },
+            
+            updateFilterButtons(entityType, entityData) {
+              const filterContainer = document.getElementById('entity-filter-buttons');
+              if (!filterContainer) return;
+              
+              // Check if a filter button for this type already exists
+              let filterButton = filterContainer.querySelector(`[data-filter-type="${entityType}"]`);
+              
+              if (filterButton) {
+                // Update the count for existing filter
+                const count = document.querySelectorAll(`.linked-entity[data-entity-type="${entityType}"]`).length;
+                const countSpan = filterButton.querySelector('.filter-count');
+                if (countSpan) {
+                  countSpan.textContent = `(${count})`;
+                }
+              } else {
+                // Create a new filter button for this entity type
+                const newButton = document.createElement('button');
+                // Don't use Alpine directives - use regular JavaScript instead
+                newButton.className = 'p-2 rounded-md text-xs font-medium transition-colors flex items-center space-x-1 bg-gray-100 text-gray-700';
+                newButton.setAttribute('title', entityType + 's');
+                newButton.setAttribute('data-filter-type', entityType);
+                
+                // Use the icon from entity data
+                newButton.innerHTML = `
+                  <i class="material-icons text-sm">${entityData.class_icon}</i>
+                  <span class="text-xs filter-count">(1)</span>
+                `;
+                
+                // Add click handler
+                newButton.addEventListener('click', () => {
+                  this.filterByType(entityType);
+                  
+                  // Update button styles to show active state
+                  document.querySelectorAll('#entity-filter-buttons button').forEach(btn => {
+                    if (btn.getAttribute('data-filter-type') === entityType || 
+                        (btn.querySelector('.material-icons')?.textContent === 'apps' && entityType === 'all')) {
+                      btn.className = btn.className.replace('bg-gray-100 text-gray-700', 'bg-blue-100 text-blue-700');
+                    } else if (!btn.hasAttribute('@click')) {
+                      // Only update non-Alpine buttons
+                      btn.className = btn.className.replace('bg-blue-100 text-blue-700', 'bg-gray-100 text-gray-700');
+                    }
+                  });
+                });
+                
+                // Insert the button (keep alphabetical order)
+                const allButtons = Array.from(filterContainer.querySelectorAll('[data-filter-type]'));
+                const insertIndex = allButtons.findIndex(btn => btn.dataset.filterType > entityType);
+                
+                if (insertIndex === -1) {
+                  // Add at the end
+                  filterContainer.appendChild(newButton);
+                } else {
+                  // Insert before the found button
+                  filterContainer.insertBefore(newButton, allButtons[insertIndex]);
+                }
+              }
+            },
+            
+            showSuccessFeedback(message) {
+              // Create a temporary success message
+              const feedback = document.createElement('div');
+              feedback.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300';
+              feedback.textContent = message;
+              document.body.appendChild(feedback);
+              
+              setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => feedback.remove(), 300);
+              }, 2000);
+            },
+            
+            escapeHtml(text) {
+              if (!text) return '';
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div.innerHTML;
+            },
+            
+            truncate(text, length) {
+              if (!text) return '';
+              if (text.length <= length) return text;
+              return text.substring(0, length) + '...';
+            }
+          }
+        }
+
+        // Books sidebar component
+        function documentBooksSidebar(autoExpandBookId = null) {
+          return {
+            selectedBookId: '',
+            expandedBooks: autoExpandBookId ? [autoExpandBookId] : [],
+            isCreatingBook: false,
+            showCreateModal: false,
+            newBookTitle: '',
+
+            init() {
+              // Initialize sortable for any auto-expanded books
+              this.$nextTick(() => {
+                this.initSortable();
+              });
+            },
+
+            isExpanded(bookId) {
+              return this.expandedBooks.includes(bookId);
+            },
+
+            toggleBook(bookId) {
+              const index = this.expandedBooks.indexOf(bookId);
+              if (index > -1) {
+                this.expandedBooks.splice(index, 1);
+              } else {
+                this.expandedBooks.push(bookId);
+                // Initialize sortable after Alpine renders the expanded content
+                this.$nextTick(() => {
+                  this.initSortable();
+                });
+              }
+            },
+
+            initSortable() {
+              if (typeof $ === 'undefined' || !$.fn.sortable) return;
+
+              const self = this;
+              document.querySelectorAll('.sortable-chapters').forEach(list => {
+                // Skip if already initialized
+                if ($(list).data('ui-sortable')) return;
+
+                const bookId = list.dataset.bookId;
+
+                $(list).sortable({
+                  handle: '.drag-handle',
+                  placeholder: 'bg-blue-50 dark:bg-blue-900 border border-dashed border-blue-300 dark:border-blue-600 rounded h-8',
+                  update: function(event, ui) {
+                    const bookDocumentId = ui.item.data('book-document-id');
+                    const newPosition = ui.item.index(); // 0-indexed
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                    fetch('/books/' + bookId + '/sort_document', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrfToken
+                      },
+                      body: JSON.stringify({
+                        book_document_id: bookDocumentId,
+                        position: newPosition  // Backend adds +1 for acts_as_list
+                      })
+                    }).then(() => {
+                      self.updatePositionNumbers(list);
+                    }).catch(error => {
+                      console.error('Error sorting:', error);
+                      $(list).sortable('cancel');
+                    });
+                  }
+                });
+              });
+            },
+
+            updatePositionNumbers(list) {
+              const items = list.querySelectorAll('[data-book-document-id]');
+              items.forEach((item, index) => {
+                const positionNumber = item.querySelector('.position-number');
+                if (positionNumber) {
+                  positionNumber.textContent = (index + 1);
+                }
+              });
+            },
+
+            addToBook() {
+              if (!this.selectedBookId) return;
+
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+              fetch('/books/' + this.selectedBookId + '/add_document', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Accept': 'application/json'
+                },
+                body: 'document_id=' + documentId
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === 'ok') {
+                  window.location.reload();
+                }
+              })
+              .catch(error => console.error('Error adding to book:', error));
+
+              this.selectedBookId = '';
+            },
+
+            removeFromBook(bookId) {
+              if (!confirm('Remove this document from the book?')) return;
+
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+              fetch('/books/' + bookId + '/remove_document?document_id=' + documentId, {
+                method: 'DELETE',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Accept': 'application/json'
+                }
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.status === 'ok') {
+                  const bookSection = document.querySelector('[data-book-id="' + bookId + '"]');
+                  if (bookSection) {
+                    const wrapper = bookSection.closest('.bg-gray-50');
+                    if (wrapper) wrapper.remove();
+                  }
+
+                  const remainingBooks = document.querySelectorAll('#books-accordion > div');
+                  if (remainingBooks.length === 0) {
+                    window.location.reload();
+                  }
+                }
+              })
+              .catch(error => console.error('Error removing from book:', error));
+            },
+
+            createAndAddToBook() {
+              this.newBookTitle = '';
+              this.showCreateModal = true;
+              this.$nextTick(() => {
+                this.$refs.newBookInput?.focus();
+              });
+            },
+
+            createBookWithTitle() {
+              if (!this.newBookTitle.trim()) return;
+
+              this.isCreatingBook = true;
+              const documentId = document.querySelector('[data-document-id]').dataset.documentId;
+              const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+              const title = this.newBookTitle.trim();
+
+              fetch('/books', {
+                method: 'POST',
+                headers: {
+                  'X-CSRF-Token': csrfToken,
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify({ book: { title: title } })
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.id) {
+                  return fetch('/books/' + data.id + '/add_document', {
+                    method: 'POST',
+                    headers: {
+                      'X-CSRF-Token': csrfToken,
+                      'Content-Type': 'application/x-www-form-urlencoded',
+                      'Accept': 'application/json'
+                    },
+                    body: 'document_id=' + documentId
+                  });
+                }
+              })
+              .then(() => window.location.reload())
+              .catch(error => {
+                console.error('Error creating book:', error);
+                this.isCreatingBook = false;
+              });
+            }
+          };
+        }
+      </script>
+
+</div> <!-- Close main page container (x-data="documentEditController()") -->

@@ -27,11 +27,11 @@ class Scene < ApplicationRecord
   end
 
   def self.color
-    'grey'
+    'grey bg-gray-400'
   end
 
   def self.text_color
-    'grey-text'
+    'grey-text text-gray-400'
   end
 
   def self.hex_color

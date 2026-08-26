@@ -14,11 +14,11 @@ class School < ActiveRecord::Base
   self.authorizer_name = 'ExtendedContentAuthorizer'
 
   def self.color
-    'cyan'
+    'cyan bg-rose-800'
   end
 
   def self.text_color
-    'cyan-text'
+    'cyan-text text-rose-800'
   end
 
   def self.hex_color

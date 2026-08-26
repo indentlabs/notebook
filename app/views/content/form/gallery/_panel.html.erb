@@ -34,7 +34,7 @@
                 image_data = image_item[:data]
                 image_type = image_item[:type]
                 image_id = image_item[:id]
-                is_pinned = image_data.respond_to?(:pinned?) && image_data.pinned?
+                is_pinned = image_data.pinned == true
               %>
               <div class="col s12 m6 l6 gallery-sortable-item" data-image-id="<%= image_id %>" data-image-type="<%= image_type %>">
                 <div class="image-card <%= is_pinned ? 'image-pinned' : '' %>">
@@ -203,8 +203,7 @@
           <%= link_to_add_association "<i class='material-icons left'>add_photo_alternate</i>Add another image".html_safe, f,
             :image_uploads,
             class: 'btn-flat waves-effect',
-            partial: 'content/form/images/upload',
-            render_options: { locals: { f: f, content: content }}
+            partial: 'content/form/images/upload_fields'
           %>
         </div>
         

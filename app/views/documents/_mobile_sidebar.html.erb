@@ -1,0 +1,230 @@
+<%#
+  Mobile/Tablet Sidebar for Document Editor
+
+  Displays a slide-in sidebar with overlay for mobile and tablet devices.
+  Contains the same panel content as the desktop sidebar.
+
+  Expected Alpine.js context (from documentEditController):
+    - showRightSidebar: Boolean
+    - isDesktop: Boolean
+    - activeSidebarPanel: String ('information', 'linked_pages', 'actions', 'books')
+    - closeMobileSidebar(): Function
+%>
+
+<!-- Mobile/Tablet Right Sidebar Overlay -->
+<div x-show="showRightSidebar && !isDesktop" x-cloak
+     x-transition:enter="transition-opacity ease-linear duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity ease-linear duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     @click="closeMobileSidebar()"
+     @keydown.escape.window="closeMobileSidebar()"
+     class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+     role="presentation"
+     aria-hidden="true">
+</div>
+
+<!-- Mobile/Tablet Right Sidebar -->
+<div x-show="showRightSidebar && !isDesktop" x-cloak
+     x-transition:enter="transform transition ease-in-out duration-200"
+     x-transition:enter-start="translate-x-full"
+     x-transition:enter-end="translate-x-0"
+     x-transition:leave="transform transition ease-in-out duration-200"
+     x-transition:leave-start="translate-x-0"
+     x-transition:leave-end="translate-x-full"
+     @keydown.escape="closeMobileSidebar()"
+     class="lg:hidden fixed right-0 top-14 h-screen-minus-nav w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
+     role="dialog"
+     aria-modal="true"
+     :aria-labelledby="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : activeSidebarPanel === 'books' ? 'mobile-books-title' : 'mobile-entities-title'">
+
+  <!-- Mobile Header - Dynamic based on active panel -->
+  <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+    <button @click="closeMobileSidebar()"
+            class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :aria-label="activeSidebarPanel === 'information' ? 'Close Information' : activeSidebarPanel === 'actions' ? 'Close Actions' : activeSidebarPanel === 'books' ? 'Close Books' : 'Close Linked Pages'">
+      <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
+      <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
+        <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
+      </div>
+      <h2 :id="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : activeSidebarPanel === 'books' ? 'mobile-books-title' : 'mobile-entities-title'"
+          class="text-sm font-semibold text-gray-900 dark:text-white"
+          x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
+    </button>
+  </div>
+
+  <!-- Information Panel -->
+  <div x-show="activeSidebarPanel === 'information'">
+    <%= render partial: 'documents/information_sidebar' %>
+  </div>
+
+  <!-- Linked Pages Panel -->
+  <div x-show="activeSidebarPanel === 'linked_pages'" x-data="documentEntitiesSidebar()" >
+    <%= render partial: 'documents/entities_sidebar' %>
+  </div>
+
+  <!-- Actions Panel -->
+  <div x-show="activeSidebarPanel === 'actions'">
+    <%= render partial: 'documents/actions_sidebar' %>
+  </div>
+
+  <!-- Books Panel -->
+  <div x-show="activeSidebarPanel === 'books'" x-data="documentBooksSidebar(<%= @document_books.count == 1 ? @document_books.first.id : 'null' %>)">
+    <!-- Create Book Modal -->
+    <div x-show="showCreateModal" x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="showCreateModal = false">
+      <div class="fixed inset-0 bg-black bg-opacity-50" @click="showCreateModal = false"></div>
+      <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm"
+             x-show="showCreateModal"
+             x-transition:enter="ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.stop>
+          <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-medium text-gray-900 dark:text-white flex items-center">
+                <i class="material-icons text-gray-400 mr-2 text-sm">menu_book</i>
+                Create New Book
+              </h3>
+              <button @click="showCreateModal = false" class="text-gray-400 hover:text-gray-500">
+                <i class="material-icons text-sm">close</i>
+              </button>
+            </div>
+          </div>
+          <div class="p-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Book Title</label>
+            <input type="text"
+                   x-model="newBookTitle"
+                   x-ref="newBookInput"
+                   @keydown.enter="createBookWithTitle()"
+                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                   placeholder="My New Book">
+          </div>
+          <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
+            <button @click="showCreateModal = false"
+                    class="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors">
+              Cancel
+            </button>
+            <button @click="createBookWithTitle()"
+                    :disabled="isCreatingBook || !newBookTitle.trim()"
+                    class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              <span x-show="!isCreatingBook">Create</span>
+              <span x-show="isCreatingBook">Creating...</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col h-full overflow-hidden">
+      <!-- Books List Section (moved to top) -->
+      <% if @document_books.any? %>
+        <div class="flex-1 overflow-y-auto">
+          <div class="py-1">
+            <%# Header removed - "Books" panel title already provides context %>
+            <div class="divide-y divide-gray-200 dark:divide-gray-700" id="mobile-books-accordion">
+              <% @document_books.each do |book| %>
+                <div>
+                  <div
+                    @click="toggleBook(<%= book.id %>)"
+                    class="w-full flex items-center py-2 px-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left cursor-pointer"
+                  >
+                    <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1 transition-transform duration-200"
+                       :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
+                    <i class="material-icons <%= Book.text_color %> text-base mr-1.5"><%= Book.icon %></i>
+                    <div class="min-w-0 flex-1">
+                      <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.name %></h5>
+                      <p class="text-xs text-gray-500 dark:text-gray-400"><%= pluralize(book.book_documents.count, 'chapter') %></p>
+                    </div>
+                  </div>
+                  <div x-show="isExpanded(<%= book.id %>)" x-collapse>
+                    <div class="max-h-64 overflow-y-auto sortable-chapters" data-book-id="<%= book.id %>">
+                      <% book.book_documents.order(:position).each do |book_document| %>
+                        <% is_current = book_document.document_id == @document.id %>
+                        <div class="flex items-center px-2 py-1.5 text-sm transition-colors border-l-4 <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-teal-500' : 'border-transparent hover:bg-gray-100 dark:hover:bg-gray-700' %>"
+                             data-book-document-id="<%= book_document.id %>">
+                          <%# Drag handles hidden on mobile - reorder via books#edit %>
+                          <% if is_current %>
+                            <span class="position-number w-4 h-4 flex items-center justify-center rounded-full bg-teal-500 text-xs text-white mr-1.5 flex-shrink-0 font-medium"><%= book_document.position %></span>
+                          <% else %>
+                            <span class="position-number w-4 h-4 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400 mr-1.5 flex-shrink-0 font-medium"><%= book_document.position %></span>
+                          <% end %>
+                          <%= link_to edit_document_path(book_document.document),
+                              class: "truncate flex-1 #{is_current ? 'text-teal-700 dark:text-teal-300 font-medium' : 'text-gray-700 dark:text-gray-300'}" do %>
+                            <%= book_document.document.title %>
+                          <% end %>
+                          <% if is_current %>
+                            <i class="material-icons text-teal-500 text-xs ml-auto flex-shrink-0">edit</i>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                    <!-- Book Actions -->
+                    <div class="py-1">
+                      <%= link_to edit_book_path(book), class: "flex items-center px-2 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+                        <i class="material-icons text-gray-400 dark:text-gray-500 text-base mr-2">edit</i>
+                        Edit book
+                      <% end %>
+                      <button
+                        @click="removeFromBook(<%= book.id %>)"
+                        class="w-full flex items-center px-2 py-1.5 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+                      >
+                        <i class="material-icons text-gray-400 dark:text-gray-500 text-base mr-2">remove_circle_outline</i>
+                        Remove from book
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Add to Book Section (moved to bottom) -->
+      <div class="px-2 py-3 border-t border-gray-200 dark:border-gray-700">
+        <% available_books = @user_books.reject { |b| @document_books.include?(b) } %>
+        <% if available_books.any? %>
+          <div class="relative mb-2">
+            <select
+              x-model="selectedBookId"
+              @change="addToBook()"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm appearance-none cursor-pointer"
+            >
+              <option value="">Add to book...</option>
+              <% available_books.each do |book| %>
+                <option value="<%= book.id %>"><%= book.name %></option>
+              <% end %>
+            </select>
+          </div>
+        <% end %>
+
+        <button
+          @click="createAndAddToBook()"
+          :disabled="isCreatingBook"
+          class="w-full flex items-center justify-center px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md transition-colors text-sm font-medium disabled:opacity-50"
+        >
+          <i class="material-icons text-sm mr-1.5">add</i>
+          Create New Book
+        </button>
+      </div>
+
+      <% if @document_books.empty? %>
+        <!-- Empty state (only shown when no books) -->
+        <div class="flex-1 flex flex-col items-center justify-center py-8 text-center px-4">
+          <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-3">
+            <i class="material-icons text-gray-400 text-xl">menu_book</i>
+          </div>
+          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Not in any books yet</h4>
+          <p class="text-xs text-gray-500 dark:text-gray-400">Add this document to a book to organize your writing</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

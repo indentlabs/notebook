@@ -1,0 +1,71 @@
+<%#
+  Document Notes Modal
+
+  A modal for editing document notes (private, not visible to readers).
+
+  Required: @document must be set
+%>
+<div
+  id="document-notes-modal"
+  x-data="{ open: false }"
+  x-show="open"
+  @open-modal.window="if ($event.detail === 'document-notes-modal') open = true"
+  @close-modal.window="open = false"
+  @keydown.escape.window="open = false"
+  class="fixed inset-0 z-50 overflow-y-auto"
+  x-cloak
+>
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-3xl transform transition-all"
+      x-show="open"
+      x-transition:enter="ease-out duration-300"
+      x-transition:enter-start="opacity-0 translate-y-4"
+      x-transition:enter-end="opacity-100 translate-y-0"
+      x-transition:leave="ease-in duration-200"
+      x-transition:leave-start="opacity-100 translate-y-0"
+      x-transition:leave-end="opacity-0 translate-y-4"
+      @click.away="open = false"
+    >
+      <%= form_for(@document, remote: true, html: { id: 'document-notes-form', class: 'metadata-form' }) do |f| %>
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500 to-teal-600">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-teal-500">notes</i>
+              </div>
+              <h3 class="text-lg font-medium text-white">Document Notes</h3>
+            </div>
+            <button type="button" @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+              <i class="material-icons">close</i>
+            </button>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="flex items-start mb-4">
+            <i class="material-icons text-teal-500 mr-3 mt-0.5">info</i>
+            <span class="text-sm text-gray-600 dark:text-gray-300">
+              Document notes are for your reference only and won't be visible to readers. Use this space for research notes, planning, or any other information you want to keep with your document.
+            </span>
+          </div>
+          <%= f.text_area :notes_text,
+            class: 'w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-teal-500 focus:ring focus:ring-teal-500 focus:ring-opacity-30 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100',
+            placeholder: "Write as little or as much as you'd like!",
+            style: 'min-height: 300px; padding: 12px;'
+          %>
+        </div>
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+          <div class="flex space-x-3">
+            <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+              Cancel
+            </button>
+            <button type="button" class="save-metadata-button px-4 py-2 text-sm font-medium text-white bg-teal-500 border border-transparent rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+              Save & Close
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

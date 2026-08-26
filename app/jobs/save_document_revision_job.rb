@@ -1,40 +1,65 @@
 class SaveDocumentRevisionJob < ApplicationJob
   queue_as :low_priority
 
+  MAX_RETRY_ATTEMPTS = 3
+
   def perform(*args)
     document_id = args.shift
     document = Document.find_by(id: document_id)
     return unless document
 
     # Initialize variables; body is NOT loaded yet
-    new_word_count = 0
     body_loaded = false
     body_text = nil
 
-    begin
-      # Try the accurate (but potentially memory-intensive) count first
-      # This accesses document.body internally
-      new_word_count = document.computed_word_count
-    rescue StandardError => e
-      # Log the error for visibility
-      Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
+    # Use client-provided word count if available (browser edit), otherwise calculate server-side (API/import)
+    if document.cached_word_count.present? && document.cached_word_count > 0
+      # Client already provided the count via autosave - use it as-is
+      new_word_count = document.cached_word_count
+    else
+      # No client count (API/import edit) - calculate server-side
+      begin
+        # Try the accurate (but potentially memory-intensive) count first
+        # This accesses document.body internally
+        new_word_count = document.computed_word_count
+      rescue StandardError => e
+        # Log the error for visibility
+        Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
 
-      # Fallback: Load body ONLY if needed for fallback count
-      body_text = document.body || "" # Load body here
-      body_loaded = true
-      new_word_count = body_text.split.size
+        # Fallback: Load body ONLY if needed for fallback count
+        body_text = document.body || "" # Load body here
+        body_loaded = true
+        new_word_count = body_text.split.size
+      end
+
+      # Only update cached_word_count if we calculated it server-side
+      document.update(cached_word_count: new_word_count)
     end
 
-    # Update cached word count for the document (always do this)
-    document.update(cached_word_count: new_word_count)
+    # Save a WordCountUpdate for this document for the day the edit was made
+    # Use enqueued_at (when the job was created) to handle Sidekiq delays correctly
+    user = document.user
+    enqueue_time = enqueued_at || Time.current
+    user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
 
-    # Save a WordCountUpdate for this document for today (always do this)
-    update = document.word_count_updates.find_or_initialize_by(
-      for_date: DateTime.current,
-    )
-    update.word_count = new_word_count
-    update.user_id  ||= document.user_id
-    update.save!
+    retry_count = 0
+    begin
+      update = document.word_count_updates.find_or_initialize_by(
+        for_date: user_date,
+      )
+      update.word_count = new_word_count
+      update.user_id  ||= document.user_id
+      update.save!
+    rescue ActiveRecord::RecordNotUnique
+      # Unique index exists and found a duplicate via race condition - retry to find the existing record
+      retry_count += 1
+      if retry_count <= MAX_RETRY_ATTEMPTS
+        retry
+      else
+        Rails.logger.error("SaveDocumentRevisionJob: max retries exceeded for Document##{document_id} on #{user_date}")
+        raise # Let Sidekiq handle with its retry mechanism
+      end
+    end
 
     # Check if revision is needed BEFORE potentially loading body again
     latest_revision = document.document_revisions.order('created_at DESC').limit(1).first

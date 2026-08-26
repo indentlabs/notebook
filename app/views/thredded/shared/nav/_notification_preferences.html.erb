@@ -1,0 +1,16 @@
+<%# Notification preferences are disabled for now since they require messageboard context %>
+<%# which isn't available on all forum pages (like the messageboards index) %>
+<% if false %>
+  <% if user_signed_in? && @messageboard %>
+    <% current = current_page_preferences? %>
+    <li class="thredded--user-navigation--item thredded--user-navigation--settings<%= ' thredded--is-current' if current %> flex items-center h-full">
+      <%= link_to current ? nav_back_path(@messageboard) : edit_preferences_path(@messageboard), 
+                  rel: 'nofollow',
+                  class: 'flex items-center h-full px-4 py-3 text-center hover:bg-gray-50 transition-colors',
+                  title: t('thredded.nav.settings') do %>
+        <i class="material-icons text-gray-600 text-base">notifications</i>
+        <span class="sr-only"><%= t('thredded.nav.settings') %></span>
+      <% end %>
+    </li>
+  <% end %>
+<% end %>
