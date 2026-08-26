@@ -135,6 +135,7 @@ class SubscriptionsController < ApplicationController
     @selected_plan = BillingPlan.find_by(stripe_plan_id: params['plan'], available: true)
     @stripe_customer = Stripe::Customer.retrieve(current_user.stripe_customer_id)
     @stripe_payment_methods = @stripe_customer.list_payment_methods(type: 'card')
+    @stripe_subscriptions = SubscriptionService.billable_stripe_subscriptions(current_user.stripe_customer_id)
   end
 
   # Save a payment method
@@ -179,10 +180,6 @@ class SubscriptionsController < ApplicationController
 
   def delete_payment_method
     stripe_customer = Stripe::Customer.retrieve current_user.stripe_customer_id
-    
-    # Use safe navigation to handle customers without subscriptions
-    subscriptions = stripe_customer.subscriptions&.data || []
-    stripe_subscription = subscriptions.first
 
     payment_methods = stripe_customer.list_payment_methods(type: 'card')
     payment_methods.data.each do |payment_method|
@@ -191,17 +188,18 @@ class SubscriptionsController < ApplicationController
 
     notice = ['Your payment method has been successfully deleted.']
 
-    # Check if user has a non-starter subscription using modern API
-    if stripe_subscription&.items&.data&.any?
-      current_price_id = stripe_subscription.items.data[0].price.id
-      if current_price_id != 'starter'
-        # Cancel the user's at the end of its effective period on Stripe's end, so they don't get rebilled
-        stripe_subscription.delete(at_period_end: true)
+    # With no card on file, make sure every paid subscription stops rebilling
+    # at the end of its current period.
+    SubscriptionService.billable_stripe_subscriptions(current_user.stripe_customer_id).each do |stripe_subscription|
+      current_price_id = SubscriptionService.subscription_price_ids(stripe_subscription).first
+      next if current_price_id.nil? || current_price_id == 'starter'
 
-        active_billing_plan = BillingPlan.find_by(stripe_plan_id: current_price_id)
-        if active_billing_plan
-          notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(stripe_subscription.current_period_end).strftime('%B %d')}."
-        end
+      Stripe::Subscription.update(stripe_subscription.id, { cancel_at_period_end: true })
+
+      active_billing_plan = BillingPlan.find_by(stripe_plan_id: current_price_id)
+      period_end = SubscriptionService.subscription_period_end(stripe_subscription)
+      if active_billing_plan && period_end
+        notice << "Your #{active_billing_plan.name} subscription will end on #{Time.at(period_end).strftime('%B %d')}."
       end
     end
 
@@ -281,12 +279,26 @@ class SubscriptionsController < ApplicationController
   end
 
   def process_plan_change(user, new_plan_id)
-    # General flow we're going to take here:
-    # 1. Cancel all existing plans, reversing their benefits
-    SubscriptionService.cancel_all_existing_subscriptions(user)
+    # Serialize plan changes per user with a row lock, so repeated clicks on a
+    # slow page (or two racing requests) can't both act on stale subscription
+    # state and double-subscribe the user on Stripe.
+    # requires_new gives us our own savepoint, so a declined card rolls back the
+    # local downgrade below even if we're ever called inside another transaction.
+    user.transaction(requires_new: true) do
+      user.lock!
 
-    # 2. Add a new plan, adding its benefits
-    SubscriptionService.add_subscription(user, new_plan_id)
+      # General flow we're going to take here:
+      # 1. Cancel all existing plans, reversing their benefits
+      SubscriptionService.cancel_all_existing_subscriptions(user)
+
+      # 2. Add a new plan, adding its benefits
+      SubscriptionService.add_subscription(user, new_plan_id)
+    end
+  rescue Stripe::CardError
+    # with_lock runs in a transaction, so letting the error escape it rolled the
+    # local downgrade back: the user keeps the plan and bandwidth they had
+    # before their card was declined.
+    :failed_card
   end
 
   def set_sidenav_expansion
