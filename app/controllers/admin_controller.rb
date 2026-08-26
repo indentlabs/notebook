@@ -267,6 +267,9 @@ class AdminController < ApplicationController
     @users = User.where(email: emails)
     @users.each do |user|
       if user.on_premium_plan?
+        # Cancel on Stripe too, or the user stays subscribed there and keeps
+        # getting billed after we've unsubscribed them on our end.
+        SubscriptionService.cancel_stripe_subscriptions!(user)
         SubscriptionService.cancel_all_existing_subscriptions(user)
         UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
       end

@@ -293,27 +293,11 @@ class User < ApplicationRecord
         self.stripe_customer_id = customer_data.id
         self.save
 
-        # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier
-        # Get the customer's available payment methods (if any)
-        payment_methods = Stripe::PaymentMethod.list({
-          customer: self.stripe_customer_id,
-          type: 'card'
-        })
-        
-        default_payment_method = payment_methods.data.first&.id
-        
-        # Create subscription with payment method if available
-        subscription_params = {
-          customer: self.stripe_customer_id,
-          items: [{ price: 'starter' }]
-        }
-        
-        # Add default payment method if available (free tier may not have payment methods)
-        if default_payment_method
-          subscription_params[:default_payment_method] = default_payment_method
-        end
-        
-        Stripe::Subscription.create(subscription_params)
+        # If we're creating this Customer in Stripe for the first time, we should also associate them with the free tier.
+        # This goes through SubscriptionService so it obeys the same
+        # one-subscription-per-customer invariant as every other code path, and
+        # can't leave a brand new user with a parallel subscription.
+        SubscriptionService.sync_stripe_subscriptions_to_plan(self, 'starter')
       else
         # In test environment, just set a dummy customer ID
         self.stripe_customer_id = 'test_customer_id'

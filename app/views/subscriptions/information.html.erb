@@ -221,16 +221,16 @@
           </div>
         <% else %>
           <%
-            # Get subscriptions with safe navigation and use modern price.id instead of plan.id
-            subscriptions = @stripe_customer.subscriptions&.data || []
-            active_plan_on_stripe = subscriptions.select { |sub| 
-              sub.items&.data&.any? { |item| item.price&.id == @selected_plan.stripe_plan_id }
-            }.first
+            subscriptions = @stripe_subscriptions || []
+            active_plan_on_stripe = subscriptions.detect { |sub|
+              SubscriptionService.subscription_price_ids(sub).include?(@selected_plan.stripe_plan_id)
+            }
+            active_plan_period_end = active_plan_on_stripe && SubscriptionService.subscription_period_end(active_plan_on_stripe)
           %>
           
           <!-- Subscription Confirmation -->
           <div class="space-y-4">
-            <% if active_plan_on_stripe %>
+            <% if active_plan_on_stripe && active_plan_period_end %>
               <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
@@ -239,7 +239,7 @@
                   <div class="ml-3">
                     <p class="text-sm text-blue-800 dark:text-blue-200">
                       Since you've already paid for a <strong><%= @selected_plan.name %></strong> plan until 
-                      <strong><%= Time.at(active_plan_on_stripe.current_period_end).strftime('%B %d, %Y') %></strong>, 
+                      <strong><%= Time.at(active_plan_period_end).strftime('%B %d, %Y') %></strong>,
                       you will not be charged again until your next renewal date.
                     </p>
                   </div>
