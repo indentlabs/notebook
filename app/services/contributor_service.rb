@@ -1,5 +1,5 @@
 class ContributorService < Service
-  def self.invite_contributor_to_universe(universe:, email:)
+  def self.invite_contributor_to_universe(universe:, email:, role: 'full')
     # First, look up whether a user already exists for this invite
     related_user = User.find_by(email: email.downcase)
 
@@ -7,7 +7,8 @@ class ContributorService < Service
     Contributor.create(
       universe: universe,
       email: email.downcase,
-      user: related_user
+      user: related_user,
+      role: role
     )
 
     # If the user doesn't already have a Notebook.ai account, send them an invite

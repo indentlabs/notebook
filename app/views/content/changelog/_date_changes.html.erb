@@ -52,15 +52,12 @@
           old_value = change.first.blank? ? ContentChangeEvent::BLANK_PLACEHOLDER : change.first.to_s
           new_value = change.second.blank? ? ContentChangeEvent::BLANK_PLACEHOLDER : change.second.to_s
           
-          # Privacy check
-          visible_change = true
-          if related_field.label.start_with?('Private')
-            visible_change = user_signed_in? && (
-              (content.raw_model.is_a?(Universe) && content.user == current_user) ||
-              (content.respond_to?(:universe) && content.universe && content.universe.user == current_user) ||
-              (content.respond_to?(:universe) && content.universe.nil? && content.user == current_user)
-            )
-          end
+          # Privacy check: hide values of fields the viewer doesn't have visibility into
+          visible_change = PermissionService.attribute_field_visible_to?(
+            field:   related_field,
+            content: content.raw_model,
+            viewer:  user_signed_in? ? current_user : nil
+          )
           
           unless visible_change
             old_value = ContentChangeEvent::PRIVATE_PLACEHOLDER

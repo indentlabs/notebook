@@ -84,13 +84,13 @@ class ContentSerializer
           icon:   category.icon,
           hidden: !!category.hidden,
           fields: self.fields.select { |field| field.attribute_category_id == category.id }.map { |field|
-            # Check if this is a private field (e.g., private_notes)
-            is_private_field = field.old_column_source == 'private_notes'
-            # Only the content owner can see private fields
-            viewer_is_owner = self.viewing_user.present? && content.user_id == self.viewing_user.id
-
-            # Skip private fields entirely if viewer is not the owner
-            next nil if is_private_field && !viewer_is_owner
+            # Skip fields the viewer doesn't have visibility into
+            # (public / contributors / private -- see AttributeField::VISIBILITIES)
+            next nil unless PermissionService.attribute_field_visible_to?(
+              field:   field,
+              content: content,
+              viewer:  self.viewing_user
+            )
 
             {
               internal_id:       field.id,
@@ -103,7 +103,8 @@ class ContentSerializer
               options:           field.field_options,
               migrated_link:     field.migrated_from_legacy,
               old_column_source: field.old_column_source,
-              private:           is_private_field
+              privacy:           field.effective_privacy,
+              private:           field.effective_privacy == 'private'
             }
           }.compact.sort do |a, b|
             if a[:position] && b[:position]

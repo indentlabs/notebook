@@ -93,7 +93,7 @@ module Api
           page = content_type.find_by(id: params[:id].to_i)
 
           if page && page.readable_by?(@current_api_user || User.new)
-            render json: ApiContentSerializer.new(page, include_blank_fields: params.fetch(:include_blank_fields, false)).data
+            render json: ApiContentSerializer.new(page, include_blank_fields: params.fetch(:include_blank_fields, false), viewer: @current_api_user).data
           else
             render json: { error: "Page not found" }
           end

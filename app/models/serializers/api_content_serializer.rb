@@ -15,7 +15,7 @@ class ApiContentSerializer
 
   attr_accessor :data
 
-  def initialize(content, include_blank_fields: false)
+  def initialize(content, include_blank_fields: false, viewer: nil)
     self.categories       = content.class.attribute_categories(content.user).where(hidden: [false, nil]).eager_load(attribute_fields: :attribute_values)
     self.fields           = AttributeField.where(attribute_category_id: self.categories.map(&:id), hidden: [false, nil])
     self.attribute_values = Attribute.where(attribute_field_id: self.fields.map(&:id), entity_type: content.page_type, entity_id: content.id).order('created_at desc')
@@ -54,9 +54,9 @@ class ApiContentSerializer
           id:     category.id,
           label:  category.label,
           icon:   category.icon,
-          fields: category.attribute_fields.order(:position).reject { |field|
-            # Filter out private fields from API responses
-            field.old_column_source == 'private_notes'
+          fields: category.attribute_fields.order(:position).select { |field|
+            # Filter out fields the API viewer doesn't have visibility into
+            PermissionService.attribute_field_visible_to?(field: field, content: content, viewer: viewer)
           }.map { |field|
             {
               id:     field.id,

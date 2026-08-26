@@ -30,11 +30,11 @@ class ContentPageAuthorizer < CoreContentAuthorizer
 
   def updatable_by?(user)
     return true if PermissionService.user_owns_content?(user: user, content: resource)
-    
+
     if resource.page_type == 'Universe'
-      return true if PermissionService.user_can_contribute_to_universe?(user: user, universe: resource)
+      return true if PermissionService.user_can_edit_universe_content?(user: user, universe: resource)
     else
-      return true if PermissionService.user_can_contribute_to_containing_universe?(user: user, content: resource)
+      return true if PermissionService.user_can_edit_containing_universe_content?(user: user, content: resource)
     end
 
     return false

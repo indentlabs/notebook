@@ -26,6 +26,18 @@ class AttributeField < ApplicationRecord
   UNDELETEABLE_FIELD_TYPES = %w(name universe tags)
   SETTABLE_FIELD_TYPES     = %w(text_area page_link)
 
+  # Who can see this field (and its values) on pages that use it:
+  # - public:       anyone who can view the page
+  # - contributors: the page owner, the universe owner, and contributors to the containing universe
+  # - private:      only the page owner
+  VISIBILITIES = {
+    'public'       => 'Everyone who can view the page',
+    'contributors' => 'Universe contributors only',
+    'private'      => 'Only me'
+  }.freeze
+
+  validates :privacy, inclusion: { in: VISIBILITIES.keys }
+
   # todo replace old_column_source etc
   #json :acceptable_page_link_classes
 
@@ -68,7 +80,23 @@ class AttributeField < ApplicationRecord
   end
 
   def private?
-    privacy != 'public'
+    effective_privacy != 'public'
+  end
+
+  # The privacy level actually in effect for this field. Legacy Private Notes
+  # fields (old_column_source == 'private_notes') have always been hidden from
+  # other viewers, so they can be opened up to contributors but never made fully
+  # public -- for everything else the privacy column is authoritative.
+  def effective_privacy
+    return privacy if VISIBILITIES.key?(privacy) && privacy != 'public'
+    return 'private' if old_column_source == 'private_notes'
+
+    'public'
+  end
+
+  # Legacy Private Notes fields can't be made fully public (see effective_privacy)
+  def can_be_public?
+    old_column_source != 'private_notes'
   end
 
   def system?

@@ -12,8 +12,19 @@ class PermissionService < Service
     content.respond_to?(:universe) && content.universe.present? && user_owns_content?(user: user, content: content.universe)
   end
 
+  # Read-level access: the user is a contributor (of any role) to this universe
   def self.user_can_contribute_to_universe?(user:, universe:)
     user.present? && user.contributable_universes.pluck(:id).include?(universe.id)
+  end
+
+  # Edit-level access: the user is a Full Contributor or Editor in this universe
+  def self.user_can_edit_universe_content?(user:, universe:)
+    user.present? && user.editable_universe_ids.include?(universe.id)
+  end
+
+  # Create-level access: the user is a Full Contributor in this universe
+  def self.user_can_create_universe_content?(user:, universe:)
+    user.present? && user.creatable_universe_ids.include?(universe.id)
   end
 
   def self.content_is_public?(content:)
@@ -24,10 +35,11 @@ class PermissionService < Service
     content.respond_to?(:universe) && content.universe.present? && self.content_is_public?(content: content.universe)
   end
 
+  # Read-level access to the universe containing this content (contributor of any role)
   def self.user_can_contribute_to_containing_universe?(user:, content:)
     # Early return if no user is provided
     return false if user.nil?
-    
+
     # Special case for attribute-related content
     return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
 
@@ -41,8 +53,49 @@ class PermissionService < Service
     return false
   end
 
+  # Edit-level access to the universe containing this content (Full Contributor or Editor)
+  def self.user_can_edit_containing_universe_content?(user:, content:)
+    return false if user.nil?
+
+    # Special case for attribute-related content, mirroring user_can_contribute_to_containing_universe?
+    return true if [AttributeCategory, AttributeField, Attribute].include?(content.class) #todo audit this
+
+    return false if content.universe_id.nil?
+
+    return true if user.respond_to?(:editable_universe_ids) && user.editable_universe_ids.include?(content.universe_id)
+    return true if user.respond_to?(:universes) && user.universes.pluck(:id).include?(content.universe_id)
+
+    return false
+  end
+
   def self.content_has_no_containing_universe?(content:)
     content.universe.nil?
+  end
+
+  # Whether the given attribute field (and its value) on the given content page is
+  # visible to the given viewer. This is the single source of truth for field-level
+  # privacy; see AttributeField::VISIBILITIES for the levels.
+  def self.attribute_field_visible_to?(field:, content:, viewer:)
+    case field.effective_privacy
+    when 'private'
+      # Only the page owner can see private fields
+      user_owns_content?(user: viewer, content: content)
+    when 'contributors'
+      return false if viewer.nil?
+      return true if viewer.try(:site_administrator?)
+      return true if user_owns_content?(user: viewer, content: content)
+      return true if user_owns_any_containing_universe?(user: viewer, content: content)
+
+      if content.is_a?(Universe)
+        user_can_contribute_to_universe?(user: viewer, universe: content)
+      else
+        content.respond_to?(:universe_id) &&
+          content.universe_id.present? &&
+          user_can_contribute_to_containing_universe?(user: viewer, content: content)
+      end
+    else # 'public'
+      true
+    end
   end
 
   def self.user_is_on_premium_plan?(user:)
@@ -61,7 +114,9 @@ class PermissionService < Service
   end
 
   def self.user_can_collaborate_in_universe_that_allows_extended_content?(user:)
-    user.contributable_universes.any? do |universe|
+    # Only universes the user can create new content in count here, since this
+    # permission gates creating extended content types
+    user.creatable_universes.any? do |universe|
       universe.user.on_premium_plan?
 #      billing_plan_allows_extended_content?(user: universe.user) || user_has_active_promotion_for_this_content_type(user: universe.user, content_type: Universe)
     end
@@ -73,7 +128,7 @@ class PermissionService < Service
   end
 
   def self.user_can_collaborate_in_universe_that_allows_collective_content?(user:)
-    user.contributable_universes.any? do |universe|
+    user.creatable_universes.any? do |universe|
       universe.user.on_premium_plan?
 #      billing_plan_allows_collective_content?(user: universe.user) || user_has_active_promotion_for_this_content_type(user: universe.user, content_type: Universe)
     end

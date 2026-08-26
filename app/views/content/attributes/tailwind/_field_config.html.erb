@@ -390,15 +390,30 @@
                 <strong>Note:</strong> All <%= content_type.downcase %> pages are private by default, but these settings affect any page that is public.
               </div>
             </div>
-            <div class="flex items-center space-x-2 mb-3">
-              <input type="checkbox" 
-                     <%= "checked" if field.label.start_with?('Private') %>
-                     id="field_private"
-                     class="h-4 w-4 border-gray-300 rounded focus:ring-2 focus:ring-offset-2"
-                     style="color: <%= content_type_class.hex_color %>; --tw-ring-color: <%= content_type_class.hex_color %>;">
-              <label for="field_private" class="text-sm text-gray-700 dark:text-gray-300">Private: For my eyes only</label>
-            </div>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Private fields (and their answers) are only visible to you, even when your pages are shared publicly.</p>
+            <%= form_for(field, method: :put, html: { class: 'space-y-3', 'data-type': 'json' }, remote: true) do |f| %>
+              <div class="space-y-2 mb-3">
+                <% {
+                  'public'       => ['Public', 'Visible to everyone who can view the page'],
+                  'contributors' => ['Contributors only', 'Visible to you, the universe owner, and universe contributors — hidden from the public'],
+                  'private'      => ['Only me', 'Visible only to you, even on public pages and shared universes']
+                }.each do |privacy_value, (privacy_label, privacy_help)| %>
+                  <% next if privacy_value == 'public' && !field.can_be_public? %>
+                  <div class="flex items-start space-x-2">
+                    <%= f.radio_button :privacy, privacy_value,
+                          checked: field.effective_privacy == privacy_value,
+                          id: "field_privacy_#{field.id}_#{privacy_value}",
+                          class: "mt-0.5 h-4 w-4 border-gray-300 focus:ring-2 focus:ring-offset-2",
+                          style: "color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+                    <label for="field_privacy_<%= field.id %>_<%= privacy_value %>" class="text-sm text-gray-700 dark:text-gray-300">
+                      <span class="font-medium"><%= privacy_label %></span>
+                      <span class="block text-xs text-gray-500 dark:text-gray-400"><%= privacy_help %></span>
+                    </label>
+                  </div>
+                <% end %>
+              </div>
+              <%= f.submit 'Update visibility', class: "px-3 py-1.5 border border-transparent rounded-md shadow-sm text-xs font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2", style: "background-color: #{content_type_class.hex_color}; --tw-ring-color: #{content_type_class.hex_color};" %>
+            <% end %>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">This setting applies to this field on <strong>all</strong> of your <%= content_type.downcase %> pages, since fields are part of your <%= content_type.downcase %> template.</p>
           </div>
         </div>
         
