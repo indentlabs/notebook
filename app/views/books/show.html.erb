@@ -158,6 +158,10 @@
             <p class="text-xs text-blue-600/80 dark:text-blue-400/80 mb-4 leading-relaxed">
               <% if @book.privacy == 'public' %>
                 You are currently viewing the public layout. This is what readers will see.
+              <% elsif @book.effectively_public? %>
+                You are currently viewing the public layout. This book is set to private, but it belongs to the public
+                universe <%= link_to @book.universe.name, universe_path(@book.universe), class: "underline" %>, so anyone
+                can see it — this is what readers will see.
               <% else %>
                 You are currently viewing the reader layout. This book is private, so only you and collaborators can see it.
               <% end %>
