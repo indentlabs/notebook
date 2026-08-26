@@ -254,9 +254,24 @@ class ContentController < ApplicationController
     document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
     @documents = Document.where(id: document_ids)
     @references = @content.incoming_page_references.preload(:referencing_page)
+
+    # Hide references coming from fields the viewer can't see on the referencing page
+    # (e.g. another page mentioning this one in a private or contributors-only field)
+    reference_fields = AttributeField.where(id: @references.map(&:attribute_field_id)).index_by(&:id)
+    @references = @references.select do |reference|
+      field = reference_fields[reference.attribute_field_id]
+      page  = reference.referencing_page
+
+      field.nil? || page.nil? || PermissionService.attribute_field_visible_to?(
+        field:   field,
+        content: page,
+        viewer:  current_user
+      )
+    end
+
     @mentioning_attributes = Attribute.where(
-      attribute_field_id: @references.pluck(:attribute_field_id),
-      entity_id: @references.pluck(:referencing_page_id)
+      attribute_field_id: @references.map(&:attribute_field_id),
+      entity_id: @references.map(&:referencing_page_id)
     )
   end
 
@@ -949,6 +964,13 @@ class ContentController < ApplicationController
     return render json: { error: 'Not found' }, status: 404 if entity.nil?
 
     unless entity.updatable_by?(current_user)
+      return render json: { error: 'Unauthorized' }, status: 403
+    end
+
+    # Even with edit access to the page, a field that isn't visible to this user
+    # (private, or contributors-only when they aren't one) can't be written to
+    field = AttributeField.find_by(id: params[:field_id].to_i)
+    if field.present? && !PermissionService.attribute_field_visible_to?(field: field, content: entity, viewer: current_user)
       render json: { error: 'Unauthorized' }, status: 403
     end
   end

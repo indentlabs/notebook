@@ -72,6 +72,32 @@ class PermissionService < Service
     content.universe.nil?
   end
 
+  # Whether the given attribute field (and its value) on the given content page is
+  # visible to the given viewer. This is the single source of truth for field-level
+  # privacy; see AttributeField::VISIBILITIES for the levels.
+  def self.attribute_field_visible_to?(field:, content:, viewer:)
+    case field.effective_privacy
+    when 'private'
+      # Only the page owner can see private fields
+      user_owns_content?(user: viewer, content: content)
+    when 'contributors'
+      return false if viewer.nil?
+      return true if viewer.try(:site_administrator?)
+      return true if user_owns_content?(user: viewer, content: content)
+      return true if user_owns_any_containing_universe?(user: viewer, content: content)
+
+      if content.is_a?(Universe)
+        user_can_contribute_to_universe?(user: viewer, universe: content)
+      else
+        content.respond_to?(:universe_id) &&
+          content.universe_id.present? &&
+          user_can_contribute_to_containing_universe?(user: viewer, content: content)
+      end
+    else # 'public'
+      true
+    end
+  end
+
   def self.user_is_on_premium_plan?(user:)
     user.on_premium_plan?
   end

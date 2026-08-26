@@ -1,0 +1,14 @@
+<%# Usage: render partial: 'content/tailwind_components/field_privacy_badge', locals: { field: field }
+    Shows a small badge on fields that aren't visible to everyone. The serializer has
+    already stripped fields the viewer can't see, so this is purely informational. %>
+<% if field[:privacy] == 'contributors' %>
+  <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xxs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300" title="Only visible to you, the universe owner, and universe contributors">
+    <i class="material-icons text-xs mr-1">group</i>
+    Contributors only
+  </span>
+<% elsif field[:privacy] == 'private' %>
+  <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xxs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300" title="Only visible to you">
+    <i class="material-icons text-xs mr-1">lock</i>
+    Only you
+  </span>
+<% end %>

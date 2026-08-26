@@ -285,7 +285,7 @@ class AttributeFieldsController < ContentController
       :label, :description,
       :entity_type,
       :attribute_category_id,
-      :hidden, :position,
+      :hidden, :position, :privacy,
       field_options: [
         :display_style,
         :input_size,
