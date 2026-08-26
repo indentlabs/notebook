@@ -1871,7 +1871,8 @@ function updateFieldArchiveUI(fieldId, isArchived) {
   const button = fieldItem.querySelector('.field-archive-toggle');
   if (button) {
     button.setAttribute('data-archived', isArchived);
-    button.setAttribute('title', isArchived ? 'Archived field - Click to restore' : 'Active field - Click to archive');
+    button.setAttribute('data-tooltip', isArchived ? 'Archived field - Click to restore' : 'Active field - Click to archive');
+    button.setAttribute('aria-label', isArchived ? 'Restore field' : 'Archive field');
     button.disabled = false; // Re-enable button after successful update
     
     // Update button content with correct icon
@@ -1943,11 +1944,11 @@ function updateCategoryArchiveUI(categoryId, isArchived) {
   // Update data attribute
   categoryCard.setAttribute('data-archived', isArchived);
   
-  // Update archive button data attribute and title
+  // Update archive button data attribute and tooltip
   const archiveButton = categoryCard.querySelector('.category-archive-toggle');
   if (archiveButton) {
     archiveButton.setAttribute('data-archived', isArchived);
-    archiveButton.setAttribute('title', isArchived ? 'Archived category - Click to restore' : 'Active category - Click to archive');
+    archiveButton.setAttribute('data-tooltip', isArchived ? 'Click to restore' : 'Click to archive');
     archiveButton.disabled = false; // Re-enable button after successful update
     
     // Update the button icon

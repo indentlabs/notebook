@@ -83,10 +83,11 @@
   <div class="flex items-center space-x-1.5">
     <!-- Archive Button -->
     <% unless field.name_field? %>
-      <button class="field-archive-toggle p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors" 
+      <button class="field-archive-toggle p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-600 transition-colors relative tooltip-left" 
               data-field-id="<%= field.id %>"
               data-archived="<%= field.hidden? %>"
-              title="<%= field.hidden? ? 'Archived field - Click to restore' : 'Active field - Click to archive' %>"
+              data-tooltip="<%= field.hidden? ? 'Archived field - Click to restore' : 'Active field - Click to archive' %>"
+              aria-label="<%= field.hidden? ? 'Restore field' : 'Archive field' %>"
               @click.stop="toggleFieldArchive(<%= field.id %>, $el.dataset.archived === 'true')">
         <% if field.hidden? %>
           <i class="material-icons text-amber-600 text-sm">unarchive</i>
