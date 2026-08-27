@@ -82,7 +82,7 @@ class AttributeFieldsController < ContentController
   def successful_response(url, notice)
     respond_to do |format|
       format.html { redirect_to attribute_customization_path(content_type: @content.attribute_category.entity_type), notice: notice }
-      format.json { render json: @content || {}, status: :success, notice: notice }
+      format.json { render json: @content || {}, status: :ok }
     end
   end
 
