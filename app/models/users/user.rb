@@ -6,7 +6,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable,
+         :omniauthable, omniauth_providers: [:google_oauth2, :discord]
 
   include HasContent
   include Authority::UserAbilities
@@ -42,6 +43,59 @@ class User < ApplicationRecord
   has_many :basil_commissions, dependent: :destroy
 
   has_many :contributors, dependent: :destroy
+
+  has_many :user_authentications, dependent: :destroy
+
+  # Providers that guarantee verified email addresses, so an OAuth login can
+  # be safely matched to an existing account by email alone.
+  EMAIL_VERIFIED_OAUTH_PROVIDERS = %w(google_oauth2 discord).freeze
+
+  # Set when from_omniauth creates a brand-new account, so callers can run
+  # new-account onboarding. (previously_new_record? can't be used for this:
+  # after_create hooks like initialize_secure_code update the row again,
+  # which resets it.)
+  attr_accessor :new_oauth_signup
+
+  # Finds (or creates) the user for an OmniAuth callback. Returns a persisted
+  # user with the authentication linked, or an unpersisted user (with errors)
+  # when account creation fails (e.g. the provider sent no email).
+  def self.from_omniauth(auth)
+    authentication = UserAuthentication.find_by(provider: auth.provider, uid: auth.uid)
+    return authentication.user if authentication
+
+    email = auth.info.email&.downcase
+    user  = nil
+
+    if email.present? && EMAIL_VERIFIED_OAUTH_PROVIDERS.include?(auth.provider.to_s)
+      user = User.find_by(email: email)
+    end
+
+    if user.nil?
+      user = User.new(
+        email:                      email,
+        name:                       auth.info.name,
+        password:                   Devise.friendly_token[0, 20],
+        password_automatically_set: true
+      )
+      user.new_oauth_signup = user.save
+    end
+
+    user.user_authentications.create(provider: auth.provider, uid: auth.uid) if user.persisted?
+    user
+  end
+
+  # True when the user signed up through OAuth and has never chosen their own
+  # password (so their only way into the account is a linked provider).
+  def oauth_only?
+    password_automatically_set? && user_authentications.any?
+  end
+
+  # Once a user sets a real password (e.g. through the reset-password email),
+  # they're no longer dependent on their linked providers to log in.
+  after_update :clear_password_automatically_set, if: :saved_change_to_encrypted_password?
+  def clear_password_automatically_set
+    update_column(:password_automatically_set, false) if password_automatically_set?
+  end
 
   has_one :referral_code, dependent: :destroy
   has_many :referrals, foreign_key: :referrer_id, dependent: :destroy

@@ -95,38 +95,10 @@ class RegistrationsController < Devise::RegistrationsController
   protected
 
   def add_account
-    # Tie any universe contributor invites with this email to this user
-    if resource.persisted?
-      potential_contributor_records = Contributor.where(email: resource.email.downcase, user_id: nil)
-      
-      if potential_contributor_records.any? 
-        potential_contributor_records.update_all(user_id: resource.id)
-        
-        # Create a notification letting the user know about each collaboration!
-        potential_contributor_records.each do |contributorship|
-          resource.notifications.create(
-            message_html:     "<div>You have been added as a contributor to the <span class='#{Universe.text_color}'>#{contributorship.universe.name}</span> universe.</div>",
-            icon:             Universe.icon,
-            icon_color:       Universe.color,
-            happened_at:      DateTime.current,
-            passthrough_link: Rails.application.routes.url_helpers.universe_path(contributorship.universe),
-            reference_code:   'contributor-added'
-          )
-        end
-      end
-    end
+    UserOnboardingService.link_pending_contributor_invites(resource)
 
-    # If the user was created in the last 60 seconds, report it to Slack
-    if resource.persisted?
-      if params[:user].key? :referral_code
-        referral_code = ReferralCode.where(code: params[:user][:referral_code]).first
-
-        Referral.create(
-          referrer_id: referral_code.user.id,
-          referred_id: resource.id,
-          associated_code_id: referral_code.id
-        ) if referral_code.present?
-      end
+    if params[:user].key? :referral_code
+      UserOnboardingService.record_referral(resource, params[:user][:referral_code])
     end
   end
 
