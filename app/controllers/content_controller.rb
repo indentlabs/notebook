@@ -521,39 +521,17 @@ class ContentController < ApplicationController
   end
 
   def upload_files image_uploads_list, content_type, content_id
+    content = content_type.to_s.safe_constantize&.find_by(id: content_id)
+    return if content.nil?
+
     upload_errors = []
-    out_of_bandwidth = false
 
     image_uploads_list.each do |image_data|
-      image_size_kb = File.size(image_data.tempfile.path) / 1000.0
-
-      if current_user.upload_bandwidth_kb < image_size_kb
-        out_of_bandwidth = true
-        next
-      else
-        current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb - image_size_kb)
-      end
-
-      related_image = ImageUpload.create(
-        user: current_user,
-        content_type: content_type,
-        content_id: content_id,
-        src: image_data,
-        privacy: 'public'
-      )
-
-      next if related_image.persisted?
-
-      # Nothing was stored, so hand the bandwidth we just charged back over.
-      current_user.update(upload_bandwidth_kb: current_user.upload_bandwidth_kb + image_size_kb)
-
-      filename = ERB::Util.html_escape(image_data.original_filename.presence || 'Your image')
-      reason   = related_image.errors[:src].first.presence || "couldn't be uploaded"
-      upload_errors << "#{filename} #{reason}."
+      result = ImageUploadService.upload(user: current_user, content: content, file: image_data)
+      upload_errors << result.error unless result.success?
     end
 
-    if out_of_bandwidth
-      upload_errors << "At least one of your images failed to upload because you do not have enough upload bandwidth."
+    if upload_errors.any? { |error| error.include?('upload bandwidth') }
       upload_errors << "<a href='#{subscription_path}' class='btn white black-text center-align'>Get more</a>"
     end
 
@@ -683,11 +661,8 @@ class ContentController < ApplicationController
       return render json: { error: 'Content not found for this image' }, status: 422
     end
 
-    # Need to check if user owns or contributes to the content directly
-    unless content.user_id == current_user.id ||
-           (content.respond_to?(:universe_id) &&
-            content.universe_id.present? &&
-            current_user.contributable_universe_ids.include?(content.universe_id))
+    # Anyone who can edit the page can choose its cover image
+    unless ContentImageAuthorization.can_manage?(current_user, content)
       return render json: { error: 'Unauthorized' }, status: 403
     end
 
@@ -729,10 +704,11 @@ class ContentController < ApplicationController
     content.instance_variable_set(:@first_public_image_cache, nil)
     
     # Return the updated status (use new_pin_status since update_column might not refresh the object)
-    render json: { 
-      id: @image.id, 
-      type: params[:image_type], 
-      pinned: new_pin_status 
+    render json: {
+      id: @image.id,
+      type: params[:image_type],
+      pinned: new_pin_status,
+      dom_id: ContentImage.wrap(@image).dom_id
     }
   end
 

@@ -411,6 +411,7 @@ Rails.application.routes.draw do
     # Image handling
     delete '/delete/image/:id', to: 'image_upload#delete', as: :image_deletion
     patch  '/image_uploads/:id', to: 'image_upload#update', as: :image_upload
+    post   '/image_uploads',     to: 'image_upload#create', as: :image_uploads
     post '/toggle_image_pin', to: 'content#toggle_image_pin', as: :toggle_image_pin
 
     # Attributes

@@ -1,4 +1,6 @@
 class ImageUpload < ApplicationRecord
+  include Authority::Abilities
+
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
 

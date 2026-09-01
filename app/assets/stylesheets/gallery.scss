@@ -1,0 +1,62 @@
+// Gallery management (content#edit > Gallery tab)
+
+.gallery-card__media {
+  cursor: grab;
+}
+
+.gallery--reordering .gallery-card__media {
+  cursor: grabbing;
+}
+
+// The drag handle and the hover toolbar fade in on hover / focus on pointer
+// devices, and stay visible on touch devices where there is no hover.
+.gallery-card__handle,
+.gallery-card__overlay {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.gallery-card:hover .gallery-card__handle,
+.gallery-card:focus-within .gallery-card__handle,
+.gallery-card:hover .gallery-card__overlay,
+.gallery-card:focus-within .gallery-card__overlay {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .gallery-card__handle {
+    opacity: 0.85;
+  }
+
+  .gallery-card__overlay {
+    opacity: 1;
+  }
+}
+
+// jQuery UI sortable states
+.gallery-card.ui-sortable-helper {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+  transform: rotate(1deg);
+}
+
+.gallery-card__placeholder {
+  visibility: visible !important;
+  min-height: 12rem;
+  border: 2px dashed rgba(59, 130, 246, 0.6);
+  border-radius: 0.5rem;
+  background-color: rgba(59, 130, 246, 0.08);
+  box-shadow: none;
+}
+
+// Whole-tab drop zone highlight while dragging files over it
+.gallery-dropzone--active {
+  outline: 3px dashed rgba(59, 130, 246, 0.8);
+  outline-offset: 8px;
+  border-radius: 0.5rem;
+  background-color: rgba(59, 130, 246, 0.04);
+}
+
+.gallery-dropzone--active .gallery-dropzone__prompt {
+  border-color: rgba(59, 130, 246, 0.9);
+  background-color: rgba(59, 130, 246, 0.08);
+}

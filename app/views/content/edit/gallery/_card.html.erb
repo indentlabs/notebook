@@ -1,0 +1,166 @@
+<%#
+  One gallery card. Works for uploaded images and Basil images alike.
+
+  Locals:
+    image   - a ContentImage
+    content - the page the image belongs to (used for labels only)
+%>
+<%
+  image = ContentImage.wrap(image)
+  cover = image.cover?
+  dimensions = image.width && image.height ? "#{image.width} × #{image.height}" : nil
+%>
+<div id="gallery-<%= image.dom_id %>"
+     class="gallery-card group relative flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+     data-gallery-target="card"
+     data-image-id="<%= image.id %>"
+     data-image-type="<%= image.type_param %>"
+     data-image-kind="<%= image.kind %>"
+     data-param-key="<%= image.param_key %>"
+     data-pinned="<%= cover %>"
+     data-privacy="<%= image.privacy %>"
+     data-update-url="<%= image.update_path %>"
+     data-delete-url="<%= image.delete_path %>"
+     data-pin-url="<%= image.pin_path %>"
+     data-original-url="<%= image.original_url %>"
+     data-large-url="<%= image.url(:large) %>"
+     data-width="<%= image.width %>"
+     data-height="<%= image.height %>"
+     data-byte-size="<%= image.byte_size %>"
+     data-filename="<%= image.filename %>"
+     data-source-label="<%= image.source_label %>">
+
+  <%# Image area. The whole area is the drag handle. %>
+  <div class="gallery-card__media relative aspect-video bg-gray-100 dark:bg-gray-900 <%= cover ? 'ring-2 ring-inset ring-yellow-400' : '' %>"
+       data-gallery-target="media">
+    <% if image.url(:large) %>
+      <%= image_tag image.url(:large),
+            class: 'w-full h-full object-cover select-none',
+            alt: image.notes.presence || "#{content.try(:name)} image",
+            loading: 'lazy',
+            draggable: false,
+            data: { gallery_target: 'thumb' } %>
+    <% else %>
+      <div class="w-full h-full flex items-center justify-center text-gray-400">
+        <i class="material-icons text-4xl">broken_image</i>
+      </div>
+    <% end %>
+
+    <%# Cover chip %>
+    <span class="gallery-card__cover-chip absolute top-2 left-2 inline-flex items-center px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold shadow-sm <%= cover ? '' : 'hidden' %>"
+          data-gallery-target="coverChip">
+      <i class="material-icons text-xs mr-1">star</i> Cover
+    </span>
+
+    <%# Drag handle: a real circle, top centre %>
+    <span class="gallery-card__handle absolute top-2 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-200 shadow-md flex items-center justify-center cursor-grab select-none"
+          title="Drag to reorder"
+          aria-hidden="true">
+      <i class="material-icons">drag_indicator</i>
+    </span>
+
+    <%# Hover actions on the image %>
+    <div class="gallery-card__overlay absolute inset-x-0 bottom-0 flex items-center justify-end gap-2 p-2 bg-gradient-to-t from-black to-transparent">
+      <button type="button"
+              class="inline-flex items-center px-3 py-1 rounded-md bg-white text-gray-800 text-xs font-medium shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              data-action="gallery#edit"
+              title="Adjust how this image is cropped and framed">
+        <i class="material-icons text-sm mr-1">crop</i> Edit
+      </button>
+      <a href="<%= image.original_url %>" target="_blank" rel="noopener"
+         class="inline-flex items-center justify-center w-8 h-8 rounded-md bg-white text-gray-800 shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+         title="Open the original image in a new tab"
+         aria-label="Open the original image in a new tab">
+        <i class="material-icons text-sm">open_in_new</i>
+      </a>
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-2 p-3">
+    <%# Meta row %>
+    <div class="flex items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-full font-medium <%= image.basil? ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' %>">
+          <i class="material-icons text-xs mr-1"><%= image.basil? ? 'auto_awesome' : 'file_upload' %></i>
+          <%= image.source_label %>
+        </span>
+        <% if dimensions %>
+          <span class="tabular-nums whitespace-nowrap" data-gallery-target="dimensions"><%= dimensions %></span>
+        <% end %>
+        <% if image.byte_size %>
+          <span class="tabular-nums whitespace-nowrap"><%= number_to_human_size(image.byte_size) %></span>
+        <% end %>
+      </div>
+
+      <% if image.supports_privacy? %>
+        <button type="button"
+                class="gallery-card__privacy inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 <%= image.public? ? 'border-green-300 text-green-700 dark:border-green-700 dark:text-green-300' : 'border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-300' %>"
+                data-action="gallery#togglePrivacy"
+                data-gallery-target="privacyButton"
+                title="<%= image.public? ? 'Visible to anyone who can see this page. Click to make it private.' : 'Only you and collaborators can see this image. Click to make it public.' %>"
+                aria-label="Toggle image privacy">
+          <i class="material-icons text-xs mr-1" data-gallery-target="privacyIcon"><%= image.public? ? 'public' : 'lock' %></i>
+          <span data-gallery-target="privacyLabel"><%= image.public? ? 'Public' : 'Private' %></span>
+        </button>
+      <% end %>
+    </div>
+
+    <%# Notes %>
+    <div class="relative">
+      <textarea class="js-image-notes w-full text-sm p-2 pr-14 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                rows="2"
+                placeholder="Add a description, creation date, or notes…"
+                aria-label="Notes for this image"
+                data-gallery-target="notes"
+                data-action="blur->gallery#saveNotes keydown->gallery#notesKeydown input->gallery#autosize"
+                data-original-value="<%= image.notes %>"><%= image.notes %></textarea>
+      <span class="absolute right-2 bottom-2 text-xs text-green-600 dark:text-green-400 opacity-0 transition-opacity pointer-events-none"
+            data-gallery-target="notesStatus" aria-live="polite"></span>
+    </div>
+
+    <%# Actions %>
+    <div class="flex items-center justify-between gap-2" data-gallery-target="actions">
+      <button type="button"
+              class="gallery-card__cover-button inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium border focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors <%= cover ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-yellow-50 dark:hover:bg-gray-700' %>"
+              data-action="gallery#toggleCover"
+              data-gallery-target="coverButton"
+              aria-pressed="<%= cover %>"
+              title="<%= cover ? 'This image is the cover. Click to stop using it as the cover.' : 'Use this image on cards, the page banner and link previews.' %>">
+        <i class="material-icons text-sm mr-1"><%= cover ? 'star' : 'star_border' %></i>
+        <span data-gallery-target="coverLabel"><%= cover ? 'Cover' : 'Set as cover' %></span>
+      </button>
+
+      <div class="flex items-center gap-1">
+        <button type="button"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-action="gallery#moveUp" title="Move earlier" aria-label="Move this image earlier">
+          <i class="material-icons text-base">arrow_upward</i>
+        </button>
+        <button type="button"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-action="gallery#moveDown" title="Move later" aria-label="Move this image later">
+          <i class="material-icons text-base">arrow_downward</i>
+        </button>
+        <button type="button"
+                class="inline-flex items-center justify-center w-8 h-8 rounded-md text-red-500 hover:bg-red-50 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500"
+                data-action="gallery#confirmDelete" title="Delete this image" aria-label="Delete this image">
+          <i class="material-icons text-base">delete</i>
+        </button>
+      </div>
+    </div>
+
+    <%# Inline delete confirmation (hidden until the delete button is pressed) %>
+    <div class="hidden items-center justify-between gap-2 rounded-md bg-red-50 dark:bg-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-100"
+         data-gallery-target="deleteConfirm">
+      <span>Delete this image? This can't be undone.</span>
+      <div class="flex items-center gap-2">
+        <button type="button"
+                class="px-3 py-1 rounded-md bg-red-600 text-white text-xs font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+                data-action="gallery#delete">Delete</button>
+        <button type="button"
+                class="px-3 py-1 rounded-md border border-red-300 dark:border-red-700 text-xs font-medium hover:bg-red-100 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-red-500"
+                data-action="gallery#cancelDelete">Keep</button>
+      </div>
+    </div>
+  </div>
+</div>

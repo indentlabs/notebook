@@ -820,10 +820,8 @@ class BasilController < ApplicationController
   end
 
   def delete
-    @commission = BasilCommission.find_by(
-      id:   params[:id],
-      user: current_user
-    )
+    @commission = BasilCommission.find_by(id: params[:id])
+    @commission = nil if @commission && !@commission.deletable_by?(current_user)
 
     if @commission.nil?
       respond_to do |format|
@@ -841,18 +839,20 @@ class BasilController < ApplicationController
   end
 
   def update_commission
-    @commission = BasilCommission.find_by(
-      id:   params[:id],
-      user: current_user
-    )
+    @commission = BasilCommission.find_by(id: params[:id])
 
     if @commission.nil?
       render json: { error: "Commission not found" }, status: :not_found
       return
     end
 
+    unless @commission.updatable_by?(current_user)
+      render json: { error: "Unauthorized" }, status: :forbidden
+      return
+    end
+
     if @commission.update(update_commission_params)
-      render json: { success: true }, status: 200
+      render json: { success: true, image: ContentImage.wrap(@commission).as_json }, status: 200
     else
       render json: { error: @commission.errors.full_messages }, status: :unprocessable_entity
     end

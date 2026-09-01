@@ -74,12 +74,11 @@
             basil_count = raw_content.basil_commissions.where.not(saved_at: nil).count rescue 0
             total_images = image_count + basil_count
           %>
-          <% if total_images > 0 %>
-            <span class="ml-auto text-xs px-2 py-0.5 rounded-full"
-                  :class="isViewActive('gallery') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
-              <%= total_images %>
-            </span>
-          <% end %>
+          <span id="gallery-nav-count"
+                class="ml-auto text-xs px-2 py-0.5 rounded-full <%= total_images > 0 ? '' : 'hidden' %>"
+                :class="isViewActive('gallery') ? 'bg-white bg-opacity-20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+            <%= total_images %>
+          </span>
         </button>
         
         <!-- Privacy Tab -->

@@ -17,12 +17,8 @@ class Api::V1::GalleryImagesController < ApplicationController
     content_id = params[:content_id]
     content = content_type.constantize.find_by(id: content_id)
     
-    # Check permissions - must own or contribute to this content
-    unless content && 
-           (content.user_id == current_user.id || 
-            (content.respond_to?(:universe_id) && 
-             content.universe_id.present? && 
-             current_user.contributable_universe_ids.include?(content.universe_id)))
+    # Check permissions - anyone who can edit the page can reorder its images
+    unless content && ContentImageAuthorization.can_manage?(current_user, content)
       return render json: { error: 'Unauthorized' }, status: :unauthorized
     end
 

@@ -1,5 +1,6 @@
 class BasilCommission < ApplicationRecord
   acts_as_paranoid
+  include Authority::Abilities
 
   belongs_to :user, optional: true
   belongs_to :entity, polymorphic: true, optional: true
