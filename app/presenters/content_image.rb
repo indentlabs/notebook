@@ -156,6 +156,27 @@ class ContentImage
     upload? ? record.src_file_name.present? : record.image.attached?
   end
 
+  def crops
+    record.try(:crops) || {}
+  end
+
+  def focal_x
+    record.try(:focal_x) || 0.5
+  end
+
+  def focal_y
+    record.try(:focal_y) || 0.5
+  end
+
+  # CSS object-position keeping the focal point in view.
+  def object_position
+    record.respond_to?(:object_position_css) ? record.object_position_css : '50% 50%'
+  end
+
+  def crops_generated_at
+    record.try(:crops_generated_at)
+  end
+
   # URL for a size-limited derivative (see SIZE_LIMITS), or nil when the
   # record has no file.
   def url(size = :medium)
@@ -171,6 +192,23 @@ class ContentImage
       else
         original_url
       end
+    end
+  end
+
+  # URL of the derivative cut to the writer's framing for +preset+ (see
+  # ImagePresets), or nil when it has not been generated yet. Callers fall
+  # back to url(:hero) plus object_position in that case.
+  def preset_url(preset)
+    return nil unless attached? && ImagePresets.valid?(preset)
+
+    if upload?
+      return nil if record.crops_generated_at.nil?
+
+      url = record.src(preset.to_sym).to_s
+      url.include?('missing.png') ? nil : url
+    else
+      variant = ImageDerivativeService.variant_for(record, preset)
+      variant ? rails_representation_path(variant, only_path: true) : nil
     end
   end
 
@@ -223,12 +261,16 @@ class ContentImage
       byte_size:  byte_size,
       width:      width,
       height:     height,
+      crops:      crops,
+      focal_x:    focal_x,
+      focal_y:    focal_y,
       urls: {
         thumb:    url(:thumb),
         medium:   url(:medium),
         large:    url(:large),
         original: original_url
-      }
+      },
+      preset_urls: ImagePresets.keys.index_with { |key| preset_url(key) }
     }
   end
 end

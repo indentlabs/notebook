@@ -35,15 +35,21 @@ class ImageUploadService
       )
     end
 
-    @user.update(upload_bandwidth_kb: @user.upload_bandwidth_kb - size_kb)
+    image = nil
 
-    image = ImageUpload.create(
-      user:         @user,
-      content_type: @content.class.name,
-      content_id:   @content.id,
-      src:          @file,
-      privacy:      @privacy
-    )
+    # Charge and store together so an exception mid-upload cannot leave the
+    # quota charged for an image that was never saved.
+    ImageUpload.transaction do
+      @user.update(upload_bandwidth_kb: @user.upload_bandwidth_kb - size_kb)
+
+      image = ImageUpload.create(
+        user:         @user,
+        content_type: @content.class.name,
+        content_id:   @content.id,
+        src:          @file,
+        privacy:      @privacy
+      )
+    end
 
     if image.persisted?
       Result.new(image: image, charged_kb: size_kb)

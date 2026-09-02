@@ -1,43 +1,17 @@
 <!-- Hero Image Header -->
-<div class="relative <%= local_assigns[:height_classes] || 'h-64 md:h-80 lg:h-96' %> bg-gray-900 overflow-hidden">
-  <% 
-    # Get images using the same logic as dashboard cards
-    regular_images = content.image_uploads.ordered.to_a
-    # Filter for public if the current user isn't the owner
-    unless user_signed_in? && content.user_id == current_user.id
-      regular_images = regular_images.select { |img| img.privacy == 'public' }
-    end
-    basil_images = content.basil_commissions.where.not(saved_at: nil).ordered.to_a
-    
-    # Use get_preview_image to prioritize pinned images, then randomize
-    preview_image = get_preview_image(regular_images, basil_images)
-  %>
-  
-  <% if preview_image.present? %>
-    <% image_type = preview_image[:type] %>
-    <% image_data = preview_image[:data] %>
-    
-    <% if image_type == 'image_upload' %>
-      <%= image_tag image_data.src.url, 
-                    class: "w-full h-full object-cover",
-                    alt: "#{content.name} banner image" %>
-    <% elsif image_type == 'basil_commission' %>
-      <% if image_data.image.attached? %>
-        <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
-                      class: "w-full h-full object-cover",
-                      alt: "#{content.name} banner image" %>
-      <% else %>
-        <%= image_tag "card-headers/#{content.class.name.downcase.pluralize}.jpg", 
-                      class: "w-full h-full object-cover",
-                      alt: "#{content.name} banner image" %>
-      <% end %>
-    <% end %>
-  <% else %>
-    <%= image_tag "card-headers/#{content.class.name.downcase.pluralize}.jpg", 
-                  class: "w-full h-full object-cover",
-                  alt: "#{content.name} banner image" %>
-  <% end %>
-    
+<%
+  # Owners and collaborators see private images too; everyone else only public ones.
+  can_see_private = user_signed_in? && ContentImageAuthorization.can_manage?(current_user, content)
+  # Banner keeps a 3:1 shape (matching the banner crop) on tablet and up,
+  # capped so very wide screens don't get a towering header.
+  hero_classes = local_assigns[:height_classes] || 'h-56 sm:h-64 md:h-auto md:aspect-banner md:max-h-96'
+%>
+<div class="relative <%= hero_classes %> bg-gray-900 overflow-hidden">
+  <%= content_image_tag content, :banner,
+        include_private: can_see_private,
+        class: "w-full h-full object-cover",
+        alt: "#{content.name} banner image" %>
+
     <!-- Content overlay with solid background -->
     <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
       <div class="max-w-4xl mx-auto">

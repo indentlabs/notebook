@@ -702,6 +702,7 @@ class ContentController < ApplicationController
     content.instance_variable_set(:@random_image_including_private_cache, nil)
     content.instance_variable_set(:@pinned_public_image_cache, nil)
     content.instance_variable_set(:@first_public_image_cache, nil)
+    content.clear_cover_image_cache if content.respond_to?(:clear_cover_image_cache)
     
     # Return the updated status (use new_pin_status since update_column might not refresh the object)
     render json: {

@@ -886,6 +886,6 @@ class BasilController < ApplicationController
   end
 
   def update_commission_params
-    params.require(:basil_commission).permit(:notes)
+    params.require(:basil_commission).permit(:notes, :focal_x, :focal_y, crops: {})
   end
 end

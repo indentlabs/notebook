@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_04_01_171734) do
+ActiveRecord::Schema.define(version: 2026_09_01_120000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -205,6 +205,12 @@ ActiveRecord::Schema.define(version: 2026_04_01_171734) do
     t.boolean "pinned", default: false
     t.integer "position"
     t.text "notes"
+    t.json "crops", default: {}
+    t.float "focal_x", default: 0.5, null: false
+    t.float "focal_y", default: 0.5, null: false
+    t.integer "width"
+    t.integer "height"
+    t.datetime "crops_generated_at"
     t.index ["entity_type", "entity_id", "pinned"], name: "index_basil_commissions_on_entity_pinned"
     t.index ["entity_type", "entity_id", "position"], name: "index_basil_commissions_on_entity_position"
     t.index ["entity_type", "entity_id", "saved_at"], name: "basil_commissions_ees"
@@ -1739,6 +1745,12 @@ ActiveRecord::Schema.define(version: 2026_04_01_171734) do
     t.datetime "src_updated_at"
     t.integer "position"
     t.text "notes"
+    t.json "crops", default: {}
+    t.float "focal_x", default: 0.5, null: false
+    t.float "focal_y", default: 0.5, null: false
+    t.integer "width"
+    t.integer "height"
+    t.datetime "crops_generated_at"
     t.index ["content_type", "content_id", "pinned"], name: "index_image_uploads_on_content_pinned"
     t.index ["content_type", "content_id", "position"], name: "index_image_uploads_on_content_type_and_content_id_and_position"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"

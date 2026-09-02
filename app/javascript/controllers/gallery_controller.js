@@ -268,7 +268,10 @@ export default class extends Controller {
   // ---------------------------------------------------------------------
 
   confirmDelete(event) {
-    const card = this.cardFor(event)
+    this.showDeleteConfirm(this.cardFor(event))
+  }
+
+  showDeleteConfirm(card) {
     this.cardTargets.forEach((other) => { if (other !== card) this.hideDeleteConfirm(other) })
     card.querySelector("[data-gallery-target='actions']").classList.add("hidden")
     const confirm = card.querySelector("[data-gallery-target='deleteConfirm']")
@@ -350,6 +353,10 @@ export default class extends Controller {
     if (image.crops) card.dataset.crops = JSON.stringify(image.crops)
     if (typeof image.focal_x === "number") card.dataset.focalX = image.focal_x
     if (typeof image.focal_y === "number") card.dataset.focalY = image.focal_y
+    const thumb = card.querySelector("[data-gallery-target='thumb']")
+    if (thumb && typeof image.focal_x === "number" && typeof image.focal_y === "number") {
+      thumb.style.objectPosition = `${(image.focal_x * 100).toFixed(1)}% ${(image.focal_y * 100).toFixed(1)}%`
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -408,25 +415,40 @@ export default class extends Controller {
     return this.hasUploadUrlValue && types && Array.from(types).includes("Files")
   }
 
+  // Files are sent one at a time so progress is meaningful, the bandwidth
+  // check sees each previous result, and the server never has to juggle
+  // several uploads for the same page at once.
   enqueueFiles(fileList) {
     const files = Array.from(fileList || [])
     if (files.length === 0) return
-    files.forEach((file) => this.uploadFile(file))
+    this.pending = this.pending || []
+    files.forEach((file) => {
+      const row = this.buildQueueRow(file)
+      this.queueTarget.appendChild(row)
+      this.queueTarget.classList.remove("hidden")
+      this.pending.push({ file, row })
+    })
+    this.drainQueue()
   }
 
-  uploadFile(file) {
-    const row = this.buildQueueRow(file)
-    this.queueTarget.appendChild(row)
-    this.queueTarget.classList.remove("hidden")
+  drainQueue() {
+    if (this.uploading > 0) return
+    const next = this.pending && this.pending.shift()
+    if (!next) return
+    this.uploadFile(next.file, next.row)
+  }
 
+  uploadFile(file, row) {
     if (!file.type.startsWith("image/")) {
       this.failRow(row, `${file.name} isn't an image file.`, false)
+      this.drainQueue()
       return
     }
 
     const sizeKb = file.size / 1000
     if (this.hasRemainingKbValue && sizeKb > this.remainingKbValue) {
       this.failRow(row, `${file.name} is ${this.humanSize(file.size)}, but you only have ${this.humanSize(this.remainingKbValue * 1000)} of upload bandwidth left.`, false)
+      this.drainQueue()
       return
     }
 
@@ -456,6 +478,7 @@ export default class extends Controller {
 
     xhr.addEventListener("load", () => {
       this.uploading -= 1
+      setTimeout(() => this.drainQueue(), 0)
       let data = {}
       try { data = JSON.parse(xhr.responseText || "{}") } catch (e) { /* not JSON */ }
 
@@ -478,6 +501,7 @@ export default class extends Controller {
 
     xhr.addEventListener("error", () => {
       this.uploading -= 1
+      setTimeout(() => this.drainQueue(), 0)
       this.failRow(row, `Couldn't upload ${file.name}. Check your connection and try again.`, true, file)
     })
 

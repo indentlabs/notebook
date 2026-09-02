@@ -28,14 +28,18 @@
      data-height="<%= image.height %>"
      data-byte-size="<%= image.byte_size %>"
      data-filename="<%= image.filename %>"
-     data-source-label="<%= image.source_label %>">
+     data-source-label="<%= image.source_label %>"
+     data-crops="<%= image.crops.to_json %>"
+     data-focal-x="<%= image.focal_x %>"
+     data-focal-y="<%= image.focal_y %>">
 
   <%# Image area. The whole area is the drag handle. %>
-  <div class="gallery-card__media relative aspect-video bg-gray-100 dark:bg-gray-900 <%= cover ? 'ring-2 ring-inset ring-yellow-400' : '' %>"
+  <div class="gallery-card__media relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-900 <%= cover ? 'ring-2 ring-inset ring-yellow-400' : '' %>"
        data-gallery-target="media">
     <% if image.url(:large) %>
       <%= image_tag image.url(:large),
             class: 'w-full h-full object-cover select-none',
+            style: "object-position: #{image.object_position}",
             alt: image.notes.presence || "#{content.try(:name)} image",
             loading: 'lazy',
             draggable: false,
@@ -78,8 +82,8 @@
 
   <div class="flex flex-col gap-2 p-3">
     <%# Meta row %>
-    <div class="flex items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
-      <div class="flex items-center gap-2 min-w-0">
+    <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
         <span class="inline-flex items-center px-2 py-0.5 rounded-full font-medium <%= image.basil? ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' %>">
           <i class="material-icons text-xs mr-1"><%= image.basil? ? 'auto_awesome' : 'file_upload' %></i>
           <%= image.source_label %>

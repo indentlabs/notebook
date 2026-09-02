@@ -1,6 +1,7 @@
 class BasilCommission < ApplicationRecord
   acts_as_paranoid
   include Authority::Abilities
+  include HasImageFraming
 
   belongs_to :user, optional: true
   belongs_to :entity, polymorphic: true, optional: true
@@ -48,6 +49,16 @@ class BasilCommission < ApplicationRecord
 
   def complete?
     image.attached?
+  end
+
+  # Pixel size of the generated image. Falls back to ActiveStorage's
+  # analysis metadata for commissions created before the columns existed.
+  def width
+    self[:width] || (image.attached? ? image.metadata['width'] : nil)
+  end
+
+  def height
+    self[:height] || (image.attached? ? image.metadata['height'] : nil)
   end
 
   # Use acts_as_list for ordering images

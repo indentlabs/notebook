@@ -104,6 +104,6 @@ class ImageUploadController < ApplicationController
   end
 
   def image_upload_params
-    params.require(:image_upload).permit(:notes, :privacy)
+    params.require(:image_upload).permit(:notes, :privacy, :focal_x, :focal_y, crops: {})
   end
 end

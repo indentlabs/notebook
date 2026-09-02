@@ -4,9 +4,8 @@
       <div class="flex-1">
         <div class="space-y-8 sm:flex sm:justify-between sm:items-center xl:block">
           <div class="flex-shrink-0 w-full mb-2">
-            <% image = content.raw_model.random_image_including_private %>
             <%= link_to send("gallery_#{content.class_name.downcase}_path") do %>
-              <%= image_tag image, class: 'rounded-lg bg-notebook-blue h-64 object-cover object-center hover:shadow hover:opacity-90' %>
+              <%= content_image_tag content.raw_model, :square, include_private: true, pick: :random, class: 'rounded-lg bg-notebook-blue w-full h-64 object-cover hover:shadow hover:opacity-90' %>
             <% end %>
           </div>
 
@@ -43,7 +42,7 @@
                 In the
                 <span class="text-gray-500 mx-1 <%= Universe.text_color %> font-medium"><%= content.universe.name %></span>
                 universe
-                <%= image_tag content.universe.random_image_including_private, class: "#{Universe.color} w-full h-24 border border-purple-800 object-center object-cover rounded-md shadow hover:opacity-90" %>
+                <%= content_image_tag content.universe, :banner, include_private: true, pick: :random, class: "#{Universe.color} w-full h-24 border border-purple-800 object-cover rounded-md shadow hover:opacity-90" %>
               <% end %>
             </div>
           <% end %>

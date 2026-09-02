@@ -41,6 +41,13 @@ Rails.application.configure do
   # Use the :test queue adapter so jobs are not sent to Redis/Sidekiq.
   config.active_job.queue_adapter = :test
 
+  # Keep Paperclip files written by tests out of public/system, where they
+  # would collide with (and be deleted alongside) development uploads.
+  config.paperclip_defaults = {
+    path: ':rails_root/tmp/test_uploads/:class/:attachment/:id_partition/:style/:filename',
+    url:  '/test_uploads/:class/:attachment/:id_partition/:style/:filename'
+  }
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 

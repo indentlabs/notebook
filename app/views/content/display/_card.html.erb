@@ -27,21 +27,10 @@
       
       <!-- Card Image Area -->
       <div class="relative h-48 flex-shrink-0 overflow-hidden">
-        <% 
-          card_image_url = nil
-          if show_private_images && content_page.respond_to?(:random_image_including_private)
-            card_image_url = content_page.random_image_including_private
-          elsif content_page.respond_to?(:first_public_image)
-            card_image_url = content_page.first_public_image
-          end
-        %>
-        <% if card_image_url.present? %>
-          <%= image_tag card_image_url, class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
-        <% else %>
-          <%= image_tag "card-headers/#{content_page.try(:page_type)&.downcase&.pluralize || 'universes'}.webp",
-              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
-              alt: "placeholder" %>
-        <% end %>
+        <%= content_image_tag content_page, :card,
+              include_private: show_private_images,
+              pick: show_private_images ? :random : :first,
+              class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" %>
         
         <!-- Protection Gradient -->
         <!-- Light Mode: White gradient going up, Text is Black -->

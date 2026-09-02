@@ -197,5 +197,53 @@ module HasImageUploads
     def header_asset_for(class_name)
       "card-headers/#{class_name.downcase.pluralize}.webp"
     end
+
+    # The image that represents this page, as a ContentImage (or nil when
+    # there are no usable images). Used by content_image_tag.
+    #
+    #   include_private: whether private uploads may be used (owner/collaborator views)
+    #   pick:            :first (stable) or :random when nothing is pinned
+    #
+    # A pinned image always wins. Uploads are preferred over Basil images,
+    # matching the older *_image URL helpers.
+    def cover_image(include_private: false, pick: :first)
+      @cover_image_cache ||= {}
+      key = [include_private, pick]
+      return @cover_image_cache[key] if @cover_image_cache.key?(key)
+
+      uploads = image_uploads.loaded? ? image_uploads.to_a : image_uploads.to_a
+      uploads = uploads.select { |upload| upload.privacy == 'public' } unless include_private
+      uploads = uploads.select { |upload| upload.src_file_name.present? }
+
+      basil = if respond_to?(:basil_commissions)
+        if basil_commissions.loaded?
+          basil_commissions.select { |commission| commission.saved_at.present? }
+        else
+          basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).to_a
+        end
+      else
+        []
+      end
+      basil = basil.select { |commission| commission.image.attached? }
+
+      chosen = uploads.select(&:pinned?).min_by(&:id) ||
+               basil.select(&:pinned?).min_by(&:id)
+
+      if chosen.nil?
+        ordered_uploads = uploads.sort_by { |upload| [upload.position || 999_999, upload.id] }
+        ordered_basil   = basil.sort_by { |commission| [commission.position || 999_999, commission.id] }
+        chosen = if pick == :random
+          ordered_uploads.sample || ordered_basil.sample
+        else
+          ordered_uploads.first || ordered_basil.first
+        end
+      end
+
+      @cover_image_cache[key] = chosen ? ContentImage.wrap(chosen) : nil
+    end
+
+    def clear_cover_image_cache
+      @cover_image_cache = nil
+    end
   end
 end

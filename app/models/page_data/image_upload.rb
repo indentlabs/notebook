@@ -1,5 +1,6 @@
 class ImageUpload < ApplicationRecord
   include Authority::Abilities
+  include HasImageFraming
 
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
@@ -21,10 +22,13 @@ class ImageUpload < ApplicationRecord
     styles: {
       thumb:  '100x100>',
       small:  '190x190#',
-      square: '280x280#',
       medium: '300x300>',
       large:  '600x600>',
-      hero:   '800x800>'
+      hero:   '800x800>',
+      # Shape derivatives cut by the gallery editor's framing (lib/paperclip_processors/cropper.rb)
+      banner: { geometry: ImagePresets[:banner].geometry, processors: [:cropper], preset: :banner },
+      card:   { geometry: ImagePresets[:card].geometry,   processors: [:cropper], preset: :card },
+      square: { geometry: ImagePresets[:square].geometry, processors: [:cropper], preset: :square }
     },
     filename_cleaner: -> (filename) {
       [
@@ -34,6 +38,35 @@ class ImageUpload < ApplicationRecord
     },
     s3_protocol: 'https'
   # has_one_attached :upload
+
+  # Remember the original's pixel size so crops can be validated and the
+  # editor can lay out the image before it has loaded.
+  before_post_process :capture_dimensions
+  before_save :mark_crops_generated, if: :will_save_change_to_src_file_name?
+  after_commit :regenerate_crops_later, on: :update, if: :framing_changed?
+
+  def capture_dimensions
+    file = src.queued_for_write[:original]
+    return true if file.nil?
+
+    geometry = Paperclip::Geometry.from_file(file)
+    geometry.auto_orient # match what browsers (and the editor) display
+    self.width  = geometry.width.to_i
+    self.height = geometry.height.to_i
+    true
+  rescue Paperclip::Errors::NotIdentifiedByImageMagickError, Paperclip::Errors::CommandNotFoundError, Errno::ENOENT
+    true
+  end
+
+  # Paperclip cuts the shape styles synchronously when a file is stored, so
+  # a freshly uploaded image already has its derivatives.
+  def mark_crops_generated
+    self.crops_generated_at = Time.current if src_file_name.present?
+  end
+
+  def regenerate_crops_later
+    GenerateImageCropsJob.perform_later('ImageUpload', id)
+  end
 
   validates_attachment_content_type :src,
     content_type: /\Aimage\/.*\Z/,

@@ -100,6 +100,12 @@ module.exports = {
       width: {
         '112': '28rem', // 448px - for wider notification panel on xl screens
       },
+      aspectRatio: {
+        'banner': '3 / 1', // page hero banner (ImagePresets[:banner])
+      },
+      zIndex: {
+        '60': '60', // modals that must sit above the z-50 site sidebar
+      },
     },
   },
   plugins: [

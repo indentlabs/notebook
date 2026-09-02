@@ -5,9 +5,9 @@
 
   set_meta_tags title:       @content.name,
                 description: page_description.truncate(160),
-                image_src:   @content.first_public_image,
+                image_src:   content_social_image_url(@content),
                 og:          { type: 'website' },
-                twitter:     { card: 'photo', image: @content.first_public_image }
+                twitter:     { card: 'photo', image: content_social_image_url(@content) }
 %>
 <div
   x-data="{ showEditMode: <%= params.fetch('editing', false) %> }"
@@ -150,7 +150,7 @@
                   <% @documents.each do |document| %>
                     <div class="py-6 sm:flex">
                       <div class="flex space-x-4 sm:min-w-0 sm:flex-1 sm:space-x-6 lg:space-x-8">
-                        <%= image_tag document.random_image_including_private, class: "#{Document.color} flex-none w-20 h-20 rounded-md object-center object-cover sm:w-48 sm:h-48" %>
+                        <%= content_image_tag document, :square, include_private: true, pick: :random, class: "#{Document.color} flex-none w-20 h-20 rounded-md object-center object-cover sm:w-48 sm:h-48" %>
                         <div class="pt-1.5 min-w-0 flex-1 sm:pt-0">
                           <h3 class="text-sm font-medium text-gray-900">
                             <%= link_to document.title, document %>
@@ -226,7 +226,7 @@
                           <td class="py-6 pr-8">
                             <div class="flex items-center">
                               <%= link_to reference.referencing_page do %>
-                                <%= image_tag reference.referencing_page.random_image_including_private(format: :thumb), class: "w-16 h-16 object-center object-cover rounded mr-6 #{reference.referencing_page.class.color}", alt: reference.referencing_page.name %>
+                                <%= content_image_tag reference.referencing_page, :square, include_private: true, pick: :random, class: "w-16 h-16 object-center object-cover rounded mr-6 #{reference.referencing_page.class.color}", alt: reference.referencing_page.name %>
                               <% end %>
                               <div>
                                 <div class="font-medium text-gray-900">
