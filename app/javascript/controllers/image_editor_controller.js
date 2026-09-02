@@ -17,7 +17,7 @@ export default class extends Controller {
     "modal", "subtitle", "coverButton", "coverLabel",
     "shapeTab", "shapeState", "stage", "loading", "image",
     "focalLayer", "focalDot", "cropControls", "zoom", "gridToggle", "help",
-    "preview", "previewTitle", "previewBadge",
+    "preview", "previewTitle", "previewBadge", "usage",
     "notes", "privacyRow", "privacy", "facts", "downloadLink",
     "status", "saveButton"
   ]
@@ -34,8 +34,10 @@ export default class extends Controller {
 
     this.onGalleryEdit = this.onGalleryEdit.bind(this)
     this.onResize = this.onResize.bind(this)
+    this.onCoversChanged = this.onCoversChanged.bind(this)
     window.addEventListener("gallery:edit", this.onGalleryEdit)
     window.addEventListener("resize", this.onResize)
+    window.addEventListener("gallery:covers-changed", this.onCoversChanged)
     this.presetMap = {}
     this.presetsValue.forEach((preset) => { this.presetMap[preset.key] = preset })
     this.open = false
@@ -45,6 +47,7 @@ export default class extends Controller {
   disconnect() {
     if (this.onGalleryEdit) window.removeEventListener("gallery:edit", this.onGalleryEdit)
     if (this.onResize) window.removeEventListener("resize", this.onResize)
+    if (this.onCoversChanged) window.removeEventListener("gallery:covers-changed", this.onCoversChanged)
     this.destroyCropper()
   }
 
@@ -162,7 +165,57 @@ export default class extends Controller {
     this.previewTitleTargets.forEach((el) => { el.textContent = pageName })
     if (this.hasPreviewBadgeTarget) this.previewBadgeTarget.textContent = this.pageTypeValue || ""
 
+    this.refreshCoverRoles()
     this.setStatus("")
+  }
+
+  onCoversChanged() {
+    if (!this.open || !this.card) return
+    this.applyCoverState(this.card.dataset.pinned === "true")
+    this.refreshCoverRoles()
+  }
+
+  // Header menu checks and the "Used now" line under each preview.
+  refreshCoverRoles() {
+    const gallery = this.galleryController()
+    const roles = gallery ? gallery.rolesOf(this.card) : []
+    this.element.querySelectorAll("[data-action*='image-editor#toggleCoverFor']").forEach((item) => {
+      const active = roles.includes(item.dataset.preset)
+      item.setAttribute("aria-checked", active ? "true" : "false")
+      const check = item.querySelector("[data-role-check]")
+      if (check) check.classList.toggle("invisible", !active)
+    })
+
+    if (!this.hasUsageTarget) return
+    const cards = gallery ? gallery.cardTargets : []
+    this.usageTargets.forEach((el) => {
+      const preset = el.dataset.preset
+      const specific = cards.find((card) => gallery.rolesOf(card).includes(preset))
+      const pinned = cards.find((card) => card.dataset.pinned === "true")
+      let text
+      if (specific) {
+        text = specific === this.card ? "Used now: this image" : `Used now: ${specific.dataset.filename || "another image"}`
+      } else if (pinned) {
+        text = pinned === this.card ? "Used now: this image (cover)" : "Used now: the cover image"
+      } else {
+        text = "Used now: a random image"
+      }
+      el.textContent = text
+      el.classList.toggle("text-blue-600", !!specific && specific === this.card)
+      el.classList.toggle("dark:text-blue-400", !!specific && specific === this.card)
+    })
+  }
+
+  toggleCoverFor(event) {
+    const gallery = this.galleryController()
+    const preset = event.currentTarget.dataset.preset
+    const details = event.currentTarget.closest("details")
+    if (details) details.open = false
+    if (!gallery || !this.card || !preset) return
+    const item = this.card.querySelector(`[data-action*='gallery#toggleCoverFor'][data-preset='${preset}']`)
+    if (!item) return
+    gallery.toggleCoverFor({ target: item, currentTarget: item })
+    setTimeout(() => this.refreshCoverRoles(), 1500)
   }
 
   loadImage() {
@@ -478,12 +531,14 @@ export default class extends Controller {
     }
     if (typing) return
 
-    if (["1", "2", "3"].includes(event.key)) {
-      const preset = this.presetsValue[parseInt(event.key, 10) - 1]
-      if (preset) { event.preventDefault(); this.selectPresetKey(preset.key) }
+    if (/^[1-9]$/.test(event.key)) {
+      const index = parseInt(event.key, 10) - 1
+      const preset = this.presetsValue[index]
+      if (preset) { event.preventDefault(); this.selectPresetKey(preset.key); return }
+      if (index === this.presetsValue.length) { event.preventDefault(); this.selectPresetKey("focal"); return }
       return
     }
-    if (event.key === "4" || event.key === "f") { event.preventDefault(); this.selectPresetKey("focal"); return }
+    if (event.key === "f") { event.preventDefault(); this.selectPresetKey("focal"); return }
     if (event.key === "+" || event.key === "=") { event.preventDefault(); this.zoomIn(); return }
     if (event.key === "-" || event.key === "_") { event.preventDefault(); this.zoomOut(); return }
 

@@ -1,0 +1,31 @@
+<%#
+  Caret menu next to a "Set as cover" button: choose this image as the cover
+  for one shape only. Shared by the gallery card and the editor header.
+
+  Locals:
+    image         - a ContentImage
+    action_prefix - Stimulus controller identifier handling toggleCoverFor
+%>
+<details class="gallery-cover-menu relative">
+  <summary class="list-none h-full cursor-pointer inline-flex items-center px-1.5 rounded-r-md border border-l-0 border-gray-300 dark:border-gray-600 text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+           title="Use this image for one shape only"
+           aria-label="Use this image for one shape only">
+    <i class="material-icons text-sm">expand_more</i>
+  </summary>
+  <div class="absolute left-0 z-20 mt-1 w-56 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg py-1 text-sm"
+       role="menu">
+    <p class="px-3 py-1 text-xxs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Use only for</p>
+    <% ImagePresets.each do |preset| %>
+      <% active = image.cover_for?(preset.key) %>
+      <button type="button" role="menuitemcheckbox" aria-checked="<%= active %>"
+              class="w-full flex items-center justify-between gap-2 px-3 py-1.5 text-left text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:bg-gray-50 dark:focus:bg-gray-700"
+              data-action="<%= action_prefix %>#toggleCoverFor"
+              data-preset="<%= preset.key %>"
+              data-label="<%= preset.chip %>">
+        <span><%= preset.chip %> <span class="text-xs text-gray-400 tabular-nums"><%= preset.ratio_label %></span></span>
+        <i class="material-icons text-sm text-blue-600 dark:text-blue-400 <%= active ? '' : 'invisible' %>"
+           data-role-check="<%= preset.key %>">check</i>
+      </button>
+    <% end %>
+  </div>
+</details>

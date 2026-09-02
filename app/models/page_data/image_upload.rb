@@ -1,6 +1,7 @@
 class ImageUpload < ApplicationRecord
   include Authority::Abilities
   include HasImageFraming
+  include HasCoverRoles
 
   belongs_to :user, optional: true
   belongs_to :content, polymorphic: true
@@ -17,18 +18,23 @@ class ImageUpload < ApplicationRecord
   scope :ordered, -> { order(:position) }
 
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
+  # Derivatives regenerated when the framing changes (see ImagePresets) plus
+  # the large WebP used by the lightbox and the editor instead of the original.
+  FRAMED_STYLES = ImagePresets.style_names.freeze
+  XLARGE_STYLE  = ImagePresets.webp_style('1600x1600>', convert_options: '-quality 85 -strip').freeze
+
   has_attached_file :src,
-    **(Rails.env.production? ? { path: 'content/uploads/:style/:filename' } : {}),
+    **(Rails.env.production? ? { path: 'content/uploads/:style/:filename', s3_headers: { 'Cache-Control' => 'public, max-age=31536000' } } : {}),
     styles: {
+      # Legacy JPEG/PNG sizes, still used as fallbacks and by RSS readers
       thumb:  '100x100>',
       small:  '190x190#',
       medium: '300x300>',
       large:  '600x600>',
       hero:   '800x800>',
+      xlarge: XLARGE_STYLE,
       # Shape derivatives cut by the gallery editor's framing (lib/paperclip_processors/cropper.rb)
-      banner: { geometry: ImagePresets[:banner].geometry, processors: [:cropper], preset: :banner },
-      card:   { geometry: ImagePresets[:card].geometry,   processors: [:cropper], preset: :card },
-      square: { geometry: ImagePresets[:square].geometry, processors: [:cropper], preset: :square }
+      **ImagePresets.paperclip_styles
     },
     filename_cleaner: -> (filename) {
       [

@@ -1,11 +1,11 @@
 namespace :gallery do
-  desc "Generate banner/card/square derivatives for uploads that don't have them yet (enqueues GenerateImageCropsJob)"
+  desc "Generate the WebP shape derivatives (banner/card/square/social, plus xlarge) for uploads that don't have them yet (enqueues GenerateImageCropsJob)"
   task backfill_crops: :environment do
     scope = ImageUpload.where(crops_generated_at: nil).where.not(src_file_name: nil)
     count = 0
 
     scope.find_each do |image|
-      GenerateImageCropsJob.perform_later('ImageUpload', image.id)
+      GenerateImageCropsJob.perform_later('ImageUpload', image.id, 'backfill')
       count += 1
     end
 

@@ -2,6 +2,7 @@ class BasilCommission < ApplicationRecord
   acts_as_paranoid
   include Authority::Abilities
   include HasImageFraming
+  include HasCoverRoles
 
   belongs_to :user, optional: true
   belongs_to :entity, polymorphic: true, optional: true

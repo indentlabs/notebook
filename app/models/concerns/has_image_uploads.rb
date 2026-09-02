@@ -206,9 +206,15 @@ module HasImageUploads
     #
     # A pinned image always wins. Uploads are preferred over Basil images,
     # matching the older *_image URL helpers.
-    def cover_image(include_private: false, pick: :first)
+    # The image that represents this page.
+    #
+    # Resolution order: an image chosen for +preset+ specifically (cover_for),
+    # then the pinned image, then the first (or a random) image with a file.
+    def cover_image(include_private: false, pick: :first, preset: nil)
       @cover_image_cache ||= {}
-      key = [include_private, pick]
+      preset = preset.to_s if preset.present? && ImagePresets.valid?(preset)
+      preset = nil unless preset.is_a?(String)
+      key = [include_private, pick, preset]
       return @cover_image_cache[key] if @cover_image_cache.key?(key)
 
       uploads = image_uploads.loaded? ? image_uploads.to_a : image_uploads.to_a
@@ -226,8 +232,14 @@ module HasImageUploads
       end
       basil = basil.select { |commission| commission.image.attached? }
 
-      chosen = uploads.select(&:pinned?).min_by(&:id) ||
-               basil.select(&:pinned?).min_by(&:id)
+      chosen = nil
+      if preset
+        chosen = uploads.select { |upload| upload.cover_for?(preset) }.min_by(&:id) ||
+                 basil.select { |commission| commission.cover_for?(preset) }.min_by(&:id)
+      end
+
+      chosen ||= uploads.select(&:pinned?).min_by(&:id) ||
+                 basil.select(&:pinned?).min_by(&:id)
 
       if chosen.nil?
         ordered_uploads = uploads.sort_by { |upload| [upload.position || 999_999, upload.id] }
@@ -244,6 +256,8 @@ module HasImageUploads
 
     def clear_cover_image_cache
       @cover_image_cache = nil
+      image_uploads.reset if image_uploads.loaded?
+      basil_commissions.reset if respond_to?(:basil_commissions) && basil_commissions.loaded?
     end
   end
 end

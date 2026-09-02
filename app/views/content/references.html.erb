@@ -3,11 +3,8 @@
   page_description ||= @content.description
   page_description ||= "#{@content.name} is a fictional #{@content.class.name.downcase} on Notebook.ai"
 
-  set_meta_tags title:       @content.name,
-                description: page_description.truncate(160),
-                image_src:   content_social_image_url(@content),
-                og:          { type: 'website' },
-                twitter:     { card: 'photo', image: content_social_image_url(@content) }
+  set_meta_tags({ title:       @content.name,
+                  description: page_description.truncate(160) }.merge(content_social_meta(@content)))
 %>
 <div
   x-data="{ showEditMode: <%= params.fetch('editing', false) %> }"
@@ -226,7 +223,7 @@
                           <td class="py-6 pr-8">
                             <div class="flex items-center">
                               <%= link_to reference.referencing_page do %>
-                                <%= content_image_tag reference.referencing_page, :square, include_private: true, pick: :random, class: "w-16 h-16 object-center object-cover rounded mr-6 #{reference.referencing_page.class.color}", alt: reference.referencing_page.name %>
+                                <%= content_image_tag reference.referencing_page, :square, include_private: true, pick: :random, size: :small, class: "w-16 h-16 object-center object-cover rounded mr-6 #{reference.referencing_page.class.color}", alt: reference.referencing_page.name %>
                               <% end %>
                               <div>
                                 <div class="font-medium text-gray-900">

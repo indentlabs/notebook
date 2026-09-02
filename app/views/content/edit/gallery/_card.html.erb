@@ -29,6 +29,7 @@
      data-byte-size="<%= image.byte_size %>"
      data-filename="<%= image.filename %>"
      data-source-label="<%= image.source_label %>"
+     data-cover-for="<%= image.cover_for.to_json %>"
      data-crops="<%= image.crops.to_json %>"
      data-focal-x="<%= image.focal_x %>"
      data-focal-y="<%= image.focal_y %>">
@@ -50,11 +51,17 @@
       </div>
     <% end %>
 
-    <%# Cover chip %>
-    <span class="gallery-card__cover-chip absolute top-2 left-2 inline-flex items-center px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold shadow-sm <%= cover ? '' : 'hidden' %>"
-          data-gallery-target="coverChip">
-      <i class="material-icons text-xs mr-1">star</i> Cover
-    </span>
+    <%# Cover chips: "Cover" for everything, plus one per shape this image is chosen for %>
+    <div class="absolute top-2 left-2 right-14 flex flex-wrap gap-1 pointer-events-none">
+      <span class="gallery-card__cover-chip inline-flex items-center px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold shadow-sm <%= cover ? '' : 'hidden' %>"
+            data-gallery-target="coverChip">
+        <i class="material-icons text-xs mr-1">star</i> Cover
+      </span>
+      <% ImagePresets.each do |preset| %>
+        <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold shadow-sm <%= image.cover_for?(preset.key) ? '' : 'hidden' %>"
+              data-gallery-target="roleChip" data-preset="<%= preset.key %>"><%= preset.chip %></span>
+      <% end %>
+    </div>
 
     <%# Drag handle: a real circle, top centre %>
     <span class="gallery-card__handle absolute top-2 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full bg-white dark:bg-gray-700 text-gray-500 dark:text-gray-200 shadow-md flex items-center justify-center cursor-grab select-none"
@@ -124,15 +131,18 @@
 
     <%# Actions %>
     <div class="flex items-center justify-between gap-2" data-gallery-target="actions">
-      <button type="button"
-              class="gallery-card__cover-button inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium border focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors <%= cover ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-yellow-50 dark:hover:bg-gray-700' %>"
-              data-action="gallery#toggleCover"
-              data-gallery-target="coverButton"
-              aria-pressed="<%= cover %>"
-              title="<%= cover ? 'This image is the cover. Click to stop using it as the cover.' : 'Use this image on cards, the page banner and link previews.' %>">
-        <i class="material-icons text-sm mr-1"><%= cover ? 'star' : 'star_border' %></i>
-        <span data-gallery-target="coverLabel"><%= cover ? 'Cover' : 'Set as cover' %></span>
-      </button>
+      <div class="inline-flex items-stretch" role="group" aria-label="Cover image options">
+        <button type="button"
+                class="gallery-card__cover-button inline-flex items-center px-3 py-1.5 rounded-l-md text-xs font-medium border focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors <%= cover ? 'bg-yellow-400 border-yellow-400 text-yellow-900' : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-yellow-50 dark:hover:bg-gray-700' %>"
+                data-action="gallery#toggleCover"
+                data-gallery-target="coverButton"
+                aria-pressed="<%= cover %>"
+                title="<%= cover ? 'This image is the cover. Click to stop using it as the cover.' : 'Use this image on cards, the page banner and link previews.' %>">
+          <i class="material-icons text-sm mr-1"><%= cover ? 'star' : 'star_border' %></i>
+          <span data-gallery-target="coverLabel"><%= cover ? 'Cover' : 'Set as cover' %></span>
+        </button>
+        <%= render partial: 'content/edit/gallery/cover_menu', locals: { image: image, action_prefix: 'gallery' } %>
+      </div>
 
       <div class="flex items-center gap-1">
         <button type="button"

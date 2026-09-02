@@ -22,6 +22,29 @@ class ContentControllerPinTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
+  test "should set an image as the cover for one shape only" do
+    post toggle_image_pin_path,
+         params: { image_id: @image_upload.id, image_type: 'image_upload', preset: 'banner' },
+         headers: { 'Accept' => 'application/json' }
+
+    assert_response :success
+    json_response = JSON.parse(response.body)
+    assert_equal 'banner', json_response['preset']
+    assert json_response['active']
+    assert_equal ['banner'], json_response['cover_for']
+    assert_not json_response['pinned'], 'a shape role must not pin the image'
+    assert_equal ['banner'], @image_upload.reload.cover_for
+    assert @pinned_image.reload.pinned, 'the general cover is untouched'
+  end
+
+  test "should reject unknown shapes" do
+    post toggle_image_pin_path,
+         params: { image_id: @image_upload.id, image_type: 'image_upload', preset: 'hexagon' },
+         headers: { 'Accept' => 'application/json' }
+
+    assert_response :bad_request
+  end
+
   test "should pin an unpinned image upload" do
     assert_not @image_upload.pinned, "Image should start unpinned"
     

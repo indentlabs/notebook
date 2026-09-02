@@ -24,9 +24,28 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
     ImagePresets.each do |preset|
       path = @upload.src.path(preset.key)
       assert File.exist?(path), "#{preset.key} derivative should exist at #{path}"
+      assert path.end_with?('.webp'), "#{preset.key} derivative is WebP"
       geometry = Paperclip::Geometry.from_file(path)
       assert_equal preset.size, [geometry.width.to_i, geometry.height.to_i], "#{preset.key} derivative has the preset size"
+
+      next unless preset.small_size
+      small_path = @upload.src.path(preset.small_style)
+      assert File.exist?(small_path), "#{preset.small_style} derivative should exist"
+      small_geometry = Paperclip::Geometry.from_file(small_path)
+      assert_equal preset.small_size, [small_geometry.width.to_i, small_geometry.height.to_i]
     end
+
+    xlarge = @upload.src.path(:xlarge)
+    assert File.exist?(xlarge) && xlarge.end_with?('.webp'), 'xlarge WebP is produced on upload'
+    assert_equal 'WEBP', `identify -format %m #{xlarge}`.strip
+  end
+
+  test "backfill regenerates the framed styles and xlarge" do
+    @upload = create_upload
+    File.delete(@upload.src.path(:xlarge))
+
+    assert ImageDerivativeService.backfill!(@upload)
+    assert File.exist?(@upload.src.path(:xlarge))
   end
 
   test "changing the framing regenerates derivatives through a job" do
@@ -87,6 +106,11 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
 
     assert_equal [600, 600], transformations[:resize_to_fill]
     assert transformations[:crop].present?
+    assert_equal :webp, transformations[:format]
+
+    small = ImageDerivativeService.variant_for(commission, :square, small: true)
+    assert_equal [200, 200], small.variation.transformations[:resize_to_fill]
+    assert ContentImage.wrap(commission).preset_url(:square, size: :small).present?
 
     assert ContentImage.wrap(commission).preset_url(:square).present?
   end

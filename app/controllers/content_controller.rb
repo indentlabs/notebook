@@ -666,37 +666,13 @@ class ContentController < ApplicationController
       return render json: { error: 'Unauthorized' }, status: 403
     end
 
-    # Are we pinning or unpinning? Handle nil pinned values explicitly
-    current_pinned_status = @image.pinned == true
-    new_pin_status = !current_pinned_status
-    
-    # If we're pinning this image, unpin all other images for this content first
-    # This prevents database locking issues from the model callbacks
-    if new_pin_status == true
-      if params[:image_type] == 'image_upload'
-        # Unpinning an ImageUpload, so exclude it from the ImageUpload query
-        ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
-                  .where.not(id: @image.id)
-                  .update_all(pinned: false)
-        # Unpin all basil commissions
-        BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
-                       .update_all(pinned: false)
-      else  # basil_commission
-        # Unpin all image uploads
-        ImageUpload.where(content_type: content.class.name, content_id: content.id, pinned: true)
-                  .update_all(pinned: false)
-        # Unpinning a BasilCommission, so exclude it from the BasilCommission query
-        BasilCommission.where(entity_type: content.class.name, entity_id: content.id, pinned: true)
-                       .where.not(id: @image.id)
-                       .update_all(pinned: false)
-      end
+    preset = params[:preset].presence
+    if preset && !ImagePresets.valid?(preset)
+      return render json: { error: 'Unknown shape' }, status: 400
     end
-    
-    # Now update this image's pin status (without triggering callbacks that cause locks)
-    @image.update_column(:pinned, new_pin_status)
 
-    # Touch the content so it appears in "recently edited" views
-    content.touch
+    result = ContentCoverService.toggle!(@image, preset: preset)
+    new_pin_status = result.pinned
 
     # Clear any cached images to ensure pinned images are shown
     content.instance_variable_set(:@random_image_including_private_cache, nil)
@@ -706,10 +682,13 @@ class ContentController < ApplicationController
     
     # Return the updated status (use new_pin_status since update_column might not refresh the object)
     render json: {
-      id: @image.id,
-      type: params[:image_type],
-      pinned: new_pin_status,
-      dom_id: ContentImage.wrap(@image).dom_id
+      id:        @image.id,
+      type:      params[:image_type],
+      dom_id:    ContentImage.wrap(@image).dom_id,
+      pinned:    new_pin_status,
+      preset:    result.preset,
+      active:    result.active,
+      cover_for: result.cover_for
     }
   end
 

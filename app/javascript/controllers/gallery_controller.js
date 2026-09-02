@@ -36,10 +36,13 @@ export default class extends Controller {
     this.refreshBandwidth()
     this.onWindowPaste = this.onWindowPaste.bind(this)
     window.addEventListener("paste", this.onWindowPaste)
+    this.onDocumentClick = this.onDocumentClick.bind(this)
+    document.addEventListener("click", this.onDocumentClick)
   }
 
   disconnect() {
     window.removeEventListener("paste", this.onWindowPaste)
+    document.removeEventListener("click", this.onDocumentClick)
     if (this.sortable) {
       try { this.sortable.sortable("destroy") } catch (e) { /* already gone */ }
       this.sortable = null
@@ -160,6 +163,67 @@ export default class extends Controller {
     card.querySelector("[data-gallery-target='coverLabel']").textContent = isCover ? "Cover" : "Set as cover"
 
     this.refreshCoverSummary()
+    this.announceCoverChange()
+  }
+
+  // Close any open "use only for" menus when clicking elsewhere.
+  onDocumentClick(event) {
+    document.querySelectorAll("details.gallery-cover-menu[open]").forEach((details) => {
+      if (!details.contains(event.target)) details.open = false
+    })
+  }
+
+  // Cover for one shape only (banner / card / square ...).
+  toggleCoverFor(event) {
+    const item = event.currentTarget || event.target
+    const card = this.cardFor(event)
+    const preset = item.dataset.preset
+    const label = item.dataset.label || preset
+    const details = item.closest("details")
+    if (details) details.open = false
+    if (!card || !preset || card.dataset.busy) return
+    card.dataset.busy = "role"
+
+    const wasActive = this.rolesOf(card).includes(preset)
+    const url = card.dataset.pinUrl + (card.dataset.pinUrl.includes("?") ? "&" : "?") + "preset=" + encodeURIComponent(preset)
+
+    this.request(url, "POST")
+      .then((data) => {
+        this.applyCoverRoles(card, data.cover_for || [])
+        if (data.active) {
+          this.cardTargets.forEach((other) => {
+            if (other !== card) this.applyCoverRoles(other, this.rolesOf(other).filter((role) => role !== preset))
+          })
+        }
+        this.toast(data.active ? `This image is now the ${label.toLowerCase()} cover` : `${label} cover removed`, "success")
+      })
+      .catch((error) => {
+        this.applyCoverRoles(card, wasActive ? this.rolesOf(card) : this.rolesOf(card).filter((role) => role !== preset))
+        this.toast(error.message || "Couldn't update the cover", "error")
+      })
+      .finally(() => { delete card.dataset.busy })
+  }
+
+  rolesOf(card) {
+    try { return JSON.parse(card.dataset.coverFor || "[]") } catch (e) { return [] }
+  }
+
+  applyCoverRoles(card, roles) {
+    card.dataset.coverFor = JSON.stringify(roles)
+    card.querySelectorAll("[data-gallery-target='roleChip']").forEach((chip) => {
+      chip.classList.toggle("hidden", !roles.includes(chip.dataset.preset))
+    })
+    card.querySelectorAll("[data-action*='toggleCoverFor']").forEach((item) => {
+      const active = roles.includes(item.dataset.preset)
+      item.setAttribute("aria-checked", active ? "true" : "false")
+      const check = item.querySelector("[data-role-check]")
+      if (check) check.classList.toggle("invisible", !active)
+    })
+    this.announceCoverChange()
+  }
+
+  announceCoverChange() {
+    window.dispatchEvent(new CustomEvent("gallery:covers-changed"))
   }
 
   refreshCoverSummary() {
@@ -335,6 +399,7 @@ export default class extends Controller {
   refreshCard(card, image) {
     if (!card || !image) return
     if (typeof image.pinned === "boolean") this.applyCoverState(card, image.pinned)
+    if (Array.isArray(image.cover_for)) this.applyCoverRoles(card, image.cover_for)
     if (image.privacy) this.applyPrivacyState(card, image.privacy)
     const notes = card.querySelector("[data-gallery-target='notes']")
     if (notes && typeof image.notes === "string" && notes.value !== image.notes) {

@@ -14,24 +14,31 @@ class ImageDerivativeService
     new(record).generate!
   end
 
-  def self.variant_for(commission, preset)
-    new(commission).variant_for(preset)
+  # One-off backfill: crop derivatives plus the xlarge WebP that uploads made
+  # before the gallery editor never had.
+  def self.backfill!(record)
+    new(record).generate!(styles: ImageUpload::FRAMED_STYLES + [:xlarge])
+  end
+
+  def self.variant_for(commission, preset, small: false)
+    new(commission).variant_for(preset, small: small)
   end
 
   def initialize(record)
     @record = record
   end
 
-  def generate!
+  def generate!(styles: ImageUpload::FRAMED_STYLES)
     case @record
-    when ImageUpload        then generate_upload_styles!
+    when ImageUpload        then generate_upload_styles!(styles)
     when BasilCommission    then prewarm_variants!
     else false
     end
   end
 
-  # ActiveStorage variant for +preset+, cropped to the record's framing.
-  def variant_for(preset)
+  # ActiveStorage variant for +preset+, cropped to the record's framing and
+  # encoded as WebP. +small+ picks the preset's reduced size when it has one.
+  def variant_for(preset, small: false)
     preset = ImagePresets[preset]
     return nil if preset.nil? || !@record.image.attached? || !@record.image.variable?
 
@@ -41,14 +48,16 @@ class ImageDerivativeService
       x, y, w, h = pixels
       transformations[:crop] = vips? ? [x, y, w, h] : "#{w}x#{h}+#{x}+#{y}"
     end
-    transformations[:resize_to_fill] = preset.size
+    transformations[:resize_to_fill] = (small && preset.small_size) || preset.size
+    transformations[:format] = :webp
+    transformations[:saver]  = { quality: 82 }
 
     @record.image.variant(transformations)
   end
 
   private
 
-  def generate_upload_styles!
+  def generate_upload_styles!(styles)
     return false unless @record.src_file_name.present?
 
     attachment = @record.src
@@ -59,7 +68,7 @@ class ImageDerivativeService
     attachment.options[:filename_cleaner] = ->(filename) { filename }
 
     begin
-      attachment.reprocess!(*ImagePresets.keys)
+      attachment.reprocess!(*styles)
     ensure
       attachment.options[:filename_cleaner] = original_cleaner
     end

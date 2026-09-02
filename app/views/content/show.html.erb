@@ -3,11 +3,8 @@
   page_description ||= @content.description
   page_description ||= "#{@content.name} is a fictional #{@content.class.name.downcase} on Notebook.ai"
 
-  set_meta_tags title:       @content.name,
-                description: page_description.truncate(160),
-                image_src:   content_social_image_url(@content),
-                og:          { type: 'website' },
-                twitter:     { card: 'photo', image: content_social_image_url(@content) }
+  set_meta_tags({ title:       @content.name,
+                  description: page_description.truncate(160) }.merge(content_social_meta(@content)))
 %>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pt-10"

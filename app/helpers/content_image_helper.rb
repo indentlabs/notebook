@@ -10,11 +10,18 @@
 # at all, the content type's placeholder header is rendered.
 module ContentImageHelper
   # Sizes to serve when a preset derivative has not been generated yet.
-  FALLBACK_SIZE = { banner: :hero, card: :large, square: :medium }.freeze
+  FALLBACK_SIZE = { banner: :hero, card: :large, square: :medium, social: :hero }.freeze
 
-  def content_image_tag(content, preset, include_private: false, pick: :first, **options)
+  # Options:
+  #   include_private: show private uploads (owner / collaborator views)
+  #   pick:            :first or :random when no cover is chosen
+  #   size:            :full (default) or :small for boxes of about 100 px or
+  #                    less, where the preset has a reduced derivative
+  #   sizes:           the HTML sizes attribute for the banner's srcset
+  #                    (default "100vw")
+  def content_image_tag(content, preset, include_private: false, pick: :first, size: :full, sizes: nil, **options)
     preset = preset.to_sym
-    image  = content.respond_to?(:cover_image) ? content.cover_image(include_private: include_private, pick: pick) : nil
+    image  = content.respond_to?(:cover_image) ? content.cover_image(include_private: include_private, pick: pick, preset: preset) : nil
 
     if image.nil?
       options[:alt] ||= "#{content.try(:name)} placeholder image".strip
@@ -23,25 +30,49 @@ module ContentImageHelper
 
     options[:alt] ||= image.notes.presence || "#{content.try(:name)} #{preset}".strip
     options[:loading] = 'lazy' unless options.key?(:loading) || preset == :banner
+    options[:decoding] ||= 'async'
 
-    src = image.preset_url(preset)
-    if src.nil?
+    src = image.preset_url(preset, size: size)
+    if src
+      dimensions = image.preset_dimensions(preset, size: size)
+      options[:width]  ||= dimensions[0]
+      options[:height] ||= dimensions[1]
+
+      small_url = size.to_sym == :full ? image.preset_url(preset, size: :small) : nil
+      if small_url && small_url != src
+        small_dimensions = image.preset_dimensions(preset, size: :small)
+        options[:srcset] ||= "#{small_url} #{small_dimensions[0]}w, #{src} #{dimensions[0]}w"
+        options[:sizes]  ||= sizes || (preset == :banner ? '100vw' : "#{dimensions[0]}px")
+      end
+    else
       src = image.url(FALLBACK_SIZE.fetch(preset, :large)) || image.original_url
       options[:style] = [options[:style], "object-position: #{image.object_position}"].compact.join('; ')
     end
 
-    return image_tag(content_placeholder_image(content), options.except(:style)) if src.nil?
+    return image_tag(content_placeholder_image(content), options.except(:style, :width, :height, :srcset, :sizes)) if src.nil?
 
     image_tag(src, options)
   end
 
-  # Absolute URL for social previews (Open Graph / Twitter). Uses the card
-  # framing at its full output size; falls back to the placeholder.
+  # Absolute URL for social previews (Open Graph / Twitter): the 1200x630
+  # link-preview framing, else the card, else a general size, else the
+  # placeholder.
   def content_social_image_url(content)
-    image = content.respond_to?(:cover_image) ? content.cover_image(include_private: false) : nil
-    url = image && (image.preset_url(:card) || image.url(:hero) || image.original_url)
+    image = content.respond_to?(:cover_image) ? content.cover_image(include_private: false, preset: :social) : nil
+    url = image && (image.preset_url(:social) || image.preset_url(:card) || image.url(:hero) || image.original_url)
     url ||= content_placeholder_image(content)
     image_url(url)
+  end
+
+  # Meta-tags options for a page's social preview. Merge into set_meta_tags.
+  def content_social_meta(content)
+    url = content_social_image_url(content)
+    size = ImagePresets[:social].size
+    {
+      image_src: url,
+      og:        { type: 'website', image: { _: url, width: size[0], height: size[1] } },
+      twitter:   { card: 'summary_large_image', image: url }
+    }
   end
 
   def content_placeholder_image(content)

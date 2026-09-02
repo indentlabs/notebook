@@ -20,7 +20,8 @@ class ContentImage
     small:  [190, 190],
     medium: [300, 300],
     large:  [600, 600],
-    hero:   [800, 800]
+    hero:   [800, 800],
+    xlarge: [1600, 1600]
   }.freeze
 
   attr_reader :record
@@ -98,6 +99,15 @@ class ContentImage
     record.pinned == true
   end
   alias cover? pinned?
+
+  # Shapes this image is the specific cover for (ImagePresets keys).
+  def cover_for
+    record.respond_to?(:cover_for) ? record.cover_for : []
+  end
+
+  def cover_for?(preset)
+    cover_for.include?(preset.to_s)
+  end
 
   def notes
     record.notes
@@ -188,7 +198,9 @@ class ContentImage
     else
       limit = SIZE_LIMITS[size.to_sym]
       if limit && record.image.variable?
-        rails_representation_path(record.image.variant(resize_to_limit: limit), only_path: true)
+        transformations = { resize_to_limit: limit }
+        transformations.merge!(format: :webp, saver: { quality: 85 }) if size.to_sym == :xlarge
+        rails_representation_path(record.image.variant(transformations), only_path: true)
       else
         original_url
       end
@@ -198,18 +210,29 @@ class ContentImage
   # URL of the derivative cut to the writer's framing for +preset+ (see
   # ImagePresets), or nil when it has not been generated yet. Callers fall
   # back to url(:hero) plus object_position in that case.
-  def preset_url(preset)
+  def preset_url(preset, size: :full)
     return nil unless attached? && ImagePresets.valid?(preset)
+
+    definition = ImagePresets[preset]
+    small = size.to_sym == :small && definition.small_size.present?
 
     if upload?
       return nil if record.crops_generated_at.nil?
 
-      url = record.src(preset.to_sym).to_s
+      url = record.src(small ? definition.small_style : definition.key).to_s
       url.include?('missing.png') ? nil : url
     else
-      variant = ImageDerivativeService.variant_for(record, preset)
+      variant = ImageDerivativeService.variant_for(record, preset, small: small)
       variant ? rails_representation_path(variant, only_path: true) : nil
     end
+  end
+
+  # Pixel size of the derivative preset_url returns for these arguments.
+  def preset_dimensions(preset, size: :full)
+    definition = ImagePresets[preset]
+    return nil if definition.nil?
+
+    (size.to_sym == :small && definition.small_size) || definition.size
   end
 
   def original_url
@@ -255,6 +278,7 @@ class ContentImage
       type:       type_param,
       dom_id:     dom_id,
       pinned:     pinned?,
+      cover_for:  cover_for,
       notes:      notes,
       position:   position,
       privacy:    privacy,
@@ -268,6 +292,7 @@ class ContentImage
         thumb:    url(:thumb),
         medium:   url(:medium),
         large:    url(:large),
+        xlarge:   url(:xlarge),
         original: original_url
       },
       preset_urls: ImagePresets.keys.index_with { |key| preset_url(key) }
