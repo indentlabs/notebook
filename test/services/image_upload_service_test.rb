@@ -46,6 +46,20 @@ class ImageUploadServiceTest < ActiveSupport::TestCase
     assert_equal 500, @user.reload.upload_bandwidth_kb
   end
 
+  test "converts HEIC uploads to JPEG before storing them" do
+    # The local ImageMagick can read but not write HEIC, so a PNG posing as
+    # HEIC exercises the conversion path.
+    heic = Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files/gallery_test.png'), 'image/heic', false, original_filename: 'IMG_0001.HEIC')
+
+    result = ImageUploadService.upload(user: @user, content: @character, file: heic)
+
+    assert result.success?, result.error
+    assert_equal 'image/jpeg', result.image.src_content_type
+    assert_equal 'JPEG', `identify -format %m #{result.image.src.path(:original)}`.strip
+  ensure
+    result&.image&.destroy
+  end
+
   test "fails cleanly when no file is given" do
     result = ImageUploadService.upload(user: @user, content: @character, file: nil)
 

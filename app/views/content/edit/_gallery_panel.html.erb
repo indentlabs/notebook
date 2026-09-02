@@ -93,16 +93,36 @@
       <i class="material-icons text-4xl text-blue-500">cloud_upload</i>
       <div>
         <p class="text-sm font-medium text-gray-900 dark:text-white">Drop images here, paste from your clipboard, or</p>
-        <button type="button"
-                class="mt-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                data-action="gallery#pickFiles">
-          <i class="material-icons text-sm mr-2">add_photo_alternate</i>
-          Choose images
-        </button>
+        <div class="mt-2 flex flex-wrap items-center justify-center gap-2">
+          <button type="button"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  data-action="gallery#pickFiles">
+            <i class="material-icons text-sm mr-2">add_photo_alternate</i>
+            Choose images
+          </button>
+          <button type="button"
+                  class="gallery-touch-only items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  data-action="gallery#takePhoto">
+            <i class="material-icons text-sm mr-2">photo_camera</i>
+            Take a photo
+          </button>
+        </div>
       </div>
-      <p class="text-xs text-gray-500 dark:text-gray-400">JPG, PNG, GIF or WebP. You can select several at once; each one appears in the gallery as soon as it finishes uploading.</p>
-      <input type="file" accept="image/*" multiple class="hidden" tabindex="-1" aria-hidden="true"
+      <p class="text-xs text-gray-500 dark:text-gray-400">JPG, PNG, GIF, WebP or HEIC (iPhone photos are converted automatically). Select several at once; each one appears in the gallery as soon as it finishes uploading.</p>
+      <label class="inline-flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer max-w-md text-left">
+        <input type="checkbox" class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+               data-gallery-target="shrinkToggle"
+               data-action="change->gallery#rememberShrink">
+        <span>
+          <span class="font-medium text-gray-700 dark:text-gray-200">Shrink large photos before uploading.</span>
+          Photos wider than 2500 px are resized in your browser first, which saves upload bandwidth and keeps plenty of detail for banners.
+        </span>
+      </label>
+      <input type="file" accept="image/*,.heic,.heif" multiple class="hidden" tabindex="-1" aria-hidden="true"
              data-gallery-target="fileInput"
+             data-action="change->gallery#filesChosen">
+      <input type="file" accept="image/*" capture="environment" class="hidden" tabindex="-1" aria-hidden="true"
+             data-gallery-target="cameraInput"
              data-action="change->gallery#filesChosen">
     </div>
 

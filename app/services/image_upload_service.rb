@@ -23,8 +23,20 @@ class ImageUploadService
     @privacy = %w[public private].include?(privacy.to_s) ? privacy.to_s : 'public'
   end
 
+  # Browsers cannot display HEIC/HEIF (what iPhones shoot), so those are
+  # converted to JPEG before storage; every derivative is cut from the JPEG.
+  HEIC_TYPES      = %w[image/heic image/heif image/heic-sequence image/heif-sequence].freeze
+  HEIC_EXTENSIONS = %w[.heic .heif .hif].freeze
+
   def call
     return Result.new(error: 'No file was sent.') if @file.blank?
+
+    if heic?(@file)
+      converted = convert_heic_to_jpeg(@file)
+      return Result.new(error: "#{filename} couldn't be converted from HEIC. Try exporting it as JPEG first.", charged_kb: 0) if converted.nil?
+
+      @file = converted
+    end
 
     size_kb = file_size_kb
 
@@ -62,6 +74,29 @@ class ImageUploadService
   end
 
   private
+
+  def heic?(file)
+    type = file.try(:content_type).to_s.downcase
+    name = file.try(:original_filename).to_s.downcase
+    HEIC_TYPES.include?(type) || HEIC_EXTENSIONS.any? { |ext| name.end_with?(ext) }
+  end
+
+  def convert_heic_to_jpeg(file)
+    source_path = file.respond_to?(:tempfile) ? file.tempfile.path : file.path
+    image = MiniMagick::Image.open(source_path)
+    image.format('jpg')
+    image.auto_orient
+
+    basename = File.basename(file.try(:original_filename).to_s, '.*').presence || 'photo'
+    ActionDispatch::Http::UploadedFile.new(
+      tempfile: File.open(image.path, 'rb'),
+      filename: "#{basename}.jpg",
+      type:     'image/jpeg'
+    )
+  rescue MiniMagick::Error, MiniMagick::Invalid, Errno::ENOENT => e
+    Rails.logger.warn("HEIC conversion failed for #{file.try(:original_filename)}: #{e.class}: #{e.message}")
+    nil
+  end
 
   def filename
     ERB::Util.html_escape(@file.try(:original_filename).presence || 'Your image')

@@ -12,7 +12,7 @@ import { Controller } from "stimulus"
 export default class extends Controller {
   static targets = [
     "grid", "card", "count", "empty", "hint", "coverSummary",
-    "dropzone", "fileInput", "queue", "bandwidth", "bandwidthBar",
+    "dropzone", "fileInput", "cameraInput", "shrinkToggle", "queue", "bandwidth", "bandwidthBar",
     "media", "thumb", "coverChip", "coverButton", "coverLabel",
     "privacyButton", "privacyIcon", "privacyLabel",
     "notes", "notesStatus", "actions", "deleteConfirm", "dimensions"
@@ -38,6 +38,7 @@ export default class extends Controller {
     window.addEventListener("paste", this.onWindowPaste)
     this.onDocumentClick = this.onDocumentClick.bind(this)
     document.addEventListener("click", this.onDocumentClick)
+    this.restoreShrinkPreference()
   }
 
   disconnect() {
@@ -433,6 +434,25 @@ export default class extends Controller {
     if (this.hasFileInputTarget) this.fileInputTarget.click()
   }
 
+  takePhoto(event) {
+    event.preventDefault()
+    if (this.hasCameraInputTarget) this.cameraInputTarget.click()
+  }
+
+  // Shrink-before-upload preference (off by default, remembered per browser).
+  restoreShrinkPreference() {
+    if (!this.hasShrinkToggleTarget) return
+    try { this.shrinkToggleTarget.checked = window.localStorage.getItem("gallery.shrinkUploads") === "1" } catch (e) { /* storage blocked */ }
+  }
+
+  rememberShrink(event) {
+    try { window.localStorage.setItem("gallery.shrinkUploads", event.target.checked ? "1" : "0") } catch (e) { /* storage blocked */ }
+  }
+
+  get shrinkEnabled() {
+    return this.hasShrinkToggleTarget && this.shrinkToggleTarget.checked
+  }
+
   filesChosen(event) {
     this.enqueueFiles(event.target.files)
     event.target.value = ""
@@ -504,7 +524,8 @@ export default class extends Controller {
   }
 
   uploadFile(file, row) {
-    if (!file.type.startsWith("image/")) {
+    const looksLikeImage = file.type.startsWith("image/") || /\.(heic|heif|hif)$/i.test(file.name)
+    if (!looksLikeImage) {
       this.failRow(row, `${file.name} isn't an image file.`, false)
       this.drainQueue()
       return
@@ -520,7 +541,50 @@ export default class extends Controller {
     this.sendFile(file, row)
   }
 
+  // Resizes big JPEG/PNG/WebP photos in the browser when the writer asked
+  // for it. Resolves to the original file when shrinking is off, not
+  // worthwhile, or unsupported (GIF animations, HEIC, old browsers).
+  async prepareFile(file, row) {
+    const shrinkable = ["image/jpeg", "image/png", "image/webp"].includes(file.type)
+    if (!this.shrinkEnabled || !shrinkable || file.size < 400 * 1000 || typeof createImageBitmap !== "function") return file
+
+    const status = row.querySelector(".gallery-upload__status")
+    try {
+      const bitmap = await createImageBitmap(file)
+      const longest = Math.max(bitmap.width, bitmap.height)
+      const MAX = 2500
+      if (longest <= MAX && file.size < 2 * 1000 * 1000) { bitmap.close(); return file }
+
+      const scale = Math.min(1, MAX / longest)
+      const canvas = document.createElement("canvas")
+      canvas.width = Math.round(bitmap.width * scale)
+      canvas.height = Math.round(bitmap.height * scale)
+      canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+      bitmap.close()
+
+      const outputType = file.type === "image/png" ? "image/png" : "image/jpeg"
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, outputType, 0.85))
+      if (!blob || blob.size >= file.size) return file
+
+      const name = file.name.replace(/\.[^.]+$/, "") + (outputType === "image/png" ? ".png" : ".jpg")
+      const shrunk = new File([blob], name, { type: outputType, lastModified: file.lastModified })
+      if (status) status.textContent = `Shrunk from ${this.humanSize(file.size)} to ${this.humanSize(shrunk.size)}`
+      row.dataset.shrunkFrom = file.size
+      return shrunk
+    } catch (e) {
+      return file
+    }
+  }
+
   sendFile(file, row) {
+    this.uploading += 1
+    this.prepareFile(file, row).then((prepared) => {
+      this.uploading -= 1
+      this.transmit(prepared, row, file)
+    })
+  }
+
+  transmit(file, row, originalFile) {
     const form = new FormData()
     form.append("content_type", this.contentTypeValue)
     form.append("content_id", this.contentIdValue)
@@ -551,7 +615,9 @@ export default class extends Controller {
         bar.style.width = "100%"
         this.insertCard(data.html)
         if (typeof data.remaining_kb === "number") this.setRemainingKb(data.remaining_kb)
-        status.textContent = "Added to gallery"
+        status.textContent = row.dataset.shrunkFrom
+          ? `Added to gallery (shrunk from ${this.humanSize(parseInt(row.dataset.shrunkFrom, 10))} to ${this.humanSize(file.size)})`
+          : "Added to gallery"
         row.dataset.state = "done"
         setTimeout(() => {
           row.remove()
@@ -560,14 +626,14 @@ export default class extends Controller {
         this.toast(`${file.name} uploaded`, "success")
       } else {
         if (typeof data.remaining_kb === "number") this.setRemainingKb(data.remaining_kb)
-        this.failRow(row, data.error || `Couldn't upload ${file.name} (HTTP ${xhr.status}).`, true, file)
+        this.failRow(row, data.error || `Couldn't upload ${file.name} (HTTP ${xhr.status}).`, true, originalFile || file)
       }
     })
 
     xhr.addEventListener("error", () => {
       this.uploading -= 1
       setTimeout(() => this.drainQueue(), 0)
-      this.failRow(row, `Couldn't upload ${file.name}. Check your connection and try again.`, true, file)
+      this.failRow(row, `Couldn't upload ${file.name}. Check your connection and try again.`, true, originalFile || file)
     })
 
     xhr.open("POST", this.uploadUrlValue)
