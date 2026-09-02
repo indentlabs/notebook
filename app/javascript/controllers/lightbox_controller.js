@@ -12,18 +12,54 @@ export default class extends Controller {
   static values = { pageName: String }
 
   connect() {
-    // Fixed positioning must escape the page's transformed wrappers.
+    // Fixed positioning must escape the page's transformed wrappers. Moving
+    // the dialog out of this controller's scope also drops any data-action
+    // bindings on it, so its events are wired by hand below.
     if (this.hasModalTarget && this.modalTarget.parentElement !== document.body) {
       this.modalHome = this.modalTarget
       document.body.appendChild(this.modalTarget)
     }
     this.index = -1
     this.opened = false
+
+    this.onModalClick = this.onModalClick.bind(this)
+    this.onKeydown = this.keydown.bind(this)
+    this.onPointerDown = this.pointerDown.bind(this)
+    this.onPointerUp = this.pointerUp.bind(this)
+    this.modal.addEventListener("click", this.onModalClick)
+    document.addEventListener("keydown", this.onKeydown)
+    const stage = this.part("stage")
+    stage.addEventListener("pointerdown", this.onPointerDown)
+    stage.addEventListener("pointerup", this.onPointerUp)
+    stage.addEventListener("pointercancel", this.onPointerUp)
   }
 
   disconnect() {
     if (this.opened) this.close()
+    document.removeEventListener("keydown", this.onKeydown)
+    if (this.modal) {
+      this.modal.removeEventListener("click", this.onModalClick)
+      const stage = this.part("stage")
+      if (stage) {
+        stage.removeEventListener("pointerdown", this.onPointerDown)
+        stage.removeEventListener("pointerup", this.onPointerUp)
+        stage.removeEventListener("pointercancel", this.onPointerUp)
+      }
+    }
     if (this.modalHome && this.modalHome.parentElement === document.body) this.modalHome.remove()
+  }
+
+  onModalClick(event) {
+    const control = event.target.closest("[data-lightbox-action]")
+    if (control) {
+      event.preventDefault()
+      const action = control.dataset.lightboxAction
+      if (action === "close") this.close()
+      if (action === "previous") this.previous(event)
+      if (action === "next") this.next(event)
+      return
+    }
+    this.backdrop(event)
   }
 
   // The modal lives on <body>, so target lookups must not rely on scope.

@@ -273,6 +273,8 @@ export default class extends Controller {
     button.title = isPublic
       ? "Visible to anyone who can see this page. Click to make it private."
       : "Only you and collaborators can see this image. Click to make it public."
+    button.setAttribute("aria-label", isPublic ? "Image is public. Make it private." : "Image is private. Make it public.")
+    button.setAttribute("aria-pressed", isPublic ? "false" : "true")
     card.querySelector("[data-gallery-target='privacyIcon']").textContent = isPublic ? "public" : "lock"
     card.querySelector("[data-gallery-target='privacyLabel']").textContent = isPublic ? "Public" : "Private"
   }
@@ -820,6 +822,7 @@ export default class extends Controller {
     }
     const note = document.createElement("div")
     note.className = "fixed bottom-4 right-4 px-4 py-2 rounded-md text-white z-50 " + (type === "success" ? "bg-green-500" : "bg-red-500")
+    note.setAttribute("role", "status")
     note.textContent = message
     document.body.appendChild(note)
     setTimeout(() => note.remove(), 3000)

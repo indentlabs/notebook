@@ -330,6 +330,7 @@ function initializeToasts() {
     }
     
     toast.textContent = message;
+    toast.setAttribute('role', 'status');
     document.body.appendChild(toast);
     
     // Show toast

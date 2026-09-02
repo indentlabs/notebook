@@ -19,7 +19,7 @@ export default class extends Controller {
     "focalLayer", "focalDot", "cropControls", "zoom", "gridToggle", "help",
     "preview", "previewTitle", "previewBadge", "usage",
     "notes", "privacyRow", "privacy", "facts", "downloadLink",
-    "status", "saveButton"
+    "status", "saveButton", "announcer", "shortcuts"
   ]
 
   static values = { presets: Array, pageName: String, pageType: String }
@@ -288,6 +288,8 @@ export default class extends Controller {
         this.selectPresetKey(firstPreset)
         this.renderAllPreviews()
         this.applying = false
+        const activeTab = this.shapeTabTargets.find((tab) => tab.dataset.preset === firstPreset)
+        if (activeTab) activeTab.focus()
       },
       crop: () => {
         if (this.applying || !this.currentPreset || this.currentPreset === "focal") return
@@ -344,6 +346,7 @@ export default class extends Controller {
     this.shapeTabTargets.forEach((tab) => {
       const active = tab.dataset.preset === key
       tab.setAttribute("aria-selected", active ? "true" : "false")
+      tab.setAttribute("tabindex", active ? "0" : "-1")
       tab.classList.toggle("ring-2", active)
       tab.classList.toggle("ring-blue-500", active)
       tab.classList.toggle("border-blue-500", active)
@@ -365,7 +368,54 @@ export default class extends Controller {
     this.applying = false
     this.refreshShapeStates()
     this.helpTarget.textContent = `Drag the box to choose what shows in the ${preset.label.toLowerCase()} (${preset.ratio_label || this.ratioLabel(preset)}). Drag a corner to zoom in or out, or use the slider. Arrow keys nudge.`
+    this.announce(`${preset.label} shape, ${this.custom[key] ? "custom" : "automatic"} framing`)
     this.schedulePreview(key)
+  }
+
+  announce(text) {
+    if (!this.hasAnnouncerTarget) return
+    this.announcerTarget.textContent = ""
+    setTimeout(() => { this.announcerTarget.textContent = text }, 30)
+  }
+
+  toggleShortcuts(event) {
+    if (event) event.preventDefault()
+    if (!this.hasShortcutsTarget) return
+    const showing = this.shortcutsTarget.classList.toggle("hidden")
+    if (!showing) this.shortcutsTarget.querySelector("button").focus()
+  }
+
+  // Left/Right/Home/End move between shape tabs when a tab has focus.
+  tablistKeydown(event) {
+    const tabs = this.shapeTabTargets
+    const index = tabs.indexOf(document.activeElement)
+    if (index === -1) return
+    let target = null
+    if (event.key === "ArrowRight") target = tabs[(index + 1) % tabs.length]
+    if (event.key === "ArrowLeft") target = tabs[(index - 1 + tabs.length) % tabs.length]
+    if (event.key === "Home") target = tabs[0]
+    if (event.key === "End") target = tabs[tabs.length - 1]
+    if (!target) return
+    event.preventDefault()
+    event.stopPropagation()
+    target.focus()
+    this.selectPresetKey(target.dataset.preset)
+  }
+
+  // Keep Tab inside the dialog while it is open.
+  trapFocus(event) {
+    const focusable = Array.from(this.element.querySelectorAll("a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex='0']"))
+      .filter((el) => el.offsetParent !== null && !el.closest(".hidden"))
+    if (focusable.length === 0) return
+    const first = focusable[0]
+    const last = focusable[focusable.length - 1]
+    if (event.shiftKey && (document.activeElement === first || !this.element.contains(document.activeElement))) {
+      event.preventDefault()
+      last.focus()
+    } else if (!event.shiftKey && (document.activeElement === last || !this.element.contains(document.activeElement))) {
+      event.preventDefault()
+      first.focus()
+    }
   }
 
   refreshShapeStates() {
@@ -374,15 +424,17 @@ export default class extends Controller {
       const state = tab.querySelector("[data-image-editor-target='shapeState']")
       if (!state) return
       const isCustom = !!this.custom[key]
+      const wasCustom = state.textContent.trim() === "custom"
+      if (isCustom !== wasCustom && this.presetMap[key]) this.announce(`${this.presetMap[key].label}: ${isCustom ? "custom framing" : "automatic framing"}`)
       state.textContent = isCustom ? "custom" : "auto"
       state.classList.toggle("bg-blue-100", isCustom)
-      state.classList.toggle("text-blue-700", isCustom)
+      state.classList.toggle("text-blue-800", isCustom)
       state.classList.toggle("dark:bg-blue-900", isCustom)
-      state.classList.toggle("dark:text-blue-200", isCustom)
-      state.classList.toggle("bg-gray-100", !isCustom)
-      state.classList.toggle("text-gray-500", !isCustom)
+      state.classList.toggle("dark:text-blue-100", isCustom)
+      state.classList.toggle("bg-gray-200", !isCustom)
+      state.classList.toggle("text-gray-700", !isCustom)
       state.classList.toggle("dark:bg-gray-700", !isCustom)
-      state.classList.toggle("dark:text-gray-300", !isCustom)
+      state.classList.toggle("dark:text-gray-200", !isCustom)
     })
   }
 
@@ -519,11 +571,14 @@ export default class extends Controller {
     const tag = (event.target.tagName || "").toLowerCase()
     const typing = tag === "textarea" || tag === "input" || tag === "select"
 
+    if (event.key === "Tab") { this.trapFocus(event); return }
     if (event.key === "Escape") {
       event.preventDefault()
+      if (this.hasShortcutsTarget && !this.shortcutsTarget.classList.contains("hidden")) { this.toggleShortcuts(); return }
       this.close()
       return
     }
+    if (event.key === "?" && !typing) { event.preventDefault(); this.toggleShortcuts(); return }
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault()
       this.save()
@@ -571,6 +626,7 @@ export default class extends Controller {
     this.focalLayerTarget.classList.remove("hidden")
     this.positionFocalDot()
     this.helpTarget.textContent = "Drag the dot to the most important part of the image. Wherever the image is shown without its own crop, this point stays in view."
+    this.announce("Focal point mode. Use the arrow keys to move the point.")
   }
 
   exitFocalMode() {
@@ -591,7 +647,7 @@ export default class extends Controller {
   focalPointerDown(event) {
     event.preventDefault()
     this.focalDragging = true
-    this.focalLayerTarget.setPointerCapture(event.pointerId)
+    try { this.focalLayerTarget.setPointerCapture(event.pointerId) } catch (e) { /* noop */ }
     this.focalFromPointer(event)
   }
 
