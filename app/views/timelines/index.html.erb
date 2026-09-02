@@ -389,10 +389,7 @@
               >
                 <%= link_to edit_timeline_path(timeline), class: "block" do %>
                   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
-                    <%
-                      timeline_image = timeline.random_image_including_private(format: :medium) || asset_path("card-headers/timelines.jpg")
-                    %>
-                    <%= image_tag timeline_image, class: 'h-48 w-full object-cover' %>
+                    <%= content_image_tag timeline, :card, include_private: true, pick: :random, class: 'h-48 w-full object-cover' %>
                     <div class="p-4">
                       <div class="flex items-start justify-between">
                         <div class="flex-1 min-w-0 pr-8">
@@ -454,10 +451,7 @@
               >
                 <%= link_to edit_timeline_path(timeline), class: "flex items-center p-4 space-x-4 pr-16" do %>
                   <div class="flex-shrink-0">
-                    <%
-                      timeline_image = timeline.random_image_including_private(format: :small) || asset_path("card-headers/timelines.jpg")
-                    %>
-                    <%= image_tag timeline_image, class: 'w-16 h-16 rounded-lg object-cover' %>
+                    <%= content_image_tag timeline, :square, include_private: true, pick: :random, size: :small, class: 'w-16 h-16 rounded-lg object-cover' %>
                   </div>
                   <div class="flex-1 min-w-0">
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate" title="<%= timeline.name %>"><%= timeline.name %></h3>

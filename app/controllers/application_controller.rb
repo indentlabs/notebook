@@ -282,4 +282,43 @@ class ApplicationController < ActionController::Base
       @linkables_cache[page_type] = @linkables_raw[page_type].map { |page| [page.name, page.id] }
     end
   end
+
+  # Preloads everything cover_image / content_image_tag need for a list of
+  # pages (possibly of mixed types) so rendering a page of cards costs a fixed
+  # number of queries instead of two per card.
+  def preload_cover_images(records)
+    records = Array(records).compact.select { |record| record.class.include?(HasImageUploads) }
+    return if records.empty?
+
+    records.group_by(&:class).each_value do |group|
+      klass = group.first.class
+
+      # Generic rows from User#content: look the galleries up by page_type + id.
+      if klass == ContentPage
+        keys = group.map { |page| [page.page_type, page.id] }
+        uploads = ImageUpload.where(content_type: keys.map(&:first).uniq, content_id: keys.map(&:last).uniq)
+                             .group_by { |upload| [upload.content_type, upload.content_id] }
+        commissions = BasilCommission.where(entity_type: keys.map(&:first).uniq, entity_id: keys.map(&:last).uniq)
+                                     .where.not(saved_at: nil).includes(image_attachment: :blob)
+                                     .group_by { |commission| [commission.entity_type, commission.entity_id] }
+        group.each { |page| page.preload_gallery(uploads.fetch([page.page_type, page.id], []), commissions.fetch([page.page_type, page.id], [])) }
+        next
+      end
+
+      has_uploads = klass.reflect_on_association(:image_uploads).present?
+      has_basil   = klass.reflect_on_association(:basil_commissions).present?
+
+      # Records that came out of a cache can carry stale, already-loaded
+      # associations, which the preloader would otherwise leave alone.
+      group.each do |record|
+        record.association(:image_uploads).reset if has_uploads
+        record.association(:basil_commissions).reset if has_basil
+      end
+
+      ActiveRecord::Associations::Preloader.new.preload(group, :image_uploads) if has_uploads
+      ActiveRecord::Associations::Preloader.new.preload(group, { basil_commissions: { image_attachment: :blob } }) if has_basil
+    end
+  end
+  helper_method :preload_cover_images
+
 end

@@ -1,5 +1,10 @@
 require 'active_support/concern'
 
+# Gives a page its gallery (uploaded images plus saved Basil images) and one
+# way to ask which image represents it: cover_image / cover_image_url.
+#
+# Views should render through ContentImageHelper#content_image_tag; the URL
+# form exists for JSON, meta tags, hidden fields and mailers.
 module HasImageUploads
   extend ActiveSupport::Concern
 
@@ -9,207 +14,11 @@ module HasImageUploads
     # todo: dependent: :destroy_async
     # todo: destroy from s3 on destroy
 
-    def primary_image
-      # self.image_uploads.find_by(primary: true) || self.image_uploads.first
-      self.image_uploads.first.presence || [header_asset_for(self.class.name)]
-    end
-
-    def extract_image_url(upload, format = :medium)
-      return nil unless upload
-      
-      # Fast Paperclip check: ensure an underlying file is recorded in the DB
-      # before asking for a URL, dodging the default 'missing.png' return.
-      if upload.respond_to?(:src_file_name) && upload.src_file_name.blank?
-        return nil
-      end
-
-      # Future-proofing for upcoming ActiveStorage transition
-      if upload.respond_to?(:upload) && upload.upload.respond_to?(:attached?) && !upload.upload.attached?
-        return nil
-      end
-
-      url = upload.try(:src, format).to_s
-      return nil if url.blank? || url.include?('missing.png')
-      url
-    end
-
-    def public_image_uploads
-      uploads = if image_uploads.loaded?
-        image_uploads.select { |upload| upload.privacy == 'public' }
-      else
-        self.image_uploads.where(privacy: 'public')
-      end
-      uploads.presence || [header_asset_for(self.class.name)]
-    end
-
-    def private_image_uploads
-      self.image.uploads.where(privacy: 'private').presence || [header_asset_for(self.class.name)]
-    end
-
-    def random_image_including_private(format: :medium)
-      @random_image_including_private_cache ||= {}
-      key = self.class.name + self.id.to_s
-      return @random_image_including_private_cache[key] if @random_image_including_private_cache.key?(key)
-
-      # First check for pinned images (prioritize pinned images over random ones)
-      result = pinned_image_upload(format)
-      
-      # If no pinned image, fall back to random selection
-      if result.nil?
-        result = extract_image_url(image_uploads.sample, format)
-        
-        # If we don't have any uploaded images, we look for saved Basil commissions
-        if result.nil? && respond_to?(:basil_commissions)
-          basil_image = if basil_commissions.loaded?
-            basil_commissions.select { |commission| commission.saved_at.present? }.sample.try(:image)
-          else
-            basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
-          end
-          # Handle Active Storage attachments properly
-          if basil_image.present? && basil_image.respond_to?(:url)
-            begin
-              result = basil_image.url
-            rescue
-              result = nil
-            end
-          end
-        end
-      end
-
-      # Cache the result (only cache non-nil results to avoid issues)
-      @random_image_including_private_cache[key] = result if result.present?
-
-      # Finally, if we have no valid image URL, return the default image for this type
-      result.presence || header_asset_for(self.class.name)
-    end
-
-    def first_public_image(format = :medium)
-      # First check for pinned public images
-      pinned = pinned_public_image(format: format)
-      return pinned if pinned.present?
-      
-      # Fall back to first public image
-      extract_image_url(public_image_uploads.first, format).presence || header_asset_for(self.class.name)
-    end
-
-    def random_public_image(format = :medium)
-      # First check for pinned public images
-      pinned = pinned_public_image(format: format)
-      return pinned if pinned.present?
-      
-      # Fall back to random public image
-      extract_image_url(public_image_uploads.sample, format).presence || header_asset_for(self.class.name)
-    end
-
-    def custom_public_thumbnail_url(format: :medium)
-      url = first_public_image(format)
-      fallback_url = header_asset_for(self.class.name)
-      url == fallback_url ? nil : url
-    end
-    
-    # Returns the pinned image upload (or nil if none pinned)
-    def pinned_image_upload(format = :medium)
-      # First check standard image uploads
-      pinned_upload = if image_uploads.loaded?
-        image_uploads.select(&:pinned?).min_by(&:id)
-      else
-        image_uploads.pinned.first
-      end
-      if pinned_upload.present?
-        url = extract_image_url(pinned_upload, format)
-        return url if url.present?
-      end
-
-      # Then check basil commissions
-      if respond_to?(:basil_commissions)
-        pinned_commission = if basil_commissions.loaded?
-          basil_commissions.select { |commission| commission.pinned? && commission.saved_at.present? }.min_by(&:id)
-        else
-          basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
-        end
-        if pinned_commission.present?
-          basil_image = pinned_commission.try(:image)
-          # Handle Active Storage attachments properly
-          if basil_image.present? && basil_image.respond_to?(:url)
-            begin
-              return basil_image.url
-            rescue
-              return nil
-            end
-          end
-        end
-      end
-      
-      nil
-    end
-    
-    # Returns the pinned public image (or nil if none pinned)
-    def pinned_public_image(format = :medium)
-      pinned_upload = if image_uploads.loaded?
-        image_uploads.select { |upload| upload.pinned? && upload.privacy == 'public' }.min_by(&:id)
-      else
-        image_uploads.pinned.where(privacy: 'public').first
-      end
-      if pinned_upload.present?
-        url = extract_image_url(pinned_upload, format)
-        return url if url.present?
-      end
-
-      if respond_to?(:basil_commissions)
-        pinned_commission = if basil_commissions.loaded?
-          basil_commissions.select { |commission| commission.pinned? && commission.saved_at.present? }.min_by(&:id)
-        else
-          basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
-        end
-        if pinned_commission.present?
-          basil_image = pinned_commission.try(:image)
-          # Handle Active Storage attachments properly
-          if basil_image.present? && basil_image.respond_to?(:url)
-            begin
-              return basil_image.url
-            rescue
-              return nil
-            end
-          end
-        end
-      end
-      
-      nil
-    end
-
-    def pinned_or_random_image_including_private(format: :medium)
-      # First check for pinned images
-      pinned = pinned_image_upload(format)
-      return pinned if pinned.present?
-
-      # If no pinned image, fall back to random selection
-      random_image_including_private(format: format)
-    end
-
-    # Returns a custom user image (pinned, uploaded, or basil generated)
-    # but explicitly returns nil instead of the generic header placeholder.
-    # Useful for UI elements that should fallback to an icon instead of a generic header image.
-    def custom_thumbnail_url(format: :medium)
-      url = pinned_or_random_image_including_private(format: format)
-      url == header_asset_for(self.class.name) ? nil : url
-    end
-
-    def header_asset_for(class_name)
-      "card-headers/#{class_name.downcase.pluralize}.webp"
-    end
-
-    # The image that represents this page, as a ContentImage (or nil when
-    # there are no usable images). Used by content_image_tag.
-    #
-    #   include_private: whether private uploads may be used (owner/collaborator views)
-    #   pick:            :first (stable) or :random when nothing is pinned
-    #
-    # A pinned image always wins. Uploads are preferred over Basil images,
-    # matching the older *_image URL helpers.
-    # The image that represents this page.
+    # The image that represents this page, as a ContentImage, or nil.
     #
     # Resolution order: an image chosen for +preset+ specifically (cover_for),
     # then the pinned image, then the first (or a random) image with a file.
+    # Private uploads are only considered when include_private is true.
     def cover_image(include_private: false, pick: :first, preset: nil)
       @cover_image_cache ||= {}
       preset = preset.to_s if preset.present? && ImagePresets.valid?(preset)
@@ -217,15 +26,16 @@ module HasImageUploads
       key = [include_private, pick, preset]
       return @cover_image_cache[key] if @cover_image_cache.key?(key)
 
-      uploads = image_uploads.loaded? ? image_uploads.to_a : image_uploads.to_a
+      uploads = image_uploads.to_a
       uploads = uploads.select { |upload| upload.privacy == 'public' } unless include_private
       uploads = uploads.select { |upload| upload.src_file_name.present? }
 
       basil = if respond_to?(:basil_commissions)
-        if basil_commissions.loaded?
-          basil_commissions.select { |commission| commission.saved_at.present? }
+        source = basil_commissions
+        if source.respond_to?(:loaded?) && !source.loaded?
+          source.where.not(saved_at: nil).includes(image_attachment: :blob).to_a
         else
-          basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).to_a
+          source.to_a.select { |commission| commission.saved_at.present? }
         end
       else
         []
@@ -254,10 +64,38 @@ module HasImageUploads
       @cover_image_cache[key] = chosen ? ContentImage.wrap(chosen) : nil
     end
 
+    def cover_image?(include_private: false)
+      cover_image(include_private: include_private).present?
+    end
+
+    # URL of the cover for +preset+ (see ImagePresets), for places that need a
+    # string rather than an <img> tag. Returns the type's placeholder asset
+    # path when there is no image, or nil when fallback is false.
+    def cover_image_url(preset = :card, include_private: false, pick: :first, size: :full, fallback: true)
+      image = cover_image(include_private: include_private, pick: pick, preset: preset)
+      url = image && (
+        image.preset_url(preset, size: size) ||
+        image.url(ImagePresets.fallback_size(preset)) ||
+        image.original_url
+      )
+      return url if url.present?
+
+      fallback ? ActionController::Base.helpers.asset_path(header_asset_for(self.class.name)) : nil
+    end
+
     def clear_cover_image_cache
       @cover_image_cache = nil
-      image_uploads.reset if image_uploads.loaded?
-      basil_commissions.reset if respond_to?(:basil_commissions) && basil_commissions.loaded?
+      uploads = image_uploads
+      uploads.reset if uploads.respond_to?(:loaded?) && uploads.loaded?
+      if respond_to?(:basil_commissions)
+        commissions = basil_commissions
+        commissions.reset if commissions.respond_to?(:loaded?) && commissions.loaded?
+      end
+    end
+
+    # The generic header image for a content type, as an asset name.
+    def header_asset_for(class_name)
+      "card-headers/#{class_name.downcase.pluralize}.webp"
     end
   end
 end

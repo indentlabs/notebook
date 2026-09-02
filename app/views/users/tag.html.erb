@@ -168,25 +168,7 @@
                     
                     <!-- Card Image -->
                     <div class="relative h-48 overflow-hidden">
-                      <% 
-                        # Find image for content
-                        content_image = @random_image_including_private_pool_cache.fetch([content.class.name, content.id], [])
-                          .sample
-                          .try(:src, :medium)
-
-                        if @saved_basil_commissions
-                          content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
-                            .sample
-                            .try(:image)
-                            .try(:url)
-                        end
-
-                        content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.jpg")
-                      %>
-                      
-                      <div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300" 
-                           style="background-image: url('<%= content_image %>');">
-                      </div>
+                      <%= content_image_tag content, :card, pick: :random, class: 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' %>
                       
                       <!-- Content Title -->
                       <div class="absolute bottom-4 left-4 right-4">

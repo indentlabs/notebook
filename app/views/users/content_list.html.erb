@@ -161,34 +161,7 @@
               
               <!-- Card Image -->
               <div class="relative h-48 overflow-hidden">
-                <% 
-                  # Find image for content using the same logic as the original
-                  image_cache = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
-                  content_image = nil
-                  
-                  if image_cache.present?
-                    sample_image = image_cache.sample
-                    if sample_image && sample_image.respond_to?(:src_file_name) && sample_image.src_file_name.present?
-                      content_image = sample_image.src(:medium)
-                    end
-                  end
-                  
-                  if content_image.nil? && @saved_basil_commissions
-                    basil_cache = @saved_basil_commissions.fetch([content.page_type, content.id], [])
-                    if basil_cache.present?
-                      sample_commission = basil_cache.sample
-                      if sample_commission && sample_commission.image.attached?
-                        content_image = sample_commission.image.url
-                      end
-                    end
-                  end
-                  
-                  content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
-                %>
-                
-                <div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300" 
-                     style="background-image: url('<%= content_image %>');">
-                </div>
+                <%= content_image_tag content, :card, pick: :random, class: 'w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' %>
                 
                 <!-- Content Title -->
                 <div class="absolute bottom-4 left-4 right-4">
@@ -258,20 +231,7 @@
               
               <!-- Thumbnail -->
               <div class="flex-shrink-0">
-                <% 
-                  image_cache = @random_image_including_private_pool_cache.fetch([content.page_type, content.id], [])
-                  content_image = nil
-                  
-                  if image_cache.present?
-                    sample_image = image_cache.sample
-                    if sample_image && sample_image.respond_to?(:src_file_name) && sample_image.src_file_name.present?
-                      content_image = sample_image.src(:medium)
-                    end
-                  end
-                  
-                  content_image ||= asset_path("card-headers/#{content.page_type.downcase.pluralize}.jpg")
-                %>
-                <div class="w-16 h-16 bg-cover bg-center rounded-lg" style="background-image: url('<%= content_image %>');"></div>
+                <%= content_image_tag content, :square, pick: :random, size: :small, class: 'w-16 h-16 rounded-lg object-cover' %>
               </div>
               
               <!-- Content Info -->

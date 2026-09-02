@@ -1,26 +1,19 @@
 <%
-  set_meta_tags title:       @book.name,
-                description: @book.blurb.presence || @book.description.presence || "A book by #{@book.user.display_name}",
-                image_src:   image_url(@book.first_public_image),
-                og:          { type: 'book' },
-                twitter:     { card: 'photo', image: image_url(@book.first_public_image) }
+  book_meta = content_social_meta(@book)
+  book_meta[:og][:type] = 'book'
+  set_meta_tags({ title:       @book.name,
+                  description: @book.blurb.presence || @book.description.presence || "A book by #{@book.user.display_name}" }.merge(book_meta))
 
-  valid_cover = @book.image_uploads.find { |upload| upload.src_file_name.present? }
+  can_see_private = user_signed_in? && ContentImageAuthorization.can_manage?(current_user, @book)
 %>
 
 <div class="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
   
   <!-- Hero Section (Mirrors content/_hero_header.html.erb) -->
   <div class="relative h-64 md:h-80 lg:h-96 bg-gray-900 overflow-hidden">
-    <% if valid_cover.present? %>
-      <%= image_tag valid_cover.src(:large), 
-                    class: "w-full h-full object-cover",
-                    alt: "#{@book.name} banner image" %>
-    <% else %>
-      <%= image_tag "card-headers/books.webp", 
-                    class: "w-full h-full object-cover opacity-70",
-                    alt: "#{@book.name} banner image" %>
-    <% end %>
+    <%= content_image_tag @book, :banner, include_private: can_see_private,
+          class: "w-full h-full object-cover",
+          alt: "#{@book.name} banner image" %>
 
     <!-- Gradient overlay for legibility if needed, but we rely on the glass box -->
     <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>

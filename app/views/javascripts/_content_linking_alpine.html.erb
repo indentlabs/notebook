@@ -11,7 +11,7 @@
             value: '[[<%= class_name %>-<%= linkable.id %>]]',
             raw_value: '<%= class_name %>-<%= linkable.id %>',
             type: '<%= class_name %>',
-            imageUrl: '<%= linkable.primary_image %>',
+            imageUrl: '<%= linkable.respond_to?(:cover_image_url) ? linkable.cover_image_url(:square, include_private: true, size: :small) : asset_path("card-headers/#{class_name.downcase.pluralize}.webp") %>',
             color: '<%= linkable_class.color %>',
             icon: '<%= linkable_class.icon %>',
             textColor: '<%= linkable_class.text_color %>'

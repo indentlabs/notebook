@@ -16,6 +16,7 @@ class BasilController < ApplicationController
       end
 
       @content = @current_user_content.fetch(@content_type, []).sort_by(&:name)
+      preload_cover_images(@content)
     end
 
     @generated_images_count = current_user.basil_commissions.with_deleted.count

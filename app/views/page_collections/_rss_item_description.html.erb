@@ -11,9 +11,9 @@
   </div>
 
   <!-- Article image -->
-  <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+  <% if submission.content.respond_to?(:cover_image?) && submission.content.cover_image? %>
     <div style="margin-bottom: 16px; text-align: center;">
-      <%= image_tag submission.content.random_image_including_private, 
+      <%= image_tag submission.content.cover_image.url(:hero) || submission.content.cover_image.original_url, 
           style: "max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" %>
     </div>
   <% end %>

@@ -3,16 +3,10 @@
   <div class="p-6 space-y-6">
     
     <!-- Page Image Card -->
-    <% 
-      # Get the same preview image as the header
-      regular_images = raw_content.image_uploads.ordered.to_a
-      unless user_signed_in? && raw_content.user_id == current_user.id
-        regular_images = regular_images.select { |img| img.privacy == 'public' }
-      end
-      basil_images = raw_content.basil_commissions.where.not(saved_at: nil).ordered.to_a
-      preview_image = get_preview_image(regular_images, basil_images)
-
-      has_images = regular_images.any? || basil_images.any?
+    <%
+      # Same cover as the header; private images only for people who can edit
+      can_see_private = user_signed_in? && ContentImageAuthorization.can_manage?(current_user, raw_content)
+      has_images = raw_content.cover_image?(include_private: can_see_private)
       has_encyclopedia = raw_content.class.name == 'Universe'
     %>
     
@@ -25,30 +19,9 @@
                   class="block group w-full text-left" 
                   title="View full gallery">
             <div class="relative aspect-square rounded-xl overflow-hidden shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 group-hover:ring-2 group-hover:ring-blue-500 transition-all duration-200 bg-gray-100 dark:bg-gray-800">
-              <% if preview_image.present? %>
-                <% image_type = preview_image[:type] %>
-                <% image_data = preview_image[:data] %>
-                
-                <% if image_type == 'image_upload' %>
-                  <%= image_tag image_data.src.url, 
-                                class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                                alt: "#{content.name} preview" %>
-                <% elsif image_type == 'basil_commission' %>
-                  <% if image_data.image.attached? %>
-                    <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), 
-                                  class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                                  alt: "#{content.name} preview" %>
-                  <% else %>
-                    <%= image_tag asset_path("content/card-headers/#{raw_content.class.name.downcase.pluralize}.jpg"), 
-                                  class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                                  alt: "#{content.name} preview" %>
-                  <% end %>
-                <% end %>
-              <% else %>
-                <%= image_tag "card-headers/#{raw_content.class.name.downcase.pluralize}.jpg", 
-                              class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
-                              alt: "#{content.name} preview" %>
-              <% end %>
+              <%= content_image_tag raw_content, :square, include_private: can_see_private,
+                    class: "w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500",
+                    alt: "#{content.name} preview" %>
               
               <!-- Gradient Overlay -->
               <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity duration-300 pointer-events-none"></div>

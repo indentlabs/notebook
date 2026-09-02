@@ -2,7 +2,7 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
     <div class="md:col-span-1 space-y-6">
       <%= link_to @character do %>
-        <%= image_tag @character.random_image_including_private, class: "w-full rounded-xl shadow-md object-cover" %>
+        <%= content_image_tag @character, :card, include_private: true, class: "w-full rounded-xl shadow-md object-cover" %>
       <% end %>
 
       <div class="bg-white dark:bg-gray-800 shadow rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -33,7 +33,7 @@
     <div class="md:col-span-2 space-y-6">
       <%= form_tag export_character_path(@character.id), method: :post, target: '_blank', class: "space-y-6" do |f| %>
         <%= hidden_field_tag "name",   @character.name %>
-        <%= hidden_field_tag "avatar", @character.random_image_including_private %>
+        <%= hidden_field_tag "avatar", @character.cover_image_url(:square, include_private: true) %>
         <%# TODO background image/music/etc? %>
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">

@@ -26,13 +26,9 @@
           <div class="group/card flex-shrink-0 w-40 h-24 rounded-lg overflow-hidden linked-content-card relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <!-- Background Image -->
             <div class="absolute inset-0">
-              <% if entity.respond_to?(:pinned_or_random_image_including_private) %>
-                <% preview_image = entity.pinned_or_random_image_including_private(format: :medium) %>
-                <% if preview_image.present? && !preview_image.include?('card-headers') %>
-                  <img src="<%= preview_image %>" 
-                       alt="<%= entity.name %>" 
-                       class="w-full h-full object-cover"
-                       loading="lazy">
+              <% if entity.respond_to?(:cover_image) %>
+                <% if entity.cover_image(include_private: true).present? %>
+                  <%= content_image_tag entity, :card, include_private: true, alt: entity.name, class: 'w-full h-full object-cover' %>
                 <% else %>
                   <!-- Fallback Icon Background -->
                   <div class="w-full h-full image-placeholder bg-gray-100 dark:bg-gray-700 flex items-center justify-center">

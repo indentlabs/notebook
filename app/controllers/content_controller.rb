@@ -85,34 +85,8 @@ class ContentController < ApplicationController
       @questioned_content = @content.sample
       @attribute_field_to_question = SerendipitousService.question_for(@questioned_content)
 
-      # Query for both regular and pinned images - only for current page content
-      current_page_content_ids = @content.map(&:id)
-      image_uploads = ImageUpload.where(
-        content_type: @content_type_class.name,
-        content_id:   current_page_content_ids
-      )
-      
-      # Group by content but prioritize pinned images
-      @random_image_including_private_pool_cache = {}
-      image_uploads.group_by { |image| [image.content_type, image.content_id] }.each do |key, images|
-        # Check for pinned images first that have a valid src
-        pinned_image = images.find { |img| img.pinned }
-        if pinned_image && pinned_image.src_file_name.present?
-          @random_image_including_private_pool_cache[key] = [pinned_image]
-        else
-          # Use all valid images if no valid pinned image
-          @random_image_including_private_pool_cache[key] = images.select { |img| img.src_file_name.present? }
-        end
-      end
-
-      @saved_basil_commissions = BasilCommission.where(
-        entity_type: @content_type_class.name,
-        entity_id:   current_page_content_ids
-      ).where.not(saved_at: nil)
-      .group_by { |commission| [commission.entity_type, commission.entity_id] }
-    else
-      @random_image_including_private_pool_cache = {}
-      @saved_basil_commissions = {}
+      # One query per association for the page of cards (see content_image_tag)
+      preload_cover_images(@content)
     end
 
     # Uh, do we ever actually make JSON requests to logged-in user pages?
@@ -329,9 +303,6 @@ class ContentController < ApplicationController
       return redirect_to @content, notice: t(:no_do_permission)
     end
 
-    @random_image_including_private_pool_cache = ImageUpload.where(
-      user_id: current_user.id,
-    ).group_by { |image| [image.content_type, image.content_id] }
     @basil_images       = BasilCommission.where(entity: @content)
                                          .where.not(saved_at: nil)
 
@@ -674,10 +645,6 @@ class ContentController < ApplicationController
     result = ContentCoverService.toggle!(@image, preset: preset)
     new_pin_status = result.pinned
 
-    # Clear any cached images to ensure pinned images are shown
-    content.instance_variable_set(:@random_image_including_private_cache, nil)
-    content.instance_variable_set(:@pinned_public_image_cache, nil)
-    content.instance_variable_set(:@first_public_image_cache, nil)
     content.clear_cover_image_cache if content.respond_to?(:clear_cover_image_cache)
     
     # Return the updated status (use new_pin_status since update_column might not refresh the object)

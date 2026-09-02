@@ -43,12 +43,13 @@ xml.rss version: "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom", "xmlns:cont
         end
         
         # Add enclosure for article image if present
-        if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present?
+        # Feed readers get the legacy JPEG/PNG size rather than WebP
+        cover = submission.content.respond_to?(:cover_image) ? submission.content.cover_image : nil
+        enclosure_url = cover && (cover.url(:hero) || cover.original_url)
+        if enclosure_url.present?
           begin
-            if submission.content.random_image_including_private.respond_to?(:attached?) && submission.content.random_image_including_private.attached?
-              image_url = url_for(submission.content.random_image_including_private)
-              xml.enclosure url: image_url, type: "image/jpeg"
-            end
+            enclosure_url = URI.join(request.base_url, enclosure_url).to_s unless enclosure_url.start_with?('http')
+            xml.enclosure url: enclosure_url, type: enclosure_url.split('?').first.end_with?('.png') ? 'image/png' : 'image/jpeg'
           rescue => e
             # Skip if image URL generation fails
             Rails.logger.warn "RSS image enclosure failed: #{e.message}"

@@ -47,30 +47,13 @@ class PageCollection < ApplicationRecord
     accepted_submissions.editor_picks.order(:editor_pick_position).limit(6)
   end
 
-  def random_public_image
+  # The collection's own header: the cover_image URL column, else the
+  # uploaded header image, else the generic placeholder.
+  def header_image_url
     return cover_image if cover_image.present?
+    return header_image if header_image.attachment.present?
 
-    if header_image.attachment.present?
-      return header_image
-    end
-
-    # If all else fails, fall back on default header
     ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
-  end
-
-  def random_image_including_private(format)
-    return cover_image if cover_image.present?
-
-    if header_image.attachment.present?
-      return header_image
-    end
-
-    # If all else fails, fall back on default header
-    ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
-  end
-
-  def first_public_image
-    random_public_image
   end
 
   def name

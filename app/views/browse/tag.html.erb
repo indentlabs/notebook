@@ -194,20 +194,6 @@
         content_name = content.respond_to?(:name) ? content.name : content.title
         content_name = content_name.presence || 'Untitled'
 
-        # Find image for this content
-        content_image = @random_image_pool_cache.fetch([content.class.name, content.id], [])
-          .sample
-          .try(:src, :medium)
-
-        if @saved_basil_commissions
-          content_image ||= @saved_basil_commissions.fetch([content.class.name, content.id], [])
-            .sample
-            .try(:image)
-            .try(:url)
-        end
-
-        content_image ||= asset_path("card-headers/#{content.class.name.downcase.pluralize}.webp")
-
         # Get user
         user = @users_cache[content.user_id]
       %>
@@ -223,10 +209,9 @@
 
           <!-- Image with fallback styling -->
           <div class="relative overflow-hidden aspect-[3/4]">
-            <img src="<%= content_image %>"
-                 alt="<%= content_name %>"
-                 class="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
-                 loading="lazy">
+            <%= content_image_tag content, :square, pick: :random,
+                  alt: content_name,
+                  class: 'w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:rotate-1' %>
           </div>
 
           <!-- Content type badge (top-right) -->

@@ -17,11 +17,7 @@
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 dark:border-gray-700">
       <!-- Book Cover Area -->
       <div class="h-48 w-full relative bg-gray-100 dark:bg-gray-800">
-        <%
-          # custom_thumbnail_url returns nil if no images are uploaded, letting us use the view's asset_path natively for the fallback
-          cover_image = book.custom_thumbnail_url(format: :medium) || asset_path('card-headers/books.webp')
-        %>
-        <%= image_tag cover_image, class: 'absolute inset-0 w-full h-full object-cover' %>
+        <%= content_image_tag book, :card, include_private: true, class: 'absolute inset-0 w-full h-full object-cover' %>
         
         <!-- Dark gradient overlay for better icon/text visibility -->
         <div class="absolute inset-0 bg-black bg-opacity-10 opacity-0 group-hover:opacity-100 transition-opacity"></div>

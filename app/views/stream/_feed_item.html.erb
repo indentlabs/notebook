@@ -82,9 +82,9 @@
       <%= link_to share.content_page, class: 'block group' do %>
         <div class="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
           <div class="flex">
-            <% if share.content_page.respond_to?(:first_public_image) && share.content_page.first_public_image.present? %>
+            <% if share.content_page.respond_to?(:cover_image?) && share.content_page.cover_image? %>
               <div class="flex-shrink-0 w-32 h-24">
-                <%= image_tag share.content_page.first_public_image, class: 'w-full h-full object-cover' %>
+                <%= content_image_tag share.content_page, :card, class: 'w-full h-full object-cover' %>
               </div>
             <% end %>
             <% if share.content_page.class.respond_to?(:hex_color) %>

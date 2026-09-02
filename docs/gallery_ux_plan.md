@@ -1,11 +1,11 @@
 # Gallery management: UX & quality-of-life plan
 
-> **Status (2026-09-02):** Phases 1 through 4 are implemented on `tailwind-redesign`.
+> **Status (2026-09-02):** Phases 1 through 4 and the round-two items in section 7 are implemented on `tailwind-redesign`.
 > Decisions taken: random cover stays when nothing is pinned; Cropper.js drives the editor;
 > crops are generated on Paperclip now (behind `ImageDerivativeService`); no separate alt-text field, notes only.
 > After deploying, run `rake gallery:backfill_dimensions` then `rake gallery:backfill_crops` so
 > existing uploads get their banner/card/square derivatives (until then they render through the
-> focal-point fallback). Phase 5 items remain open.
+> focal-point fallback). Of the Phase 5 extras, undo-delete, bulk actions, replace-image and rotate remain open.
 
 Scope: the **Gallery** tab of `content#edit` (`app/views/content/edit/_gallery_panel.html.erb`, also rendered by `books/edit`), the endpoints behind it, and every place around the site that displays a page's image (banners, cards, thumbnails, social previews).
 

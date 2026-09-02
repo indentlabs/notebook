@@ -45,13 +45,9 @@
                   <!-- Full Background Image with Overlay Content -->
                   <div class="relative w-full h-full">
                     <!-- Background Image -->
-                    <% if entity.respond_to?(:pinned_or_random_image_including_private) %>
-                      <% preview_image = entity.pinned_or_random_image_including_private(format: :medium) %>
-                      <% if preview_image.present? && !preview_image.include?('card-headers') %>
-                        <img src="<%= preview_image %>" 
-                             alt="<%= entity_name %>" 
-                             class="w-full h-full object-cover"
-                             loading="lazy">
+                    <% if entity.respond_to?(:cover_image) %>
+                      <% if entity.cover_image(include_private: true).present? %>
+                        <%= content_image_tag entity, :card, include_private: true, alt: entity_name, class: 'w-full h-full object-cover' %>
                       <% else %>
                         <!-- Icon Placeholder Background -->
                         <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">

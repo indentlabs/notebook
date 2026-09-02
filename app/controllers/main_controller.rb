@@ -45,6 +45,7 @@ class MainController < ApplicationController
     # Check if user has any content for null state detection
     cache_current_user_content
     @user_has_content = @current_user_content.values.flatten.any?
+    preload_cover_images(@current_user_content.except('Universe').values.flatten)
     
     set_questionable_content # for questions
     generate_dashboard_analytics # for activity chart and streak
@@ -53,13 +54,11 @@ class MainController < ApplicationController
 
     # Eager load image uploads for dashboard sections that render visual cards
     if @most_edited_pages
-      pages_to_preload = @most_edited_pages.first(20).map { |page, _| page }.select { |p| p.respond_to?(:image_uploads) }
-      ActiveRecord::Associations::Preloader.new.preload(pages_to_preload, :image_uploads) if pages_to_preload.any?
+      preload_cover_images(@most_edited_pages.first(20).map { |page, _| page })
     end
 
     if @recently_edited_pages
-      pages_to_preload = @recently_edited_pages.first(7).select { |p| p.respond_to?(:image_uploads) }
-      ActiveRecord::Associations::Preloader.new.preload(pages_to_preload, :image_uploads) if pages_to_preload.any?
+      preload_cover_images(@recently_edited_pages.first(7))
     end
   end
 
@@ -203,7 +202,7 @@ class MainController < ApplicationController
         days_since_created: (Date.current - content_page.created_at.to_date).to_i,
         days_since_updated: (Date.current - content_page.updated_at.to_date).to_i,
         word_count: content_page.try(:cached_word_count) || 0,
-        has_image: content_page.respond_to?(:custom_thumbnail_url) && content_page.custom_thumbnail_url.present?
+        has_image: content_page.respond_to?(:cover_image?) && content_page.cover_image?(include_private: true)
       }
     end
     
@@ -221,6 +220,7 @@ class MainController < ApplicationController
     @per_page = params[:per_page]&.to_i || 24
     @total_pages = (@filtered_content.length.to_f / @per_page).ceil
     @paginated_content = @filtered_content.slice((@page - 1) * @per_page, @per_page) || []
+    preload_cover_images(@paginated_content.map { |item| item[:page] })
     
     # Eager load image uploads for only the items being rendered
     pages_to_preload = @paginated_content.map { |item| item[:page] }.select { |p| p.respond_to?(:image_uploads) }

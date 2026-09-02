@@ -1,30 +1,11 @@
 <div class="min-h-screen bg-gray-50 dark:bg-gray-900 pb-20">
   <!-- Hero Section -->
   <div class="relative w-full bg-gray-900 overflow-hidden" style="height: 32rem; min-height: 450px;">
-    <% 
-      regular_images = @universe.image_uploads.ordered.to_a
-      unless user_signed_in? && @universe.user_id == current_user.id
-        regular_images = regular_images.select { |img| img.privacy == 'public' }
-      end
-      basil_images = @universe.basil_commissions.where.not(saved_at: nil).ordered.to_a
-      preview_image = get_preview_image(regular_images, basil_images)
+    <%
       can_edit_universe = user_signed_in? && (current_user == @universe.user || Contributor.exists?(user_id: current_user.id, universe_id: @universe.id))
     %>
-    <% if preview_image.present? %>
-      <% image_type = preview_image[:type] %>
-      <% image_data = preview_image[:data] %>
-      <% if image_type == 'image_upload' %>
-        <%= image_tag image_data.src.url, class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
-      <% elsif image_type == 'basil_commission' %>
-        <% if image_data.image.attached? %>
-          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "absolute inset-0 w-full h-full object-cover" %>
-        <% else %>
-          <%= image_tag "card-headers/universes.webp", class: "absolute inset-0 w-full h-full object-cover" %>
-        <% end %>
-      <% end %>
-    <% else %>
-      <%= image_tag "card-headers/universes.webp", class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
-    <% end %>
+    <%= content_image_tag @universe, :banner, include_private: can_edit_universe,
+          class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
 
     <main class="absolute inset-0 pb-12 flex flex-col items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center drop-shadow-lg w-full">
       <div class="max-w-4xl w-full p-8 md:p-12 rounded-3xl bg-gray-900 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-white border-opacity-10 shadow-2xl">

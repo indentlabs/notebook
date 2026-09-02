@@ -103,6 +103,13 @@ module ImagePresets
     ALL.key?(key.to_s.to_sym)
   end
 
+  # Legacy Paperclip style to serve when a preset derivative does not exist yet.
+  FALLBACK_SIZES = { banner: :hero, card: :large, square: :medium, social: :hero }.freeze
+
+  def self.fallback_size(preset)
+    FALLBACK_SIZES.fetch(preset.to_s.to_sym, :large)
+  end
+
   # ImageMagick options shared by every WebP derivative.
   WEBP_CONVERT_OPTIONS = '-quality 82 -strip'.freeze
 

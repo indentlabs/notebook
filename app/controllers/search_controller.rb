@@ -63,6 +63,8 @@ class SearchController < ApplicationController
               .where("LOWER(#{name_column}) LIKE LOWER(?)", "%#{@query}%")
           end
 
+          matching_entities = matching_entities.to_a
+          preload_cover_images(matching_entities)
           matching_entities.each do |entity|
             # Create a virtual attribute-like object for the name match
             # Use the name method which returns title for Documents
@@ -171,6 +173,8 @@ class SearchController < ApplicationController
             .limit(5) # Limit per content type
             .select(*select_columns)
 
+          matching_entities = matching_entities.to_a
+          preload_cover_images(matching_entities)
           matching_entities.each do |entity|
             results << {
               id: entity.id,

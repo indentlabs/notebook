@@ -36,18 +36,8 @@ class UsersController < ApplicationController
       # rendering each card doesn't run its own attribute lookups
       content_type.preload_overview_field_values(@content_list.to_a)
 
-      # Only load public images for the content being displayed
-      content_ids = @content_list.map(&:id)
-      @random_image_including_private_pool_cache = ImageUpload
-        .where(user_id: @user.id, content_type: content_type.name, content_id: content_ids)
-        .where(privacy: 'public')
-        .group_by { |image| [image.content_type, image.content_id] }
-
-      # Optimized: Use content_ids we already have
-      @saved_basil_commissions = BasilCommission
-        .where(entity_type: content_type.name, entity_id: content_ids)
-        .where.not(saved_at: nil)
-        .group_by { |commission| [commission.entity_type, commission.entity_id] }
+      # Cards render through content_image_tag; preload what it needs
+      preload_cover_images(@content_list.to_a)
 
       render :content_list
     end
@@ -65,9 +55,6 @@ class UsersController < ApplicationController
                          .order(:name)
                          .paginate(page: params[:page], per_page: 20)
 
-    # Timeline doesn't use image_uploads or basil commissions like content pages
-    @random_image_including_private_pool_cache = {}
-    @saved_basil_commissions = {}
 
     render :content_list
   end
@@ -217,31 +204,9 @@ class UsersController < ApplicationController
       } if timelines.any?
     end
     
-    # Get images for content cards
-    @random_image_including_private_pool_cache = ImageUpload.where(
-      user_id: @user.id,
-    ).group_by { |image| [image.content_type, image.content_id] }
-    
-    # Collect all content IDs and types for fetching basil commissions
-    basil_entity_types = []
-    basil_entity_ids = []
+    # Cards render through content_image_tag; preload what it needs
+    preload_cover_images(@tagged_content.flat_map { |group| group[:content].to_a })
 
-    @tagged_content.each do |content_group|
-      content_group[:content].each do |content|
-        basil_entity_types << content.class.name
-        basil_entity_ids << content.id
-      end
-    end
-
-    # Initialize @saved_basil_commissions if there are any content items
-    if basil_entity_types.any?
-      @saved_basil_commissions = BasilCommission.where(
-        entity_type: basil_entity_types,
-        entity_id: basil_entity_ids
-      ).where.not(saved_at: nil)
-      .group_by { |commission| [commission.entity_type, commission.entity_id] }
-    end
-    
     @sidenav_expansion = 'community'
   end
 

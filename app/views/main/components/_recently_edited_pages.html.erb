@@ -6,8 +6,8 @@
         <div class="flex items-stretch">
           <!-- Content Type Icon or Image -->
           <div class="flex-shrink-0 w-20 flex">
-            <% if page.respond_to?(:custom_thumbnail_url) && page.custom_thumbnail_url.present? %>
-              <%= image_tag page.custom_thumbnail_url, class: "w-full h-full object-cover" %>
+            <% if page.respond_to?(:cover_image?) && page.cover_image?(include_private: true) %>
+              <%= content_image_tag page, :square, include_private: true, size: :small, class: "w-full h-full object-cover" %>
             <% else %>
               <div class="w-full h-full <%= page.color %> flex items-center justify-center">
                 <i class="material-icons text-white text-2xl"><%= page.icon %></i>

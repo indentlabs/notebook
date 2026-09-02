@@ -9,9 +9,6 @@
 # object-position that keeps the writer's focal point in view. With no image
 # at all, the content type's placeholder header is rendered.
 module ContentImageHelper
-  # Sizes to serve when a preset derivative has not been generated yet.
-  FALLBACK_SIZE = { banner: :hero, card: :large, square: :medium, social: :hero }.freeze
-
   # Options:
   #   include_private: show private uploads (owner / collaborator views)
   #   pick:            :first or :random when no cover is chosen
@@ -45,7 +42,7 @@ module ContentImageHelper
         options[:sizes]  ||= sizes || (preset == :banner ? '100vw' : "#{dimensions[0]}px")
       end
     else
-      src = image.url(FALLBACK_SIZE.fetch(preset, :large)) || image.original_url
+      src = image.url(ImagePresets.fallback_size(preset)) || image.original_url
       options[:style] = [options[:style], "object-position: #{image.object_position}"].compact.join('; ')
     end
 

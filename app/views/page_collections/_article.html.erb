@@ -36,14 +36,14 @@
         
         <!-- Article Image with Lazy Loading -->
         <div class="lg:w-80 h-48 lg:h-auto bg-gray-100 flex-shrink-0 relative overflow-hidden">
-          <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+          <% if submission.content.respond_to?(:cover_image?) && submission.content.cover_image? %>
             <!-- Skeleton loader placeholder -->
             <div class="article-image-skeleton absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse"></div>
-            <%= image_tag submission.content.random_image_including_private, 
+            <%= content_image_tag submission.content, :card,
                 class: "w-full h-full object-cover transition-opacity duration-300 opacity-0 lazy-image",
                 loading: "lazy",
-                data: { 
-                  src: submission.content.random_image_including_private,
+                data: {
+                  src: submission.content.cover_image_url(:card),
                   lightbox: "article-#{submission.id}"
                 } %>
           <% else %>
@@ -55,7 +55,7 @@
           <% end %>
           
           <!-- Image overlay for lightbox trigger -->
-          <% if submission.content.respond_to?(:random_image_including_private) && submission.content.random_image_including_private.present? %>
+          <% if submission.content.respond_to?(:cover_image?) && submission.content.cover_image? %>
             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
               <i class="material-icons text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-2xl">zoom_in</i>
             </div>
