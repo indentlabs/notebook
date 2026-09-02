@@ -242,3 +242,114 @@ Do this in two steps so the editor ships value immediately:
 | 6 | Phase 5 extras | as needed |
 
 Steps 1–2 are independent of the crop work and can go out as their own PRs. Step 4 before 3b means the site already renders from the focal point everywhere before real crops exist, so 3b only has to swap URLs.
+
+---
+
+## 7. Round two: polish and consolidation
+
+Eight follow-ups agreed after Phases 1–4 shipped, in the order that keeps each step cheap for the next one. Estimates assume one person; the whole list is 6–8 days, so a cut line after step 5 fits a 4-day budget and leaves the sweeps (7 and 8) for a later PR.
+
+| Step | Item | Effort |
+|------|------|--------|
+| 1 | Different cover per shape | 1 day |
+| 2 | Social preview shape | 0.5 day |
+| 3 | Smaller derivative files (WebP, srcset, one backfill pass) | 1 day |
+| 4 | Show-page gallery and lightbox | 1 day |
+| 5 | Mobile uploads (HEIC, camera, shrink before upload) | 0.5–1 day |
+| 6 | Accessibility and dark-mode pass on the editor | 0.5–1 day |
+| 7 | N+1 cleanup on list pages | 0.5–1 day |
+| 8 | Retire the old image helpers and partials | 1–1.5 days |
+
+### 7.1 Different cover per shape
+
+**Why.** A portrait is right for the square thumbnail and wrong for the 3:1 banner. One cover for every shape forces a compromise.
+
+**Model.** Store the choice on the image, not on the ~30 content tables: `cover_for json, default: []` on `image_uploads` and `basil_commissions` (declared with `attribute :cover_for, :json` like `crops`), holding preset keys such as `["banner"]`. The existing `pinned` flag stays the default for every shape. `HasImageUploads#cover_image(preset:)` resolves: image whose `cover_for` includes the preset → pinned image → current fallback (first / random). `ContentImage#cover_for` and `cover_for?(preset)` feed the JSON.
+
+**Endpoint.** Extend `POST /toggle_image_pin` with an optional `preset` param. With a preset it toggles that shape only and clears the same preset from every other image of the page (the same "unpin others" pattern already used for `pinned`). Authorisation unchanged.
+
+**UI.** The card's "Set as cover" button becomes a split button: main click = cover for everything; caret menu = "Banner only", "Card only", "Square only", "Link preview only". Chips on the image read "Cover", "Banner", "Thumbnail", "Card", "Preview". The editor header gets the same menu, and the editor's preview panel highlights which image is currently used for each shape ("Currently: this image" / "Currently: Amelia-2.jpg") so the choice is visible where the crop is made.
+
+**Files.** Migration; `has_image_framing.rb` (or a small `HasCoverRoles` concern); `has_image_uploads.rb`; `content_controller.rb#toggle_image_pin`; `content_image.rb`; `_card.html.erb`; `_editor.html.erb`; `gallery_controller.js`; `image_editor_controller.js`; `content_image_helper.rb`.
+
+**Tests.** Model resolution order (per-shape → pinned → fallback); controller toggle clears others per preset; helper renders the banner from image A and the square from image B.
+
+### 7.2 Social preview shape
+
+**Why.** Open Graph and Twitter crop to 1.91:1 at 1200×630; today they borrow the 3:2 card.
+
+**Change.** Add `social: ratio [1.91, 1] → use [40, 21], size [1200, 630], label "Link preview"` to `ImagePresets`. Because the editor, the Paperclip styles, the Cropper processor, the validation and the backfill all iterate `ImagePresets`, the new shape appears everywhere with only: the tab icon size in `_editor.html.erb`, a fourth preview mock (a link card with title and "notebook.ai"), and `content_social_image_url` switching to `preset_url(:social)` with the card as fallback. Emit `og:image:width`/`height` and switch `twitter:card` from the deprecated `photo` to `summary_large_image` in `content/show.html.erb` and `content/references.html.erb`.
+
+**Tests.** Preset present; helper prefers `/social/`; meta tags present on show.
+
+### 7.3 Smaller derivative files
+
+**Why.** Banners are the heaviest asset on the site; 48 px avatars are served from a 600 px square.
+
+**Changes.**
+- Shape styles (`banner`, `card`, `square`, `social`) and a new `xlarge 1600x1600>` (used by the lightbox and the editor instead of the original) get `format: :webp` and `convert_options: '-quality 82 -strip'`. Basil variants pass `format: :webp, saver: { quality: 82 }`.
+- Add `banner_sm 750x250#` and `square_sm 200x200#`; `content_image_tag` emits `srcset`/`sizes` for the banner and picks `square_sm` when the rendered box is ≤ 96 px (a `size: :small` option on the helper), plus `width`/`height` attributes from the preset to stop layout shift and `decoding="async"`.
+- Confirm S3 objects are written with a long `Cache-Control` (Paperclip `s3_headers`); the timestamp query string already busts caches on reprocess.
+- Backfill: change `gallery:backfill_crops` to reprocess **all** styles once (the originals are downloaded anyway), so legacy `thumb`/`medium`/`large` also become WebP. Run off-peak; it is one pass over every original in S3.
+- Production check before deploying: `convert -list format | grep -i webp` on the app image.
+
+**Tests.** Derivative content type is `image/webp`; `srcset` present on banner; `square_sm` chosen for small boxes; Basil variant transformation includes the format.
+
+### 7.4 Show-page gallery and lightbox
+
+**Why.** `content/show/_gallery_content.html.erb` still serves originals through inline `onclick` handlers and a modal without navigation.
+
+**Change.** Re-render the grid from `ContentImage.gallery_for(content, viewer:)` (privacy-aware, same order as the editor) with `url(:large)`, lazy loading, notes as a hover caption, and the cover chip. New Stimulus `lightbox_controller.js`: opens on click or Enter, previous/next by arrows, buttons and touch swipe, Escape closes, focus is trapped and returned, `aria-modal` and a live "3 of 8" counter. It shows `xlarge` (from 7.3) with the notes as caption, a download link, and for editors an "Edit framing" link to `edit#gallery/upload-<id>`. Neighbours are preloaded. Delete the global `openImageModal`/`closeImageModal` and the `.gallery-grid` CSS block in `_dynamic_content.html.erb`, moving it to `gallery.scss`.
+
+**Tests.** Controller test that show renders `/large/` and no `/original/` in the grid; privacy filtering for a stranger.
+
+### 7.5 Mobile uploads
+
+**Why.** iPhones upload HEIC, and the local ImageMagick reads it (`convert -list format` lists HEIC and AVIF here; confirm on the production image).
+
+**Changes.**
+- Server: every Paperclip style already re-encodes (7.3 makes them WebP), so HEIC originals get browser-readable derivatives. The editor and lightbox load `xlarge`, never the original, so HEIC never has to render in a browser. `validates_attachment_content_type` already accepts `image/heic`.
+- Client: `accept="image/*,.heic,.heif"`, a "Take a photo" button on touch devices (`capture="environment"` input), and the "Shrink large images before uploading" toggle: `createImageBitmap` → resize to 2500 px → JPEG 0.85, off by default, skipped for GIF/HEIC (canvas cannot decode HEIC outside Safari). Show the estimated saving next to the toggle ("about 4.2 MB → 900 KB").
+- Queue rows and the drop-zone prompt tighten on narrow screens (single column, larger tap targets).
+
+**Tests.** Service accepts a HEIC fixture (skipped when the host ImageMagick lacks HEIC); controller returns a card for it.
+
+### 7.6 Accessibility and dark-mode pass on the editor
+
+**Checklist.**
+- Focus trap inside the modal, initial focus on the active shape tab, focus returned on close (partly done: return only).
+- Tabs use `role="tablist"` with arrow-key navigation between shapes; `aria-selected` already set.
+- Shape state changes ("Banner: custom") announced through a visually hidden `aria-live` region; the footer status already is.
+- Privacy button `aria-label` reflects the current state instead of the static "Toggle image privacy".
+- A "?" shortcut that opens a keyboard-help sheet listing the existing shortcuts.
+- Cropper handles enlarged to 20 px on touch devices; the focal dot gets a visible focus ring and is reachable by Tab (arrow keys already move it).
+- Toasts get `role="status"`; card fades respect `prefers-reduced-motion`.
+- Dark mode: the site toggles a `dark` class from `localStorage.dark_mode_enabled`, so the Playwright harness can set it and screenshot every editor state. Check stage background vs. crop overlay, preview mock contrast, chip colours, range slider and select styling under `dark:`.
+
+**Tests.** Extend the Playwright check with a dark-mode run; add an axe-core pass over the open editor (axe is loadable from `node_modules` in the harness) and fix what it reports.
+
+### 7.7 N+1 cleanup on list pages
+
+**Why.** `cover_image` loads `image_uploads` and `basil_commissions` per page unless they are preloaded. The content index builds its own `@random_image_including_private_pool_cache`, which the foldered index still reads, so those cards never got the focal point.
+
+**Changes.**
+- `ContentController#index`: replace the pool cache and `@saved_basil_commissions` with `includes(:image_uploads, basil_commissions: { image_attachment: :blob })` on `@content`; the two `_tailwind_foldered_index` branches use `content_image_tag(item, :card, include_private: true, pick: :random)`.
+- Same `includes` on: dashboard content library, `users#content` tab, `main#recent_content`, search results, page collections, universes content list, Basil index.
+- `ContentImage#url`/`preset_url` for Basil touch `image.blob`; with the attachment preloaded they are query-free. Memoise `variant_for` per instance.
+- Verify with the Bullet output already shown in development, plus a request test that loads a character index with 20 characters and asserts the query count stays flat (`assert_queries`-style helper around `ActiveSupport::Notifications`).
+
+### 7.8 Retire the old image helpers and partials
+
+**Scope (from a grep of the tree).** About 50 remaining call sites still use `random_image_including_private`, `first_public_image`, `pinned_or_random_image_including_private`, `custom_thumbnail_url`, `custom_public_thumbnail_url` or `get_preview_image`: page collections (views, model and the RSS builder), the stream partials, the dashboard components, books, conversation pages, `universes/content_list`, `_image_card_header`, `_secondary_sidebar`, `_parallax_universe_header`, the content panels, plus `content_page.rb`, `page_collection.rb`, `users_controller.rb`, `main_controller.rb` and `conversation_controller.rb`.
+
+**Steps.**
+1. Migrate every view call site to `content_image_tag` (or `cover_image(...)&.url(...)` where a URL is needed, and `content_social_image_url` in the RSS builder, which needs absolute URLs).
+2. Migrate the model/controller callers (`content_page.rb`, `page_collection.rb`, JSON in `users_controller.rb`) to `cover_image`.
+3. Delete from `HasImageUploads`: `primary_image`, `extract_image_url`, `public_image_uploads`, `private_image_uploads` (which calls a non-existent `self.image`), `random_image_including_private`, `first_public_image`, `random_public_image`, `pinned_image_upload`, `pinned_public_image`, `pinned_or_random_image_including_private`, `custom_thumbnail_url`, `custom_public_thumbnail_url`. Keep `header_asset_for`.
+4. Delete `ApplicationHelper#combine_and_sort_gallery_images` and `#get_preview_image` with their tests, the pool-cache code in `ContentController`, and the `instance_variable_set` cache clears in `toggle_image_pin`.
+5. Delete the dead partials `content/form/gallery/_panel.html.erb`, `content/form/images/_gallery.html.erb`, `content/form/_panel.html.erb` if nothing renders it, `app/assets/javascripts/image_uploads.js`, and the `.aspect-w-16` rules in `timeline_viewer.scss` if no other view uses them. Keep `content/form/images/_upload*.html.erb` for the no-JS fallback.
+6. Add a guard test that greps `app/` for the removed method names so they cannot creep back.
+
+**Order of work.** 7.1 first because it changes the cover API that 7.7 and 7.8 migrate everything onto. 7.2 and 7.3 together, since they share one backfill pass. 7.4 and 7.5 both rely on `xlarge` from 7.3. 7.6 once the editor UI has settled. 7.7 and 7.8 last as one sweep with the query-count test as the safety net.
+
+**Deploy notes for the round.** One migration (`cover_for`), one full reprocess pass over S3 originals (WebP plus the new styles), and a check that the production ImageMagick lists `WEBP` and `HEIC` formats.
