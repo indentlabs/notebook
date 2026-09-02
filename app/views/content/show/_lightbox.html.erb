@@ -1,0 +1,58 @@
+<%# Lightbox dialog for the public gallery. Driven by lightbox_controller.js; moved to <body> on connect. %>
+<div class="hidden fixed inset-0 z-60 bg-black bg-opacity-90 flex flex-col"
+     data-lightbox-target="modal"
+     role="dialog" aria-modal="true" aria-label="Image viewer"
+     data-action="keydown->lightbox#keydown">
+
+  <%# Top bar %>
+  <div class="flex items-center justify-between gap-3 px-4 py-3 text-white">
+    <div class="text-sm tabular-nums" aria-live="polite" data-lightbox-target="counter"></div>
+    <div class="flex items-center gap-1">
+      <a href="#" target="_blank" rel="noopener"
+         class="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white"
+         title="Open the original image" aria-label="Open the original image in a new tab"
+         data-lightbox-target="download">
+        <i class="material-icons">open_in_new</i>
+      </a>
+      <a href="#"
+         class="hidden inline-flex items-center px-3 h-10 rounded-md text-sm font-medium hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white"
+         title="Adjust how this image is framed" data-lightbox-target="edit">
+        <i class="material-icons text-base mr-1">crop</i> Edit framing
+      </a>
+      <button type="button"
+              class="inline-flex items-center justify-center w-10 h-10 rounded-md hover:bg-white hover:bg-opacity-10 focus:outline-none focus:ring-2 focus:ring-white"
+              data-action="lightbox#close" aria-label="Close" title="Close (Esc)">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+  </div>
+
+  <%# Stage %>
+  <div class="relative flex-1 min-h-0 flex items-center justify-center px-2 sm:px-16 select-none"
+       data-lightbox-target="stage"
+       data-action="click->lightbox#backdrop pointerdown->lightbox#pointerDown pointerup->lightbox#pointerUp pointercancel->lightbox#pointerUp">
+    <button type="button"
+            class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-12 h-12 rounded-full bg-black bg-opacity-40 text-white hover:bg-opacity-60 focus:outline-none focus:ring-2 focus:ring-white"
+            data-action="lightbox#previous" data-lightbox-target="previous" aria-label="Previous image" title="Previous (←)">
+      <i class="material-icons text-3xl">chevron_left</i>
+    </button>
+
+    <img class="max-w-full max-h-full object-contain rounded-md shadow-2xl" alt="" draggable="false"
+         data-lightbox-target="image">
+    <div class="absolute inset-0 hidden items-center justify-center text-white text-sm pointer-events-none" data-lightbox-target="loading">
+      <i class="material-icons animate-spin mr-2">autorenew</i> Loading…
+    </div>
+
+    <button type="button"
+            class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-12 h-12 rounded-full bg-black bg-opacity-40 text-white hover:bg-opacity-60 focus:outline-none focus:ring-2 focus:ring-white"
+            data-action="lightbox#next" data-lightbox-target="next" aria-label="Next image" title="Next (→)">
+      <i class="material-icons text-3xl">chevron_right</i>
+    </button>
+  </div>
+
+  <%# Caption %>
+  <div class="px-4 py-3 text-white text-sm flex items-start justify-between gap-4">
+    <p class="min-w-0 whitespace-pre-line" data-lightbox-target="caption"></p>
+    <span class="flex-shrink-0 text-xs text-gray-300" data-lightbox-target="source"></span>
+  </div>
+</div>
