@@ -1,4 +1,8 @@
 class BooksController < ApplicationController
+  # How many characters we pull from the database before privacy-filtering them
+  # for the book's sidebar (see #readable_book_characters).
+  CHARACTER_LOOKUP_LIMIT = 50
+
   before_action :authenticate_user!, except: [:show]
   before_action :set_book, except: [:index, :new, :create, :show]
   before_action :set_sidenav_expansion
@@ -23,6 +27,8 @@ class BooksController < ApplicationController
     @book_documents = @book.book_documents.includes(:document).order(position: :asc)
     @total_words = @book_documents.sum { |bd| bd.document&.word_count.to_i }
     @est_reading_time = (@total_words / 200.0).ceil
+
+    @characters, @characters_source = readable_book_characters
   end
 
   def new
@@ -160,5 +166,39 @@ class BooksController < ApplicationController
 
   def book_params
     params.require(:book).permit(:name, :subtitle, :description, :blurb, :status, :privacy, :universe_id, image_uploads_attributes: [:id, :src, :privacy, :_destroy])
+  end
+
+  # Characters to show alongside a book, filtered down to the ones the current
+  # viewer is allowed to see. Returns [characters, source], where source is
+  # :book when the characters were detected in the book's own chapters, or
+  # :universe when we fell back to everyone living in the book's universe.
+  def readable_book_characters
+    characters = characters_appearing_in_book
+    source = :book
+
+    if characters.empty? && @book.universe.present?
+      characters = @book.universe.characters.unarchived.order(:name).limit(CHARACTER_LOOKUP_LIMIT)
+      source = :universe
+    end
+
+    viewer = current_user || User.new
+    [characters.select { |character| viewer.can_read?(character) }, source]
+  end
+
+  # Characters that document analysis has linked to one of this book's chapters.
+  def characters_appearing_in_book
+    document_ids = @book_documents.map(&:document_id).compact
+    return [] if document_ids.empty?
+
+    character_ids = DocumentEntity
+      .joins(:document_analysis)
+      .where(document_analyses: { document_id: document_ids })
+      .where(entity_type: 'Character')
+      .where.not(entity_id: nil)
+      .distinct
+      .pluck(:entity_id)
+    return [] if character_ids.empty?
+
+    Character.unarchived.where(id: character_ids).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
   end
 end

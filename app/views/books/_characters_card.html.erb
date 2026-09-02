@@ -1,0 +1,64 @@
+<%#
+  Sidebar card listing the characters connected to a book.
+
+  Locals:
+    characters - already privacy-filtered array of Characters
+    source     - :book when the characters were detected in this book's chapters,
+                 :universe when they come from the book's universe
+%>
+<%
+  # Keep the sidebar scannable: list a handful and summarize the rest.
+  visible_characters = characters.first(12)
+  hidden_character_count = characters.size - visible_characters.size
+%>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex justify-between items-center">
+    <h3 class="text-sm font-semibold tracking-wider text-gray-700 dark:text-gray-300 uppercase flex items-center">
+      <i class="material-icons text-base mr-2 text-gray-400"><%= Character.icon %></i>
+      Characters
+    </h3>
+    <span class="text-xs font-medium text-gray-500 bg-white dark:bg-gray-700 px-2 py-1 rounded-md border border-gray-200 dark:border-gray-600">
+      <%= characters.size %>
+    </span>
+  </div>
+
+  <div class="divide-y divide-gray-100 dark:divide-gray-700">
+    <% visible_characters.each do |character| %>
+      <%= link_to polymorphic_path(character), class: "group flex items-center px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out" do %>
+        <% thumbnail = character.custom_public_thumbnail_url(format: :thumb) %>
+        <% if thumbnail.present? %>
+          <%= image_tag thumbnail,
+                        class: "w-9 h-9 rounded-lg object-cover flex-shrink-0 mr-3 ring-1 ring-gray-200 dark:ring-gray-600",
+                        alt: character.name %>
+        <% else %>
+          <div class="w-9 h-9 rounded-lg <%= Character.color %> flex items-center justify-center flex-shrink-0 mr-3 shadow-sm">
+            <i class="material-icons text-white text-lg"><%= Character.icon %></i>
+          </div>
+        <% end %>
+
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
+            <%= character.name %>
+          </p>
+          <% if character.role.present? %>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate"><%= character.role %></p>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <div class="px-5 py-3 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+    <p class="text-xs text-gray-500 dark:text-gray-400">
+      <% if hidden_character_count > 0 %>
+        <%= pluralize(hidden_character_count, 'more character') %> not shown &middot;
+      <% end %>
+      <% if source == :universe %>
+        From <%= link_to book.universe.name, universe_path(book.universe), class: "text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" %>
+      <% else %>
+        Appearing in this book
+      <% end %>
+    </p>
+  </div>
+</div>
