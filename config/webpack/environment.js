@@ -89,4 +89,26 @@ if (environment.plugins.getIndex('OptimizeCSSAssets') >= 0) {
   environment.plugins.delete('OptimizeCSSAssets')
 }
 
+// This file is shared by all three environments, so guard production-only tweaks
+// on NODE_ENV (config/webpack/production.js sets it before requiring us).
+if (process.env.NODE_ENV === 'production') {
+  // Webpacker defaults to `devtool: 'source-map'`, which appends a
+  // `//# sourceMappingURL=` comment to every shipped bundle. Nothing consumes those
+  // maps automatically (there is no browser-side Sentry SDK), but every visitor who
+  // opens devtools pulls down a multi-megabyte map. `hidden-source-map` still writes
+  // the maps into public/packs for manual debugging, just without the comment.
+  environment.config.merge({ devtool: 'hidden-source-map' })
+
+  // Webpacker gzips and brotlis `.map` files too, which is where most of the
+  // "asset size limit" warnings in the precompile output come from. Maps are never
+  // fetched with content-encoding negotiation, so drop them from both passes.
+  const COMPRESSED_TYPES = /\.(js|css|html|json|ico|svg|eot|otf|ttf)$/
+  const compressionPlugins = ['Compression', 'Compression Brotli']
+  compressionPlugins.forEach((name) => {
+    if (environment.plugins.getIndex(name) < 0) return
+    const plugin = environment.plugins.get(name)
+    if (plugin && plugin.options) plugin.options.test = COMPRESSED_TYPES
+  })
+}
+
 module.exports = environment
