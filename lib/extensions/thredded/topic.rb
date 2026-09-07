@@ -9,6 +9,7 @@ module Extensions
       included do
         after_create :create_content_page_share
         after_create :notify_discord
+        after_commit :notify_discord_of_approval, on: :update
         has_many     :content_page_shares, as: :content
 
         acts_as_paranoid
@@ -28,6 +29,18 @@ module Extensions
 
       def notify_discord
         NotifyDiscordOfThreadJob.set(wait: 1.minute).perform_later(self.id) if Rails.env.production?
+      end
+
+      # Threads held for moderation aren't announced on Discord when they're
+      # created (see NotifyDiscordOfThreadJob); announce them once a moderator
+      # approves them instead.
+      def notify_discord_of_approval
+        return unless saved_change_to_moderation_state?
+
+        previous_state, new_state = saved_change_to_moderation_state
+        return unless previous_state == 'pending_moderation' && new_state == 'approved'
+
+        NotifyDiscordOfThreadJob.perform_later(self.id, true) if Rails.env.production?
       end
 
       def create_content_page_share

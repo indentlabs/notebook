@@ -3,13 +3,20 @@ class NotifyDiscordOfThreadJob < ApplicationJob
 
   queue_as :low_priority
 
-  def perform(*args)
-    thread_id = args.shift
-    thread    = Thredded::Topic.find_by(id: thread_id)
-    raise "No thread found for new ID #{thread.id.inspect}" unless thread
-    return if thread.moderation_state == "blocked"
+  # from_moderation is true when this job was enqueued because a moderator
+  # approved a thread that was held for moderation (rather than at creation).
+  def perform(thread_id, from_moderation = false)
+    thread = Thredded::Topic.find_by(id: thread_id)
+    return if thread.nil? # deleted before the announcement went out
+    return unless thread.moderation_state == "approved"
+
+    # Threads that went through the moderation queue get announced by the
+    # approval-time enqueue; skip the creation-time enqueue so approving a
+    # thread within the 1-minute announcement delay can't announce it twice.
+    return if !from_moderation && went_through_moderation?(thread)
 
     webhook_url = ENV.fetch('DISCORD_FORUMS_WEBHOOK', '').freeze
+    return if webhook_url.blank?
 
     client = Discordrb::Webhooks::Client.new(url: webhook_url)
     client.execute do |builder|
@@ -22,6 +29,12 @@ class NotifyDiscordOfThreadJob < ApplicationJob
         embed.colour = 2201331
       end
     end
+  end
 
+  private
+
+  def went_through_moderation?(thread)
+    first_post = thread.first_post
+    first_post.present? && Thredded::PostModerationRecord.where(post_id: first_post.id).exists?
   end
 end
