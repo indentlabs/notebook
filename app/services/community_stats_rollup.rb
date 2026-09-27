@@ -81,6 +81,8 @@ class CommunityStatsRollup
   end
 
   # One row per (user, entity type) with the positive words written on `date`.
+  # (On Postgres, OFFSET 0 keeps the planner from inlining the subquery, which
+  # would run each previous-record probe twice: once for the filter, once for the sum.)
   def words_by_user_and_type
     WordCountUpdate.connection.select_all(WordCountUpdate.sanitize_sql_array([<<~SQL, { date: date }]))
       SELECT user_id, entity_type, SUM(delta) AS words
@@ -97,9 +99,14 @@ class CommunityStatsRollup
                ), 0) AS delta
         FROM word_count_updates w
         WHERE w.for_date = :date
+        #{postgres? ? 'OFFSET 0' : ''}
       ) deltas
       WHERE delta > 0
       GROUP BY user_id, entity_type
     SQL
+  end
+
+  def postgres?
+    WordCountUpdate.connection.adapter_name.downcase.include?('postg')
   end
 end
