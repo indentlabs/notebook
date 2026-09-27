@@ -13,7 +13,7 @@ class SubscriptionSyncTasksTest < ActiveSupport::TestCase
   def setup
     self.class.load_tasks_once
     Rake::Task['data_integrity:subscription_synced_with_stripe'].reenable
-    Rake::Task['incident:restore_mass_downgraded_premium'].reenable
+    Rake::Task['incident:restore_premium_from_stripe'].reenable
 
     @starter = create_plan(1, 'starter', 0)
     create_plan(2, 'free-for-life', 0)
@@ -28,11 +28,11 @@ class SubscriptionSyncTasksTest < ActiveSupport::TestCase
     @user.subscriptions.create!(billing_plan: @premium, start_date: 1.year.ago, end_date: 1.year.ago.end_of_day + 10.years)
 
     stub_request(:get, "#{STRIPE_BASE}/account").to_return(status: 200, body: { id: 'acct_test', object: 'account' }.to_json)
-    @env_backup = ENV.to_h.slice('APPLY', 'INCIDENT_START', 'INCIDENT_END', 'REPORT', 'LIMIT')
+    @env_backup = ENV.to_h.slice('APPLY', 'REPORT', 'LIMIT')
   end
 
   def teardown
-    %w[APPLY INCIDENT_START INCIDENT_END REPORT LIMIT].each { |key| ENV.delete(key) }
+    %w[APPLY REPORT LIMIT].each { |key| ENV.delete(key) }
     @env_backup.each { |key, value| ENV[key] = value }
   end
 
@@ -110,62 +110,114 @@ class SubscriptionSyncTasksTest < ActiveSupport::TestCase
     others.each { |user| assert_equal @annual.id, user.reload.selected_billing_plan_id }
   end
 
-  # incident:restore_mass_downgraded_premium
+  # incident:restore_premium_from_stripe
 
-  def simulate_incident!(at: 2.hours.ago)
-    travel_to(at) { SubscriptionService.cancel_all_existing_subscriptions(@user) }
-    ENV['INCIDENT_START'] = (at - 5.minutes).iso8601
-    ENV['INCIDENT_END']   = (at + 5.minutes).iso8601
-    ENV['REPORT']         = File.join(Dir.tmpdir, "restore_test_#{SecureRandom.hex(4)}.csv")
+  def stripe_subscription(customer, price_id, status: 'active')
+    subscription_json(price_id, status: status).merge(id: "sub_#{customer}_#{price_id}", customer: customer)
   end
 
-  def report_rows
+  # Stubs the per-status Stripe listings the restore task pages through.
+  def stub_stripe_listing(subscriptions)
+    SubscriptionService::BILLABLE_STRIPE_STATUSES.each do |status|
+      data = subscriptions.select { |s| s[:status] == status }
+      stub_request(:get, "#{STRIPE_BASE}/subscriptions")
+        .with(query: { status: status, limit: '100' })
+        .to_return(status: 200, body: { object: 'list', url: '/v1/subscriptions', has_more: false, data: data }.to_json)
+    end
+  end
+
+  def downgrade!(user)
+    SubscriptionService.cancel_all_existing_subscriptions(user)
+    user.reload
+  end
+
+  def run_restore
+    ENV['REPORT'] = File.join(Dir.tmpdir, "restore_test_#{SecureRandom.hex(4)}.csv")
+    run_task('incident:restore_premium_from_stripe')
     CSV.read(ENV['REPORT'], headers: true)
   end
 
-  test "restore dry run changes nothing and reports the user as restorable" do
-    simulate_incident!
-    stub_subscriptions('cus_one', [subscription_json('premium')])
-    run_task('incident:restore_mass_downgraded_premium')
-
-    assert_equal @starter.id, @user.reload.selected_billing_plan_id
-    assert_equal 'would_restore', report_rows.first['outcome']
+  def outcome_for(rows, user)
+    rows.find { |row| row['user_id'] == user.id.to_s }&.fetch('outcome')
   end
 
-  test "restore with APPLY=1 exactly reverses the downgrade" do
-    bandwidth_before = @user.upload_bandwidth_kb
-    simulate_incident!
+  test "restore dry run changes nothing and reports the user as restorable" do
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    rows = run_restore
+
     assert_equal @starter.id, @user.reload.selected_billing_plan_id
-    stub_subscriptions('cus_one', [subscription_json('premium')])
+    assert_equal 'would_restore', outcome_for(rows, @user)
+  end
+
+  test "restore with APPLY=1 puts the user back on the plan Stripe bills for" do
+    bandwidth_before = @user.upload_bandwidth_kb
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium-annual'), stripe_subscription('cus_one', 'starter')])
 
     ENV['APPLY'] = '1'
-    run_task('incident:restore_mass_downgraded_premium')
+    rows = run_restore
 
     @user.reload
-    assert_equal @premium.id, @user.selected_billing_plan_id
+    assert_equal @annual.id, @user.selected_billing_plan_id
     assert_equal bandwidth_before, @user.upload_bandwidth_kb
+    assert_equal [@annual.id], @user.active_subscriptions.pluck(:billing_plan_id)
+    assert_equal 'restored', outcome_for(rows, @user)
+  end
+
+  test "restore is idempotent" do
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    ENV['APPLY'] = '1'
+    run_restore
+    Rake::Task['incident:restore_premium_from_stripe'].reenable
+    rows = run_restore
+
+    assert_equal 'ok_already_on_plan', outcome_for(rows, @user)
+    assert_equal 1, @user.reload.active_subscriptions.count
+  end
+
+  test "restore leaves past_due subscribers for review" do
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium', status: 'past_due')])
+    ENV['APPLY'] = '1'
+    rows = run_restore
+
+    assert_equal @starter.id, @user.reload.selected_billing_plan_id
+    assert_equal 'review_unhealthy_status', outcome_for(rows, @user)
+  end
+
+  test "restore never downgrades and reports local Premium users missing from Stripe" do
+    other = users(:two)
+    other.update_columns(stripe_customer_id: 'cus_two', selected_billing_plan_id: @premium.id)
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    ENV['APPLY'] = '1'
+    rows = run_restore
+
+    assert_equal @premium.id, other.reload.selected_billing_plan_id
+    assert_equal 'review_local_premium_without_stripe', outcome_for(rows, other)
+  end
+
+  test "restore gives a live subscription row back to a user whose downgrade only half-applied" do
+    @user.active_subscriptions.update_all(end_date: 1.hour.ago) # plan kept, row end-dated
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    ENV['APPLY'] = '1'
+    rows = run_restore
+
+    assert_equal @premium.id, @user.reload.selected_billing_plan_id
+    assert_equal 10_000_000, @user.upload_bandwidth_kb
     assert_equal 1, @user.active_subscriptions.count
-    assert_equal 'restored', report_rows.first['outcome']
+    assert_equal 'repaired_subscription_row', outcome_for(rows, @user)
   end
 
-  test "restore leaves users without a live Stripe subscription for review" do
-    simulate_incident!
-    stub_subscriptions('cus_one', [subscription_json('premium', status: 'past_due')])
+  test "restore aborts when Stripe has nobody on a Premium price" do
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'price_unknown')])
     ENV['APPLY'] = '1'
-    run_task('incident:restore_mass_downgraded_premium')
+    ENV['REPORT'] = File.join(Dir.tmpdir, "restore_test_#{SecureRandom.hex(4)}.csv")
 
+    assert_raises(SystemExit) { run_task('incident:restore_premium_from_stripe') }
     assert_equal @starter.id, @user.reload.selected_billing_plan_id
-    assert_equal 'review_unhealthy_status', report_rows.first['outcome']
-  end
-
-  test "restore ignores subscriptions ended outside the incident window" do
-    simulate_incident!(at: 3.days.ago)
-    ENV['INCIDENT_START'] = 1.day.ago.iso8601
-    ENV['INCIDENT_END']   = Time.current.iso8601
-    ENV['APPLY'] = '1'
-    run_task('incident:restore_mass_downgraded_premium')
-
-    assert_equal @starter.id, @user.reload.selected_billing_plan_id
-    assert_empty report_rows
   end
 end

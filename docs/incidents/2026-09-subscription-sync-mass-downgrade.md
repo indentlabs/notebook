@@ -1,112 +1,82 @@
 # Incident: mass Premium downgrade by `data_integrity:subscription_synced_with_stripe`
 
+Production runs the `tailwind-redesign` branch.
+
 ## TL;DR
 
-- **Local database only. Stripe was not touched.** On `master` (the code production runs),
-  `SubscriptionService.cancel_all_existing_subscriptions` makes no Stripe calls. Affected
-  customers are **almost certainly still being billed by Stripe** while they're locked out of
-  Premium. That makes local restoration urgent.
-- **Root cause (hypothesis 1, confirmed from code):** production runs `stripe` gem **15.1.0**.
-  On current Stripe API versions, a retrieved `Stripe::Customer` no longer includes
-  `subscriptions` (it has to be expanded explicitly). So `stripe_customer.subscriptions&.data || []`
-  is always `[]`, every synced user hits `stripe_subscription.nil?`, and every one is downgraded.
-  This is the same dead read that caused the parallel-subscription bug fixed on
-  `tailwind-redesign` in 43902ce.
-- Hypothesis 3 (plan ID vs price ID) is **not needed** to explain the incident, because the price
-  comparison is never reached. Legacy Plan IDs also still work as Price IDs in Stripe. Still
-  verify with `BillingPlan.pluck(:id, :name, :stripe_plan_id)`.
-- **Recovery doesn't need an RDS restore.** The downgrade end-dated `subscriptions` rows
-  instead of deleting them, so those rows already record who was downgraded and from which
-  plan. An RDS point-in-time restore is still a useful cross-check.
+- **Local database only. Stripe was not touched.** `SubscriptionService.cancel_all_existing_subscriptions`
+  makes no Stripe calls, on this branch and on `master`, and the Stripe webhook handlers only log
+  events. Affected customers are **almost certainly still being billed** while locked out of Premium.
+- **So Stripe is the source of truth for recovery.** List every Premium subscription in Stripe and
+  put the matching user back on that plan: `rake incident:restore_premium_from_stripe`. No incident
+  window, Slack history, or RDS restore is needed for the Stripe-billed users.
 
-## What `cancel_all_existing_subscriptions` did (master)
+## What `cancel_all_existing_subscriptions` does
 
 ```ruby
 def self.cancel_all_existing_subscriptions(user)
-  user.update(selected_billing_plan_id: 1)
+  user.update(selected_billing_plan_id: 1)            # validated update
   user.active_subscriptions.each do |subscription|
-    remove_subscription(user, subscription)   # upload_bandwidth_kb -= plan.bonus_bandwidth_kb
-  end                                         # subscription.update(end_date: now)
+    remove_subscription(user, subscription)           # upload_bandwidth_kb -= plan.bonus_bandwidth_kb
+  end                                                 # subscription.update(end_date: now)
 end
 ```
 
-| Question from handoff | Answer |
-|---|---|
-| Only local DB? | **Yes** |
-| Calls Stripe / cancels / `cancel_at_period_end` / deletes? | **No** |
-| Changes billing plan locally? | Yes, `selected_billing_plan_id = 1` (validated `update`) |
-| Clears Stripe IDs? | No, `stripe_customer_id` untouched |
-| Entitlements? | `subscriptions.end_date = now`; `upload_bandwidth_kb -= bonus_bandwidth_kb` (can go negative) |
+It doesn't cancel, delete, or set `cancel_at_period_end` on anything in Stripe, and it doesn't
+clear Stripe IDs. It then sent `UnsubscribedMailer.unsubscribed`, with the subject *"Update your
+payment method to keep your Notebook.ai Premium features"*. That email wrongly tells customers
+their card is no longer valid, so the correction email needs to say their card is fine.
 
-Then it sent `UnsubscribedMailer.unsubscribed`, with the subject *"Update your payment method to
-keep your Notebook.ai Premium features"*. That email wrongly tells customers their payment
-method is invalid. The correction email must address that specifically.
+## Which sync code ran
 
-## Things the handoff missed
+Two versions of the sync task have existed on this branch:
 
-1. **Early Adopters (plan 3) were probably hit too.** `BillingPlan::PREMIUM_IDS = [2,3,4,5,6]`.
-   The task subtracts only free-for-life (2), so it synced plans **3**, 4, 5 and 6. Count them with
-   `Subscription.where(billing_plan_id: 3, end_date: window).count`.
-2. **Some of the "5 remaining" users may also have been hit.** `user.update` runs validations
-   (e.g. `time_zone` must be present and valid). For an invalid user, both the plan change and
-   the bandwidth deduction silently fail. Their subscription rows were still end-dated and they
-   still got the email. The recovery task accounts for this and doesn't re-add their bandwidth.
-3. **Tonight's run can do it again for anyone restored.** Keep the cron disabled everywhere
-   until the fixed task (below) is deployed.
-4. `user.last_sign_in_at.strftime` in the master task raises on users who never signed in,
-   which crashes the run part-way. The downgrade count may therefore be smaller than the full
-   Premium population, or split across several nights. Check Slack for multiple
-   "N total accounts downgraded" lines.
+- **Before 48ebc17 (Aug 8, 2026):** read `Stripe::Customer#subscriptions`. With stripe gem 15.1.0
+  that is never populated, so **every** synced user looked unsubscribed and was downgraded in one
+  night. (It could crash part-way on a nil `last_sign_in_at`, spreading this over several nights.)
+- **48ebc17 and later:** lists subscriptions correctly, but aborts only after downgrading 20% of
+  Premium users, and the counter resets every night. If this version still found a false mismatch
+  for most users (say, a `stripe_plan_id` that doesn't match Stripe's price IDs, or the wrong Stripe
+  account/key on the new server), it would take ~20% of the remaining Premium users each night.
+  That would reach "5 left" in about a month.
 
-## Reconstructing the affected set (read-only)
+`rake incident:premium_downgrades_by_day` shows which one happened: one big spike, or a ~20%
+decay over many nights. The restore task's dry run also rules the second cause in or out. It
+prints every Stripe price with subscriber counts next to the matching billing plan, and aborts if
+no Premium price in `billing_plans` has any Stripe subscribers.
 
-```ruby
-window = Time.zone.parse('YYYY-MM-DD 00:55 UTC')..Time.zone.parse('YYYY-MM-DD HH:MM UTC')
-Subscription.where(billing_plan_id: [3,4,5,6], end_date: window).group(:billing_plan_id).count
-Subscription.where(billing_plan_id: [3,4,5,6], end_date: window).distinct.count(:user_id)
-```
-
-Take the window from the first and last "Automatically downgrading" Slack messages. The task
-sleeps 1s per user, so thousands of users means a run of an hour or more. Keep the window tight,
-because a legitimate cancellation inside it would look identical. Also cross-check the user set
-against the Slack ledger and/or an RDS restore.
-
-## Recovery: `rake incident:restore_mass_downgraded_premium`
-
-`lib/tasks/incident_recovery.rake` is a dry run by default and writes a CSV report.
+## Recovery: `rake incident:restore_premium_from_stripe`
 
 ```bash
-INCIDENT_START='2026-09-XX 00:55 UTC' INCIDENT_END='2026-09-XX 03:00 UTC' \
-  bundle exec rake incident:restore_mass_downgraded_premium        # dry run + CSV
-# review the CSV, then a small batch:
-APPLY=1 LIMIT=5 INCIDENT_START=... INCIDENT_END=... bundle exec rake incident:restore_mass_downgraded_premium
-# then everyone:
-APPLY=1 INCIDENT_START=... INCIDENT_END=... bundle exec rake incident:restore_mass_downgraded_premium
+bundle exec rake incident:premium_downgrades_by_day                    # when did it happen?
+bundle exec rake incident:restore_premium_from_stripe                  # dry run, writes a CSV
+APPLY=1 LIMIT=5 bundle exec rake incident:restore_premium_from_stripe  # small test batch
+APPLY=1 bundle exec rake incident:restore_premium_from_stripe          # everyone
 ```
 
-For each user with a plan 3–6 subscription end-dated in the window, the task works as follows:
+The task pages through all billable Stripe subscriptions, one listing per status. For each
+customer with a subscription on a Premium price (plans 3–6):
 
-- Skips users that were deleted, have re-subscribed since, or are on another plan now.
-- Lists their Stripe subscriptions (`Stripe::Subscription.list`, `status: all`).
-- Restores the user **only** if Stripe has an `active`/`trialing` subscription on that plan's
-  price. Restoring means: plan id back, the subscription's `end_date` back to
-  `start_date.end_of_day + 10.years` (what `add_subscription` sets), and bonus bandwidth back.
-  This is idempotent.
-- Sends everyone else (past_due, unpaid, different price, no subscription, Stripe error) to
-  `review_*` in the CSV for a human. Nobody is charged, and no Stripe object is created or changed.
-- Prints the Stripe account id and whether the key is live, so you can confirm it's the
-  production account before trusting results.
-- Sends no emails. Send the correction/apology separately, after verification.
+| Outcome | Meaning |
+|---|---|
+| `restored` / `would_restore` | Active/trialing on a Premium price, user on Starter locally. Plan set, bonus bandwidth re-added, a live subscription row created, the same local changes `add_subscription` makes without its Stripe sync. |
+| `repaired_subscription_row` | User kept their plan (the validated downgrade silently failed) but lost their live subscription row. Row recreated; bandwidth untouched. |
+| `ok_already_on_plan` | Nothing to do. Re-running is safe. |
+| `review_unhealthy_status` | Only past_due/unpaid/incomplete in Stripe. A human decides. |
+| `review_plan_differs` / `review_multiple_premium_plans` | Local Premium plan differs from Stripe, or Stripe bills several Premium plans. |
+| `review_no_matching_user` / `review_multiple_users` | The Stripe customer maps to 0 or 2+ users. |
+| `review_local_premium_without_stripe` | Premium locally, no Premium Stripe subscription. Reported, **never downgraded**. |
+| `review_downgraded_without_stripe` | Lost a Premium row in the last `LOOKBACK_DAYS` (default 120), no Stripe subscription. For example, hand-granted Premium, which Stripe can't restore. |
 
-## Fixed sync task
+The task never downgrades anyone, never writes to Stripe, and never sends email. Every row
+includes `last_premium_row_ended`. That separates incident victims from people who cancelled
+in the app long ago but were still billed. The cancel flow didn't reach Stripe before Aug 8, so
+there may be some of those. They're paying, so restoring them is defensible, but they may also
+want refunds.
 
-`data_integrity:subscription_synced_with_stripe` on this branch now:
+## Sync task
 
-- lists subscriptions explicitly and checks all billable ones, not `.first`
-- is **report-only unless `APPLY=1`**, so the cron line as written only reports
-- treats a Stripe error as "skip and count", never "no subscription"
-- collects all mismatches first and, before touching anyone, aborts if there were any Stripe
-  errors or more than `min(10, 5%)` mismatches
-- no longer crashes on a nil `last_sign_in_at`
-
-This fix lives on `tailwind-redesign`, not `master`. Don't re-enable the cron until it's deployed.
+`data_integrity:subscription_synced_with_stripe` is now report-only unless `APPLY=1`. It skips
+users on Stripe errors instead of treating them as unsubscribed. It collects every mismatch
+before touching anyone, and aborts if there are any Stripe errors or more than min(10, 5%)
+mismatches. Keep the cron disabled until you've seen a few clean report-only runs.
