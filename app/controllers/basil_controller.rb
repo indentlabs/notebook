@@ -839,6 +839,27 @@ class BasilController < ApplicationController
     end
   end
 
+  # Cancels a commission that hasn't finished generating yet. Cancelled
+  # commissions are hard-deleted (not soft-deleted) so they don't count toward
+  # the user's free image limit or Basil stats, which include deleted rows.
+  def cancel
+    @commission = BasilCommission.find_by(id: params[:id], user: current_user, completed_at: nil)
+
+    if @commission.nil? || @commission.complete?
+      respond_to do |format|
+        format.html { redirect_back fallback_location: basil_path, alert: 'That commission can no longer be cancelled.' }
+        format.all { render json: { error: "Commission not found or already complete" }, status: :not_found }
+      end
+      return
+    end
+
+    @commission.really_destroy!
+    respond_to do |format|
+      format.html { redirect_back fallback_location: basil_path, notice: 'Commission cancelled.' }
+      format.all { render json: { success: true }, status: 200 }
+    end
+  end
+
   def update_commission
     @commission = BasilCommission.find_by(id: params[:id])
 
