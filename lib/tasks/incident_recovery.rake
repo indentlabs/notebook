@@ -26,9 +26,16 @@ namespace :incident do
     synced_plan_ids     = plans_by_price.values.map(&:id)
     restorable_statuses = %w[active trialing]
 
-    account = Stripe::Account.retrieve
+    # Production uses a restricted key (rk_live_...) that can't read the account, so
+    # this is informational only; the price counts below are the real sanity check.
+    account_id = begin
+      Stripe::Account.retrieve.id
+    rescue Stripe::PermissionError
+      'unavailable (restricted key)'
+    end
+    live_key = Stripe.api_key.to_s.start_with?('sk_live_', 'rk_live_')
     puts apply ? "APPLY mode: users WILL be restored." : "Dry run: no changes will be made. Re-run with APPLY=1 to restore."
-    puts "Stripe account #{account.id} (#{Stripe.api_key.to_s.start_with?('sk_live_') ? 'LIVE' : 'NOT LIVE'} key)"
+    puts "Stripe account #{account_id} (#{live_key ? 'LIVE' : 'NOT LIVE'} key)"
     puts "Premium prices: #{plans_by_price.map { |price, plan| "#{price} => plan #{plan.id}" }.join(', ')}"
     puts
 
@@ -107,7 +114,10 @@ namespace :incident do
 
           # A user whose validated downgrade silently failed kept their plan (and bandwidth)
           # but had their subscription row end-dated. Give them a live row back.
+          # Counts toward LIMIT like a restore, so a LIMIT=N test batch writes at most N users.
+          next write.call('restorable_over_limit', user: user, plan: plan, subs: premium_subs) if limit && restored >= limit
           user.subscriptions.create!(billing_plan: plan, start_date: DateTime.now, end_date: DateTime.now.end_of_day + 10.years) if apply
+          restored += 1
           next write.call(apply ? 'repaired_subscription_row' : 'would_repair_subscription_row', user: user, plan: plan, subs: premium_subs)
         end
 

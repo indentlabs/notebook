@@ -220,4 +220,31 @@ class SubscriptionSyncTasksTest < ActiveSupport::TestCase
     assert_raises(SystemExit) { run_task('incident:restore_premium_from_stripe') }
     assert_equal @starter.id, @user.reload.selected_billing_plan_id
   end
+
+  test "restore runs with a restricted key that can't read the Stripe account" do
+    stub_request(:get, "#{STRIPE_BASE}/account").to_return(
+      status: 403, body: { error: { type: 'invalid_request_error', message: 'Permission denied' } }.to_json
+    )
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    ENV['APPLY'] = '1'
+    rows = run_restore
+
+    assert_equal @premium.id, @user.reload.selected_billing_plan_id
+    assert_equal 'restored', outcome_for(rows, @user)
+  end
+
+  test "LIMIT also caps repaired subscription rows" do
+    other = users(:two)
+    other.update_columns(stripe_customer_id: 'cus_two', selected_billing_plan_id: @premium.id)
+    other.subscriptions.create!(billing_plan: @premium, start_date: 1.year.ago, end_date: 1.hour.ago)
+    @user.active_subscriptions.update_all(end_date: 1.hour.ago)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium'), stripe_subscription('cus_two', 'premium')])
+    ENV['APPLY'] = '1'
+    ENV['LIMIT'] = '1'
+    rows = run_restore
+
+    assert_equal 1, rows.count { |row| row['outcome'] == 'repaired_subscription_row' }
+    assert_equal 1, rows.count { |row| row['outcome'] == 'restorable_over_limit' }
+  end
 end
