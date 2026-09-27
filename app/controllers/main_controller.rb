@@ -98,6 +98,9 @@ class MainController < ApplicationController
     @other_pages   = all_pages.reject { |p| p.try(:favorite) }
     @pages_by_type = @other_pages.group_by(&:page_type)
 
+    # Only the cards the view renders need their cover images loaded
+    preload_cover_images(@starred_pages + @pages_by_type.values.flat_map { |pages| pages.first(7) })
+
     # Statistics
     @total_pages = all_pages.size
     @total_words = all_pages.sum { |p| p.try(:cached_word_count).to_i }
