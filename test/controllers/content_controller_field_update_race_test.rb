@@ -53,6 +53,37 @@ class ContentControllerFieldUpdateRaceTest < ActionDispatch::IntegrationTest
     assert_equal 'Son of Mikhail', values.first.value
   end
 
+  test "text_field_update updates the existing value when the unique index rejects a concurrent insert" do
+    Attribute.create!(user: @user, attribute_field: @field, entity: @character, value: 'Old value')
+
+    # Both requests passed validation at the same moment, so only the database index catches the duplicate
+    real_values = @field.attribute_values
+    lookups = 0
+    racing_values = Object.new
+    racing_values.define_singleton_method(:find_or_initialize_by) do |attrs|
+      lookups += 1
+      next real_values.find_or_initialize_by(attrs) unless lookups == 1
+
+      Attribute.new(attrs).tap { |racer| racer.define_singleton_method(:valid?) { |*| true } }
+    end
+    @field.define_singleton_method(:attribute_values) { racing_values }
+
+    AttributeField.stub(:find_by, @field) do
+      patch text_field_update_path(@field.id),
+            params: {
+              entity: { entity_id: @character.id, entity_type: 'Character' },
+              field:  { name: @field.id.to_s, value: 'Son of Mikhail' }
+            },
+            headers: { 'Accept' => 'application/json' }
+    end
+
+    assert_response :success
+    assert_equal 2, lookups
+    values = Attribute.where(attribute_field_id: @field.id, entity: @character)
+    assert_equal 1, values.count
+    assert_equal 'Son of Mikhail', values.first.value
+  end
+
   test "text_field_update creates a value when none exists" do
     patch text_field_update_path(@field.id),
           params: {

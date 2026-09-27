@@ -804,7 +804,8 @@ class ContentController < ApplicationController
 
   # Finds or creates the Attribute for @attribute_field on the current entity and saves `value` to it.
   # Concurrent autosaves on a field with no value yet can both miss the existing-row lookup and try to
-  # create it; the loser fails the uniqueness validation, so we retry once and update the winner's row.
+  # create it. The loser fails either the uniqueness validation or, if both passed validation at once,
+  # the unique index on live attributes; either way we retry once and update the winner's row.
   def save_attribute_value!(value)
     retried = false
     begin
@@ -817,6 +818,10 @@ class ContentController < ApplicationController
       attribute_value
     rescue ActiveRecord::RecordInvalid => e
       raise if retried || !attribute_value.new_record? || !e.record.errors.of_kind?(:attribute_field_id, :taken)
+      retried = true
+      retry
+    rescue ActiveRecord::RecordNotUnique
+      raise if retried || !attribute_value.new_record?
       retried = true
       retry
     end
