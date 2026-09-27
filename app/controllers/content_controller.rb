@@ -473,7 +473,11 @@ class ContentController < ApplicationController
         entity_id: @content.id
       ),
       content_type: "Attribute"
-    ).includes(:user).order('created_at DESC')
+    ).or(ContentChangeEvent.where(
+      content_id: @content.id,
+      content_type: @content.class.name,
+      action: ContentChangeEvent::IMAGE_ACTIONS
+    )).includes(:user).order('created_at DESC')
     
     @paginated_events = change_events_query.paginate(page: page, per_page: per_page)
     @grouped_changes = group_events_by_date(@paginated_events)
@@ -499,7 +503,11 @@ class ContentController < ApplicationController
 
     image_uploads_list.each do |image_data|
       result = ImageUploadService.upload(user: current_user, content: content, file: image_data)
-      upload_errors << result.error unless result.success?
+      if result.success?
+        GalleryActivity.record!(content, user: current_user, action: :image_added, image: result.image)
+      else
+        upload_errors << result.error
+      end
     end
 
     if upload_errors.any? { |error| error.include?('upload bandwidth') }
@@ -644,6 +652,9 @@ class ContentController < ApplicationController
 
     result = ContentCoverService.toggle!(@image, preset: preset)
     new_pin_status = result.pinned
+
+    cover_change = preset ? { "cover:#{preset}" => [!result.active, result.active] } : { 'cover' => [!new_pin_status, new_pin_status] }
+    GalleryActivity.record!(content, user: current_user, action: :cover_changed, image: @image, changes: cover_change)
 
     content.clear_cover_image_cache if content.respond_to?(:clear_cover_image_cache)
     
@@ -835,7 +846,7 @@ class ContentController < ApplicationController
       {
         date: date,
         events: date_events,
-        total_field_changes: date_events.sum { |event| event.changed_fields.keys.length },
+        total_field_changes: date_events.sum(&:change_count),
         users: date_events.map(&:user).compact.uniq
       }
     end.sort_by { |group| group[:date] }.reverse

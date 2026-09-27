@@ -23,6 +23,22 @@ module HasChangelog
       ).includes(:user).order(:id).last(limit)
     end
 
+    # Gallery activity (uploads, edits, cover changes) logged against this page.
+    def image_change_events
+      ContentChangeEvent.where(
+        content_id:   id,
+        content_type: self.class.name,
+        action:       ContentChangeEvent::IMAGE_ACTIONS
+      ).includes(:user).order(:id)
+    end
+
+    # Attribute and gallery events together, oldest first.
+    def changelog_events(limit=100)
+      (attribute_change_events(limit) + image_change_events.last(limit))
+        .sort_by { |event| [event.created_at, event.id] }
+        .last(limit)
+    end
+
     after_create do
       if self.is_a?(Attribute)
         changes = {"value"=>[nil, value]} if changes.nil?

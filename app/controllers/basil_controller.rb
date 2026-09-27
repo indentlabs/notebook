@@ -816,7 +816,11 @@ class BasilController < ApplicationController
       return
     end
 
+    newly_saved = @commission.saved_at.nil?
     @commission.update(saved_at: DateTime.current)
+    if newly_saved && @commission.entity
+      GalleryActivity.record!(@commission.entity, user: current_user, action: :image_added, image: @commission)
+    end
     render json: { success: true }, status: 200
   end
 
@@ -832,7 +836,10 @@ class BasilController < ApplicationController
       return
     end
 
+    # Only saved images were on the page; unsaved ones only lived in Basil's history.
+    on_page = @commission.saved_at.present? && @commission.entity
     @commission.destroy!
+    GalleryActivity.record!(@commission.entity, user: current_user, action: :image_removed, image: @commission) if on_page
     respond_to do |format|
       format.html { redirect_back fallback_location: root_path, notice: 'Image successfully deleted.' }
       format.all { render json: { success: true }, status: 200 }
@@ -853,6 +860,8 @@ class BasilController < ApplicationController
     end
 
     if @commission.update(update_commission_params)
+      GalleryActivity.record!(@commission.entity, user: current_user, action: :image_updated, image: @commission,
+                              changes: GalleryActivity.changes_from(@commission))
       render json: { success: true, image: ContentImage.wrap(@commission).as_json }, status: 200
     else
       render json: { error: @commission.errors.full_messages }, status: :unprocessable_entity
