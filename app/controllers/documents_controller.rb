@@ -584,7 +584,7 @@ class DocumentsController < ApplicationController
 
     tags_to_remove.each do |tag|
       # TODO: create changelog event for RemovedTag or use destroy_all
-      document.page_tags.find_by(tag: tag).destroy
+      document.page_tags.find_by(tag: tag)&.destroy
     end
   end
 

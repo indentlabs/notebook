@@ -860,7 +860,7 @@ class ContentController < ApplicationController
 
     tags_to_remove.each do |tag|
       # TODO: create changelog event for RemovedTag or use destroy_all
-      @content.page_tags.find_by(tag: tag).destroy
+      @content.page_tags.find_by(tag: tag)&.destroy
     end
   end
 
