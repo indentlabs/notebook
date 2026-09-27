@@ -324,6 +324,9 @@ Rails.application.routes.draw do
     get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
   end
 
+  # Public, anonymous community-wide writing stats
+  get '/community', to: 'community#index', as: :community
+
   # Lab apps
   scope '/lab' do
     # Navigator
