@@ -181,7 +181,7 @@ class SubscriptionServiceTest < ActiveSupport::TestCase
       stripe_subscription_json('sub_active',     'premium', status: 'active',     created: 1_600_000_000)
     ])
     cancel = stub_request(:delete, "#{STRIPE_BASE}/subscriptions/sub_incomplete")
-      .with(query: { prorate: 'true' })
+      .with(query: { prorate: 'false' })
       .to_return(status: 200, body: { id: 'sub_incomplete' }.to_json)
 
     kept = SubscriptionService.sync_stripe_subscriptions_to_plan(@user, 'premium')
@@ -189,6 +189,51 @@ class SubscriptionServiceTest < ActiveSupport::TestCase
     assert_equal 'sub_active', kept.id
     assert_requested cancel
     assert_not_requested :delete, %r{#{STRIPE_BASE}/subscriptions/sub_active}
+  end
+
+  test "re-choosing the plan of an unpaid subscription charges for a new one instead of keeping it" do
+    stub_subscription_list([
+      stripe_subscription_json('sub_unpaid', 'premium', status: 'unpaid')
+    ])
+    stub_no_payment_methods
+    create = stub_request(:post, "#{STRIPE_BASE}/subscriptions")
+      .with(body: { customer: 'cus_test', items: [{ price: 'premium' }], payment_behavior: 'error_if_incomplete' })
+      .to_return(status: 200, body: stripe_subscription_json('sub_new', 'premium').to_json)
+    cancel = stub_request(:delete, "#{STRIPE_BASE}/subscriptions/sub_unpaid")
+      .with(query: { prorate: 'false' })
+      .to_return(status: 200, body: { id: 'sub_unpaid' }.to_json)
+
+    kept = SubscriptionService.sync_stripe_subscriptions_to_plan(@user, 'premium')
+
+    assert_equal 'sub_new', kept.id
+    assert_requested create
+    assert_requested cancel
+  end
+
+  test "an unpaid subscription is left alone when the new charge is declined" do
+    stub_subscription_list([
+      stripe_subscription_json('sub_unpaid', 'premium', status: 'unpaid')
+    ])
+    stub_no_payment_methods
+    stub_request(:post, "#{STRIPE_BASE}/subscriptions")
+      .to_return(status: 402, body: { error: { type: 'card_error', code: 'card_declined', message: 'Your card was declined.' } }.to_json)
+
+    assert_raises(Stripe::CardError) do
+      SubscriptionService.sync_stripe_subscriptions_to_plan(@user, 'premium')
+    end
+    assert_not_requested :delete, %r{#{STRIPE_BASE}/subscriptions/sub_unpaid}
+  end
+
+  test "a past_due subscription on the requested plan is still kept while Stripe retries it" do
+    stub_subscription_list([
+      stripe_subscription_json('sub_past_due', 'premium', status: 'past_due')
+    ])
+
+    kept = SubscriptionService.sync_stripe_subscriptions_to_plan(@user, 'premium')
+
+    assert_equal 'sub_past_due', kept.id
+    assert_not_requested :post, "#{STRIPE_BASE}/subscriptions"
+    assert_not_requested :delete, %r{#{STRIPE_BASE}/subscriptions/sub_past_due}
   end
 
   test "cancel_stripe_subscriptions! cancels every billable subscription outright" do

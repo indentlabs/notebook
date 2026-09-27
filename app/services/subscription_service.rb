@@ -7,6 +7,10 @@ class SubscriptionService < Service
   # dead weight we can ignore.
   BILLABLE_STRIPE_STATUSES = %w[active trialing past_due unpaid incomplete].freeze
 
+  # Billable statuses Stripe isn't collecting payment on: unpaid (retries exhausted)
+  # and incomplete (the first payment never went through).
+  UNCOLLECTIBLE_STRIPE_STATUSES = %w[unpaid incomplete].freeze
+
   def self.add_subscription(user, plan_id)
     related_plan = BillingPlan.find_by(stripe_plan_id: plan_id, available: true)
     raise "Plan #{plan_id} not available for user #{user.id}" if related_plan.nil?
@@ -61,6 +65,26 @@ class SubscriptionService < Service
   def self.sync_stripe_subscriptions_to_plan(user, plan_id)
     subscriptions = prioritize_subscriptions_to_keep(billable_stripe_subscriptions(user.stripe_customer_id))
 
+    # Never keep a subscription nobody is paying for. Keeping an unpaid one on the
+    # requested plan granted the plan without charging anything, since Stripe has
+    # stopped collecting on it. Those go through the new-subscription path below,
+    # which charges the card up front, and are canceled once that has succeeded.
+    uncollectible, subscriptions = subscriptions.partition do |subscription|
+      UNCOLLECTIBLE_STRIPE_STATUSES.include?(subscription.status)
+    end
+
+    result = keep_one_subscription_on_plan(user, subscriptions, plan_id)
+
+    # Without proration: their current period was never paid for, so crediting its
+    # "unused time" would hand the customer free balance toward the new plan.
+    uncollectible.each do |subscription|
+      Stripe::Subscription.cancel(subscription.id, prorate: false)
+    end
+
+    result
+  end
+
+  def self.keep_one_subscription_on_plan(user, subscriptions, plan_id)
     # Prefer to keep a subscription already on the requested price so we never
     # interrupt a billing period the user has already paid for; otherwise keep
     # the healthiest/oldest one and switch its price below.
