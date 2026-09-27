@@ -4,29 +4,22 @@
 # CommunityDailyStat / CommunityMonthlyWriter, which CommunityStatsService
 # reads to render the public /community page.
 #
-# Everything here is designed to stay cheap on very large tables:
+# Word counts are the only expensive part: each day reads just that day's
+# word_count_updates rows (via the for_date index), and each row's previous
+# record is a single backwards probe on the (entity_type, entity_id, for_date)
+# unique index, so a day costs the same regardless of total table size.
 #
-# * Words: only the word_count_updates rows for the day are read (via the
-#   for_date index). Each row's previous record is a single backwards probe
-#   on the (entity_type, entity_id, for_date) unique index.
-# * Pages created / sign-ups / forum posts: those tables have no created_at
-#   index, so instead of scanning them we binary search the primary key for
-#   the first id created at or after a given time (ids and created_at grow
-#   together), then count an id range.
+# Pages created, sign-ups, forum posts and goals come from the existing
+# EndOfDayAnalyticsReport rows instead of being counted again here.
 #
-# Recent days are refreshed regularly (see CommunityStatsRefreshJob); history
-# is filled once with `rake community:backfill`.
+# Recent days are refreshed regularly (see CommunityStatsRefreshJob), each
+# finished day is finalized by EndOfDayAnalyticsJob, and history is filled
+# once with `rake community:backfill`.
 class CommunityStatsRollup
-  # Page types whose creation counts are shown on the page.
-  def self.page_classes
-    Rails.application.config.content_types[:all] + [Document, Timeline]
-  end
-
   # Re-rolls the last few days (writers in time zones behind the server are
   # still adding to "yesterday"), plus the point-in-time metrics.
   def self.refresh_recent!(today: Date.current)
-    boundaries = IdBoundaries.new
-    ((today - 2.days)..today).each { |date| new(date, boundaries: boundaries).run! }
+    ((today - 2.days)..today).each { |date| new(date).run! }
 
     record_point_in_time_metrics!(today)
   end
@@ -57,14 +50,12 @@ class CommunityStatsRollup
 
   attr_reader :date
 
-  def initialize(date, boundaries: IdBoundaries.new)
+  def initialize(date)
     @date = date
-    @boundaries = boundaries
   end
 
   def run!
     roll_up_words!
-    roll_up_creations!
     self
   end
 
@@ -110,68 +101,5 @@ class CommunityStatsRollup
       WHERE delta > 0
       GROUP BY user_id, entity_type
     SQL
-  end
-
-  def roll_up_creations!
-    day_start = date.in_time_zone.beginning_of_day
-    day_end   = [day_start + 1.day, Time.current].min
-
-    pages = self.class.page_classes.each_with_object({}) do |klass, counts|
-      count = created_between(klass, day_start, day_end)
-      counts[klass.name] = count if count > 0
-    end
-    self.class.replace!(date, 'pages_created', pages)
-
-    self.class.replace!(date, 'new_writers', { '' => created_between(User, day_start, day_end) })
-    self.class.replace!(date, 'forum_posts', {
-      '' => Thredded::Post.where(moderation_state: 'approved', created_at: day_start...day_end).count
-    })
-    self.class.replace!(date, 'goals_completed', {
-      '' => WritingGoal.where(completed_at: day_start...day_end).count
-    })
-  end
-
-  # Rows of `klass` (respecting its default scope, e.g. soft deletes) created
-  # in [from, to), found by id range rather than scanning created_at.
-  def created_between(klass, from, to)
-    first_id = @boundaries.first_id_at_or_after(klass, from)
-    last_id  = @boundaries.first_id_at_or_after(klass, to)
-    return 0 if first_id >= last_id
-
-    klass.where(id: first_id...last_id).count
-  end
-
-  # Binary searches a table's primary key for the first id created at or after
-  # a time. Assumes created_at grows with id, which holds for rows inserted by
-  # the app; the occasional out-of-order row only nudges counts by one or two.
-  # Results are memoized so consecutive days share their boundaries.
-  class IdBoundaries
-    def initialize
-      @cache = {}
-    end
-
-    def first_id_at_or_after(klass, time)
-      @cache[[klass.name, time.to_i]] ||= search(klass.unscoped, time)
-    end
-
-    private
-
-    def search(scope, time)
-      lo = scope.minimum(:id)
-      return 0 if lo.nil?
-      hi = scope.maximum(:id) + 1
-
-      # Smallest x in [lo, hi] where the first row with id >= x was created at or after `time`
-      while lo < hi
-        mid = (lo + hi) / 2
-        _, created_at = scope.where('id >= ?', mid).order(:id).limit(1).pluck(:id, :created_at).first
-        if created_at && created_at >= time
-          hi = mid
-        else
-          lo = mid + 1
-        end
-      end
-      lo
-    end
   end
 end

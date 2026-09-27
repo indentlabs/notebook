@@ -102,16 +102,24 @@ class CommunityStatsServiceTest < ActiveSupport::TestCase
     assert_equal 400, series.first[:data].last.last
   end
 
-  test "counts pages created and sign-ups by id range" do
-    Character.where(user: @alice).delete_all
-    travel_to(@today.in_time_zone.beginning_of_day - 2.hours) { Character.create!(name: 'Before', user: @alice) }
-    travel_to(@today.in_time_zone.beginning_of_day + 1.hour) do
-      Character.create!(name: 'One', user: @alice)
-      Character.create!(name: 'Two', user: @alice)
-    end
-    roll_up(@today)
+  test "reads creation, sign-up, goal, and forum stats from end-of-day reports" do
+    EndOfDayAnalyticsReport.delete_all
+    month = @today.beginning_of_month
+    EndOfDayAnalyticsReport.create!(day: month, characters_created: 3, documents_created: 5, user_signups: 7,
+                                    writing_goals_completed: 1, thredded_replies_created: 4)
+    EndOfDayAnalyticsReport.create!(day: month + 1.day, characters_created: 2, user_signups: 1)
+    EndOfDayAnalyticsReport.create!(day: month - 1.day, characters_created: 100) # last month
 
-    assert_equal 2, stats.pages_created_in_month(@today)['Character']
+    assert_equal({ 'Document' => 5, 'Character' => 5 }, stats.pages_created_in_month(month))
+    assert_equal 8, stats.new_writers_in_month(month)
+    assert_equal 1, stats.goals_completed_in_month(month)
+    assert_equal 4, stats.forum_posts_in_month(month)
+  end
+
+  test "every page type shown has an end-of-day report column" do
+    CommunityStatsService.page_classes.each do |klass|
+      assert EndOfDayAnalyticsReport.column_names.include?("#{klass.name.downcase.pluralize}_created"), klass.name
+    end
   end
 
   test "records, rhythms, and heatmap handle an empty community" do

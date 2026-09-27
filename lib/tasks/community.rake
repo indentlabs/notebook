@@ -12,11 +12,10 @@ namespace :community do
     to   = args[:to].present?   ? Date.parse(args[:to])   : Date.current - 3.days
     abort "Nothing to backfill." if from.nil? || from > to
 
-    boundaries = CommunityStatsRollup::IdBoundaries.new
     started = Time.current
     (from..to).each do |date|
       day_started = Time.current
-      CommunityStatsRollup.new(date, boundaries: boundaries).run!
+      CommunityStatsRollup.new(date).run!
       puts "#{date}: #{(Time.current - day_started).round(2)}s"
     end
     CommunityStatsRollup.record_point_in_time_metrics!(Date.current)

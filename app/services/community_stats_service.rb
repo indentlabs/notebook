@@ -278,29 +278,38 @@ class CommunityStatsService
   # Beyond word counts: what the community built this month
   # ---------------------------------------------------------------------------
 
+  # These come from the nightly EndOfDayAnalyticsReport rows, so the current
+  # month counts through yesterday.
+
   # { 'Character' => count, ... } for pages created in the given month, most first.
   def pages_created_in_month(month_start)
     cached("pages_created/#{month_start.strftime('%Y-%m')}") do
-      CommunityDailyStat
-        .where(metric: 'pages_created', date: month_start.beginning_of_month..month_start.end_of_month)
-        .group(:key)
-        .sum(:value)
-        .select { |_, count| count > 0 }
+      columns = self.class.page_classes.index_by { |klass| "#{klass.name.downcase.pluralize}_created" }
+      totals = eod_reports_in_month(month_start).pluck(*columns.keys.map { |c| Arel.sql("SUM(#{c})") }).first || []
+
+      columns.values.map(&:name).zip(totals)
+        .select { |_, count| count.to_i > 0 }
+        .map { |name, count| [name, count.to_i] }
         .sort_by { |_, count| -count }
         .to_h
     end
   end
 
   def new_writers_in_month(month_start)
-    sum_in_month('new_writers', month_start)
+    eod_sum('user_signups', month_start)
   end
 
   def goals_completed_in_month(month_start)
-    sum_in_month('goals_completed', month_start)
+    eod_sum('writing_goals_completed', month_start)
   end
 
   def forum_posts_in_month(month_start)
-    sum_in_month('forum_posts', month_start)
+    eod_sum('thredded_replies_created', month_start)
+  end
+
+  # Page types whose creation counts are shown (all have *_created EOD columns).
+  def self.page_classes
+    Rails.application.config.content_types[:all] + [Document, Timeline]
   end
 
   private
@@ -336,9 +345,11 @@ class CommunityStatsService
     end
   end
 
-  def sum_in_month(metric, month_start)
-    cached("#{metric}/#{month_start.strftime('%Y-%m')}") do
-      CommunityDailyStat.where(metric: metric, date: month_start.beginning_of_month..month_start.end_of_month).sum(:value)
-    end
+  def eod_reports_in_month(month_start)
+    EndOfDayAnalyticsReport.where(day: month_start.beginning_of_month..month_start.end_of_month)
+  end
+
+  def eod_sum(column, month_start)
+    cached("eod/#{column}/#{month_start.strftime('%Y-%m')}") { eod_reports_in_month(month_start).sum(column).to_i }
   end
 end
