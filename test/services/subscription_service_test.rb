@@ -86,8 +86,9 @@ class SubscriptionServiceTest < ActiveSupport::TestCase
     stub_subscription_list([
       stripe_subscription_json('sub_starter', 'starter')
     ])
+    stub_no_payment_methods
     modify = stub_request(:post, "#{STRIPE_BASE}/subscriptions/sub_starter")
-      .with(body: { items: [{ id: 'si_sub_starter', price: 'premium' }] })
+      .with(body: { items: [{ id: 'si_sub_starter', price: 'premium' }], payment_behavior: 'error_if_incomplete' })
       .to_return(status: 200, body: stripe_subscription_json('sub_starter', 'premium').to_json)
     stub_request(:get, "#{STRIPE_BASE}/subscriptions/sub_starter")
       .to_return(status: 200, body: stripe_subscription_json('sub_starter', 'premium').to_json)
@@ -96,6 +97,44 @@ class SubscriptionServiceTest < ActiveSupport::TestCase
 
     assert_requested modify
     assert_not_requested :post, "#{STRIPE_BASE}/subscriptions"
+  end
+
+  test "sync points a subscription with no payment method at the card on file when changing plans" do
+    stub_subscription_list([
+      stripe_subscription_json('sub_premium', 'premium')
+    ])
+    stub_request(:get, "#{STRIPE_BASE}/payment_methods")
+      .with(query: { customer: 'cus_test', type: 'card' })
+      .to_return(status: 200, body: { object: 'list', data: [{ id: 'pm_new_card', object: 'payment_method' }] }.to_json)
+    modify = stub_request(:post, "#{STRIPE_BASE}/subscriptions/sub_premium")
+      .with(body: {
+        items:                  [{ id: 'si_sub_premium', price: 'premium-trio' }],
+        payment_behavior:       'error_if_incomplete',
+        default_payment_method: 'pm_new_card'
+      })
+      .to_return(status: 200, body: stripe_subscription_json('sub_premium', 'premium-trio').to_json)
+    stub_request(:get, "#{STRIPE_BASE}/subscriptions/sub_premium")
+      .to_return(status: 200, body: stripe_subscription_json('sub_premium', 'premium-trio').to_json)
+
+    SubscriptionService.sync_stripe_subscriptions_to_plan(@user, 'premium-trio')
+
+    assert_requested modify
+  end
+
+  test "sync leaves a subscription's existing payment method alone when changing plans" do
+    stub_subscription_list([
+      stripe_subscription_json('sub_premium', 'premium').merge(default_payment_method: 'pm_existing')
+    ])
+    modify = stub_request(:post, "#{STRIPE_BASE}/subscriptions/sub_premium")
+      .with(body: { items: [{ id: 'si_sub_premium', price: 'premium-trio' }], payment_behavior: 'error_if_incomplete' })
+      .to_return(status: 200, body: stripe_subscription_json('sub_premium', 'premium-trio').to_json)
+    stub_request(:get, "#{STRIPE_BASE}/subscriptions/sub_premium")
+      .to_return(status: 200, body: stripe_subscription_json('sub_premium', 'premium-trio').to_json)
+
+    SubscriptionService.sync_stripe_subscriptions_to_plan(@user, 'premium-trio')
+
+    assert_requested modify
+    assert_not_requested :get, %r{#{STRIPE_BASE}/payment_methods}
   end
 
   test "sync creates a single subscription when the customer has none" do

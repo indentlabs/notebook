@@ -73,13 +73,7 @@ class SubscriptionService < Service
     end
 
     if kept.nil?
-      # Get the customer's default payment method
-      payment_methods = Stripe::PaymentMethod.list({
-        customer: user.stripe_customer_id,
-        type: 'card'
-      })
-
-      default_payment_method = payment_methods.data.first&.id
+      default_payment_method = card_on_file_id(user.stripe_customer_id)
 
       # Create a new subscription on Stripe with the default payment method.
       # error_if_incomplete makes a declined card raise Stripe::CardError
@@ -97,13 +91,28 @@ class SubscriptionService < Service
 
       Stripe::Subscription.create(subscription_params)
     elsif !subscription_price_ids(kept).include?(plan_id)
-      # Edit the existing Stripe subscription by modifying its items
-      Stripe::Subscription.update(kept.id, {
+      # Edit the existing Stripe subscription by modifying its items.
+      # error_if_incomplete makes a declined card raise Stripe::CardError
+      # (rolling back the local plan change) instead of leaving the
+      # subscription past_due on a plan the user never paid for.
+      update_params = {
         items: [{
           id:    kept.items.data[0].id,
           price: plan_id
-        }]
-      })
+        }],
+        payment_behavior: 'error_if_incomplete'
+      }
+
+      # Changing plans can invoice immediately (e.g. a different billing
+      # interval). If the card the subscription was billing to has since been
+      # replaced, it has no payment method left to charge and Stripe rejects the
+      # update outright, so point it at the card currently on file.
+      if kept.try(:default_payment_method).blank? && kept.try(:default_source).blank?
+        card_id = card_on_file_id(user.stripe_customer_id)
+        update_params[:default_payment_method] = card_id if card_id
+      end
+
+      Stripe::Subscription.update(kept.id, update_params)
       Stripe::Subscription.retrieve(kept.id)
     else
       # Already on the requested plan (e.g. a repeated click); just make sure a
@@ -113,6 +122,17 @@ class SubscriptionService < Service
       end
       kept
     end
+  end
+
+  # The id of a card attached to the customer, if any. We only keep one card on
+  # file at a time (see SubscriptionsController#information_change).
+  def self.card_on_file_id(stripe_customer_id)
+    return nil if stripe_customer_id.blank?
+
+    Stripe::PaymentMethod.list({
+      customer: stripe_customer_id,
+      type:     'card'
+    }).data.first&.id
   end
 
   # All of the customer's Stripe subscriptions that are (or can become) billable.
