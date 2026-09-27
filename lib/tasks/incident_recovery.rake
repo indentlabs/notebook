@@ -39,16 +39,29 @@ namespace :incident do
     puts "Premium prices: #{plans_by_price.map { |price, plan| "#{price} => plan #{plan.id}" }.join(', ')}"
     puts
 
-    # One paginated listing per status instead of one API call per user.
-    subscriptions_by_customer = Hash.new { |hash, key| hash[key] = [] }
-    SubscriptionService::BILLABLE_STRIPE_STATUSES.each do |status|
-      Stripe::Subscription.list(status: status, limit: 100).auto_paging_each do |subscription|
-        subscriptions_by_customer[subscription.customer] << subscription
+    # Only list subscriptions on Premium prices, one paginated listing per price and
+    # status. Listing every billable subscription (including every $0 'starter' one)
+    # held hundreds of thousands of objects in memory and took down the box it ran on.
+    subscriptions_by_id = {}
+    plans_by_price.each_key do |price|
+      SubscriptionService::BILLABLE_STRIPE_STATUSES.each do |status|
+        listed = 0
+        Stripe::Subscription.list(price: price, status: status, limit: 100).auto_paging_each do |subscription|
+          subscriptions_by_id[subscription.id] = subscription # a sub on two Premium prices is listed twice
+          listed += 1
+          puts "  ...#{listed} #{price} (#{status}) so far" if (listed % 1000).zero?
+        end
+        puts "  Listed #{listed} #{price} (#{status}) subscriptions"
+      rescue Stripe::InvalidRequestError => e
+        # e.g. a price that doesn't exist on this Stripe account (early-adopters may not)
+        puts "  WARNING: couldn't list #{price} (#{status}) subscriptions: #{e.message}"
       end
     end
+    subscriptions_by_customer = subscriptions_by_id.values.group_by(&:customer)
 
-    # Unrecognized prices are listed loudly: if billing_plans.stripe_plan_id doesn't match
-    # what Stripe uses, real Premium subscribers would otherwise be silently skipped.
+    # Every price on the listed subscriptions, so a Premium subscription that also carries
+    # an unrecognized price stands out. (Subscriptions ONLY on unknown prices aren't
+    # listed at all now; the abort below still catches a wholesale plan/price mismatch.)
     price_counts = Hash.new(0)
     subscriptions_by_customer.each_value do |subscriptions|
       subscriptions.each { |s| SubscriptionService.subscription_price_ids(s).each { |price| price_counts[price] += 1 } }
@@ -64,6 +77,14 @@ namespace :incident do
       abort "ABORTING: no Stripe subscriptions on any Premium price. Wrong Stripe account/key, or " \
             "billing_plans.stripe_plan_id doesn't match Stripe's price IDs. Nothing was changed."
     end
+
+    # users.stripe_customer_id isn't indexed, so one lookup per customer would be a full
+    # scan of the users table each time. Fetch them all in a few large batches instead.
+    users_by_customer = subscriptions_by_customer.keys.each_slice(5_000).flat_map do |customer_ids|
+      User.where(stripe_customer_id: customer_ids).to_a
+    end.group_by(&:stripe_customer_id)
+    puts "Matched #{users_by_customer.size} of #{subscriptions_by_customer.size} Stripe customers to users."
+    puts
 
     counts                 = Hash.new(0)
     restored               = 0
@@ -91,7 +112,7 @@ namespace :incident do
         next if premium_subs.empty? # Starter-only or unrelated customers: nothing to restore
         premium_customer_ids << customer_id
 
-        users = User.where(stripe_customer_id: customer_id).to_a
+        users = users_by_customer.fetch(customer_id, [])
         next write.call('review_no_matching_user', customer_id: customer_id, subs: premium_subs) if users.empty?
         next write.call('review_multiple_users', customer_id: customer_id, subs: premium_subs, note: "users #{users.map(&:id).join(' ')}") if users.many?
         user = users.first

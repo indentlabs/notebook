@@ -116,13 +116,18 @@ class SubscriptionSyncTasksTest < ActiveSupport::TestCase
     subscription_json(price_id, status: status).merge(id: "sub_#{customer}_#{price_id}", customer: customer)
   end
 
-  # Stubs the per-status Stripe listings the restore task pages through.
+  # Stubs the per-price, per-status Stripe listings the restore task pages through.
+  # Unfiltered listings aren't stubbed, so WebMock fails any test that makes one.
   def stub_stripe_listing(subscriptions)
-    SubscriptionService::BILLABLE_STRIPE_STATUSES.each do |status|
-      data = subscriptions.select { |s| s[:status] == status }
-      stub_request(:get, "#{STRIPE_BASE}/subscriptions")
-        .with(query: { status: status, limit: '100' })
-        .to_return(status: 200, body: { object: 'list', url: '/v1/subscriptions', has_more: false, data: data }.to_json)
+    %w[early-adopters premium premium-trio premium-annual].each do |price|
+      SubscriptionService::BILLABLE_STRIPE_STATUSES.each do |status|
+        data = subscriptions.select do |s|
+          s[:status] == status && s[:items][:data].any? { |item| item[:price][:id] == price }
+        end
+        stub_request(:get, "#{STRIPE_BASE}/subscriptions")
+          .with(query: { price: price, status: status, limit: '100' })
+          .to_return(status: 200, body: { object: 'list', url: '/v1/subscriptions', has_more: false, data: data }.to_json)
+      end
     end
   end
 
@@ -227,6 +232,19 @@ class SubscriptionSyncTasksTest < ActiveSupport::TestCase
     )
     downgrade!(@user)
     stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    ENV['APPLY'] = '1'
+    rows = run_restore
+
+    assert_equal @premium.id, @user.reload.selected_billing_plan_id
+    assert_equal 'restored', outcome_for(rows, @user)
+  end
+
+  test "restore skips a Premium price Stripe doesn't recognize and still restores the rest" do
+    downgrade!(@user)
+    stub_stripe_listing([stripe_subscription('cus_one', 'premium')])
+    stub_request(:get, "#{STRIPE_BASE}/subscriptions")
+      .with(query: hash_including(price: 'early-adopters'))
+      .to_return(status: 400, body: { error: { type: 'invalid_request_error', message: 'No such price' } }.to_json)
     ENV['APPLY'] = '1'
     rows = run_restore
 
