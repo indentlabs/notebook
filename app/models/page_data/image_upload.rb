@@ -18,9 +18,7 @@ class ImageUpload < ApplicationRecord
   scope :ordered, -> { order(:position) }
 
   # This is the old way we uploaded files -- now we're transitioning to ActiveStorage's has_one_attached
-  # Derivatives regenerated when the framing changes (see ImagePresets) plus
-  # the large WebP used by the lightbox and the editor instead of the original.
-  FRAMED_STYLES = ImagePresets.style_names.freeze
+  # The large WebP used by the lightbox and the editor instead of the original.
   XLARGE_STYLE  = ImagePresets.webp_style('1600x1600>', convert_options: '-quality 85 -strip').freeze
 
   has_attached_file :src,

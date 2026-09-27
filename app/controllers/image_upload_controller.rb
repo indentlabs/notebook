@@ -27,6 +27,7 @@ class ImageUploadController < ApplicationController
     remaining_kb = current_user.reload.upload_bandwidth_kb
 
     if result.success?
+      GalleryActivity.record!(content, user: current_user, action: :image_added, image: result.image)
       image = ContentImage.wrap(result.image)
       html  = render_to_string(
         partial: 'content/edit/gallery/card',
@@ -49,13 +50,15 @@ class ImageUploadController < ApplicationController
   def delete
     reclaimed_space_kb = (@image.src_file_size || 0) / 1000.0
     # Credit the quota back to whoever paid for the upload.
-    owner = @image.user || @image.content&.user
+    content = @image.content
+    owner = @image.user || content&.user
 
     result = @image.destroy
 
     if result && owner
       owner.update(upload_bandwidth_kb: owner.upload_bandwidth_kb + reclaimed_space_kb)
     end
+    GalleryActivity.record!(content, user: current_user, action: :image_removed, image: @image) if result
 
     respond_to do |format|
       format.html { redirect_back fallback_location: root_path, notice: 'Image successfully deleted.' }
@@ -72,6 +75,8 @@ class ImageUploadController < ApplicationController
   # PATCH /image_uploads/:id
   def update
     if @image.update(image_upload_params)
+      GalleryActivity.record!(@image.content, user: current_user, action: :image_updated, image: @image,
+                              changes: GalleryActivity.changes_from(@image))
       render json: {
         success: true,
         notes:   @image.notes,

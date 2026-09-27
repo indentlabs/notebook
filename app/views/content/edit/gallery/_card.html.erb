@@ -9,9 +9,12 @@
   image = ContentImage.wrap(image)
   cover = image.cover?
   dimensions = image.width && image.height ? "#{image.width} × #{image.height}" : nil
+  # Only public pages have outside viewers who'd see a different cover.
+  page_public = content.respond_to?(:public_content?) ? content.public_content? : true
+  private_cover = page_public && image.supports_privacy? && !image.public? && (cover || image.cover_for.any?)
 %>
 <div id="gallery-<%= image.dom_id %>"
-     class="gallery-card group relative flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+     class="gallery-card group relative flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
      data-gallery-target="card"
      data-image-id="<%= image.id %>"
      data-image-type="<%= image.type_param %>"
@@ -19,6 +22,8 @@
      data-param-key="<%= image.param_key %>"
      data-pinned="<%= cover %>"
      data-privacy="<%= image.privacy %>"
+     data-supports-privacy="<%= image.supports_privacy? %>"
+     data-page-public="<%= page_public %>"
      data-update-url="<%= image.update_path %>"
      data-delete-url="<%= image.delete_path %>"
      data-pin-url="<%= image.pin_path %>"
@@ -35,7 +40,7 @@
      data-focal-y="<%= image.focal_y %>">
 
   <%# Image area. The whole area is the drag handle. %>
-  <div class="gallery-card__media relative aspect-video overflow-hidden bg-gray-100 dark:bg-gray-900 <%= cover ? 'ring-2 ring-inset ring-yellow-400' : '' %>"
+  <div class="gallery-card__media relative aspect-video overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-900 <%= cover ? 'ring-2 ring-inset ring-yellow-400' : '' %>"
        data-gallery-target="media">
     <% if image.url(:large) %>
       <%= image_tag image.url(:large),
@@ -56,6 +61,11 @@
       <span class="gallery-card__cover-chip inline-flex items-center px-2 py-1 rounded-full bg-yellow-400 text-yellow-900 text-xs font-semibold shadow-sm <%= cover ? '' : 'hidden' %>"
             data-gallery-target="coverChip">
         <i class="material-icons text-xs mr-1">star</i> Cover
+      </span>
+      <span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-800 text-white text-xs font-semibold shadow-sm <%= image.supports_privacy? && !image.public? ? '' : 'hidden' %>"
+            data-gallery-target="privacyChip"
+            title="Only you and collaborators can see this image">
+        <i class="material-icons text-xs mr-1">lock</i> Private
       </span>
       <% ImagePresets.each do |preset| %>
         <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-600 text-white text-xs font-semibold shadow-sm <%= image.cover_for?(preset.key) ? '' : 'hidden' %>"
@@ -102,19 +112,6 @@
           <span class="tabular-nums whitespace-nowrap"><%= number_to_human_size(image.byte_size) %></span>
         <% end %>
       </div>
-
-      <% if image.supports_privacy? %>
-        <button type="button"
-                class="gallery-card__privacy inline-flex items-center px-2 py-0.5 rounded-full border text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 <%= image.public? ? 'border-green-300 text-green-700 dark:border-green-700 dark:text-green-300' : 'border-gray-300 text-gray-600 dark:border-gray-600 dark:text-gray-300' %>"
-                data-action="gallery#togglePrivacy"
-                data-gallery-target="privacyButton"
-                title="<%= image.public? ? 'Visible to anyone who can see this page. Click to make it private.' : 'Only you and collaborators can see this image. Click to make it public.' %>"
-                aria-label="<%= image.public? ? 'Image is public. Make it private.' : 'Image is private. Make it public.' %>"
-                aria-pressed="<%= image.public? ? 'false' : 'true' %>">
-          <i class="material-icons text-xs mr-1" data-gallery-target="privacyIcon"><%= image.public? ? 'public' : 'lock' %></i>
-          <span data-gallery-target="privacyLabel"><%= image.public? ? 'Public' : 'Private' %></span>
-        </button>
-      <% end %>
     </div>
 
     <%# Notes %>
@@ -163,6 +160,13 @@
         </button>
       </div>
     </div>
+
+    <%# Shown when a private image is chosen as a cover on a public page %>
+    <p class="flex items-start gap-1 text-xs text-yellow-800 dark:text-yellow-200 <%= private_cover ? '' : 'hidden' %>"
+       data-gallery-target="coverPrivacyWarning">
+      <i class="material-icons text-sm">warning</i>
+      <span>This image is private, so other viewers will see a different cover.</span>
+    </p>
 
     <%# Inline delete confirmation (hidden until the delete button is pressed) %>
     <div class="hidden items-center justify-between gap-2 rounded-md bg-red-50 dark:bg-red-900 px-3 py-2 text-sm text-red-800 dark:text-red-100"

@@ -473,7 +473,11 @@ class ContentController < ApplicationController
         entity_id: @content.id
       ),
       content_type: "Attribute"
-    ).includes(:user).order('created_at DESC')
+    ).or(ContentChangeEvent.where(
+      content_id: @content.id,
+      content_type: @content.class.name,
+      action: ContentChangeEvent::IMAGE_ACTIONS
+    )).includes(:user).order('created_at DESC')
     
     @paginated_events = change_events_query.paginate(page: page, per_page: per_page)
     @grouped_changes = group_events_by_date(@paginated_events)
@@ -499,7 +503,11 @@ class ContentController < ApplicationController
 
     image_uploads_list.each do |image_data|
       result = ImageUploadService.upload(user: current_user, content: content, file: image_data)
-      upload_errors << result.error unless result.success?
+      if result.success?
+        GalleryActivity.record!(content, user: current_user, action: :image_added, image: result.image)
+      else
+        upload_errors << result.error
+      end
     end
 
     if upload_errors.any? { |error| error.include?('upload bandwidth') }
@@ -645,6 +653,9 @@ class ContentController < ApplicationController
     result = ContentCoverService.toggle!(@image, preset: preset)
     new_pin_status = result.pinned
 
+    cover_change = preset ? { "cover:#{preset}" => [!result.active, result.active] } : { 'cover' => [!new_pin_status, new_pin_status] }
+    GalleryActivity.record!(content, user: current_user, action: :cover_changed, image: @image, changes: cover_change)
+
     content.clear_cover_image_cache if content.respond_to?(:clear_cover_image_cache)
     
     # Return the updated status (use new_pin_status since update_column might not refresh the object)
@@ -692,17 +703,12 @@ class ContentController < ApplicationController
   # Content update for link-type fields
   def link_field_update
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
-      entity_params.merge(attribute_field_id: @attribute_field.id)
-    )
-    attribute_value.user_id ||= current_user.id
-
-    if params.key?(:attribute_field)
-      attribute_value.value = params.require(:attribute_field).fetch('linked_pages', [])
+    linked_pages = if params.key?(:attribute_field)
+      params.require(:attribute_field).fetch('linked_pages', [])
     else
-      attribute_value.value = []
+      []
     end
-    attribute_value.save!
+    attribute_value = save_attribute_value!(linked_pages)
 
     # Make sure we create references from the entity to the linked pages
     set_entity
@@ -742,12 +748,7 @@ class ContentController < ApplicationController
   # Content update for name fields
   def name_field_update
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
-      entity_params.merge(attribute_field_id: @attribute_field.id)
-    )
-    attribute_value.value = field_params.fetch('value', '')
-    attribute_value.user_id ||= current_user.id
-    attribute_value.save!
+    attribute_value = save_attribute_value!(field_params.fetch('value', ''))
 
     # We also need to update the cached `name` field on the content page itself
     entity_type = entity_params.fetch(:entity_type)
@@ -762,12 +763,7 @@ class ContentController < ApplicationController
   def text_field_update
     text = field_params.fetch('value', '')
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
-      entity_params.merge(attribute_field_id: @attribute_field.id)
-    )
-    attribute_value.user_id ||= current_user.id
-    attribute_value.value = text
-    attribute_value.save!
+    attribute_value = save_attribute_value!(text)
 
     begin
       UpdateTextAttributeReferencesJob.perform_later(attribute_value.id)
@@ -785,12 +781,7 @@ class ContentController < ApplicationController
     return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
-      entity_params.merge(attribute_field_id: @attribute_field.id)
-    )
-    attribute_value.user_id ||= current_user.id
-    attribute_value.value = field_params.fetch('value', '')
-    attribute_value.save!
+    attribute_value = save_attribute_value!(field_params.fetch('value', ''))
 
     # Create the actual page_tag models too
     set_entity
@@ -807,15 +798,9 @@ class ContentController < ApplicationController
     return unless valid_content_types.include?(entity_params.fetch('entity_type'))
 
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
-    attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
-      entity_params.merge(attribute_field_id: @attribute_field.id)
-    )
-    attribute_value.user_id ||= current_user.id
-
     new_universe_id = field_params.fetch('value', nil).to_i
     new_universe_id = nil if new_universe_id == 0
-    attribute_value.value = new_universe_id
-    attribute_value.save!
+    attribute_value = save_attribute_value!(new_universe_id)
 
     @content = entity_params.fetch('entity_type').constantize.find_by(
       id:   entity_params.fetch('entity_id'), 
@@ -828,6 +813,31 @@ class ContentController < ApplicationController
 
   private
 
+  # Finds or creates the Attribute for @attribute_field on the current entity and saves `value` to it.
+  # Concurrent autosaves on a field with no value yet can both miss the existing-row lookup and try to
+  # create it. The loser fails either the uniqueness validation or, if both passed validation at once,
+  # the unique index on live attributes; either way we retry once and update the winner's row.
+  def save_attribute_value!(value)
+    retried = false
+    begin
+      attribute_value = @attribute_field.attribute_values.find_or_initialize_by(
+        entity_params.merge(attribute_field_id: @attribute_field.id)
+      )
+      attribute_value.user_id ||= current_user.id
+      attribute_value.value = value
+      attribute_value.save!
+      attribute_value
+    rescue ActiveRecord::RecordInvalid => e
+      raise if retried || !attribute_value.new_record? || !e.record.errors.of_kind?(:attribute_field_id, :taken)
+      retried = true
+      retry
+    rescue ActiveRecord::RecordNotUnique
+      raise if retried || !attribute_value.new_record?
+      retried = true
+      retry
+    end
+  end
+
   def group_events_by_date(events)
     # Group events by date for timeline display
     grouped = events.group_by { |event| event.created_at.to_date }
@@ -836,7 +846,7 @@ class ContentController < ApplicationController
       {
         date: date,
         events: date_events,
-        total_field_changes: date_events.sum { |event| event.changed_fields.keys.length },
+        total_field_changes: date_events.sum(&:change_count),
         users: date_events.map(&:user).compact.uniq
       }
     end.sort_by { |group| group[:date] }.reverse
@@ -860,7 +870,7 @@ class ContentController < ApplicationController
 
     tags_to_remove.each do |tag|
       # TODO: create changelog event for RemovedTag or use destroy_all
-      @content.page_tags.find_by(tag: tag).destroy
+      @content.page_tags.find_by(tag: tag)&.destroy
     end
   end
 
