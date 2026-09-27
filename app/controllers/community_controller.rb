@@ -9,6 +9,7 @@ class CommunityController < ApplicationController
     )
 
     @stats = CommunityStatsService.new
+    CommunityStatsRefreshJob.enqueue_unless_pending if @stats.stale?
     @this_month = Date.current.beginning_of_month
     @last_month = @this_month.prev_month
 
