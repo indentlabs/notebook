@@ -816,7 +816,11 @@ class BasilController < ApplicationController
       return
     end
 
+    newly_saved = @commission.saved_at.nil?
     @commission.update(saved_at: DateTime.current)
+    if newly_saved && @commission.entity
+      GalleryActivity.record!(@commission.entity, user: current_user, action: :image_added, image: @commission)
+    end
     render json: { success: true }, status: 200
   end
 
@@ -832,9 +836,33 @@ class BasilController < ApplicationController
       return
     end
 
+    # Only saved images were on the page; unsaved ones only lived in Basil's history.
+    on_page = @commission.saved_at.present? && @commission.entity
     @commission.destroy!
+    GalleryActivity.record!(@commission.entity, user: current_user, action: :image_removed, image: @commission) if on_page
     respond_to do |format|
       format.html { redirect_back fallback_location: root_path, notice: 'Image successfully deleted.' }
+      format.all { render json: { success: true }, status: 200 }
+    end
+  end
+
+  # Cancels a commission that hasn't finished generating yet. Cancelled
+  # commissions are hard-deleted (not soft-deleted) so they don't count toward
+  # the user's free image limit or Basil stats, which include deleted rows.
+  def cancel
+    @commission = BasilCommission.find_by(id: params[:id], user: current_user, completed_at: nil)
+
+    if @commission.nil? || @commission.complete?
+      respond_to do |format|
+        format.html { redirect_back fallback_location: basil_path, alert: 'That commission can no longer be cancelled.' }
+        format.all { render json: { error: "Commission not found or already complete" }, status: :not_found }
+      end
+      return
+    end
+
+    @commission.really_destroy!
+    respond_to do |format|
+      format.html { redirect_back fallback_location: basil_path, notice: 'Commission cancelled.' }
       format.all { render json: { success: true }, status: 200 }
     end
   end
@@ -853,6 +881,8 @@ class BasilController < ApplicationController
     end
 
     if @commission.update(update_commission_params)
+      GalleryActivity.record!(@commission.entity, user: current_user, action: :image_updated, image: @commission,
+                              changes: GalleryActivity.changes_from(@commission))
       render json: { success: true, image: ContentImage.wrap(@commission).as_json }, status: 200
     else
       render json: { error: @commission.errors.full_messages }, status: :unprocessable_entity

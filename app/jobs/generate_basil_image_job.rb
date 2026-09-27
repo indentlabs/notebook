@@ -13,7 +13,9 @@ class GenerateBasilImageJob < ApplicationJob
 
   def perform(basil_commission_id)
     # Find the BasilCommission record
-    commission = BasilCommission.find(basil_commission_id)
+    # The commission may have been cancelled (hard-deleted) while queued.
+    commission = BasilCommission.find_by(id: basil_commission_id)
+    return if commission.nil?
 
     # Skip if already completed (image attached)
     return if commission.image.attached?
@@ -57,6 +59,9 @@ class GenerateBasilImageJob < ApplicationJob
 
       # Decode the base64 image data
       image_data_binary = Base64.decode64(image_data_base64)
+
+      # Don't store the image if the commission was cancelled mid-generation
+      return unless BasilCommission.exists?(id: commission.id)
 
       # --- Manual S3 Upload and ActiveStorage Blob Creation --- 
       begin

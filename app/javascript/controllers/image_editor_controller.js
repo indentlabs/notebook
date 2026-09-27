@@ -134,7 +134,7 @@ export default class extends Controller {
     this.notesTarget.value = notes ? notes.value : ""
     this.originalNotes = this.notesTarget.value
 
-    const supportsPrivacy = !!this.card.querySelector("[data-gallery-target='privacyButton']")
+    const supportsPrivacy = this.card.dataset.supportsPrivacy === "true"
     this.privacyRowTarget.classList.toggle("hidden", !supportsPrivacy)
     this.privacyTarget.value = this.info.privacy || "public"
     this.originalPrivacy = this.privacyTarget.value

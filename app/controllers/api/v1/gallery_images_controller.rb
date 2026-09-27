@@ -79,6 +79,8 @@ class Api::V1::GalleryImagesController < ApplicationController
     end
 
     if success
+      # Reorders bump the page's "recently edited" time but aren't logged.
+      GalleryActivity.touch!(content)
       render json: { success: true }
     else
       render json: { error: 'Failed to update image positions' }, status: :unprocessable_entity

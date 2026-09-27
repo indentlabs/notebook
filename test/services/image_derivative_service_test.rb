@@ -115,6 +115,15 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
     assert ContentImage.wrap(commission).preset_url(:square).present?
   end
 
+  test "refuses to report success for styles the attachment doesn't define" do
+    @upload = create_upload
+
+    error = assert_raises(ArgumentError) do
+      ImageDerivativeService.new(@upload).generate!(styles: [:banner, :not_a_style])
+    end
+    assert_match(/not_a_style/, error.message)
+  end
+
   test "job discards missing records instead of failing" do
     assert_nothing_raised do
       GenerateImageCropsJob.perform_now('ImageUpload', -1)

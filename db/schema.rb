@@ -175,6 +175,7 @@ ActiveRecord::Schema.define(version: 2026_09_27_120000) do
     t.integer "word_count_cache"
     t.index ["attribute_field_id", "deleted_at", "entity_id", "entity_type"], name: "attributes_afi_deleted_at_entity_id_entity_type"
     t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
+    t.index ["attribute_field_id", "entity_id", "entity_type"], name: "index_attributes_unique_live_value", unique: true, where: "deleted_at IS NULL"
     t.index ["attribute_field_id", "user_id", "entity_type", "entity_id", "deleted_at"], name: "attributes_afi_ui_et_ei_da"
     t.index ["deleted_at", "attribute_field_id", "entity_type", "entity_id"], name: "deleted_at__attribute_field_id__entity_type_and_id"
     t.index ["deleted_at", "user_id", "attribute_field_id", "entity_type", "entity_id", "id"], name: "all_the_export_fields_with_sort"

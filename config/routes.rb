@@ -35,6 +35,7 @@ Rails.application.routes.draw do
       post   '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
       post   '/:id/save',        to: 'basil#save',     as: :basil_save
       delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
+      delete '/:id/cancel',      to: 'basil#cancel',   as: :basil_cancel
       get    '/commission/:jobid', to: 'basil#commission_info', as: :basil_commission_info
       patch  '/commission/:id',    to: 'basil#update_commission', as: :basil_commission_update
 

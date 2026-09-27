@@ -320,8 +320,14 @@ function editPageController() {
       // Handle window resize
       window.addEventListener('resize', () => {
         // Left Sidebar Logic (lg breakpoint)
+        // Only reset visibility when crossing the breakpoint. Mobile browsers fire resize
+        // events while scrolling (as the address bar shows/hides), which would otherwise
+        // reopen a Table of Contents the user just hid.
+        const wasDesktop = this.isDesktop;
         this.isDesktop = window.innerWidth >= 1024;
-        this.showLeftSidebar = window.innerWidth >= 1024;
+        if (wasDesktop !== this.isDesktop) {
+          this.showLeftSidebar = this.isDesktop;
+        }
 
         // Right Sidebar Logic (lg breakpoint)
         const wasXlDesktop = this.isXlDesktop;
