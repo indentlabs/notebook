@@ -15,8 +15,9 @@ class CommunityStatsService
   CACHE_TTL     = 5.minutes
   CACHE_VERSION = 'v2'
 
-  # Recent rollups older than this mean the refresh job isn't keeping up.
-  STALE_AFTER = 20.minutes
+  # Recent rollups older than this mean the hourly refresh (cron) isn't running,
+  # so the page enqueues one itself. Keep this longer than the cron interval.
+  STALE_AFTER = 90.minutes
 
   # Days of daily history loaded for charts, the heatmap, and weekday averages.
   HISTORY_DAYS = 400

@@ -1,5 +1,5 @@
 namespace :community do
-  desc "Refresh the last few days of /community stats (run every ~15 minutes)"
+  desc "Refresh the last few days of /community stats (run hourly from cron)"
   task refresh: :environment do
     started = Time.current
     CommunityStatsRollup.refresh_recent!

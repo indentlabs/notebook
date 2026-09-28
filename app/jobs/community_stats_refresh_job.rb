@@ -1,5 +1,5 @@
 # Re-rolls the last few days of anonymous community stats for /community.
-# Run it every ~15 minutes (config/schedule.rb); the page also enqueues it
+# Run it hourly via cron (rake community:refresh); the page also enqueues it
 # when it notices the numbers have gone stale.
 class CommunityStatsRefreshJob < ApplicationJob
   queue_as :low_priority
