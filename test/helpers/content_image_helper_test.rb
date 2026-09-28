@@ -135,6 +135,40 @@ class ContentImageHelperTest < ActionView::TestCase
     first&.destroy
   end
 
+  test "content_cover_image? reflects whether a gallery page has an image" do
+    assert_not content_cover_image?(@character)
+
+    @upload = create_upload(privacy: 'private')
+    @character.clear_cover_image_cache
+    assert_not content_cover_image?(@character)
+    assert content_cover_image?(@character, include_private: true)
+    assert_equal @upload.id, content_cover_image(@character, include_private: true).id
+  end
+
+  # PageCollection's legacy cover_image column shadows the gallery API and
+  # takes no arguments; calling it with options used to raise ArgumentError.
+  test "page collections render their own header instead of the gallery API" do
+    collection = page_collections(:one)
+    collection.cover_image = 'https://example.com/collection-cover.png'
+
+    assert_nil content_cover_image(collection)
+    assert content_cover_image?(collection)
+    html = content_image_tag(collection, :card, class: 'w-full')
+    assert_includes html, 'https://example.com/collection-cover.png'
+    assert_includes html, 'class="w-full"'
+
+    collection.cover_image = nil
+    assert_not content_cover_image?(collection)
+    assert_includes content_image_tag(collection, :card), 'card-headers/pagecollections'
+  end
+
+  test "records with neither a gallery nor a header have no cover" do
+    record = Object.new
+
+    assert_nil content_cover_image(record)
+    assert_not content_cover_image?(record)
+  end
+
   private
 
   def create_upload(privacy: 'public')
@@ -147,15 +181,4 @@ class ContentImageHelperTest < ActionView::TestCase
     )
   end
 
-  test "renders a page collection's own cover without calling the gallery API" do
-    collection = page_collections(:one)
-    collection.cover_image = 'https://example.com/collection-cover.png'
-
-    html = content_image_tag(collection, :card, class: 'w-full')
-    assert_includes html, 'https://example.com/collection-cover.png'
-    assert_includes html, 'class="w-full"'
-
-    collection.cover_image = nil
-    assert_includes content_image_tag(collection, :card), 'card-headers/pagecollections'
-  end
 end

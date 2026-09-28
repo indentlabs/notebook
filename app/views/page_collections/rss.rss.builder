@@ -44,7 +44,7 @@ xml.rss version: "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom", "xmlns:cont
         
         # Add enclosure for article image if present
         # Feed readers get the legacy JPEG/PNG size rather than WebP
-        cover = submission.content.respond_to?(:cover_image) ? submission.content.cover_image : nil
+        cover = content_cover_image(submission.content)
         enclosure_url = cover && (cover.url(:hero) || cover.original_url)
         if enclosure_url.present?
           begin

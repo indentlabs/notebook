@@ -205,7 +205,7 @@ class MainController < ApplicationController
         days_since_created: (Date.current - content_page.created_at.to_date).to_i,
         days_since_updated: (Date.current - content_page.updated_at.to_date).to_i,
         word_count: content_page.try(:cached_word_count) || 0,
-        has_image: content_page.respond_to?(:cover_image?) && content_page.cover_image?(include_private: true)
+        has_image: helpers.content_cover_image?(content_page, include_private: true)
       }
     end
     
