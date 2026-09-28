@@ -10,6 +10,7 @@
 
   should_autocomplete = defined?(autocomplete) && !!autocomplete
   should_autosave     = defined?(autosave)     && !!autosave
+  can_roll_dice       = should_autocomplete && autocomplete.any?
 %>
 
 <% unless defined?(show_label) && !show_label %>
@@ -25,7 +26,8 @@
     default: 'Write as little or as much as you want!'
 %>
 
-<div x-data="contentLinking()" class="relative">
+<div class="js-field-with-tools flex items-start gap-1">
+<div x-data="contentLinking()" class="relative flex-1 min-w-0">
   <%= hidden_field_tag "field[name]", field[:id] %>
   <%=
     text_area_tag "field[value]",
@@ -47,6 +49,20 @@
 
   <!-- Include shared dropdown template -->
   <%= render partial: 'javascripts/content_linking_dropdown' %>
+</div>
+
+  <%# Input help tools that sit beside the field %>
+  <% if can_roll_dice %>
+    <div class="flex flex-col gap-1 pt-1">
+      <button type="button"
+              class="js-roll-field-dice p-1 rounded text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:text-gray-500 transition-colors"
+              title="Roll for a random answer"
+              aria-label="Roll for a random answer"
+              data-choices="<%= autocomplete.to_json %>">
+        <i class="material-icons text-lg leading-none">casino</i>
+      </button>
+    </div>
+  <% end %>
 </div>
 
 <%# todo switch to field[:options].fetch('privacy') %>
