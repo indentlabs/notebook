@@ -101,7 +101,8 @@ class GenerateBasilImageJob < ApplicationJob
 
         # 3. Associate the blob with the commission
         # Note: We use update! which saves immediately. No separate save! needed.
-        commission.update!(image: blob)
+        width, height = BasilCommission.png_dimensions(image_data_binary)
+        commission.update!(image: blob, width: width, height: height)
 
         # 4. Update completed_at timestamp
         commission.update!(completed_at: Time.current)
