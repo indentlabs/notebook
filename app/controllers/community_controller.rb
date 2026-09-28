@@ -9,8 +9,11 @@ class CommunityController < ApplicationController
     )
 
     @stats = CommunityStatsService.new
+    CommunityStatsRefreshJob.enqueue_unless_pending if @stats.stale?
     @this_month = Date.current.beginning_of_month
     @last_month = @this_month.prev_month
+    # Creation counts come from nightly reports, so on the 1st there's nothing for this month yet
+    @creations_month = Date.current.day == 1 ? @last_month : @this_month
 
     if user_signed_in?
       @your_words_today = WordCountUpdate.words_written_on_date(current_user, current_user.current_date_in_time_zone)

@@ -2,6 +2,7 @@ require 'test_helper'
 
 class CommunityControllerTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
 
   setup do
     Rails.cache.clear
@@ -13,6 +14,8 @@ class CommunityControllerTest < ActionDispatch::IntegrationTest
       WordCountUpdate.insert_all!([{ user_id: user_id, entity_type: type, entity_id: id, for_date: date,
                                      word_count: words, created_at: Time.current, updated_at: Time.current }])
     end
+    [Date.current - 40.days, Date.current - 3.days].each { |date| CommunityStatsRollup.new(date).run! }
+    CommunityStatsRollup.refresh_recent!
 
   teardown do
     Rails.cache.clear
@@ -35,8 +38,15 @@ class CommunityControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "renders with no writing activity at all" do
-    WordCountUpdate.delete_all
+    CommunityDailyStat.delete_all
+    Rails.cache.clear
     get community_path
     assert_response :success
+  end
+
+  test "enqueues a refresh when the stats are stale" do
+    CommunityDailyStat.delete_all
+    Rails.cache.clear
+    assert_enqueued_with(job: CommunityStatsRefreshJob) { get community_path }
   end
 end

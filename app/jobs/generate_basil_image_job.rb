@@ -72,7 +72,6 @@ class GenerateBasilImageJob < ApplicationJob
         )
         bucket_name = ENV.fetch('S3_BASIL_BUCKET_NAME', 'basil-commissions')
         s3_key      = "job-#{commission.job_id || SecureRandom.uuid}.png" # Use job_id for the key
-        filename    = s3_key # Use the same for the filename
 
         # 1. Upload directly to S3
         Rails.logger.info "Uploading key '#{s3_key}' to bucket '#{bucket_name}'"
@@ -85,21 +84,12 @@ class GenerateBasilImageJob < ApplicationJob
         )
 
         # 2. Create the ActiveStorage Blob record manually
-        checksum = upload_response.etag.gsub('"','') # ETag comes with quotes
-        byte_size = image_data_binary.size
-
-        blob = ActiveStorage::Blob.create!(
-          key:          s3_key,
-          filename:     filename,
-          content_type: 'image/png',
-          byte_size:    byte_size,
-          checksum:     checksum,
-          service_name: :amazon_basil # Crucial: Specify the service!
-        )
+        blob = BasilCommission.create_png_blob!(s3_key, image_data_binary)
 
         # 3. Associate the blob with the commission
         # Note: We use update! which saves immediately. No separate save! needed.
-        commission.update!(image: blob)
+        width, height = BasilCommission.png_dimensions(image_data_binary)
+        commission.update!(image: blob, width: width, height: height)
 
         # 4. Update completed_at timestamp
         commission.update!(completed_at: Time.current)

@@ -18,7 +18,13 @@ module ContentImageHelper
   #                    (default "100vw")
   def content_image_tag(content, preset, include_private: false, pick: :first, size: :full, sizes: nil, **options)
     preset = preset.to_sym
-    image  = content.respond_to?(:cover_image) ? content.cover_image(include_private: include_private, pick: pick, preset: preset) : nil
+    image  = gallery_cover_image(content, include_private: include_private, pick: pick, preset: preset)
+
+    # Pages without a gallery (e.g. PageCollection) supply their own header.
+    if image.nil? && !content.is_a?(HasImageUploads) && content.respond_to?(:header_image_url)
+      options[:alt] ||= content.try(:name).to_s
+      return image_tag(content.header_image_url, options)
+    end
 
     if image.nil?
       options[:alt] ||= "#{content.try(:name)} placeholder image".strip
@@ -55,7 +61,7 @@ module ContentImageHelper
   # link-preview framing, else the card, else a general size, else the
   # placeholder.
   def content_social_image_url(content)
-    image = content.respond_to?(:cover_image) ? content.cover_image(include_private: false, preset: :social) : nil
+    image = gallery_cover_image(content, include_private: false, preset: :social)
     url = image && (image.preset_url(:social) || image.preset_url(:card) || image.url(:hero) || image.original_url)
     url ||= content_placeholder_image(content)
     image_url(url)
@@ -75,5 +81,13 @@ module ContentImageHelper
   def content_placeholder_image(content)
     klass = content.respond_to?(:page_type) && content.page_type.present? ? content.page_type : content.class.name
     "card-headers/#{klass.to_s.downcase.pluralize}.webp"
+  end
+
+  private
+
+  # Only gallery pages take cover_image options; other models (PageCollection)
+  # have an unrelated cover_image column that accepts no arguments.
+  def gallery_cover_image(content, **options)
+    content.is_a?(HasImageUploads) ? content.cover_image(**options) : nil
   end
 end

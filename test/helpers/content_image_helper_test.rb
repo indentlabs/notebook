@@ -146,4 +146,16 @@ class ContentImageHelperTest < ActionView::TestCase
       src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files/gallery_test.png'), 'image/png')
     )
   end
+
+  test "renders a page collection's own cover without calling the gallery API" do
+    collection = page_collections(:one)
+    collection.cover_image = 'https://example.com/collection-cover.png'
+
+    html = content_image_tag(collection, :card, class: 'w-full')
+    assert_includes html, 'https://example.com/collection-cover.png'
+    assert_includes html, 'class="w-full"'
+
+    collection.cover_image = nil
+    assert_includes content_image_tag(collection, :card), 'card-headers/pagecollections'
+  end
 end

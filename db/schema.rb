@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_27_130000) do
+ActiveRecord::Schema.define(version: 2026_09_28_130000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -556,6 +556,24 @@ ActiveRecord::Schema.define(version: 2026_09_27_130000) do
     t.integer "user_id"
     t.integer "character_id"
     t.integer "child_id"
+  end
+
+  create_table "community_daily_stats", force: :cascade do |t|
+    t.date "date", null: false
+    t.string "metric", null: false
+    t.string "key", default: "", null: false
+    t.bigint "value", default: 0, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["date", "metric", "key"], name: "index_community_daily_stats_unique", unique: true
+    t.index ["metric", "date"], name: "index_community_daily_stats_on_metric_and_date"
+  end
+
+  create_table "community_monthly_writers", force: :cascade do |t|
+    t.date "month", null: false
+    t.integer "user_id", null: false
+    t.index ["month", "user_id"], name: "index_community_monthly_writers_on_month_and_user_id", unique: true
+    t.index ["user_id"], name: "index_community_monthly_writers_on_user_id"
   end
 
   create_table "conditions", force: :cascade do |t|
@@ -1387,6 +1405,7 @@ ActiveRecord::Schema.define(version: 2026_09_27_130000) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "document_revisions_created"
+    t.integer "writing_goals_completed"
   end
 
   create_table "famous_figureships", force: :cascade do |t|

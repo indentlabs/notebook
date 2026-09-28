@@ -10,8 +10,8 @@
   busiest_month  = stats.busiest_month
   favorite_day   = stats.favorite_weekday
   weekday_max    = [stats.weekday_averages.map(&:last).max.to_i, 1].max
-  pages_created  = stats.pages_created_in_month(@this_month)
-  page_classes   = (Rails.application.config.content_types[:all] + [Document, Timeline]).index_by(&:name)
+  pages_created  = stats.pages_created_in_month(@creations_month)
+  page_classes   = CommunityStatsService.page_classes.index_by(&:name)
 
   # Heatmap intensity classes, written out in full so Tailwind keeps them.
   heatmap_classes = [
@@ -295,25 +295,25 @@
 
   <%# ───────────────────────── Worlds taking shape ───────────────────────── %>
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
-    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Worlds taking shape in <%= @this_month.strftime('%B') %></h2>
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Worlds taking shape in <%= @creations_month.strftime('%B') %></h2>
     <p class="mt-2 text-gray-600 dark:text-gray-400">
-      New pages the community has started this month. Each one is a character, a place, or an idea that didn't exist before.
+      New pages the community started <%= @creations_month == @this_month ? 'this month (counted through yesterday)' : 'last month' %>. Each one is a character, a place, or an idea that didn't exist before.
     </p>
 
     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm p-5">
         <i class="material-icons text-sky-100">waving_hand</i>
-        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.new_writers_in_month(@this_month) %></div>
+        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.new_writers_in_month(@creations_month) %></div>
         <div class="text-sm text-sky-100">new writers joined</div>
       </div>
       <div class="rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-sm p-5">
         <i class="material-icons text-emerald-100">flag</i>
-        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.goals_completed_in_month(@this_month) %></div>
+        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.goals_completed_in_month(@creations_month) %></div>
         <div class="text-sm text-emerald-100">writing goals completed</div>
       </div>
       <div class="rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm p-5">
         <i class="material-icons text-violet-100">forum</i>
-        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.forum_posts_in_month(@this_month) %></div>
+        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.forum_posts_in_month(@creations_month) %></div>
         <div class="text-sm text-violet-100">
           posts in the <%= link_to 'forums', main_app.thredded_path, class: 'underline hover:text-white' %>
         </div>
@@ -365,7 +365,7 @@
       </div>
     </div>
     <p class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
-      Today's numbers refresh every few minutes. Days are counted in each writer's own time zone.
+      Numbers refresh about every 15 minutes. Days are counted in each writer's own time zone.
     </p>
   </section>
 </div>
