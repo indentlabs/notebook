@@ -177,7 +177,7 @@ class BooksController < ApplicationController
     source = :book
 
     if characters.empty? && @book.universe.present?
-      characters = @book.universe.characters.unarchived.order(:name).limit(CHARACTER_LOOKUP_LIMIT)
+      characters = @book.universe.characters.unarchived.includes(:image_uploads).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
       source = :universe
     end
 
@@ -199,6 +199,6 @@ class BooksController < ApplicationController
       .pluck(:entity_id)
     return [] if character_ids.empty?
 
-    Character.unarchived.where(id: character_ids).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
+    Character.unarchived.includes(:image_uploads).where(id: character_ids).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
   end
 end
