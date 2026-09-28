@@ -11,7 +11,12 @@
   favorite_day   = stats.favorite_weekday
   weekday_max    = [stats.weekday_averages.map(&:last).max.to_i, 1].max
   pages_created  = stats.pages_created_in_month(@creations_month)
-  page_classes   = CommunityStatsService.page_classes.index_by(&:name)
+  pages_edited   = stats.pages_edited_in_month(@creations_month)
+  page_classes   = CommunityStatsService.display_page_classes.index_by(&:name)
+  # Edited counts include new pages that got any writing; fall back to created
+  # counts for types (or months) with no edit data yet.
+  pages_worked_on = pages_created.merge(pages_edited) { |_, created, edited| [created, edited].max }
+                                 .sort_by { |_, count| -count }.to_h
 
   # Heatmap intensity classes, written out in full so Tailwind keeps them.
   heatmap_classes = [
@@ -27,21 +32,13 @@
 <div class="bg-gray-50 dark:bg-gray-900 min-h-screen">
 
   <%# ───────────────────────── Hero: what's happening right now ───────────────────────── %>
-  <section class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-500 text-white">
+  <section class="bg-notebook-blue text-white">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-center">
-      <div class="inline-flex items-center gap-2 rounded-full bg-white bg-opacity-10 px-4 py-1 text-sm font-medium text-indigo-100">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-300 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
-        </span>
-        The Notebook.ai community, live
-      </div>
-
-      <h1 class="mt-6 text-4xl sm:text-5xl font-bold tracking-tight">
-        Every writer here writes in private.
-        <span class="block text-indigo-200">None of us writes alone.</span>
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
+        Everything is private by default.
+        <span class="block text-blue-100">But none of us write alone.</span>
       </h1>
-      <p class="mt-6 max-w-2xl mx-auto text-lg text-indigo-100">
+      <p class="mt-6 max-w-2xl mx-auto text-lg text-blue-50">
         Your notebook is yours alone, and nobody else can read it. But every word you write adds to the
         pile of words written by thousands of other writers working on their own worlds, today and every day.
       </p>
@@ -49,31 +46,31 @@
       <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
         <div class="rounded-xl bg-white bg-opacity-10 px-6 py-6">
           <div class="text-4xl sm:text-5xl font-bold tabular-nums"><%= number_with_delimiter stats.words_today %></div>
-          <div class="mt-1 text-sm uppercase tracking-wide text-indigo-100">words written today</div>
+          <div class="mt-1 text-sm uppercase tracking-wide text-blue-50">words written today</div>
         </div>
         <div class="rounded-xl bg-white bg-opacity-10 px-6 py-6">
           <div class="text-4xl sm:text-5xl font-bold tabular-nums"><%= number_with_delimiter stats.writers_today %></div>
-          <div class="mt-1 text-sm uppercase tracking-wide text-indigo-100"><%= 'writer'.pluralize(stats.writers_today) %> at work today</div>
+          <div class="mt-1 text-sm uppercase tracking-wide text-blue-50"><%= 'writer'.pluralize(stats.writers_today) %> at work today</div>
         </div>
         <div class="rounded-xl bg-white bg-opacity-10 px-6 py-6">
           <div class="text-4xl sm:text-5xl font-bold tabular-nums"><%= number_with_delimiter stats.writers_this_hour %></div>
-          <div class="mt-1 text-sm uppercase tracking-wide text-indigo-100">writing in the last hour</div>
+          <div class="mt-1 text-sm uppercase tracking-wide text-blue-50">writing in the last hour</div>
         </div>
       </div>
 
-      <div class="mt-8 text-indigo-100">
+      <div class="mt-8 text-blue-50">
         <% if user_signed_in? %>
           <% if @your_words_today.to_i > 0 %>
             You've added <strong class="text-white"><%= number_with_delimiter @your_words_today %></strong>
             <%= 'word'.pluralize(@your_words_today) %> to today's total. Thank you!
           <% else %>
             You haven't added any words to today's total yet.
-            <%= link_to 'Open your notebook', main_app.dashboard_path, class: 'font-semibold text-white underline hover:text-indigo-100' %>
+            <%= link_to 'Open your notebook', main_app.dashboard_path, class: 'font-semibold text-white underline hover:text-blue-50' %>
             and write a few.
           <% end %>
         <% else %>
           Yesterday the community wrote <strong class="text-white"><%= number_with_delimiter stats.words_yesterday %></strong> words.
-          <%= link_to 'Join them', main_app.new_user_registration_path, class: 'font-semibold text-white underline hover:text-indigo-100' %>.
+          <%= link_to 'Join them', main_app.new_user_registration_path, class: 'font-semibold text-white underline hover:text-blue-50' %>.
         <% end %>
       </div>
     </div>
@@ -297,7 +294,7 @@
   <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
     <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Worlds taking shape in <%= @creations_month.strftime('%B') %></h2>
     <p class="mt-2 text-gray-600 dark:text-gray-400">
-      New pages the community started <%= @creations_month == @this_month ? 'this month (counted through yesterday)' : 'last month' %>. Each one is a character, a place, or an idea that didn't exist before.
+      Every page the community worked on <%= @creations_month == @this_month ? 'this month (counted through yesterday)' : 'last month' %>, from brand-new ideas to characters and places getting another pass.
     </p>
 
     <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -320,17 +317,22 @@
       </div>
     </div>
 
-    <% if pages_created.any? %>
+    <% if pages_worked_on.any? %>
       <div class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-4">
-          <% pages_created.each do |class_name, count| %>
+          <% pages_worked_on.each do |class_name, count| %>
             <% klass = page_classes[class_name] %>
             <% next unless klass %>
             <div class="flex items-center">
               <i class="material-icons mr-3 text-2xl" style="color: <%= klass.hex_color %>;"><%= klass.icon %></i>
               <div>
                 <div class="text-lg font-bold text-gray-900 dark:text-white tabular-nums leading-tight"><%= number_with_delimiter count %></div>
-                <div class="text-xs text-gray-500 dark:text-gray-400"><%= klass.name.titleize.downcase.pluralize(count) %></div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">
+                  <%= klass.name.titleize.downcase.pluralize(count) %>
+                  <% if pages_created[class_name].to_i > 0 %>
+                    <span class="block text-emerald-600 dark:text-emerald-400"><%= number_with_delimiter pages_created[class_name] %> new</span>
+                  <% end %>
+                </div>
               </div>
             </div>
           <% end %>

@@ -16,6 +16,7 @@ namespace :community do
     (from..to).each do |date|
       day_started = Time.current
       CommunityStatsRollup.new(date).run!
+      CommunityStatsRollup.roll_up_pages_edited!(date) if date == date.end_of_month || date == to
       puts "#{date}: #{(Time.current - day_started).round(2)}s"
     end
     CommunityStatsRollup.record_point_in_time_metrics!(Date.current)

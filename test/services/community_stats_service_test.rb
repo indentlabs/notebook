@@ -116,6 +116,27 @@ class CommunityStatsServiceTest < ActiveSupport::TestCase
     assert_equal 4, stats.forum_posts_in_month(month)
   end
 
+  test "counts distinct pages edited in a month, with timeline events as their timelines" do
+    month = @today.beginning_of_month
+    through = [@today - 1.day, month].max
+    timeline = Timeline.create!(user: @alice, name: 'History')
+    event_a = timeline.timeline_events.create!(title: 'A', event_type: TimelineEvent::EVENT_TYPES.keys.first, skip_word_count_update: true)
+    event_b = timeline.timeline_events.create!(title: 'B', event_type: TimelineEvent::EVENT_TYPES.keys.first, skip_word_count_update: true)
+
+    log(@alice, 'Character', 1, month, 100)
+    log(@alice, 'Character', 1, through, 100)       # same page twice: counted once
+    log(@bob,   'Character', 2, month, 10)
+    log(@bob,   'Document',  3, through, 500)
+    log(@bob,   'TimelineEvent', event_a.id, month, 20)
+    log(@bob,   'TimelineEvent', event_b.id, month, 20) # same timeline
+    log(@bob,   'ManualAdjustment', 9, month, 50)
+    log(@bob,   'Location',  4, month - 1.day, 70)    # last month
+
+    CommunityStatsRollup.roll_up_pages_edited!(through)
+
+    assert_equal({ 'Character' => 2, 'Document' => 1, 'Timeline' => 1 }, stats.pages_edited_in_month(month))
+  end
+
   test "every page type shown has an end-of-day report column" do
     CommunityStatsService.page_classes.each do |klass|
       assert EndOfDayAnalyticsReport.column_names.include?("#{klass.name.downcase.pluralize}_created"), klass.name

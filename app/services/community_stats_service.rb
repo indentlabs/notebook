@@ -296,6 +296,18 @@ class CommunityStatsService
     end
   end
 
+  # { 'Character' => count, ... } distinct pages edited in the given month,
+  # most first. Rolled up nightly, so the current month counts through yesterday.
+  def pages_edited_in_month(month_start)
+    cached("pages_edited/#{month_start.strftime('%Y-%m')}") do
+      CommunityDailyStat
+        .where(metric: 'pages_edited', date: month_start.beginning_of_month)
+        .pluck(:key, :value)
+        .sort_by { |_, count| -count }
+        .to_h
+    end
+  end
+
   def new_writers_in_month(month_start)
     eod_sum('user_signups', month_start)
   end
@@ -306,6 +318,11 @@ class CommunityStatsService
 
   def forum_posts_in_month(month_start)
     eod_sum('thredded_replies_created', month_start)
+  end
+
+  # Every page type that can appear in the edited/created breakdown.
+  def self.display_page_classes
+    page_classes + [Book]
   end
 
   # Page types whose creation counts are shown (all have *_created EOD columns).

@@ -35,6 +35,34 @@ class CommunityStatsRollup
     replace!(today, 'all_time_writers', { '' => CommunityMonthlyWriter.distinct.count(:user_id) })
   end
 
+  # Distinct pages edited from the start of `through`'s month up to `through`,
+  # stored on the month's first day as { 'Character' => count, ... }.
+  #
+  # Every text edit writes a word_count_updates row for that day (even when the
+  # count doesn't change), so distinct entities with a row that month are the
+  # pages someone worked on. Timeline events are counted as their timelines.
+  # This scans a month of rows via the for_date index, so it runs nightly
+  # (EndOfDayAnalyticsJob) rather than hourly.
+  def self.roll_up_pages_edited!(through)
+    month_start = through.beginning_of_month
+    month_rows = WordCountUpdate.where(for_date: month_start..through)
+
+    counts = month_rows
+      .where.not(entity_type: %w(ManualAdjustment TimelineEvent))
+      .group(:entity_type)
+      .distinct
+      .count(:entity_id)
+
+    timelines = month_rows
+      .where(entity_type: 'TimelineEvent')
+      .joins('INNER JOIN timeline_events ON timeline_events.id = word_count_updates.entity_id')
+      .distinct
+      .count('timeline_events.timeline_id')
+    counts['Timeline'] = timelines if timelines > 0
+
+    replace!(month_start, 'pages_edited', counts.select { |_, count| count > 0 })
+  end
+
   # Swap all rows of one metric for one date in a single transaction.
   def self.replace!(date, metric, values_by_key)
     now = Time.current

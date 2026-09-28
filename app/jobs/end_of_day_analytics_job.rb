@@ -58,5 +58,6 @@ class EndOfDayAnalyticsJob < ApplicationJob
 
     # Finalize the day's anonymous community word counts for /community
     CommunityStatsRollup.new(report_date).run!
+    CommunityStatsRollup.roll_up_pages_edited!(report_date)
   end
 end

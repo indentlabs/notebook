@@ -25,7 +25,7 @@ class CommunityControllerTest < ActionDispatch::IntegrationTest
   test "is public and shows community totals" do
     get community_path
     assert_response :success
-    assert_select 'h1', /None of us writes alone/
+    assert_select 'h1', /But none of us write alone/
     assert_includes response.body, '1,750' # all-time words
     assert_includes response.body, new_user_registration_path
   end
@@ -35,6 +35,18 @@ class CommunityControllerTest < ActionDispatch::IntegrationTest
     get community_path
     assert_response :success
     assert_includes response.body, "added <strong class=\"text-white\">250</strong>"
+  end
+
+  test "shows pages worked on this month with how many were new" do
+    month = Date.current.day == 1 ? Date.current.prev_month.beginning_of_month : Date.current.beginning_of_month
+    EndOfDayAnalyticsReport.delete_all
+    CommunityDailyStat.create!(date: month, metric: 'pages_edited', key: 'Character', value: 1_234)
+    EndOfDayAnalyticsReport.create!(day: month, characters_created: 56)
+
+    get community_path
+    assert_response :success
+    assert_includes response.body, '1,234'
+    assert_includes response.body, '56 new'
   end
 
   test "renders with no writing activity at all" do
