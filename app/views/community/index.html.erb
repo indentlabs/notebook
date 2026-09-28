@@ -1,0 +1,371 @@
+<%
+  stats = @stats
+  this_month_words   = stats.words_in_month(@this_month)
+  last_month_words   = stats.words_in_month(@last_month)
+  this_month_writers = stats.writers_in_month(@this_month)
+  categories_this_month = stats.words_by_category_in_month(@this_month)
+  categories_last_month = stats.words_by_category_in_month(@last_month)
+  all_time_words = stats.all_time_words
+  record_day     = stats.record_day
+  busiest_month  = stats.busiest_month
+  favorite_day   = stats.favorite_weekday
+  weekday_max    = [stats.weekday_averages.map(&:last).max.to_i, 1].max
+  pages_created  = stats.pages_created_in_month(@creations_month)
+  page_classes   = CommunityStatsService.page_classes.index_by(&:name)
+
+  # Heatmap intensity classes, written out in full so Tailwind keeps them.
+  heatmap_classes = [
+    'bg-gray-100 dark:bg-gray-800',
+    'bg-indigo-200 dark:bg-indigo-900',
+    'bg-indigo-300 dark:bg-indigo-700',
+    'bg-indigo-500 dark:bg-indigo-500',
+    'bg-indigo-700 dark:bg-indigo-300'
+  ]
+  category_colors = stats.monthly_category_series.map { |series| CommunityStatsService.category_style(series[:name])[:hex_color] }
+%>
+
+<div class="bg-gray-50 dark:bg-gray-900 min-h-screen">
+
+  <%# ───────────────────────── Hero: what's happening right now ───────────────────────── %>
+  <section class="bg-gradient-to-br from-indigo-700 via-indigo-600 to-blue-500 text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 text-center">
+      <div class="inline-flex items-center gap-2 rounded-full bg-white bg-opacity-10 px-4 py-1 text-sm font-medium text-indigo-100">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-300 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+        </span>
+        The Notebook.ai community, live
+      </div>
+
+      <h1 class="mt-6 text-4xl sm:text-5xl font-bold tracking-tight">
+        Every writer here writes in private.
+        <span class="block text-indigo-200">None of us writes alone.</span>
+      </h1>
+      <p class="mt-6 max-w-2xl mx-auto text-lg text-indigo-100">
+        Your notebook is yours alone, and nobody else can read it. But every word you write adds to the
+        pile of words written by thousands of other writers working on their own worlds, today and every day.
+      </p>
+
+      <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
+        <div class="rounded-xl bg-white bg-opacity-10 px-6 py-6">
+          <div class="text-4xl sm:text-5xl font-bold tabular-nums"><%= number_with_delimiter stats.words_today %></div>
+          <div class="mt-1 text-sm uppercase tracking-wide text-indigo-100">words written today</div>
+        </div>
+        <div class="rounded-xl bg-white bg-opacity-10 px-6 py-6">
+          <div class="text-4xl sm:text-5xl font-bold tabular-nums"><%= number_with_delimiter stats.writers_today %></div>
+          <div class="mt-1 text-sm uppercase tracking-wide text-indigo-100"><%= 'writer'.pluralize(stats.writers_today) %> at work today</div>
+        </div>
+        <div class="rounded-xl bg-white bg-opacity-10 px-6 py-6">
+          <div class="text-4xl sm:text-5xl font-bold tabular-nums"><%= number_with_delimiter stats.writers_this_hour %></div>
+          <div class="mt-1 text-sm uppercase tracking-wide text-indigo-100">writing in the last hour</div>
+        </div>
+      </div>
+
+      <div class="mt-8 text-indigo-100">
+        <% if user_signed_in? %>
+          <% if @your_words_today.to_i > 0 %>
+            You've added <strong class="text-white"><%= number_with_delimiter @your_words_today %></strong>
+            <%= 'word'.pluralize(@your_words_today) %> to today's total. Thank you!
+          <% else %>
+            You haven't added any words to today's total yet.
+            <%= link_to 'Open your notebook', main_app.dashboard_path, class: 'font-semibold text-white underline hover:text-indigo-100' %>
+            and write a few.
+          <% end %>
+        <% else %>
+          Yesterday the community wrote <strong class="text-white"><%= number_with_delimiter stats.words_yesterday %></strong> words.
+          <%= link_to 'Join them', main_app.new_user_registration_path, class: 'font-semibold text-white underline hover:text-indigo-100' %>.
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <%# ───────────────────────── All-time total ───────────────────────── %>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
+    <div class="rounded-2xl bg-white dark:bg-gray-800 shadow-lg px-6 py-8 sm:px-10 flex flex-col md:flex-row md:items-center gap-6">
+      <div class="flex-shrink-0 flex items-center justify-center h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900">
+        <i class="material-icons text-4xl text-indigo-600 dark:text-indigo-300">auto_stories</i>
+      </div>
+      <div class="flex-1">
+        <div class="text-sm uppercase tracking-wide text-gray-500 dark:text-gray-400">Written together, so far</div>
+        <div class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tabular-nums">
+          <%= number_with_delimiter all_time_words %> <span class="text-2xl font-medium text-gray-500 dark:text-gray-400">words</span>
+        </div>
+        <p class="mt-2 text-gray-600 dark:text-gray-300">
+          <% if stats.novels_equivalent(all_time_words) > 0 %>
+            That's as many words as
+            <strong><%= number_with_delimiter stats.novels_equivalent(all_time_words) %> <%= CommunityStatsService::NOVEL_LENGTH / 1000 %>,000-word novels</strong>,
+          <% else %>
+            That's a start,
+          <% end %>
+          from <strong><%= number_with_delimiter stats.all_time_writers %></strong> writers
+          <% if stats.first_tracked_date %>
+            since we started counting on <%= stats.first_tracked_date.strftime('%B %-d, %Y') %>.
+          <% else %>
+            so far.
+          <% end %>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <%# ───────────────────────── Every day, every month ───────────────────────── %>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Every day, every month</h2>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">
+      Word counts from documents, notebook pages, timelines, and books, added up across the whole community.
+    </p>
+
+    <div class="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-5">
+        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Yesterday</div>
+        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter stats.words_yesterday %></div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">words</div>
+      </div>
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-5">
+        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400"><%= @this_month.strftime('%B') %> so far</div>
+        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter this_month_words %></div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">words</div>
+      </div>
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-5">
+        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">All of <%= @last_month.strftime('%B') %></div>
+        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter last_month_words %></div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">words</div>
+      </div>
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-5">
+        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Writers this month</div>
+        <div class="mt-1 text-2xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter this_month_writers %></div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">wrote at least one word</div>
+      </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center">
+          <i class="material-icons text-indigo-500 mr-2 text-lg">bar_chart</i>
+          Words written each day
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Last 30 days. Today's bar is still growing.</p>
+        <div class="mt-4">
+          <%= column_chart stats.daily_series(days: 30).map { |date, words| [date.strftime('%b %-d'), words] },
+                colors: ['#6366F1'], height: '260px', thousands: ',',
+                library: { legend: { display: false }, scales: { xAxes: [{ gridLines: { display: false } }] } } %>
+        </div>
+      </div>
+
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+        <h3 class="font-semibold text-gray-900 dark:text-white flex items-center">
+          <i class="material-icons text-indigo-500 mr-2 text-lg">calendar_month</i>
+          Words written each month
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Last 12 months, including <%= @this_month.strftime('%B') %> so far.</p>
+        <div class="mt-4">
+          <%= column_chart stats.monthly_series(months: 12).map { |month, words| [month.strftime('%b %Y'), words] },
+                colors: ['#3B82F6'], height: '260px', thousands: ',',
+                library: { legend: { display: false }, scales: { xAxes: [{ gridLines: { display: false } }] } } %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# ───────────────────────── What we're writing ───────────────────────── %>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">What we're writing</h2>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">
+      Some of us are drafting chapters. Some are filling in the backstory of a side character. All of it counts.
+    </p>
+
+    <% if categories_this_month.any? %>
+      <div class="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <% categories_this_month.each do |category, words| %>
+          <% style = CommunityStatsService.category_style(category) %>
+          <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-5 border-t-4" style="border-top-color: <%= style[:hex_color] %>;">
+            <div class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-200">
+              <i class="material-icons mr-2 text-lg" style="color: <%= style[:hex_color] %>;"><%= style[:icon] %></i>
+              <%= category %>
+            </div>
+            <div class="mt-2 text-2xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter words %></div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              words in <%= @this_month.strftime('%B') %>
+              &middot; <%= number_with_delimiter categories_last_month[category] || 0 %> in <%= @last_month.strftime('%B') %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6 text-gray-500 dark:text-gray-400">
+        Nobody has written anything yet this month. Be the first!
+      </div>
+    <% end %>
+
+    <div class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+      <h3 class="font-semibold text-gray-900 dark:text-white flex items-center">
+        <i class="material-icons text-indigo-500 mr-2 text-lg">stacked_bar_chart</i>
+        Where the words went, month by month
+      </h3>
+      <div class="mt-4">
+        <%= column_chart stats.monthly_category_series(months: 12),
+              stacked: true, colors: category_colors, height: '320px', thousands: ',',
+              library: { scales: { xAxes: [{ gridLines: { display: false } }] } } %>
+      </div>
+    </div>
+  </section>
+
+  <%# ───────────────────────── A year of writing ───────────────────────── %>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">A year of writing</h2>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">
+      Each square is one day of words from the whole community. Darker days are busier ones.
+    </p>
+
+    <div class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+      <div class="overflow-x-auto pb-2">
+        <div class="flex gap-1 min-w-max">
+          <% stats.heatmap_weeks.each do |week| %>
+            <div class="flex flex-col gap-1">
+              <% week.each do |day| %>
+                <% if day %>
+                  <% date, words = day %>
+                  <div class="w-3 h-3 lg:w-4 lg:h-4 rounded-sm <%= heatmap_classes[stats.heatmap_level(words)] %>"
+                       title="<%= date.strftime('%a, %b %-d, %Y') %>: <%= number_with_delimiter words %> words"></div>
+                <% else %>
+                  <div class="w-3 h-3 lg:w-4 lg:h-4"></div>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="mt-3 flex items-center justify-end gap-1 text-xs text-gray-500 dark:text-gray-400">
+        Quieter
+        <% heatmap_classes.each do |klass| %>
+          <div class="w-3 h-3 rounded-sm <%= klass %>"></div>
+        <% end %>
+        Busier
+      </div>
+    </div>
+
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+        <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+          <i class="material-icons text-amber-500 mr-2">emoji_events</i> Biggest day ever
+        </div>
+        <% if record_day %>
+          <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter record_day[:words] %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">words on <%= record_day[:date].strftime('%B %-d, %Y') %></div>
+        <% else %>
+          <div class="mt-2 text-gray-500 dark:text-gray-400">Still waiting for the first one.</div>
+        <% end %>
+      </div>
+
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+        <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+          <i class="material-icons text-rose-500 mr-2">local_fire_department</i> Busiest month this year
+        </div>
+        <% if busiest_month %>
+          <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white tabular-nums"><%= number_with_delimiter busiest_month[:words] %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">words in <%= busiest_month[:month].strftime('%B %Y') %></div>
+        <% else %>
+          <div class="mt-2 text-gray-500 dark:text-gray-400">Not enough data yet.</div>
+        <% end %>
+      </div>
+
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+        <div class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
+          <i class="material-icons text-emerald-500 mr-2">event_repeat</i> Our favorite day to write
+        </div>
+        <% if favorite_day %>
+          <div class="mt-2 text-3xl font-bold text-gray-900 dark:text-white"><%= favorite_day[:day].pluralize %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">about <%= number_with_delimiter favorite_day[:average_words] %> words on an average <%= favorite_day[:day] %></div>
+        <% else %>
+          <div class="mt-2 text-gray-500 dark:text-gray-400">Not enough data yet.</div>
+        <% end %>
+        <div class="mt-4 space-y-1">
+          <% stats.weekday_averages.each do |day, average| %>
+            <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+              <span class="w-8"><%= day.first(3) %></span>
+              <div class="flex-1 h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+                <div class="h-2 rounded-full bg-emerald-500" style="width: <%= (average * 100.0 / weekday_max).round %>%;"></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <%# ───────────────────────── Worlds taking shape ───────────────────────── %>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16">
+    <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Worlds taking shape in <%= @creations_month.strftime('%B') %></h2>
+    <p class="mt-2 text-gray-600 dark:text-gray-400">
+      New pages the community started <%= @creations_month == @this_month ? 'this month (counted through yesterday)' : 'last month' %>. Each one is a character, a place, or an idea that didn't exist before.
+    </p>
+
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-sm p-5">
+        <i class="material-icons text-sky-100">waving_hand</i>
+        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.new_writers_in_month(@creations_month) %></div>
+        <div class="text-sm text-sky-100">new writers joined</div>
+      </div>
+      <div class="rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-sm p-5">
+        <i class="material-icons text-emerald-100">flag</i>
+        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.goals_completed_in_month(@creations_month) %></div>
+        <div class="text-sm text-emerald-100">writing goals completed</div>
+      </div>
+      <div class="rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm p-5">
+        <i class="material-icons text-violet-100">forum</i>
+        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.forum_posts_in_month(@creations_month) %></div>
+        <div class="text-sm text-violet-100">
+          posts in the <%= link_to 'forums', main_app.thredded_path, class: 'underline hover:text-white' %>
+        </div>
+      </div>
+    </div>
+
+    <% if pages_created.any? %>
+      <div class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm p-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-4">
+          <% pages_created.each do |class_name, count| %>
+            <% klass = page_classes[class_name] %>
+            <% next unless klass %>
+            <div class="flex items-center">
+              <i class="material-icons mr-3 text-2xl" style="color: <%= klass.hex_color %>;"><%= klass.icon %></i>
+              <div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white tabular-nums leading-tight"><%= number_with_delimiter count %></div>
+                <div class="text-xs text-gray-500 dark:text-gray-400"><%= klass.name.titleize.downcase.pluralize(count) %></div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <%# ───────────────────────── Privacy & call to action ───────────────────────── %>
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-8 sm:p-10 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+      <div>
+        <div class="flex items-center text-gray-900 dark:text-white font-semibold">
+          <i class="material-icons text-green-500 mr-2">lock</i>
+          Your writing stays yours
+        </div>
+        <p class="mt-3 text-gray-600 dark:text-gray-300">
+          Every number on this page is an anonymous total. We only count how many words get written, never
+          what they say or who wrote them. Nothing on this page links back to you or your work.
+        </p>
+      </div>
+      <div class="text-center md:text-right">
+        <% if user_signed_in? %>
+          <%= link_to main_app.writing_activity_path, class: 'inline-flex items-center rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white shadow hover:bg-indigo-700' do %>
+            <i class="material-icons mr-2">trending_up</i> See your own writing activity
+          <% end %>
+        <% else %>
+          <%= link_to main_app.new_user_registration_path, class: 'inline-flex items-center rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white shadow hover:bg-indigo-700' do %>
+            <i class="material-icons mr-2">edit</i> Start writing with us, it's free
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    <p class="mt-4 text-center text-xs text-gray-400 dark:text-gray-500">
+      Numbers refresh about every 15 minutes. Days are counted in each writer's own time zone.
+    </p>
+  </section>
+</div>

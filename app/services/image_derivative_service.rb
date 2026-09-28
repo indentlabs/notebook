@@ -17,7 +17,7 @@ class ImageDerivativeService
   # One-off backfill: crop derivatives plus the xlarge WebP that uploads made
   # before the gallery editor never had.
   def self.backfill!(record)
-    new(record).generate!(styles: ImageUpload::FRAMED_STYLES + [:xlarge])
+    new(record).generate!(styles: ImagePresets.style_names + [:xlarge])
   end
 
   def self.variant_for(commission, preset, small: false)
@@ -28,7 +28,7 @@ class ImageDerivativeService
     @record = record
   end
 
-  def generate!(styles: ImageUpload::FRAMED_STYLES)
+  def generate!(styles: ImagePresets.style_names)
     case @record
     when ImageUpload        then generate_upload_styles!(styles)
     when BasilCommission    then prewarm_variants!
@@ -61,6 +61,14 @@ class ImageDerivativeService
     return false unless @record.src_file_name.present?
 
     attachment = @record.src
+    # Paperclip silently skips styles it doesn't know, which would leave the
+    # old cut in place while reporting success. Fail loudly instead.
+    missing = styles.map(&:to_sym) - attachment.styles.keys.map(&:to_sym)
+    if missing.any?
+      raise ArgumentError, "ImageUpload has no Paperclip style(s) #{missing.join(', ')}; " \
+                           "is this process running code older than the one that enqueued the job?"
+    end
+
     original_cleaner = attachment.options[:filename_cleaner]
     # ImageUpload renames files to a fresh UUID on assignment. Reprocessing
     # re-assigns the attachment, so without this the record would point at a

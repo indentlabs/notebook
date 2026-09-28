@@ -14,7 +14,7 @@ export default class extends Controller {
     "grid", "card", "count", "empty", "hint", "coverSummary",
     "dropzone", "fileInput", "cameraInput", "shrinkToggle", "queue", "bandwidth", "bandwidthBar",
     "media", "thumb", "coverChip", "coverButton", "coverLabel",
-    "privacyButton", "privacyIcon", "privacyLabel",
+    "privacyChip", "coverPrivacyWarning",
     "notes", "notesStatus", "actions", "deleteConfirm", "dimensions"
   ]
 
@@ -163,6 +163,7 @@ export default class extends Controller {
     button.querySelector(".material-icons").textContent = isCover ? "star" : "star_border"
     card.querySelector("[data-gallery-target='coverLabel']").textContent = isCover ? "Cover" : "Set as cover"
 
+    this.refreshCoverPrivacyWarning(card)
     this.refreshCoverSummary()
     this.announceCoverChange()
   }
@@ -220,6 +221,7 @@ export default class extends Controller {
       const check = item.querySelector("[data-role-check]")
       if (check) check.classList.toggle("invisible", !active)
     })
+    this.refreshCoverPrivacyWarning(card)
     this.announceCoverChange()
   }
 
@@ -239,44 +241,25 @@ export default class extends Controller {
   // Privacy
   // ---------------------------------------------------------------------
 
-  togglePrivacy(event) {
-    const card = this.cardFor(event)
-    if (card.dataset.busy === "privacy") return
-    card.dataset.busy = "privacy"
-
-    const current = card.dataset.privacy || "public"
-    const next = current === "public" ? "private" : "public"
-    this.applyPrivacyState(card, next)
-
-    this.request(card.dataset.updateUrl, "PATCH", { [card.dataset.paramKey]: { privacy: next } })
-      .then((data) => {
-        const saved = (data.image && data.image.privacy) || next
-        this.applyPrivacyState(card, saved)
-        this.toast(saved === "public" ? "Image is now public" : "Image is now private", "success")
-      })
-      .catch((error) => {
-        this.applyPrivacyState(card, current)
-        this.toast(error.message || "Couldn't update privacy", "error")
-      })
-      .finally(() => { delete card.dataset.busy })
-  }
-
+  // Privacy is changed from the image editor; the card just reflects it.
   applyPrivacyState(card, privacy) {
     card.dataset.privacy = privacy
-    const button = card.querySelector("[data-gallery-target='privacyButton']")
-    if (!button) return
-    const isPublic = privacy === "public"
-    const publicClasses = ["border-green-300", "text-green-700", "dark:border-green-700", "dark:text-green-300"]
-    const privateClasses = ["border-gray-300", "text-gray-600", "dark:border-gray-600", "dark:text-gray-300"]
-    publicClasses.forEach((c) => button.classList.toggle(c, isPublic))
-    privateClasses.forEach((c) => button.classList.toggle(c, !isPublic))
-    button.title = isPublic
-      ? "Visible to anyone who can see this page. Click to make it private."
-      : "Only you and collaborators can see this image. Click to make it public."
-    button.setAttribute("aria-label", isPublic ? "Image is public. Make it private." : "Image is private. Make it public.")
-    button.setAttribute("aria-pressed", isPublic ? "false" : "true")
-    card.querySelector("[data-gallery-target='privacyIcon']").textContent = isPublic ? "public" : "lock"
-    card.querySelector("[data-gallery-target='privacyLabel']").textContent = isPublic ? "Public" : "Private"
+    const chip = card.querySelector("[data-gallery-target='privacyChip']")
+    if (chip) chip.classList.toggle("hidden", privacy !== "private")
+    this.refreshCoverPrivacyWarning(card)
+  }
+
+  // A private image picked as a cover is skipped for other viewers of a
+  // public page, so say so rather than letting it silently fall back.
+  refreshCoverPrivacyWarning(card) {
+    const warning = card.querySelector("[data-gallery-target='coverPrivacyWarning']")
+    if (!warning) return
+    const isCover = card.dataset.pinned === "true" || this.rolesOf(card).length > 0
+    const show = card.dataset.pagePublic === "true" &&
+      card.dataset.supportsPrivacy === "true" &&
+      card.dataset.privacy === "private" &&
+      isCover
+    warning.classList.toggle("hidden", !show)
   }
 
   // ---------------------------------------------------------------------

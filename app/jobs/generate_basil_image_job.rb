@@ -13,7 +13,9 @@ class GenerateBasilImageJob < ApplicationJob
 
   def perform(basil_commission_id)
     # Find the BasilCommission record
-    commission = BasilCommission.find(basil_commission_id)
+    # The commission may have been cancelled (hard-deleted) while queued.
+    commission = BasilCommission.find_by(id: basil_commission_id)
+    return if commission.nil?
 
     # Skip if already completed (image attached)
     return if commission.image.attached?
@@ -58,6 +60,9 @@ class GenerateBasilImageJob < ApplicationJob
       # Decode the base64 image data
       image_data_binary = Base64.decode64(image_data_base64)
 
+      # Don't store the image if the commission was cancelled mid-generation
+      return unless BasilCommission.exists?(id: commission.id)
+
       # --- Manual S3 Upload and ActiveStorage Blob Creation --- 
       begin
         s3_client = Aws::S3::Client.new(
@@ -80,7 +85,9 @@ class GenerateBasilImageJob < ApplicationJob
         )
 
         # 2. Create the ActiveStorage Blob record manually
-        checksum = upload_response.etag.gsub('"','') # ETag comes with quotes
+        # ActiveStorage wants a base64 MD5. S3's ETag is a hex MD5, and a
+        # mismatch makes every variant (resize/crop) fail its integrity check.
+        checksum = Digest::MD5.base64digest(image_data_binary)
         byte_size = image_data_binary.size
 
         blob = ActiveStorage::Blob.create!(
@@ -94,7 +101,8 @@ class GenerateBasilImageJob < ApplicationJob
 
         # 3. Associate the blob with the commission
         # Note: We use update! which saves immediately. No separate save! needed.
-        commission.update!(image: blob)
+        width, height = BasilCommission.png_dimensions(image_data_binary)
+        commission.update!(image: blob, width: width, height: height)
 
         # 4. Update completed_at timestamp
         commission.update!(completed_at: Time.current)

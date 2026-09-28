@@ -44,6 +44,24 @@ class BasilCommission < ApplicationRecord
      GenerateBasilImageJob.perform_later(self.id)
   end
 
+  # ActiveStorage checksums are base64 MD5s; S3 reports a quoted hex MD5 as
+  # the ETag of a single-part upload. Storing the ETag as-is makes every
+  # variant of the image fail ActiveStorage's integrity check.
+  def self.checksum_from_etag(etag)
+    Base64.strict_encode64([etag.to_s.delete('"')].pack('H*'))
+  end
+
+  PNG_SIGNATURE = "\x89PNG\r\n\x1A\n".b
+
+  # [width, height] read from a PNG's header, or nil for anything else.
+  # Basil returns PNGs; knowing the size up front means crops apply without
+  # waiting for ActiveStorage's background analysis.
+  def self.png_dimensions(data)
+    return nil unless data.to_s.b.start_with?(PNG_SIGNATURE) && data.bytesize >= 24
+
+    data.b[16, 8].unpack('NN')
+  end
+
   def cache_after_complete!
     update(cached_seconds_taken: self.completed_at - self.created_at)
   end
