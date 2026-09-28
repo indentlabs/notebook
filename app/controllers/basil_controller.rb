@@ -753,7 +753,7 @@ class BasilController < ApplicationController
       filename:     obj.key, 
       content_type: obj.content_type, # binary/octet-stream but we want image/png
       byte_size:    obj.size, 
-      checksum:     obj.etag.gsub('"',"")
+      checksum:     BasilCommission.checksum_from_etag(obj.etag)
     }
     blob = ActiveStorage::Blob.create_before_direct_upload!(**params)
     blob.key = key

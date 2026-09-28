@@ -85,7 +85,9 @@ class GenerateBasilImageJob < ApplicationJob
         )
 
         # 2. Create the ActiveStorage Blob record manually
-        checksum = upload_response.etag.gsub('"','') # ETag comes with quotes
+        # ActiveStorage wants a base64 MD5. S3's ETag is a hex MD5, and a
+        # mismatch makes every variant (resize/crop) fail its integrity check.
+        checksum = Digest::MD5.base64digest(image_data_binary)
         byte_size = image_data_binary.size
 
         blob = ActiveStorage::Blob.create!(

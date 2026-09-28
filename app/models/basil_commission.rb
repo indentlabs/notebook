@@ -44,6 +44,13 @@ class BasilCommission < ApplicationRecord
      GenerateBasilImageJob.perform_later(self.id)
   end
 
+  # ActiveStorage checksums are base64 MD5s; S3 reports a quoted hex MD5 as
+  # the ETag of a single-part upload. Storing the ETag as-is makes every
+  # variant of the image fail ActiveStorage's integrity check.
+  def self.checksum_from_etag(etag)
+    Base64.strict_encode64([etag.to_s.delete('"')].pack('H*'))
+  end
+
   def cache_after_complete!
     update(cached_seconds_taken: self.completed_at - self.created_at)
   end
