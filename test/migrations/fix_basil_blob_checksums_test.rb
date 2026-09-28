@@ -27,11 +27,6 @@ class FixBasilBlobChecksumsTest < ActionDispatch::IntegrationTest
     blob.reload.update_column(:service_name, ActiveStorage::Blob.service.name)
   end
 
-  test "checksum_from_etag turns S3's quoted hex MD5 into ActiveStorage's base64 MD5" do
-    etag = %("#{Digest::MD5.hexdigest(@data)}")
-    assert_equal Digest::MD5.base64digest(@data), BasilCommission.checksum_from_etag(etag)
-  end
-
   test "rewrites hex checksums on Basil blobs and leaves others alone" do
     commission = basil_commission_with_etag_checksum
     blob = commission.image.blob

@@ -44,11 +44,39 @@ class BasilCommission < ApplicationRecord
      GenerateBasilImageJob.perform_later(self.id)
   end
 
-  # ActiveStorage checksums are base64 MD5s; S3 reports a quoted hex MD5 as
-  # the ETag of a single-part upload. Storing the ETag as-is makes every
-  # variant of the image fail ActiveStorage's integrity check.
-  def self.checksum_from_etag(etag)
-    Base64.strict_encode64([etag.to_s.delete('"')].pack('H*'))
+  # Builds the ActiveStorage blob for a Basil PNG already stored in the Basil
+  # bucket under +key+. Everything is derived from the image bytes: an S3
+  # ETag is a hex MD5 (and not even that for multipart uploads), while
+  # ActiveStorage needs a base64 MD5 and an image/* content type to build the
+  # resized and cropped variants the gallery shows.
+  #
+  # The type and size are recorded as already identified and analysed, which
+  # saves ActiveStorage two downloads from S3 (sniffing the type on attach,
+  # then the background analysis).
+  def self.create_png_blob!(key, data)
+    width, height = png_dimensions(data)
+    metadata = { identified: true }
+    metadata.merge!(width: width, height: height, analyzed: true) if width
+
+    ActiveStorage::Blob.create!(
+      key:          key,
+      filename:     key,
+      content_type: 'image/png',
+      metadata:     metadata,
+      byte_size:    data.bytesize,
+      checksum:     Digest::MD5.base64digest(data),
+      service_name: :amazon_basil
+    )
+  end
+
+  # Attaches the PNG stored in the Basil bucket under +key+ (for images that
+  # were uploaded to S3 by something other than GenerateBasilImageJob).
+  def attach_stored_png!(key)
+    data = Aws::S3::Resource.new(region: ENV.fetch('AWS_REGION', 'us-east-1'))
+                            .bucket(ENV.fetch('S3_BASIL_BUCKET_NAME', 'basil-commissions'))
+                            .object(key).get.body.read
+    width, height = self.class.png_dimensions(data)
+    update!(image: self.class.create_png_blob!(key, data), width: width, height: height)
   end
 
   PNG_SIGNATURE = "\x89PNG\r\n\x1A\n".b
