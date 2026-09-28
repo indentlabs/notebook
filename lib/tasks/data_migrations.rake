@@ -11,25 +11,9 @@ namespace :data_migrations do
       end
 
       # Attach the image in S3 to our `image` ActiveStorage relation
-      key    = "job-#{commission.job_id}.png"
+      key = "job-#{commission.job_id}.png"
       puts "Attaching #{key}"
-      s3     = Aws::S3::Resource.new(region: "us-east-1")
-      obj    = s3.bucket("basil-commissions").object(key)
-      params = {
-        filename:     obj.key, 
-        content_type: obj.content_type, # binary/octet-stream but we want image/png
-        byte_size:    obj.size, 
-        checksum:     obj.etag.gsub('"',"")
-      }
-      blob = ActiveStorage::Blob.create_before_direct_upload!(**params)
-      blob.key = key
-      blob.service_name = :amazon_basil
-      blob.save!
-
-      # blob.update_attribute(:key, key)
-      # blob.update_attribute(:service_name, :amazon_basil)
-
-      commission.update!(image: blob.signed_id)
+      commission.attach_stored_png!(key)
     end
 
     puts "Done!"

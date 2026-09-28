@@ -746,21 +746,7 @@ class BasilController < ApplicationController
                        final_settings: merged_settings.merge(JSON.parse(params.fetch(:settings, "{}"))))
 
     # Attach the image in S3 to our `image` ActiveStorage relation
-    key    = "job-#{params[:jobid]}.png"
-    s3     = Aws::S3::Resource.new(region: "us-east-1")
-    obj    = s3.bucket("basil-commissions").object(key)
-    params = { 
-      filename:     obj.key, 
-      content_type: obj.content_type, # binary/octet-stream but we want image/png
-      byte_size:    obj.size, 
-      checksum:     BasilCommission.checksum_from_etag(obj.etag)
-    }
-    blob = ActiveStorage::Blob.create_before_direct_upload!(**params)
-    blob.key = key
-    blob.service_name = :amazon_basil
-    blob.save!
-
-    commission.update(image: blob.signed_id)
+    commission.attach_stored_png!("job-#{params[:jobid]}.png")
     commission.cache_after_complete!
 
     render json: { success: true }
