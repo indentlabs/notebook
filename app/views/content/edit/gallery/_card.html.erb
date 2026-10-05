@@ -16,6 +16,12 @@
 <div id="gallery-<%= image.dom_id %>"
      class="gallery-card group relative flex flex-col bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow"
      data-gallery-target="card"
+     data-lightbox-target="item"
+     data-full="<%= image.url(:xlarge) || image.original_url %>"
+     data-caption="<%= image.notes %>"
+     data-source="<%= image.source_label %>"
+     data-download="<%= image.download_url %>"
+     data-edit-url="#gallery/<%= image.dom_id %>"
      data-image-id="<%= image.id %>"
      data-image-type="<%= image.type_param %>"
      data-image-kind="<%= image.kind %>"
@@ -39,9 +45,11 @@
      data-focal-x="<%= image.focal_x %>"
      data-focal-y="<%= image.focal_y %>">
 
-  <%# Image area. The whole area is the drag handle. %>
+  <%# Image area. Click to view it larger; drag anywhere on it to reorder. %>
   <div class="gallery-card__media relative aspect-video overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-900 <%= cover ? 'ring-2 ring-inset ring-yellow-400' : '' %>"
-       data-gallery-target="media">
+       data-gallery-target="media"
+       data-action="click->lightbox#open"
+       title="Click to view larger, or drag to reorder">
     <% if image.url(:large) %>
       <%= image_tag image.url(:large),
             class: 'w-full h-full object-cover select-none',
@@ -84,9 +92,16 @@
     <div class="gallery-card__overlay absolute inset-x-0 bottom-0 flex items-center justify-end gap-2 p-2 bg-gradient-to-t from-black to-transparent">
       <button type="button"
               class="inline-flex items-center px-3 py-1 rounded-md bg-white text-gray-800 text-xs font-medium shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              data-action="lightbox#open"
+              data-lightbox-opener
+              title="View this image larger">
+        <i class="material-icons text-sm mr-1">zoom_in</i> View
+      </button>
+      <button type="button"
+              class="inline-flex items-center px-3 py-1 rounded-md bg-white text-gray-800 text-xs font-medium shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               data-action="gallery#edit"
               title="Adjust how this image is cropped and framed">
-        <i class="material-icons text-sm mr-1">crop</i> Edit
+        <i class="material-icons text-sm mr-1">crop</i> Edit framing
       </button>
       <a href="<%= image.original_url %>" target="_blank" rel="noopener"
          class="inline-flex items-center justify-center w-8 h-8 rounded-md bg-white text-gray-800 shadow hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"

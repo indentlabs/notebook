@@ -44,6 +44,7 @@ export default class extends Controller {
   disconnect() {
     window.removeEventListener("paste", this.onWindowPaste)
     document.removeEventListener("click", this.onDocumentClick)
+    if (this.onGridClickCapture && this.hasGridTarget) this.gridTarget.removeEventListener("click", this.onGridClickCapture, true)
     if (this.sortable) {
       try { this.sortable.sortable("destroy") } catch (e) { /* already gone */ }
       this.sortable = null
@@ -71,11 +72,22 @@ export default class extends Controller {
       opacity: 0.9,
       start: () => this.element.classList.add("gallery--reordering"),
       stop: () => {
+        this.sortedAt = Date.now()
         this.element.classList.remove("gallery--reordering")
         this.persistOrder()
       }
     })
     this.sortable = $grid
+
+    // Dropping a card fires a click on the image, which would open the
+    // viewer. Swallow it before it reaches the card.
+    this.onGridClickCapture = (event) => {
+      if (this.sortedAt && Date.now() - this.sortedAt < 300) {
+        event.stopPropagation()
+        event.preventDefault()
+      }
+    }
+    this.gridTarget.addEventListener("click", this.onGridClickCapture, true)
   }
 
   moveUp(event) {
@@ -294,6 +306,7 @@ export default class extends Controller {
     this.request(card.dataset.updateUrl, "PATCH", { [card.dataset.paramKey]: { notes: value } })
       .then(() => {
         textarea.dataset.originalValue = value
+        card.dataset.caption = value
         const thumb = card.querySelector("[data-gallery-target='thumb']")
         if (thumb && value.trim()) thumb.alt = value.trim()
         this.setStatus(status, "Saved", "text-green-600 dark:text-green-400", true)
@@ -391,6 +404,7 @@ export default class extends Controller {
     if (notes && typeof image.notes === "string" && notes.value !== image.notes) {
       notes.value = image.notes
       notes.dataset.originalValue = image.notes
+      card.dataset.caption = image.notes
       this.resizeTextarea(notes)
     }
     if (image.urls && image.urls.large) {
