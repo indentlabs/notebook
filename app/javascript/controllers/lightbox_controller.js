@@ -1,8 +1,9 @@
 import { Controller } from "stimulus"
 
-// Lightbox for the public gallery on content#show.
+// Lightbox for the gallery on content#show, and for viewing images larger on
+// the content#edit gallery tab.
 //
-// The grid renders one <button data-lightbox-target="item"> per image with
+// The grid renders one data-lightbox-target="item" element per image with
 // the full-size URL, caption and links in data attributes, so this
 // controller needs no server round-trips. Keyboard: ← → Home End Esc.
 // Touch: swipe left/right. Focus stays inside the dialog while open and
@@ -57,6 +58,7 @@ export default class extends Controller {
       if (action === "close") this.close()
       if (action === "previous") this.previous(event)
       if (action === "next") this.next(event)
+      if (action === "edit") this.edit(control)
       return
     }
     this.backdrop(event)
@@ -67,9 +69,18 @@ export default class extends Controller {
   part(name) { return this.modal.querySelector(`[data-lightbox-target='${name}']`) }
 
   open(event) {
-    const item = event.currentTarget
-    this.index = parseInt(item.dataset.index, 10) || 0
-    this.opener = item
+    // On the edit page the trigger sits inside a card that has its own
+    // buttons and links; let those do their own thing.
+    const control = event.target.closest("a, button, input, textarea, select, label")
+    if (control && control !== event.currentTarget) return
+
+    const item = event.currentTarget.closest("[data-lightbox-target='item']")
+    if (!item) return
+    event.preventDefault()
+    // Items can be reordered in place, so use DOM order rather than a stored index.
+    this.index = Math.max(this.itemTargets.indexOf(item), 0)
+    // Return focus somewhere focusable: the card's "View" button on the edit page.
+    this.opener = item.querySelector("[data-lightbox-opener]") || item
     this.opened = true
     this.modal.classList.remove("hidden")
     document.body.style.overflow = "hidden"
@@ -85,6 +96,19 @@ export default class extends Controller {
     document.body.style.overflow = ""
     this.part("image").removeAttribute("src")
     if (this.opener && this.opener.focus) this.opener.focus()
+  }
+
+  // "Edit framing": on the edit page, hand the image to the in-page editor
+  // (image_editor_controller cancels the event). Elsewhere, follow the link.
+  edit(link) {
+    const item = this.itemTargets[this.index]
+    const card = item && item.closest(".gallery-card")
+    if (card) {
+      const event = new CustomEvent("gallery:edit", { detail: { card, dataset: { ...card.dataset } }, cancelable: true })
+      this.close()
+      if (!window.dispatchEvent(event)) return
+    }
+    if (link.href && !link.getAttribute("href").startsWith("#")) window.location.href = link.href
   }
 
   backdrop(event) {

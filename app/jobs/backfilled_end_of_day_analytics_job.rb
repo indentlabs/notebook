@@ -38,6 +38,9 @@ class BackfilledEndOfDayAnalyticsJob < ApplicationJob
     report.stream_shares_created = ContentPageShare.where(created_at: timespan).count
     report.stream_comments       = ShareComment.where(created_at: timespan).count
 
+    # Writing goals
+    report.writing_goals_completed = WritingGoal.where(completed_at: timespan).count
+
     # Collections
     report.collections_created            = PageCollection.where(created_at: timespan).count
     report.collection_submissions_created = PageCollectionSubmission.where(created_at: timespan).count
@@ -50,5 +53,9 @@ class BackfilledEndOfDayAnalyticsJob < ApplicationJob
     
     # Finish up :)
     report.save!
+
+    # Finalize the day's anonymous community word counts for /community
+    CommunityStatsRollup.new(report_date).run!
+    CommunityStatsRollup.roll_up_pages_edited!(report_date)
   end
 end

@@ -293,10 +293,10 @@ class UsersController < ApplicationController
   
   def load_user_collections
     # Collections user maintains (only public ones visible on profile)
-    @maintained_collections = @user.page_collections.where(privacy: 'public').order(updated_at: :desc)
+    @maintained_collections = @user.page_collections.where(privacy: 'public').with_attached_header_image.order(updated_at: :desc)
     
     # Collections user is published in
-    @published_in_collections = @user.published_in_page_collections.limit(20)
+    @published_in_collections = @user.published_in_page_collections.with_attached_header_image.limit(20)
   end
   
   def load_user_statistics

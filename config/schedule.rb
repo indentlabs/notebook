@@ -14,3 +14,7 @@ end
 every :sunday, at: '2:00 am' do
   rake "cache:stats"
 end
+# Keep the public /community page's anonymous stats fresh
+every 1.hour, at: 40 do
+  rake "community:refresh"
+end

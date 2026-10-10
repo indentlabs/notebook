@@ -8,6 +8,10 @@
 # Otherwise the largest general-purpose size is served with a CSS
 # object-position that keeps the writer's focal point in view. With no image
 # at all, the content type's placeholder header is rendered.
+#
+# Always go through content_cover_image / content_cover_image? rather than
+# calling cover_image on a record: PageCollection has a legacy cover_image
+# column that shadows the gallery API and accepts no options.
 module ContentImageHelper
   # Options:
   #   include_private: show private uploads (owner / collaborator views)
@@ -18,7 +22,13 @@ module ContentImageHelper
   #                    (default "100vw")
   def content_image_tag(content, preset, include_private: false, pick: :first, size: :full, sizes: nil, **options)
     preset = preset.to_sym
-    image  = content.respond_to?(:cover_image) ? content.cover_image(include_private: include_private, pick: pick, preset: preset) : nil
+    image  = content_cover_image(content, include_private: include_private, pick: pick, preset: preset)
+
+    # Pages without a gallery (e.g. PageCollection) supply their own header.
+    if !content.is_a?(HasImageUploads) && content.respond_to?(:header_image_url)
+      options[:alt] ||= content.try(:name).to_s
+      return image_tag(content.header_image_url, options)
+    end
 
     if image.nil?
       options[:alt] ||= "#{content.try(:name)} placeholder image".strip
@@ -55,7 +65,7 @@ module ContentImageHelper
   # link-preview framing, else the card, else a general size, else the
   # placeholder.
   def content_social_image_url(content)
-    image = content.respond_to?(:cover_image) ? content.cover_image(include_private: false, preset: :social) : nil
+    image = content_cover_image(content, include_private: false, preset: :social)
     url = image && (image.preset_url(:social) || image.preset_url(:card) || image.url(:hero) || image.original_url)
     url ||= content_placeholder_image(content)
     image_url(url)
@@ -70,6 +80,24 @@ module ContentImageHelper
       og:        { type: 'website', image: { _: url, width: size[0], height: size[1] } },
       twitter:   { card: 'summary_large_image', image: url }
     }
+  end
+
+  # The ContentImage representing +content+, or nil. Safe to call on any
+  # record; only gallery pages (HasImageUploads) ever have one.
+  def content_cover_image(content, include_private: false, pick: :first, preset: nil)
+    return nil unless content.is_a?(HasImageUploads)
+
+    content.cover_image(include_private: include_private, pick: pick, preset: preset)
+  end
+
+  # Whether content_image_tag would show a real image for +content+ rather
+  # than the placeholder.
+  def content_cover_image?(content, include_private: false)
+    if content.is_a?(HasImageUploads)
+      content.cover_image?(include_private: include_private)
+    else
+      content.respond_to?(:custom_header_image?) && content.custom_header_image?
+    end
   end
 
   def content_placeholder_image(content)

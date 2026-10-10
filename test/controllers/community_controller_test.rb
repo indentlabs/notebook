@@ -1,0 +1,64 @@
+require 'test_helper'
+
+class CommunityControllerTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+  include ActiveJob::TestHelper
+
+  setup do
+    Rails.cache.clear
+    WordCountUpdate.delete_all
+    @user = users(:one)
+    [[@user.id, 'Document', 1, Date.current - 3.days, 1_200],
+     [@user.id, 'Document', 1, Date.current, 1_450],
+     [users(:two).id, 'Character', 2, Date.current - 40.days, 300]].each do |user_id, type, id, date, words|
+      WordCountUpdate.insert_all!([{ user_id: user_id, entity_type: type, entity_id: id, for_date: date,
+                                     word_count: words, created_at: Time.current, updated_at: Time.current }])
+    end
+    [Date.current - 40.days, Date.current - 3.days].each { |date| CommunityStatsRollup.new(date).run! }
+    CommunityStatsRollup.refresh_recent!
+
+  teardown do
+    Rails.cache.clear
+  end
+  end
+
+  test "is public and shows community totals" do
+    get community_path
+    assert_response :success
+    assert_select 'h1', /But none of us write alone/
+    assert_includes response.body, '1,750' # all-time words
+    assert_includes response.body, new_user_registration_path
+  end
+
+  test "shows signed-in writers their share of today's words" do
+    sign_in @user
+    get community_path
+    assert_response :success
+    assert_includes response.body, "added <strong class=\"text-white\">250</strong>"
+  end
+
+  test "shows pages worked on this month with how many were new" do
+    month = Date.current.day == 1 ? Date.current.prev_month.beginning_of_month : Date.current.beginning_of_month
+    EndOfDayAnalyticsReport.delete_all
+    CommunityDailyStat.create!(date: month, metric: 'pages_edited', key: 'Character', value: 1_234)
+    EndOfDayAnalyticsReport.create!(day: month, characters_created: 56)
+
+    get community_path
+    assert_response :success
+    assert_includes response.body, '1,234'
+    assert_includes response.body, '56 new'
+  end
+
+  test "renders with no writing activity at all" do
+    CommunityDailyStat.delete_all
+    Rails.cache.clear
+    get community_path
+    assert_response :success
+  end
+
+  test "enqueues a refresh when the stats are stale" do
+    CommunityDailyStat.delete_all
+    Rails.cache.clear
+    assert_enqueued_with(job: CommunityStatsRefreshJob) { get community_path }
+  end
+end

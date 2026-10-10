@@ -16,7 +16,8 @@
 %>
 
 <div class="space-y-8 rounded-lg"
-     data-controller="gallery"
+     data-controller="gallery lightbox"
+     data-lightbox-page-name-value="<%= raw_content.try(:name) %>"
      data-gallery-content-type-value="<%= raw_content.class.name %>"
      data-gallery-content-id-value="<%= raw_content.id %>"
      data-gallery-sort-url-value="/api/v1/gallery_images/sort"
@@ -140,7 +141,10 @@
     </noscript>
   </div>
 
-  <%# Image editor modal (opened from each card's Edit button) %>
+  <%# Full-size viewer (clicking an image), with an "Edit framing" hand-off to the editor %>
+  <%= render partial: 'content/show/lightbox' %>
+
+  <%# Image editor modal (opened from each card's "Edit framing" button) %>
   <%= render partial: 'content/edit/gallery/editor', locals: { content: raw_content } %>
 
   <%# Generate with Basil %>
