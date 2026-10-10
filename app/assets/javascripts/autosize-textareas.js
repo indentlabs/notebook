@@ -1,52 +1,35 @@
 // Auto-grow textareas (.js-autosize-textarea) to fit their content.
 //
-// The only way to measure a textarea's content height is to collapse it so
-// scrollHeight reflects the text rather than the current box. Done naively,
-// that collapse shortens the whole document for one synchronous layout. Every
-// browser clamps the window scroll position to the shorter document during
-// that layout; Chromium's scroll anchoring quietly puts it back, but browsers
-// without it (Safari/WebKit) leave the page scrolled up by however much the
-// textarea shrank. For a long field near the bottom of an edit page that looks
-// like the page jumping to the top on every keystroke.
+// Browsers with `field-sizing: content` (Baseline since mid-2026) do this in
+// layout, so the stylesheet rule in autosize-textareas.scss handles it and this
+// script does nothing. The code below is the fallback for older browsers.
 //
-// So while measuring, the textarea's parent is pinned to its current height
-// (the document can't get shorter, so nothing gets clamped), and any scroll
-// offset that moved anyway is restored afterwards.
+// The fallback has to measure content by collapsing the textarea and reading
+// scrollHeight. Done naively, that collapse shortens the whole document for one
+// synchronous layout and the browser clamps the window scroll to the shorter
+// document. Chromium's scroll anchoring restores it, but Firefox suppresses
+// anchoring when the anchor node itself changes height, and Safari has no
+// anchoring at all, so the page is left scrolled up by however much the
+// textarea shrank. In a long field near the bottom of an edit page that reads
+// as the page jumping to the top on every keystroke. Pinning the textarea's
+// parent to its current height while measuring means the document can never
+// get shorter, so there is nothing to clamp.
 $(document).ready(function() {
+  if (window.CSS && CSS.supports && CSS.supports('field-sizing', 'content')) return;
+
   const yPadding = 16;
   const lineHeight = 20;
   const minLines = 3;
   const minHeight = yPadding + (minLines * lineHeight);
 
-  function scrollOffsets(element) {
-    const offsets = [{ node: window, top: window.pageYOffset }];
-    for (let node = element.parentElement; node; node = node.parentElement) {
-      if (node.scrollTop > 0) offsets.push({ node: node, top: node.scrollTop });
-    }
-    return offsets;
-  }
-
-  function restoreScrollOffsets(offsets) {
-    offsets.forEach(function(entry) {
-      if (entry.node === window) {
-        if (window.pageYOffset !== entry.top) window.scrollTo(window.pageXOffset, entry.top);
-      } else if (entry.node.scrollTop !== entry.top) {
-        entry.node.scrollTop = entry.top;
-      }
-    });
-  }
-
   function fitToContent(textarea) {
     const parent = textarea.parentElement;
-    const offsets = scrollOffsets(textarea);
-    const previousMinHeight = parent ? parent.style.minHeight : '';
+    const previousMinHeight = parent.style.minHeight;
 
-    if (parent) parent.style.minHeight = parent.offsetHeight + 'px';
+    parent.style.minHeight = parent.offsetHeight + 'px';
     textarea.style.height = minHeight + 'px';
     textarea.style.height = Math.max(textarea.scrollHeight, minHeight) + 'px';
-    if (parent) parent.style.minHeight = previousMinHeight;
-
-    restoreScrollOffsets(offsets);
+    parent.style.minHeight = previousMinHeight;
   }
 
   // Textareas that aren't rendered yet (e.g. inside a hidden category section)
