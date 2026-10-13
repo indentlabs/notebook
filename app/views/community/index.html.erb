@@ -303,8 +303,17 @@
       </div>
       <div class="rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-sm p-5">
         <i class="material-icons text-emerald-100">flag</i>
-        <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.goals_completed_in_month(@creations_month) %></div>
-        <div class="text-sm text-emerald-100">writing goals completed</div>
+        <% goals = stats.goal_completion_in_month(@creations_month) %>
+        <% if goals[:percent] %>
+          <div class="mt-1 text-3xl font-bold tabular-nums"><%= goals[:percent] %>%</div>
+          <div class="text-sm text-emerald-100">
+            of writing goals completed
+            <span class="block tabular-nums"><%= number_with_delimiter goals[:completed] %> of <%= number_with_delimiter goals[:set] %> set in <%= @creations_month.strftime('%B') %></span>
+          </div>
+        <% else %>
+          <div class="mt-1 text-3xl font-bold tabular-nums"><%= number_with_delimiter stats.goals_completed_in_month(@creations_month) %></div>
+          <div class="text-sm text-emerald-100">writing goals completed</div>
+        <% end %>
       </div>
       <div class="rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-sm p-5">
         <i class="material-icons text-violet-100">forum</i>

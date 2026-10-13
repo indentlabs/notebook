@@ -49,6 +49,20 @@ class CommunityControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, '56 new'
   end
 
+  test "shows the completion rate of writing goals set this month" do
+    month = Date.current.day == 1 ? Date.current.prev_month.beginning_of_month : Date.current.beginning_of_month
+    WritingGoal.delete_all
+    4.times do |i|
+      WritingGoal.create!(user: @user, title: "Goal #{i}", target_word_count: 1_000, start_date: month,
+                          end_date: month + 20.days, created_at: month, completed_at: (month if i.zero?))
+    end
+
+    get community_path
+    assert_response :success
+    assert_includes response.body, '25%'
+    assert_includes response.body, "1 of 4 set in #{month.strftime('%B')}"
+  end
+
   test "renders with no writing activity at all" do
     CommunityDailyStat.delete_all
     Rails.cache.clear
