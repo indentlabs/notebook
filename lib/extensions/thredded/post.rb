@@ -7,7 +7,7 @@ module Extensions
       extend ActiveSupport::Concern
 
       # Accounts younger than this are considered "new" for automoderation purposes.
-      NEW_ACCOUNT_AGE = 30.days
+      NEW_ACCOUNT_AGE = 5.days
 
       # Anything that looks like a link: explicit URLs, www-prefixed hosts, BBCode/HTML links,
       # or a bare domain on a common TLD (e.g. "cheap-pills.shop").

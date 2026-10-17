@@ -49,7 +49,7 @@ class ThreddedAutomoderationTest < ActiveSupport::TestCase
   end
 
   test "does not hold a link in an older account's first post" do
-    @user.update_columns(created_at: 1.year.ago)
+    @user.update_columns(created_at: 6.days.ago)
     topic, post = create_topic('Check out https://example.com')
 
     assert post.approved?
