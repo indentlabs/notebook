@@ -13,6 +13,8 @@
  * A form only needs saving when its data differs from what was last sent, so repeated triggers
  * (blur, the idle timer, change events) never send the same data twice.
  *
+ * Trigger 'autosave:request' on a field to save it immediately (e.g. after setting its value from script).
+ *
  * Events: 'autosave:start', 'autosave:success' and 'autosave:error' are dispatched on the field and
  * bubble up to document. event.detail.field is the field, and event.detail.response is the server's
  * response on success.
@@ -196,6 +198,13 @@ $(document).ready(function() {
     if (isImmediateSaveElement(this)) {
       save($(this));
     }
+  });
+
+  // Lets other scripts save a field right away after changing its value programmatically
+  $(document).on('autosave:request', '.js-autosave', function() {
+    var field = $(this);
+    clearTimeout(field.data('autosaveIdleTimer'));
+    save(field);
   });
 
   // An AJAX request can be cancelled when the page goes away, but a beacon is delivered after the page
