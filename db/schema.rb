@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_09_28_130000) do
+ActiveRecord::Schema.define(version: 2026_10_28_120000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3871,6 +3871,20 @@ ActiveRecord::Schema.define(version: 2026_09_28_130000) do
     t.index ["for_date", "user_id"], name: "index_word_count_updates_on_for_date_and_user_id"
     t.index ["user_id", "for_date"], name: "idx_word_count_user_date"
     t.index ["user_id"], name: "index_word_count_updates_on_user_id"
+  end
+
+  create_table "wordsmith_entries", force: :cascade do |t|
+    t.string "word", null: false
+    t.text "senses"
+    t.text "related"
+    t.string "pronunciation"
+    t.integer "syllables"
+    t.string "rhyme_key"
+    t.string "near_rhyme_key"
+    t.boolean "common", default: false, null: false
+    t.index ["near_rhyme_key", "common"], name: "index_wordsmith_entries_on_near_rhyme_key_and_common"
+    t.index ["rhyme_key", "common"], name: "index_wordsmith_entries_on_rhyme_key_and_common"
+    t.index ["word"], name: "index_wordsmith_entries_on_word", unique: true
   end
 
   create_table "writing_goals", force: :cascade do |t|
