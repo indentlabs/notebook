@@ -92,12 +92,9 @@
           <% else %>
             That's a start,
           <% end %>
-          from <strong><%= number_with_delimiter stats.all_time_writers %></strong> writers
-          <% if stats.first_tracked_date %>
-            since we started counting on <%= stats.first_tracked_date.strftime('%B %-d, %Y') %>.
-          <% else %>
-            so far.
-          <% end %>
+          written by a community of
+          <strong><%= number_to_human stats.community_size, precision: 2, significant: true, format: '%n%u', units: { thousand: 'K', million: 'M', billion: 'B' } %></strong> writers<% if stats.first_tracked_date %>
+            since we started counting on <%= stats.first_tracked_date.strftime('%B %-d, %Y') %><% end %>.
         </p>
       </div>
     </div>

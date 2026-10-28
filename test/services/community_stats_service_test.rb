@@ -40,7 +40,10 @@ class CommunityStatsServiceTest < ActiveSupport::TestCase
     assert_equal 1_000, stats.daily_words[@today - 10.days]
     assert_equal 2, stats.daily_writers[@today - 2.days]
     assert_equal 1_750, stats.all_time_words
-    assert_equal 2, stats.all_time_writers
+  end
+
+  test "community size covers every account, not just recent writers" do
+    assert_equal User.maximum(:id), stats.community_size
   end
 
   test "deletions never subtract from community totals" do

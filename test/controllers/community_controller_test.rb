@@ -27,6 +27,7 @@ class CommunityControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select 'h1', /But none of us write alone/
     assert_includes response.body, '1,750' # all-time words
+    assert_match(/written by a community of\s*<strong>#{User.maximum(:id)}<\/strong> writers/, response.body)
     assert_includes response.body, new_user_registration_path
   end
 
