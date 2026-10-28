@@ -23,6 +23,16 @@ module Wordsmith
 
     COMMON_WORD_FORMAT = /\A[a-z]+(?:['-][a-z]+)*\z/
 
+    # Rough sound classes for consonants. Near rhymes keep the vowels but only
+    # the class of each consonant, so "grief" (IY F) near-rhymes with "sleeve"
+    # (IY V) and "peace" (IY S) but not "beam" (IY M).
+    CONSONANT_CLASSES = {
+      'P' => 'stop', 'B' => 'stop', 'T' => 'stop', 'D' => 'stop', 'K' => 'stop', 'G' => 'stop',
+      'F' => 'fric', 'V' => 'fric', 'TH' => 'fric', 'DH' => 'fric', 'S' => 'fric', 'Z' => 'fric', 'SH' => 'fric', 'ZH' => 'fric', 'HH' => 'fric',
+      'CH' => 'affr', 'JH' => 'affr', 'M' => 'nasal', 'N' => 'nasal', 'NG' => 'nasal',
+      'L' => 'liquid', 'R' => 'liquid', 'W' => 'glide', 'Y' => 'glide'
+    }.freeze
+
     attr_reader :wordnet_dir, :cmu_file, :moby_file
 
     def initialize(wordnet_dir:, cmu_file:, moby_file:, logger: Rails.logger)
@@ -33,8 +43,9 @@ module Wordsmith
     end
 
     def import!
-      related, vocabulary = load_moby
-      pronunciations      = load_pronunciations
+      usage                            = load_usage_counts
+      related, vocabulary, appearances = load_moby(usage)
+      pronunciations                   = load_pronunciations
 
       synsets = load_synsets
       senses  = load_senses(synsets)
@@ -54,6 +65,7 @@ module Wordsmith
           rows = batch.map do |word|
             phones = pronunciations[word]
             rhyme_key, near_rhyme_key = Importer.rhyme_keys(phones)
+            frequency = usage[word] + appearances[word]
 
             {
               word:           word,
@@ -63,7 +75,8 @@ module Wordsmith
               syllables:      phones && phones.scan(/\d/).size,
               rhyme_key:      rhyme_key,
               near_rhyme_key: near_rhyme_key,
-              common:         Importer.common_word?(word, phones, vocabulary)
+              frequency:      frequency,
+              common:         frequency.positive? && Importer.common_word?(word, phones, vocabulary)
             }
           end
 
@@ -86,8 +99,8 @@ module Wordsmith
     end
 
     # Perfect rhymes share every phone from the last stressed vowel onward
-    # ("constantly" -> "AA N S T AH N T L IY"); near rhymes share only the
-    # vowels from that point ("AA AH IY").
+    # ("grief" -> "IY F"); near rhymes share the vowels and the kinds of
+    # consonants from that point ("IY fric").
     def self.rhyme_keys(phones)
       return [nil, nil] if phones.blank?
 
@@ -100,13 +113,28 @@ module Wordsmith
                  vowel_indexes.last
 
       tail = phones[stressed..].map { |phone| phone.delete('0-9') }
-      [tail.join(' '), phones[stressed..].select { |p| p =~ /\d/ }.map { |p| p.delete('0-9') }.join(' ')]
+      [tail.join(' '), tail.map { |phone| CONSONANT_CLASSES[phone] || phone }.join(' ')]
     end
 
     private
 
     def log(message)
       @logger.info("[Wordsmith] #{message}")
+    end
+
+    # How often each lemma appears in WordNet's sense-tagged corpus, summed
+    # across its senses ("time" is tagged hundreds of times, "ca" never). Sparse,
+    # but a good signal of everyday words; Moby list appearances fill in the rest.
+    def load_usage_counts
+      counts = Hash.new(0)
+
+      File.foreach(File.join(wordnet_dir, 'index.sense')) do |line|
+        sense_key, _offset, _sense_number, tag_count = line.split(' ')
+        counts[sense_key[/\A[^%]+/].tr('_', ' ')] += tag_count.to_i
+      end
+
+      log "Loaded usage counts for #{counts.size} WordNet lemmas"
+      counts
     end
 
     # Returns { "n00001740" => { type:, words: [...], pointers: [...], gloss: } }
@@ -249,18 +277,27 @@ module Wordsmith
       pronunciations
     end
 
-    # Each Moby line is "root,related,related,...". Returns the related lists
-    # keyed by root, plus every lowercase word Moby knows (used to tell real
-    # words apart from the names and acronyms that fill the CMU dictionary).
+    # Each Moby line is "root,related,related,...". Returns:
     #
-    # Moby lists are alphabetical and can run to thousands of words, so before
-    # capping them we move lowercase headwords (words with their own Moby
-    # entry) ahead of proper nouns and obscure multi-word phrases.
-    def load_moby
-      # First pass: just the headwords, so the second pass can rank and cap
-      # each list as it goes instead of holding every full list in memory.
-      roots = Set.new
-      File.foreach(moby_file) { |line| roots << line[/\A[^,]*/].strip.downcase }
+    #   * the related lists, keyed by root
+    #   * every lowercase word Moby knows (used to tell real words apart from
+    #     the names and acronyms that fill the CMU dictionary)
+    #   * how many lists each word appears in (a proxy for how common it is)
+    #
+    # Moby lists are alphabetical and can run to thousands of words, so each
+    # one is re-sorted and capped. Mutual entries come first: if "grief" lists
+    # "anguish" and "anguish" lists "grief", they're close in meaning. Then
+    # words that are common but specific: corpus usage divided by how many
+    # lists a word is in, since vague words like "take" appear in hundreds.
+    def load_moby(usage)
+      appearances = Hash.new(0)
+      lists = {} # root -> ",its,whole,list," for cheap membership checks
+
+      File.foreach(moby_file) do |line|
+        words = line.strip.downcase.split(',').map(&:strip)
+        words.each { |word| appearances[word] += 1 }
+        lists[words.first] = ",#{words.join(',')}," if words.first
+      end
 
       related    = {}
       vocabulary = Set.new
@@ -275,13 +312,18 @@ module Wordsmith
 
         words = (related[root] || []) + words.reject { |w| w.casecmp?(root) }
         related[root] = words.uniq.each_with_index
-                             .sort_by { |w, i| [w == w.downcase ? 0 : 1, roots.include?(w.downcase) ? 0 : 1, w.include?(' ') ? 1 : 0, i] }
+                             .sort_by do |w, i|
+                               key = w.downcase
+                               mutual = lists[key]&.include?(",#{root},")
+                               specificity = (usage[key] + 1).fdiv(appearances[key] + 1)
+                               [w == key ? 0 : 1, mutual ? 0 : 1, w.include?(' ') ? 1 : 0, -specificity, i]
+                             end
                              .map(&:first)
                              .first(MAX_RELATED)
       end
 
       log "Loaded #{related.size} Moby thesaurus roots"
-      [related, vocabulary]
+      [related, vocabulary, appearances]
     end
   end
 end
