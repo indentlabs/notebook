@@ -7,7 +7,8 @@
   Expected Alpine.js context (from documentEditController):
     - showRightSidebar: Boolean
     - isDesktop: Boolean
-    - activeSidebarPanel: String ('information', 'linked_pages', 'actions', 'books')
+    - activeSidebarPanel: String ('information', 'linked_pages', 'actions', 'books', 'wordsmith')
+    - activePanel: Object ({ label, icon } for the active panel)
     - closeMobileSidebar(): Function
 %>
 
@@ -38,20 +39,20 @@
      class="lg:hidden fixed right-0 top-14 h-screen-minus-nav w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl z-50 overflow-y-auto"
      role="dialog"
      aria-modal="true"
-     :aria-labelledby="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : activeSidebarPanel === 'books' ? 'mobile-books-title' : 'mobile-entities-title'">
+     aria-labelledby="mobile-sidebar-title">
 
   <!-- Mobile Header - Dynamic based on active panel -->
   <div class="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
     <button @click="closeMobileSidebar()"
             class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            :aria-label="activeSidebarPanel === 'information' ? 'Close Information' : activeSidebarPanel === 'actions' ? 'Close Actions' : activeSidebarPanel === 'books' ? 'Close Books' : 'Close Linked Pages'">
+            :aria-label="'Close ' + activePanel.label">
       <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
       <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-        <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
+        <i class="material-icons text-white text-xs" x-text="activePanel.icon"></i>
       </div>
-      <h2 :id="activeSidebarPanel === 'information' ? 'mobile-information-title' : activeSidebarPanel === 'actions' ? 'mobile-actions-title' : activeSidebarPanel === 'books' ? 'mobile-books-title' : 'mobile-entities-title'"
+      <h2 id="mobile-sidebar-title"
           class="text-sm font-semibold text-gray-900 dark:text-white"
-          x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
+          x-text="activePanel.label"></h2>
     </button>
   </div>
 
@@ -68,6 +69,11 @@
   <!-- Actions Panel -->
   <div x-show="activeSidebarPanel === 'actions'">
     <%= render partial: 'documents/actions_sidebar' %>
+  </div>
+
+  <!-- Wordsmith Panel -->
+  <div x-show="activeSidebarPanel === 'wordsmith'">
+    <%= render partial: 'documents/wordsmith_sidebar' %>
   </div>
 
   <!-- Books Panel -->

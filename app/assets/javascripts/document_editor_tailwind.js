@@ -57,8 +57,12 @@ document.addEventListener('DOMContentLoaded', function() {
         'unorderedlist',
         'quote',
         'anchor',
-        'removeFormat'
+        'removeFormat',
+        'wordsmith'
       ]
+    },
+    extensions: {
+      wordsmith: window.createWordsmithToolbarButton()
     },
     anchorPreview: {
       hideDelay: 0
@@ -111,7 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
       'insertunorderedlist': 'Bullet List',
       'append-blockquote': 'Block Quote',
       'createLink': 'Insert Link (Ctrl+K)',
-      'removeFormat': 'Clear Formatting'
+      'removeFormat': 'Clear Formatting',
+      'wordsmith': 'Look up in Wordsmith'
     };
 
     document.querySelectorAll('.medium-editor-action').forEach(function(btn) {

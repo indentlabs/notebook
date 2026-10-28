@@ -1,6 +1,6 @@
 <% set_meta_tags title: "Editing: " + @document.title, description: truncate(@document.body) %>
 
-<div x-data="documentEditController()" x-init="init()" data-document-id="<%= @document.id %>" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col overflow-x-hidden">
+<div x-data="documentEditController()" x-init="init()" @wordsmith-open.window="activeSidebarPanel = 'wordsmith'" data-document-id="<%= @document.id %>" class="min-h-screen bg-white dark:bg-gray-900 flex flex-col overflow-x-hidden">
 
   <!-- Main content area - Flex layout -->
   <main class="flex-1 pt-14">
@@ -60,19 +60,19 @@
          x-transition:leave-end="translate-x-full"
          class="fixed right-0 top-14 w-80 h-screen-minus-nav bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 overflow-y-auto z-40"
          role="complementary"
-         :aria-label="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'">
+         :aria-label="activePanel.label">
 
       <!-- Desktop Header - Dynamic based on active panel -->
       <div class="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <button @click="activeSidebarPanel = null"
                 class="flex items-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors p-1.5 -ml-1.5"
-                :title="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'"
-                :aria-label="activeSidebarPanel === 'information' ? 'Hide Information' : activeSidebarPanel === 'actions' ? 'Hide Actions' : activeSidebarPanel === 'books' ? 'Hide Books' : 'Hide Linked Pages'">
+                :title="'Hide ' + activePanel.label"
+                :aria-label="'Hide ' + activePanel.label">
           <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-1">chevron_right</i>
           <div class="w-6 h-6 rounded-full bg-notebook-blue flex items-center justify-center mr-1.5">
-            <i class="material-icons text-white text-xs" x-text="activeSidebarPanel === 'information' ? 'info' : activeSidebarPanel === 'actions' ? 'bolt' : activeSidebarPanel === 'books' ? 'menu_book' : 'link'"></i>
+            <i class="material-icons text-white text-xs" x-text="activePanel.icon"></i>
           </div>
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activeSidebarPanel === 'information' ? 'Information' : activeSidebarPanel === 'actions' ? 'Actions' : activeSidebarPanel === 'books' ? 'Books' : 'Linked Pages'"></h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white" x-text="activePanel.label"></h2>
         </button>
       </div>
 
@@ -89,6 +89,11 @@
       <!-- Actions Panel -->
       <div x-show="activeSidebarPanel === 'actions'">
         <%= render partial: 'documents/actions_sidebar' %>
+      </div>
+
+      <!-- Wordsmith Panel -->
+      <div x-show="activeSidebarPanel === 'wordsmith'">
+        <%= render partial: 'documents/wordsmith_sidebar' %>
       </div>
 
       <!-- Books Panel -->
@@ -259,10 +264,12 @@
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'linked_pages', icon: 'link', tooltip: 'Linked Pages', top_position: 124, is_desktop: true %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'books', icon: 'menu_book', tooltip: 'Books', top_position: 172, is_desktop: true %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'actions', icon: 'bolt', tooltip: 'Actions', top_position: 220, is_desktop: true %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'wordsmith', icon: 'hardware', tooltip: 'Wordsmith', top_position: 268, is_desktop: true %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'information', icon: 'info', tooltip: 'Information', top_position: 76, is_desktop: false %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'linked_pages', icon: 'link', tooltip: 'Linked Pages', top_position: 124, is_desktop: false %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'books', icon: 'menu_book', tooltip: 'Books', top_position: 172, is_desktop: false %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'actions', icon: 'bolt', tooltip: 'Actions', top_position: 220, is_desktop: false %>
+    <%= render 'documents/sidebar_toggle_tab', panel_name: 'wordsmith', icon: 'hardware', tooltip: 'Wordsmith', top_position: 268, is_desktop: false %>
 
     <%= render 'documents/mobile_sidebar' %>
 
@@ -292,8 +299,21 @@
         function documentEditController() {
           return {
             // Sidebar state - null means closed, otherwise shows which panel is active
-            activeSidebarPanel: null, // null, 'linked_pages', 'information', 'actions', or 'books'
+            activeSidebarPanel: null, // null, or one of the keys in `panels`
             isDesktop: window.innerWidth >= 1024,
+
+            // Header label and icon for each sidebar panel
+            panels: {
+              information:  { label: 'Information',  icon: 'info' },
+              linked_pages: { label: 'Linked Pages', icon: 'link' },
+              books:        { label: 'Books',        icon: 'menu_book' },
+              actions:      { label: 'Actions',      icon: 'bolt' },
+              wordsmith:    { label: 'Wordsmith',    icon: 'hardware' }
+            },
+
+            get activePanel() {
+              return this.panels[this.activeSidebarPanel] || this.panels.linked_pages;
+            },
 
             // Computed property for backwards compatibility
             get showRightSidebar() {
@@ -302,6 +322,11 @@
 
             init() {
               this.setupResizeListener();
+
+              // Wordsmith only follows the writer's highlighting while its panel is open
+              this.$watch('activeSidebarPanel', panel => {
+                Alpine.store('wordsmith').setActive(panel === 'wordsmith');
+              });
             },
 
             togglePanel(panel) {
