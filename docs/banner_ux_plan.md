@@ -42,13 +42,13 @@ When a box has `aspect-ratio` and an automatic width, CSS sends the `max-height`
 
 ## 5. Rolling out
 
-Existing uploads keep their current 1500×500 banner files, which already work, until they're regenerated:
+No backfill. With about a million uploads in S3, regenerating would mean roughly 13 million S3 writes (every style is rebuilt, not only the banner) and weeks of ImageMagick time, all to sharpen banners on old pages, mostly ones nobody visits.
 
-```bash
-bin/rails gallery:regenerate_crops
-```
+- The width fix and the focal-point trim are applied when the page renders, so they reach every image as soon as this is deployed.
+- Existing uploads keep their 1500×500 banner files, which look the same as before. `preset_dimensions` may describe one of these as 2400 px wide. That only steers which `srcset` entry the browser picks, and there is no larger file to pick, so nothing changes visibly.
+- New uploads, new Basil images and any image a writer reframes get the 2400×800 banner from the jobs that already run on upload and on reframe. Basil variants have new variant keys, so they regenerate on first view.
 
-This enqueues `GenerateImageCropsJob` for every upload that already has derivatives, and re-downloads each original from S3, so run it off-peak. Basil variants need nothing: the new transformations have new variant keys, so they're generated on first request.
+If old banners ever need upgrading, do it lazily rather than in bulk: when a banner is rendered for an upload whose `crops_generated_at` predates this change and whose source is wider than 1500 px, enqueue a banner-only reprocess (`reprocess!(:banner, :banner_sm)`), at most once per image. Only pages people actually visit would pay the cost.
 
 ## 6. Left alone
 

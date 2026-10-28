@@ -12,19 +12,6 @@ namespace :gallery do
     puts "Enqueued crop generation for #{count} image upload(s)."
   end
 
-  desc "Regenerate the shape derivatives of uploads that already have them, after a preset's size or processing changes (enqueues GenerateImageCropsJob). Basil variants regenerate on their own."
-  task regenerate_crops: :environment do
-    scope = ImageUpload.where.not(crops_generated_at: nil).where.not(src_file_name: nil)
-    count = 0
-
-    scope.find_each do |image|
-      GenerateImageCropsJob.perform_later('ImageUpload', image.id)
-      count += 1
-    end
-
-    puts "Enqueued crop regeneration for #{count} image upload(s)."
-  end
-
   desc "Record original pixel dimensions for uploads that were stored before width/height were captured"
   task backfill_dimensions: :environment do
     scope = ImageUpload.where(width: nil).where.not(src_file_name: nil)
