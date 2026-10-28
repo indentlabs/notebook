@@ -97,6 +97,25 @@ document.addEventListener('DOMContentLoaded', function() {
     e.preventDefault();
   });
 
+  // Medium Editor keeps its toolbar inside the window but doesn't know about
+  // the sidebar toggle tabs (or the open sidebar beside them), so nudge the
+  // toolbar left whenever it would run underneath them.
+  window.editor.subscribe('positionedToolbar', function() {
+    const toolbar = window.editor.getExtensionByName('toolbar').getToolbarElement();
+    const tabEdges = Array.from(document.querySelectorAll('.js-sidebar-toggle-tab'))
+      .map(tab => tab.getBoundingClientRect())
+      .filter(rect => rect.width > 0)
+      .map(rect => rect.left);
+    if (!tabEdges.length) return;
+
+    const margin = 8;
+    const overflow = toolbar.getBoundingClientRect().right - (Math.min(...tabEdges) - margin);
+    if (overflow > 0) {
+      const left = parseFloat(toolbar.style.left) || 0;
+      toolbar.style.left = Math.max(left - overflow, window.scrollX + margin) + 'px';
+    }
+  });
+
   // Add tooltips to toolbar buttons
   setTimeout(function() {
     const tooltips = {

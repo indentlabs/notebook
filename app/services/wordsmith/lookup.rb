@@ -7,7 +7,6 @@ module Wordsmith
     MAX_QUERY_LENGTH  = 60
     MAX_RHYMES        = 150
     MAX_NEAR_RHYMES   = 60
-    NEAR_RHYME_POOL   = 600
 
     # WordNet's base-form rules ("morphy"), tried in order when a word isn't
     # found as typed: "cities" -> "city", "running" -> "runn" -> "run".
@@ -57,14 +56,6 @@ module Wordsmith
       P_L P_R B_L B_R T_R D_R K_L K_R G_L G_R F_L F_R TH_R SH_R S_P S_T S_K S_M S_N S_L S_W T_W D_W K_W G_W TH_W
       P_Y B_Y F_Y K_Y M_Y HH_Y V_Y S_P_L S_P_R S_T_R S_K_R S_K_W S_P_Y S_K_Y
     ).map { |onset| onset.split('_') }.to_set.freeze
-
-    # Rough sound classes, used to rank near rhymes by how alike their endings sound.
-    CONSONANT_CLASSES = {
-      'P' => 'stop', 'B' => 'stop', 'T' => 'stop', 'D' => 'stop', 'K' => 'stop', 'G' => 'stop',
-      'F' => 'fric', 'V' => 'fric', 'TH' => 'fric', 'DH' => 'fric', 'S' => 'fric', 'Z' => 'fric', 'SH' => 'fric', 'ZH' => 'fric', 'HH' => 'fric',
-      'CH' => 'affr', 'JH' => 'affr', 'M' => 'nasal', 'N' => 'nasal', 'NG' => 'nasal',
-      'L' => 'liquid', 'R' => 'liquid', 'W' => 'glide', 'Y' => 'glide'
-    }.freeze
 
     def self.normalize(text)
       text.to_s
@@ -139,38 +130,31 @@ module Wordsmith
       { ipa: self.class.ipa(entry.pronunciation), syllables: entry.syllables }
     end
 
+    # Most common first within each syllable count, so "the" leads with "a"
+    # rather than "ca".
     def rhymes_for(entry)
       return [] unless entry&.rhyme_key
 
       WordsmithEntry.where(rhyme_key: entry.rhyme_key, common: true)
                     .where.not(word: entry.word)
-                    .order(:syllables, :word)
+                    .order(:syllables, frequency: :desc, word: :asc)
                     .limit(MAX_RHYMES)
                     .pluck(:word, :syllables)
                     .group_by(&:last)
                     .map { |syllables, words| { syllables: syllables, words: words.map(&:first) } }
     end
 
-    # Near (slant) rhymes share the stressed vowel sounds but not the exact
-    # ending. Rank the ones whose ending consonants sound alike first, so
-    # "grief" suggests "sleeve" and "peace" before "beam".
+    # Near (slant) rhymes have the same vowels and the same kinds of consonants
+    # but aren't perfect rhymes: "grief" -> "sleeve", "peace" (see
+    # Wordsmith::Importer::CONSONANT_CLASSES).
     def near_rhymes_for(entry)
       return [] unless entry&.near_rhyme_key
 
-      target = consonant_shape(entry.rhyme_key)
-
       WordsmithEntry.where(near_rhyme_key: entry.near_rhyme_key, common: true)
                     .where.not(rhyme_key: entry.rhyme_key)
-                    .order(Arel.sql("ABS(syllables - #{entry.syllables.to_i})"), :word)
-                    .limit(NEAR_RHYME_POOL)
-                    .pluck(:word, :rhyme_key, :syllables)
-                    .sort_by.with_index { |(_, rhyme_key, syllables), index| [consonant_shape(rhyme_key) == target ? 0 : 1, (syllables - entry.syllables.to_i).abs, index] }
-                    .first(MAX_NEAR_RHYMES)
-                    .map(&:first)
-    end
-
-    def consonant_shape(rhyme_key)
-      rhyme_key.to_s.split.map { |phone| CONSONANT_CLASSES[phone] || 'V' }.join(' ')
+                    .order(frequency: :desc, word: :asc)
+                    .limit(MAX_NEAR_RHYMES)
+                    .pluck(:word)
     end
 
     # "K AA1 N S T AH0 N T L IY0" -> "ˈkɑnstəntli"

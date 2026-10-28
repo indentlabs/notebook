@@ -6,6 +6,7 @@ export const dictionary = {
   "belief": "B IH0 L IY1 F",
   "brief": "B R IY1 F",
   "cunning": "K AH1 N IH0 NG",
+  "fief": "F IY1 F",
   "explain": "IH0 K S P L EY1 N",
   "grief": "G R IY1 F",
   "grief(2)": "G R IY1 V",

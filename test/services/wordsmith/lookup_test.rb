@@ -27,6 +27,7 @@ class Wordsmith::LookupTest < ActiveSupport::TestCase
     assert WordsmithEntry.find_by(word: 'beef').common
     refute WordsmithEntry.find_by(word: 'japan').common, 'proper nouns are not common'
     refute WordsmithEntry.find_by(word: 'amd').common, 'acronyms read letter by letter are not common'
+    refute WordsmithEntry.find_by(word: 'fief').common, 'words neither source shows being used are not common'
   end
 
   test "looks up definitions, synonyms and pronunciation" do
@@ -55,19 +56,24 @@ class Wordsmith::LookupTest < ActiveSupport::TestCase
     assert_equal ['mild'], sense['antonyms']
   end
 
-  test "related words put lowercase headwords before proper nouns" do
+  test "related words put common words first and proper nouns last" do
     related = lookup('grief')[:related]
 
-    assert_includes related, 'affliction'
+    assert_equal 'anguish', related.first
     assert_equal 'Sorrow Street', related.last
   end
 
-  test "groups perfect rhymes by syllable count" do
-    assert_equal [{ syllables: 1, words: %w(beef brief) }, { syllables: 2, words: %w(belief) }], lookup('grief')[:rhymes]
+  test "groups perfect rhymes by syllable count, most common first" do
+    assert_equal [{ syllables: 1, words: %w(brief beef) }, { syllables: 2, words: %w(belief) }], lookup('grief')[:rhymes]
   end
 
-  test "ranks near rhymes with similar-sounding endings first" do
-    assert_equal %w(sleeve beam), lookup('grief')[:near_rhymes]
+  test "near rhymes need similar-sounding consonants" do
+    assert_equal %w(sleeve), lookup('grief')[:near_rhymes]
+  end
+
+  test "frequency combines corpus usage and thesaurus appearances" do
+    assert_equal 3 + 1, WordsmithEntry.find_by(word: 'grief').frequency
+    assert_equal 0, WordsmithEntry.find_by(word: 'fief').frequency
   end
 
   test "irregular and inflected forms show their base form" do
