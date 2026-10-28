@@ -1,6 +1,8 @@
 # Paperclip processor that crops to the rectangle a writer chose in the
 # gallery editor (or the automatic focal-point crop) before resizing to the
-# preset's output size.
+# preset's output size. Derivatives are never upscaled: a crop smaller than
+# the preset's size is kept at its own resolution, since enlarging it would
+# only make the file bigger, not sharper.
 #
 # Used by ImageUpload's banner / card / square styles:
 #
@@ -20,7 +22,7 @@ module Paperclip
       trans << "-coalesce" if animated?
       trans << "-auto-orient" if auto_orient
       trans << "-crop" << %["#{w}x#{h}+#{x}+#{y}"] << "+repage"
-      trans << "-resize" << %["#{@target_geometry.width.to_i}x#{@target_geometry.height.to_i}!"]
+      trans << "-resize" << %["#{@target_geometry.width.to_i}x#{@target_geometry.height.to_i}>"]
       trans
     end
 

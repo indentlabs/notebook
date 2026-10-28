@@ -38,17 +38,23 @@ class ImageDerivativeService
 
   # ActiveStorage variant for +preset+, cropped to the record's framing and
   # encoded as WebP. +small+ picks the preset's reduced size when it has one.
+  # Like uploads (see Paperclip::Cropper), a crop smaller than the preset's
+  # size is not upscaled.
   def variant_for(preset, small: false)
     preset = ImagePresets[preset]
     return nil if preset.nil? || !@record.image.attached? || !@record.image.variable?
 
     pixels = @record.crop_pixels_for(preset.key)
+    target = (small && preset.small_size) || preset.size
     transformations = {}
     if pixels
       x, y, w, h = pixels
       transformations[:crop] = vips? ? [x, y, w, h] : "#{w}x#{h}+#{x}+#{y}"
+      # Already the preset's shape, so only ever shrink it.
+      transformations[:resize_to_limit] = target
+    else
+      transformations[:resize_to_fill] = target
     end
-    transformations[:resize_to_fill] = (small && preset.small_size) || preset.size
     transformations[:format] = :webp
     transformations[:saver]  = { quality: 82 }
 

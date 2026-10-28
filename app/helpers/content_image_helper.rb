@@ -45,9 +45,16 @@ module ContentImageHelper
       options[:width]  ||= dimensions[0]
       options[:height] ||= dimensions[1]
 
+      # Boxes are rarely exactly the preset's shape (a banner header is wider
+      # than 3:1 on big screens), so trim around the focal point rather than
+      # the centre.
+      position = image.preset_object_position(preset)
+      options[:style] = [options[:style], "object-position: #{position}"].compact.join('; ') if position
+
       small_url = size.to_sym == :full ? image.preset_url(preset, size: :small) : nil
-      if small_url && small_url != src
-        small_dimensions = image.preset_dimensions(preset, size: :small)
+      small_dimensions = small_url && image.preset_dimensions(preset, size: :small)
+      # A small source gives the same file at both sizes; skip the srcset then.
+      if small_url && small_url != src && small_dimensions[0] < dimensions[0]
         options[:srcset] ||= "#{small_url} #{small_dimensions[0]}w, #{src} #{dimensions[0]}w"
         options[:sizes]  ||= sizes || (preset == :banner ? '100vw' : "#{dimensions[0]}px")
       end

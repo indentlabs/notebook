@@ -24,22 +24,49 @@ class ContentImageHelperTest < ActionView::TestCase
   end
 
   test "serves the preset derivative when it has been generated" do
-    @upload = create_upload
+    @upload = create_upload(file: 'gallery_large_test.png')
     html = content_image_tag(@character, :banner, class: 'hero')
 
     assert_includes html, '/banner/'
     assert_includes html, '.webp'
-    assert_not_includes html, 'object-position'
+    assert_not_includes html, 'object-position', 'a centred focal point needs no positioning'
     assert_not_includes html, 'loading="lazy"', 'banners are above the fold'
-    assert_includes html, 'width="1500"'
-    assert_includes html, 'height="500"'
+    assert_includes html, 'width="2400"'
+    assert_includes html, 'height="800"'
     assert_includes html, 'decoding="async"'
-    assert_match(/srcset="[^"]*\/banner_sm\/[^"]* 750w, [^"]*\/banner\/[^"]* 1500w"/, html)
+    assert_match(/srcset="[^"]*\/banner_sm\/[^"]* 750w, [^"]*\/banner\/[^"]* 2400w"/, html)
     assert_includes html, 'sizes="100vw"'
   end
 
-  test "small boxes get the reduced square derivative" do
+  test "small images keep their own size and skip the srcset" do
     @upload = create_upload
+    html = content_image_tag(@character, :banner)
+
+    assert_includes html, 'width="64"', 'a 64px-wide image is not described as 2400px'
+    assert_includes html, 'height="21"'
+    assert_not_includes html, 'srcset', 'both sizes would be the same file'
+  end
+
+  test "keeps the focal point in view when the box is a different shape" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    # 3:2 image, so the automatic banner crop is the top half (the focal point
+    # is too near the top edge to centre on); 0.2 sits 40% of the way down it.
+    @upload.update_columns(focal_x: 0.5, focal_y: 0.2)
+    @character.clear_cover_image_cache
+
+    assert_includes content_image_tag(@character, :banner), 'object-position: 50.0% 40.0%'
+  end
+
+  test "centres a custom crop that leaves the focal point out" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    @upload.update_columns(focal_x: 0.5, focal_y: 0.9, crops: { 'banner' => { 'x' => 0, 'y' => 0, 'w' => 1, 'h' => 0.5 } })
+    @character.clear_cover_image_cache
+
+    assert_not_includes content_image_tag(@character, :banner), 'object-position'
+  end
+
+  test "small boxes get the reduced square derivative" do
+    @upload = create_upload(file: 'gallery_large_test.png')
     html = content_image_tag(@character, :square, size: :small, class: 'w-12 h-12')
 
     assert_includes html, '/square_sm/'
@@ -48,7 +75,7 @@ class ContentImageHelperTest < ActionView::TestCase
   end
 
   test "shapes without a small size get no srcset" do
-    @upload = create_upload
+    @upload = create_upload(file: 'gallery_large_test.png')
     html = content_image_tag(@character, :card)
 
     assert_includes html, '/card/'
@@ -171,13 +198,13 @@ class ContentImageHelperTest < ActionView::TestCase
 
   private
 
-  def create_upload(privacy: 'public')
+  def create_upload(privacy: 'public', file: 'gallery_test.png')
     ImageUpload.create!(
       user: @user,
       content_type: 'Character',
       content_id: @character.id,
       privacy: privacy,
-      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files/gallery_test.png'), 'image/png')
+      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files', file), 'image/png')
     )
   end
 

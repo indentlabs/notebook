@@ -17,7 +17,7 @@ export default class extends Controller {
     "modal", "subtitle", "coverButton", "coverLabel",
     "shapeTab", "shapeState", "stage", "loading", "image",
     "focalLayer", "focalDot", "cropControls", "zoom", "gridToggle", "help",
-    "preview", "previewTitle", "previewBadge", "usage",
+    "preview", "previewTitle", "previewBadge", "usage", "bannerQuality",
     "notes", "privacyRow", "privacy", "facts", "downloadLink",
     "status", "saveButton", "announcer", "shortcuts"
   ]
@@ -673,12 +673,11 @@ export default class extends Controller {
   setFocal(x, y) {
     this.focal = { x: this.clamp(x, 0, 1), y: this.clamp(y, 0, 1) }
     this.positionFocalDot()
-    // Shapes that are still automatic follow the focal point.
+    // Shapes that are still automatic follow the focal point. Every preview
+    // re-renders, since custom crops also trim around it in wider boxes.
     Object.keys(this.presetMap).forEach((key) => {
-      if (!this.custom[key]) {
-        this.crops[key] = this.autoRect(key)
-        this.renderPreview(key)
-      }
+      if (!this.custom[key]) this.crops[key] = this.autoRect(key)
+      this.renderPreview(key)
     })
     this.markDirty()
   }
@@ -716,15 +715,41 @@ export default class extends Controller {
       }
       const boxWidth = box.clientWidth || 1
       const boxHeight = box.clientHeight || 1
-      // Scale so the crop rect exactly fills the box.
+      // Scale so the crop rect covers the box. When the box is a different
+      // shape from the crop, trim the overflow around the focal point, as
+      // the site does (ContentImage#preset_object_position).
       const scaleX = boxWidth / (rect.w * this.naturalWidth)
       const scaleY = boxHeight / (rect.h * this.naturalHeight)
       const scale = Math.max(scaleX, scaleY)
+      const [posX, posY] = this.positionWithin(rect)
+      const overflowX = rect.w * this.naturalWidth * scale - boxWidth
+      const overflowY = rect.h * this.naturalHeight * scale - boxHeight
       img.style.width = (this.naturalWidth * scale) + "px"
       img.style.height = (this.naturalHeight * scale) + "px"
-      img.style.left = (-rect.x * this.naturalWidth * scale) + "px"
-      img.style.top = (-rect.y * this.naturalHeight * scale) + "px"
+      img.style.left = (-rect.x * this.naturalWidth * scale - overflowX * posX) + "px"
+      img.style.top = (-rect.y * this.naturalHeight * scale - overflowY * posY) + "px"
     })
+    if (key === "banner") this.renderBannerQuality(rect)
+  }
+
+  // Where the focal point sits inside +rect+, as fractions; the centre when
+  // the crop leaves it out.
+  positionWithin(rect) {
+    const x = (this.focal.x - rect.x) / rect.w
+    const y = (this.focal.y - rect.y) / rect.h
+    if (x < 0 || x > 1 || y < 0 || y > 1) return [0.5, 0.5]
+    return [x, y]
+  }
+
+  // Banners fill the page width, so a small crop looks soft on big screens.
+  renderBannerQuality(rect) {
+    if (!this.hasBannerQualityTarget) return
+    const widthPx = Math.round(rect.w * this.naturalWidth)
+    const soft = this.naturalWidth > 0 && widthPx < 1200
+    this.bannerQualityTarget.classList.toggle("hidden", !soft)
+    this.bannerQualityTarget.textContent = soft
+      ? `This crop is ${widthPx}px wide, so the banner may look soft on large screens. A larger image, or a wider crop, will look sharper.`
+      : ""
   }
 
   // ---------------------------------------------------------------------
