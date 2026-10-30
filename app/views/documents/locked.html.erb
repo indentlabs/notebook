@@ -1,0 +1,72 @@
+<%# Shown instead of the document, so nothing here can use its title, text, length or dates. %>
+<% set_meta_tags title: 'Password protected document', noindex: true %>
+<% password_error = params[:too_many_attempts].present? ? 'Too many attempts. Please wait a minute and try again.' : flash[:document_password_error] %>
+
+<div class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black flex items-start justify-center px-4 py-16 sm:py-24">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-md">
+    <div class="px-6 py-8 bg-gradient-to-r from-teal-500 to-teal-600 text-center">
+      <div class="w-16 h-16 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mx-auto mb-4">
+        <i class="material-icons text-3xl text-teal-500">lock</i>
+      </div>
+      <h1 class="text-xl font-medium text-white">This document is password protected</h1>
+    </div>
+
+    <div class="p-6">
+      <div class="flex items-center justify-center mb-6">
+        <img class="h-8 w-8 rounded-full" src="<%= @document.user.image_url(size: 64) %>" alt="<%= @document.user.display_name %>">
+        <p class="ml-3 text-sm text-gray-600 dark:text-gray-300">
+          Written by <%= link_to @document.user.display_name, @document.user, class: 'font-medium text-gray-900 hover:underline dark:text-gray-100' %>
+        </p>
+      </div>
+
+      <%= form_with url: unlock_document_path(@document), method: :post, local: true, data: { turbo: false } do %>
+        <div x-data="{ showPassword: false }">
+          <label for="document-unlock-password" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            Enter the password to read it
+          </label>
+          <div class="relative">
+            <input
+              id="document-unlock-password"
+              name="password"
+              :type="showPassword ? 'text' : 'password'"
+              type="password"
+              required
+              autofocus
+              autocomplete="off"
+              class="block w-full px-3 py-2 pr-10 border <%= password_error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600' %> rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              <% if password_error %>aria-describedby="document-unlock-error" aria-invalid="true"<% end %>
+            >
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              :aria-label="showPassword ? 'Hide password' : 'Show password'"
+              aria-label="Show password"
+              class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none"
+            >
+              <i class="material-icons text-base" x-text="showPassword ? 'visibility_off' : 'visibility'">visibility</i>
+            </button>
+          </div>
+        </div>
+
+        <% if password_error %>
+          <p id="document-unlock-error" class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+            <i class="material-icons text-base mr-1">error_outline</i>
+            <%= password_error %>
+          </p>
+        <% end %>
+
+        <button type="submit" class="mt-4 w-full px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-md shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+          Read document
+        </button>
+      <% end %>
+
+      <% unless user_signed_in? %>
+        <p class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+          Is this your document?
+          <%= link_to 'Sign in', new_user_session_path, class: 'text-teal-600 dark:text-teal-400 hover:underline' %>
+          to read it without the password.
+        </p>
+      <% end %>
+    </div>
+  </div>
+</div>

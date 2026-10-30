@@ -30,7 +30,7 @@ class Document < ApplicationRecord
   }.freeze
 
   # bcrypt ignores everything past 72 bytes
-  PASSWORD_LENGTH = 8..72
+  PASSWORD_LENGTH = 5..72
 
   has_secure_password :document_password, validations: false
 
@@ -152,6 +152,12 @@ class Document < ApplicationRecord
       self.document_password = nil
       save
     end
+  end
+
+  # What a reader's session keeps after they enter the password. It's tied to the digest,
+  # so setting a new password locks out everyone who entered the old one.
+  def password_fingerprint
+    OpenSSL::HMAC.hexdigest('SHA256', Rails.application.secret_key_base, "#{id}/#{document_password_digest}").first(16)
   end
 
   # The digest is sensitive even though it isn't the password itself
