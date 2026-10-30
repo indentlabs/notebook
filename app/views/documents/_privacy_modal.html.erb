@@ -14,13 +14,13 @@
   x-data="{ open: false, activeTab: 'document' }"
   x-show="open"
   @open-modal.window="if ($event.detail === 'document-privacy-modal') open = true"
-  @close-modal.window="open = false"
-  @keydown.escape.window="open = false"
+  @close-modal.window="open = open && !documentPrivacyCanClose()"
+  @keydown.escape.window="open = open && !documentPrivacyCanClose()"
   class="fixed inset-0 z-50 overflow-y-auto"
   x-cloak
 >
   <!-- Modal backdrop -->
-  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = !documentPrivacyCanClose()"></div>
 
   <!-- Modal content -->
   <div class="relative min-h-screen flex items-center justify-center p-4">
@@ -33,7 +33,7 @@
       x-transition:leave="ease-in duration-200"
       x-transition:leave-start="opacity-100 translate-y-0"
       x-transition:leave-end="opacity-0 translate-y-4"
-      @click.away="open = false"
+      @click.away="open = open && !documentPrivacyCanClose()"
     >
       <!-- Modal header -->
       <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-teal-500 to-teal-600">
@@ -44,7 +44,7 @@
             </div>
             <h3 class="text-lg font-medium text-white">Privacy Settings</h3>
           </div>
-          <button @click="open = false" class="text-white hover:text-gray-100 focus:outline-none">
+          <button @click="open = !documentPrivacyCanClose()" class="text-white hover:text-gray-100 focus:outline-none">
             <i class="material-icons">close</i>
           </button>
         </div>
@@ -183,8 +183,6 @@
             </div>
           <% end %>
 
-          <p id="document-privacy-error" class="hidden mt-3 text-sm text-red-600 dark:text-red-400"></p>
-
           <!-- Password settings. Outside the form above, and with no name, so the password can't be sent by anything but the save button. -->
           <div id="document-password-panel" class="<%= @document.password_protected? ? '' : 'hidden' %> mt-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
             <div id="document-password-summary" class="<%= @document.password_protected? ? '' : 'hidden' %>">
@@ -313,9 +311,13 @@
         <% end %>
       </div>
 
-      <!-- Modal footer -->
-      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end">
-        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = false">
+      <!-- Modal footer. Changes here save on their own, so this says what's really been saved. -->
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center">
+        <div id="document-privacy-status" role="status" class="flex items-center mr-4 text-sm">
+          <i class="hidden material-icons text-base mr-2 flex-shrink-0"></i>
+          <span></span>
+        </div>
+        <button type="button" class="ml-auto flex-shrink-0 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" @click="open = !documentPrivacyCanClose()">
           Close
         </button>
       </div>
@@ -327,33 +329,44 @@
   // Document privacy update function
   window.updateDocumentPrivacy = window.updateDocumentPrivacy || function(radio) {
     const value = radio.value;
+    const current = documentPrivacyForm().dataset.currentPrivacy;
 
-    setDocumentPrivacyError(null);
     highlightDocumentPrivacyOption(value);
 
     // A password has to be chosen before this can be saved, so there's nothing to send yet
     if (value === 'password') {
-      if (documentPrivacyForm().dataset.currentPrivacy !== 'password') {
+      if (current !== 'password') {
         showDocumentPasswordForm();
+        setDocumentPrivacyStatus('unsaved', 'Not saved until you choose a password.');
       }
       return;
     }
 
     hideDocumentPasswordPanel();
+
+    // Coming back from an unsaved password choice, so nothing has changed
+    if (value === current) {
+      setDocumentPrivacyStatus(null);
+      return;
+    }
+
     setDocumentPrivacyOptionsDisabled(true);
+    setDocumentPrivacyStatus('saving', 'Saving...');
 
     // Password protection can only be taken off through its own endpoint
-    const leavingPassword = documentPrivacyForm().dataset.currentPrivacy === 'password';
+    const leavingPassword = current === 'password';
     const request = leavingPassword ?
       documentPrivacyRequest(documentPrivacyForm().dataset.passwordUrl, 'DELETE', { privacy: value }) :
       documentPrivacyRequest(documentPrivacyForm().action, 'PATCH', { document: { privacy: value } });
 
     request.then(function() {
       applyDocumentPrivacy(value);
+      setDocumentPrivacyStatus('saved', 'Saved. This document is now ' + value + '.');
     }).catch(function(error) {
       console.error('Error updating privacy:', error);
-      setDocumentPrivacyError("That didn't save. Please try again.");
+      setDocumentPrivacyStatus('failed', "That didn't save. Please try again.");
       restoreDocumentPrivacySelection();
+      document.getElementById('document-password-panel').classList.toggle('hidden', !leavingPassword);
     }).then(function() {
       setDocumentPrivacyOptionsDisabled(false);
     });
@@ -362,8 +375,10 @@
   window.saveDocumentPassword = window.saveDocumentPassword || function() {
     const input = document.getElementById('document-password-input');
     const saveButton = document.getElementById('document-password-save');
+    const changing = documentPrivacyForm().dataset.currentPrivacy === 'password';
 
     setDocumentPasswordError(null);
+    setDocumentPrivacyStatus('saving', 'Saving...');
     saveButton.disabled = true;
 
     documentPrivacyRequest(documentPrivacyForm().dataset.passwordUrl, 'PATCH', { password: input.value }).then(function() {
@@ -371,8 +386,10 @@
       applyDocumentPrivacy('password');
       document.getElementById('document-password-form').classList.add('hidden');
       document.getElementById('document-password-summary').classList.remove('hidden');
+      setDocumentPrivacyStatus('saved', changing ? 'Saved. The password has been changed.' : 'Saved. This document is now password protected.');
     }).catch(function(error) {
       setDocumentPasswordError(error.message || "That didn't save. Please try again.");
+      setDocumentPrivacyStatus('failed', 'Not saved.');
     }).then(function() {
       saveButton.disabled = false;
     });
@@ -381,6 +398,7 @@
   window.cancelDocumentPassword = window.cancelDocumentPassword || function() {
     document.getElementById('document-password-input').value = '';
     setDocumentPasswordError(null);
+    setDocumentPrivacyStatus(null);
     restoreDocumentPrivacySelection();
 
     if (documentPrivacyForm().dataset.currentPrivacy === 'password') {
@@ -391,7 +409,23 @@
     }
   };
 
+  // A typed password would be lost by closing, so say so instead. Otherwise, put back anything
+  // unsaved so the modal isn't showing a choice that never took effect the next time it opens.
+  window.documentPrivacyCanClose = window.documentPrivacyCanClose || function() {
+    const current = documentPrivacyForm().dataset.currentPrivacy;
+
+    if (document.getElementById('document-password-input').value) {
+      setDocumentPrivacyStatus('unsaved', "This password isn't saved yet. Save it, or cancel to keep " +
+        (current === 'password' ? 'your current password.' : 'this document ' + (current === 'public' ? 'public.' : 'private.')));
+      return false;
+    }
+
+    cancelDocumentPassword();
+    return true;
+  };
+
   window.showDocumentPasswordForm = window.showDocumentPasswordForm || function() {
+    setDocumentPrivacyStatus(null);
     document.getElementById('document-password-panel').classList.remove('hidden');
     document.getElementById('document-password-summary').classList.add('hidden');
     document.getElementById('document-password-form').classList.remove('hidden');
@@ -465,10 +499,20 @@
     setDocumentPasswordError(null);
   };
 
-  window.setDocumentPrivacyError = window.setDocumentPrivacyError || function(message) {
-    const error = document.getElementById('document-privacy-error');
-    error.textContent = message || '';
-    error.classList.toggle('hidden', !message);
+  window.setDocumentPrivacyStatus = window.setDocumentPrivacyStatus || function(state, message) {
+    const look = {
+      saving: { icon: 'sync', color: 'text-gray-500 dark:text-gray-400' },
+      saved: { icon: 'check_circle', color: 'text-teal-600 dark:text-teal-400' },
+      unsaved: { icon: 'warning', color: 'text-yellow-800 dark:text-yellow-200' },
+      failed: { icon: 'error', color: 'text-red-600 dark:text-red-400' }
+    }[state];
+    const status = document.getElementById('document-privacy-status');
+    const icon = status.querySelector('i');
+
+    status.className = 'flex items-center mr-4 text-sm ' + (look ? look.color : '');
+    status.querySelector('span').textContent = message || '';
+    icon.textContent = look ? look.icon : '';
+    icon.classList.toggle('hidden', !look);
   };
 
   window.setDocumentPasswordError = window.setDocumentPasswordError || function(message) {
@@ -554,16 +598,47 @@
 
   // Universe privacy update function
   window.updateUniversePrivacy = window.updateUniversePrivacy || function(radio) {
-    // Disable all radio buttons during submission
-    document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
-      option.disabled = true;
-      option.parentElement.classList.add('opacity-50');
-    });
-
     const value = radio.value;
-    document.getElementById('universe_privacy_field').value = value;
+    const field = document.getElementById('universe_privacy_field');
+    const previous = field.value;
+    const form = document.getElementById('universe-privacy-form');
 
-    // Update selected state visually
+    setUniversePrivacyOptionsDisabled(true);
+    setDocumentPrivacyStatus('saving', 'Saving...');
+    field.value = value;
+    highlightUniversePrivacyOption(value);
+
+    fetch('/plan/universes/' + form.action.split('/').pop(), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ universe: { privacy: value } })
+    }).then(function(response) {
+      if (!response.ok) throw new Error('Saving failed with status ' + response.status);
+
+      setDocumentPrivacyStatus('saved', 'Saved. This universe is now ' + value + '.');
+    }).catch(function(error) {
+      console.error('Error updating universe privacy:', error);
+      setDocumentPrivacyStatus('failed', "That didn't save. Please try again.");
+      field.value = previous;
+      document.getElementById('universe-privacy-' + previous).checked = true;
+      highlightUniversePrivacyOption(previous);
+    }).then(function() {
+      setUniversePrivacyOptionsDisabled(false);
+    });
+  };
+
+  window.setUniversePrivacyOptionsDisabled = window.setUniversePrivacyOptionsDisabled || function(disabled) {
+    document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
+      option.disabled = disabled;
+      option.parentElement.classList.toggle('opacity-50', disabled);
+    });
+  };
+
+  window.highlightUniversePrivacyOption = window.highlightUniversePrivacyOption || function(value) {
     document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
       const container = option.closest('div.flex.items-center.p-2');
       if (container) {
@@ -574,33 +649,5 @@
         }
       }
     });
-
-    // Submit the form
-    const form = document.getElementById('universe-privacy-form');
-    if (form) {
-      const universeId = form.action.split('/').pop();
-
-      fetch('/plan/universes/' + universeId, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ universe: { privacy: value } })
-      }).then(function() {
-        // Re-enable radio buttons
-        document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
-          option.disabled = false;
-          option.parentElement.classList.remove('opacity-50');
-        });
-      }).catch(function(error) {
-        console.error('Error updating universe privacy:', error);
-        document.querySelectorAll('[name="universe-privacy-option"]').forEach(function(option) {
-          option.disabled = false;
-          option.parentElement.classList.remove('opacity-50');
-        });
-      });
-    }
   };
 </script>

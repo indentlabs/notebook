@@ -23,7 +23,7 @@ class DocumentPasswordsController < ApplicationController
     if @document.protect_with_password(params[:password])
       render_privacy
     else
-      render json: { error: @document.errors.full_messages.to_sentence }, status: :unprocessable_entity
+      render json: { error: password_error }, status: :unprocessable_entity
     end
   end
 
@@ -51,6 +51,12 @@ class DocumentPasswordsController < ApplicationController
   end
 
   private
+
+  # Just the part the author can act on, since a blank password also fails the digest's own check
+  def password_error
+    message = @document.errors[:document_password].first
+    message ? "Password #{message}" : @document.errors.full_messages.to_sentence
+  end
 
   def render_privacy
     render json: { privacy: @document.privacy, label: @document.privacy_label, icon: @document.privacy_icon }
