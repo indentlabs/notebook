@@ -116,6 +116,24 @@ class CommunityStatsServiceTest < ActiveSupport::TestCase
     assert_equal 4, stats.forum_posts_in_month(month)
   end
 
+  test "computes the completion rate of writing goals set in a month, through yesterday" do
+    WritingGoal.delete_all
+    month = @today.beginning_of_month.prev_month
+    goal = ->(created_at, completed_at = nil) do
+      WritingGoal.create!(user: @alice, title: 'Goal', target_word_count: 1000, start_date: month,
+                          end_date: month + 20.days, created_at: created_at, completed_at: completed_at)
+    end
+    goal.call(month + 1.day, month + 10.days)
+    goal.call(month + 2.days, @today)                # set last month, completed this month: still counts
+    goal.call(month + 3.days)
+    goal.call(month + 5.days)
+    goal.call(month - 1.day, month + 2.days)         # set the month before: ignored
+    goal.call(@today.beginning_of_day, @today)       # set today: not counted yet
+
+    assert_equal({ set: 4, completed: 2, percent: 50 }, stats.goal_completion_in_month(month))
+    assert_equal({ set: 0, completed: 0, percent: nil }, stats.goal_completion_in_month(month.prev_month.prev_month))
+  end
+
   test "counts distinct pages edited in a month, with timeline events as their timelines" do
     month = @today.beginning_of_month
     through = [@today - 1.day, month].max

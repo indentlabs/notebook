@@ -6,9 +6,10 @@
 # Nothing in here ever exposes an individual user's content or identity: every
 # number is a total or a count across all writers.
 #
-# This class only reads the small pre-aggregated CommunityDailyStat and
+# This class mostly reads the small pre-aggregated CommunityDailyStat and
 # CommunityMonthlyWriter tables; CommunityStatsRollup does the heavy lifting in
-# the background. Word counts follow the same rules as the per-user stats in
+# the background. (Writing goal completion rates come straight from the small
+# writing_goals table, cached like everything else.) Word counts follow the same rules as the per-user stats in
 # WordCountUpdate: words written on a day are the positive growth of each
 # page/document since its previous record, and deletions never subtract.
 class CommunityStatsService
@@ -314,6 +315,23 @@ class CommunityStatsService
 
   def goals_completed_in_month(month_start)
     eod_sum('writing_goals_completed', month_start)
+  end
+
+  # { set:, completed:, percent: } for writing goals set in the given month
+  # (through yesterday, like the other monthly stats): how many were created
+  # and how many of those have since been completed. Tracking the same goals
+  # keeps the completion rate between 0 and 100%. percent is nil when no goals
+  # were set.
+  def goal_completion_in_month(month_start)
+    cached("goal_completion/#{month_start.strftime('%Y-%m')}") do
+      month_start = month_start.beginning_of_month
+      through     = [month_start.next_month, today].min
+      goals       = WritingGoal.where(created_at: month_start.beginning_of_day...through.beginning_of_day)
+
+      set       = goals.count
+      completed = goals.completed.count
+      { set: set, completed: completed, percent: set.zero? ? nil : (100.0 * completed / set).round }
+    end
   end
 
   def forum_posts_in_month(month_start)
