@@ -24,10 +24,6 @@ class ContentImage
     xlarge: [1600, 1600]
   }.freeze
 
-  # Images at least this wide (width / height) fill the 3:1 page banner
-  # edge to edge; narrower ones get a blurred backdrop instead of a crop.
-  FULL_BLEED_BANNER_RATIO = 2.0
-
   attr_reader :record
 
   def self.wrap(record)
@@ -189,34 +185,6 @@ class ContentImage
 
   def crops_generated_at
     record.try(:crops_generated_at)
-  end
-
-  def custom_crop?(preset)
-    record.respond_to?(:custom_crop?) && record.custom_crop?(preset)
-  end
-
-  def aspect_ratio
-    return nil unless width.to_i > 0 && height.to_i > 0
-
-    width.to_f / height
-  end
-
-  def wide?(threshold = FULL_BLEED_BANNER_RATIO)
-    return false unless aspect_ratio
-
-    aspect_ratio >= threshold
-  end
-
-  def narrow?(threshold = FULL_BLEED_BANNER_RATIO)
-    return true unless aspect_ratio
-
-    aspect_ratio < threshold
-  end
-
-  # URL for an uncropped image at the highest practical size (up to 1600px),
-  # falling back to large or original. Ideal for full-frame contained display.
-  def display_url(size = :xlarge)
-    url(size) || url(:large) || original_url
   end
 
   # URL for a size-limited derivative (see SIZE_LIMITS), or nil when the

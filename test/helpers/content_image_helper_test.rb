@@ -1,5 +1,4 @@
 require 'test_helper'
-require 'minitest/mock'
 
 class ContentImageHelperTest < ActionView::TestCase
   include ContentImageHelper
@@ -163,28 +162,19 @@ class ContentImageHelperTest < ActionView::TestCase
     first&.destroy
   end
 
-  test "content_hero_banner_tag renders placeholder when there are no images" do
-    html = content_hero_banner_tag(@character)
-
-    assert_includes html, 'card-headers/characters'
-    assert_includes html, 'object-cover'
-  end
-
-  test "content_hero_banner_tag renders ambient blurred backdrop when cover is narrow without custom crop" do
+  test "a banner with no saved crop is cut to the banner shape, whatever the image's shape" do
     @upload = create_upload
     @upload.update_columns(width: 600, height: 900)
     @character.clear_cover_image_cache
 
-    html = content_hero_banner_tag(@character)
+    html = content_image_tag(@character, :banner)
 
-    assert_includes html, 'blur-2xl'
-    assert_includes html, 'scale-110'
-    assert_includes html, 'opacity-50'
-    assert_includes html, 'object-contain'
-    assert_includes html, 'drop-shadow-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'width="600"'
+    assert_includes html, 'height="200"'
   end
 
-  test "content_hero_banner_tag renders full-bleed when image has a custom banner crop" do
+  test "a saved banner crop sets what the banner shows" do
     @upload = create_upload
     @upload.update_columns(
       width: 600,
@@ -193,47 +183,11 @@ class ContentImageHelperTest < ActionView::TestCase
     )
     @character.clear_cover_image_cache
 
-    html = content_hero_banner_tag(@character)
+    html = content_image_tag(@character, :banner)
 
-    assert_not_includes html, 'blur-2xl'
     assert_includes html, '/banner/'
-    assert_includes html, 'object-cover'
-  end
-
-  test "content_hero_banner_tag renders full-bleed when image is naturally wide" do
-    @upload = create_upload
-    @upload.update_columns(width: 1500, height: 500)
-    @character.clear_cover_image_cache
-
-    html = content_hero_banner_tag(@character)
-
-    assert_not_includes html, 'blur-2xl'
-    assert_includes html, '/banner/'
-    assert_includes html, 'object-cover'
-  end
-
-  test "content_hero_banner_tag renders full-bleed when the cover has no display URL" do
-    @upload = create_upload
-    @upload.update_columns(width: 600, height: 900)
-    @character.clear_cover_image_cache
-
-    image = ContentImage.wrap(@upload)
-    html = image.stub(:display_url, nil) do
-      @character.stub(:cover_image, image) { content_hero_banner_tag(@character) }
-    end
-
-    assert_not_includes html, 'blur-2xl'
-    assert_includes html, 'object-cover'
-  end
-
-  test "content_hero_banner_tag renders a page collection's own header" do
-    collection = page_collections(:one)
-    collection.cover_image = 'https://example.com/collection-cover.png'
-
-    html = content_hero_banner_tag(collection)
-
-    assert_includes html, 'https://example.com/collection-cover.png'
-    assert_includes html, 'object-cover'
+    assert_includes html, 'width="600"'
+    assert_includes html, 'height="198"'
   end
 
   test "content_cover_image? reflects whether a gallery page has an image" do

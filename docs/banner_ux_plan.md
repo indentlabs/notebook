@@ -35,8 +35,6 @@ When a box has `aspect-ratio` and an automatic width, CSS sends the `max-height`
 | 1920 px | ~4.4:1 | ~68% |
 | 2560 px | ~6:1 | ~49% |
 
-**Narrow images.** Page headers render through `content_hero_banner_tag`. An image narrower than 2:1 (`ContentImage::FULL_BLEED_BANNER_RATIO`) with no custom banner crop skips the steps above: it's shown whole (`object-contain`) over a blurred copy of itself, instead of being cut down to a thin 3:1 strip. Once the writer saves a banner crop, or for any image 2:1 or wider, the banner is cropped and trimmed as described here. The editor's banner previews and help text follow the same rule.
-
 ## 4. Editor
 
 - A second banner preview at 5:1 shows what wide screens keep, using the same focal-point trim as the site. Every preview now trims that way, and all of them redraw when the focal point moves.

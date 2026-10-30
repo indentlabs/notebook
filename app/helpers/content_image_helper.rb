@@ -68,47 +68,6 @@ module ContentImageHelper
     image_tag(src, options)
   end
 
-  # Renders the hero header banner for a page.
-  # If the cover image is narrow (e.g. portrait or square) and lacks an explicit
-  # custom banner crop, it renders an ambient blurred backdrop behind the crisp,
-  # uncropped contained image. If the image is wide, has an explicit custom banner
-  # crop, or falls back to a placeholder, it renders full-bleed.
-  def content_hero_banner_tag(content, include_private: false, pick: :first, **options)
-    image = content_cover_image(content, include_private: include_private, pick: pick, preset: :banner)
-    options[:class] = [options[:class], 'w-full h-full object-cover'].compact.join(' ')
-
-    # If the image has an explicit custom banner crop or is naturally wide
-    # (ContentImage::FULL_BLEED_BANNER_RATIO), render edge-to-edge full-bleed using the
-    # standard preset derivative or focal point fallback. content_image_tag also
-    # handles placeholders, pages with their own header, and images without a usable URL.
-    display_src = image&.display_url
-    if display_src.nil? || image.custom_crop?(:banner) || image.wide?
-      return content_image_tag(content, :banner, include_private: include_private, pick: pick, **options)
-    end
-
-    options[:alt] ||= image.notes.presence || "#{content.try(:name)} banner image".strip
-
-    # Otherwise (portrait, square, or standard 4:3 photo without a custom banner crop):
-    # Render ambient blurred background + crisp centered uncropped foreground.
-    bg_img = image_tag(display_src,
-      class: 'w-full h-full object-cover blur-2xl scale-110 opacity-50 brightness-75 select-none pointer-events-none',
-      alt: '',
-      aria: { hidden: 'true' },
-      loading: 'eager',
-      decoding: 'async'
-    )
-
-    fg_img = image_tag(display_src,
-      class: 'max-h-full max-w-full object-contain drop-shadow-2xl select-none',
-      alt: options[:alt],
-      loading: 'eager',
-      decoding: 'async'
-    )
-
-    content_tag(:div, class: 'absolute inset-0 overflow-hidden select-none pointer-events-none', aria: { hidden: 'true' }) { bg_img } +
-      content_tag(:div, class: 'relative w-full h-full flex items-center justify-center p-2 sm:p-4') { fg_img }
-  end
-
   # Absolute URL for social previews (Open Graph / Twitter): the 1200x630
   # link-preview framing, else the card, else a general size, else the
   # placeholder.

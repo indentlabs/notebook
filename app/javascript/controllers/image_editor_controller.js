@@ -23,7 +23,7 @@ export default class extends Controller {
     "status", "saveButton", "announcer", "shortcuts"
   ]
 
-  static values = { presets: Array, pageName: String, pageType: String, bannerFullBleedRatio: Number }
+  static values = { presets: Array, pageName: String, pageType: String }
 
   connect() {
     // The edit page wraps its content in transformed containers, which would
@@ -481,11 +481,7 @@ export default class extends Controller {
     this.applying = false
     this.refreshShapeStates()
     this.refreshStagePlacementButton()
-    if (this.isNarrowBanner(key)) {
-      this.helpTarget.textContent = "This image is narrower than a banner. By default, the page header displays it with a softened ambient backdrop so the full image is shown without clipping. You can also drag the box here if you want an explicit wide crop."
-    } else {
-      this.helpTarget.textContent = `Drag the box to choose what shows in the ${preset.label.toLowerCase()} (${preset.ratio_label || this.ratioLabel(preset)}). Drag a corner to zoom in or out, or use the slider. Arrow keys nudge.`
-    }
+    this.helpTarget.textContent = `Drag the box to choose what shows in the ${preset.label.toLowerCase()} (${preset.ratio_label || this.ratioLabel(preset)}). Drag a corner to zoom in or out, or use the slider. Arrow keys nudge.`
     this.announce(`${preset.label} shape, ${this.custom[key] ? "custom" : "automatic"} framing`)
     this.schedulePreview(key)
   }
@@ -820,41 +816,9 @@ export default class extends Controller {
     const rect = this.crops[key]
     if (!rect) return
     const src = this.info.largeUrl || this.info.originalUrl
-    const isNarrowBanner = this.isNarrowBanner(key)
 
     this.previewTargets.forEach((box) => {
       if (box.dataset.preset !== key) return
-
-      if (isNarrowBanner) {
-        // Show ambient blurred backdrop preview matching the page hero header.
-        // It doesn't depend on the crop or focal point, so build it once per image.
-        if (box.dataset.backdrop === src) return
-        box.innerHTML = ""
-        box.dataset.backdrop = src
-        const bg = document.createElement("img")
-        bg.alt = ""
-        bg.draggable = false
-        bg.className = "absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
-        bg.style.filter = "blur(4px)"
-        bg.style.transform = "scale(1.15)"
-        bg.style.opacity = "0.5"
-        bg.src = src
-
-        const fg = document.createElement("img")
-        fg.alt = ""
-        fg.draggable = false
-        fg.className = "relative w-full h-full object-contain select-none p-1 drop-shadow"
-        fg.src = src
-
-        box.appendChild(bg)
-        box.appendChild(fg)
-        return
-      }
-
-      if (box.dataset.backdrop) {
-        box.innerHTML = ""
-        delete box.dataset.backdrop
-      }
 
       let img = box.querySelector("img")
       if (!img) {
@@ -882,7 +846,7 @@ export default class extends Controller {
       img.style.left = (-rect.x * this.naturalWidth * scale - overflowX * posX) + "px"
       img.style.top = (-rect.y * this.naturalHeight * scale - overflowY * posY) + "px"
     })
-    if (key === "banner") this.renderBannerQuality(isNarrowBanner ? null : rect)
+    if (key === "banner") this.renderBannerQuality(rect)
   }
 
   // Where the focal point sits inside +rect+, as fractions; the centre when
@@ -895,11 +859,10 @@ export default class extends Controller {
   }
 
   // Banners fill the page width, so a small crop looks soft on big screens.
-  // No +rect+ means the banner shows the whole image over a backdrop.
   renderBannerQuality(rect) {
     if (!this.hasBannerQualityTarget) return
-    const widthPx = rect ? Math.round(rect.w * this.naturalWidth) : 0
-    const soft = !!rect && this.naturalWidth > 0 && widthPx < 1200
+    const widthPx = Math.round(rect.w * this.naturalWidth)
+    const soft = this.naturalWidth > 0 && widthPx < 1200
     this.bannerQualityTarget.classList.toggle("hidden", !soft)
     this.bannerQualityTarget.textContent = soft
       ? `This crop is ${widthPx}px wide, so the banner may look soft on large screens. A larger image, or a wider crop, will look sharper.`
@@ -1013,13 +976,6 @@ export default class extends Controller {
 
   dimensionsLabel() {
     return this.naturalWidth && this.naturalHeight ? `${this.naturalWidth} × ${this.naturalHeight}` : ""
-  }
-
-  // Mirrors content_hero_banner_tag: without a custom banner crop, images
-  // narrower than the full-bleed ratio get the blurred-backdrop header.
-  isNarrowBanner(key) {
-    if (key !== "banner" || this.custom.banner || !this.naturalWidth || !this.naturalHeight) return false
-    return this.naturalWidth / this.naturalHeight < (this.bannerFullBleedRatioValue || 2)
   }
 
   ratioLabel(preset) {
