@@ -14,6 +14,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      # Webpacker 5's webpack 4 hashes with md4, which Node 17+ only allows
+      # through OpenSSL's legacy provider.
+      NODE_OPTIONS: --openssl-legacy-provider
+
     steps:
     - uses: actions/checkout@v2
     - name: Install native dependencies
@@ -26,7 +31,7 @@ jobs:
     - name: Set up Node
       uses: actions/setup-node@v1
       with:
-        node-version: 16.20.2 # keep in step with the Dockerfile
+        node-version: 20.19.5 # keep in step with the production server
     - name: Compile JS
       run: RAILS_ENV=test bundle exec rake assets:precompile
     - name: Run tests
