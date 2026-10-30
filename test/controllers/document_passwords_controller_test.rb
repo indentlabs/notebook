@@ -355,6 +355,7 @@ class DocumentPasswordsControllerTest < ActionDispatch::IntegrationTest
 
   test "universe contributors can't change the password" do
     universe = Universe.create!(user: @stranger, name: 'Their Universe', privacy: 'private')
+    Contributor.create!(universe: universe, user: @author)
     @document.update!(universe: universe)
     sign_in @stranger
 
