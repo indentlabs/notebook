@@ -27,6 +27,16 @@
     }
   }
 
+  // The text highlighted in the editor, or '' if nothing there is highlighted.
+  function editorSelectionText() {
+    const editor = document.getElementById('editor');
+    const selection = window.getSelection();
+    if (!editor || !selection || selection.isCollapsed || !selection.rangeCount) return '';
+    if (!editor.contains(selection.anchorNode)) return '';
+
+    return selection.toString().trim();
+  }
+
   // How many times the word appears in the document being edited.
   function countInDocument(word) {
     const editor = document.getElementById('editor');
@@ -50,20 +60,25 @@
       collapsed: readCollapsedSections(),
       cache: {},
       requestId: 0,
+      lastSelection: '',
 
       setActive(active) {
         this.active = active;
-        if (active) this.lookupSelection();
+        if (active) {
+          this.lastSelection = '';
+          this.lookupSelection();
+        }
       },
 
       // Look up the editor's current selection, if it's short enough to be a word or phrase.
       lookupSelection() {
-        const editor = document.getElementById('editor');
-        const selection = window.getSelection();
-        if (!editor || !selection || selection.isCollapsed || !selection.rangeCount) return;
-        if (!editor.contains(selection.anchorNode)) return;
+        // selectionchange also fires when clicking a word in the panel moves focus out of
+        // the editor, with the old highlight still in place. Only a new highlight counts,
+        // or it would yank the panel straight back to the word that's highlighted.
+        const text = editorSelectionText();
+        if (text === this.lastSelection) return;
+        this.lastSelection = text;
 
-        const text = selection.toString().trim();
         if (!text || text.length > MAX_SELECTION_LENGTH || text.split(/\s+/).length > MAX_SELECTION_WORDS) return;
 
         this.lookup(text);

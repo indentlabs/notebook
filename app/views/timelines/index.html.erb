@@ -213,164 +213,166 @@
       </div>
     </div>
 
-    <!-- Filters & Controls -->
-    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-          <!-- Search Input -->
-          <div class="relative group w-full sm:w-64">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="material-icons text-gray-400 text-lg">search</i>
+    <!-- Filters & Controls (only once there's something to filter, or a tag filter to undo) -->
+    <% if @content.any? || @filtered_page_tags.present? %>
+      <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <!-- Search Input -->
+            <div class="relative group w-full sm:w-64">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="material-icons text-gray-400 text-lg">search</i>
+              </div>
+              <input
+                x-model="searchQuery"
+                type="text"
+                placeholder="Search timelines..."
+                class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+              />
+              <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
+                  <i class="material-icons text-lg">clear</i>
+                </button>
+              </div>
             </div>
-            <input
-              x-model="searchQuery"
-              type="text"
-              placeholder="Search timelines..."
-              class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-            <div x-show="searchQuery.length > 0" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-              <button @click="searchQuery = ''" class="text-gray-400 hover:text-gray-600">
-                <i class="material-icons text-lg">clear</i>
-              </button>
-            </div>
-          </div>
 
-          <!-- Sort & Tag Filters (wrapped together on mobile) -->
-          <div class="flex items-center gap-2 sm:gap-4">
-            <!-- Sort Dropdown -->
-            <div data-controller="dropdown" class="relative">
-              <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <i class="material-icons text-lg sm:mr-2">sort</i>
-                <span class="hidden sm:inline">
-                  <%
-                    sort_labels = {
-                      'updated_at' => 'Recently edited',
-                      'alphabetical' => 'Alphabetical',
-                      'created_at' => 'Date created',
-                      'events' => 'Most events'
-                    }
-                    current_sort = params[:sort] || 'updated_at'
-                  %>
-                  <%= sort_labels[current_sort] || 'Sort' %>
-                </span>
-                <span class="hidden sm:inline"><%= chevron_down %></span>
-              </button>
-              <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                <div class="py-1">
-                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
-                    Recently edited
-                  <% end %>
-                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'alphabetical'}" do %>
-                    Alphabetical
-                  <% end %>
-                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'created_at'}" do %>
-                    Date created
-                  <% end %>
-                  <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'events' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'events'}" do %>
-                    Most events
-                  <% end %>
+            <!-- Sort & Tag Filters (wrapped together on mobile) -->
+            <div class="flex items-center gap-2 sm:gap-4">
+              <!-- Sort Dropdown -->
+              <div data-controller="dropdown" class="relative">
+                <button data-action="dropdown#toggle click@window->dropdown#hide" class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <i class="material-icons text-lg sm:mr-2">sort</i>
+                  <span class="hidden sm:inline">
+                    <%
+                      sort_labels = {
+                        'updated_at' => 'Recently edited',
+                        'alphabetical' => 'Alphabetical',
+                        'created_at' => 'Date created',
+                        'events' => 'Most events'
+                      }
+                      current_sort = params[:sort] || 'updated_at'
+                    %>
+                    <%= sort_labels[current_sort] || 'Sort' %>
+                  </span>
+                  <span class="hidden sm:inline"><%= chevron_down %></span>
+                </button>
+                <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                  <div class="py-1">
+                    <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'updated_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'updated_at' || params[:sort].blank?}" do %>
+                      Recently edited
+                    <% end %>
+                    <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'alphabetical' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'alphabetical'}" do %>
+                      Alphabetical
+                    <% end %>
+                    <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'created_at' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'created_at'}" do %>
+                      Date created
+                    <% end %>
+                    <%= link_to url_for(params.permit(:slug, :favorite_only).merge({ sort: 'events' })), class: "block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 #{'bg-gray-100 dark:bg-gray-700 font-medium' if params[:sort] == 'events'}" do %>
+                      Most events
+                    <% end %>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Tag Filter -->
-            <% if true # Always show tag filter so users can start tagging %>
-              <div data-controller="dropdown" class="relative">
-                <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
-                  <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
-                  <button
-                    data-action="dropdown#toggle click@window->dropdown#hide"
-                    type="button"
-                    class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' %>"
-                  >
-                    <i class="material-icons text-lg sm:mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : @content_type_class.text_color %>">label</i>
-                    <span class="hidden sm:inline">Tags</span>
-                    <% if @filtered_page_tags && @filtered_page_tags.any? %>
-                      <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
-                        <%= @filtered_page_tags.count %>
-                      </span>
-                    <% end %>
-                    <span class="hidden sm:inline"><%= chevron_down %></span>
-                  </button>
-                  <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                    <div class="p-4">
-                      <div class="space-y-3">
-                        <% if @page_tags && @page_tags.any? %>
-                          <% @page_tags.each do |page_tag| %>
-                            <div class="flex items-center">
-                              <input
-                                id="filter-tag-<%= page_tag.id %>"
-                                name="slug[]"
-                                <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %>
-                                value="<%= page_tag.slug %>"
-                                type="checkbox"
-                                class="h-4 w-4 border-gray-300 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
-                              >
-                              <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                                <%= page_tag.tag %>
-                              </label>
+              <!-- Tag Filter -->
+              <% if true # Always show tag filter so users can start tagging %>
+                <div data-controller="dropdown" class="relative">
+                  <%= form_with url: "", method: :get, local: true, class: "contents" do |form| %>
+                    <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+                    <button
+                      data-action="dropdown#toggle click@window->dropdown#hide"
+                      type="button"
+                      class="inline-flex items-center px-3 py-2 border rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'border-blue-300 dark:border-blue-500 bg-blue-50 dark:bg-blue-900 text-blue-900 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600' %>"
+                    >
+                      <i class="material-icons text-lg sm:mr-2 <%= @filtered_page_tags && @filtered_page_tags.any? ? 'text-blue-600' : @content_type_class.text_color %>">label</i>
+                      <span class="hidden sm:inline">Tags</span>
+                      <% if @filtered_page_tags && @filtered_page_tags.any? %>
+                        <span class="ml-1.5 bg-blue-200 text-blue-900 text-xs font-medium px-2 py-0.5 rounded-full">
+                          <%= @filtered_page_tags.count %>
+                        </span>
+                      <% end %>
+                      <span class="hidden sm:inline"><%= chevron_down %></span>
+                    </button>
+                    <div data-dropdown-target="menu" class="origin-top-left absolute left-0 mt-2 w-64 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                      <div class="p-4">
+                        <div class="space-y-3">
+                          <% if @page_tags && @page_tags.any? %>
+                            <% @page_tags.each do |page_tag| %>
+                              <div class="flex items-center">
+                                <input
+                                  id="filter-tag-<%= page_tag.id %>"
+                                  name="slug[]"
+                                  <%= 'checked' if @filtered_page_tags && @filtered_page_tags.map(&:slug).include?(page_tag.slug) %>
+                                  value="<%= page_tag.slug %>"
+                                  type="checkbox"
+                                  class="h-4 w-4 border-gray-300 dark:border-gray-600 rounded text-blue-600 focus:ring-blue-500 bg-white dark:bg-gray-700"
+                                >
+                                <label for="filter-tag-<%= page_tag.id %>" class="ml-3 text-sm font-medium text-gray-900 dark:text-white">
+                                  <%= page_tag.tag %>
+                                </label>
+                              </div>
+                            <% end %>
+                            <div class="pt-2">
+                              <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
+                                Apply filters
+                              </button>
+                            </div>
+                          <% else %>
+                            <div class="text-center text-gray-500 py-4">
+                              <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
+                              <p class="text-sm">No tags yet</p>
+                              <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
                             </div>
                           <% end %>
-                          <div class="pt-2">
-                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-3 py-2 rounded-lg">
-                              Apply filters
-                            </button>
-                          </div>
-                        <% else %>
-                          <div class="text-center text-gray-500 py-4">
-                            <i class="material-icons text-2xl mb-2 text-gray-400">label_outline</i>
-                            <p class="text-sm">No tags yet</p>
-                            <p class="text-xs mt-1">Add tags to your <%= @content_type_name.downcase.pluralize %> to filter by them</p>
-                          </div>
-                        <% end %>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2 flex-shrink-0">
-          <!-- View Mode Toggle -->
-          <div class="hidden sm:flex border border-gray-300 dark:border-gray-600 rounded-lg">
-            <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg focus:outline-none">
-              <i class="material-icons text-lg">grid_view</i>
-            </button>
-            <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-r-lg focus:outline-none">
-              <i class="material-icons text-lg">view_list</i>
-            </button>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
           </div>
 
-          <span class="hidden sm:inline text-sm text-gray-500">
-            <% if (@total_content_count || 0) > 0 %>
-              <span x-text="searchQuery === '' ? 'Showing <%= @content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
-              <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
-            <% else %>
-              <span>No items</span>
-            <% end %>
-          </span>
-        </div>
-      </div>
-      
-      <!-- Active Filters -->
-      <% if @filtered_page_tags && @filtered_page_tags.any? %>
-        <div class="mt-3 flex flex-wrap items-center gap-2">
-          <span class="text-sm text-gray-500 dark:text-gray-400">Filtered by:</span>
-          <% @filtered_page_tags.each do |page_tag| %>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300">
-              <%= page_tag.tag %>
-              <%= link_to(polymorphic_path(@content_type_class, params.permit(:sort, :favorite_only).merge({ slug: Array(params.fetch(:slug, [])) - [page_tag.slug] }))) do %>
-                <button class="ml-1 hover:text-blue-600 dark:hover:text-blue-400">
-                  <i class="material-icons text-sm">close</i>
-                </button>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <!-- View Mode Toggle -->
+            <div class="hidden sm:flex border border-gray-300 dark:border-gray-600 rounded-lg">
+              <button @click="viewMode = 'grid'" :class="viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-l-lg focus:outline-none">
+                <i class="material-icons text-lg">grid_view</i>
+              </button>
+              <button @click="viewMode = 'list'" :class="viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-600 text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'" class="p-2 rounded-r-lg focus:outline-none">
+                <i class="material-icons text-lg">view_list</i>
+              </button>
+            </div>
+
+            <span class="hidden sm:inline text-sm text-gray-500">
+              <% if (@total_content_count || 0) > 0 %>
+                <span x-text="searchQuery === '' ? 'Showing <%= @content.count %> of <%= @total_content_count || 0 %> items' : 'Filtered results'"></span>
+                <span x-show="searchQuery !== ''" x-text="`for '${searchQuery}'`" class="text-gray-400"></span>
+              <% else %>
+                <span>No items</span>
               <% end %>
             </span>
-          <% end %>
+          </div>
         </div>
-      <% end %>
-    </div>
+      
+        <!-- Active Filters -->
+        <% if @filtered_page_tags && @filtered_page_tags.any? %>
+          <div class="mt-3 flex flex-wrap items-center gap-2">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Filtered by:</span>
+            <% @filtered_page_tags.each do |page_tag| %>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300">
+                <%= page_tag.tag %>
+                <%= link_to(polymorphic_path(@content_type_class, params.permit(:sort, :favorite_only).merge({ slug: Array(params.fetch(:slug, [])) - [page_tag.slug] }))) do %>
+                  <button class="ml-1 hover:text-blue-600 dark:hover:text-blue-400">
+                    <i class="material-icons text-sm">close</i>
+                  </button>
+                <% end %>
+              </span>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
 
     <!-- Content Grid -->
     <div class="flex-1 bg-gray-50 dark:bg-gray-900">
@@ -507,7 +509,12 @@
               </div>
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Welcome to your <%= @content_type_name.pluralize %></h2>
               <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                Timelines help you organize the events in your world chronologically. Create your first timeline to start mapping out your story's progression.
+                Timelines help you organize the events in your world chronologically.
+                <% if current_user.can_create?(@content_type_class) %>
+                  Create your first timeline to start mapping out your story's progression.
+                <% else %>
+                  <%= @content_type_name.pluralize %> require an active Premium subscription to create.
+                <% end %>
               </p>
             </div>
 
