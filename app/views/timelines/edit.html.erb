@@ -468,7 +468,21 @@ function timelineEditor() {
     activeLeftPanel: null,   // null | 'filter' | 'linked-content' - mutually exclusive left panels
     activeRightPanel: null,  // null | 'inspector' | 'settings' - mutually exclusive right panels
     isDesktop: window.innerWidth >= 1024,
-    siteNavExpanded: localStorage.getItem('site_navigation_sidebar_visible') === 'true',
+
+    // Whether the site navigation rail is expanded (w-56) or collapsed (w-16).
+    // The rail belongs to the layout, whose x-data on <body> owns `showSidebar`;
+    // reading it from that outer scope keeps the panel and its tabs beside the
+    // rail as it toggles. The rail is open unless the user collapsed it, so a
+    // missing preference means expanded (matching layouts/application.html.erb).
+    get siteNavExpanded() {
+      if (typeof this.showSidebar === 'boolean') return this.showSidebar;
+
+      try {
+        return localStorage.getItem('site_navigation_sidebar_visible') !== 'false';
+      } catch (e) {
+        return true;
+      }
+    },
 
     // Computed properties for panel visibility
     get showLeftSidebar() { return this.activeLeftPanel !== null; },
@@ -504,7 +518,6 @@ function timelineEditor() {
       // Initialize sidebar state
       this.initializeSidebarState();
       this.setupResizeListener();
-      this.setupSiteNavListener();
 
       // Initialize eventTags from server-rendered DOM data
       this.initializeEventTagsFromDOM();
@@ -1555,27 +1568,6 @@ function timelineEditor() {
           this.activeRightPanel = null;
         }
       });
-    },
-
-    setupSiteNavListener() {
-      // Watch for site sidenav toggle via storage events (cross-tab)
-      window.addEventListener('storage', (e) => {
-        if (e.key === 'site_navigation_sidebar_visible') {
-          this.siteNavExpanded = e.newValue === 'true';
-        }
-      });
-
-      // Also watch for clicks on the sidenav toggle button (same tab)
-      // The sidenav buttons update localStorage, so we poll for changes
-      const checkSiteNavState = () => {
-        const currentState = localStorage.getItem('site_navigation_sidebar_visible') === 'true';
-        if (currentState !== this.siteNavExpanded) {
-          this.siteNavExpanded = currentState;
-        }
-      };
-
-      // Check periodically for same-tab changes (storage event doesn't fire for same tab)
-      setInterval(checkSiteNavState, 100);
     },
 
     getSavedSidebarState() {
