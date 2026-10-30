@@ -212,11 +212,13 @@ class User < ApplicationRecord
     writing_goals.current.first
   end
 
-  # Returns the user's daily word goal: the maximum of all active writing goals,
-  # or a default of 1,000 words if no active goals exist or all goals have nil/0 values
+  # Returns the user's daily word goal: the maximum of all active writing goals
+  # that have started, or a default of 1,000 words if there are none or all
+  # goals have nil/0 values. Words written before a goal starts don't count
+  # toward it, so an upcoming goal doesn't set today's target.
   DEFAULT_DAILY_WORD_GOAL = 1000
   def daily_word_goal
-    goals = current_writing_goals
+    goals = current_writing_goals.where('start_date <= ?', current_date_in_time_zone)
     return DEFAULT_DAILY_WORD_GOAL if goals.empty?
 
     calculated = goals.map(&:daily_goal).compact.max
