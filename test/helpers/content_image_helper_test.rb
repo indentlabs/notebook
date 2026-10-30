@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'minitest/mock'
 
 class ContentImageHelperTest < ActionView::TestCase
   include ContentImageHelper
@@ -24,22 +25,49 @@ class ContentImageHelperTest < ActionView::TestCase
   end
 
   test "serves the preset derivative when it has been generated" do
-    @upload = create_upload
+    @upload = create_upload(file: 'gallery_large_test.png')
     html = content_image_tag(@character, :banner, class: 'hero')
 
     assert_includes html, '/banner/'
     assert_includes html, '.webp'
-    assert_not_includes html, 'object-position'
+    assert_not_includes html, 'object-position', 'a centred focal point needs no positioning'
     assert_not_includes html, 'loading="lazy"', 'banners are above the fold'
-    assert_includes html, 'width="1500"'
-    assert_includes html, 'height="500"'
+    assert_includes html, 'width="2400"'
+    assert_includes html, 'height="800"'
     assert_includes html, 'decoding="async"'
-    assert_match(/srcset="[^"]*\/banner_sm\/[^"]* 750w, [^"]*\/banner\/[^"]* 1500w"/, html)
+    assert_match(/srcset="[^"]*\/banner_sm\/[^"]* 750w, [^"]*\/banner\/[^"]* 2400w"/, html)
     assert_includes html, 'sizes="100vw"'
   end
 
-  test "small boxes get the reduced square derivative" do
+  test "small images keep their own size and skip the srcset" do
     @upload = create_upload
+    html = content_image_tag(@character, :banner)
+
+    assert_includes html, 'width="64"', 'a 64px-wide image is not described as 2400px'
+    assert_includes html, 'height="21"'
+    assert_not_includes html, 'srcset', 'both sizes would be the same file'
+  end
+
+  test "keeps the focal point in view when the box is a different shape" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    # 3:2 image, so the automatic banner crop is the top half (the focal point
+    # is too near the top edge to centre on); 0.2 sits 40% of the way down it.
+    @upload.update_columns(focal_x: 0.5, focal_y: 0.2)
+    @character.clear_cover_image_cache
+
+    assert_includes content_image_tag(@character, :banner), 'object-position: 50.0% 40.0%'
+  end
+
+  test "centres a custom crop that leaves the focal point out" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    @upload.update_columns(focal_x: 0.5, focal_y: 0.9, crops: { 'banner' => { 'x' => 0, 'y' => 0, 'w' => 1, 'h' => 0.5 } })
+    @character.clear_cover_image_cache
+
+    assert_not_includes content_image_tag(@character, :banner), 'object-position'
+  end
+
+  test "small boxes get the reduced square derivative" do
+    @upload = create_upload(file: 'gallery_large_test.png')
     html = content_image_tag(@character, :square, size: :small, class: 'w-12 h-12')
 
     assert_includes html, '/square_sm/'
@@ -48,7 +76,7 @@ class ContentImageHelperTest < ActionView::TestCase
   end
 
   test "shapes without a small size get no srcset" do
-    @upload = create_upload
+    @upload = create_upload(file: 'gallery_large_test.png')
     html = content_image_tag(@character, :card)
 
     assert_includes html, '/card/'
@@ -135,15 +163,123 @@ class ContentImageHelperTest < ActionView::TestCase
     first&.destroy
   end
 
+  test "content_hero_banner_tag renders placeholder when there are no images" do
+    html = content_hero_banner_tag(@character)
+
+    assert_includes html, 'card-headers/characters'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders ambient blurred backdrop when cover is narrow without custom crop" do
+    @upload = create_upload
+    @upload.update_columns(width: 600, height: 900)
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_includes html, 'blur-2xl'
+    assert_includes html, 'scale-110'
+    assert_includes html, 'opacity-50'
+    assert_includes html, 'object-contain'
+    assert_includes html, 'drop-shadow-2xl'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when image has a custom banner crop" do
+    @upload = create_upload
+    @upload.update_columns(
+      width: 600,
+      height: 900,
+      crops: { 'banner' => { 'x' => 0.0, 'y' => 0.2, 'w' => 1.0, 'h' => 0.22 } }
+    )
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when image is naturally wide" do
+    @upload = create_upload
+    @upload.update_columns(width: 1500, height: 500)
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when the cover has no display URL" do
+    @upload = create_upload
+    @upload.update_columns(width: 600, height: 900)
+    @character.clear_cover_image_cache
+
+    image = ContentImage.wrap(@upload)
+    html = image.stub(:display_url, nil) do
+      @character.stub(:cover_image, image) { content_hero_banner_tag(@character) }
+    end
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders a page collection's own header" do
+    collection = page_collections(:one)
+    collection.cover_image = 'https://example.com/collection-cover.png'
+
+    html = content_hero_banner_tag(collection)
+
+    assert_includes html, 'https://example.com/collection-cover.png'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_cover_image? reflects whether a gallery page has an image" do
+    assert_not content_cover_image?(@character)
+
+    @upload = create_upload(privacy: 'private')
+    @character.clear_cover_image_cache
+    assert_not content_cover_image?(@character)
+    assert content_cover_image?(@character, include_private: true)
+    assert_equal @upload.id, content_cover_image(@character, include_private: true).id
+  end
+
+  # PageCollection's legacy cover_image column shadows the gallery API and
+  # takes no arguments; calling it with options used to raise ArgumentError.
+  test "page collections render their own header instead of the gallery API" do
+    collection = page_collections(:one)
+    collection.cover_image = 'https://example.com/collection-cover.png'
+
+    assert_nil content_cover_image(collection)
+    assert content_cover_image?(collection)
+    html = content_image_tag(collection, :card, class: 'w-full')
+    assert_includes html, 'https://example.com/collection-cover.png'
+    assert_includes html, 'class="w-full"'
+
+    collection.cover_image = nil
+    assert_not content_cover_image?(collection)
+    assert_includes content_image_tag(collection, :card), 'card-headers/pagecollections'
+  end
+
+  test "records with neither a gallery nor a header have no cover" do
+    record = Object.new
+
+    assert_nil content_cover_image(record)
+    assert_not content_cover_image?(record)
+  end
+
   private
 
-  def create_upload(privacy: 'public')
+  def create_upload(privacy: 'public', file: 'gallery_test.png')
     ImageUpload.create!(
       user: @user,
       content_type: 'Character',
       content_id: @character.id,
       privacy: privacy,
-      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files/gallery_test.png'), 'image/png')
+      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files', file), 'image/png')
     )
   end
+
 end

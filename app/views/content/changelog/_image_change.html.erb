@@ -1,0 +1,80 @@
+<%#
+  One gallery event in the changelog (see GalleryActivity).
+
+  Locals:
+    change_event - a ContentChangeEvent where image_event? is true
+%>
+<%
+  snapshot = change_event.image_snapshot
+  record   = change_event.image_record
+  image    = record && ContentImage.wrap(record)
+  thumb    = image&.url(:thumb)
+  changes  = change_event.field_changes
+  basil    = snapshot['type'] == 'BasilCommission'
+
+  headline, icon = case change_event.action
+    when 'image_added'   then [basil ? 'Saved a Basil image to this page' : 'Uploaded an image', 'add_photo_alternate']
+    when 'image_removed' then ['Removed an image', 'hide_image']
+    when 'cover_changed' then ['Changed the cover image', 'star']
+    else                      ['Edited an image', 'edit']
+  end
+
+  details = changes.filter_map do |key, (before, after)|
+    if key == 'cover'
+      after ? 'Set as the cover' : 'No longer the cover'
+    elsif key.start_with?('cover:')
+      preset = ImagePresets[key.delete_prefix('cover:')]
+      label  = preset ? preset.chip : key.delete_prefix('cover:').humanize
+      after ? "Set as the #{label.downcase} cover" : "No longer the #{label.downcase} cover"
+    elsif key == 'privacy'
+      after == 'private' ? 'Made private (only you and collaborators can see it)' : 'Made visible to anyone who can see this page'
+    elsif key == 'framing'
+      'Adjusted the cropping and framing'
+    end
+  end
+  notes_change = changes['notes']
+%>
+<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+  <div class="flex items-start gap-3">
+    <div class="w-12 h-12 flex-shrink-0 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+      <% if thumb %>
+        <%= image_tag thumb, alt: '', class: 'w-full h-full object-cover', loading: 'lazy' %>
+      <% else %>
+        <i class="material-icons text-gray-400"><%= icon %></i>
+      <% end %>
+    </div>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center justify-between gap-2">
+        <h4 class="font-medium text-gray-900 dark:text-white flex items-center">
+          <i class="material-icons text-sm text-gray-500 dark:text-gray-400 mr-1"><%= icon %></i>
+          <%= headline %>
+        </h4>
+        <span class="text-xs px-2 py-1 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 rounded-full font-medium flex-shrink-0">
+          gallery
+        </span>
+      </div>
+
+      <% if details.any? %>
+        <ul class="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+          <% details.each do |detail| %>
+            <li class="flex items-start"><i class="material-icons text-xs text-gray-400 mr-1 mt-1">chevron_right</i><%= detail %></li>
+          <% end %>
+        </ul>
+      <% end %>
+
+      <% if notes_change %>
+        <div class="mt-2 grid gap-2 sm:grid-cols-2 text-sm">
+          <div class="rounded-md bg-red-50 dark:bg-red-900 dark:bg-opacity-30 p-2 text-red-800 dark:text-red-200">
+            <p class="text-xs font-medium mb-1">Previous notes</p>
+            <p class="whitespace-pre-line break-words"><%= notes_change.first.presence || '(none)' %></p>
+          </div>
+          <div class="rounded-md bg-green-50 dark:bg-green-900 dark:bg-opacity-30 p-2 text-green-800 dark:text-green-200">
+            <p class="text-xs font-medium mb-1">New notes</p>
+            <p class="whitespace-pre-line break-words"><%= notes_change.second.presence || '(none)' %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

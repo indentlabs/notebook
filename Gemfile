@@ -4,16 +4,12 @@ ruby "~> 3.2"
 # Server core
 gem 'rails', '~> 6.1'
 
-#gem 'puma', '~> 5.6'
+gem 'puma', '~> 5.6'
 gem 'passenger'
 
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 4.2.0'
 gem 'terser'
-
-group :production do
-  gem 'puma-heroku'
-end
 
 # Storage
 gem 'aws-sdk', '~> 3.1'
@@ -30,6 +26,7 @@ gem 'active_storage_validations'
 # Authentication
 gem 'devise'
 gem 'authority'
+gem 'bcrypt', '~> 3.1' # Also used directly by Document's password protection
 
 # Billing
 gem 'stripe'

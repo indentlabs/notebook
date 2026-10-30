@@ -9,9 +9,18 @@ class ContentPageShare < ApplicationRecord
   has_many :content_page_share_followings, dependent: :destroy
   has_many :content_page_share_reports,    dependent: :destroy
 
+  validate :pages_are_not_password_protected, on: :create
+
   after_create do
     # Subscribe the OP to new notifications whenever a post is created
     user.content_page_share_followings.create({content_page_share: self})
+  end
+
+  # Shares show a page's title and an excerpt to everyone in the stream
+  def pages_are_not_password_protected
+    return unless [content_page, secondary_content_page].any? { |page| page.try(:password_protected?) }
+
+    errors.add(:base, "Password protected documents can't be shared. Change its privacy setting first.")
   end
 
   # Human-readable label for the shared page's type, e.g. "character" or

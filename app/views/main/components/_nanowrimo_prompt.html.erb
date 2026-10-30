@@ -1,0 +1,39 @@
+<%#
+  Dashboard invitation to set a National Novel Writing Month goal. Shown when
+  WritingGoalsHelper#nanowrimo_prompt_start_date returns a date.
+
+  Locals:
+    november - November 1 of the year the writer is invited to join
+%>
+<% started = current_user.current_date_in_time_zone >= november %>
+<div>
+  <%= link_to new_nanowrimo_goal_path(november), class: 'block group' do %>
+    <div class="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-800 border border-orange-200 dark:border-gray-700 rounded-lg p-4 hover:border-orange-300 dark:hover:border-orange-500 hover:shadow-sm transition-all duration-200">
+      <div class="flex items-start gap-3">
+        <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-orange-500 flex items-center justify-center">
+          <i class="material-icons text-white">edit_calendar</i>
+        </div>
+        <div class="min-w-0">
+          <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-orange-700 dark:group-hover:text-orange-300 transition-colors">
+            Doing National Novel Writing Month?
+          </h4>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            <% if started %>
+              Set a 50,000-word goal for November. Words you've already written this month count toward it.
+            <% else %>
+              Set a 50,000-word goal for the month and track your progress every day.
+            <% end %>
+          </p>
+          <span class="mt-2 inline-flex items-center text-sm font-medium text-orange-700 dark:text-orange-300">
+            Set up my goal
+            <i class="material-icons text-base ml-1">arrow_forward</i>
+          </span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <div class="text-right mt-1">
+    <%= link_to 'Not this year', notice_dismissal_dismiss_path(notice_id: nanowrimo_notice_id(november.year)),
+          class: 'text-xs font-medium text-gray-400 hover:text-notebook-blue' %>
+  </div>
+</div>

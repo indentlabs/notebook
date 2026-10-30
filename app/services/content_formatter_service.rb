@@ -21,6 +21,8 @@ class ContentFormatterService < Service
   # https://s3.amazonaws.com/raw.paste.esk.io/Llb%2F64DJHK?versionId=19Lb_TtukDbo1J_IoCpkr.d.pwpW_vmH
   VALID_LINK_CLASSES = Rails.application.config.content_type_names[:all] + %w(Timeline Document)
 
+  PRIVATE_DOCUMENT_LABEL = 'Private document'.freeze
+
   def self.plaintext_show(text:, viewing_user: User.new)
     formatted_text = markdown.render(text || '').html_safe
 
@@ -96,6 +98,8 @@ class ContentFormatterService < Service
       else
         link_template(content_model)
       end
+    elsif content_model.is_a?(Document)
+      plaintext ? PRIVATE_DOCUMENT_LABEL : private_document_template
     else
       if plaintext
         plaintext_replacement_template(content_model)
@@ -111,6 +115,11 @@ class ContentFormatterService < Service
 
   def self.private_link_template(content_model)
     inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
+  end
+
+  # A document's title can give away what's in it, so unlike other pages it isn't shown to people who can't read it
+  def self.private_document_template
+    inline_template(Document) { content_tag(:span, PRIVATE_DOCUMENT_LABEL, class: 'grey-text content_link disabled') }
   end
 
   def self.plaintext_replacement_template(content_model)

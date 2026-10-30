@@ -1,0 +1,71 @@
+<%#
+  Document Confirm Action Modal
+
+  A small confirmation dialog for archiving or deleting a document.
+  Open it with $dispatch('open-modal', id).
+
+  Required locals:
+    - id: String (modal id, also the open-modal event detail)
+    - tone: String ('orange' or 'red')
+    - icon: String (Material Icons name)
+    - title: String
+    - message: String
+    - confirm_label: String
+    - url: String (where the confirm button submits)
+    - method: Symbol (:post, :delete, ...)
+%>
+<%
+  tone_classes = {
+    'orange' => { badge: 'bg-orange-100 dark:bg-orange-900 text-orange-600 dark:text-orange-300', button: 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500' },
+    'red'    => { badge: 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300',             button: 'bg-red-600 hover:bg-red-700 focus:ring-red-500' }
+  }.fetch(tone)
+%>
+<div
+  id="<%= id %>"
+  x-data="{ open: false }"
+  x-show="open"
+  x-init="$watch('open', value => value && $nextTick(() => $refs.cancel.focus()))"
+  @open-modal.window="if ($event.detail === '<%= id %>') open = true"
+  @close-modal.window="open = false"
+  @keydown.escape.window="open = false"
+  class="fixed inset-0 z-50 overflow-y-auto"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="<%= id %>-title"
+  x-cloak
+>
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" x-show="open" @click="open = false"></div>
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-sm transform transition-all"
+      x-show="open"
+      x-transition:enter="ease-out duration-200"
+      x-transition:enter-start="opacity-0 scale-95"
+      x-transition:enter-end="opacity-100 scale-100"
+      x-transition:leave="ease-in duration-150"
+      x-transition:leave-start="opacity-100 scale-100"
+      x-transition:leave-end="opacity-0 scale-95"
+      @click.away="open = false"
+    >
+      <div class="p-6 text-center">
+        <div class="mx-auto w-12 h-12 rounded-full flex items-center justify-center mb-4 <%= tone_classes[:badge] %>">
+          <i class="material-icons"><%= icon %></i>
+        </div>
+        <h3 id="<%= id %>-title" class="text-lg font-medium text-gray-900 dark:text-white"><%= title %></h3>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-300"><%= message %></p>
+      </div>
+      <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2">
+        <%# Cancel takes focus when the modal opens, so a stray Enter doesn't confirm %>
+        <button type="button" x-ref="cancel" @click="open = false"
+                class="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400">
+          Cancel
+        </button>
+        <%= button_to url,
+            method: method,
+            class: "px-3 py-1.5 text-sm font-medium text-white rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 #{tone_classes[:button]}" do %>
+          <%= confirm_label %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

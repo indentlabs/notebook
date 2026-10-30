@@ -105,7 +105,7 @@ class PageCollectionsController < ApplicationController
   end
 
   def explore
-    @collections = PageCollection.first(8)
+    @collections = PageCollection.with_attached_header_image.first(8)
   end
 
   Rails.application.config.content_types[:all].each do |content_type|

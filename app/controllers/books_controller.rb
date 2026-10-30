@@ -25,7 +25,8 @@ class BooksController < ApplicationController
     end
 
     @book_documents = @book.book_documents.includes(:document).order(position: :asc)
-    @total_words = @book_documents.sum { |bd| bd.document&.word_count.to_i }
+    @unlocked_book_documents = @book_documents.reject { |bd| bd.document && helpers.document_locked?(bd.document) }
+    @total_words = @unlocked_book_documents.sum { |bd| bd.document&.word_count.to_i }
     @est_reading_time = (@total_words / 200.0).ceil
 
     @characters, @characters_source = readable_book_characters
@@ -177,7 +178,7 @@ class BooksController < ApplicationController
     source = :book
 
     if characters.empty? && @book.universe.present?
-      characters = @book.universe.characters.unarchived.order(:name).limit(CHARACTER_LOOKUP_LIMIT)
+      characters = @book.universe.characters.unarchived.includes(:image_uploads).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
       source = :universe
     end
 
@@ -187,7 +188,7 @@ class BooksController < ApplicationController
 
   # Characters that document analysis has linked to one of this book's chapters.
   def characters_appearing_in_book
-    document_ids = @book_documents.map(&:document_id).compact
+    document_ids = @unlocked_book_documents.map(&:document_id).compact
     return [] if document_ids.empty?
 
     character_ids = DocumentEntity
@@ -199,6 +200,6 @@ class BooksController < ApplicationController
       .pluck(:entity_id)
     return [] if character_ids.empty?
 
-    Character.unarchived.where(id: character_ids).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
+    Character.unarchived.includes(:image_uploads).where(id: character_ids).order(:name).limit(CHARACTER_LOOKUP_LIMIT)
   end
 end

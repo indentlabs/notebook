@@ -1,10 +1,6 @@
 require 'test_helper'
 
 class Api::V1::GalleryImagesControllerTest < ActionDispatch::IntegrationTest
-  # Skip the automatically generated smoke test since there's no root URL for this controller
-  def test_should_get_root_url
-    skip("No root URL for gallery images controller")
-  end
   include Devise::Test::IntegrationHelpers
   
   setup do

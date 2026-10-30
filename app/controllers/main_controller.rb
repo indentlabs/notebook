@@ -98,6 +98,9 @@ class MainController < ApplicationController
     @other_pages   = all_pages.reject { |p| p.try(:favorite) }
     @pages_by_type = @other_pages.group_by(&:page_type)
 
+    # Only the cards the view renders need their cover images loaded
+    preload_cover_images(@starred_pages + @pages_by_type.values.flat_map { |pages| pages.first(7) })
+
     # Statistics
     @total_pages = all_pages.size
     @total_words = all_pages.sum { |p| p.try(:cached_word_count).to_i }
@@ -202,7 +205,7 @@ class MainController < ApplicationController
         days_since_created: (Date.current - content_page.created_at.to_date).to_i,
         days_since_updated: (Date.current - content_page.updated_at.to_date).to_i,
         word_count: content_page.try(:cached_word_count) || 0,
-        has_image: content_page.respond_to?(:cover_image?) && content_page.cover_image?(include_private: true)
+        has_image: helpers.content_cover_image?(content_page, include_private: true)
       }
     end
     

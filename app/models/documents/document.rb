@@ -10,7 +10,8 @@ class Document < ApplicationRecord
   has_many :document_categories, through: :document_analysis
 
   has_many :document_revisions, dependent: :destroy
-  after_update :save_document_revision!
+  # After commit, so a slow or failing enqueue can't hold the row lock or roll back the save itself
+  after_update_commit :save_document_revision!
 
   has_many :book_documents, dependent: :destroy
   has_many :books, through: :book_documents
@@ -21,6 +22,25 @@ class Document < ApplicationRecord
   include HasPageTags
   include BelongsToUniverse
   include HasPrivacy
+
+  PRIVACY_LABELS = {
+    'private'  => 'Private',
+    'public'   => 'Public',
+    'password' => 'Password protected'
+  }.freeze
+
+  # bcrypt ignores everything past 72 bytes
+  PASSWORD_LENGTH = 8..72
+
+  has_secure_password :document_password, validations: false
+
+  # Only checked when these change, so a row with an old or unexpected value can still be autosaved.
+  validates :privacy, inclusion: { in: PRIVACY_LABELS.keys }, allow_blank: true, if: :will_save_change_to_privacy?
+  validates :document_password_digest, presence: true, if: :password_protected?
+  validates :document_password,
+            length: { in: PASSWORD_LENGTH, too_short: 'must be at least %{count} characters', too_long: 'must be at most %{count} characters' },
+            if: -> { @changing_password_protection && password_protected? }
+  validate :password_protection_changed_explicitly, if: -> { will_save_change_to_privacy? || will_save_change_to_document_password_digest? }
 
   belongs_to :folder, optional: true
 
@@ -82,7 +102,7 @@ class Document < ApplicationRecord
   # readable. Purely additive and computed at read time, so toggling the
   # book (or removing the document from it) instantly reverts visibility.
   def readable_via_public_book?
-    return false if new_record?
+    return false if new_record? || password_protected?
 
     containing_public_books.exists?
   end
@@ -90,9 +110,62 @@ class Document < ApplicationRecord
   # Overrides HasPrivacy#public_content? to reflect *effective* visibility,
   # including exposure through a public book.
   def public_content?
+    return false if password_protected?
+
     universe_is_public = universe.present? && universe.public_content?
     privacy == 'public' || universe_is_public || readable_via_public_book?
   end
+
+  def password_protected?
+    privacy == 'password'
+  end
+
+  def privacy_label
+    PRIVACY_LABELS.fetch(privacy, PRIVACY_LABELS['private'])
+  end
+
+  def privacy_icon
+    { 'public' => 'public', 'password' => 'vpn_key' }.fetch(privacy, 'lock')
+  end
+
+  # Password protection only ever changes through these two methods, so nothing that does a
+  # routine update(privacy: 'public'), like sharing a page, can quietly take it off a document.
+  def protect_with_password(password)
+    change_password_protection do
+      # Assigning a blank password is a no-op, which would leave any earlier one here to pass validation
+      @document_password = nil
+
+      self.privacy = 'password'
+      self.document_password = password.to_s
+      save
+    end
+  end
+
+  def remove_password_protection(new_privacy)
+    change_password_protection do
+      self.privacy = new_privacy
+      self.document_password = nil
+      save
+    end
+  end
+
+  # The digest is sensitive even though it isn't the password itself
+  def serializable_hash(options = nil)
+    options = (options || {}).dup
+    options[:except] = Array(options[:except]) + ['document_password_digest']
+    super(options)
+  end
+
+  # For listing documents alongside other pages. Stricter than #readable_by?, which takes up
+  # to three queries per document, and that adds up on pages that list twenty of them.
+  scope :public_or_owned_by, ->(user) {
+    where('documents.privacy = ? OR documents.user_id = ?', 'public', user&.id)
+  }
+
+  # Written out so that documents with no privacy value at all aren't dropped too
+  scope :without_passwords_unless_owned_by, ->(user) {
+    where("documents.privacy IS NULL OR documents.privacy != 'password' OR documents.user_id = ?", user&.id)
+  }
 
   # Archive scopes and methods (matching IsContentPage pattern)
   scope :unarchived, -> { where(archived_at: nil) }
@@ -174,13 +247,33 @@ class Document < ApplicationRecord
 
   def save_document_revision!
     if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
-      begin
-        SaveDocumentRevisionJob.perform_later(self.id)
-      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
-        # Log the error but don't fail the save - document revisions are not critical
-        Rails.logger.warn "Could not save document revision due to Redis connection error: #{e.message}"
-      end
+      enqueue_debounced(SaveDocumentRevisionJob)
     end
+  end
+
+  # Autosave can update a document every few seconds while someone is writing. Rather than queueing
+  # a job for every save, queue at most one per document per debounce window, and run it at the end
+  # of that window. Jobs load the document when they run, so they still see every edit made before then.
+  def enqueue_debounced(job_class)
+    wait = self.class.background_job_debounce
+    return job_class.perform_later(id) if wait.zero?
+
+    key = "documents/#{id}/#{job_class.name.underscore}/queued"
+    return unless Rails.cache.write(key, true, unless_exist: true, expires_in: wait)
+
+    begin
+      job_class.set(wait: wait).perform_later(id)
+    rescue StandardError
+      Rails.cache.delete(key)
+      raise
+    end
+  rescue RedisClient::Error, Redis::BaseError => e
+    # Background jobs are not critical; never let Redis trouble fail a save
+    Rails.logger.warn "Could not queue #{job_class.name} for Document #{id}: #{e.class}: #{e.message}"
+  end
+
+  def self.background_job_debounce
+    Rails.application.config.x.document_job_debounce || 30.seconds
   end
 
   def word_count
@@ -204,5 +297,21 @@ class Document < ApplicationRecord
       tagger = EngTagger.new
       tagger.add_tags(plaintext)
     end
+  end
+
+  private
+
+  def change_password_protection
+    @changing_password_protection = true
+    yield
+  ensure
+    @changing_password_protection = false
+  end
+
+  def password_protection_changed_explicitly
+    return if @changing_password_protection
+    return unless privacy_in_database == 'password' || password_protected? || will_save_change_to_document_password_digest?
+
+    errors.add(:privacy, "can't be changed to or from password protected here")
   end
 end

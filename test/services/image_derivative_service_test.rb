@@ -15,10 +15,10 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
   end
 
   test "a new upload records its dimensions and cuts every shape derivative" do
-    @upload = create_upload
+    @upload = create_upload(file: 'gallery_large_test.png')
 
-    assert_equal 64, @upload.width
-    assert_equal 40, @upload.height
+    assert_equal 3000, @upload.width
+    assert_equal 2000, @upload.height
     assert @upload.crops_generated_at.present?, "derivatives are cut synchronously on upload"
 
     ImagePresets.each do |preset|
@@ -38,6 +38,17 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
     xlarge = @upload.src.path(:xlarge)
     assert File.exist?(xlarge) && xlarge.end_with?('.webp'), 'xlarge WebP is produced on upload'
     assert_equal 'WEBP', `identify -format %m #{xlarge}`.strip
+  end
+
+  test "derivatives of a small image are not upscaled" do
+    @upload = create_upload
+
+    ImagePresets.each do |preset|
+      geometry = Paperclip::Geometry.from_file(@upload.src.path(preset.key))
+      size = [geometry.width.to_i, geometry.height.to_i]
+      assert_equal @upload.crop_pixels_for(preset.key)[2..3], size, "#{preset.key} keeps the crop's own size"
+      assert_equal ContentImage.wrap(@upload).preset_dimensions(preset.key), size, "#{preset.key} dimensions match the file"
+    end
   end
 
   test "backfill regenerates the framed styles and xlarge" do
@@ -62,7 +73,7 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
     assert ImageDerivativeService.generate!(@upload.reload)
     assert File.mtime(@upload.src.path(:square)) >= before
     geometry = Paperclip::Geometry.from_file(@upload.src.path(:square))
-    assert_equal [600, 600], [geometry.width.to_i, geometry.height.to_i]
+    assert_equal [40, 40], [geometry.width.to_i, geometry.height.to_i], "the new crop, at its own (small) size"
 
     @upload.reload
     assert_equal original_name, @upload.src_file_name, "regeneration must not rename the file"
@@ -104,15 +115,25 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
     variant = ImageDerivativeService.variant_for(commission, :square)
     transformations = variant.variation.transformations
 
-    assert_equal [600, 600], transformations[:resize_to_fill]
+    assert_equal [600, 600], transformations[:resize_to_limit], "cropped to shape, so only ever shrunk"
+    assert_nil transformations[:resize_to_fill]
     assert transformations[:crop].present?
     assert_equal :webp, transformations[:format]
 
     small = ImageDerivativeService.variant_for(commission, :square, small: true)
-    assert_equal [200, 200], small.variation.transformations[:resize_to_fill]
+    assert_equal [200, 200], small.variation.transformations[:resize_to_limit]
     assert ContentImage.wrap(commission).preset_url(:square, size: :small).present?
 
     assert ContentImage.wrap(commission).preset_url(:square).present?
+  end
+
+  test "refuses to report success for styles the attachment doesn't define" do
+    @upload = create_upload
+
+    error = assert_raises(ArgumentError) do
+      ImageDerivativeService.new(@upload).generate!(styles: [:banner, :not_a_style])
+    end
+    assert_match(/not_a_style/, error.message)
   end
 
   test "job discards missing records instead of failing" do
@@ -123,13 +144,13 @@ class ImageDerivativeServiceTest < ActiveSupport::TestCase
 
   private
 
-  def create_upload
+  def create_upload(file: 'gallery_test.png')
     ImageUpload.create!(
       user: @user,
       content_type: 'Character',
       content_id: @character.id,
       privacy: 'public',
-      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files/gallery_test.png'), 'image/png')
+      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files', file), 'image/png')
     )
   end
 end

@@ -37,11 +37,11 @@
       <button @click="$dispatch('open-modal', 'document-privacy-modal')"
               class="w-full flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors group">
         <div class="flex items-center">
-          <div id="sidebar-privacy-badge" class="w-8 h-8 rounded-full <%= @document.privacy == 'private' ? 'bg-gray-200 dark:bg-gray-600' : 'bg-green-100 dark:bg-green-900' %> flex items-center justify-center mr-3">
-            <i id="sidebar-privacy-icon" class="material-icons text-sm <%= @document.privacy == 'private' ? 'text-gray-500 dark:text-gray-400' : 'text-green-500' %>"><%= @document.privacy == 'private' ? 'lock' : 'public' %></i>
+          <div id="sidebar-privacy-badge" class="w-8 h-8 rounded-full <%= @document.privacy == 'public' ? 'bg-green-100 dark:bg-green-900' : 'bg-gray-200 dark:bg-gray-600' %> flex items-center justify-center mr-3">
+            <i id="sidebar-privacy-icon" class="material-icons text-sm <%= @document.privacy == 'public' ? 'text-green-500' : 'text-gray-500 dark:text-gray-400' %>"><%= @document.privacy_icon %></i>
           </div>
           <div class="text-left">
-            <p id="sidebar-privacy-text" class="text-sm font-medium text-gray-900 dark:text-gray-100 capitalize"><%= @document.privacy || 'private' %></p>
+            <p id="sidebar-privacy-text" class="text-sm font-medium text-gray-900 dark:text-gray-100"><%= @document.privacy_label %></p>
             <p class="text-xs text-gray-500 dark:text-gray-400">Click to change</p>
           </div>
         </div>
@@ -121,6 +121,76 @@
         </span>
         <i class="material-icons text-gray-400 text-sm">chevron_right</i>
       <% end %>
+
+      <!-- View As (collapsed by default) -->
+      <div x-data="{ open: false }">
+        <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          <span class="flex items-center">
+            <i class="material-icons text-gray-500 dark:text-gray-400 mr-3">visibility</i>
+            View as...
+          </span>
+          <i class="material-icons text-gray-400 text-sm transition-transform" :class="open ? 'rotate-180' : ''">expand_more</i>
+        </button>
+
+        <div x-show="open" x-collapse x-cloak class="pl-6 space-y-1">
+          <%= link_to document_path(@document),
+                      target: "_blank",
+                      class: "w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+            <span class="flex items-center">
+              <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-3">auto_stories</i>
+              Reader
+            </span>
+            <i class="material-icons text-gray-400 text-sm">open_in_new</i>
+          <% end %>
+
+          <%= link_to plaintext_document_path(@document),
+                      target: "_blank",
+                      class: "w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+            <span class="flex items-center">
+              <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-3">text_snippet</i>
+              Plaintext
+            </span>
+            <i class="material-icons text-gray-400 text-sm">open_in_new</i>
+          <% end %>
+
+          <%= link_to printable_document_path(@document),
+                      target: "_blank",
+                      class: "w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+            <span class="flex items-center">
+              <i class="material-icons text-gray-500 dark:text-gray-400 text-lg mr-3">print</i>
+              Printed
+            </span>
+            <i class="material-icons text-gray-400 text-sm">open_in_new</i>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Archive & Delete: muted until hovered, since they're rarely needed and shouldn't compete with the writing tools above -->
+  <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+    <nav class="space-y-1">
+      <%# Archive and Delete confirm in modals (rendered once in documents/edit); unarchiving just restores, so it doesn't ask %>
+      <% if @document.archived? %>
+        <%= button_to toggle_archive_document_path(@document),
+            method: :post,
+            class: "group w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-lg hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900 dark:hover:bg-opacity-30 transition-colors text-left" do %>
+          <i class="material-icons text-lg text-gray-400 dark:text-gray-500 group-hover:text-orange-500 mr-3">unarchive</i>
+          Unarchive this document
+        <% end %>
+      <% else %>
+        <button type="button" @click="$dispatch('open-modal', 'document-archive-modal')"
+                class="group w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-lg hover:text-orange-600 dark:hover:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900 dark:hover:bg-opacity-30 transition-colors text-left">
+          <i class="material-icons text-lg text-gray-400 dark:text-gray-500 group-hover:text-orange-500 mr-3">archive</i>
+          Archive this document
+        </button>
+      <% end %>
+      <button type="button" @click="$dispatch('open-modal', 'document-delete-modal')"
+              class="group w-full flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 rounded-lg hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900 dark:hover:bg-opacity-30 transition-colors text-left">
+        <i class="material-icons text-lg text-gray-400 dark:text-gray-500 group-hover:text-red-500 mr-3">delete</i>
+        Delete this document
+      </button>
     </nav>
   </div>
 </div>

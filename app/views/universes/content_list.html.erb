@@ -4,8 +4,7 @@
     <%
       can_edit_universe = user_signed_in? && (current_user == @universe.user || Contributor.exists?(user_id: current_user.id, universe_id: @universe.id))
     %>
-    <%= content_image_tag @universe, :banner, include_private: can_edit_universe,
-          class: "absolute inset-0 w-full h-full object-cover", alt: "#{@universe.name} banner" %>
+    <%= content_hero_banner_tag @universe, include_private: can_edit_universe, alt: "#{@universe.name} banner" %>
 
     <main class="absolute inset-0 pb-12 flex flex-col items-center justify-center mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center drop-shadow-lg w-full">
       <div class="max-w-4xl w-full p-8 md:p-12 rounded-3xl bg-gray-900 bg-opacity-40 backdrop-filter backdrop-blur-xl border border-white border-opacity-10 shadow-2xl">
@@ -69,13 +68,8 @@
     <div class="rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 relative bg-gray-900 flex flex-col md:flex-row items-stretch min-h-[24rem]">
       <!-- Background Image -->
       <div class="absolute inset-0">
-        <% if preview_image.present? && image_type == 'image_upload' %>
-          <%= image_tag image_data.src.url, class: "w-full h-full object-cover opacity-40", alt: "#{@universe.name} banner" %>
-        <% elsif preview_image.present? && image_type == 'basil_commission' && image_data.image.attached? %>
-          <%= image_tag rails_blob_path(image_data.image, disposition: "attachment"), class: "w-full h-full object-cover opacity-40" %>
-        <% else %>
-          <%= image_tag "card-headers/universes.webp", class: "w-full h-full object-cover opacity-40", alt: "#{@universe.name} banner" %>
-        <% end %>
+        <%= content_image_tag @universe, :banner, include_private: can_edit_universe,
+              class: "w-full h-full object-cover opacity-40", alt: "#{@universe.name} banner", loading: 'lazy' %>
         <!-- Overlay Gradient -->
         <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-gray-900 via-gray-900/90 to-gray-900/10"></div>
       </div>

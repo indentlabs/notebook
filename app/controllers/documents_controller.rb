@@ -382,15 +382,12 @@ class DocumentsController < ApplicationController
       # Update tags after successful save
       update_page_tags(document) if document_tag_params
       
-      # Queue background jobs only after successful save, and fail gracefully if Redis is down
-      begin
-        # Only queue document mentions for analysis if the document body has changed
-        DocumentMentionJob.perform_later(document.id) if d_params.key?(:body)
-      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
-        # Log the error but don't fail the save - the document is already saved
-        Rails.logger.warn "Could not queue DocumentMentionJob due to Redis connection error: #{e.message}"
+      # Mentions are stored as [[Type-id]] tokens, so there's nothing to link unless the body has one.
+      # enqueue_debounced never raises on Redis errors, so the save still succeeds if Redis is down.
+      if document.saved_change_to_body? && document.body.to_s.include?('[[')
+        document.enqueue_debounced(DocumentMentionJob)
       end
-      
+
       head 200, content_type: "text/html"
     else
       head 501, content_type: "text/html"
@@ -584,7 +581,7 @@ class DocumentsController < ApplicationController
 
     tags_to_remove.each do |tag|
       # TODO: create changelog event for RemovedTag or use destroy_all
-      document.page_tags.find_by(tag: tag).destroy
+      document.page_tags.find_by(tag: tag)&.destroy
     end
   end
 

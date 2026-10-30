@@ -28,10 +28,6 @@ class PageCollectionSubmissionsController < ApplicationController
       @page_collection_submission = PageCollectionSubmission.new(page_collection_submission_params)
 
       if @page_collection_submission.save
-        if @page_collection_submission.page_collection.try(:privacy) == 'public'
-          @page_collection_submission.content.update(privacy: 'public')
-        end
-
         redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
       else
         page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id])

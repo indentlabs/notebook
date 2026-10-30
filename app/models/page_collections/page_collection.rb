@@ -32,11 +32,16 @@ class PageCollection < ApplicationRecord
   self.authorizer_name = 'CollectionAuthorizer'
 
   def pending_submissions
-    page_collection_submissions.where(accepted_at: nil).order('submitted_at ASC')
+    collectable_submissions.where(accepted_at: nil).order('submitted_at ASC')
   end
 
   def accepted_submissions
-    page_collection_submissions.where.not(accepted_at: nil).order('accepted_at DESC')
+    collectable_submissions.where.not(accepted_at: nil).order('accepted_at DESC')
+  end
+
+  # Documents can't be submitted anymore, but older submissions could have slipped one in
+  def collectable_submissions
+    page_collection_submissions.where.not(content_type: Document.name)
   end
 
   def contributors
@@ -49,11 +54,20 @@ class PageCollection < ApplicationRecord
 
   # The collection's own header: the cover_image URL column, else the
   # uploaded header image, else the generic placeholder.
+  #
+  # cover_image is a legacy column that nothing writes any more. Read it only
+  # here; its name shadows the gallery API (HasImageUploads#cover_image).
   def header_image_url
     return cover_image if cover_image.present?
-    return header_image if header_image.attachment.present?
+    return header_image if header_image.attached?
 
     ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
+  end
+
+  # Whether header_image_url is the collection's own image rather than the
+  # placeholder.
+  def custom_header_image?
+    cover_image.present? || header_image.attached?
   end
 
   def name

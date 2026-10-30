@@ -45,15 +45,8 @@
                   <!-- Full Background Image with Overlay Content -->
                   <div class="relative w-full h-full">
                     <!-- Background Image -->
-                    <% if entity.respond_to?(:cover_image) %>
-                      <% if entity.cover_image(include_private: true).present? %>
-                        <%= content_image_tag entity, :card, include_private: true, alt: entity_name, class: 'w-full h-full object-cover' %>
-                      <% else %>
-                        <!-- Icon Placeholder Background -->
-                        <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                          <i class="material-icons text-4xl text-white opacity-60"><%= klass.icon %></i>
-                        </div>
-                      <% end %>
+                    <% if content_cover_image?(entity, include_private: true) %>
+                      <%= content_image_tag entity, :card, include_private: true, alt: entity_name, class: 'w-full h-full object-cover' %>
                     <% else %>
                       <!-- Icon Placeholder Background -->
                       <div class="w-full h-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">

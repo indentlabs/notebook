@@ -17,16 +17,16 @@ RUN apt-get update -qq && \
     apt-get install -y build-essential libpq-dev imagemagick libmagickwand-dev curl git libjemalloc2 && \
     rm --recursive --force /var/lib/apt/lists/*
 
-# Install Node.js 16.x explicitly and support both ARM and x64 architectures
+# Install Node.js 20.x explicitly (the production server runs 20.19.5) and support both ARM and x64 architectures
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" && \
     case "${dpkgArch##*-}" in \
       amd64) ARCH='x64';; \
       arm64) ARCH='arm64';; \
       *) echo "unsupported architecture"; exit 1 ;; \
     esac && \
-    curl -fsSLO "https://nodejs.org/dist/v16.20.2/node-v16.20.2-linux-$ARCH.tar.gz" && \
-    tar -xzf "node-v16.20.2-linux-$ARCH.tar.gz" -C /usr/local --strip-components=1 && \
-    rm "node-v16.20.2-linux-$ARCH.tar.gz"
+    curl -fsSLO "https://nodejs.org/dist/v20.19.5/node-v20.19.5-linux-$ARCH.tar.gz" && \
+    tar -xzf "node-v20.19.5-linux-$ARCH.tar.gz" -C /usr/local --strip-components=1 && \
+    rm "node-v20.19.5-linux-$ARCH.tar.gz"
 
 # Install yarn via npm (matches local tools specification)
 RUN npm install -g yarn@1.22.22
@@ -52,7 +52,8 @@ USER notebookai
 
 # Precompile assets during docker build to prevent OOM memory spikes at runtime
 # We strictly limit Node.js memory to 1GB to prevent Railway's Builder container from OOMing
-RUN NODE_OPTIONS="--max_old_space_size=1024" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
+# Webpacker 5's webpack 4 hashes with md4, which Node 17+ only allows through OpenSSL's legacy provider
+RUN NODE_OPTIONS="--max_old_space_size=1024 --openssl-legacy-provider" SECRET_KEY_BASE=dummy bundle exec rake assets:precompile
 
 # This image should expose port 3000.
 EXPOSE 3000/tcp

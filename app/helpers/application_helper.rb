@@ -1,5 +1,17 @@
 # Helps generate HTML constructs for object owned by the user
 module ApplicationHelper
+  # Shares outlive a document's privacy setting, so check before previewing one
+  def share_preview_visible?(page)
+    return true unless page.is_a?(Document)
+
+    page.readable_by?(current_user || User.new)
+  end
+
+  # Whether this viewer gets a lock instead of the document's title and text
+  def document_locked?(document)
+    document.password_protected? && !document.readable_by?(current_user || User.new)
+  end
+
   def content_class_from_name(class_name)
     # If we pass in a class (e.g. Character instead of "Character") by mistake, just return it
     return class_name if class_name.is_a?(Class)

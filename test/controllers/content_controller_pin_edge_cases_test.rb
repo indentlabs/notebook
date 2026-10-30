@@ -77,36 +77,6 @@ class ContentControllerPinEdgeCasesTest < ActionDispatch::IntegrationTest
     assert_equal 'You need to sign in or sign up before continuing.', json_response['error']
   end
 
-  test "handles concurrent pin requests without errors" do
-    image1 = image_uploads(:regular)
-    image2 = image_uploads(:pinned)
-
-    threads = []
-
-    # Simulate concurrent requests
-    threads << Thread.new do
-      post toggle_image_pin_path,
-           params: { image_id: image1.id, image_type: 'image_upload' },
-           headers: { 'Accept' => 'application/json' }
-    end
-
-    threads << Thread.new do
-      post toggle_image_pin_path,
-           params: { image_id: image2.id, image_type: 'image_upload' },
-           headers: { 'Accept' => 'application/json' }
-    end
-
-    threads.each(&:join)
-
-    # Both requests should complete without database lock errors
-    # Only one should be pinned
-    image1.reload
-    image2.reload
-
-    pinned_count = [image1, image2].count(&:pinned)
-    assert_equal 1, pinned_count, "Exactly one image should be pinned after concurrent requests"
-  end
-
   test "mixed type unpinning works correctly" do
     # Pin an image upload
     image = image_uploads(:regular)

@@ -83,15 +83,18 @@ Rails.application.configure do
   # Use the async adapter in development so Redis isn't strictly required
   config.active_job.queue_adapter = :async
 
-  Bullet.enable = true
-  # Bullet.sentry = true
-  Bullet.alert = false
-  Bullet.bullet_logger = true
-  Bullet.console = true
-  Bullet.rails_logger = true
-  # Bullet.honeybadger = true
-  # Bullet.bugsnag = true
-  # Bullet.airbrake = true
-  # Bullet.rollbar = true
-  Bullet.add_footer = true
+  # Guarded so tasks still boot when the development gem group isn't installed
+  if defined?(Bullet)
+    Bullet.enable = true
+    # Bullet.sentry = true
+    Bullet.alert = false
+    Bullet.bullet_logger = true
+    Bullet.console = true
+    Bullet.rails_logger = true
+    # Bullet.honeybadger = true
+    # Bullet.bugsnag = true
+    # Bullet.airbrake = true
+    # Bullet.rollbar = true
+    Bullet.add_footer = true
+  end
 end
