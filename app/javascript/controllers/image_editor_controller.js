@@ -17,7 +17,8 @@ export default class extends Controller {
     "modal", "subtitle", "coverButton", "coverLabel",
     "shapeTab", "shapeState", "stage", "loading", "image",
     "focalLayer", "focalDot", "cropControls", "zoom", "gridToggle", "help",
-    "preview", "previewTitle", "previewBadge", "usage",
+    "stagePlacementButton", "stagePlacementIcon", "stagePlacementLabel", "stagePlacementSeparator",
+    "preview", "previewTitle", "previewBadge", "previewBlock", "usage", "placementAction",
     "notes", "privacyRow", "privacy", "facts", "downloadLink",
     "status", "saveButton", "announcer", "shortcuts"
   ]
@@ -175,47 +176,170 @@ export default class extends Controller {
     this.refreshCoverRoles()
   }
 
-  // Header menu checks and the "Used now" line under each preview.
+  // Updates usage lines, placement action buttons under previews, and the stage placement button.
   refreshCoverRoles() {
     const gallery = this.galleryController()
-    const roles = gallery ? gallery.rolesOf(this.card) : []
-    this.element.querySelectorAll("[data-action*='image-editor#toggleCoverFor']").forEach((item) => {
-      const active = roles.includes(item.dataset.preset)
-      item.setAttribute("aria-checked", active ? "true" : "false")
-      const check = item.querySelector("[data-role-check]")
-      if (check) check.classList.toggle("invisible", !active)
-    })
-
-    if (!this.hasUsageTarget) return
+    const roles = gallery && this.card ? gallery.rolesOf(this.card) : []
     const cards = gallery ? gallery.cardTargets : []
-    this.usageTargets.forEach((el) => {
-      const preset = el.dataset.preset
-      const specific = cards.find((card) => gallery.rolesOf(card).includes(preset))
-      const pinned = cards.find((card) => card.dataset.pinned === "true")
-      let text
-      if (specific) {
-        text = specific === this.card ? "Used now: this image" : `Used now: ${specific.dataset.filename || "another image"}`
-      } else if (pinned) {
-        text = pinned === this.card ? "Used now: this image (cover)" : "Used now: the cover image"
-      } else {
-        text = "Used now: a random image"
+    const pinnedCard = cards.find((card) => card.dataset.pinned === "true")
+
+    // Update usage text and styling
+    if (this.hasUsageTarget) {
+      this.usageTargets.forEach((el) => {
+        const presetKey = el.dataset.preset
+        const specificCard = cards.find((card) => gallery.rolesOf(card).includes(presetKey))
+        const preset = this.presetMap[presetKey] || { chip: presetKey }
+        const chip = preset.chip || presetKey
+
+        let usageText = ""
+        let isDedicatedThis = false
+        let isViaDefaultThis = false
+
+        if (roles.includes(presetKey)) {
+          usageText = `✓ Dedicated ${chip.toLowerCase()} cover`
+          isDedicatedThis = true
+        } else if (specificCard) {
+          usageText = `Used now: ${specificCard.dataset.filename || "custom image"}`
+        } else if (pinnedCard) {
+          if (pinnedCard === this.card) {
+            usageText = `Active via Default cover`
+            isViaDefaultThis = true
+          } else {
+            usageText = `Used now: Default cover`
+          }
+        } else {
+          usageText = "Used now: Random image"
+        }
+
+        el.textContent = usageText
+        el.classList.toggle("text-blue-600", isDedicatedThis)
+        el.classList.toggle("dark:text-blue-400", isDedicatedThis)
+        el.classList.toggle("font-medium", isDedicatedThis || isViaDefaultThis)
+        el.classList.toggle("text-yellow-700", isViaDefaultThis && !isDedicatedThis)
+        el.classList.toggle("dark:text-yellow-400", isViaDefaultThis && !isDedicatedThis)
+      })
+    }
+
+    // Update the action buttons in preview card footers
+    if (this.hasPlacementActionTarget) {
+      this.placementActionTargets.forEach((btn) => {
+        const presetKey = btn.dataset.preset
+        const specificCard = cards.find((card) => gallery.rolesOf(card).includes(presetKey))
+        const preset = this.presetMap[presetKey] || { chip: presetKey }
+        const chip = preset.chip || presetKey
+
+        const isDedicated = roles.includes(presetKey)
+        const isViaDefault = !specificCard && pinnedCard === this.card
+
+        if (isDedicated) {
+          btn.textContent = "Remove"
+          btn.title = `Remove this image as the dedicated ${chip.toLowerCase()} cover (falls back to default cover)`
+          btn.className = "flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+        } else if (isViaDefault) {
+          btn.textContent = "Make dedicated"
+          btn.title = `Lock this image as the dedicated ${chip.toLowerCase()} cover even if default cover changes`
+          btn.className = "flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        } else {
+          btn.textContent = `Use for ${chip}`
+          btn.title = `Use this image as the ${chip.toLowerCase()} cover`
+          btn.className = "flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        }
+      })
+    }
+
+    // Highlight preview card blocks
+    if (this.hasPreviewBlockTarget) {
+      this.previewBlockTargets.forEach((block) => {
+        const presetKey = block.dataset.preset
+        const isDedicated = roles.includes(presetKey)
+        block.classList.toggle("ring-1", isDedicated)
+        block.classList.toggle("ring-blue-500", isDedicated)
+        block.classList.toggle("border-blue-500", isDedicated)
+      })
+    }
+
+    this.refreshStagePlacementButton()
+  }
+
+  refreshStagePlacementButton() {
+    if (!this.hasStagePlacementButtonTarget) return
+    const isShape = this.currentPreset && this.currentPreset !== "focal"
+    if (!isShape) {
+      this.stagePlacementButtonTarget.classList.add("hidden")
+      if (this.hasStagePlacementSeparatorTarget) this.stagePlacementSeparatorTarget.classList.add("hidden")
+      return
+    }
+
+    this.stagePlacementButtonTarget.classList.remove("hidden")
+    if (this.hasStagePlacementSeparatorTarget) this.stagePlacementSeparatorTarget.classList.remove("hidden")
+
+    const gallery = this.galleryController()
+    const roles = gallery && this.card ? gallery.rolesOf(this.card) : []
+    const cards = gallery ? gallery.cardTargets : []
+    const pinnedCard = cards.find((card) => card.dataset.pinned === "true")
+    const specificCard = cards.find((card) => gallery.rolesOf(card).includes(this.currentPreset))
+    const preset = this.presetMap[this.currentPreset] || { chip: this.currentPreset }
+    const chip = preset.chip || this.currentPreset
+
+    const isDedicated = roles.includes(this.currentPreset)
+    const isViaDefault = !specificCard && pinnedCard === this.card
+
+    if (isDedicated) {
+      this.stagePlacementLabelTarget.textContent = `${chip} cover ✓`
+      this.stagePlacementButtonTarget.title = `Click to remove this image as the ${chip.toLowerCase()} cover`
+      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-blue-400 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+      if (this.hasStagePlacementIconTarget) {
+        this.stagePlacementIconTarget.textContent = "check_circle"
+        this.stagePlacementIconTarget.className = "material-icons text-xs text-blue-600 dark:text-blue-400"
       }
-      el.textContent = text
-      el.classList.toggle("text-blue-600", !!specific && specific === this.card)
-      el.classList.toggle("dark:text-blue-400", !!specific && specific === this.card)
-    })
+    } else if (isViaDefault) {
+      this.stagePlacementLabelTarget.textContent = `${chip}: via Default cover`
+      this.stagePlacementButtonTarget.title = `Currently used via Default cover. Click to make this image the dedicated ${chip.toLowerCase()} cover.`
+      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500"
+      if (this.hasStagePlacementIconTarget) {
+        this.stagePlacementIconTarget.textContent = "star"
+        this.stagePlacementIconTarget.className = "material-icons text-xs text-yellow-600 dark:text-yellow-400"
+      }
+    } else {
+      this.stagePlacementLabelTarget.textContent = `Use as ${chip} cover`
+      this.stagePlacementButtonTarget.title = `Use this image as the ${chip.toLowerCase()} cover`
+      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+      if (this.hasStagePlacementIconTarget) {
+        this.stagePlacementIconTarget.textContent = "add_circle_outline"
+        this.stagePlacementIconTarget.className = "material-icons text-xs text-gray-500 dark:text-gray-400"
+      }
+    }
+  }
+
+  togglePlacement(event) {
+    if (event) event.stopPropagation()
+    const preset = event.currentTarget ? event.currentTarget.dataset.preset : null
+    if (!preset) return
+    this.toggleCoverForPreset(preset)
+  }
+
+  toggleActiveShapePlacement(event) {
+    if (event) event.stopPropagation()
+    if (!this.currentPreset || this.currentPreset === "focal") return
+    this.toggleCoverForPreset(this.currentPreset)
+  }
+
+  toggleCoverForPreset(preset) {
+    const gallery = this.galleryController()
+    if (!gallery || !this.card || !preset) return
+    gallery.toggleCoverRole(this.card, preset)
+      .then(() => {
+        this.refreshCoverRoles()
+      })
+      .catch(() => {
+        this.refreshCoverRoles()
+      })
   }
 
   toggleCoverFor(event) {
-    const gallery = this.galleryController()
-    const preset = event.currentTarget.dataset.preset
-    const details = event.currentTarget.closest("details")
-    if (details) details.open = false
-    if (!gallery || !this.card || !preset) return
-    const item = this.card.querySelector(`[data-action*='gallery#toggleCoverFor'][data-preset='${preset}']`)
-    if (!item) return
-    gallery.toggleCoverFor({ target: item, currentTarget: item })
-    setTimeout(() => this.refreshCoverRoles(), 1500)
+    const item = event.currentTarget || event.target
+    const preset = item ? item.dataset.preset : null
+    if (preset) this.toggleCoverForPreset(preset)
   }
 
   loadImage() {
@@ -354,6 +478,7 @@ export default class extends Controller {
 
     if (key === "focal") {
       this.enterFocalMode()
+      this.refreshStagePlacementButton()
       return
     }
 
@@ -367,7 +492,13 @@ export default class extends Controller {
     this.applyRect(rect)
     this.applying = false
     this.refreshShapeStates()
-    this.helpTarget.textContent = `Drag the box to choose what shows in the ${preset.label.toLowerCase()} (${preset.ratio_label || this.ratioLabel(preset)}). Drag a corner to zoom in or out, or use the slider. Arrow keys nudge.`
+    this.refreshStagePlacementButton()
+    const isNarrowBanner = key === "banner" && !this.custom[key] && this.naturalWidth && this.naturalHeight && (this.naturalWidth / this.naturalHeight < 2.0)
+    if (isNarrowBanner) {
+      this.helpTarget.textContent = "This image is narrower than a banner. By default, the page header displays it with a softened ambient backdrop so the full image is shown without clipping. You can also drag the box here if you want an explicit wide crop."
+    } else {
+      this.helpTarget.textContent = `Drag the box to choose what shows in the ${preset.label.toLowerCase()} (${preset.ratio_label || this.ratioLabel(preset)}). Drag a corner to zoom in or out, or use the slider. Arrow keys nudge.`
+    }
     this.announce(`${preset.label} shape, ${this.custom[key] ? "custom" : "automatic"} framing`)
     this.schedulePreview(key)
   }
@@ -703,8 +834,38 @@ export default class extends Controller {
     const rect = this.crops[key]
     if (!rect) return
     const src = this.info.largeUrl || this.info.originalUrl
+    const isNarrowBanner = key === "banner" && !this.custom["banner"] && this.naturalWidth && this.naturalHeight && (this.naturalWidth / this.naturalHeight < 2.0)
+
     this.previewTargets.forEach((box) => {
       if (box.dataset.preset !== key) return
+
+      if (isNarrowBanner) {
+        // Show ambient blurred backdrop preview matching the page hero header
+        box.innerHTML = ""
+        const bg = document.createElement("img")
+        bg.alt = ""
+        bg.draggable = false
+        bg.className = "absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+        bg.style.filter = "blur(4px)"
+        bg.style.transform = "scale(1.15)"
+        bg.style.opacity = "0.5"
+        bg.src = src
+
+        const fg = document.createElement("img")
+        fg.alt = ""
+        fg.draggable = false
+        fg.className = "relative w-full h-full object-contain select-none p-1 drop-shadow"
+        fg.src = src
+
+        box.appendChild(bg)
+        box.appendChild(fg)
+        return
+      }
+
+      if (box.children.length > 1) {
+        box.innerHTML = ""
+      }
+
       let img = box.querySelector("img")
       if (!img) {
         img = document.createElement("img")
@@ -714,6 +875,9 @@ export default class extends Controller {
         img.src = src
         box.appendChild(img)
       }
+      img.style.filter = ""
+      img.style.transform = ""
+      img.style.opacity = ""
       const boxWidth = box.clientWidth || 1
       const boxHeight = box.clientHeight || 1
       // Scale so the crop rect exactly fills the box.
@@ -743,12 +907,15 @@ export default class extends Controller {
 
   applyCoverState(isCover) {
     this.coverButtonTarget.setAttribute("aria-pressed", isCover ? "true" : "false")
+    this.coverButtonTarget.title = isCover
+      ? "This image is the default cover. Click to stop using it as the cover."
+      : "Use this image as the default cover across all placements."
     const active = ["bg-yellow-400", "border-yellow-400", "text-yellow-900"]
     const inactive = ["border-gray-300", "dark:border-gray-600", "text-gray-700", "dark:text-gray-200", "hover:bg-yellow-50", "dark:hover:bg-gray-700"]
     active.forEach((c) => this.coverButtonTarget.classList.toggle(c, isCover))
     inactive.forEach((c) => this.coverButtonTarget.classList.toggle(c, !isCover))
     this.coverButtonTarget.querySelector(".material-icons").textContent = isCover ? "star" : "star_border"
-    this.coverLabelTarget.textContent = isCover ? "Cover" : "Set as cover"
+    this.coverLabelTarget.textContent = isCover ? "Default cover" : "Set as default cover"
   }
 
   deleteImage() {

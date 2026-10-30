@@ -96,4 +96,47 @@ class ContentImageTest < ActiveSupport::TestCase
     assert_nil ContentImage.resolve_content('NotAClass', 1)
     assert_nil ContentImage.resolve_content('Character', -1)
   end
+
+  test "aspect_ratio, wide?, and narrow? classify image orientation" do
+    @regular.update_columns(width: 600, height: 900)
+    image = ContentImage.wrap(@regular)
+
+    assert_in_delta 0.667, image.aspect_ratio, 0.01
+    assert image.narrow?
+    assert_not image.wide?
+
+    @regular.update_columns(width: 1500, height: 500)
+    assert_equal 3.0, image.aspect_ratio
+    assert image.wide?
+    assert_not image.narrow?
+
+    @regular.update_columns(width: nil, height: nil)
+    assert_nil image.aspect_ratio
+    assert image.narrow?, "unknown dimensions default to narrow presentation"
+    assert_not image.wide?
+  end
+
+  test "custom_crop? detects whether a crop was explicitly saved" do
+    image = ContentImage.wrap(@regular)
+    assert_not image.custom_crop?(:banner)
+
+    @regular.update_columns(crops: { 'banner' => { 'x' => 0.1, 'y' => 0.1, 'w' => 0.8, 'h' => 0.4 } })
+    assert image.custom_crop?(:banner)
+    assert_not image.custom_crop?(:card)
+  end
+
+  test "display_url returns the uncropped derivative URL when attached" do
+    assert_nil ContentImage.wrap(@regular).display_url
+
+    upload = ImageUpload.create!(
+      user: @user,
+      content_type: 'Character',
+      content_id: @character.id,
+      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files/gallery_test.png'), 'image/png')
+    )
+    image = ContentImage.wrap(upload)
+    assert_includes image.display_url, '/xlarge/'
+  ensure
+    upload&.destroy
+  end
 end

@@ -135,6 +135,55 @@ class ContentImageHelperTest < ActionView::TestCase
     first&.destroy
   end
 
+  test "content_hero_banner_tag renders placeholder when there are no images" do
+    html = content_hero_banner_tag(@character)
+
+    assert_includes html, 'card-headers/characters'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders ambient blurred backdrop when cover is narrow without custom crop" do
+    @upload = create_upload
+    @upload.update_columns(width: 600, height: 900)
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_includes html, 'blur-2xl'
+    assert_includes html, 'scale-110'
+    assert_includes html, 'opacity-50'
+    assert_includes html, 'object-contain'
+    assert_includes html, 'drop-shadow-2xl'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when image has a custom banner crop" do
+    @upload = create_upload
+    @upload.update_columns(
+      width: 600,
+      height: 900,
+      crops: { 'banner' => { 'x' => 0.0, 'y' => 0.2, 'w' => 1.0, 'h' => 0.22 } }
+    )
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when image is naturally wide" do
+    @upload = create_upload
+    @upload.update_columns(width: 1500, height: 500)
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
   private
 
   def create_upload(privacy: 'public')

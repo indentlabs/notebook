@@ -187,6 +187,34 @@ class ContentImage
     record.try(:crops_generated_at)
   end
 
+  def custom_crop?(preset)
+    record.respond_to?(:custom_crop?) && record.custom_crop?(preset)
+  end
+
+  def aspect_ratio
+    return nil unless width.to_i > 0 && height.to_i > 0
+
+    width.to_f / height
+  end
+
+  def wide?(threshold = 2.0)
+    return false unless aspect_ratio
+
+    aspect_ratio >= threshold
+  end
+
+  def narrow?(threshold = 2.0)
+    return true unless aspect_ratio
+
+    aspect_ratio < threshold
+  end
+
+  # URL for an uncropped image at the highest practical size (up to 1600px),
+  # falling back to large or original. Ideal for full-frame contained display.
+  def display_url(size = :xlarge)
+    url(size) || url(:large) || original_url
+  end
+
   # URL for a size-limited derivative (see SIZE_LIMITS), or nil when the
   # record has no file.
   def url(size = :medium)
