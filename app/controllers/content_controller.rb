@@ -129,11 +129,15 @@ class ContentController < ApplicationController
     end
     @gallery_count += @basil_images.count
 
+    # The associations and timelines tabs name other pages, so they only list ones the viewer can read
+    viewer = current_user || User.new
+
     # Associations count
-    @associations_count = 0
+    @visible_references = []
     if @content.respond_to?(:incoming_page_references)
-      @associations_count += @content.incoming_page_references.count rescue 0
+      @visible_references = @content.incoming_page_references.limit(50).visible_to(viewer)
     end
+    @associations_count = @visible_references.size
     if @content.respond_to?(:document_entities)
       @associations_count += @content.document_entities.select(:document_id).distinct.count rescue 0
     end
@@ -150,28 +154,26 @@ class ContentController < ApplicationController
     end
 
     # Timelines count
-    @timelines_count = 0
-    begin
-      if defined?(Timeline) && @content.respond_to?(:incoming_page_references)
-        @timelines_count += @content.incoming_page_references
-          .where(referencing_page_type: 'Timeline')
-          .select(:referencing_page_id)
-          .distinct
-          .count
-      end
-    rescue
-      # Timeline model might not exist
+    @linked_timelines = []
+    if @content.respond_to?(:incoming_page_references)
+      @linked_timelines = @content.incoming_page_references
+        .where(referencing_page_type: 'Timeline')
+        .limit(50)
+        .visible_to(viewer)
+        .map(&:referencing_page)
+        .uniq
     end
-    begin
-      if defined?(TimelineEvent) && @content.respond_to?(:timeline_events)
-        @timelines_count += @content.timeline_events
-          .select(:timeline_id)
-          .distinct
-          .count
-      end
-    rescue
-      # TimelineEvent model might not exist
+    @mentioned_in_timelines = []
+    if @content.respond_to?(:timeline_events)
+      @mentioned_in_timelines = @content.timeline_events
+        .includes(:timeline)
+        .limit(50)
+        .map(&:timeline)
+        .compact
+        .uniq
+        .select { |timeline| timeline.readable_by?(viewer) }
     end
+    @timelines_count = @linked_timelines.size + @mentioned_in_timelines.size
 
     # Shares count
     @shares_count = 0
@@ -217,16 +219,17 @@ class ContentController < ApplicationController
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content    
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") unless current_user.can_read?(@content)
 
     @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
 
     analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
     document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
     @documents = Document.where(id: document_ids).public_or_owned_by(current_user)
-    @references = @content.incoming_page_references.preload(:referencing_page)
+    @references = @content.incoming_page_references.visible_to(current_user)
     @mentioning_attributes = Attribute.where(
-      attribute_field_id: @references.pluck(:attribute_field_id),
-      entity_id: @references.pluck(:referencing_page_id)
+      attribute_field_id: @references.map(&:attribute_field_id),
+      entity_id: @references.map(&:referencing_page_id)
     )
   end
 

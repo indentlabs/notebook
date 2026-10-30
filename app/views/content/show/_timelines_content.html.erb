@@ -1,32 +1,7 @@
 <%
   # Get timelines that reference this content
-  linked_timelines = []
-  mentioned_in_timelines = []
-  
-  # Try to get timeline references if available
-  # This would check for Timeline model and relationships
-  begin
-    if defined?(Timeline) && raw_content.respond_to?(:incoming_page_references)
-      timeline_references = raw_content.incoming_page_references
-        .joins("JOIN timelines ON page_references.referencing_page_id = timelines.id")
-        .where("page_references.referencing_page_type = 'Timeline'")
-        .includes(:referencing_page)
-        .limit(50)
-      linked_timelines = timeline_references.map(&:referencing_page).compact
-    end
-  rescue
-    # Timeline model might not exist yet, so we'll show empty state
-  end
-  
-  # Try to get timelines where this content appears as timeline events
-  begin
-    if defined?(TimelineEvent) && raw_content.respond_to?(:timeline_events)
-      timeline_events = raw_content.timeline_events.includes(:timeline).limit(50)
-      mentioned_in_timelines = timeline_events.map(&:timeline).compact.uniq
-    end
-  rescue
-    # TimelineEvent model might not exist yet
-  end
+  linked_timelines = @linked_timelines
+  mentioned_in_timelines = @mentioned_in_timelines
   
   total_timelines = linked_timelines.count + mentioned_in_timelines.count
 %>

@@ -5,16 +5,16 @@ module Api
       before_action :set_content
 
       def name_lookup
-        render body: viewable_content.try(:name) || 'Page not found', content_type: 'text/plain'
+        render body: page_name, content_type: 'text/plain'
       end
 
       private
 
-      # A document's title can give away what's in it, so it's only for people who can read it
-      def viewable_content
-        return @content unless @content.is_a?(Document)
+      def page_name
+        return 'Page not found' if @content.nil?
+        return @content.name if @content.readable_by?(current_user || User.new)
 
-        @content if @content.readable_by?(current_user || User.new)
+        ContentFormatterService.private_label(@content.class)
       end
 
       def sanitize_content_type

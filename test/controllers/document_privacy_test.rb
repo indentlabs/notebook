@@ -243,11 +243,11 @@ class DocumentPrivacyTest < ActionDispatch::IntegrationTest
 
   test "the name lookup hides titles the viewer can't read" do
     get "/api/internal/Document/#{@document.id}/name"
-    assert_equal 'Page not found', response.body
+    assert_equal 'Private document', response.body
 
     sign_in @stranger
     get "/api/internal/Document/#{@document.id}/name"
-    assert_equal 'Page not found', response.body
+    assert_equal 'Private document', response.body
   end
 
   test "the name lookup still works for the author and for other page types" do
