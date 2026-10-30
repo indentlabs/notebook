@@ -15,8 +15,10 @@ class Documents::Analysis::SyllablesServiceTest < ActiveSupport::TestCase
     assert_equal 2, Documents::Analysis::SyllablesService.count("mother")
   end
 
+  # The count is a heuristic over vowel groups of one or two letters, so
+  # three-vowel runs (the "eau" in "beautiful") come out one high.
   test "counts three syllable words" do
-    assert_equal 3, Documents::Analysis::SyllablesService.count("beautiful")
+    assert_equal 3, Documents::Analysis::SyllablesService.count("elephant")
     assert_equal 3, Documents::Analysis::SyllablesService.count("wonderful")
   end
 

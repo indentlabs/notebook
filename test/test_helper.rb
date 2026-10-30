@@ -1,6 +1,12 @@
 ENV['RAILS_ENV']    ||= 'test'
 ENV['RAILS_GROUPS'] ||= 'test'
 
+# Without AWS credentials, the AWS SDK asks the EC2 metadata service for some
+# when an S3 client is built (e.g. when BasilCommission loads its
+# amazon_basil storage). Off EC2 that times out, and once WebMock is loaded it
+# raises instead, leaving BasilCommission half-defined for every later test.
+ENV['AWS_EC2_METADATA_DISABLED'] = 'true'
+
 require 'minitest/reporters'
 Minitest::Reporters.use! [Minitest::Reporters::DefaultReporter.new]
 
