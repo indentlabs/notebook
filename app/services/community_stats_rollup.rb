@@ -32,7 +32,6 @@ class CommunityStatsRollup
       .count(:user_id)
 
     replace!(today, 'writers_last_hour', { '' => writers_last_hour })
-    replace!(today, 'all_time_writers', { '' => CommunityMonthlyWriter.distinct.count(:user_id) })
   end
 
   # Distinct pages edited from the start of `through`'s month up to `through`,
