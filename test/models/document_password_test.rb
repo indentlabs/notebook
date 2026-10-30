@@ -20,12 +20,15 @@ class DocumentPasswordTest < ActiveSupport::TestCase
   end
 
   test "passwords have to be a reasonable length" do
-    assert_not @document.protect_with_password('short')
-    assert_includes @document.errors.full_messages.to_sentence, 'at least 8 characters'
+    assert_not @document.protect_with_password('abcd')
+    assert_includes @document.errors.full_messages.to_sentence, 'at least 5 characters'
     assert_equal 'private', @document.reload.privacy
 
     assert_not @document.protect_with_password('x' * 73)
     assert_equal 'private', @document.reload.privacy
+
+    assert @document.protect_with_password('abcde')
+    assert @document.reload.authenticate_document_password('abcde')
   end
 
   test "a blank password is rejected, even on a document that already has one" do

@@ -158,6 +158,12 @@ Rails.application.routes.draw do
     get  '/printable',           to: 'documents#printable',               on: :member
     get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
 
+    # Password protection. The unlock route is strict about its path so that nothing
+    # can reach it without matching the limits in config/initializers/rack_attack.rb.
+    patch  '/password',          to: 'document_passwords#update',         on: :member
+    delete '/password',          to: 'document_passwords#destroy',        on: :member
+    post   '/unlock',            to: 'document_passwords#unlock',         on: :member, format: false, constraints: { id: /\d+/ }
+
     resources :document_revisions, path: 'revisions', on: :member do
       member do
         get 'diff'
