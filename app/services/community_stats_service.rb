@@ -102,8 +102,10 @@ class CommunityStatsService
     latest_value('writers_last_hour')
   end
 
-  def all_time_writers
-    latest_value('all_time_writers')
+  # Everyone who has ever signed up. The highest user id stands in for a count
+  # so this stays an index lookup instead of a scan of the users table.
+  def community_size
+    cached('community_size') { User.maximum(:id) || 0 }
   end
 
   def all_time_words
