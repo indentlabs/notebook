@@ -295,6 +295,23 @@ class DocumentPrivacyTest < ActionDispatch::IntegrationTest
     assert_includes response.body, SECRET_TITLE
   end
 
+  test "the associations count only includes documents the viewer can see, once each" do
+    character = mentioned_character
+    @document.document_analysis.create!.document_entities.create!(entity_type: 'Character', entity_id: character.id, text: 'Mentioned Person')
+
+    get character_path(character)
+    assert_nil associations_count_shown
+
+    sign_in @author
+    get character_path(character)
+    assert_equal 1, associations_count_shown
+    sign_out @author
+
+    @document.update!(privacy: 'public')
+    get character_path(character)
+    assert_equal 1, associations_count_shown
+  end
+
   test "the references page doesn't list private documents" do
     character = mentioned_character
     sign_in @stranger
@@ -328,6 +345,10 @@ class DocumentPrivacyTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def associations_count_shown
+    css_select('button').find { |button| button.text.include?('Associations') }&.at_css('span')&.text&.to_i
+  end
 
   def mentioned_character
     character = Character.create!(user: @author, name: 'Mentioned Person', privacy: 'public')

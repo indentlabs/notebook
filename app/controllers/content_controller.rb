@@ -139,7 +139,11 @@ class ContentController < ApplicationController
     end
     @associations_count = @visible_references.size
     if @content.respond_to?(:document_entities)
-      @associations_count += @content.document_entities.select(:document_id).distinct.count rescue 0
+      @associations_count += @content.document_entities
+        .joins(:document)
+        .merge(Document.public_or_owned_by(current_user))
+        .distinct
+        .count('documents.id')
     end
 
     # Collections count
