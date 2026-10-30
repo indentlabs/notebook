@@ -1,23 +1,25 @@
 require 'test_helper'
-require 'webmock'
+# webmock/minitest enables WebMock for the whole test process and resets stubs
+# between tests; never WebMock.disable! here, as that would turn interception
+# off for every test that runs afterwards (e.g. GenerateBasilImageJobTest).
+require 'webmock/minitest'
 
 class NotifyDiscordOfThreadJobTest < ActiveSupport::TestCase
   WEBHOOK_URL = 'https://discord.test/api/webhooks/123/abc'.freeze
 
-  def setup
+  # setup/teardown blocks (not method overrides) keep webmock/minitest's
+  # teardown chain intact so stubs and request history reset between tests.
+  setup do
     @user         = users(:one)
     @moderator    = users(:two)
     @moderator.update!(forum_moderator: true)
     @messageboard = Thredded::Messageboard.create!(name: "Job test board")
 
     ENV['DISCORD_FORUMS_WEBHOOK'] = WEBHOOK_URL
-    WebMock.enable!
     WebMock.stub_request(:post, WEBHOOK_URL).to_return(status: 204)
   end
 
-  def teardown
-    WebMock.reset!
-    WebMock.disable!
+  teardown do
     ENV.delete('DISCORD_FORUMS_WEBHOOK')
   end
 
