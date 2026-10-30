@@ -310,10 +310,10 @@ class DocumentPasswordsControllerTest < ActionDispatch::IntegrationTest
     document = Document.create!(user: @author, title: 'Mine', privacy: 'public')
     sign_in @author
 
-    patch password_document_path(document), params: { password: 'short' }, as: :json
+    patch password_document_path(document), params: { password: 'abcd' }, as: :json
 
     assert_response :unprocessable_entity
-    assert_includes response.parsed_body['error'], 'at least 8 characters'
+    assert_includes response.parsed_body['error'], 'at least 5 characters'
     assert_equal 'public', document.reload.privacy
   end
 

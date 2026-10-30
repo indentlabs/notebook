@@ -30,7 +30,7 @@ class Document < ApplicationRecord
   }.freeze
 
   # bcrypt ignores everything past 72 bytes
-  PASSWORD_LENGTH = 8..72
+  PASSWORD_LENGTH = 5..72
 
   has_secure_password :document_password, validations: false
 
