@@ -32,4 +32,30 @@ namespace :gallery do
 
     puts "Recorded dimensions for #{done} image(s); #{failed} failed."
   end
+
+  desc "Record pixel dimensions for Basil images on pages, so their saved crops apply (run after the FixBasilBlobChecksums migration)"
+  task backfill_basil_dimensions: :environment do
+    scope = BasilCommission.where(width: nil).where.not(saved_at: nil).includes(image_attachment: :blob)
+    done = 0
+    failed = 0
+
+    scope.find_each do |commission|
+      next unless commission.image.attached?
+
+      begin
+        blob = commission.image.blob
+        blob.analyze unless blob.metadata['width'].present?
+        width, height = blob.metadata.values_at('width', 'height')
+        raise "no dimensions after analysis" if width.blank? || height.blank?
+
+        commission.update_columns(width: width, height: height)
+        done += 1
+      rescue StandardError => e
+        failed += 1
+        warn "BasilCommission #{commission.id}: #{e.class}: #{e.message}"
+      end
+    end
+
+    puts "Recorded dimensions for #{done} Basil image(s); #{failed} failed."
+  end
 end

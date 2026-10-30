@@ -3,11 +3,11 @@
 class ChangelogStatsService
   def initialize(content)
     @content = content
-    @change_events = content.attribute_change_events
+    @change_events = content.changelog_events
   end
 
   def total_changes
-    @change_events.sum { |event| event.changed_fields.keys.length }
+    @change_events.sum { |event| event.change_count }
   end
 
   def active_days
@@ -29,7 +29,7 @@ class ChangelogStatsService
   def most_active_field
     field_counts = Hash.new(0)
     
-    @change_events.each do |event|
+    @change_events.reject(&:image_event?).each do |event|
       event.changed_fields.keys.each do |field_key|
         field_counts[field_key] += 1
       end
@@ -58,7 +58,7 @@ class ChangelogStatsService
       weeks << {
         week_start: week_start,
         week_end: week_end,
-        change_count: changes_this_week.sum { |event| event.changed_fields.keys.length },
+        change_count: changes_this_week.sum { |event| event.change_count },
         event_count: changes_this_week.length
       }
     end
@@ -71,7 +71,7 @@ class ChangelogStatsService
     
     @change_events.each do |event|
       day_name = event.created_at.strftime('%A')
-      day_counts[day_name] += event.changed_fields.keys.length
+      day_counts[day_name] += event.change_count
     end
     
     # Return in week order
@@ -81,12 +81,12 @@ class ChangelogStatsService
   end
 
   def biggest_single_update
-    biggest_event = @change_events.max_by { |event| event.changed_fields.keys.length }
+    biggest_event = @change_events.max_by { |event| event.change_count }
     return nil unless biggest_event
     
     {
       event: biggest_event,
-      field_count: biggest_event.changed_fields.keys.length,
+      field_count: biggest_event.change_count,
       date: biggest_event.created_at
     }
   end
@@ -133,7 +133,7 @@ class ChangelogStatsService
       {
         date: date,
         events: events,
-        total_field_changes: events.sum { |event| event.changed_fields.keys.length },
+        total_field_changes: events.sum { |event| event.change_count },
         users: events.map(&:user).compact.uniq
       }
     end.sort_by { |group| group[:date] }.reverse
@@ -143,7 +143,7 @@ class ChangelogStatsService
 
   def find_field_by_id(field_id)
     # Get related attribute and field information
-    related_attribute = Attribute.find_by(id: @change_events.map(&:content_id).uniq)
+    related_attribute = Attribute.find_by(id: @change_events.reject(&:image_event?).map(&:content_id).uniq)
     return nil unless related_attribute
     
     AttributeField.find_by(id: related_attribute.attribute_field_id)

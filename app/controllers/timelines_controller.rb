@@ -266,7 +266,7 @@ class TimelinesController < ApplicationController
     end
 
     tags_to_remove.each do |tag|
-      @timeline.page_tags.find_by(tag: tag).destroy
+      @timeline.page_tags.find_by(tag: tag)&.destroy
     end
   end
 

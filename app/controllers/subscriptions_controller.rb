@@ -160,6 +160,13 @@ class SubscriptionsController < ApplicationController
         card: { token: valid_token }
       })
       payment_method.attach(customer: stripe_customer.id)
+
+      # Detaching the old card cleared it as the customer's (and their
+      # subscriptions') default, so make the new card the default. Otherwise
+      # Stripe has nothing to charge on the next invoice or plan change.
+      Stripe::Customer.update(stripe_customer.id, {
+        invoice_settings: { default_payment_method: payment_method.id }
+      })
     rescue Stripe::CardError => e
       flash[:alert] = "We couldn't save your payment information because #{e.message.downcase} Please double check that your information is correct."
       return redirect_back fallback_location: payment_info_path

@@ -260,11 +260,40 @@ class ContentImage
   end
 
   # Pixel size of the derivative preset_url returns for these arguments.
+  # Derivatives are shrunk to fit the preset's size but never upscaled, so a
+  # crop smaller than the preset keeps its own size.
   def preset_dimensions(preset, size: :full)
     definition = ImagePresets[preset]
     return nil if definition.nil?
 
-    (size.to_sym == :small && definition.small_size) || definition.size
+    target = (size.to_sym == :small && definition.small_size) || definition.size
+    pixels = record.try(:crop_pixels_for, definition.key)
+    return target if pixels.nil?
+
+    crop_w, crop_h = pixels[2], pixels[3]
+    return [crop_w, crop_h] if crop_w <= target[0] && crop_h <= target[1]
+
+    scale = [target[0].to_f / crop_w, target[1].to_f / crop_h].min
+    [(crop_w * scale).round, (crop_h * scale).round]
+  end
+
+  # CSS object-position for a +preset+ derivative shown in a box of a
+  # different shape (a 3:1 banner in a 5:1 header on a wide screen, say).
+  # Keeps the focal point in view by aligning to where it sits inside the
+  # crop. Returns nil when the default centring is right: the focal point is
+  # central, or the writer's crop leaves it out (the crop is then the better
+  # guide to what matters).
+  def preset_object_position(preset)
+    rect = record.try(:effective_crop_for, preset)
+    return nil if rect.nil? || rect[:w].to_f <= 0 || rect[:h].to_f <= 0
+
+    fx, fy = record.focal_point
+    px = ((fx - rect[:x]) / rect[:w] * 100).round(1)
+    py = ((fy - rect[:y]) / rect[:h] * 100).round(1)
+    return nil unless px.between?(0.0, 100.0) && py.between?(0.0, 100.0)
+    return nil if px == 50.0 && py == 50.0
+
+    "#{px}% #{py}%"
   end
 
   def original_url

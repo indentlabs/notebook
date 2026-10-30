@@ -56,7 +56,9 @@ module ImagePresets
       label:       'Banner',
       chip:        'Banner',
       ratio:       [3, 1],
-      size:        [1500, 500],
+      # Wide enough for a full-width header on large and high-density
+      # screens; the srcset sends phones the small size.
+      size:        [2400, 800],
       small_size:  [750, 250],
       description: 'The wide strip across the top of the page'
     ),
@@ -86,6 +88,14 @@ module ImagePresets
       description: 'The image shown when this page is shared on social networks and chat apps'
     )
   }.freeze
+
+  # Sizing for the box a page's banner sits in. 3:1 (the banner crop) on
+  # tablet and up, capped at 384px tall on wide screens, where the image is
+  # trimmed top and bottom around the focal point (see
+  # ContentImage#preset_object_position). The explicit w-full matters:
+  # without it the max-h cap transfers back through the aspect ratio and
+  # shrinks the box's width to 1152px.
+  BANNER_BOX_CLASSES = 'w-full h-56 sm:h-64 md:h-auto md:aspect-banner md:max-h-96'.freeze
 
   def self.[](key)
     ALL[key.to_s.to_sym]

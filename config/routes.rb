@@ -35,6 +35,7 @@ Rails.application.routes.draw do
       post   '/feedback/:jobid', to: 'basil#feedback', as: :basil_feedback
       post   '/:id/save',        to: 'basil#save',     as: :basil_save
       delete '/:id/delete',      to: 'basil#delete',   as: :basil_delete
+      delete '/:id/cancel',      to: 'basil#cancel',   as: :basil_cancel
       get    '/commission/:jobid', to: 'basil#commission_info', as: :basil_commission_info
       patch  '/commission/:id',    to: 'basil#update_commission', as: :basil_commission_update
 
@@ -143,6 +144,9 @@ Rails.application.routes.draw do
     get '/', to: 'document_analyses#landing', as: :landing_path
     get '/hub', to: 'document_analyses#hub', as: :analysis_hub
   end
+
+  # Word lookups for the Wordsmith panel in the document editor
+  get '/wordsmith/lookup', to: 'wordsmith#lookup', as: :wordsmith_lookup
 
   resources :documents do
     # Document Analysis routes
@@ -323,6 +327,9 @@ Rails.application.routes.draw do
     get '/writers',     to: 'main#for_writers',     as: :writers_landing
     get '/roleplayers', to: 'main#for_roleplayers', as: :roleplayers_landing
   end
+
+  # Public, anonymous community-wide writing stats
+  get '/community', to: 'community#index', as: :community
 
   # Lab apps
   scope '/lab' do

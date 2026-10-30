@@ -18,7 +18,7 @@ export default class extends Controller {
     "shapeTab", "shapeState", "stage", "loading", "image",
     "focalLayer", "focalDot", "cropControls", "zoom", "gridToggle", "help",
     "stagePlacement", "stagePlacementButton", "stagePlacementIcon", "stagePlacementLabel",
-    "preview", "previewTitle", "previewBadge", "previewBlock", "usage", "placementAction",
+    "preview", "previewTitle", "previewBadge", "previewBlock", "usage", "placementAction", "bannerQuality",
     "notes", "privacyRow", "privacy", "facts", "downloadLink",
     "status", "saveButton", "announcer", "shortcuts"
   ]
@@ -135,7 +135,7 @@ export default class extends Controller {
     this.notesTarget.value = notes ? notes.value : ""
     this.originalNotes = this.notesTarget.value
 
-    const supportsPrivacy = !!this.card.querySelector("[data-gallery-target='privacyButton']")
+    const supportsPrivacy = this.card.dataset.supportsPrivacy === "true"
     this.privacyRowTarget.classList.toggle("hidden", !supportsPrivacy)
     this.privacyTarget.value = this.info.privacy || "public"
     this.originalPrivacy = this.privacyTarget.value
@@ -791,12 +791,11 @@ export default class extends Controller {
   setFocal(x, y) {
     this.focal = { x: this.clamp(x, 0, 1), y: this.clamp(y, 0, 1) }
     this.positionFocalDot()
-    // Shapes that are still automatic follow the focal point.
+    // Shapes that are still automatic follow the focal point. Every preview
+    // re-renders, since custom crops also trim around it in wider boxes.
     Object.keys(this.presetMap).forEach((key) => {
-      if (!this.custom[key]) {
-        this.crops[key] = this.autoRect(key)
-        this.renderPreview(key)
-      }
+      if (!this.custom[key]) this.crops[key] = this.autoRect(key)
+      this.renderPreview(key)
     })
     this.markDirty()
   }
@@ -827,8 +826,11 @@ export default class extends Controller {
       if (box.dataset.preset !== key) return
 
       if (isNarrowBanner) {
-        // Show ambient blurred backdrop preview matching the page hero header
+        // Show ambient blurred backdrop preview matching the page hero header.
+        // It doesn't depend on the crop or focal point, so build it once per image.
+        if (box.dataset.backdrop === src) return
         box.innerHTML = ""
+        box.dataset.backdrop = src
         const bg = document.createElement("img")
         bg.alt = ""
         bg.draggable = false
@@ -849,8 +851,9 @@ export default class extends Controller {
         return
       }
 
-      if (box.children.length > 1) {
+      if (box.dataset.backdrop) {
         box.innerHTML = ""
+        delete box.dataset.backdrop
       }
 
       let img = box.querySelector("img")
@@ -859,23 +862,48 @@ export default class extends Controller {
         img.alt = ""
         img.draggable = false
         img.className = "absolute max-w-none select-none"
-        img.src = src
         box.appendChild(img)
       }
-      img.style.filter = ""
-      img.style.transform = ""
-      img.style.opacity = ""
+      // The editor is reused for every image, so the box may hold the last one.
+      if (img.getAttribute("src") !== src) img.src = src
       const boxWidth = box.clientWidth || 1
       const boxHeight = box.clientHeight || 1
-      // Scale so the crop rect exactly fills the box.
+      // Scale so the crop rect covers the box. When the box is a different
+      // shape from the crop, trim the overflow around the focal point, as
+      // the site does (ContentImage#preset_object_position).
       const scaleX = boxWidth / (rect.w * this.naturalWidth)
       const scaleY = boxHeight / (rect.h * this.naturalHeight)
       const scale = Math.max(scaleX, scaleY)
+      const [posX, posY] = this.positionWithin(rect)
+      const overflowX = rect.w * this.naturalWidth * scale - boxWidth
+      const overflowY = rect.h * this.naturalHeight * scale - boxHeight
       img.style.width = (this.naturalWidth * scale) + "px"
       img.style.height = (this.naturalHeight * scale) + "px"
-      img.style.left = (-rect.x * this.naturalWidth * scale) + "px"
-      img.style.top = (-rect.y * this.naturalHeight * scale) + "px"
+      img.style.left = (-rect.x * this.naturalWidth * scale - overflowX * posX) + "px"
+      img.style.top = (-rect.y * this.naturalHeight * scale - overflowY * posY) + "px"
     })
+    if (key === "banner") this.renderBannerQuality(isNarrowBanner ? null : rect)
+  }
+
+  // Where the focal point sits inside +rect+, as fractions; the centre when
+  // the crop leaves it out.
+  positionWithin(rect) {
+    const x = (this.focal.x - rect.x) / rect.w
+    const y = (this.focal.y - rect.y) / rect.h
+    if (x < 0 || x > 1 || y < 0 || y > 1) return [0.5, 0.5]
+    return [x, y]
+  }
+
+  // Banners fill the page width, so a small crop looks soft on big screens.
+  // No +rect+ means the banner shows the whole image over a backdrop.
+  renderBannerQuality(rect) {
+    if (!this.hasBannerQualityTarget) return
+    const widthPx = rect ? Math.round(rect.w * this.naturalWidth) : 0
+    const soft = !!rect && this.naturalWidth > 0 && widthPx < 1200
+    this.bannerQualityTarget.classList.toggle("hidden", !soft)
+    this.bannerQualityTarget.textContent = soft
+      ? `This crop is ${widthPx}px wide, so the banner may look soft on large screens. A larger image, or a wider crop, will look sharper.`
+      : ""
   }
 
   // ---------------------------------------------------------------------

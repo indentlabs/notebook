@@ -17,7 +17,7 @@ class ImageDerivativeService
   # One-off backfill: crop derivatives plus the xlarge WebP that uploads made
   # before the gallery editor never had.
   def self.backfill!(record)
-    new(record).generate!(styles: ImageUpload::FRAMED_STYLES + [:xlarge])
+    new(record).generate!(styles: ImagePresets.style_names + [:xlarge])
   end
 
   def self.variant_for(commission, preset, small: false)
@@ -28,7 +28,7 @@ class ImageDerivativeService
     @record = record
   end
 
-  def generate!(styles: ImageUpload::FRAMED_STYLES)
+  def generate!(styles: ImagePresets.style_names)
     case @record
     when ImageUpload        then generate_upload_styles!(styles)
     when BasilCommission    then prewarm_variants!
@@ -38,17 +38,23 @@ class ImageDerivativeService
 
   # ActiveStorage variant for +preset+, cropped to the record's framing and
   # encoded as WebP. +small+ picks the preset's reduced size when it has one.
+  # Like uploads (see Paperclip::Cropper), a crop smaller than the preset's
+  # size is not upscaled.
   def variant_for(preset, small: false)
     preset = ImagePresets[preset]
     return nil if preset.nil? || !@record.image.attached? || !@record.image.variable?
 
     pixels = @record.crop_pixels_for(preset.key)
+    target = (small && preset.small_size) || preset.size
     transformations = {}
     if pixels
       x, y, w, h = pixels
       transformations[:crop] = vips? ? [x, y, w, h] : "#{w}x#{h}+#{x}+#{y}"
+      # Already the preset's shape, so only ever shrink it.
+      transformations[:resize_to_limit] = target
+    else
+      transformations[:resize_to_fill] = target
     end
-    transformations[:resize_to_fill] = (small && preset.small_size) || preset.size
     transformations[:format] = :webp
     transformations[:saver]  = { quality: 82 }
 
@@ -61,6 +67,14 @@ class ImageDerivativeService
     return false unless @record.src_file_name.present?
 
     attachment = @record.src
+    # Paperclip silently skips styles it doesn't know, which would leave the
+    # old cut in place while reporting success. Fail loudly instead.
+    missing = styles.map(&:to_sym) - attachment.styles.keys.map(&:to_sym)
+    if missing.any?
+      raise ArgumentError, "ImageUpload has no Paperclip style(s) #{missing.join(', ')}; " \
+                           "is this process running code older than the one that enqueued the job?"
+    end
+
     original_cleaner = attachment.options[:filename_cleaner]
     # ImageUpload renames files to a fresh UUID on assignment. Reprocessing
     # re-assigns the attachment, so without this the record would point at a
