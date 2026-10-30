@@ -71,6 +71,6 @@ class Timeline < ApplicationRecord
   end
 
   def total_word_count
-    (cached_word_count || 0) + timeline_events.sum(:cached_word_count)
+    timeline_events.sum(:cached_word_count)
   end
 end

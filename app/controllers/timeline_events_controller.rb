@@ -1,26 +1,8 @@
 class TimelineEventsController < ApplicationController
-  before_action :set_timeline_event, only: [
-    :show, :edit, :update, :destroy,
-    :link_entity, :unlink_entity, :add_tag, :remove_tag
-  ]
-
-  # GET /timeline_events
-  def index
-    @timeline_events = TimelineEvent.all
-  end
-
-  # GET /timeline_events/1
-  def show
-  end
-
-  # GET /timeline_events/new
-  def new
-    @timeline_event = TimelineEvent.new
-  end
-
-  # GET /timeline_events/1/edit
-  def edit
-  end
+  # reorder answers signed out requests itself, in the JSON its caller expects
+  before_action :authenticate_user!, except: [:reorder]
+  before_action :set_timeline_event, except: [:create, :reorder]
+  before_action :require_event_edit_permission, except: [:create, :reorder]
 
   # POST /timeline_events
   def create
@@ -54,15 +36,16 @@ class TimelineEventsController < ApplicationController
 
   # PATCH/PUT /timeline_events/1
   def update
-    if @timeline_event.update(timeline_event_params)
+    # timeline_id is only for create, so an event can't be moved onto someone else's timeline
+    if @timeline_event.update(timeline_event_params.except(:timeline_id))
       respond_to do |format|
-        format.html { redirect_to @timeline_event, notice: 'Timeline event was successfully updated.' }
+        format.html { redirect_to edit_timeline_path(@timeline_event.timeline), notice: 'Timeline event was successfully updated.' }
         format.json { render json: { status: 'success', message: 'Timeline event updated successfully' } }
         format.js   { render json: { status: 'success', message: 'Timeline event updated successfully' } }
       end
     else
       respond_to do |format|
-        format.html { render :edit }
+        format.html { redirect_to edit_timeline_path(@timeline_event.timeline), alert: 'Failed to update timeline event' }
         format.json { render json: { status: 'error', message: 'Failed to update timeline event', errors: @timeline_event.errors.full_messages }, status: :unprocessable_entity }
         format.js   { render json: { status: 'error', message: 'Failed to update timeline event', errors: @timeline_event.errors.full_messages }, status: :unprocessable_entity }
       end
@@ -77,8 +60,6 @@ class TimelineEventsController < ApplicationController
   end
 
   def link_entity
-    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
-    
     entity = @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
     
     if entity.persisted?
@@ -103,8 +84,6 @@ class TimelineEventsController < ApplicationController
   end
 
   def unlink_entity
-    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
-    
     entity = @timeline_event.timeline_event_entities.find_by(id: params[:entity_id].to_i)
     
     if entity&.destroy
@@ -179,8 +158,6 @@ class TimelineEventsController < ApplicationController
   end
 
   def add_tag
-    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
-    
     tag_name = params[:tag_name]&.strip
     return render json: { error: 'Tag name is required' }, status: :bad_request if tag_name.blank?
     
@@ -226,8 +203,6 @@ class TimelineEventsController < ApplicationController
   end
 
   def remove_tag
-    return render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
-    
     tag_name = params[:tag_name]&.strip
     return render json: { error: 'Tag name is required' }, status: :bad_request if tag_name.blank?
     
@@ -251,6 +226,10 @@ class TimelineEventsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_timeline_event
     @timeline_event = TimelineEvent.find(params[:id])
+  end
+
+  def require_event_edit_permission
+    render json: { error: 'Not authorized' }, status: :forbidden unless @timeline_event.can_be_modified_by?(current_user)
   end
 
   # Only allow a trusted parameter "white list" through.
