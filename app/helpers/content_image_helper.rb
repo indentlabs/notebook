@@ -67,16 +67,17 @@ module ContentImageHelper
 
     options[:alt] ||= image.notes.presence || "#{content.try(:name)} banner image".strip
 
-    # If the image has an explicit custom banner crop or is naturally wide (>= 2.0 aspect ratio),
-    # render edge-to-edge full-bleed using the standard preset derivative or focal point fallback.
-    if image.custom_crop?(:banner) || image.wide?
+    # If the image has an explicit custom banner crop or is naturally wide
+    # (ContentImage::FULL_BLEED_BANNER_RATIO), render edge-to-edge full-bleed using the
+    # standard preset derivative or focal point fallback. content_image_tag also
+    # handles images without a usable URL.
+    display_src = image.display_url
+    if display_src.nil? || image.custom_crop?(:banner) || image.wide?
       return content_image_tag(content, :banner, include_private: include_private, pick: pick, **options)
     end
 
     # Otherwise (portrait, square, or standard 4:3 photo without a custom banner crop):
     # Render ambient blurred background + crisp centered uncropped foreground.
-    display_src = image.display_url(:xlarge) || image.original_url
-
     bg_img = image_tag(display_src,
       class: 'w-full h-full object-cover blur-2xl scale-110 opacity-50 brightness-75 select-none pointer-events-none',
       alt: '',

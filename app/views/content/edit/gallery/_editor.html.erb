@@ -6,6 +6,7 @@
 <div class="hidden fixed inset-0 z-60 overflow-hidden"
      data-controller="image-editor"
      data-image-editor-presets-value="<%= ImagePresets.as_json.to_json %>"
+     data-image-editor-banner-full-bleed-ratio-value="<%= ContentImage::FULL_BLEED_BANNER_RATIO %>"
      data-image-editor-page-name-value="<%= content.try(:name) %>"
      data-image-editor-page-type-value="<%= content.try(:page_type).presence || content.class.name %>"
      data-image-editor-target="modal"
@@ -16,7 +17,7 @@
   <div class="sr-only" aria-live="polite" data-image-editor-target="announcer"></div>
 
   <div class="fixed inset-2 sm:inset-4 lg:inset-6 flex items-center justify-center pointer-events-none">
-    <div class="pointer-events-auto relative w-full max-w-6xl h-full max-h-[900px] bg-white dark:bg-gray-900 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+    <div class="pointer-events-auto relative w-full max-w-6xl h-full max-h-225 bg-white dark:bg-gray-900 rounded-xl shadow-2xl flex flex-col overflow-hidden">
 
     <%# Header %>
     <div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -71,7 +72,7 @@
           </button>
         </div>
 
-        <div class="relative bg-gray-900 rounded-lg overflow-hidden select-none h-64 sm:h-80 lg:h-auto lg:flex-1 min-h-[220px]"
+        <div class="relative bg-gray-900 rounded-lg overflow-hidden select-none h-64 sm:h-80 lg:h-auto lg:flex-1 min-h-56"
              data-image-editor-target="stage">
           <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm" data-image-editor-target="loading">
             <i class="material-icons animate-spin mr-2">autorenew</i> Loading the original image…
@@ -101,14 +102,16 @@
           <button type="button" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline" data-action="image-editor#resetShape">Reset to auto</button>
           <button type="button" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline" data-action="image-editor#centerOnFocal">Centre on focal point</button>
           <button type="button" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline" data-action="image-editor#copyToAll">Copy framing to all shapes</button>
-          <span class="hidden sm:inline text-gray-300 dark:text-gray-600" data-image-editor-target="stagePlacementSeparator">|</span>
-          <button type="button"
-                  class="hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  data-image-editor-target="stagePlacementButton"
-                  data-action="image-editor#toggleActiveShapePlacement">
-            <i class="material-icons text-xs text-blue-600 dark:text-blue-400" data-image-editor-target="stagePlacementIcon">check_circle</i>
-            <span data-image-editor-target="stagePlacementLabel">Use as Banner cover</span>
-          </button>
+          <span class="hidden inline-flex items-center gap-3" data-image-editor-target="stagePlacement">
+            <span class="hidden sm:inline text-gray-300 dark:text-gray-600">|</span>
+            <button type="button"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    data-image-editor-target="stagePlacementButton"
+                    data-action="image-editor#toggleActiveShapePlacement">
+              <i class="material-icons text-xs text-gray-500 dark:text-gray-400" data-image-editor-target="stagePlacementIcon">add_circle_outline</i>
+              <span data-image-editor-target="stagePlacementLabel">Use as Banner cover</span>
+            </button>
+          </span>
         </div>
 
         <p class="text-xs text-gray-600 dark:text-gray-300 flex-shrink-0" data-image-editor-target="help"></p>
@@ -138,7 +141,7 @@
                   <span class="text-gray-400 tabular-nums">3:1</span>
                 </div>
               </button>
-              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between gap-2">
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2">
                 <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="banner"></span>
                 <button type="button"
                         class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -166,7 +169,7 @@
                   <span class="text-gray-400 tabular-nums">3:2</span>
                 </div>
               </button>
-              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between gap-2">
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2">
                 <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="card"></span>
                 <button type="button"
                         class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -195,7 +198,7 @@
                   <span class="text-gray-400 tabular-nums">40:21</span>
                 </div>
               </button>
-              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between gap-2">
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2">
                 <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="social"></span>
                 <button type="button"
                         class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -225,7 +228,7 @@
                   </div>
                 </div>
               </button>
-              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800/60 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
                 <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="square"></span>
                 <button type="button"
                         class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"

@@ -268,7 +268,7 @@ Eight follow-ups agreed after Phases 1–4 shipped, in the order that keeps each
 
 **Endpoint.** Extend `POST /toggle_image_pin` with an optional `preset` param. With a preset it toggles that shape only and clears the same preset from every other image of the page (the same "unpin others" pattern already used for `pinned`). Authorisation unchanged.
 
-**UI.** High-level cards feature a clean standalone "Default cover" button without dropdown clutters. Chips distinguish `[★ Default cover]` from explicit placement covers (`[Banner cover]`, `[Thumbnail cover]`). Placement customization lives inside the image editor modal: next to each live shape preview (Banner, Card, Link preview, Square) and on the active crop stage, writers can toggle dedicating that image for that specific placement with one click (`Use for Banner` / `Remove`).
+**UI.** Gallery cards keep a single "Default cover" button, with no dropdown. Chips distinguish `[★ Default cover]` from explicit placement covers (`[Banner cover]`, `[Thumbnail cover]`). Placement customization lives inside the image editor modal: next to each live shape preview (Banner, Card, Link preview, Square) and on the active crop stage, writers can toggle dedicating that image for that specific placement with one click (`Use for Banner` / `Remove`).
 
 **Files.** Migration; `has_image_framing.rb` (or a small `HasCoverRoles` concern); `has_image_uploads.rb`; `content_controller.rb#toggle_image_pin`; `content_image.rb`; `_card.html.erb`; `_editor.html.erb`; `gallery_controller.js`; `image_editor_controller.js`; `content_image_helper.rb`.
 

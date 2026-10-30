@@ -17,13 +17,13 @@ export default class extends Controller {
     "modal", "subtitle", "coverButton", "coverLabel",
     "shapeTab", "shapeState", "stage", "loading", "image",
     "focalLayer", "focalDot", "cropControls", "zoom", "gridToggle", "help",
-    "stagePlacementButton", "stagePlacementIcon", "stagePlacementLabel", "stagePlacementSeparator",
+    "stagePlacement", "stagePlacementButton", "stagePlacementIcon", "stagePlacementLabel",
     "preview", "previewTitle", "previewBadge", "previewBlock", "usage", "placementAction",
     "notes", "privacyRow", "privacy", "facts", "downloadLink",
     "status", "saveButton", "announcer", "shortcuts"
   ]
 
-  static values = { presets: Array, pageName: String, pageType: String }
+  static values = { presets: Array, pageName: String, pageType: String, bannerFullBleedRatio: Number }
 
   connect() {
     // The edit page wraps its content in transformed containers, which would
@@ -234,7 +234,7 @@ export default class extends Controller {
         if (isDedicated) {
           btn.textContent = "Remove"
           btn.title = `Remove this image as the dedicated ${chip.toLowerCase()} cover (falls back to default cover)`
-          btn.className = "flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+          btn.className = "flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900 dark:bg-opacity-30 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900 dark:hover:bg-opacity-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
         } else if (isViaDefault) {
           btn.textContent = "Make dedicated"
           btn.title = `Lock this image as the dedicated ${chip.toLowerCase()} cover even if default cover changes`
@@ -262,16 +262,10 @@ export default class extends Controller {
   }
 
   refreshStagePlacementButton() {
-    if (!this.hasStagePlacementButtonTarget) return
+    if (!this.hasStagePlacementTarget) return
     const isShape = this.currentPreset && this.currentPreset !== "focal"
-    if (!isShape) {
-      this.stagePlacementButtonTarget.classList.add("hidden")
-      if (this.hasStagePlacementSeparatorTarget) this.stagePlacementSeparatorTarget.classList.add("hidden")
-      return
-    }
-
-    this.stagePlacementButtonTarget.classList.remove("hidden")
-    if (this.hasStagePlacementSeparatorTarget) this.stagePlacementSeparatorTarget.classList.remove("hidden")
+    this.stagePlacementTarget.classList.toggle("hidden", !isShape)
+    if (!isShape) return
 
     const gallery = this.galleryController()
     const roles = gallery && this.card ? gallery.rolesOf(this.card) : []
@@ -287,7 +281,7 @@ export default class extends Controller {
     if (isDedicated) {
       this.stagePlacementLabelTarget.textContent = `${chip} cover ✓`
       this.stagePlacementButtonTarget.title = `Click to remove this image as the ${chip.toLowerCase()} cover`
-      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-blue-400 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-blue-400 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-40 text-blue-700 dark:text-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
       if (this.hasStagePlacementIconTarget) {
         this.stagePlacementIconTarget.textContent = "check_circle"
         this.stagePlacementIconTarget.className = "material-icons text-xs text-blue-600 dark:text-blue-400"
@@ -295,7 +289,7 @@ export default class extends Controller {
     } else if (isViaDefault) {
       this.stagePlacementLabelTarget.textContent = `${chip}: via Default cover`
       this.stagePlacementButtonTarget.title = `Currently used via Default cover. Click to make this image the dedicated ${chip.toLowerCase()} cover.`
-      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500"
+      this.stagePlacementButtonTarget.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-yellow-400 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-30 text-yellow-800 dark:text-yellow-200 transition-colors focus:outline-none focus:ring-2 focus:ring-yellow-500"
       if (this.hasStagePlacementIconTarget) {
         this.stagePlacementIconTarget.textContent = "star"
         this.stagePlacementIconTarget.className = "material-icons text-xs text-yellow-600 dark:text-yellow-400"
@@ -334,12 +328,6 @@ export default class extends Controller {
       .catch(() => {
         this.refreshCoverRoles()
       })
-  }
-
-  toggleCoverFor(event) {
-    const item = event.currentTarget || event.target
-    const preset = item ? item.dataset.preset : null
-    if (preset) this.toggleCoverForPreset(preset)
   }
 
   loadImage() {
@@ -493,8 +481,7 @@ export default class extends Controller {
     this.applying = false
     this.refreshShapeStates()
     this.refreshStagePlacementButton()
-    const isNarrowBanner = key === "banner" && !this.custom[key] && this.naturalWidth && this.naturalHeight && (this.naturalWidth / this.naturalHeight < 2.0)
-    if (isNarrowBanner) {
+    if (this.isNarrowBanner(key)) {
       this.helpTarget.textContent = "This image is narrower than a banner. By default, the page header displays it with a softened ambient backdrop so the full image is shown without clipping. You can also drag the box here if you want an explicit wide crop."
     } else {
       this.helpTarget.textContent = `Drag the box to choose what shows in the ${preset.label.toLowerCase()} (${preset.ratio_label || this.ratioLabel(preset)}). Drag a corner to zoom in or out, or use the slider. Arrow keys nudge.`
@@ -834,7 +821,7 @@ export default class extends Controller {
     const rect = this.crops[key]
     if (!rect) return
     const src = this.info.largeUrl || this.info.originalUrl
-    const isNarrowBanner = key === "banner" && !this.custom["banner"] && this.naturalWidth && this.naturalHeight && (this.naturalWidth / this.naturalHeight < 2.0)
+    const isNarrowBanner = this.isNarrowBanner(key)
 
     this.previewTargets.forEach((box) => {
       if (box.dataset.preset !== key) return
@@ -998,6 +985,13 @@ export default class extends Controller {
 
   dimensionsLabel() {
     return this.naturalWidth && this.naturalHeight ? `${this.naturalWidth} × ${this.naturalHeight}` : ""
+  }
+
+  // Mirrors content_hero_banner_tag: without a custom banner crop, images
+  // narrower than the full-bleed ratio get the blurred-backdrop header.
+  isNarrowBanner(key) {
+    if (key !== "banner" || this.custom.banner || !this.naturalWidth || !this.naturalHeight) return false
+    return this.naturalWidth / this.naturalHeight < (this.bannerFullBleedRatioValue || 2)
   }
 
   ratioLabel(preset) {

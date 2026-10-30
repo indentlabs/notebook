@@ -24,7 +24,8 @@ export default class extends Controller {
     sortUrl: String,
     uploadUrl: String,
     remainingKb: Number,
-    maxUploadKb: Number
+    maxUploadKb: Number,
+    presets: Array
   }
 
   connect() {
@@ -200,17 +201,9 @@ export default class extends Controller {
       .finally(() => { delete card.dataset.busy })
   }
 
-  presetLabel(preset) {
-    const map = { banner: "Banner", card: "Card", square: "Thumbnail", social: "Link preview" }
-    return map[preset] || preset
-  }
-
-  toggleCoverFor(event) {
-    const item = event.currentTarget || event.target
-    const card = this.cardFor(event)
-    const preset = item ? item.dataset.preset : null
-    if (!card || !preset) return
-    this.toggleCoverRole(card, preset)
+  presetLabel(key) {
+    const preset = this.presetsValue.find((p) => p.key === key)
+    return (preset && preset.chip) || key
   }
 
   rolesOf(card) {
@@ -233,7 +226,7 @@ export default class extends Controller {
     if (!this.hasCoverSummaryTarget) return
     const cover = this.cardTargets.find((card) => card.dataset.pinned === "true")
     this.coverSummaryTarget.textContent = cover
-      ? "Your default cover is used on cards, banners, and thumbnails unless customized."
+      ? "Your default cover is used on cards, banners, thumbnails and link previews unless you pick another image for one of them."
       : "No cover chosen yet. A random image is used on cards and banners until you set one."
   }
 

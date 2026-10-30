@@ -4,6 +4,7 @@ module.exports = {
   darkMode: 'class',
   content: [
     'app/views/**/*.html.erb',
+    'app/helpers/**/*.rb',
     'app/models/**/*.rb',
     'app/javascript/**/*.js',
     'app/assets/javascripts/**/*.js'
@@ -99,6 +100,9 @@ module.exports = {
       },
       width: {
         '112': '28rem', // 448px - for wider notification panel on xl screens
+      },
+      maxHeight: {
+        '225': '56.25rem', // 900px - image editor modal on tall screens
       },
       aspectRatio: {
         'banner': '3 / 1', // page hero banner (ImagePresets[:banner])

@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'minitest/mock'
 
 class ContentImageHelperTest < ActionView::TestCase
   include ContentImageHelper
@@ -181,6 +182,20 @@ class ContentImageHelperTest < ActionView::TestCase
 
     assert_not_includes html, 'blur-2xl'
     assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag falls back to the placeholder when the cover has no file" do
+    @upload = create_upload
+    @upload.update_columns(width: 600, height: 900)
+    @character.clear_cover_image_cache
+
+    image = ContentImage.wrap(@upload)
+    html = image.stub(:display_url, nil) do
+      @character.stub(:cover_image, image) { content_hero_banner_tag(@character) }
+    end
+
+    assert_not_includes html, 'blur-2xl'
     assert_includes html, 'object-cover'
   end
 
