@@ -22,7 +22,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install native dependencies
-      run: sudo apt-get update && sudo apt-get install -y libmagickwand-dev
+      # libmagickwand-dev builds rmagick; imagemagick provides the convert and
+      # identify commands Paperclip and MiniMagick run.
+      run: sudo apt-get update && sudo apt-get install -y libmagickwand-dev imagemagick
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -34,5 +36,9 @@ jobs:
         node-version: 20.19.5 # keep in step with the production server
     - name: Compile JS
       run: RAILS_ENV=test bundle exec rake assets:precompile
+    - name: Set up database
+      # Load the schema before the app boots for tests: initializers such as
+      # config/initializers/thredded.rb only extend models whose tables exist.
+      run: RAILS_ENV=test bundle exec rails db:schema:load
     - name: Run tests
       run: RAILS_ENV=test bundle exec rails test
