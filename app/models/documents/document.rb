@@ -10,7 +10,8 @@ class Document < ApplicationRecord
   has_many :document_categories, through: :document_analysis
 
   has_many :document_revisions, dependent: :destroy
-  after_update :save_document_revision!
+  # After commit, so a slow or failing enqueue can't hold the row lock or roll back the save itself
+  after_update_commit :save_document_revision!
 
   has_many :book_documents, dependent: :destroy
   has_many :books, through: :book_documents
@@ -174,13 +175,33 @@ class Document < ApplicationRecord
 
   def save_document_revision!
     if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
-      begin
-        SaveDocumentRevisionJob.perform_later(self.id)
-      rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
-        # Log the error but don't fail the save - document revisions are not critical
-        Rails.logger.warn "Could not save document revision due to Redis connection error: #{e.message}"
-      end
+      enqueue_debounced(SaveDocumentRevisionJob)
     end
+  end
+
+  # Autosave can update a document every few seconds while someone is writing. Rather than queueing
+  # a job for every save, queue at most one per document per debounce window, and run it at the end
+  # of that window. Jobs load the document when they run, so they still see every edit made before then.
+  def enqueue_debounced(job_class)
+    wait = self.class.background_job_debounce
+    return job_class.perform_later(id) if wait.zero?
+
+    key = "documents/#{id}/#{job_class.name.underscore}/queued"
+    return unless Rails.cache.write(key, true, unless_exist: true, expires_in: wait)
+
+    begin
+      job_class.set(wait: wait).perform_later(id)
+    rescue StandardError
+      Rails.cache.delete(key)
+      raise
+    end
+  rescue RedisClient::Error, Redis::BaseError => e
+    # Background jobs are not critical; never let Redis trouble fail a save
+    Rails.logger.warn "Could not queue #{job_class.name} for Document #{id}: #{e.class}: #{e.message}"
+  end
+
+  def self.background_job_debounce
+    Rails.application.config.x.document_job_debounce || 30.seconds
   end
 
   def word_count

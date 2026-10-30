@@ -56,6 +56,13 @@
         },
 
         handleMentionInput(event) {
+          // This runs on every keystroke, and reading the whole text is slow in long documents,
+          // so skip that unless the caret could be in a mention
+          if (!this.caretMayBeInMention()) {
+            this.hideDropdown();
+            return;
+          }
+
           // Use textContent (not innerText) to match how getCursorPosition() counts characters
           // innerText inserts \n between <p> elements, but Range.toString() does not
           const text = this.textElement.value || this.textElement.textContent;
@@ -359,6 +366,24 @@
             this.expandedSections.push(contentType);
           }
           this.updateFilteredResults(); // Re-render with expanded items
+        },
+
+        // Cheap check of the caret's own text node: false when no @mention could end at the caret,
+        // which is when the text before it has a space, newline or bracket after its last @
+        caretMayBeInMention() {
+          if (!this.textElement.isContentEditable) return true;
+
+          const selection = window.getSelection();
+          if (selection.rangeCount === 0) return true;
+
+          const range = selection.getRangeAt(0);
+          if (range.endContainer.nodeType !== Node.TEXT_NODE || !this.textElement.contains(range.endContainer)) return true;
+
+          const beforeCaret = range.endContainer.textContent.substring(0, range.endOffset);
+          const lastAtIndex = beforeCaret.lastIndexOf('@');
+
+          // With no @ in this node, a mention could still start in an earlier node
+          return !/[\s\[\]]/.test(beforeCaret.substring(lastAtIndex + 1));
         },
 
         getCursorPosition() {
