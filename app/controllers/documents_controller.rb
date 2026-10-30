@@ -120,7 +120,8 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    unless @document.present? && (current_user || User.new).can_read?(@document)
+    # Password protected documents get a lock screen rather than looking like they don't exist
+    unless @document.present? && (@document.password_protected? || (current_user || User.new).can_read?(@document))
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
@@ -130,6 +131,11 @@ class DocumentsController < ApplicationController
 
     # Put the focus on the document by removing Notebook.ai actions
     @navbar_actions = []
+
+    # Keep the text out of browser history and shared caches, for the back button on a shared computer
+    response.headers['Cache-Control'] = 'no-store' if @document.password_protected?
+
+    render :locked if document_locked?(@document)
   end
 
   def analysis
@@ -164,6 +170,15 @@ class DocumentsController < ApplicationController
     # Preconditions lol
     unless (Rails.application.config.content_types[:all].map(&:name) + [Timeline.name, Document.name, Book.name]).include?(linked_entity_params[:entity_type])
       raise "Invalid entity type #{linked_entity_params[:entity_type]}"
+    end
+
+    # Linking a page shows its details in the document, so writers can only link pages they can read
+    linked_page = linked_entity_params[:entity_type].constantize.find_by(id: linked_entity_params[:entity_id])
+    unless linked_page&.readable_by?(current_user)
+      return respond_to do |format|
+        format.html { redirect_back(fallback_location: documents_path, alert: "You don't have permission to link that page.") }
+        format.json { render json: { success: false, error: "You don't have permission to link that page." }, status: :forbidden }
+      end
     end
 
     # Take this out of the params upfront in case we need to modify the value (after creating one, for example)

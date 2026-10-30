@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 class ApplicationController < ActionController::Base
+  include DocumentUnlocks
+
   protect_from_forgery
 
   before_action :set_universe_session

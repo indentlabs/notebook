@@ -26,6 +26,7 @@ gem 'active_storage_validations'
 # Authentication
 gem 'devise'
 gem 'authority'
+gem 'bcrypt', '~> 3.1' # Also used directly by Document's password protection
 
 # Billing
 gem 'stripe'
@@ -99,6 +100,7 @@ gem 'will_paginate', '~> 4.0'
 # Workers
 gem 'sidekiq', '~> 7.3.9'
 gem 'redis', '~> 5.1.0'
+gem 'rack-attack', '~> 6.8'
 
 # Exports
 gem 'csv'

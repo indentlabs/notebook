@@ -107,7 +107,7 @@
                   </p>
                   <p class="text-xs <%= @document.universe.privacy == 'public' ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-400' %>">
                     <% if @document.universe.privacy == 'public' %>
-                      This universe is <strong>public</strong>, so this document is visible regardless of its own setting.
+                      This universe is <strong>public</strong>, so this document is visible unless it's password protected.
                     <% else %>
                       This universe is <strong>private</strong>.
                     <% end %>
@@ -117,7 +117,7 @@
             </div>
           <% end %>
 
-          <% exposing_books = @document.privacy == 'public' ? [] : @document.containing_public_books.to_a %>
+          <% exposing_books = %w(public password).include?(@document.privacy) ? [] : @document.containing_public_books.to_a %>
           <% if exposing_books.any? %>
             <div class="mb-4 p-3 rounded-md border bg-yellow-50 dark:bg-yellow-900 border-yellow-200 dark:border-yellow-800">
               <div class="flex items-center">
@@ -132,14 +132,14 @@
                     <%= exposing_books.map { |book| link_to("\"#{book.name}\"", book_path(book), class: 'underline') }.to_sentence.html_safe %>
                   </p>
                   <p class="text-xs text-yellow-600 dark:text-yellow-400">
-                    <%= exposing_books.count == 1 ? 'That book is' : 'Those books are' %> <strong>public</strong>, so anyone who can view <%= exposing_books.count == 1 ? 'it' : 'them' %> can read this document regardless of its own setting. Remove it from the book or make the book private to restore privacy.
+                    <%= exposing_books.count == 1 ? 'That book is' : 'Those books are' %> <strong>public</strong>, so anyone who can view <%= exposing_books.count == 1 ? 'it' : 'them' %> can read this document unless it's password protected. Remove it from the book or make the book private to restore privacy.
                   </p>
                 </div>
               </div>
             </div>
           <% end %>
 
-          <%= form_for(@document, remote: true, html: { id: 'document-privacy-form', data: { turbo: false } }) do |f| %>
+          <%= form_for(@document, remote: true, html: { id: 'document-privacy-form', data: { turbo: false, current_privacy: @document.privacy, password_url: password_document_path(@document) } }) do |f| %>
             <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
               <%= f.hidden_field :privacy, value: @document.privacy, id: 'document_privacy_field' %>
 
@@ -167,9 +167,62 @@
                     </div>
                   </label>
                 </div>
+
+                <!-- Radio button for Password protected -->
+                <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer <%= @document.password_protected? ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>" onclick="document.getElementById('document-privacy-password').click()">
+                  <input type="radio" id="document-privacy-password" name="document-privacy-option" value="password" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.password_protected? ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                  <label for="document-privacy-password" class="ml-3 flex items-center cursor-pointer">
+                    <i class="material-icons text-teal-500 mr-2">vpn_key</i>
+                    <div>
+                      <span class="block text-sm font-medium text-gray-900 dark:text-white">Password protected</span>
+                      <span class="block text-xs text-gray-500 dark:text-gray-400">Only people with the password can view</span>
+                    </div>
+                  </label>
+                </div>
               </div>
             </div>
           <% end %>
+
+          <p id="document-privacy-error" class="hidden mt-3 text-sm text-red-600 dark:text-red-400"></p>
+
+          <!-- Password settings. Outside the form above, and with no name, so the password can't be sent by anything but the save button. -->
+          <div id="document-password-panel" class="<%= @document.password_protected? ? '' : 'hidden' %> mt-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <div id="document-password-summary" class="<%= @document.password_protected? ? '' : 'hidden' %>">
+              <p class="text-sm text-gray-600 dark:text-gray-300">Readers need the password to open this document, and it won't appear anywhere else on the site.</p>
+              <button type="button" onclick="showDocumentPasswordForm()" class="mt-2 text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline">
+                Change password
+              </button>
+            </div>
+
+            <div id="document-password-form" class="<%= @document.password_protected? ? 'hidden' : '' %>">
+              <label for="document-password-input" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Choose a password</label>
+              <div class="relative">
+                <input
+                  id="document-password-input"
+                  type="password"
+                  maxlength="<%= Document::PASSWORD_LENGTH.max %>"
+                  autocomplete="new-password"
+                  class="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  onkeydown="if (event.key === 'Enter') { event.preventDefault(); saveDocumentPassword(); }"
+                >
+                <button type="button" onclick="toggleDocumentPasswordVisibility(this)" aria-label="Show password" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
+                  <i class="material-icons text-base">visibility</i>
+                </button>
+              </div>
+              <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                At least <%= Document::PASSWORD_LENGTH.min %> characters. We can't show it to you again, but you can always set a new one.
+              </p>
+              <p id="document-password-error" class="hidden mt-2 text-sm text-red-600 dark:text-red-400"></p>
+              <div class="mt-3 flex justify-end space-x-2">
+                <button type="button" onclick="cancelDocumentPassword()" class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                  Cancel
+                </button>
+                <button type="button" id="document-password-save" onclick="saveDocumentPassword()" class="px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-md shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                  Save password
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Universe privacy tab -->
@@ -254,16 +307,137 @@
 <script>
   // Document privacy update function
   window.updateDocumentPrivacy = window.updateDocumentPrivacy || function(radio) {
-    // Disable all radio buttons during submission
-    document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
-      option.disabled = true;
-      option.parentElement.classList.add('opacity-50');
-    });
-
     const value = radio.value;
-    document.getElementById('document_privacy_field').value = value;
 
-    // Update selected state visually
+    setDocumentPrivacyError(null);
+    highlightDocumentPrivacyOption(value);
+
+    // A password has to be chosen before this can be saved, so there's nothing to send yet
+    if (value === 'password') {
+      if (documentPrivacyForm().dataset.currentPrivacy !== 'password') {
+        showDocumentPasswordForm();
+      }
+      return;
+    }
+
+    hideDocumentPasswordPanel();
+    setDocumentPrivacyOptionsDisabled(true);
+
+    // Password protection can only be taken off through its own endpoint
+    const leavingPassword = documentPrivacyForm().dataset.currentPrivacy === 'password';
+    const request = leavingPassword ?
+      documentPrivacyRequest(documentPrivacyForm().dataset.passwordUrl, 'DELETE', { privacy: value }) :
+      documentPrivacyRequest(documentPrivacyForm().action, 'PATCH', { document: { privacy: value } });
+
+    request.then(function() {
+      applyDocumentPrivacy(value);
+    }).catch(function(error) {
+      console.error('Error updating privacy:', error);
+      setDocumentPrivacyError("That didn't save. Please try again.");
+      restoreDocumentPrivacySelection();
+    }).then(function() {
+      setDocumentPrivacyOptionsDisabled(false);
+    });
+  };
+
+  window.saveDocumentPassword = window.saveDocumentPassword || function() {
+    const input = document.getElementById('document-password-input');
+    const saveButton = document.getElementById('document-password-save');
+
+    setDocumentPasswordError(null);
+    saveButton.disabled = true;
+
+    documentPrivacyRequest(documentPrivacyForm().dataset.passwordUrl, 'PATCH', { password: input.value }).then(function() {
+      input.value = '';
+      applyDocumentPrivacy('password');
+      document.getElementById('document-password-form').classList.add('hidden');
+      document.getElementById('document-password-summary').classList.remove('hidden');
+    }).catch(function(error) {
+      setDocumentPasswordError(error.message || "That didn't save. Please try again.");
+    }).then(function() {
+      saveButton.disabled = false;
+    });
+  };
+
+  window.cancelDocumentPassword = window.cancelDocumentPassword || function() {
+    document.getElementById('document-password-input').value = '';
+    setDocumentPasswordError(null);
+    restoreDocumentPrivacySelection();
+
+    if (documentPrivacyForm().dataset.currentPrivacy === 'password') {
+      document.getElementById('document-password-form').classList.add('hidden');
+      document.getElementById('document-password-summary').classList.remove('hidden');
+    } else {
+      hideDocumentPasswordPanel();
+    }
+  };
+
+  window.showDocumentPasswordForm = window.showDocumentPasswordForm || function() {
+    document.getElementById('document-password-panel').classList.remove('hidden');
+    document.getElementById('document-password-summary').classList.add('hidden');
+    document.getElementById('document-password-form').classList.remove('hidden');
+    document.getElementById('document-password-input').focus();
+  };
+
+  window.toggleDocumentPasswordVisibility = window.toggleDocumentPasswordVisibility || function(button) {
+    const input = document.getElementById('document-password-input');
+    const showing = input.type === 'text';
+
+    input.type = showing ? 'password' : 'text';
+    button.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    button.querySelector('i').textContent = showing ? 'visibility' : 'visibility_off';
+  };
+
+  window.documentPrivacyForm = window.documentPrivacyForm || function() {
+    return document.getElementById('document-privacy-form');
+  };
+
+  // Rejects with the server's own error message when it sends one
+  window.documentPrivacyRequest = window.documentPrivacyRequest || function(url, method, body) {
+    return fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }).then(function(response) {
+      if (response.ok) return response;
+
+      return response.json().catch(function() { return {}; }).then(function(data) {
+        throw new Error(data.error || "That didn't save. Please try again.");
+      });
+    });
+  };
+
+  window.hideDocumentPasswordPanel = window.hideDocumentPasswordPanel || function() {
+    document.getElementById('document-password-panel').classList.add('hidden');
+    document.getElementById('document-password-input').value = '';
+    setDocumentPasswordError(null);
+  };
+
+  window.setDocumentPrivacyError = window.setDocumentPrivacyError || function(message) {
+    const error = document.getElementById('document-privacy-error');
+    error.textContent = message || '';
+    error.classList.toggle('hidden', !message);
+  };
+
+  window.setDocumentPasswordError = window.setDocumentPasswordError || function(message) {
+    const error = document.getElementById('document-password-error');
+    error.textContent = message || '';
+    error.classList.toggle('hidden', !message);
+  };
+
+  window.setDocumentPrivacyOptionsDisabled = window.setDocumentPrivacyOptionsDisabled || function(disabled) {
+    document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
+      option.disabled = disabled;
+      option.parentElement.classList.toggle('opacity-50', disabled);
+    });
+  };
+
+  // Update selected state visually
+  window.highlightDocumentPrivacyOption = window.highlightDocumentPrivacyOption || function(value) {
     document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
       const container = option.closest('div.flex.items-center.p-2');
       if (container) {
@@ -274,59 +448,56 @@
         }
       }
     });
+  };
+
+  // Puts the radio buttons back to what's actually saved
+  window.restoreDocumentPrivacySelection = window.restoreDocumentPrivacySelection || function() {
+    const current = documentPrivacyForm().dataset.currentPrivacy === 'public' ? 'public' : documentPrivacyForm().dataset.currentPrivacy === 'password' ? 'password' : 'private';
+
+    document.getElementById('document-privacy-' + current).checked = true;
+    highlightDocumentPrivacyOption(current);
+  };
+
+  // Everything that shows the saved privacy, once it's really been saved
+  window.applyDocumentPrivacy = window.applyDocumentPrivacy || function(value) {
+    const labels = { private: 'Private', public: 'Public', password: 'Password protected' };
+    const icons = { private: 'lock', public: 'public', password: 'vpn_key' };
+    const isPublic = value === 'public';
+
+    documentPrivacyForm().dataset.currentPrivacy = value;
+    document.getElementById('document_privacy_field').value = value;
 
     // Update FAB icon if present (for show page)
-    const fabIcon = document.querySelector('[data-tooltip="Public"], [data-tooltip="Private"]');
+    const fabIcon = document.querySelector('[data-tooltip="Public"], [data-tooltip="Private"], [data-tooltip="Password protected"]');
     if (fabIcon) {
       const icon = fabIcon.querySelector('i');
-      icon.textContent = value === 'public' ? 'public' : 'lock';
-      icon.classList.toggle('text-green-500', value === 'public');
-      fabIcon.setAttribute('data-tooltip', value === 'public' ? 'Public' : 'Private');
+      icon.textContent = icons[value];
+      icon.classList.toggle('text-green-500', isPublic);
+      fabIcon.setAttribute('data-tooltip', labels[value]);
+    }
+
+    // Password protected documents can't be shared
+    const shareButton = document.getElementById('document-share-button');
+    if (shareButton) {
+      shareButton.classList.toggle('hidden', value === 'password');
     }
 
     // Update sidebar privacy UI if present (for edit page)
     const sidebarBadge = document.getElementById('sidebar-privacy-badge');
     const sidebarIcon = document.getElementById('sidebar-privacy-icon');
     const sidebarText = document.getElementById('sidebar-privacy-text');
-    const isPublic = value === 'public';
 
     if (sidebarBadge) {
       sidebarBadge.className = 'w-8 h-8 rounded-full flex items-center justify-center mr-3 ' +
         (isPublic ? 'bg-green-100 dark:bg-green-900' : 'bg-gray-200 dark:bg-gray-600');
     }
     if (sidebarIcon) {
-      sidebarIcon.textContent = isPublic ? 'public' : 'lock';
+      sidebarIcon.textContent = icons[value];
       sidebarIcon.className = 'material-icons text-sm ' +
         (isPublic ? 'text-green-500' : 'text-gray-500 dark:text-gray-400');
     }
     if (sidebarText) {
-      sidebarText.textContent = value;
-    }
-
-    // Submit the form
-    const form = document.getElementById('document-privacy-form');
-    if (form) {
-      fetch(form.action, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ document: { privacy: value } })
-      }).then(function() {
-        // Re-enable radio buttons
-        document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
-          option.disabled = false;
-          option.parentElement.classList.remove('opacity-50');
-        });
-      }).catch(function(error) {
-        console.error('Error updating privacy:', error);
-        document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
-          option.disabled = false;
-          option.parentElement.classList.remove('opacity-50');
-        });
-      });
+      sidebarText.textContent = labels[value];
     }
   };
 

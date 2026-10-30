@@ -97,11 +97,7 @@ class ContentFormatterService < Service
         link_template(content_model)
       end
     else
-      if plaintext
-        plaintext_replacement_template(content_model)
-      else
-        private_link_template(content_model)
-      end
+      plaintext ? private_label(content_class) : private_template(content_class)
     end
   end
 
@@ -109,8 +105,13 @@ class ContentFormatterService < Service
     inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: "content_link #{content_model.class.name.downcase}-link") }
   end
 
-  def self.private_link_template(content_model)
-    inline_template(content_model.class) { link_to(content_model.name, link_for(content_model), class: 'grey-text content_link disabled') }
+  # A page's name can give away what's in it, so it isn't shown to people who can't read the page
+  def self.private_label(content_class)
+    "Private #{content_class.name.titleize.downcase}"
+  end
+
+  def self.private_template(content_class)
+    inline_template(content_class) { content_tag(:span, private_label(content_class), class: 'grey-text content_link disabled') }
   end
 
   def self.plaintext_replacement_template(content_model)

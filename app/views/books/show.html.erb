@@ -106,6 +106,23 @@
           <div class="divide-y divide-gray-100 dark:divide-gray-700">
             <% if @book_documents.any? %>
               <% @book_documents.each_with_index do |bd, idx| %>
+                <% if document_locked?(bd.document) %>
+                  <%= link_to document_path(bd.document), class: "group block hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out" do %>
+                    <div class="px-6 py-4 flex items-center justify-between">
+                      <div class="flex items-center min-w-0">
+                        <span class="text-gray-400 dark:text-gray-500 font-mono text-sm w-8 flex-shrink-0">
+                          <%= (idx + 1).to_s.rjust(2, '0') %>.
+                        </span>
+                        <p class="text-base italic text-gray-500 dark:text-gray-400 truncate">Password protected chapter</p>
+                      </div>
+                      <div class="ml-4 flex-shrink-0 flex items-center space-x-4 text-gray-400 dark:text-gray-500">
+                        <i class="material-icons text-base">vpn_key</i>
+                        <i class="material-icons text-gray-300 dark:text-gray-600 group-hover:text-emerald-500 transition-colors">chevron_right</i>
+                      </div>
+                    </div>
+                  <% end %>
+                  <% next %>
+                <% end %>
                 <%= link_to document_path(bd.document), class: "group block hover:bg-gray-50 dark:hover:bg-gray-700/50 transition duration-150 ease-in-out" do %>
                   <div class="px-6 py-4 flex items-center justify-between">
                     <div class="flex items-center min-w-0">

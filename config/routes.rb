@@ -84,7 +84,7 @@ Rails.application.routes.draw do
     get 'editor_picks', to: 'page_collection_editor_picks#index', as: 'manage_editor_picks'
     resources :editor_picks, controller: 'page_collection_editor_picks', except: [:show, :edit]
   end
-  resources :page_collection_submissions do
+  resources :page_collection_submissions, only: [:create, :destroy] do
     get 'approve', on: :member
     get 'pass',    on: :member
   end
@@ -125,8 +125,8 @@ Rails.application.routes.draw do
       get 'report',   on: :member
     end
   end
-  resources :user_followings
-  resources :user_blockings
+  resources :user_followings, only: [:create, :destroy]
+  resources :user_blockings, only: [:create, :destroy]
 
   # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)
   patch 'users/update_timezone', to: 'users#update_timezone'
@@ -157,6 +157,12 @@ Rails.application.routes.draw do
     get  '/plaintext',           to: 'documents#plaintext',               on: :member
     get  '/printable',           to: 'documents#printable',               on: :member
     get  '/queue_analysis',      to: 'documents#queue_analysis',          on: :member
+
+    # Password protection. The unlock route is strict about its path so that nothing
+    # can reach it without matching the limits in config/initializers/rack_attack.rb.
+    patch  '/password',          to: 'document_passwords#update',         on: :member
+    delete '/password',          to: 'document_passwords#destroy',        on: :member
+    post   '/unlock',            to: 'document_passwords#unlock',         on: :member, format: false, constraints: { id: /\d+/ }
 
     resources :document_revisions, path: 'revisions', on: :member do
       member do
@@ -398,7 +404,7 @@ Rails.application.routes.draw do
       post :toggle_archive, on: :member
       post :toggle_favorite, on: :member
     end
-    resources :timeline_events do
+    resources :timeline_events, only: [:create, :update, :destroy] do
       post 'link',              to: 'timeline_events#link_entity',    on: :member
       post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
       post 'tags',              to: 'timeline_events#add_tag',        on: :member, as: :add_tag
@@ -627,8 +633,11 @@ Rails.application.routes.draw do
   Sidekiq::Web.use Rack::Auth::Basic do |username, password|
     # Protect with simple authentication until we can fix proper user-based auth
     # This is a temporary solution until we update the authentication to use ActiveSupport::SecurityUtils
-    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(username), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME'] || 'admin')) &
-    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(password), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD'] || 'password'))
+    # With no credentials configured, nobody gets in
+    next false if ENV['SIDEKIQ_USERNAME'].blank? || ENV['SIDEKIQ_PASSWORD'].blank?
+
+    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(username), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME'])) &
+    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(password), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD']))
   end unless Rails.env.development?
 
   mount Sidekiq::Web => '/sidekiq'

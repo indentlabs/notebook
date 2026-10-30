@@ -26,7 +26,7 @@ class ConversationController < ApplicationController
     })
 
     # Add a character image if one has been uploaded to the page
-    avatar = @character.cover_image_url(:square, include_private: true, fallback: false)
+    avatar = @character.cover_image_url(:square, include_private: user_signed_in? && @character.user == current_user, fallback: false)
     add_character_hash[:avatar][:url] = avatar if avatar.present?
 
     # Provide a default scenario if one wasn't given

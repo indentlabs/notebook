@@ -24,6 +24,8 @@ class UniversesController < ContentController
 
       @universe = Universe.find_by(id: params[:id])
       return redirect_to(root_path, notice: "That universe doesn't exist!", status: :not_found) unless @universe.present?
+      return redirect_to(root_path, notice: "You don't have permission to view that universe.") unless (current_user || User.new).can_read?(@universe)
+
       @content_list = @universe.send(content_type_name)
 
       # todo just use current_user.can_view?(@universe) and/or individual filtering

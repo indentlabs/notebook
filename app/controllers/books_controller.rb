@@ -25,7 +25,8 @@ class BooksController < ApplicationController
     end
 
     @book_documents = @book.book_documents.includes(:document).order(position: :asc)
-    @total_words = @book_documents.sum { |bd| bd.document&.word_count.to_i }
+    @unlocked_book_documents = @book_documents.reject { |bd| bd.document && document_locked?(bd.document) }
+    @total_words = @unlocked_book_documents.sum { |bd| bd.document&.word_count.to_i }
     @est_reading_time = (@total_words / 200.0).ceil
 
     @characters, @characters_source = readable_book_characters
@@ -73,7 +74,10 @@ class BooksController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render :edit, status: :unprocessable_entity }
+        format.html do
+          edit
+          render :edit, status: :unprocessable_entity
+        end
         format.json { render json: { errors: @book.errors }, status: :unprocessable_entity }
       end
     end
@@ -187,7 +191,7 @@ class BooksController < ApplicationController
 
   # Characters that document analysis has linked to one of this book's chapters.
   def characters_appearing_in_book
-    document_ids = @book_documents.map(&:document_id).compact
+    document_ids = @unlocked_book_documents.map(&:document_id).compact
     return [] if document_ids.empty?
 
     character_ids = DocumentEntity

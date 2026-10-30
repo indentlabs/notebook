@@ -42,6 +42,7 @@ class PageCollectionsController < ApplicationController
     @editor_picks = @page_collection.editor_picks_ordered.includes({content: [:universe, :user], user: []})
 
     sort_pages
+    hide_unreadable_pages
   end
 
   # GET /page_collections/new
@@ -113,6 +114,10 @@ class PageCollectionsController < ApplicationController
       set_page_collection
       return if performed?
 
+      unless (@page_collection.privacy == 'public' || (user_signed_in? && @page_collection.user == current_user))
+        return redirect_to page_collections_path, notice: "That Collection is not public."
+      end
+
       set_submittable_content
 
       @show_page_type_highlight = true
@@ -122,6 +127,7 @@ class PageCollectionsController < ApplicationController
       # Filter editor's picks to only show the current content type
       @editor_picks = @page_collection.editor_picks_ordered.where(content_type: content_type.name).includes({content: [:universe, :user], user: []})
       sort_pages
+      hide_unreadable_pages
 
       render :show
     end
@@ -150,7 +156,10 @@ class PageCollectionsController < ApplicationController
     end
 
     @pages = @page_collection.accepted_submissions.where(user_id: params[:user_id]).includes({content: [:universe, :user], user: []})
+    @contributors = User.where(id: @pages.to_a.map(&:user_id) - [@page_collection.user_id])
+    @editor_picks = []
     sort_pages
+    hide_unreadable_pages
 
     @show_contributor_highlight = true
     @highlighted_contributor = User.find_by(id: params[:user_id].to_i)
@@ -163,7 +172,8 @@ class PageCollectionsController < ApplicationController
     end
 
     @pages = @page_collection.accepted_submissions.includes({content: [:universe, :user], user: []}).limit(50)
-    
+    hide_unreadable_pages
+
     # Set the response content type explicitly
     response.headers['Content-Type'] = 'application/rss+xml; charset=utf-8'
     
@@ -181,7 +191,7 @@ class PageCollectionsController < ApplicationController
       return render json: { error: "Not authorized" }, status: :unauthorized
     end
 
-    page = params[:page].to_i || 1
+    page = [params[:page].to_i, 1].max
     per_page = 5 # Number of items per page
     
     # Get paginated submissions
@@ -191,11 +201,13 @@ class PageCollectionsController < ApplicationController
                             .limit(per_page)
     
     sort_pages
-    
+    hide_unreadable_pages
+
     # Render each page as HTML and return as JSON
     page_html = @pages.map do |submission|
       render_to_string(
         partial: 'page_collections/article',
+        formats: [:html],
         locals: { submission: submission },
         layout: false
       )
@@ -247,6 +259,13 @@ class PageCollectionsController < ApplicationController
   
   def set_navbar_color
     @navbar_color = PageCollection.hex_color
+  end
+
+  # A page can go private after it's accepted into a collection, so check before showing it
+  def hide_unreadable_pages
+    viewer = current_user || User.new
+    @pages = @pages.select { |submission| submission.content&.readable_by?(viewer) }
+    @editor_picks = @editor_picks&.select { |submission| submission.content&.readable_by?(viewer) }
   end
 
   def sort_pages

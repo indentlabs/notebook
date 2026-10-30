@@ -78,7 +78,11 @@
     <% end %>
     
     <!-- Content Preview -->
-    <% if share.content_page %>
+    <% if share.content_page && !share_preview_visible?(share.content_page) %>
+      <div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4 text-sm text-gray-500 dark:text-gray-400 italic">
+        This page is no longer public.
+      </div>
+    <% elsif share.content_page %>
       <%= link_to share.content_page, class: 'block group' do %>
         <div class="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
           <div class="flex">

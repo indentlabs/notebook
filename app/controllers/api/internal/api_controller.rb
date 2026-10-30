@@ -5,10 +5,17 @@ module Api
       before_action :set_content
 
       def name_lookup
-        render body: @content.try(:name) || 'Page not found', content_type: 'text/plain'
+        render body: page_name, content_type: 'text/plain'
       end
 
       private
+
+      def page_name
+        return 'Page not found' if @content.nil?
+        return @content.name if @content.readable_by?(current_user || User.new)
+
+        ContentFormatterService.private_label(@content.class)
+      end
 
       def sanitize_content_type
         valid_types = Rails.application.config.content_types[:all] + [Timeline, Document]

@@ -143,7 +143,7 @@
             <% end %>
             
             <!-- Content Preview -->
-            <% if @share.content_page %>
+            <% if @share.content_page && share_preview_visible?(@share.content_page) %>
               <%= link_to @share.content_page, class: 'block group' do %>
                 <div class="relative overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 hover:shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200">
                   <div class="flex">
@@ -414,19 +414,12 @@
                 
                 <div class="p-3">
                   <div class="space-y-2">
-                    <% @share.user.recent_content_list(limit: 5).first(3).each do |content_page_data| %>
-                      <% 
-                        begin
-                          page_path = send("#{content_page_data.page_type.downcase}_path", content_page_data.id)
-                        rescue
-                          page_path = "/#{content_page_data.page_type.downcase.pluralize}/#{content_page_data.id}"
-                        end
-                      %>
-                      <%= link_to page_path, class: "block group" do %>
+                    <% @share.user.recent_public_content_list(limit: 3).each do |content_page_data| %>
+                      <%= link_to content_page_data, class: "block group" do %>
                         <div class="flex items-center space-x-3 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           <div class="flex-shrink-0">
-                            <% content_class = content_page_data.page_type.constantize rescue nil %>
-                            <% if content_class && content_class.respond_to?(:hex_color) %>
+                            <% content_class = content_page_data.class %>
+                            <% if content_class.respond_to?(:hex_color) %>
                               <div class="w-6 h-6 rounded-md flex items-center justify-center" style="background-color: <%= content_class.hex_color %>20;">
                                 <i class="material-icons text-xs" style="color: <%= content_class.hex_color %>;"><%= content_class.icon if content_class.respond_to?(:icon) %></i>
                               </div>
@@ -441,7 +434,7 @@
                               <%= content_page_data.name %>
                             </h4>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                              <%= content_page_data.page_type %> • <%= time_ago_in_words(content_page_data.updated_at) %> ago
+                              <%= content_class.name %> • <%= time_ago_in_words(content_page_data.updated_at) %> ago
                             </p>
                           </div>
                           <svg class="w-3 h-3 text-gray-400 dark:text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors opacity-0 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -471,7 +464,8 @@
                                                   .where.not(id: @share.id)
                                                   .includes(:content_page)
                                                   .order(created_at: :desc)
-                                                  .limit(4) %>
+                                                  .limit(4)
+                                                  .select { |share| share_preview_visible?(share.content_page) } %>
 
                 <% if other_shares.any? %>
                   <div class="space-y-2">

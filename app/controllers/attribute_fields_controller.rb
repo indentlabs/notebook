@@ -173,7 +173,7 @@ class AttributeFieldsController < ContentController
   private
 
   def initialize_object
-    @attribute_field = AttributeField.find_or_initialize_by(content_params.except(:field_options)).tap do |field|
+    @attribute_field = current_user.attribute_fields.find_or_initialize_by(content_params.except(:field_options)).tap do |field|
       field.user_id = current_user.id
       
       # Clean up field_options to handle empty linkable_types arrays properly
@@ -270,7 +270,14 @@ class AttributeFieldsController < ContentController
   end
 
   def content_params
-    params.require(:attribute_field).permit(content_param_list)
+    permitted = params.require(:attribute_field).permit(content_param_list)
+
+    # A field can only go in one of its owner's own categories
+    if permitted.key?(:attribute_category_id) && !current_user.attribute_categories.exists?(id: permitted[:attribute_category_id])
+      permitted.delete(:attribute_category_id)
+    end
+
+    permitted
   end
 
   def attribute_field_params
@@ -279,7 +286,7 @@ class AttributeFieldsController < ContentController
 
   def content_param_list
     [
-      :universe_id, :user_id,
+      :universe_id,
       :attribute_category,
       :name, :field_type,
       :label, :description,
