@@ -84,7 +84,7 @@ Rails.application.routes.draw do
     get 'editor_picks', to: 'page_collection_editor_picks#index', as: 'manage_editor_picks'
     resources :editor_picks, controller: 'page_collection_editor_picks', except: [:show, :edit]
   end
-  resources :page_collection_submissions do
+  resources :page_collection_submissions, only: [:create, :destroy] do
     get 'approve', on: :member
     get 'pass',    on: :member
   end
@@ -125,8 +125,8 @@ Rails.application.routes.draw do
       get 'report',   on: :member
     end
   end
-  resources :user_followings
-  resources :user_blockings
+  resources :user_followings, only: [:create, :destroy]
+  resources :user_blockings, only: [:create, :destroy]
 
   # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)
   patch 'users/update_timezone', to: 'users#update_timezone'
@@ -398,7 +398,7 @@ Rails.application.routes.draw do
       post :toggle_archive, on: :member
       post :toggle_favorite, on: :member
     end
-    resources :timeline_events do
+    resources :timeline_events, only: [:create, :update, :destroy] do
       post 'link',              to: 'timeline_events#link_entity',    on: :member
       post 'unlink/:entity_id', to: 'timeline_events#unlink_entity',  on: :member, as: :unlink_entity
       post 'tags',              to: 'timeline_events#add_tag',        on: :member, as: :add_tag
