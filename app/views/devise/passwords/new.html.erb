@@ -1,35 +1,67 @@
-<div class="row" style="margin-top: 5%">
-  <div class="col s12 m6 offset-m3">
-    <% if resource.errors.any? %>
-      <div class="card red lighten-3">
-        <div class="card-content">
-          <div class="card-title">Please fix the following errors:</div>
-          <ul class="browser-default">
-            <%= devise_error_messages! %>
-          </ul>
-        </div>
+<section class="bg-blueGray">
+  <div class="w-full lg:w-4/12 px-4 mx-auto pt-6">
+    <div class="relative flex flex-col bg-white min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
+      <div class="rounded-t mb-0 px-6 py-6">
+        <%= image_tag 'logos/both-small.webp', class: 'w-full' %>
       </div>
-    <% end %>
-    
-    <div class="card">
-      <div class="card-content">
-        <h2 class="card-title">Forgot your password?</h2>
+
+      <div class="flex-auto px-4 lg:px-10 py-10 pt-0">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-semibold text-gray-700">Forgot your password?</h2>
+          <p class="text-sm text-gray-500 mt-2">Enter your email and we'll send you reset instructions</p>
+        </div>
+
+        <% if resource.errors.any? %>
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+            <strong class="font-bold">Please fix the following errors:</strong>
+            <ul class="list-disc list-inside mt-2">
+              <% resource.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
         <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f| %>
-      
-          <div class="field">
-            <%= f.label 'Enter the email associated with your account' %><br />
-            <%= f.email_field :email, autofocus: true %>
+          <div class="relative w-full mb-6">
+            <%= f.label :email, class: "block uppercase text-blueGray-600 text-xs font-bold mb-2" %>
+            <%= f.email_field :email,
+                autofocus: true,
+                autocomplete: "email",
+                placeholder: "Email",
+                class: "border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" %>
           </div>
 
-          <div class="actions center">
-            <%= f.submit "Send me reset password instructions", class: 'btn blue' %>
+          <div class="text-center mt-6">
+            <%= f.submit "Send reset instructions",
+                class: "bg-notebook-blue text-white active:bg-blue-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150 cursor-pointer" %>
           </div>
-          <p class="center">
-            <br />
-            <%= render "devise/shared/links" %>
-          </p>
+
+          <div class="flex flex-wrap mt-6">
+            <div class="w-1/2">
+              <%= link_to "Back to login", new_session_path(resource_name),
+                  class: "text-notebook-blue text-sm hover:text-blue-500" %>
+            </div>
+            <div class="w-1/2 text-right">
+              <%= link_to "Sign up", new_registration_path(resource_name),
+                  class: "text-notebook-blue text-sm hover:text-blue-500" %>
+            </div>
+          </div>
         <% end %>
       </div>
     </div>
   </div>
-</div>
+
+  <footer class="relative pt-8 pb-6 mt-2">
+    <div class="container mx-auto px-2">
+      <div class="flex flex-wrap items-center md:justify-between justify-center">
+        <div class="w-full md:w-6/12 px-4 mx-auto text-center">
+          <div class="text-sm text-blueGray-500 font-semibold py-1">
+            Remember your password?
+            <%= link_to 'You silly goose, sign in instead.', new_user_session_path, class: 'text-notebook-blue hover:border-notebook-blue border-b-2' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</section>

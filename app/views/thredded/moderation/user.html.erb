@@ -1,0 +1,135 @@
+<%
+  user = @user
+  user_detail = user.thredded_user_detail
+  state = user_detail.moderation_state.to_s
+
+  state_badge_class = case state
+                      when 'approved' then 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:bg-opacity-30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
+                      when 'blocked' then 'bg-red-100 text-red-800 dark:bg-red-900 dark:bg-opacity-30 dark:text-red-400 border border-red-200 dark:border-red-800'
+                      when 'pending_moderation' then 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:bg-opacity-30 dark:text-amber-400 border border-amber-200 dark:border-amber-800'
+                      else 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                      end
+
+  state_icon = case state
+               when 'approved' then 'check_circle'
+               when 'blocked' then 'block'
+               when 'pending_moderation' then 'schedule'
+               else 'help'
+               end
+%>
+<% content_for :thredded_page_title, t('thredded.nav.moderation') %>
+<% content_for :thredded_page_id, 'thredded--moderation-user' %>
+<%= render 'nav' %>
+
+<%= thredded_page do %>
+  <section class="thredded--main-section mt-6">
+    <!-- Back to all users -->
+    <div class="mb-4">
+      <%= link_to users_moderation_path, class: 'inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors' do %>
+        <i class="material-icons text-base mr-1">arrow_back</i>
+        Back to all users
+      <% end %>
+    </div>
+
+    <!-- User Profile Card -->
+    <div class="user-profile-card bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden mb-8">
+      <div class="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+        <%= image_tag user.image_url(size: 80),
+                      class: 'user-avatar w-20 h-20 rounded-full border border-slate-200 dark:border-slate-700 object-cover flex-shrink-0' %>
+
+        <div class="flex-1 min-w-0">
+          <h1 class="thredded--moderation--user--title text-2xl font-bold text-slate-900 dark:text-white truncate">
+            <%= user.thredded_display_name %>
+          </h1>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <span class="moderation-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= state_badge_class %>">
+              <i class="material-icons text-xs mr-1"><%= state_icon %></i>
+              <%= state.humanize %>
+            </span>
+            <% if user_detail.moderation_state_changed_at %>
+              <span class="text-xs text-slate-500 dark:text-slate-400">
+                changed <%= time_ago user_detail.moderation_state_changed_at %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Moderation Actions -->
+        <div class="thredded--user--moderation-actions flex flex-wrap gap-2 sm:flex-shrink-0">
+          <% unless user_detail.approved? %>
+            <%= button_to moderate_user_path,
+                          class: 'inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-colors',
+                          params: { id: user.to_model.id, moderation_state: 'approved' } do %>
+              <i class="material-icons text-base mr-2">check_circle</i>
+              <%= t('thredded.moderation.approve_btn') %>
+            <% end %>
+          <% end %>
+          <% unless user_detail.blocked? %>
+            <%= button_to moderate_user_path,
+                          class: 'inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700 shadow-sm transition-colors',
+                          params: { id: user.to_model.id, moderation_state: 'blocked' } do %>
+              <i class="material-icons text-base mr-2">block</i>
+              <%= t('thredded.moderation.block_btn') %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- User Stats -->
+      <ul class="thredded--moderation--user--info grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 dark:bg-slate-700 border-t border-slate-200 dark:border-slate-700">
+        <li class="bg-white dark:bg-slate-800 p-4 flex flex-col items-center text-center">
+          <i class="material-icons text-slate-400 dark:text-slate-500 mb-1">event</i>
+          <div class="text-sm font-semibold text-slate-800 dark:text-white"><%= time_ago user.created_at %></div>
+          <div class="text-xxs text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Member since</div>
+        </li>
+        <li class="bg-white dark:bg-slate-800 p-4 flex flex-col items-center text-center">
+          <i class="material-icons text-slate-400 dark:text-slate-500 mb-1">schedule</i>
+          <div class="text-sm font-semibold text-slate-800 dark:text-white">
+            <%= time_ago user_detail.last_seen_at, default: 'Never' %>
+          </div>
+          <div class="text-xxs text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Last active</div>
+        </li>
+        <li class="bg-white dark:bg-slate-800 p-4 flex flex-col items-center text-center">
+          <i class="material-icons text-slate-400 dark:text-slate-500 mb-1">forum</i>
+          <div class="text-xl font-bold text-slate-800 dark:text-white"><%= user_detail.topics_count %></div>
+          <div class="text-xxs text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Topics started</div>
+        </li>
+        <li class="bg-white dark:bg-slate-800 p-4 flex flex-col items-center text-center">
+          <i class="material-icons text-slate-400 dark:text-slate-500 mb-1">chat_bubble</i>
+          <div class="text-xl font-bold text-slate-800 dark:text-white"><%= user_detail.posts_count %></div>
+          <div class="text-xxs text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">Posts</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Recent Activity -->
+    <% if @posts.present? %>
+      <div class="moderation-posts">
+        <div class="moderation-posts-header flex items-center mb-6">
+          <h2 class="text-xl font-bold text-slate-800 dark:text-white flex items-center">
+            <i class="material-icons mr-2 text-slate-400 dark:text-slate-500">timeline</i>
+            <%= t 'thredded.users.recent_activity' %>
+          </h2>
+        </div>
+
+        <div class="space-y-6">
+          <%= render_posts @posts,
+                           partial: 'thredded/moderation/user_post',
+                           content_partial: 'thredded/posts/content' %>
+        </div>
+      </div>
+
+      <div class="mt-8 flex justify-center">
+        <%= paginate @posts %>
+      </div>
+    <% else %>
+      <div class="thredded--empty bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 py-16 px-6 text-center">
+        <div class="empty-icon text-slate-300 dark:text-slate-600 mb-4 inline-block">
+          <i class="material-icons" style="font-size: 48px;">inbox</i>
+        </div>
+        <h3 class="thredded--empty--title text-xl font-bold text-slate-800 dark:text-white mb-2">No recent activity</h3>
+        <p class="text-slate-500 dark:text-slate-400">This user hasn't posted anything you can moderate.</p>
+      </div>
+    <% end %>
+  </section>
+<% end %>

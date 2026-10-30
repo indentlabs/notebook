@@ -43,19 +43,26 @@ class PageCollection < ApplicationRecord
     User.where(id: accepted_submissions.pluck(:user_id) - [user.id])
   end
 
-  def random_public_image
+  def editor_picks_ordered
+    accepted_submissions.editor_picks.order(:editor_pick_position).limit(6)
+  end
+
+  # The collection's own header: the cover_image URL column, else the
+  # uploaded header image, else the generic placeholder.
+  #
+  # cover_image is a legacy column that nothing writes any more. Read it only
+  # here; its name shadows the gallery API (HasImageUploads#cover_image).
+  def header_image_url
     return cover_image if cover_image.present?
+    return header_image if header_image.attached?
 
-    if header_image.attachment.present?
-      return header_image
-    end
-
-    # If all else fails, fall back on default header
     ActionController::Base.helpers.asset_path("card-headers/#{self.class.name.downcase.pluralize}.webp")
   end
 
-  def first_public_image
-    random_public_image
+  # Whether header_image_url is the collection's own image rather than the
+  # placeholder.
+  def custom_header_image?
+    cover_image.present? || header_image.attached?
   end
 
   def name
@@ -71,11 +78,15 @@ class PageCollection < ApplicationRecord
   serialize :page_types, Array
 
   def self.color
-    'brown'
+    'brown bg-brown-800'
+  end
+
+  def text_color
+    PageCollection.text_color
   end
 
   def self.text_color
-    'brown-text'
+    'text-brown-800 brown-text'
   end
 
   def self.hex_color
@@ -83,6 +94,10 @@ class PageCollection < ApplicationRecord
   end
 
   def self.icon
-    'layers'
+    'auto_stories'
+  end
+
+  def page_type
+    'Collection'
   end
 end

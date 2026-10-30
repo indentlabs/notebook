@@ -1,0 +1,285 @@
+require 'test_helper'
+require 'minitest/mock'
+
+class ContentImageHelperTest < ActionView::TestCase
+  include ContentImageHelper
+
+  setup do
+    @user = users(:one)
+    @character = characters(:one)
+    @character.update!(user: @user)
+    @user.update!(upload_bandwidth_kb: 5000)
+    ImageUpload.where(content_type: 'Character', content_id: @character.id).delete_all
+  end
+
+  teardown do
+    @upload&.destroy
+  end
+
+  test "renders the content type placeholder when there are no images" do
+    html = content_image_tag(@character, :card, class: 'w-full')
+
+    assert_includes html, 'card-headers/characters'
+    assert_includes html, 'class="w-full"'
+    assert_includes html, 'placeholder image'
+  end
+
+  test "serves the preset derivative when it has been generated" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    html = content_image_tag(@character, :banner, class: 'hero')
+
+    assert_includes html, '/banner/'
+    assert_includes html, '.webp'
+    assert_not_includes html, 'object-position', 'a centred focal point needs no positioning'
+    assert_not_includes html, 'loading="lazy"', 'banners are above the fold'
+    assert_includes html, 'width="2400"'
+    assert_includes html, 'height="800"'
+    assert_includes html, 'decoding="async"'
+    assert_match(/srcset="[^"]*\/banner_sm\/[^"]* 750w, [^"]*\/banner\/[^"]* 2400w"/, html)
+    assert_includes html, 'sizes="100vw"'
+  end
+
+  test "small images keep their own size and skip the srcset" do
+    @upload = create_upload
+    html = content_image_tag(@character, :banner)
+
+    assert_includes html, 'width="64"', 'a 64px-wide image is not described as 2400px'
+    assert_includes html, 'height="21"'
+    assert_not_includes html, 'srcset', 'both sizes would be the same file'
+  end
+
+  test "keeps the focal point in view when the box is a different shape" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    # 3:2 image, so the automatic banner crop is the top half (the focal point
+    # is too near the top edge to centre on); 0.2 sits 40% of the way down it.
+    @upload.update_columns(focal_x: 0.5, focal_y: 0.2)
+    @character.clear_cover_image_cache
+
+    assert_includes content_image_tag(@character, :banner), 'object-position: 50.0% 40.0%'
+  end
+
+  test "centres a custom crop that leaves the focal point out" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    @upload.update_columns(focal_x: 0.5, focal_y: 0.9, crops: { 'banner' => { 'x' => 0, 'y' => 0, 'w' => 1, 'h' => 0.5 } })
+    @character.clear_cover_image_cache
+
+    assert_not_includes content_image_tag(@character, :banner), 'object-position'
+  end
+
+  test "small boxes get the reduced square derivative" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    html = content_image_tag(@character, :square, size: :small, class: 'w-12 h-12')
+
+    assert_includes html, '/square_sm/'
+    assert_includes html, 'width="200"'
+    assert_not_includes html, 'srcset'
+  end
+
+  test "shapes without a small size get no srcset" do
+    @upload = create_upload(file: 'gallery_large_test.png')
+    html = content_image_tag(@character, :card)
+
+    assert_includes html, '/card/'
+    assert_not_includes html, 'srcset'
+    assert_includes html, 'width="900"'
+  end
+
+  test "falls back to a general size with the focal point when derivatives are missing" do
+    @upload = create_upload
+    @upload.update_columns(crops_generated_at: nil, focal_x: 0.25, focal_y: 0.75)
+    @character.clear_cover_image_cache
+
+    html = content_image_tag(@character, :card, class: 'card')
+
+    assert_includes html, '/large/'
+    assert_includes html, 'object-position: 25.0% 75.0%'
+    assert_includes html, 'loading="lazy"'
+  end
+
+  test "hides private images unless include_private is set" do
+    @upload = create_upload(privacy: 'private')
+
+    public_html = content_image_tag(@character, :card)
+    assert_includes public_html, 'card-headers/characters'
+
+    @character.clear_cover_image_cache
+    private_html = content_image_tag(@character, :card, include_private: true)
+    assert_includes private_html, '/card/'
+  end
+
+  test "uses notes as alt text when present" do
+    @upload = create_upload
+    @upload.update!(notes: 'Amelia at the harbour')
+    @character.clear_cover_image_cache
+
+    assert_includes content_image_tag(@character, :square), 'alt="Amelia at the harbour"'
+  end
+
+  test "social image url prefers the link-preview framing, then the card" do
+    @upload = create_upload
+
+    # In production Paperclip returns an absolute S3 URL; locally it is a path.
+    assert_includes content_social_image_url(@character), '/social/'
+
+    @upload.update_columns(crops_generated_at: nil)
+    @character.clear_cover_image_cache
+    assert_includes content_social_image_url(@character), '/hero/'
+  end
+
+  test "social meta uses a large summary card with image dimensions" do
+    @upload = create_upload
+    meta = content_social_meta(@character)
+
+    assert_equal 'summary_large_image', meta[:twitter][:card]
+    assert_equal 1200, meta[:og][:image][:width]
+    assert_equal 630, meta[:og][:image][:height]
+    assert_includes meta[:og][:image][:_], '/social/'
+  end
+
+  test "a shape-specific cover wins for its shape only" do
+    banner_image = create_upload
+    @upload = create_upload
+    banner_image.update_columns(cover_for: ['banner'])
+    @upload.update_columns(pinned: true)
+    @character.clear_cover_image_cache
+
+    banner_html = content_image_tag(@character, :banner)
+    square_html = content_image_tag(@character, :square)
+
+    assert_includes banner_html, banner_image.src_file_name.split('.').first
+    assert_includes square_html, @upload.src_file_name.split('.').first
+  ensure
+    banner_image&.destroy
+  end
+
+  test "pinned images win over earlier ones" do
+    first = create_upload
+    @upload = create_upload
+    @upload.update_columns(pinned: true)
+    @character.clear_cover_image_cache
+
+    assert_equal @upload.id, @character.cover_image(include_private: true).id
+  ensure
+    first&.destroy
+  end
+
+  test "content_hero_banner_tag renders placeholder when there are no images" do
+    html = content_hero_banner_tag(@character)
+
+    assert_includes html, 'card-headers/characters'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders ambient blurred backdrop when cover is narrow without custom crop" do
+    @upload = create_upload
+    @upload.update_columns(width: 600, height: 900)
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_includes html, 'blur-2xl'
+    assert_includes html, 'scale-110'
+    assert_includes html, 'opacity-50'
+    assert_includes html, 'object-contain'
+    assert_includes html, 'drop-shadow-2xl'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when image has a custom banner crop" do
+    @upload = create_upload
+    @upload.update_columns(
+      width: 600,
+      height: 900,
+      crops: { 'banner' => { 'x' => 0.0, 'y' => 0.2, 'w' => 1.0, 'h' => 0.22 } }
+    )
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when image is naturally wide" do
+    @upload = create_upload
+    @upload.update_columns(width: 1500, height: 500)
+    @character.clear_cover_image_cache
+
+    html = content_hero_banner_tag(@character)
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, '/banner/'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders full-bleed when the cover has no display URL" do
+    @upload = create_upload
+    @upload.update_columns(width: 600, height: 900)
+    @character.clear_cover_image_cache
+
+    image = ContentImage.wrap(@upload)
+    html = image.stub(:display_url, nil) do
+      @character.stub(:cover_image, image) { content_hero_banner_tag(@character) }
+    end
+
+    assert_not_includes html, 'blur-2xl'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_hero_banner_tag renders a page collection's own header" do
+    collection = page_collections(:one)
+    collection.cover_image = 'https://example.com/collection-cover.png'
+
+    html = content_hero_banner_tag(collection)
+
+    assert_includes html, 'https://example.com/collection-cover.png'
+    assert_includes html, 'object-cover'
+  end
+
+  test "content_cover_image? reflects whether a gallery page has an image" do
+    assert_not content_cover_image?(@character)
+
+    @upload = create_upload(privacy: 'private')
+    @character.clear_cover_image_cache
+    assert_not content_cover_image?(@character)
+    assert content_cover_image?(@character, include_private: true)
+    assert_equal @upload.id, content_cover_image(@character, include_private: true).id
+  end
+
+  # PageCollection's legacy cover_image column shadows the gallery API and
+  # takes no arguments; calling it with options used to raise ArgumentError.
+  test "page collections render their own header instead of the gallery API" do
+    collection = page_collections(:one)
+    collection.cover_image = 'https://example.com/collection-cover.png'
+
+    assert_nil content_cover_image(collection)
+    assert content_cover_image?(collection)
+    html = content_image_tag(collection, :card, class: 'w-full')
+    assert_includes html, 'https://example.com/collection-cover.png'
+    assert_includes html, 'class="w-full"'
+
+    collection.cover_image = nil
+    assert_not content_cover_image?(collection)
+    assert_includes content_image_tag(collection, :card), 'card-headers/pagecollections'
+  end
+
+  test "records with neither a gallery nor a header have no cover" do
+    record = Object.new
+
+    assert_nil content_cover_image(record)
+    assert_not content_cover_image?(record)
+  end
+
+  private
+
+  def create_upload(privacy: 'public', file: 'gallery_test.png')
+    ImageUpload.create!(
+      user: @user,
+      content_type: 'Character',
+      content_id: @character.id,
+      privacy: privacy,
+      src: Rack::Test::UploadedFile.new(Rails.root.join('test/fixtures/files', file), 'image/png')
+    )
+  end
+
+end

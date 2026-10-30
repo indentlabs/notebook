@@ -1,0 +1,36 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+  <% Rails.application.config.content_types[:all_non_universe].each do |content_type| %>
+    <% 
+      plural_name = content_type.name.downcase.pluralize
+      count = raw_content.public_send(plural_name).count
+      next if count == 0 
+    %>
+    
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
+      <div class="p-6 flex-grow">
+        <div class="flex items-center justify-between mb-4">
+          <div class="w-12 h-12 <%= content_type.color %> bg-opacity-10 dark:bg-opacity-20 rounded-xl flex items-center justify-center">
+            <i class="material-icons text-2xl <%= content_type.text_color %>"><%= content_type.icon %></i>
+          </div>
+          <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            <%= count %>
+          </span>
+        </div>
+        
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          <%= plural_name.titleize %>
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 text-sm mb-6 flex-grow">
+          <%= t("content_descriptions.#{content_type.name.downcase}", default: "Manage #{plural_name} in your universe.") %>
+        </p>
+      </div>
+      
+      <div class="px-6 pb-6 mt-auto">
+        <%= link_to send("#{plural_name}_universe_path", { id: raw_content.id }), class: "group flex items-center justify-center w-full px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white #{content_type.color} hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200" do %>
+          <i class="material-icons mr-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</i>
+          View <%= count %> <%= count == 1 ? content_type.name : plural_name.titleize %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -1,40 +1,156 @@
-<table>
-  <tr>
-    <th>ID</th>
-    <th>Code</th>
-    <th>Internal description</th>
-    <th>Public description</th>
-    <th>Availability</th>
-    <th class="center">Active now</th>
-    <th>Pages unlocked</th>
-    <th class="center">Days active</th>
-  </tr>
-  <% @codes.each do |code| %>
-    <tr>
-      <td><%= code.id %></td>
-      <td><%= code.code %></td>
-      <td><%= code.internal_description %></td>
-      <td><%= code.description %></td>
-      <td>
-        <% used = code.promotions.pluck(:user_id).uniq.count %>
-        <% ratio = (code.uses_remaining * 100.0) / (code.uses_remaining + used) %>
-        <div class="progress">
-          <div class="determinate green" style="width: <%= ratio.round(1) %>%"></div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Promo Codes</h1>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Manage page unlock promotional codes and track their usage
+    </p>
+  </div>
+
+  <%
+    total_codes = @codes.count
+    total_used = @codes.sum { |c| c.promotions.pluck(:user_id).uniq.count }
+    total_active = @codes.sum { |c| c.promotions.active.pluck(:user_id).uniq.count }
+  %>
+
+  <!-- Summary Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+          <svg class="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+          </svg>
         </div>
-        <ul>
-          <li><strong><%= used %></strong> used</li>
-          <li><strong><%= code.uses_remaining %></strong> remaining</li>
-          <li><strong><%= used + code.uses_remaining %></strong> originally available</li>
-        </ul>
-      </td>
-      <td class="center"><h3><%= code.promotions.active.pluck(:user_id).uniq.count %></h3></td>
-      <td>
-        <% code.page_types.each do |page_type| %>
-          <% klass = content_class_from_name(page_type) %>
-          <i class="material-icons medium <%= klass.text_color %>"><%= klass.icon %></i>
-        <% end %>
-      </td>
-      <td class="center"><%= code.days_active %> days</td>
-    </tr>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Codes</p>
+          <p class="text-2xl font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter total_codes %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-green-100 dark:bg-green-900 rounded-lg">
+          <svg class="h-6 w-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Redeemed</p>
+          <p class="text-2xl font-semibold text-green-600 dark:text-green-400"><%= number_with_delimiter total_used %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+          <svg class="h-6 w-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Currently Active</p>
+          <p class="text-2xl font-semibold text-purple-600 dark:text-purple-400"><%= number_with_delimiter total_active %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Promo Codes Table -->
+  <% if @codes.any? %>
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">All Promo Codes</h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-900">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Availability</th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Active Now</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Page Types</th>
+              <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Duration</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <% @codes.each do |code| %>
+              <%
+                used = code.promotions.pluck(:user_id).uniq.count
+                total = used + code.uses_remaining
+                ratio = total > 0 ? (code.uses_remaining * 100.0) / total : 0
+                active_count = code.promotions.active.pluck(:user_id).uniq.count
+              %>
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                  <%= code.id %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-mono font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                    <%= code.code %>
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900 dark:text-white"><%= code.internal_description %></div>
+                  <% if code.description.present? %>
+                    <div class="text-sm text-gray-500 dark:text-gray-400"><%= code.description %></div>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="w-32">
+                    <!-- Progress bar -->
+                    <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div class="h-full bg-green-500 dark:bg-green-400 rounded-full" style="width: <%= ratio.round(1) %>%"></div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+                      <div><span class="font-medium text-gray-700 dark:text-gray-300"><%= used %></span> used</div>
+                      <div><span class="font-medium text-gray-700 dark:text-gray-300"><%= code.uses_remaining %></span> remaining</div>
+                      <div><span class="font-medium text-gray-700 dark:text-gray-300"><%= total %></span> original</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <% if active_count > 0 %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                      <%= active_count %>
+                    </span>
+                  <% else %>
+                    <span class="text-sm text-gray-400 dark:text-gray-500">0</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex flex-wrap gap-1">
+                    <% code.page_types.each do |page_type| %>
+                      <% klass = content_class_from_name(page_type) %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium" style="background-color: <%= klass.hex_color %>20; color: <%= klass.hex_color %>;">
+                        <%= page_type %>
+                      </span>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span class="text-sm font-medium text-gray-900 dark:text-white"><%= code.days_active %></span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">days</span>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% else %>
+    <!-- Empty state -->
+    <div class="text-center py-16 bg-white dark:bg-gray-800 rounded-lg shadow">
+      <svg class="mx-auto h-16 w-16 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No promo codes</h3>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No promotional codes have been created yet.</p>
+    </div>
   <% end %>
-</table>
+</div>

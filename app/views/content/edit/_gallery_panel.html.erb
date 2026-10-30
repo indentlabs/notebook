@@ -1,0 +1,186 @@
+<%#
+  Gallery tab on content#edit (also rendered by books/edit).
+
+  Locals:
+    raw_content - the page (Character, Location, Book, ...)
+    content     - the same page, possibly serialized (only used for labels)
+    f           - the surrounding form builder (used by the no-JS fallback)
+%>
+<%
+  images = ContentImage.gallery_for(raw_content, viewer: current_user)
+  total_images = images.size
+  cover = images.find(&:cover?)
+  basil_enabled = BasilService::ENABLED_PAGE_TYPES.include?(raw_content.class.name)
+  remaining_kb = current_user.upload_bandwidth_kb.to_f
+  page_label = raw_content.try(:page_type).presence || raw_content.class.name
+%>
+
+<div class="space-y-8 rounded-lg"
+     data-controller="gallery lightbox"
+     data-lightbox-page-name-value="<%= raw_content.try(:name) %>"
+     data-gallery-content-type-value="<%= raw_content.class.name %>"
+     data-gallery-content-id-value="<%= raw_content.id %>"
+     data-gallery-sort-url-value="/api/v1/gallery_images/sort"
+     data-gallery-upload-url-value="<%= image_uploads_path %>"
+     data-gallery-remaining-kb-value="<%= remaining_kb %>"
+     data-gallery-presets-value="<%= ImagePresets.as_json.to_json %>"
+     data-action="dragenter->gallery#dragEnter dragover->gallery#dragOver dragleave->gallery#dragLeave drop->gallery#drop">
+
+  <%# Images %>
+  <div class="<%= total_images.zero? ? 'hidden' : '' %>">
+    <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
+          Images
+          <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 tabular-nums"
+                data-gallery-target="count"><%= total_images %></span>
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-gallery-target="coverSummary">
+          <% if cover %>
+            Your default cover is used on cards, banners, thumbnails and link previews unless you pick another image for one of them.
+          <% else %>
+            No cover chosen yet. A random image is used on cards and banners until you set one.
+          <% end %>
+        </p>
+      </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center <%= total_images < 2 ? 'hidden' : '' %>"
+         data-gallery-target="hint">
+        <i class="material-icons text-sm mr-1">drag_indicator</i>
+        Drag an image to reorder, or use the arrows on each card.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-gallery-target="grid">
+      <% images.each do |image| %>
+        <%= render partial: 'content/edit/gallery/card', locals: { image: image, content: raw_content } %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Empty state %>
+  <div class="text-center py-10 px-6 bg-white dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 <%= total_images.zero? ? '' : 'hidden' %>"
+       data-gallery-target="empty">
+    <div class="mx-auto h-14 w-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mb-3">
+      <i class="material-icons text-2xl text-gray-400 dark:text-gray-500">photo_library</i>
+    </div>
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No images yet</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+      Add images below and one of them will become this <%= page_label.downcase %>'s cover on cards, the page banner and link previews.
+    </p>
+  </div>
+
+  <%# Upload %>
+  <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+      <i class="material-icons text-sm align-middle mr-2">file_upload</i>
+      Upload images
+    </h3>
+
+    <% if remaining_kb > 0 %>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        You have <span class="font-medium tabular-nums" data-gallery-target="bandwidth"><%= number_to_human_size(remaining_kb * 1000) %></span> of upload bandwidth remaining.
+      </p>
+    <% else %>
+      <div class="bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 mb-4">
+        <p class="text-sm text-yellow-800 dark:text-yellow-200">
+          <i class="material-icons text-xs align-middle mr-1">warning</i>
+          You have <span data-gallery-target="bandwidth">no</span> upload bandwidth remaining.
+          <%= link_to 'Upgrade to Premium', subscription_path, class: 'underline font-medium' %> or delete some existing images for more.
+        </p>
+      </div>
+    <% end %>
+
+    <div class="gallery-dropzone__prompt flex flex-col items-center justify-center gap-3 py-8 px-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-center transition-colors"
+         data-gallery-target="dropzone">
+      <i class="material-icons text-4xl text-blue-500">cloud_upload</i>
+      <div>
+        <p class="text-sm font-medium text-gray-900 dark:text-white">Drop images here, paste from your clipboard, or</p>
+        <div class="mt-2 flex flex-wrap items-center justify-center gap-2">
+          <button type="button"
+                  class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  data-action="gallery#pickFiles">
+            <i class="material-icons text-sm mr-2">add_photo_alternate</i>
+            Choose images
+          </button>
+          <button type="button"
+                  class="gallery-touch-only items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  data-action="gallery#takePhoto">
+            <i class="material-icons text-sm mr-2">photo_camera</i>
+            Take a photo
+          </button>
+        </div>
+      </div>
+      <p class="text-xs text-gray-500 dark:text-gray-400">JPG, PNG, GIF, WebP or HEIC (iPhone photos are converted automatically). Select several at once; each one appears in the gallery as soon as it finishes uploading.</p>
+      <label class="inline-flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300 cursor-pointer max-w-md text-left">
+        <input type="checkbox" class="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+               data-gallery-target="shrinkToggle"
+               data-action="change->gallery#rememberShrink">
+        <span>
+          <span class="font-medium text-gray-700 dark:text-gray-200">Shrink large photos before uploading.</span>
+          Photos wider than 2500 px are resized in your browser first, which saves upload bandwidth and keeps plenty of detail for banners.
+        </span>
+      </label>
+      <input type="file" accept="image/*,.heic,.heif" multiple class="hidden" tabindex="-1" aria-hidden="true"
+             data-gallery-target="fileInput"
+             data-action="change->gallery#filesChosen">
+      <input type="file" accept="image/*" capture="environment" class="hidden" tabindex="-1" aria-hidden="true"
+             data-gallery-target="cameraInput"
+             data-action="change->gallery#filesChosen">
+    </div>
+
+    <div class="mt-4 space-y-2 hidden" data-gallery-target="queue" aria-live="polite"></div>
+
+    <noscript>
+      <div class="mt-4 space-y-4">
+        <%= render partial: 'content/form/images/upload', locals: { f: f, content: content } %>
+        <%= f.button :submit,
+          class: 'inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700' do %>
+          <i class="material-icons text-sm mr-2">cloud_upload</i>
+          <span>Upload images</span>
+        <% end %>
+      </div>
+    </noscript>
+  </div>
+
+  <%# Full-size viewer (clicking an image), with an "Edit framing" hand-off to the editor %>
+  <%= render partial: 'content/show/lightbox' %>
+
+  <%# Image editor modal (opened from each card's "Edit framing" button) %>
+  <%= render partial: 'content/edit/gallery/editor', locals: { content: raw_content } %>
+
+  <%# Generate with Basil %>
+  <% if basil_enabled %>
+    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 rounded-lg p-6 border border-purple-200 dark:border-purple-800">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0 w-10 h-10 bg-purple-100 dark:bg-purple-800 rounded-full flex items-center justify-center">
+            <i class="material-icons text-purple-600 dark:text-purple-200 text-sm">auto_awesome</i>
+          </div>
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">Generate with Basil</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              Basil uses the details on this <%= page_label.downcase %> to create images that match your vision. The more you've written about appearance, the better the results.
+            </p>
+            <% if current_user && !current_user.on_premium_plan? %>
+              <% generated_count = current_user.basil_commissions.with_deleted.count %>
+              <% free_limit = BasilService::FREE_IMAGE_LIMIT %>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 tabular-nums">
+                <%= generated_count %> / <%= free_limit %> free images generated.
+                <% if generated_count >= free_limit %>
+                  <%= link_to "Upgrade", subscription_path, class: "font-medium text-purple-600 dark:text-purple-300 underline" %>
+                <% end %>
+              </p>
+            <% end %>
+          </div>
+        </div>
+
+        <%= link_to basil_content_path(raw_content.page_type.downcase, raw_content.id),
+            class: 'flex-shrink-0 inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all group' do %>
+          <i class="material-icons text-sm mr-2 group-hover:scale-110 transition-transform">auto_awesome</i>
+          <span>Generate an image</span>
+          <i class="material-icons text-sm ml-2 opacity-70 group-hover:translate-x-1 transition-transform">arrow_forward</i>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

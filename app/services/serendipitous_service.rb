@@ -8,14 +8,6 @@ class SerendipitousService < Service
       hidden:      [nil, false]
     )
 
-    # TODO: we should remove this at some point. How do we know when it's safe to do so?
-    # TODO: is this what creates new fields/categories for new users? hopefully not.
-    if categories_for_this_type.empty? && content.present?
-      # If this page type has no categories, it needs migrated to the new attribute system
-      TemporaryFieldMigrationService.migrate_fields_for_content(content, content.user)
-    end
-    #raise categories_for_this_type.pluck(:label).inspect
-  
     fields_for_these_categories = AttributeField.where(
       user:        content.user,
       field_type:  "text_area",

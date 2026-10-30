@@ -103,12 +103,6 @@ end
       next if ["private_notes", "notes", "privacy", "universe_id"].include?(field)
       "    - :name: #{field.to_s}\n      :label: #{field.to_s.titleize}"
     end.compact.join("\n") + """
-:gallery:
-  :label: Gallery
-  :icon: photo_library
-:changelog:
-  :label: Changelog
-  :icon: history
 :notes:
   :label: Notes
   :icon: edit

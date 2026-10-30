@@ -1,0 +1,100 @@
+<div class="fixed z-50 inset-0 overflow-y-auto" id="edit-folder-modal">
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" @click="showEditFolderModal = false"></div>
+  <div class="relative min-h-screen flex items-center justify-center p-4">
+    <div
+      class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden w-full max-w-md transform transition-all"
+      @click.away="showEditFolderModal = false"
+    >
+      <%= form_for folder do |f| %>
+        <!-- Gradient Header -->
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-blue-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-white dark:bg-gray-900 flex items-center justify-center mr-3">
+                <i class="material-icons text-blue-600"><%= Folder.icon %></i>
+              </div>
+              <h3 class="text-lg font-medium text-white">Edit Folder</h3>
+            </div>
+            <button type="button" @click="showEditFolderModal = false" class="text-white hover:text-gray-100 focus:outline-none">
+              <i class="material-icons">close</i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Form Content -->
+        <div class="p-6">
+          <!-- Folder Name -->
+          <div class="mb-4">
+            <label for="folder_title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Folder name</label>
+            <%= f.text_field :title,
+                class: "w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white",
+                id: "folder_title" %>
+          </div>
+
+          <!-- Parent Folder Dropdown -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Parent folder</label>
+            <%= render 'shared/folder_dropdown',
+                form: f,
+                field_name: :parent_folder_id,
+                selected_id: folder.parent_folder_id,
+                selected_name: folder.parent_folder&.title || 'None',
+                folders: current_user.folders,
+                exclude_id: folder.id,
+                context: folder.context,
+                color: 'blue',
+                none_label: 'None' %>
+          </div>
+
+          <!-- Preserve context on update -->
+          <%= f.hidden_field :context, value: folder.context %>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+          <div class="flex flex-col-reverse sm:flex-row sm:justify-between gap-3 sm:gap-0">
+            <!-- Delete button placeholder - actual button is outside form to avoid nested forms -->
+            <div id="delete-folder-button-placeholder"></div>
+
+            <!-- Save and Cancel buttons on the right -->
+            <div class="flex flex-col sm:flex-row-reverse gap-2 sm:gap-3">
+              <%= f.submit 'Save changes',
+                  class: "w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-blue-500 border border-transparent rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+              <button type="button"
+                  class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  @click="showEditFolderModal = false">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Delete button form - outside main form to avoid nested forms issue -->
+      <%
+        if folder.parent_folder
+          confirmation_text = "Are you sure you want to delete this folder?\n\n• All documents in this folder will be moved to \"#{folder.parent_folder.title}\"\n• All subfolders will be moved to \"#{folder.parent_folder.title}\"\n• The folder will be permanently deleted\n\nThis action cannot be undone."
+          js_confirmation_text = "Are you sure you want to delete this folder?\\n\\n• All documents in this folder will be moved to \\\"#{folder.parent_folder.title}\\\"\\n• All subfolders will be moved to \\\"#{folder.parent_folder.title}\\\"\\n• The folder will be permanently deleted\\n\\nThis action cannot be undone."
+        else
+          confirmation_text = "Are you sure you want to delete this folder?\n\n• All documents in this folder will be moved to the root\n• All subfolders will be moved to the root\n• The folder will be permanently deleted\n\nThis action cannot be undone."
+          js_confirmation_text = "Are you sure you want to delete this folder?\\n\\n• All documents in this folder will be moved to the root\\n• All subfolders will be moved to the root\\n• The folder will be permanently deleted\\n\\nThis action cannot be undone."
+        end
+      %>
+      <div class="px-6 pb-4 bg-gray-50 dark:bg-gray-900">
+        <%= button_to folder_path(folder),
+            method: :delete,
+            form: {
+              class: "inline-block w-full sm:w-auto",
+              data: {
+                turbo_confirm: confirmation_text
+              },
+              onsubmit: "return confirm('#{js_confirmation_text}');"
+            },
+            class: "w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900 hover:bg-red-100 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500" do %>
+          <i class="material-icons mr-2 text-sm">delete</i>
+          Delete Folder
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

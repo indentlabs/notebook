@@ -41,13 +41,26 @@ Rails.application.configure do
   # Use the :test queue adapter so jobs are not sent to Redis/Sidekiq.
   config.active_job.queue_adapter = :test
 
+  # Keep Paperclip files written by tests out of public/system, where they
+  # would collide with (and be deleted alongside) development uploads.
+  config.paperclip_defaults = {
+    path: ':rails_root/tmp/test_uploads/:class/:attachment/:id_partition/:style/:filename',
+    url:  '/test_uploads/:class/:attachment/:id_partition/:style/:filename'
+  }
+
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr
 
   # Raises error for missing translations
   # config.action_view.raise_on_missing_translations = true
 
+  # Match production's changelog serialization so updating an Attribute can load prior ContentChangeEvents
+  config.active_record.use_yaml_unsafe_load = true
+
   # Set test-mode Stripe API key
   Stripe.api_key = "We-don't-want-to-actually-hit-Stripe-from-tests"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
+
+  # Queue document background jobs immediately rather than debouncing them (see Document#enqueue_debounced)
+  config.x.document_job_debounce = 0
 end

@@ -1,0 +1,133 @@
+class WritingGoalsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_writing_goal, only: [:edit, :update, :destroy, :complete, :activate, :archive]
+  before_action :set_sidenav_expansion
+
+  def index
+    @page_title = "Writing Goals"
+    @active_goals = current_user.writing_goals.current.order(end_date: :asc)
+    @archived_goals_count = current_user.writing_goals.where('archived = ? OR completed_at IS NOT NULL', true).count
+
+    # Daily stats for header (always show, even without active goals)
+    # Uses User#daily_word_goal which defaults to 1,000 if no active goals
+    @max_daily_goal = current_user.daily_word_goal
+
+    # Words written today
+    @words_today = current_user.words_written_today
+
+    # Progress toward daily goal
+    @daily_progress_percentage = @max_daily_goal > 0 ? [(@words_today.to_f / @max_daily_goal * 100), 100.0].min : 0
+
+    # Words remaining today
+    @words_remaining_today = [@max_daily_goal - @words_today, 0].max
+
+    # Configurable time range for chart (use user's timezone)
+    user_today = current_user.current_date_in_time_zone
+    @chart_days = [7, 14, 30, 90].include?(params[:days].to_i) ? params[:days].to_i : 30
+    dates = ((user_today - (@chart_days - 1).days)..user_today).to_a
+    @daily_word_counts_30_days = WordCountUpdate.words_written_on_dates(current_user, dates)
+
+    # Summary statistics
+    @total_words_period = @daily_word_counts_30_days.values.sum
+    @days_goal_met = @daily_word_counts_30_days.count { |_, count| count >= @max_daily_goal }
+    @current_streak = calculate_writing_streak(@daily_word_counts_30_days, @max_daily_goal)
+  end
+
+  def history
+    @page_title = "Writing Goals History"
+
+    # Auto-complete any expired goals that weren't manually completed/archived
+    user_today = current_user.current_date_in_time_zone
+    current_user.writing_goals
+      .where(archived: false, completed_at: nil)
+      .where('end_date < ?', user_today)
+      .find_each { |goal| goal.update(completed_at: Time.current, active: false) }
+
+    @archived_goals = current_user.writing_goals
+      .where('archived = ? OR completed_at IS NOT NULL', true)
+      .order(end_date: :desc)
+  end
+
+  def new
+    @page_title = "New Writing Goal"
+    @writing_goal = current_user.writing_goals.build
+
+    # Use user's timezone for dates
+    user_today = current_user.current_date_in_time_zone
+
+    # Use query params if provided, otherwise use defaults
+    @writing_goal.title = params[:title] || "My Writing Goal"
+    @writing_goal.target_word_count = params[:target_word_count]&.to_i || 50000
+    @writing_goal.start_date = user_today
+
+    days = params[:days]&.to_i || 30
+    @writing_goal.end_date = user_today + days.days
+  end
+
+  def create
+    @writing_goal = current_user.writing_goals.build(writing_goal_params)
+
+    if @writing_goal.save
+      redirect_to writing_goals_path, notice: 'Writing goal created successfully!'
+    else
+      @page_title = "New Writing Goal"
+      render :new
+    end
+  end
+
+  def edit
+    @page_title = "Edit Writing Goal"
+  end
+
+  def update
+    if @writing_goal.update(writing_goal_params)
+      redirect_to writing_goals_path, notice: 'Writing goal updated successfully!'
+    else
+      @page_title = "Edit Writing Goal"
+      render :edit
+    end
+  end
+
+  def destroy
+    @writing_goal.destroy
+    redirect_to writing_goals_path, notice: 'Writing goal deleted.'
+  end
+
+  def complete
+    @writing_goal.update(active: false, completed_at: Time.current)
+    redirect_to writing_goals_path, notice: 'Goal marked as complete!'
+  end
+
+  def activate
+    @writing_goal.update(active: true, archived: false, completed_at: nil)
+    redirect_to writing_goals_path, notice: 'Goal activated!'
+  end
+
+  def archive
+    @writing_goal.archive!
+    redirect_to writing_goals_path, notice: 'Goal archived.'
+  end
+
+  private
+
+  def set_writing_goal
+    @writing_goal = current_user.writing_goals.find(params[:id])
+  end
+
+  def writing_goal_params
+    params.require(:writing_goal).permit(:title, :target_word_count, :start_date, :end_date)
+  end
+
+  def set_sidenav_expansion
+    @sidenav_expansion = 'writing'
+  end
+
+  def calculate_writing_streak(word_counts, goal)
+    streak = 0
+    word_counts.to_a.reverse.each do |_date, count|
+      break if count < goal
+      streak += 1
+    end
+    streak
+  end
+end

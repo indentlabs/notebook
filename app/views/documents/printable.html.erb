@@ -1,0 +1,14 @@
+<h1><%= @document.title %></h1>
+
+<div class="meta">
+  <span>By <%= @document.user.display_name %></span>
+  <% if @document.cached_word_count? %>
+    <% read_time = (@document.cached_word_count / 200.0).ceil %>
+    &middot; <%= read_time %> min read
+    &middot; <%= number_with_delimiter @document.cached_word_count %> words
+  <% end %>
+</div>
+
+<div class="content">
+  <%= ContentFormatterService.substitute_content_links(clean_links(@document.body.try(:html_safe)) || "", current_user).html_safe %>
+</div>

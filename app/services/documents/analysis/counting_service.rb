@@ -8,7 +8,8 @@ module Documents
         document = analysis.document
 
         # Length counters
-        analysis.word_count      = document.words.count
+        # Use WordCountService for consistent word counting across the app
+        analysis.word_count      = WordCountService.count(document.body)
         analysis.page_count      = document.pages.count
         analysis.paragraph_count = document.paragraphs.count
         analysis.character_count = document.characters.count

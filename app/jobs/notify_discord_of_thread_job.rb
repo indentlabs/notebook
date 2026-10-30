@@ -7,7 +7,8 @@ class NotifyDiscordOfThreadJob < ApplicationJob
     thread_id = args.shift
     thread    = Thredded::Topic.find_by(id: thread_id)
     raise "No thread found for new ID #{thread.id.inspect}" unless thread
-    return if thread.moderation_state == "blocked"
+    # Don't announce blocked threads, or threads held in the moderation queue (e.g. by automoderation)
+    return unless thread.approved?
 
     webhook_url = ENV.fetch('DISCORD_FORUMS_WEBHOOK', '').freeze
 

@@ -1,0 +1,108 @@
+# Produces (and locates) the per-shape derivatives of a gallery image.
+#
+# Uploaded images (Paperclip) get real files per ImagePresets style, cut by
+# the Cropper processor. Basil images (ActiveStorage) get variants whose key
+# already encodes the crop, so they are generated on first request and only
+# pre-warmed here.
+#
+#   ImageDerivativeService.generate!(image_upload)   # reprocess crop styles
+#   ImageDerivativeService.variant_for(commission, :banner)
+class ImageDerivativeService
+  # Regenerate the crop-shaped derivatives for +record+ from its current
+  # framing. Returns true when something was produced.
+  def self.generate!(record)
+    new(record).generate!
+  end
+
+  # One-off backfill: crop derivatives plus the xlarge WebP that uploads made
+  # before the gallery editor never had.
+  def self.backfill!(record)
+    new(record).generate!(styles: ImagePresets.style_names + [:xlarge])
+  end
+
+  def self.variant_for(commission, preset, small: false)
+    new(commission).variant_for(preset, small: small)
+  end
+
+  def initialize(record)
+    @record = record
+  end
+
+  def generate!(styles: ImagePresets.style_names)
+    case @record
+    when ImageUpload        then generate_upload_styles!(styles)
+    when BasilCommission    then prewarm_variants!
+    else false
+    end
+  end
+
+  # ActiveStorage variant for +preset+, cropped to the record's framing and
+  # encoded as WebP. +small+ picks the preset's reduced size when it has one.
+  # Like uploads (see Paperclip::Cropper), a crop smaller than the preset's
+  # size is not upscaled.
+  def variant_for(preset, small: false)
+    preset = ImagePresets[preset]
+    return nil if preset.nil? || !@record.image.attached? || !@record.image.variable?
+
+    pixels = @record.crop_pixels_for(preset.key)
+    target = (small && preset.small_size) || preset.size
+    transformations = {}
+    if pixels
+      x, y, w, h = pixels
+      transformations[:crop] = vips? ? [x, y, w, h] : "#{w}x#{h}+#{x}+#{y}"
+      # Already the preset's shape, so only ever shrink it.
+      transformations[:resize_to_limit] = target
+    else
+      transformations[:resize_to_fill] = target
+    end
+    transformations[:format] = :webp
+    transformations[:saver]  = { quality: 82 }
+
+    @record.image.variant(transformations)
+  end
+
+  private
+
+  def generate_upload_styles!(styles)
+    return false unless @record.src_file_name.present?
+
+    attachment = @record.src
+    # Paperclip silently skips styles it doesn't know, which would leave the
+    # old cut in place while reporting success. Fail loudly instead.
+    missing = styles.map(&:to_sym) - attachment.styles.keys.map(&:to_sym)
+    if missing.any?
+      raise ArgumentError, "ImageUpload has no Paperclip style(s) #{missing.join(', ')}; " \
+                           "is this process running code older than the one that enqueued the job?"
+    end
+
+    original_cleaner = attachment.options[:filename_cleaner]
+    # ImageUpload renames files to a fresh UUID on assignment. Reprocessing
+    # re-assigns the attachment, so without this the record would point at a
+    # new name while the original stayed under the old one.
+    attachment.options[:filename_cleaner] = ->(filename) { filename }
+
+    begin
+      attachment.reprocess!(*styles)
+    ensure
+      attachment.options[:filename_cleaner] = original_cleaner
+    end
+
+    @record.update_columns(crops_generated_at: Time.current)
+    true
+  end
+
+  def prewarm_variants!
+    return false unless @record.image.attached?
+
+    ImagePresets.keys.each do |key|
+      variant = variant_for(key)
+      variant.processed if variant
+    end
+    @record.update_columns(crops_generated_at: Time.current)
+    true
+  end
+
+  def vips?
+    ActiveStorage.variant_processor.to_s == 'vips'
+  end
+end

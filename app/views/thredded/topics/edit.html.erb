@@ -1,0 +1,128 @@
+<% content_for :thredded_page_title, t('thredded.nav.edit_topic') %>
+<% content_for :thredded_page_id, 'thredded--edit-topic' %>
+<% content_for :thredded_breadcrumbs do %>
+  <ul class="thredded--navigation-breadcrumbs">
+    <li><%= link_to t('thredded.nav.all_messageboards'), messageboards_path %></li>
+    <li><%= link_to messageboard.name, @edit_topic.messageboard_path %></li>
+    <li><%= link_to @edit_topic.title_was || @edit_topic.title, @edit_topic.path %></li>
+    <li><%= link_to t('thredded.nav.edit_topic'), @edit_topic.edit_path %></li>
+  </ul>
+<% end %>
+
+<%= thredded_page do %>
+  <section class="thredded--main-section">
+    <div class="edit-topic-container max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="edit-topic-header mb-6">
+        <h1 class="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <i class="material-icons text-blue-500 dark:text-blue-400">edit</i>
+          <%= t('thredded.nav.edit_topic') %>
+        </h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Update your topic's title, category, or settings.
+        </p>
+      </div>
+
+      <!-- Form Card -->
+      <div class="edit-topic-form-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+        <%= form_for @edit_topic,
+                     url: @edit_topic.path,
+                     html: { class: 'thredded--form thredded--is-expanded', 'data-thredded-topic-form' => true } do |form| %>
+
+          <div class="p-6 space-y-5">
+            <!-- Title Field -->
+            <div class="form-group">
+              <%= form.label :title, t('thredded.topics.form.title_label'),
+                  class: 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5' %>
+              <%= form.text_field :title,
+                    placeholder: t('thredded.topics.form.title_placeholder'),
+                    autofocus: true,
+                    required: true,
+                    class: 'w-full px-3 py-2.5 text-base border border-gray-300 dark:border-gray-600 rounded-md
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
+                           placeholder-gray-400 dark:placeholder-gray-500
+                           transition-colors duration-150' %>
+              <%= render 'thredded/shared/field_errors', messages: form.object.errors[:title] %>
+            </div>
+
+            <% if form.object.category_options.any? %>
+              <!-- Categories Field -->
+              <div class="form-group">
+                <%= form.label :category_ids, 'Categories',
+                    class: 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5' %>
+                <%= form.select :category_ids, form.object.category_options, {},
+                      multiple: true,
+                      'data-placeholder' => t('thredded.topics.form.categories_placeholder'),
+                      class: 'w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md
+                             bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                             focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400' %>
+              </div>
+            <% end %>
+
+            <!-- Messageboard Field -->
+            <div class="form-group">
+              <%= form.label :messageboard_id, t('thredded.topics.form.messageboard_label'),
+                  class: 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5' %>
+              <%= form.select :messageboard_id, form.object.messageboard_options,
+                    {},
+                    class: 'w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md
+                           bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400
+                           cursor-pointer' %>
+            </div>
+
+            <!-- Admin Options (Locked/Sticky) -->
+            <% topic = form.object.respond_to?(:topic) ? form.object.topic : form.object %>
+            <% if policy(topic).moderate? %>
+              <div class="form-group pt-4 border-t border-gray-200 dark:border-gray-700">
+                <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Topic Options</span>
+                <div class="flex flex-wrap gap-6">
+                  <label class="flex items-center gap-2 cursor-pointer group">
+                    <%= form.check_box :locked,
+                        class: 'w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600
+                               rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 cursor-pointer' %>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 flex items-center gap-1.5">
+                      <i class="material-icons text-base">lock</i>
+                      <%= t 'thredded.topics.locked.label' %>
+                    </span>
+                  </label>
+
+                  <label class="flex items-center gap-2 cursor-pointer group">
+                    <%= form.check_box :sticky,
+                        class: 'w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600
+                               rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 cursor-pointer' %>
+                    <span class="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 flex items-center gap-1.5">
+                      <i class="material-icons text-base">push_pin</i>
+                      <%= t 'thredded.topics.sticky.label' %>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Form Footer -->
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div>
+              <%= link_to @edit_topic.path,
+                  class: 'text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1' do %>
+                <i class="material-icons text-base">arrow_back</i>
+                Back to topic
+              <% end %>
+            </div>
+            <button type="submit"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700
+                           text-white text-sm font-medium rounded-md
+                           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                           dark:focus:ring-offset-gray-800
+                           transition-colors duration-150">
+              <i class="material-icons text-base">save</i>
+              <%= t('thredded.topics.form.update_btn') %>
+            </button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </section>
+<% end %>

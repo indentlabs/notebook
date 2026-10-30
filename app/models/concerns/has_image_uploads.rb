@@ -1,112 +1,101 @@
 require 'active_support/concern'
 
+# Gives a page its gallery (uploaded images plus saved Basil images) and one
+# way to ask which image represents it: cover_image / cover_image_url.
+#
+# Views should render through ContentImageHelper#content_image_tag; the URL
+# form exists for JSON, meta tags, hidden fields and mailers.
 module HasImageUploads
   extend ActiveSupport::Concern
 
   included do
     has_many :image_uploads, as: :content
+    accepts_nested_attributes_for :image_uploads, allow_destroy: true
     # todo: dependent: :destroy_async
     # todo: destroy from s3 on destroy
 
-    def public_image_uploads
-      self.image_uploads.where(privacy: 'public').presence || [header_asset_for(self.class.name)]
-    end
+    # The image that represents this page, as a ContentImage, or nil.
+    #
+    # Resolution order: an image chosen for +preset+ specifically (cover_for),
+    # then the pinned image, then the first (or a random) image with a file.
+    # Private uploads are only considered when include_private is true.
+    def cover_image(include_private: false, pick: :first, preset: nil)
+      @cover_image_cache ||= {}
+      preset = preset.to_s if preset.present? && ImagePresets.valid?(preset)
+      preset = nil unless preset.is_a?(String)
+      key = [include_private, pick, preset]
+      return @cover_image_cache[key] if @cover_image_cache.key?(key)
 
-    def private_image_uploads
-      self.image.uploads.where(privacy: 'private').presence || [header_asset_for(self.class.name)]
-    end
+      uploads = image_uploads.to_a
+      uploads = uploads.select { |upload| upload.privacy == 'public' } unless include_private
+      uploads = uploads.select { |upload| upload.src_file_name.present? }
 
-    def random_image_including_private(format: :medium)
-      @random_image_including_private_cache ||= {}
-      key = self.class.name + self.id.to_s
-      return @random_image_including_private_cache[key] if @random_image_including_private_cache.key?(key)
+      basil = if respond_to?(:basil_commissions)
+        source = basil_commissions
+        if source.respond_to?(:loaded?) && !source.loaded?
+          source.where.not(saved_at: nil).includes(image_attachment: :blob).to_a
+        else
+          source.to_a.select { |commission| commission.saved_at.present? }
+        end
+      else
+        []
+      end
+      basil = basil.select { |commission| commission.image.attached? }
 
-      # First check for pinned images (prioritize pinned images over random ones)
-      result = pinned_image_upload(format)
-      
-      # If no pinned image, fall back to random selection
-      if result.nil?
-        result = image_uploads.sample.try(:src, format)
-        
-        # If we don't have any uploaded images, we look for saved Basil commissions
-        if result.nil? && respond_to?(:basil_commissions)
-          result = basil_commissions.where.not(saved_at: nil).includes([:image_attachment]).sample.try(:image)
+      chosen = nil
+      if preset
+        chosen = uploads.select { |upload| upload.cover_for?(preset) }.min_by(&:id) ||
+                 basil.select { |commission| commission.cover_for?(preset) }.min_by(&:id)
+      end
+
+      chosen ||= uploads.select(&:pinned?).min_by(&:id) ||
+                 basil.select(&:pinned?).min_by(&:id)
+
+      if chosen.nil?
+        ordered_uploads = uploads.sort_by { |upload| [upload.position || 999_999, upload.id] }
+        ordered_basil   = basil.sort_by { |commission| [commission.position || 999_999, commission.id] }
+        chosen = if pick == :random
+          ordered_uploads.sample || ordered_basil.sample
+        else
+          ordered_uploads.first || ordered_basil.first
         end
       end
 
-      # Cache the result
-      @random_image_including_private_cache[key] = result
-
-      # Finally, if we have no image upload, we return the default image for this type
-      result = result.presence || header_asset_for(self.class.name)
-
-      result
+      @cover_image_cache[key] = chosen ? ContentImage.wrap(chosen) : nil
     end
 
-    def first_public_image(format = :medium)
-      # First check for pinned public images
-      pinned = pinned_public_image(format: format)
-      return pinned if pinned.present?
-      
-      # Fall back to first public image
-      public_image_uploads.first.try(:src, format).presence || header_asset_for(self.class.name)
+    def cover_image?(include_private: false)
+      cover_image(include_private: include_private).present?
     end
 
-    def random_public_image(format = :medium)
-      # First check for pinned public images
-      pinned = pinned_public_image(format: format)
-      return pinned if pinned.present?
-      
-      # Fall back to random public image
-      public_image_uploads.sample.try(:src, format).presence || header_asset_for(self.class.name)
+    # URL of the cover for +preset+ (see ImagePresets), for places that need a
+    # string rather than an <img> tag. Returns the type's placeholder asset
+    # path when there is no image, or nil when fallback is false.
+    def cover_image_url(preset = :card, include_private: false, pick: :first, size: :full, fallback: true)
+      image = cover_image(include_private: include_private, pick: pick, preset: preset)
+      url = image && (
+        image.preset_url(preset, size: size) ||
+        image.url(ImagePresets.fallback_size(preset)) ||
+        image.original_url
+      )
+      return url if url.present?
+
+      fallback ? ActionController::Base.helpers.asset_path(header_asset_for(self.class.name)) : nil
     end
-    
-    # Returns the pinned image upload (or nil if none pinned)
-    def pinned_image_upload(format = :medium)
-      # First check standard image uploads
-      pinned_upload = image_uploads.pinned.first
-      return pinned_upload.try(:src, format) if pinned_upload.present?
-      
-      # Then check basil commissions
+
+    def clear_cover_image_cache
+      @cover_image_cache = nil
+      uploads = image_uploads
+      uploads.reset if uploads.respond_to?(:loaded?) && uploads.loaded?
       if respond_to?(:basil_commissions)
-        pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
-        return pinned_commission.try(:image) if pinned_commission.present?
+        commissions = basil_commissions
+        commissions.reset if commissions.respond_to?(:loaded?) && commissions.loaded?
       end
-      
-      nil
-    end
-    
-    # Returns the pinned public image (or nil if none pinned)
-    def pinned_public_image(format = :medium)
-      pinned_upload = image_uploads.pinned.where(privacy: 'public').first
-      return pinned_upload.try(:src, format) if pinned_upload.present?
-      
-      if respond_to?(:basil_commissions)
-        pinned_commission = basil_commissions.pinned.where.not(saved_at: nil).includes([:image_attachment]).first
-        return pinned_commission.try(:image) if pinned_commission.present?
-      end
-      
-      nil
     end
 
-    def pinned_or_random_image_including_private(format: :medium)
-      # First check for pinned images
-      pinned = pinned_image_upload(format)
-      return pinned if pinned.present?
-
-      # If no pinned image, fall back to random selection
-      random_image_including_private(format: format)
-    end
-
+    # The generic header image for a content type, as an asset name.
     def header_asset_for(class_name)
-      # Since we use this as a fallback image on SEO content (for example, Twitter cards for shared notebook pages),
-      # we need to include the full protocol + domain + path to ensure they will display the image. A relative path
-      # will not work.
-      # 
-      # For direct view rendering, we use the relative asset path which works better with image_tag
-      Rails.env.production? ? 
-        "https://www.notebook.ai" + ActionController::Base.helpers.asset_url("card-headers/#{class_name.downcase.pluralize}.webp") :
-        ActionController::Base.helpers.asset_path("card-headers/#{class_name.downcase.pluralize}.webp")
+      "card-headers/#{class_name.downcase.pluralize}.webp"
     end
   end
 end

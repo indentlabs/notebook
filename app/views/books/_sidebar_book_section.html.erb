@@ -1,0 +1,104 @@
+<%# Collapsible book section for the documents sidebar %>
+<%# Requires: book, document (current document being edited) %>
+<%# Alpine.js context: expandedBooks array, isExpanded(bookId), toggleBook(bookId) %>
+
+<div>
+  <!-- Book Header (collapsible toggle) -->
+  <button
+    @click="toggleBook(<%= book.id %>)"
+    class="w-full flex items-center py-2 px-1 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+  >
+    <i class="material-icons text-gray-400 dark:text-gray-500 text-sm mr-1 transition-transform duration-200"
+       :class="isExpanded(<%= book.id %>) ? 'rotate-90' : ''">chevron_right</i>
+    <i class="material-icons <%= Book.text_color %> text-base mr-1.5"><%= Book.icon %></i>
+    <div class="min-w-0 flex-1">
+      <h5 class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"><%= book.name %></h5>
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        <%= pluralize(book.book_documents.count, 'chapter') %>
+      </p>
+    </div>
+  </button>
+
+  <!-- Book Contents (expandable) -->
+  <div
+    x-show="isExpanded(<%= book.id %>)"
+    x-collapse
+  >
+    <% if book.book_documents.any? %>
+      <ul
+        class="books-sidebar-chapter-list py-1"
+        data-book-id="<%= book.id %>"
+      >
+        <% book.book_documents.order(position: :asc).each_with_index do |book_document, index| %>
+          <% is_current = book_document.document_id == document.id %>
+          <li
+            class="book-chapter-row flex items-center px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group border-l-4 <%= is_current ? 'bg-teal-50 dark:bg-teal-900 border-teal-500' : 'border-transparent' %>"
+            data-book-document-id="<%= book_document.id %>"
+            data-position="<%= book_document.position %>"
+          >
+            <!-- Drag Handle -->
+            <div class="chapter-drag-handle cursor-move text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <i class="material-icons text-sm">drag_indicator</i>
+            </div>
+
+            <!-- Position Number -->
+            <% if is_current %>
+              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-teal-500 text-xs text-white mr-2 flex-shrink-0 font-medium">
+                <%= index + 1 %>
+              </span>
+            <% else %>
+              <span class="w-5 h-5 flex items-center justify-center rounded-full bg-gray-200 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-400 mr-2 flex-shrink-0 font-medium">
+                <%= index + 1 %>
+              </span>
+            <% end %>
+
+            <!-- Document Link -->
+            <% if is_current %>
+              <span class="flex-1 text-sm font-medium text-teal-700 dark:text-teal-300 truncate flex items-center">
+                <%= book_document.document.title.presence || 'Untitled' %>
+                <i class="material-icons text-teal-500 text-xs ml-1">edit</i>
+              </span>
+            <% else %>
+              <%= link_to edit_document_path(book_document.document),
+                          class: "flex-1 text-sm text-gray-700 dark:text-gray-200 hover:text-notebook-blue dark:hover:text-blue-400 truncate transition-colors" do %>
+                <%= book_document.document.title.presence || 'Untitled' %>
+              <% end %>
+            <% end %>
+
+            <!-- Word count badge (optional, shown on hover) -->
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              <%= number_with_delimiter(book_document.document.cached_word_count || 0) %>w
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <div class="px-3 py-4 text-center">
+        <p class="text-xs text-gray-500 dark:text-gray-400">No chapters yet</p>
+      </div>
+    <% end %>
+
+    <!-- Book Actions -->
+    <div class="py-1">
+      <%= link_to edit_book_path(book), class: "flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" do %>
+        <i class="material-icons text-gray-400 dark:text-gray-500 text-base mr-2">edit</i>
+        Edit book
+      <% end %>
+      <button
+        @click="removeFromBook(<%= book.id %>)"
+        class="w-full flex items-center px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+      >
+        <i class="material-icons text-gray-400 dark:text-gray-500 text-base mr-2">remove_circle_outline</i>
+        Remove from book
+      </button>
+    </div>
+
+    <!-- Add Document Button -->
+    <div class="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
+      <%= link_to create_document_book_path(book), method: :post, class: "w-full flex items-center justify-center px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-md transition-colors text-sm font-medium" do %>
+        <i class="material-icons text-sm mr-2">add</i>
+        Add Document
+      <% end %>
+    </div>
+  </div>
+</div>

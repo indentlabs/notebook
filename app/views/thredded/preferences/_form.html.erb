@@ -3,97 +3,181 @@
     class: 'thredded--form thredded--notification-preferences-form',
     'data-thredded-user-preferences-form' => true
 }) do |f| %>
-  <div class="card-panel">
-    <ul class="thredded--form-list thredded--user-preferences-global">
-      <li class="thredded--user-preferences--auto-follow-topics">
-        <%= f.label :auto_follow_topics do %>
+  <div class="space-y-6">
+    <!-- Global Preferences -->
+    <div class="space-y-4">
+      <!-- Auto-follow Topics -->
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
           <%= f.check_box :auto_follow_topics,
+                          class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer',
                           'data-thredded-update-checkbox-on-change' =>
                               'user_preferences_form[messageboard_auto_follow_topics]' %>
-          <%= t 'thredded.preferences.form.auto_follow_topics.label' %>
-          <p class="thredded--form-list--hint">
-            <%= t 'thredded.preferences.form.auto_follow_topics.hint' %>
-          </p>
-        <% end %>
-      </li>
-      <li class="thredded--user-preferences--follow-topics-on-mention">
-        <%= f.label :follow_topics_on_mention do %>
-          <%= f.check_box :follow_topics_on_mention, 'data-thredded-bound-messageboard-pref' => 'user_preferences_form[messageboard_follow_topics_on_mention]' %>
-          <%= t 'thredded.preferences.form.follow_topics_on_mention.label' %>
-          <p class="thredded--form-list--hint">
-            <%= t 'thredded.preferences.form.follow_topics_on_mention.hint' %>
-          </p>
-        <% end %>
-      </li>
-      <% if Thredded.notifiers.present? %>
-        <li class="thredded--user-preferences--notifications-for-followed-topics">
-          <label><%= t 'thredded.preferences.form.notifications_for_followed_topics.label' %></label>
-          <%= f.fields_for :notifications_for_followed_topics, preferences.notifications_for_followed_topics do |fn| %>
-            <%= fn.label :enabled do %>
-              <%= fn.hidden_field :notifier_key %>
-              <%= fn.check_box :enabled,
-                              'data-thredded-bound-messageboard-pref' =>
-                                  "user_preferences_form[messageboard_notifications_for_followed_topics_attributes][#{fn.index}][enabled]" %>
-              <%= fn.object.notifier_human_name %>
-            <%- end %>
-          <%- end %>
-        </li>
-        <li class="thredded--user-preferences--notifications-for-private-topics">
-          <label><%= t 'thredded.preferences.form.notifications_for_private_topics.label' %></label>
-          <%= f.fields_for :notifications_for_private_topics, preferences.notifications_for_private_topics do |fn| %>
-            <%= fn.label :enabled do %>
-              <%= fn.hidden_field :notifier_key %>
-              <%= fn.check_box :enabled %>
-              <%= fn.object.notifier_human_name %>
-            <% end %>
+        </div>
+        <div class="ml-3">
+          <%= f.label :auto_follow_topics, class: 'cursor-pointer' do %>
+            <span class="font-medium text-gray-900 dark:text-white">
+              <%= t 'thredded.preferences.form.auto_follow_topics.label' %>
+            </span>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <%= t 'thredded.preferences.form.auto_follow_topics.hint' %>
+            </p>
           <% end %>
-        </li>
+        </div>
+      </div>
+
+      <!-- Follow Topics on Mention -->
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <%= f.check_box :follow_topics_on_mention,
+                          class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer',
+                          'data-thredded-bound-messageboard-pref' => 'user_preferences_form[messageboard_follow_topics_on_mention]' %>
+        </div>
+        <div class="ml-3">
+          <%= f.label :follow_topics_on_mention, class: 'cursor-pointer' do %>
+            <span class="font-medium text-gray-900 dark:text-white">
+              <%= t 'thredded.preferences.form.follow_topics_on_mention.label' %>
+            </span>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              <%= t 'thredded.preferences.form.follow_topics_on_mention.hint' %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <% if Thredded.notifiers.present? %>
+        <!-- Notifications for Followed Topics -->
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h3 class="text-base font-medium text-gray-900 dark:text-white mb-3">
+            <%= t 'thredded.preferences.form.notifications_for_followed_topics.label' %>
+          </h3>
+          <div class="space-y-3 ml-6">
+            <%= f.fields_for :notifications_for_followed_topics, preferences.notifications_for_followed_topics do |fn| %>
+              <div class="flex items-center">
+                <%= fn.hidden_field :notifier_key %>
+                <div class="flex items-center h-5">
+                  <%= fn.check_box :enabled,
+                                  class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer',
+                                  'data-thredded-bound-messageboard-pref' =>
+                                      "user_preferences_form[messageboard_notifications_for_followed_topics_attributes][#{fn.index}][enabled]" %>
+                </div>
+                <%= fn.label :enabled, class: 'ml-3 cursor-pointer' do %>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <%= fn.object.notifier_human_name %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Notifications for Private Topics -->
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h3 class="text-base font-medium text-gray-900 dark:text-white mb-3">
+            <%= t 'thredded.preferences.form.notifications_for_private_topics.label' %>
+          </h3>
+          <div class="space-y-3 ml-6">
+            <%= f.fields_for :notifications_for_private_topics, preferences.notifications_for_private_topics do |fn| %>
+              <div class="flex items-center">
+                <%= fn.hidden_field :notifier_key %>
+                <div class="flex items-center h-5">
+                  <%= fn.check_box :enabled,
+                                  class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer' %>
+                </div>
+                <%= fn.label :enabled, class: 'ml-3 cursor-pointer' do %>
+                  <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <%= fn.object.notifier_human_name %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
       <% end %>
-    </ul>
+    </div>
   </div>
   <% if preferences.messageboard %>
-    <h2 class="thredded--preferences--title">
-      <%= t 'thredded.preferences.messageboard_preferences_title_html', messageboard: messageboard.name %>
-    </h2>
-    <div class="card-panel">
-      <ul class="thredded--form-list thredded--user-preferences-messageboard" data-thredded-user-preferences-form-messageboard-fields>
-        <li class="thredded--user-preferences--auto-follow-topics">
-          <%= f.label :messageboard_auto_follow_topics do %>
-            <%= f.check_box :messageboard_auto_follow_topics %>
-            <%= t 'thredded.preferences.form.messageboard_auto_follow_topics.label' %>
-            <p class="thredded--form-list--hint">
-              <%= t 'thredded.preferences.form.messageboard_auto_follow_topics.hint' %>
-            </p>
-          <% end %>
-        </li>
-        <li class="thredded--user-preferences--follow-topics-on-mention">
-          <%= f.label :messageboard_follow_topics_on_mention do %>
-            <%= f.check_box :messageboard_follow_topics_on_mention %>
-            <%= t 'thredded.preferences.form.messageboard_follow_topics_on_mention.label' %>
-            <p class="thredded--form-list--hint">
-              <%= t 'thredded.preferences.form.messageboard_follow_topics_on_mention.hint' %>
-            </p>
-          <% end %>
-        </li>
+    <!-- Messageboard-specific Preferences -->
+    <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+          <%= t 'thredded.preferences.messageboard_preferences_title_html', messageboard: preferences.messageboard.name %>
+        </h2>
+      </div>
+      <div class="p-6 space-y-4" data-thredded-user-preferences-form-messageboard-fields>
+        <!-- Messageboard Auto-follow Topics -->
+        <div class="flex items-start">
+          <div class="flex items-center h-5">
+            <%= f.check_box :messageboard_auto_follow_topics,
+                            class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer' %>
+          </div>
+          <div class="ml-3">
+            <%= f.label :messageboard_auto_follow_topics, class: 'cursor-pointer' do %>
+              <span class="font-medium text-gray-900 dark:text-white">
+                <%= t 'thredded.preferences.form.messageboard_auto_follow_topics.label' %>
+              </span>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <%= t 'thredded.preferences.form.messageboard_auto_follow_topics.hint' %>
+              </p>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Messageboard Follow Topics on Mention -->
+        <div class="flex items-start">
+          <div class="flex items-center h-5">
+            <%= f.check_box :messageboard_follow_topics_on_mention,
+                            class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer' %>
+          </div>
+          <div class="ml-3">
+            <%= f.label :messageboard_follow_topics_on_mention, class: 'cursor-pointer' do %>
+              <span class="font-medium text-gray-900 dark:text-white">
+                <%= t 'thredded.preferences.form.messageboard_follow_topics_on_mention.label' %>
+              </span>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <%= t 'thredded.preferences.form.messageboard_follow_topics_on_mention.hint' %>
+              </p>
+            <% end %>
+          </div>
+        </div>
+
         <% if Thredded.notifiers.present? %>
-          <li class="thredded--user-preferences--notifications-for-followed-topics">
-            <label><%= t 'thredded.preferences.form.messageboard_notifications_for_followed_topics.label' %></label>
-            <%= f.fields_for :messageboard_notifications_for_followed_topics,
-                            preferences.messageboard_notifications_for_followed_topics do |fn| %>
-              <%= fn.label :enabled do %>
-                <%= fn.hidden_field :notifier_key %>
-                <%= fn.hidden_field :messageboard_id %>
-                <%= fn.check_box :enabled %>
-                <%= fn.object.notifier_human_name %>
+          <!-- Messageboard Notifications for Followed Topics -->
+          <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h3 class="text-base font-medium text-gray-900 dark:text-white mb-3">
+              <%= t 'thredded.preferences.form.messageboard_notifications_for_followed_topics.label' %>
+            </h3>
+            <div class="space-y-3 ml-6">
+              <%= f.fields_for :messageboard_notifications_for_followed_topics,
+                              preferences.messageboard_notifications_for_followed_topics do |fn| %>
+                <div class="flex items-center">
+                  <%= fn.hidden_field :notifier_key %>
+                  <%= fn.hidden_field :messageboard_id %>
+                  <div class="flex items-center h-5">
+                    <%= fn.check_box :enabled,
+                                    class: 'h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer' %>
+                  </div>
+                  <%= fn.label :enabled, class: 'ml-3 cursor-pointer' do %>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <%= fn.object.notifier_human_name %>
+                    </span>
+                  <% end %>
+                </div>
               <% end %>
-            <%- end %>
-          </li>
+            </div>
+          </div>
         <% end %>
-      </ul>
+      </div>
     </div>
   <% end %>
-  <button type="submit" class="thredded--form--submit"
-          data-disable-with="<%= t 'thredded.preferences.form.update_btn_submitting' %>">
-    <%= t 'thredded.preferences.form.submit_btn' %>
-  </button>
+
+  <!-- Submit Button -->
+  <div class="mt-6 flex justify-end">
+    <button type="submit"
+            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            data-disable-with="<%= t 'thredded.preferences.form.update_btn_submitting' %>">
+      <i class="material-icons mr-2 text-lg">save</i>
+      <%= t 'thredded.preferences.form.submit_btn' %>
+    </button>
+  </div>
 <% end %>

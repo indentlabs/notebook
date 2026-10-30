@@ -16,7 +16,7 @@ class ContentPageSharesTest < ApplicationSystemTestCase
 
     click_on "Create Content page share"
 
-    assert_text "Content page share was successfully created"
+    assert_text "Thanks for sharing!"
     click_on "Back"
   end
 

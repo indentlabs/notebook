@@ -29,11 +29,11 @@ class Flora < ApplicationRecord
   end
 
   def self.color
-    'text-lighten-2 lighten-2 teal'
+    'text-lighten-2 lighten-2 teal bg-lime-700'
   end
 
   def self.text_color
-    'text-lighten-2 teal-text'
+    'text-lighten-2 teal-text text-lime-700'
   end
 
   def self.hex_color

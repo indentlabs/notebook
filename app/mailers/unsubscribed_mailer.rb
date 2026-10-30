@@ -1,6 +1,4 @@
 class UnsubscribedMailer < ApplicationMailer
-  default from: "notebook@indentlabs.com"
-
   def unsubscribed(user)
     @user_name  = user.name.presence || 'worldbuilder'
     @user_email = user.email

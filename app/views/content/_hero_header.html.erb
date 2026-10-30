@@ -1,0 +1,39 @@
+<!-- Hero Image Header -->
+<%
+  # Owners and collaborators see private images too; everyone else only public ones.
+  can_see_private = user_signed_in? && ContentImageAuthorization.can_manage?(current_user, content)
+  # Shared with every page-banner header; see ImagePresets::BANNER_BOX_CLASSES.
+  hero_classes = local_assigns[:height_classes] || ImagePresets::BANNER_BOX_CLASSES
+%>
+<div class="relative w-full <%= hero_classes %> bg-gray-900 overflow-hidden">
+  <%= content_hero_banner_tag content,
+        include_private: can_see_private,
+        alt: "#{content.name} banner image" %>
+
+    <!-- Content overlay with solid background -->
+    <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Sophisticated header container -->
+        <div class="bg-notebook-blue bg-opacity-60 backdrop-blur-xl rounded-2xl px-4 py-2 border border-white border-opacity-20 shadow-2xl">
+          <div class="flex items-center space-x-4">
+            <!-- Premium page icon -->
+            <div class="flex-shrink-0">
+              <div class="w-12 h-12 <%= serialized_content.class_color %> rounded-xl flex items-center justify-center shadow-lg ring-2 ring-white ring-opacity-20">
+                <i class="material-icons text-white text-xl font-light"><%= serialized_content.class_icon %></i>
+              </div>
+            </div>
+            
+            <!-- Enhanced typography section -->
+            <div class="flex-1 min-w-0">
+              <!-- Page name with refined typography -->
+              <h1 class="text-xl lg:text-2xl font-semibold text-white truncate mb-1 tracking-tight leading-tight page-title">
+                <%= link_to content.name, content %>
+              </h1>
+              
+              <!-- Universe information moved to right sidebar -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_03_09_033957) do
+ActiveRecord::Schema.define(version: 2026_10_30_120000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -175,6 +175,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "word_count_cache"
     t.index ["attribute_field_id", "deleted_at", "entity_id", "entity_type"], name: "attributes_afi_deleted_at_entity_id_entity_type"
     t.index ["attribute_field_id", "deleted_at"], name: "index_attributes_on_attribute_field_id_and_deleted_at"
+    t.index ["attribute_field_id", "entity_id", "entity_type"], name: "index_attributes_unique_live_value", unique: true, where: "deleted_at IS NULL"
     t.index ["attribute_field_id", "user_id", "entity_type", "entity_id", "deleted_at"], name: "attributes_afi_ui_et_ei_da"
     t.index ["deleted_at", "attribute_field_id", "entity_type", "entity_id"], name: "deleted_at__attribute_field_id__entity_type_and_id"
     t.index ["deleted_at", "user_id", "attribute_field_id", "entity_type", "entity_id", "id"], name: "all_the_export_fields_with_sort"
@@ -204,6 +205,14 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "basil_version", default: 2
     t.boolean "pinned", default: false
     t.integer "position"
+    t.text "notes"
+    t.json "crops", default: {}
+    t.float "focal_x", default: 0.5, null: false
+    t.float "focal_y", default: 0.5, null: false
+    t.integer "width"
+    t.integer "height"
+    t.datetime "crops_generated_at"
+    t.json "cover_for"
     t.index ["entity_type", "entity_id", "pinned"], name: "index_basil_commissions_on_entity_pinned"
     t.index ["entity_type", "entity_id", "position"], name: "index_basil_commissions_on_entity_position"
     t.index ["entity_type", "entity_id", "saved_at"], name: "basil_commissions_ees"
@@ -458,6 +467,18 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.index ["user_id"], name: "index_character_magics_on_user_id"
   end
 
+  create_table "character_system_chats", force: :cascade do |t|
+    t.integer "character_id"
+    t.integer "user_id"
+    t.string "uid"
+    t.json "messages", default: []
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["character_id"], name: "index_character_system_chats_on_character_id"
+    t.index ["uid"], name: "index_character_system_chats_on_uid", unique: true
+    t.index ["user_id"], name: "index_character_system_chats_on_user_id"
+  end
+
   create_table "character_technologies", force: :cascade do |t|
     t.integer "user_id"
     t.integer "character_id"
@@ -535,6 +556,24 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "user_id"
     t.integer "character_id"
     t.integer "child_id"
+  end
+
+  create_table "community_daily_stats", force: :cascade do |t|
+    t.date "date", null: false
+    t.string "metric", null: false
+    t.string "key", default: "", null: false
+    t.bigint "value", default: 0, null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["date", "metric", "key"], name: "index_community_daily_stats_unique", unique: true
+    t.index ["metric", "date"], name: "index_community_daily_stats_on_metric_and_date"
+  end
+
+  create_table "community_monthly_writers", force: :cascade do |t|
+    t.date "month", null: false
+    t.integer "user_id", null: false
+    t.index ["month", "user_id"], name: "index_community_monthly_writers_on_month_and_user_id", unique: true
+    t.index ["user_id"], name: "index_community_monthly_writers_on_user_id"
   end
 
   create_table "conditions", force: :cascade do |t|
@@ -1280,6 +1319,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "cached_word_count"
+    t.index ["document_id", "created_at"], name: "index_document_revisions_on_document_id_and_created_at"
     t.index ["document_id"], name: "index_document_revisions_on_document_id"
   end
 
@@ -1298,7 +1338,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "folder_id"
     t.integer "cached_word_count"
     t.datetime "archived_at"
-    t.integer "status", default: 0
+    t.integer "status", default: 2
     t.index ["archived_at"], name: "index_documents_on_archived_at"
     t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
     t.index ["deleted_at", "universe_id"], name: "index_documents_on_deleted_at_and_universe_id"
@@ -1366,6 +1406,7 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.integer "document_revisions_created"
+    t.integer "writing_goals_completed"
   end
 
   create_table "famous_figureships", force: :cascade do |t|
@@ -1725,6 +1766,14 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.integer "src_file_size"
     t.datetime "src_updated_at"
     t.integer "position"
+    t.text "notes"
+    t.json "crops", default: {}
+    t.float "focal_x", default: 0.5, null: false
+    t.float "focal_y", default: 0.5, null: false
+    t.integer "width"
+    t.integer "height"
+    t.datetime "crops_generated_at"
+    t.json "cover_for"
     t.index ["content_type", "content_id", "pinned"], name: "index_image_uploads_on_content_pinned"
     t.index ["content_type", "content_id", "position"], name: "index_image_uploads_on_content_type_and_content_id_and_position"
     t.index ["content_type", "content_id"], name: "index_image_uploads_on_content_type_and_content_id"
@@ -3521,7 +3570,6 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.string "notes"
     t.string "private_notes"
     t.boolean "favorite", default: false
-    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id", "privacy", "deleted_at"], name: "index_timelines_on_user_privacy_deleted"
     t.index ["user_id"], name: "index_timelines_on_user_id"
@@ -3821,8 +3869,24 @@ ActiveRecord::Schema.define(version: 2026_03_09_033957) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["entity_type", "entity_id", "for_date"], name: "index_word_count_updates_unique_entity_date", unique: true
     t.index ["entity_type", "entity_id"], name: "index_word_count_updates_on_entity_type_and_entity_id"
+    t.index ["for_date", "user_id"], name: "index_word_count_updates_on_for_date_and_user_id"
     t.index ["user_id", "for_date"], name: "idx_word_count_user_date"
     t.index ["user_id"], name: "index_word_count_updates_on_user_id"
+  end
+
+  create_table "wordsmith_entries", force: :cascade do |t|
+    t.string "word", null: false
+    t.text "senses"
+    t.text "related"
+    t.string "pronunciation"
+    t.integer "syllables"
+    t.string "rhyme_key"
+    t.string "near_rhyme_key"
+    t.boolean "common", default: false, null: false
+    t.integer "frequency", default: 0, null: false
+    t.index ["near_rhyme_key", "common"], name: "index_wordsmith_entries_on_near_rhyme_key_and_common"
+    t.index ["rhyme_key", "common"], name: "index_wordsmith_entries_on_rhyme_key_and_common"
+    t.index ["word"], name: "index_wordsmith_entries_on_word", unique: true
   end
 
   create_table "writing_goals", force: :cascade do |t|
