@@ -16,8 +16,14 @@ class Rack::Attack
     Rack::Utils.unescape_path(req.path).squeeze('/')[DOCUMENT_UNLOCK_PATH, 1]&.to_i
   end
 
+  # Cloudflare is in front of the site, so req.ip is one of its addresses or a proxy's, not the reader's.
+  # A request that skips Cloudflare could fake this header, but that only gets it around the per-visitor limit.
+  def self.visitor_ip(req)
+    req.get_header('HTTP_CF_CONNECTING_IP').presence || req.ip
+  end
+
   # Guessing a document's password. These only match the unlock path, so nothing else touches Redis.
-  throttle('document_unlock/ip', limit: 10, period: 1.minute) { |req| req.ip if document_unlock_id(req) }
+  throttle('document_unlock/ip', limit: 10, period: 1.minute) { |req| visitor_ip(req) if document_unlock_id(req) }
   throttle('document_unlock/document', limit: 30, period: 1.minute) { |req| document_unlock_id(req) }
 
   # Each attempt ties up a Puma thread for a slow bcrypt check, so this keeps a flood of them

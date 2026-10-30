@@ -401,6 +401,48 @@ class DocumentPasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_nil session[:unlocked_documents]
   end
 
+  test "visitors behind the same Cloudflare address each get their own limit" do
+    first_visitor  = { 'REMOTE_ADDR' => '10.0.0.5', 'HTTP_X_FORWARDED_FOR' => '203.0.113.7, 104.16.1.1', 'HTTP_CF_CONNECTING_IP' => '203.0.113.7' }
+    second_visitor = { 'REMOTE_ADDR' => '10.0.0.5', 'HTTP_X_FORWARDED_FOR' => '198.51.100.9, 104.16.1.1', 'HTTP_CF_CONNECTING_IP' => '198.51.100.9' }
+
+    10.times do
+      post unlock_document_path(@document), params: { password: 'wrong password' }, env: first_visitor
+      assert_redirected_to document_path(@document)
+    end
+
+    post unlock_document_path(@document), params: { password: PASSWORD }, env: first_visitor
+    assert_redirected_to document_path(@document, too_many_attempts: 1)
+
+    post unlock_document_path(@document), params: { password: PASSWORD }, env: second_visitor
+    assert_redirected_to document_path(@document)
+    follow_redirect!
+    assert_unlocked
+  end
+
+  test "a visitor can't reset their limit by changing address behind Cloudflare" do
+    10.times do |index|
+      post unlock_document_path(@document), params: { password: 'wrong password' },
+        env: { 'REMOTE_ADDR' => "10.0.0.#{index + 1}", 'HTTP_CF_CONNECTING_IP' => '203.0.113.7' }
+    end
+
+    post unlock_document_path(@document), params: { password: PASSWORD },
+      env: { 'REMOTE_ADDR' => '10.0.0.200', 'HTTP_CF_CONNECTING_IP' => '203.0.113.7' }
+
+    assert_redirected_to document_path(@document, too_many_attempts: 1)
+  end
+
+  test "faking the Cloudflare header doesn't get around the per document limit" do
+    30.times do |index|
+      post unlock_document_path(@document), params: { password: 'wrong password' }, env: { 'HTTP_CF_CONNECTING_IP' => "203.0.113.#{index + 1}" }
+      assert_redirected_to document_path(@document)
+    end
+
+    post unlock_document_path(@document), params: { password: PASSWORD }, env: { 'HTTP_CF_CONNECTING_IP' => '203.0.113.200' }
+
+    assert_redirected_to document_path(@document, too_many_attempts: 1)
+    assert_nil session[:unlocked_documents]
+  end
+
   test "guessing is limited per document, however many addresses it comes from" do
     30.times do |index|
       post unlock_document_path(@document), params: { password: 'wrong password' }, env: { 'REMOTE_ADDR' => "203.0.113.#{index + 1}" }
