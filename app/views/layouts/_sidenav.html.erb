@@ -162,7 +162,7 @@
                   </i>
                   Discussions
                   <% if @unread_threads > 0 || @unread_private_messages > 0 %>
-                    <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>">
+                    <span class="badge <%= 'blue white-text' if @unread_private_messages > 0 %>" title="Followed topics with new replies<%= ' / Private messages' if @unread_private_messages > 0 %>">
                       <%= @unread_threads %><%= "/#{@unread_private_messages}" if @unread_private_messages > 0 %>
                     </span>
                   <% end %>
@@ -198,6 +198,15 @@
                 <i class="material-icons left blue-text">credit_card</i>
                 Billing
                 <span class="badge right"><%= current_user.on_premium_plan? ? 'Premium' : 'Starter' %></span>
+              <% end %>
+            </li>
+            <li>
+              <%= link_to thredded.private_topics_path, class: 'waves-effect' do %>
+                <i class="material-icons left purple-text">inbox</i>
+                Inbox
+                <% if unread_inbox_count > 0 %>
+                  <span class="badge red white-text right"><%= unread_inbox_count %></span>
+                <% end %>
               <% end %>
             </li>
             <li>

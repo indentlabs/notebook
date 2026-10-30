@@ -1,0 +1,35 @@
+<% if (users = active_users).present? %>
+  <aside 
+    data-thredded-currently-online 
+    class="thredded--currently-online"
+    x-data="{ 
+      expanded: false,
+      timer: null,
+      userCount: <%= users.count %>
+    }"
+    @mouseenter="
+      clearTimeout(timer);
+      expanded = true;
+      $el.querySelector('.thredded--currently-online--users').classList.add('expanded');
+      $el.querySelector('.thredded--currently-online--title').classList.remove('collapsed');
+    "
+    @mouseleave="
+      timer = setTimeout(() => {
+        expanded = false;
+        $el.querySelector('.thredded--currently-online--users').classList.remove('expanded');
+        $el.querySelector('.thredded--currently-online--title').classList.add('collapsed');
+      }, 300);
+    "
+    @click="
+      if (!expanded) {
+        clearTimeout(timer);
+        expanded = true;
+        $el.querySelector('.thredded--currently-online--users').classList.add('expanded');
+        $el.querySelector('.thredded--currently-online--title').classList.remove('collapsed');
+      }
+    "
+  >
+    <%= render 'thredded/shared/currently_online/header', users: users %>
+    <%= render 'thredded/shared/currently_online/user_list', users: users %>
+  </aside>
+<% end %>

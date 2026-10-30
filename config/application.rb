@@ -7,7 +7,7 @@ if ENV['RAILS_GROUPS'].blank?
   ENV['RAILS_GROUPS'] = DEVELOPMENT_RAILS_GROUPS
   warn "RAILS_GROUPS is unset; defaulting to #{DEVELOPMENT_RAILS_GROUPS}"
 elsif ENV['RAILS_GROUPS'] == 'assets'
-  puts "RAILS_GROUPS is set to assets (building assets on heroku)"
+  puts "RAILS_GROUPS is set to assets (building assets)"
 elsif ENV['RAILS_GROUPS'] != DEVELOPMENT_RAILS_GROUPS
   warn "RAILS_GROUPS is set to #{ENV['RAILS_GROUPS']} instead of #{DEVELOPMENT_RAILS_GROUPS}"
 end
@@ -20,6 +20,9 @@ module Notebook
   class Application < Rails::Application
     config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
     config.autoload_paths += Dir[Rails.root.join('app', 'services', '{*/}')]
+    
+    # Ensure authorizers are properly loaded
+    config.eager_load_paths += Dir[Rails.root.join('app', 'authorizers')]
     
     config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
 

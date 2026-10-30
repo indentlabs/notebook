@@ -1,50 +1,43 @@
 class PageCollectionSubmissionsController < ApplicationController
   before_action :set_page_collection, only: [:index]
-  before_action :set_page_collection_submission, only: [:show, :edit, :update, :destroy, :approve, :pass]
+  before_action :set_page_collection_submission, only: [:destroy, :approve, :pass]
 
   before_action :require_collection_ownership, only: [:index]
+
+  before_action :authenticate_user!, only: [:create]
+  before_action :require_open_collection, only: [:create]
 
   # GET /page_collection_submissions
   def index
     @page_collection_submissions = @page_collection.page_collection_submissions.where(accepted_at: nil)
   end
 
-  # GET /page_collection_submissions/1
-  def show
-  end
-
-  # GET /page_collection_submissions/new
-  def new
-    @page_collection_submission = PageCollectionSubmission.new
-  end
-
-  # GET /page_collection_submissions/1/edit
-  def edit
-  end
-
   # POST /page_collection_submissions
   def create
-    @page_collection_submission = PageCollectionSubmission.new(page_collection_submission_params)
+    begin
+      @page_collection_submission = PageCollectionSubmission.new(page_collection_submission_params)
 
-    if @page_collection_submission.save
-      if @page_collection_submission.page_collection.try(:privacy) == 'public'
-        @page_collection_submission.content.update(privacy: 'public')
+      if @page_collection_submission.save
+        redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
+      else
+        page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id])
+        redirect_to page_collection, alert: 'There was a problem submitting your page. Please try again.'
       end
-
-      redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
-    else
-      raise "failed create"
-      # render :new
-    end
-  end
-
-  # PATCH/PUT /page_collection_submissions/1
-  def update
-    if @page_collection_submission.update(page_collection_submission_params)
-      redirect_to @page_collection_submission, notice: 'Page collection submission was successfully updated.'
-    else
-      raise "failed edit"
-      # render :edit
+    rescue ActionController::ParameterMissing => e
+      page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id]) rescue nil
+      if page_collection
+        redirect_to page_collection, alert: 'Please select content to submit.'
+      else
+        redirect_to page_collections_path, alert: 'Invalid submission.'
+      end
+    rescue => e
+      Rails.logger.error "PageCollectionSubmission creation failed: #{e.message}"
+      page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id]) rescue nil
+      if page_collection
+        redirect_to page_collection, alert: 'There was a problem submitting your page. Please try again.'
+      else
+        redirect_to page_collections_path, alert: 'Invalid submission.'
+      end
     end
   end
 
@@ -85,6 +78,20 @@ class PageCollectionSubmissionsController < ApplicationController
 
   private
 
+  # Owners can add anything to their own collection. Everyone else needs a public
+  # collection that's taking submissions of that page type.
+  def require_open_collection
+    submission = params.fetch(:page_collection_submission, {})
+    collection = PageCollection.find_by(id: submission[:page_collection_id])
+    return redirect_to(page_collections_path, alert: 'Invalid submission.') if collection.nil?
+    return if collection.user_id == current_user.id
+
+    page_type = submission[:content].to_s.split('-').first
+    return if collection.allow_submissions? && collection.privacy == 'public' && collection.page_types.include?(page_type)
+
+    redirect_to collection, alert: "This collection isn't taking that submission."
+  end
+
   def require_collection_ownership
     raise "Forbidden!" unless user_signed_in? && @page_collection.user_id == current_user.id
   end
@@ -100,9 +107,20 @@ class PageCollectionSubmissionsController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def page_collection_submission_params
+    content_param = params.require(:page_collection_submission).fetch(:content, '')
+    
+    if content_param.blank?
+      raise ActionController::ParameterMissing.new(:content)
+    end
+    
+    content_parts = content_param.split('-')
+    if content_parts.length != 2
+      raise ActionController::BadRequest.new("Invalid content format")
+    end
+    
     {
-      content_type: params.require(:page_collection_submission).require(:content).split('-').first,
-      content_id:   params.require(:page_collection_submission).require(:content).split('-').second,
+      content_type: content_parts.first,
+      content_id:   content_parts.second,
       explanation:  params.require(:page_collection_submission).fetch(:explanation, ''),
       user_id:      current_user.id,
       submitted_at: DateTime.current,

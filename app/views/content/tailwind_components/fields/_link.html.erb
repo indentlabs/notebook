@@ -1,0 +1,29 @@
+<%# Link field display - dispatches to style-specific partial %>
+<%
+  # The serializer returns an error string (rather than an array of link codes)
+  # when a link attribute's stored JSON can't be parsed, and stored values may
+  # also contain malformed entries. Only render well-formed "Klass-id" codes for
+  # known content types so the style partials can safely iterate them.
+  valid_klasses = Rails.application.config.content_type_names[:all]
+  link_codes = field[:value].is_a?(Array) ? field[:value] : []
+  link_codes = link_codes.select do |link_code|
+    next false unless link_code.is_a?(String)
+    klass, id = link_code.split('-', 2)
+    valid_klasses.include?(klass) && id.to_s.match?(/\A\d+\z/)
+  end
+%>
+<% return if link_codes.empty? %>
+
+<%
+  display_style = field.dig(:options, 'display_style') || 'tags'
+
+  style_partials = {
+    'list'  => 'content/tailwind_components/fields/link_styles/list',
+    'tags'  => 'content/tailwind_components/fields/link_styles/tags',
+    'cards' => 'content/tailwind_components/fields/link_styles/cards'
+  }
+
+  partial_path = style_partials.fetch(display_style, style_partials['tags'])
+%>
+
+<%= render partial: partial_path, locals: { field: field.merge(value: link_codes) } %>

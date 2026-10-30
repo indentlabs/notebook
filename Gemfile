@@ -4,16 +4,12 @@ ruby "~> 3.2"
 # Server core
 gem 'rails', '~> 6.1'
 
-#gem 'puma', '~> 5.6'
+gem 'puma', '~> 5.6'
 gem 'passenger'
 
 # gem 'bootsnap', require: false
 gem 'sprockets', '~> 4.2.0'
 gem 'terser'
-
-group :production do
-  gem 'puma-heroku'
-end
 
 # Storage
 gem 'aws-sdk', '~> 3.1'
@@ -24,11 +20,13 @@ gem 'filesize'
 gem 'paperclip' # TODO: we want to migrate off this game to ActiveStorage
 gem 'rmagick'
 gem 'image_processing'
+gem 'mini_magick'
 gem 'active_storage_validations'
 
 # Authentication
 gem 'devise'
 gem 'authority'
+gem 'bcrypt', '~> 3.1' # Also used directly by Document's password protection
 
 # Billing
 gem 'stripe'
@@ -55,7 +53,7 @@ gem 'react-rails'
 # Form enhancements
 gem 'redcarpet' #markdown formatting
 gem 'acts_as_list' #sortables
-gem 'tribute' # @mentions
+# gem 'tribute' # @mentions - Replaced with Alpine.js implementation
 
 # SEO
 gem 'meta-tags'
@@ -106,6 +104,9 @@ gem 'redis', '~> 5.1.0'
 # Exports
 gem 'csv'
 
+# Diff generation for document revisions
+gem 'diffy'
+
 # Admin
 gem 'rails_admin'
 
@@ -132,12 +133,9 @@ end
 
 group :test, :production do
   gem 'pg', '~> 1.5'
-
-  gem "mini_racer", "~> 0.6.3" # TODO: audit whether we can remove this
 end
 
 group :test do
-  gem 'codeclimate-test-reporter', require: false # TODO: remove this
   gem 'database_cleaner'
   gem 'selenium-webdriver'
   gem 'rspec-rails', '~> 5.0'
@@ -148,7 +146,7 @@ end
 
 group :development do
   gem 'web-console'
-  gem 'listen'
+  # gem 'listen'
   gem 'bullet'
   gem 'rack-mini-profiler'
   gem 'memory_profiler'
@@ -167,3 +165,4 @@ group :worker do
   gem 'ibm_watson'
   gem 'textstat'
 end
+

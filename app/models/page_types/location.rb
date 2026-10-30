@@ -39,11 +39,11 @@ class Location < ApplicationRecord
   end
 
   def self.color
-    'green'
+    'green bg-green-500'
   end
 
   def self.text_color
-    'green-text'
+    'green-text text-green-500'
   end
 
   def self.hex_color

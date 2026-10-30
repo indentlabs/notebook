@@ -13,7 +13,7 @@ class ShareCommentsController < ApplicationController
 
       ContentPageShareNotificationJob.perform_later(@share_comment.id)
 
-      redirect_to([@share_comment.content_page_share.user, @share_comment.content_page_share], notice: "Comment posted successfully!");
+      redirect_to([@share_comment.content_page_share.user, @share_comment.content_page_share], notice: "Thanks for leaving a comment!");
       # redirect_back(fallback_location: @share_comment.content_page_share, notice: "Comment posted successfully.")
     else
       render :new
@@ -31,10 +31,9 @@ class ShareCommentsController < ApplicationController
   end
 
   # DELETE /share_comments/1
-  # TODO this
   def destroy
     share = @share_comment.content_page_share
-    unless user_signed_in? && (share.user == current_user || @share_comment.user == current_user)
+    unless user_signed_in? && (share.user == current_user || @share_comment.user == current_user || current_user.site_administrator?)
       return raise "Tried to delete comment without authorization"
     end
 

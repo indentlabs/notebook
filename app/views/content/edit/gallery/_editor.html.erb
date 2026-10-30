@@ -1,0 +1,331 @@
+<%#
+  Image editor modal. Rendered once per gallery; opened by the gallery
+  controller's "Edit" button (or a #gallery/<dom_id> hash) and driven by
+  app/javascript/controllers/image_editor_controller.js.
+%>
+<div class="hidden fixed inset-0 z-60 overflow-hidden"
+     data-controller="image-editor"
+     data-image-editor-presets-value="<%= ImagePresets.as_json.to_json %>"
+     data-image-editor-banner-full-bleed-ratio-value="<%= ContentImage::FULL_BLEED_BANNER_RATIO %>"
+     data-image-editor-page-name-value="<%= content.try(:name) %>"
+     data-image-editor-page-type-value="<%= content.try(:page_type).presence || content.class.name %>"
+     data-image-editor-target="modal"
+     role="dialog" aria-modal="true" aria-labelledby="image-editor-title"
+     data-action="keydown->image-editor#keydown">
+
+  <div class="fixed inset-0 bg-black bg-opacity-75" data-action="click->image-editor#close"></div>
+  <div class="sr-only" aria-live="polite" data-image-editor-target="announcer"></div>
+
+  <div class="fixed inset-2 sm:inset-4 lg:inset-6 flex items-center justify-center pointer-events-none">
+    <div class="pointer-events-auto relative w-full max-w-6xl h-full max-h-225 bg-white dark:bg-gray-900 rounded-xl shadow-2xl flex flex-col overflow-hidden">
+
+    <%# Header %>
+    <div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+      <div class="min-w-0">
+        <h2 id="image-editor-title" class="text-base font-semibold text-gray-900 dark:text-white">Frame this image</h2>
+        <p class="text-xs text-gray-500 dark:text-gray-400 truncate tabular-nums" data-image-editor-target="subtitle"></p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button type="button"
+                class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-yellow-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors"
+                data-image-editor-target="coverButton"
+                data-action="image-editor#toggleCover"
+                aria-pressed="false"
+                title="Use this image as the default cover across all placements.">
+          <i class="material-icons text-sm mr-1">star_border</i>
+          <span data-image-editor-target="coverLabel">Set as default cover</span>
+        </button>
+        <button type="button"
+                class="inline-flex items-center justify-center w-9 h-9 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-action="image-editor#close" aria-label="Close the editor" title="Close (Esc)">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+    </div>
+
+    <%# Body %>
+    <div class="flex flex-col lg:flex-row flex-1 min-h-0 overflow-y-auto lg:overflow-hidden">
+
+      <%# Stage %>
+      <div class="flex-1 min-w-0 flex flex-col gap-2.5 sm:gap-3 p-3 sm:p-4 lg:p-5 bg-gray-100 dark:bg-gray-800 min-h-0 overflow-y-auto lg:overflow-hidden">
+        <div class="flex items-center gap-2 flex-wrap flex-shrink-0" role="tablist" aria-label="Shape" data-action="keydown->image-editor#tablistKeydown">
+          <% ImagePresets.each do |preset| %>
+            <button type="button" role="tab"
+                    class="image-editor__shape inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    data-image-editor-target="shapeTab"
+                    data-preset="<%= preset.key %>"
+                    data-action="image-editor#selectShape"
+                    title="<%= preset.description %>">
+              <span class="inline-block border-2 border-current rounded-sm <%= { banner: 'w-6 h-2', card: 'w-5 h-3', square: 'w-3 h-3', social: 'w-6 h-3' }[preset.key] || 'w-4 h-3' %>" aria-hidden="true"></span>
+              <span><%= preset.label %> <span class="text-xs text-gray-500 dark:text-gray-400 tabular-nums"><%= preset.ratio_label %></span></span>
+              <span class="text-xxs uppercase tracking-wide px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200" data-image-editor-target="shapeState">auto</span>
+            </button>
+          <% end %>
+          <button type="button" role="tab"
+                  class="image-editor__shape inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  data-image-editor-target="shapeTab"
+                  data-preset="focal"
+                  data-action="image-editor#selectShape"
+                  title="The point that stays in view wherever the image is shown without its own crop">
+            <i class="material-icons text-sm">center_focus_strong</i>
+            <span>Focal point</span>
+          </button>
+        </div>
+
+        <div class="relative bg-gray-900 rounded-lg overflow-hidden select-none h-64 sm:h-80 lg:h-auto lg:flex-1 min-h-56"
+             data-image-editor-target="stage">
+          <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm" data-image-editor-target="loading">
+            <i class="material-icons animate-spin mr-2">autorenew</i> Loading the original image…
+          </div>
+          <img data-image-editor-target="image" class="block max-w-full opacity-0" alt="" draggable="false">
+          <div class="absolute inset-0 hidden cursor-crosshair"
+               data-image-editor-target="focalLayer"
+               data-action="pointerdown->image-editor#focalPointerDown pointermove->image-editor#focalPointerMove pointerup->image-editor#focalPointerUp pointercancel->image-editor#focalPointerUp">
+            <button type="button"
+                    class="absolute w-7 h-7 -ml-3.5 -mt-3.5 rounded-full border-2 border-white bg-blue-500 bg-opacity-70 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+                    data-image-editor-target="focalDot"
+                    aria-label="Focal point. Use the arrow keys to move it."></button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 flex-wrap text-sm text-gray-700 dark:text-gray-200 flex-shrink-0" data-image-editor-target="cropControls">
+          <div class="flex items-center gap-1">
+            <button type="button" class="w-8 h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500" data-action="image-editor#zoomOut" aria-label="Zoom out" title="Zoom out (−)"><i class="material-icons text-base">remove</i></button>
+            <input type="range" min="1" max="4" step="0.01" value="1" class="w-32 sm:w-40" aria-label="Zoom"
+                   data-image-editor-target="zoom" data-action="input->image-editor#zoomSlider">
+            <button type="button" class="w-8 h-8 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500" data-action="image-editor#zoomIn" aria-label="Zoom in" title="Zoom in (+)"><i class="material-icons text-base">add</i></button>
+          </div>
+          <label class="inline-flex items-center gap-1 text-xs cursor-pointer">
+            <input type="checkbox" class="rounded border-gray-300" data-action="change->image-editor#toggleGrid" data-image-editor-target="gridToggle" checked> Grid
+          </label>
+          <span class="hidden sm:inline text-gray-300 dark:text-gray-600">|</span>
+          <button type="button" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline" data-action="image-editor#resetShape">Reset to auto</button>
+          <button type="button" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline" data-action="image-editor#centerOnFocal">Centre on focal point</button>
+          <button type="button" class="text-xs font-medium text-blue-600 dark:text-blue-400 hover:underline" data-action="image-editor#copyToAll">Copy framing to all shapes</button>
+          <span class="hidden inline-flex items-center gap-3" data-image-editor-target="stagePlacement">
+            <span class="hidden sm:inline text-gray-300 dark:text-gray-600">|</span>
+            <button type="button"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    data-image-editor-target="stagePlacementButton"
+                    data-action="image-editor#toggleActiveShapePlacement">
+              <i class="material-icons text-xs text-gray-500 dark:text-gray-400" data-image-editor-target="stagePlacementIcon">add_circle_outline</i>
+              <span data-image-editor-target="stagePlacementLabel">Use as Banner cover</span>
+            </button>
+          </span>
+        </div>
+
+        <p class="text-xs text-gray-600 dark:text-gray-300 flex-shrink-0" data-image-editor-target="help"></p>
+      </div>
+
+      <%# Side panel %>
+      <aside class="w-full lg:w-80 flex-shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 p-4 sm:p-5 space-y-5 overflow-y-auto min-h-0">
+        <section>
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">How it will look</h3>
+          <div class="space-y-3">
+            <%# Banner preview: mini hero header %>
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm"
+                 data-image-editor-target="previewBlock" data-preset="banner">
+              <button type="button" class="block w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 group"
+                      data-action="image-editor#selectShape" data-preset="banner" title="Click to edit banner framing">
+                <div class="relative bg-gray-900" style="aspect-ratio: 3 / 1">
+                  <div class="absolute inset-0 overflow-hidden" data-image-editor-target="preview" data-preset="banner"></div>
+                  <div class="absolute inset-x-0 bottom-0 p-2">
+                    <div class="bg-notebook-blue bg-opacity-60 rounded-md px-2 py-1 flex items-center gap-2">
+                      <span class="w-4 h-4 rounded bg-white bg-opacity-30 flex-shrink-0"></span>
+                      <span class="text-white text-xxs font-semibold truncate" data-image-editor-target="previewTitle"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="px-2.5 py-1.5 text-xxs text-gray-500 dark:text-gray-400 flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Banner · page header</span>
+                  <span class="text-gray-400 tabular-nums">3:1</span>
+                </div>
+                <%# The same banner on a wide screen: the header stops growing taller
+                    at 384px, so the top and bottom are trimmed around the focal point. %>
+                <div class="relative bg-gray-900" style="aspect-ratio: 5 / 1">
+                  <div class="absolute inset-0 overflow-hidden" data-image-editor-target="preview" data-preset="banner"></div>
+                  <div class="absolute inset-x-0 bottom-0 px-6 pb-1">
+                    <div class="bg-notebook-blue bg-opacity-60 rounded px-2 py-0.5 flex items-center gap-1">
+                      <span class="w-2 h-2 rounded-sm bg-white bg-opacity-30 flex-shrink-0"></span>
+                      <span class="text-white text-xxs font-semibold truncate" data-image-editor-target="previewTitle"></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="px-2.5 py-1.5 text-xxs text-gray-500 dark:text-gray-400 flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Banner · wide screens</span>
+                  <span class="text-gray-400 tabular-nums">5:1</span>
+                </div>
+                <span class="hidden block px-2.5 py-1.5 text-xxs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-gray-900 border-b border-amber-200 dark:border-amber-800" data-image-editor-target="bannerQuality"></span>
+              </button>
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2">
+                <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="banner"></span>
+                <button type="button"
+                        class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                        data-action="image-editor#togglePlacement"
+                        data-preset="banner"
+                        data-image-editor-target="placementAction">
+                  Use for Banner
+                </button>
+              </div>
+            </div>
+
+            <%# Card preview %>
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm"
+                 data-image-editor-target="previewBlock" data-preset="card">
+              <button type="button" class="block w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 group"
+                      data-action="image-editor#selectShape" data-preset="card" title="Click to edit card framing">
+                <div class="relative bg-gray-200 dark:bg-gray-800" style="aspect-ratio: 3 / 2">
+                  <div class="absolute inset-0 overflow-hidden" data-image-editor-target="preview" data-preset="card"></div>
+                  <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-white via-white to-transparent dark:from-gray-800 dark:via-gray-800 dark:to-transparent"></div>
+                  <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded-full text-xxs font-medium text-white bg-gray-700" data-image-editor-target="previewBadge"></span>
+                  <span class="absolute bottom-2 left-2 right-2 text-sm font-bold text-gray-900 dark:text-gray-100 truncate" data-image-editor-target="previewTitle"></span>
+                </div>
+                <div class="px-2.5 py-1.5 text-xxs text-gray-500 dark:text-gray-400 flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Card · lists, dashboards</span>
+                  <span class="text-gray-400 tabular-nums">3:2</span>
+                </div>
+              </button>
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2">
+                <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="card"></span>
+                <button type="button"
+                        class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                        data-action="image-editor#togglePlacement"
+                        data-preset="card"
+                        data-image-editor-target="placementAction">
+                  Use for Card
+                </button>
+              </div>
+            </div>
+
+            <%# Link preview: the card a social network or chat app shows %>
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm"
+                 data-image-editor-target="previewBlock" data-preset="social">
+              <button type="button" class="block w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 group"
+                      data-action="image-editor#selectShape" data-preset="social" title="Click to edit link preview framing">
+                <div class="relative bg-gray-200 dark:bg-gray-800" style="aspect-ratio: 40 / 21">
+                  <div class="absolute inset-0 overflow-hidden" data-image-editor-target="preview" data-preset="social"></div>
+                </div>
+                <div class="px-2 py-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+                  <div class="text-xxs uppercase tracking-wide text-gray-400">notebook.ai</div>
+                  <div class="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate" data-image-editor-target="previewTitle"></div>
+                </div>
+                <div class="px-2.5 py-1.5 text-xxs text-gray-500 dark:text-gray-400 flex items-center justify-between gap-2 border-b border-gray-100 dark:border-gray-800 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+                  <span class="font-medium text-gray-700 dark:text-gray-300">Link preview · shared links</span>
+                  <span class="text-gray-400 tabular-nums">40:21</span>
+                </div>
+              </button>
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2">
+                <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="social"></span>
+                <button type="button"
+                        class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                        data-action="image-editor#togglePlacement"
+                        data-preset="social"
+                        data-image-editor-target="placementAction">
+                  Use for Link preview
+                </button>
+              </div>
+            </div>
+
+            <%# Square previews: thumb and circle %>
+            <div class="rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm"
+                 data-image-editor-target="previewBlock" data-preset="square">
+              <button type="button" class="block w-full text-left focus:outline-none focus:ring-2 focus:ring-blue-500 group"
+                      data-action="image-editor#selectShape" data-preset="square" title="Click to edit square framing">
+                <div class="flex items-center gap-4 p-3 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+                  <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800 flex-shrink-0 relative" style="aspect-ratio: 1 / 1">
+                    <div class="absolute inset-0 overflow-hidden" data-image-editor-target="preview" data-preset="square"></div>
+                  </div>
+                  <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-800 flex-shrink-0 relative" style="aspect-ratio: 1 / 1">
+                    <div class="absolute inset-0 overflow-hidden" data-image-editor-target="preview" data-preset="square"></div>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="font-medium text-xs text-gray-700 dark:text-gray-300">Thumbnail & Avatar</div>
+                    <div class="text-xxs text-gray-400">Square 1:1</div>
+                  </div>
+                </div>
+              </button>
+              <div class="px-2.5 py-1.5 bg-gray-50 dark:bg-gray-800 dark:bg-opacity-60 flex items-center justify-between gap-2 border-t border-gray-100 dark:border-gray-800">
+                <span class="text-xxs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="usage" data-preset="square"></span>
+                <button type="button"
+                        class="flex-shrink-0 px-2 py-0.5 rounded text-xxs font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                        data-action="image-editor#togglePlacement"
+                        data-preset="square"
+                        data-image-editor-target="placementAction">
+                  Use for Thumbnail
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Details</h3>
+          <div>
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" for="image-editor-notes">Notes</label>
+            <textarea id="image-editor-notes" rows="3"
+                      class="w-full text-sm p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Add a description, creation date, or notes…"
+                      data-image-editor-target="notes"></textarea>
+          </div>
+          <div data-image-editor-target="privacyRow">
+            <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1" for="image-editor-privacy">Who can see this image</label>
+            <select id="image-editor-privacy"
+                    class="w-full text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-blue-500 focus:border-blue-500"
+                    data-image-editor-target="privacy">
+              <option value="public">Anyone who can see this page</option>
+              <option value="private">Only me and collaborators</option>
+            </select>
+          </div>
+          <dl class="text-xs text-gray-500 dark:text-gray-400 space-y-1 tabular-nums" data-image-editor-target="facts"></dl>
+          <div class="flex items-center gap-3 text-xs">
+            <a href="#" target="_blank" rel="noopener" class="font-medium text-blue-600 dark:text-blue-400 hover:underline" data-image-editor-target="downloadLink">Open original</a>
+            <button type="button" class="font-medium text-red-600 dark:text-red-400 hover:underline" data-action="image-editor#deleteImage">Delete image…</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <%# Keyboard shortcuts sheet (toggle with ?) %>
+    <div class="hidden absolute inset-x-4 bottom-16 sm:inset-x-auto sm:right-5 sm:w-80 z-10 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-xl p-4 text-sm"
+         data-image-editor-target="shortcuts" role="region" aria-label="Keyboard shortcuts">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="font-semibold text-gray-900 dark:text-white">Keyboard shortcuts</h3>
+        <button type="button" class="w-8 h-8 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-action="image-editor#toggleShortcuts" aria-label="Close shortcuts"><i class="material-icons text-base">close</i></button>
+      </div>
+      <dl class="grid grid-cols-2 gap-x-3 gap-y-1 text-gray-700 dark:text-gray-200 tabular-nums">
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">1</kbd> – <kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700"><%= ImagePresets.keys.size %></kbd></dt><dd>Choose a shape</dd>
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">F</kbd></dt><dd>Focal point</dd>
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">←</kbd> <kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">→</kbd> <kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">↑</kbd> <kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">↓</kbd></dt><dd>Nudge 1% (Shift: 5%)</dd>
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">+</kbd> <kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">−</kbd></dt><dd>Zoom</dd>
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">Ctrl</kbd>+<kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">Enter</kbd></dt><dd>Save</dd>
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">Esc</kbd></dt><dd>Close</dd>
+        <dt><kbd class="px-1 rounded bg-gray-100 dark:bg-gray-700">?</kbd></dt><dd>This sheet</dd>
+      </dl>
+    </div>
+
+    <%# Footer %>
+    <div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
+      <div class="flex items-center gap-3 min-w-0">
+        <button type="button" class="hidden sm:inline-flex items-center text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                data-action="image-editor#toggleShortcuts" aria-label="Show keyboard shortcuts" title="Keyboard shortcuts (?)">
+          <i class="material-icons text-base mr-1">keyboard</i> Shortcuts
+        </button>
+        <span class="text-xs text-gray-500 dark:text-gray-400 truncate" data-image-editor-target="status" aria-live="polite"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button type="button"
+                class="px-4 py-2 rounded-md text-sm font-medium border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                data-action="image-editor#close">Cancel</button>
+        <button type="button"
+                class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60"
+                data-image-editor-target="saveButton"
+                data-action="image-editor#save"
+                title="Save (Ctrl+Enter)">
+          <i class="material-icons text-sm mr-1">check</i> Save framing
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>

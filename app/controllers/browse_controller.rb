@@ -103,54 +103,12 @@ class BrowseController < ApplicationController
         } if timelines.any?
       end
       
-      # Get images for content cards from all users
-      content_ids_by_type = {}
-      user_ids = []
-      
-      @tagged_content.each do |content_group|
-        content_group[:content].each do |content|
-          content_type = content.class.name
-          content_ids_by_type[content_type] ||= []
-          content_ids_by_type[content_type] << content.id
-          user_ids << content.user_id
-        end
-      end
-      
-      # Get unique user IDs
-      user_ids.uniq!
-      
-      # Get all relevant images - optimize with a single query per content type
-      @random_image_pool_cache = {}
-      if content_ids_by_type.any?
-        content_ids_by_type.each do |content_type, ids|
-          images = ImageUpload.where(content_type: content_type, content_id: ids)
-          
-          images.each do |image|
-            key = [image.content_type, image.content_id]
-            @random_image_pool_cache[key] ||= []
-            @random_image_pool_cache[key] << image
-          end
-        end
-      end
-      
-      # Initialize basil commissions if there are any content items
-      if content_ids_by_type.any?
-        entity_types = []
-        entity_ids = []
-        
-        content_ids_by_type.each do |content_type, ids|
-          entity_type = content_type.downcase.pluralize
-          entity_types.concat([entity_type] * ids.length)
-          entity_ids.concat(ids)
-        end
-        
-        @saved_basil_commissions = BasilCommission.where(
-          entity_type: entity_types,
-          entity_id: entity_ids
-        ).where.not(saved_at: nil)
-        .group_by { |commission| [commission.entity_type, commission.entity_id] }
-      end
-      
+      # Cards render through content_image_tag; preload what it needs and
+      # collect the authors for display.
+      all_content = @tagged_content.flat_map { |group| group[:content].to_a }
+      preload_cover_images(all_content)
+      user_ids = all_content.map(&:user_id).uniq
+
       # Get usernames for display with content - optimize with a single query
       @users_cache = User.where(id: user_ids).index_by(&:id)
     end

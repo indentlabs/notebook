@@ -8,7 +8,8 @@ class NotifyDiscordOfThreadJob < ApplicationJob
   def perform(thread_id, from_moderation = false)
     thread = Thredded::Topic.find_by(id: thread_id)
     return if thread.nil? # deleted before the announcement went out
-    return unless thread.moderation_state == "approved"
+    # Don't announce blocked threads, or threads held in the moderation queue (e.g. by automoderation)
+    return unless thread.approved?
 
     # Threads that went through the moderation queue get announced by the
     # approval-time enqueue; skip the creation-time enqueue so approving a

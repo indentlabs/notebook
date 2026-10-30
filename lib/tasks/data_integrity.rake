@@ -11,50 +11,76 @@ namespace :data_integrity do
     PaypalInvoice.where(status: "COMPLETED", page_unlock_promo_code_id: nil).find_each(&:generate_promo_code!)
   end
 
-  desc "Ensure that all Premium subscribers are still Premium in Stripe"
+  desc "Report Premium subscribers who no longer look Premium in Stripe. " \
+       "Report-only by default; APPLY=1 downgrades them (subject to a safety limit)."
   task subscription_synced_with_stripe: :environment do
-    total_accounts_downgraded_this_run = 0
+    # This task once mass-downgraded nearly every paying user because it misread
+    # Stripe (a dead `customer.subscriptions` read made everyone look unsubscribed).
+    # So: it only reports unless APPLY=1, it never treats a Stripe error as "no
+    # subscription", and it decides whether to abort BEFORE touching anyone.
+    apply = ENV['APPLY'] == '1'
 
     synced_billing_plan_ids = BillingPlan::PREMIUM_IDS - [BillingPlan.find_by(stripe_plan_id: 'free-for-life').id]
+    synced_user_count = User.where(selected_billing_plan_id: synced_billing_plan_ids).count
+    downgrade_limit = [(synced_user_count * 0.05).ceil, 10].min
+
+    mismatches = []
+    stripe_errors = []
+
     synced_billing_plan_ids.each do |billing_plan_id|
       active_billing_plan = BillingPlan.find(billing_plan_id)
       puts "Syncing billing plan #{active_billing_plan.stripe_plan_id} (#{active_billing_plan.id})"
 
       User.where(selected_billing_plan_id: billing_plan_id).find_each do |user|
-        # puts "Checking user ID #{user.id}"
-        stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-        
-        # Use safe navigation to handle customers without subscriptions
-        subscriptions = stripe_customer.subscriptions&.data || []
-        stripe_subscription = subscriptions.first
-
-        # Go through each of the customer's subscription items and make sure their
-        # current billing plan is included as one.
-        if stripe_subscription.nil?
-          should_downgrade_user = true
-        else
-          should_downgrade_user = stripe_subscription.items.data.none? do |subscription_item|
-            # Use price.id instead of deprecated plan.id
-            subscription_item.price.id == active_billing_plan.stripe_plan_id
-          end
+        # Check every billable subscription the customer has, not just the first
+        # one, and list them directly: retrieved Customer objects no longer
+        # include their subscriptions on current Stripe API versions.
+        begin
+          stripe_subscriptions = SubscriptionService.billable_stripe_subscriptions(user.stripe_customer_id)
+        rescue Stripe::StripeError => e
+          stripe_errors << user
+          puts "Stripe error for user #{user.id}, skipping: #{e.class}: #{e.message}"
+          next
         end
 
-        if should_downgrade_user
-          total_accounts_downgraded_this_run += 1
-          puts "Downgrading user #{user.email} from #{active_billing_plan.stripe_plan_id} (last logged in #{user.last_sign_in_at.strftime("%F")})"
+        on_plan = stripe_subscriptions.any? do |stripe_subscription|
+          SubscriptionService.subscription_price_ids(stripe_subscription).include?(active_billing_plan.stripe_plan_id)
+        end
 
-          SubscriptionService.cancel_all_existing_subscriptions(user)
-          UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
-          SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}  (last logged in #{user.last_sign_in_at.strftime("%F")})")
+        unless on_plan
+          mismatches << [user, active_billing_plan]
+          puts "Mismatch: user #{user.email} is on #{active_billing_plan.stripe_plan_id} locally but not in Stripe " \
+               "(Stripe subscriptions: #{stripe_subscriptions.map { |s| "#{s.id}[#{s.status}]" }.join(', ').presence || 'none'})"
         end
 
         # Aggressively throttle (too much) just to keep Stripe happy if we plan on doing
         # this for every user, every day.
-        sleep 1
+        sleep 1 unless Rails.env.test?
       end
     end
 
-    SlackService.post('#subscriptions', total_accounts_downgraded_this_run.to_s + " total accounts downgraded from sync.")
+    summary = "Stripe sync: #{mismatches.length} of #{synced_user_count} Premium users not Premium in Stripe; #{stripe_errors.length} Stripe errors."
+    puts summary
+
+    unless apply
+      SlackService.post('#subscriptions', "#{summary} Report only; nobody was downgraded.")
+      next
+    end
+
+    if stripe_errors.any? || mismatches.length > downgrade_limit
+      SlackService.post('#subscriptions', "#{summary} ABORTED: exceeds the safety limit of #{downgrade_limit} (or had Stripe errors); nobody was downgraded.")
+      abort "ABORTING: #{summary} Safety limit is #{downgrade_limit} with zero Stripe errors. " \
+            "This usually means we're misreading Stripe rather than that these users churned. Nobody was downgraded."
+    end
+
+    mismatches.each do |user, active_billing_plan|
+      puts "Downgrading user #{user.email} from #{active_billing_plan.stripe_plan_id}"
+      SubscriptionService.cancel_all_existing_subscriptions(user)
+      UnsubscribedMailer.unsubscribed(user).deliver_now! if Rails.env.production?
+      SlackService.post('#subscriptions', "Automatically downgrading #{user.email} from #{active_billing_plan.stripe_plan_id}")
+    end
+
+    SlackService.post('#subscriptions', mismatches.length.to_s + " total accounts downgraded from sync.")
   end
 
   desc "Clean up old orphaned links on content"
@@ -72,48 +98,6 @@ namespace :data_integrity do
         orphans.destroy_all
       end
     end
-  end
-
-  desc "Migrate old content and mark it as migrated once and for all"
-  task migrate_old_content: :environment do
-    RECORDS_TO_PROCESS = 300
-
-    old_logger = ActiveRecord::Base.logger
-    ActiveRecord::Base.logger = nil
-
-    Rails.application.config.content_types[:all].each do |content_type|
-      pages = content_type.where(columns_migrated_from_old_style: nil).limit(RECORDS_TO_PROCESS)
-      puts "Migrating #{content_type.name} (#{pages.count} pages)"
-
-      pages.each do |page|
-        puts "Hey, this page shouldn't be here!" if page.columns_migrated_from_old_style == true
-        TemporaryFieldMigrationService.migrate_fields_for_content(page, page.user, force: true)
-
-        page.update_column(:columns_migrated_from_old_style, true) unless page.reload.columns_migrated_from_old_style == true
-      end
-    end
-
-    puts "Pages remaining to migrate: "
-    Rails.application.config.content_types[:all].each do |content_type|
-      count = content_type.where(columns_migrated_from_old_style: nil).count
-      puts "#{content_type.name}: #{count} (#{content_type.where.not(columns_migrated_from_old_style: nil).count} migrated)"
-    end
-
-    ActiveRecord::Base.logger = old_logger
-  end
-
-  desc "Migrate old content per user"
-  task migrate_old_content_per_user: :environment do
-    START_ID = 1
-    USERS_TO_PROCESS = 500
-
-    users = User.where(id: START_ID..(START_ID+USERS_TO_PROCESS))
-    puts "Processing #{users.count} users"
-
-    users.each do |user|
-      TemporaryFieldMigrationService.migrate_all_content_for_user(user)
-    end
-
   end
 
   desc "Remove orphan page references"

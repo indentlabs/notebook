@@ -1,0 +1,115 @@
+// Gallery management (content#edit > Gallery tab)
+
+// Clicking the image views it larger; dragging it (or the handle) reorders.
+.gallery-card__media {
+  cursor: zoom-in;
+}
+
+.gallery-card__handle {
+  cursor: grab;
+}
+
+.gallery--reordering .gallery-card__media {
+  cursor: grabbing;
+}
+
+// The drag handle and the hover toolbar fade in on hover / focus on pointer
+// devices, and stay visible on touch devices where there is no hover.
+.gallery-card__handle,
+.gallery-card__overlay {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.gallery-card:hover .gallery-card__handle,
+.gallery-card:focus-within .gallery-card__handle,
+.gallery-card:hover .gallery-card__overlay,
+.gallery-card:focus-within .gallery-card__overlay {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .gallery-card__handle {
+    opacity: 0.85;
+  }
+
+  .gallery-card__overlay {
+    opacity: 1;
+  }
+}
+
+// jQuery UI sortable states
+.gallery-card.ui-sortable-helper {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+  transform: rotate(1deg);
+}
+
+
+.gallery-card__placeholder {
+  visibility: visible !important;
+  min-height: 12rem;
+  border: 2px dashed rgba(59, 130, 246, 0.6);
+  border-radius: 0.5rem;
+  background-color: rgba(59, 130, 246, 0.08);
+  box-shadow: none;
+}
+
+// Whole-tab drop zone highlight while dragging files over it
+.gallery-dropzone--active {
+  outline: 3px dashed rgba(59, 130, 246, 0.8);
+  outline-offset: 8px;
+  border-radius: 0.5rem;
+  background-color: rgba(59, 130, 246, 0.04);
+}
+
+.gallery-dropzone--active .gallery-dropzone__prompt {
+  border-color: rgba(59, 130, 246, 0.9);
+  background-color: rgba(59, 130, 246, 0.08);
+}
+
+// "Take a photo" only makes sense where there is a camera and no hover.
+.gallery-touch-only {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .gallery-touch-only {
+    display: inline-flex;
+  }
+}
+
+// Cropper.js resize handles are 5px by default; give fingers something to grab.
+@media (hover: none) and (pointer: coarse) {
+  .cropper-point {
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+  }
+
+  .cropper-point.point-n,
+  .cropper-point.point-s { margin-left: -10px; }
+  .cropper-point.point-e,
+  .cropper-point.point-w { margin-top: -10px; }
+  .cropper-point.point-n,
+  .cropper-point.point-nw,
+  .cropper-point.point-ne { top: -10px; }
+  .cropper-point.point-s,
+  .cropper-point.point-sw,
+  .cropper-point.point-se { bottom: -10px; }
+  .cropper-point.point-w,
+  .cropper-point.point-nw,
+  .cropper-point.point-sw { left: -10px; }
+  .cropper-point.point-e,
+  .cropper-point.point-ne,
+  .cropper-point.point-se { right: -10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-card,
+  .gallery-card *,
+  .gallery-upload__bar,
+  .cropper-container * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

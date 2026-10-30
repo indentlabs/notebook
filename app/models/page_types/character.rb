@@ -40,8 +40,12 @@ class Character < ApplicationRecord
   relates :magics,           with: :character_magics
   relates :enemies,          with: :character_enemies
 
+  def self.description_attribute_label
+    'Role'
+  end
+
   def description
-    overview_field_value('Role')
+    overview_field_value(self.class.description_attribute_label)
   end
 
   def self.content_name
@@ -49,11 +53,11 @@ class Character < ApplicationRecord
   end
 
   def self.color
-    'red'
+    'bg-red-500'
   end
 
   def self.text_color
-    'red-text'
+    'text-red-500'
   end
 
   def self.hex_color

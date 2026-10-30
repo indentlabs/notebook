@@ -1,23 +1,6 @@
 class UserBlockingsController < ApplicationController
-  before_action :set_user_blocking, only: [:show, :edit, :update, :destroy]
-
-  # GET /user_blockings
-  def index
-    @user_blockings = UserBlocking.all
-  end
-
-  # GET /user_blockings/1
-  def show
-  end
-
-  # GET /user_blockings/new
-  def new
-    @user_blocking = UserBlocking.new
-  end
-
-  # GET /user_blockings/1/edit
-  def edit
-  end
+  before_action :authenticate_user!
+  before_action :set_user_blocking, only: [:destroy]
 
   # POST /user_blockings
   def create
@@ -26,16 +9,7 @@ class UserBlockingsController < ApplicationController
     if @user_blocking.save
       redirect_to @user_blocking.blocked_user, notice: 'This user has been blocked.'
     else
-      render :new
-    end
-  end
-
-  # PATCH/PUT /user_blockings/1
-  def update
-    if @user_blocking.update(user_blocking_params)
-      redirect_to @user_blocking, notice: 'User blocking was successfully updated.'
-    else
-      render :edit
+      redirect_back fallback_location: root_path, alert: 'There was a problem blocking this user. Please try again.'
     end
   end
 
@@ -51,7 +25,7 @@ class UserBlockingsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_user_blocking
-    @user_blocking = UserBlocking.find(params[:id])
+    @user_blocking = current_user.user_blockings.find(params[:id])
   end
 
   # Only allow a trusted parameter "white list" through.

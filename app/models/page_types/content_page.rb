@@ -9,25 +9,31 @@ class ContentPage < ApplicationRecord
   include Authority::Abilities
   self.authorizer_name = 'ContentPageAuthorizer'
 
-  # Returns a single image for use in previews/cards, prioritizing pinned images
-  # This method keeps the original behavior of prioritizing pinned images for thumbnails/previews
-  def random_image_including_private(format: :small)
-    # Always prioritize pinned images first for preview cards
-    pinned_image = ImageUpload.where(content_type: self.page_type, content_id: self.id, pinned: true).first
-    return pinned_image.src(format) if pinned_image
+  # Lists built by User#content are generic ContentPage rows (one union
+  # query across every page table) rather than Character/Location/... records,
+  # so they need the gallery looked up through page_type + id instead of the
+  # polymorphic association. Everything else (cover_image, cover_image_url)
+  # comes from HasImageUploads unchanged.
+  include HasImageUploads
 
-    pinned_commission = BasilCommission.where(entity_type: self.page_type, entity_id: self.id, pinned: true).where.not(saved_at: nil).includes([:image_attachment]).first
-    return pinned_commission.image if pinned_commission
+  def image_uploads
+    return @preloaded_image_uploads if defined?(@preloaded_image_uploads) && @preloaded_image_uploads
 
-    # Fall back to random images if no pinned images exist
-    random_image = ImageUpload.where(content_type: self.page_type, content_id: self.id).sample
-    return random_image.src(format) if random_image
+    ImageUpload.where(content_type: page_type, content_id: id)
+  end
 
-    random_commission = BasilCommission.where(entity_type: self.page_type, entity_id: self.id).where.not(saved_at: nil).includes([:image_attachment]).sample
-    return random_commission.image if random_commission
+  def basil_commissions
+    return @preloaded_basil_commissions if defined?(@preloaded_basil_commissions) && @preloaded_basil_commissions
 
-    # Use default image as last resort
-    ActionController::Base.helpers.asset_path("card-headers/#{self.page_type.downcase.pluralize}.webp")
+    BasilCommission.where(entity_type: page_type, entity_id: id)
+  end
+
+  # Called by ApplicationController#preload_cover_images with the rows already
+  # fetched for a whole list, so cover_image needs no further queries.
+  def preload_gallery(uploads, commissions)
+    @preloaded_image_uploads     = Array(uploads)
+    @preloaded_basil_commissions = Array(commissions)
+    clear_cover_image_cache
   end
 
   def icon
@@ -43,7 +49,15 @@ class ContentPage < ApplicationRecord
   end
 
   def favorite?
-    !!favorite
+    # Handle different formats that might come from SQL queries
+    case favorite
+    when true, 1, "1", "true"
+      true
+    when false, 0, "0", "false", nil
+      false
+    else
+      !!favorite
+    end
   end
 
   def view_path

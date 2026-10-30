@@ -1,117 +1,134 @@
-<h5 class="grey-text">Ease of reading</h5>
-<div class="row">
-  <div class="col s12">
-    <div class="green card">
-      <div class="card-content">
-        <div class="row">
-          <div class="col s12 m3 white-text center">
-            <h2><%= analysis.readability_score %></h2>
-            READABILITY
-          </div>
-          <div class="col s12 m9 white-text">
-            <h4>
-              <% Documents::Analysis::ReadabilityService.readability_score_category(analysis.readability_score) %>
-            </h4>
-            <p>
-              <%= Documents::Analysis::ReadabilityService.readability_score_text(analysis) %>
-            </p>
+<%
+  score = analysis.readability_score || 0
+  score_category = Documents::Analysis::ReadabilityService.readability_score_category(score)
+  score_text = Documents::Analysis::ReadabilityService.readability_score_text(analysis)
+
+  # Color based on score
+  score_colors = case score
+    when 66..100
+      { bg: 'bg-green-500', text: 'text-green-600 dark:text-green-400', light_bg: 'bg-green-50 dark:bg-green-900' }
+    when 36..65
+      { bg: 'bg-yellow-500', text: 'text-yellow-600 dark:text-yellow-400', light_bg: 'bg-yellow-50 dark:bg-yellow-900' }
+    else
+      { bg: 'bg-red-500', text: 'text-red-600 dark:text-red-400', light_bg: 'bg-red-50 dark:bg-red-900' }
+  end
+%>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+  <!-- Header with score -->
+  <div class="p-6 <%= score_colors[:light_bg] %>">
+    <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+      <!-- Score Circle -->
+      <div class="flex-shrink-0">
+        <div class="relative w-24 h-24">
+          <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="8" fill="none" class="text-gray-200 dark:text-gray-700" />
+            <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="8" fill="none"
+                    class="<%= score_colors[:text] %>"
+                    stroke-dasharray="<%= (score / 100.0 * 283).round %> 283"
+                    stroke-linecap="round" />
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <span class="text-2xl font-bold <%= score_colors[:text] %>"><%= score %></span>
           </div>
         </div>
       </div>
-      <div class="card-action green lighten-1">
-        <a class="activator white-text text-darken-4">
-          How is this calculated?
-        </a>
-      </div>
-      <div class="card-reveal">
-        <span class="card-title">
-          Readability scales
-          <i class="material-icons right">close</i>
-        </span>
-        <p>
-          In order to provide you with a generalized score in Notebook.ai, we compute
-          several of the most well-known readability scores on your text. 
-          For all scales other than the Flesch-Kincaid reading ease, a higher score means
-          a greater difficulty reading. Conversely, lower scores mean text is easier to read.
-        </p>
-        <p>
-          We take a weighted composite score of all readability scales to give you a singular readability score.
-        </p>
-        <ul>
-          <% if analysis.flesch_kincaid_reading_ease %>
-            <li>
-              Flesch-Kincaid reading ease: <%= analysis.flesch_kincaid_reading_ease.try(:round) %> / 100
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.flesch_kincaid_reading_ease.try(:round) / 100 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.flesch_kincaid_grade_level %>
-            <li>
-              Flesch-Kincaid grade level: <%= analysis.flesch_kincaid_grade_level.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.flesch_kincaid_grade_level.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.flesch_kincaid_age_minimum %>
-            <li>
-              Flesch-Kincaid age minimum: <%= analysis.flesch_kincaid_age_minimum.try(:round) %> / 20
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.flesch_kincaid_age_minimum.try(:round) / 20 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.forcast_grade_level %>
-            <li>
-              Forcast grade level: <%= analysis.forcast_grade_level.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.forcast_grade_level.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.coleman_liau_index %>
-            <li>
-              Coleman liau index: <%= analysis.coleman_liau_index.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.coleman_liau_index.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.automated_readability_index %>
-            <li>
-              Automated readability index: <%= analysis.automated_readability_index.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.automated_readability_index.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.gunning_fog_index %>
-            <li>
-              Gunning fog index: <%= analysis.gunning_fog_index.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.gunning_fog_index.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.smog_grade %>
-            <li>
-              SMOG grade: <%= analysis.smog_grade.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.smog_grade.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-          <% if analysis.combined_average_reading_level %>
-            <li>
-              Combined average reading level: <%= analysis.combined_average_reading_level.try(:round) %> / 16
-              <div class="progress">
-                <div class="determinate" style="width: <%= 100 * analysis.combined_average_reading_level.try(:round) / 16 %>%"></div>
-              </div>
-            </li>
-          <% end %>
-        </ul>
+
+      <!-- Score Details -->
+      <div class="flex-1">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100"><%= score_category %></h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1"><%= score_text %></p>
       </div>
     </div>
   </div>
+
+  <!-- Detailed Metrics -->
+  <details class="group">
+    <summary class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 cursor-pointer flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+      <span class="text-sm font-medium text-gray-700 dark:text-gray-300">View detailed readability metrics</span>
+      <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />
+      </svg>
+    </summary>
+
+    <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+        Multiple readability formulas are combined to calculate your overall score. Lower grade levels indicate easier reading.
+      </p>
+
+      <div class="space-y-4">
+        <% if analysis.flesch_kincaid_reading_ease %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-gray-700 dark:text-gray-300">Flesch-Kincaid Reading Ease</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100"><%= analysis.flesch_kincaid_reading_ease.try(:round) %>/100</span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="h-full bg-teal-500 rounded-full" style="width: <%= [analysis.flesch_kincaid_reading_ease.try(:round) || 0, 100].min %>%"></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if analysis.flesch_kincaid_grade_level %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-gray-700 dark:text-gray-300">Flesch-Kincaid Grade Level</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100"><%= analysis.flesch_kincaid_grade_level.try(:round) %></span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="h-full bg-teal-500 rounded-full" style="width: <%= [(analysis.flesch_kincaid_grade_level.try(:round) || 0) / 16.0 * 100, 100].min %>%"></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if analysis.gunning_fog_index %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-gray-700 dark:text-gray-300">Gunning Fog Index</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100"><%= analysis.gunning_fog_index.try(:round) %></span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="h-full bg-teal-500 rounded-full" style="width: <%= [(analysis.gunning_fog_index.try(:round) || 0) / 16.0 * 100, 100].min %>%"></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if analysis.coleman_liau_index %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-gray-700 dark:text-gray-300">Coleman-Liau Index</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100"><%= analysis.coleman_liau_index.try(:round) %></span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="h-full bg-teal-500 rounded-full" style="width: <%= [(analysis.coleman_liau_index.try(:round) || 0) / 16.0 * 100, 100].min %>%"></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if analysis.smog_grade %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-gray-700 dark:text-gray-300">SMOG Grade</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100"><%= analysis.smog_grade.try(:round) %></span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="h-full bg-teal-500 rounded-full" style="width: <%= [(analysis.smog_grade.try(:round) || 0) / 16.0 * 100, 100].min %>%"></div>
+            </div>
+          </div>
+        <% end %>
+
+        <% if analysis.automated_readability_index %>
+          <div>
+            <div class="flex items-center justify-between text-sm mb-1">
+              <span class="text-gray-700 dark:text-gray-300">Automated Readability Index</span>
+              <span class="font-medium text-gray-900 dark:text-gray-100"><%= analysis.automated_readability_index.try(:round) %></span>
+            </div>
+            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div class="h-full bg-teal-500 rounded-full" style="width: <%= [(analysis.automated_readability_index.try(:round) || 0) / 16.0 * 100, 100].min %>%"></div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </details>
 </div>

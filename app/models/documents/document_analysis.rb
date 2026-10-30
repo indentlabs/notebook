@@ -14,6 +14,7 @@ class DocumentAnalysis < ApplicationRecord
 
   # usage: analysis.pos_percentage(:adjective) => 23.4
   def pos_percentage(pos_symbol)
+    return 0.0 if word_count.nil? || word_count == 0
     (send(pos_symbol.to_s + '_count').to_f / word_count * 100).round(2)
   end
 
@@ -23,5 +24,17 @@ class DocumentAnalysis < ApplicationRecord
 
   def has_sentiment_scores?
     [joy_score, sadness_score, fear_score, disgust_score, anger_score].compact.any?
+  end
+
+  def self.icon
+    'bar_chart'
+  end
+
+  def self.text_color
+    'text-orange-500'
+  end
+
+  def self.color
+    'bg-orange-500'
   end
 end

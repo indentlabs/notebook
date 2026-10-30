@@ -1,14 +1,212 @@
 <% set_meta_tags title: @document_revision.title, description: truncate(@document_revision.body) %>
 
-<%= content_for :full_width_page_header do %>
-
-  <%= render partial: 'documents/components/document_name_bar', locals: { document: @document_revision } %>
-  <%= render partial: 'documents/components/autosave_bar', locals: { document: @document_revision } %>
-
-  <div class="card-panel yellow lighten-5">
-    You are viewing a revision of "<%= @document.title %>" that was backed up <span class="tooltipped" data-tooltip="Backed up at <%= @document_revision.created_at %>"><%= time_ago_in_words @document_revision.created_at %> ago</span>.
-    <%= link_to 'Click here to return to the latest version of this document', edit_document_path(@document) %>.
+<div class="min-h-screen bg-gray-50">
+  <!-- Header with Warning -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <!-- Breadcrumb -->
+        <nav class="flex items-center text-sm mb-4">
+          <%= link_to "Documents", documents_path, class: "text-gray-500 hover:text-gray-700" %>
+          <i class="material-icons text-gray-400 text-sm mx-2">chevron_right</i>
+          <%= link_to @document.title, edit_document_path(@document), class: "text-gray-500 hover:text-gray-700" %>
+          <i class="material-icons text-gray-400 text-sm mx-2">chevron_right</i>
+          <%= link_to "Revision History", document_document_revisions_path(@document), class: "text-gray-500 hover:text-gray-700" %>
+          <i class="material-icons text-gray-400 text-sm mx-2">chevron_right</i>
+          <span class="text-gray-900 font-medium">Viewing Revision</span>
+        </nav>
+        
+        <!-- Revision Warning Banner -->
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+          <div class="flex">
+            <div class="flex-shrink-0">
+              <i class="material-icons text-amber-400">warning</i>
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-amber-800">
+                You are viewing a historical revision
+              </h3>
+              <div class="mt-2 text-sm text-amber-700">
+                <p>
+                  This is a backup of "<%= @document.title %>" that was saved 
+                  <span class="font-medium" title="<%= @document_revision.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
+                    <%= time_ago_in_words(@document_revision.created_at) %> ago
+                  </span>.
+                </p>
+              </div>
+              <div class="mt-4 flex space-x-4">
+                <%= link_to edit_document_path(@document), class: "inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-lg text-white bg-amber-600 hover:bg-amber-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500" do %>
+                  <i class="material-icons text-sm mr-1.5">arrow_back</i>
+                  Return to Current Version
+                <% end %>
+                <button onclick="restoreThisVersion()" class="inline-flex items-center px-3 py-1.5 border border-amber-300 text-sm font-medium rounded-lg text-amber-700 bg-white hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                  <i class="material-icons text-sm mr-1.5">restore</i>
+                  Restore This Version
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Page Title -->
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">
+              <%= @document_revision.title || "Untitled Revision" %>
+            </h1>
+            <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600">
+              <span class="flex items-center">
+                <i class="material-icons text-xs mr-1">schedule</i>
+                Backed up <%= @document_revision.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+              </span>
+              <span class="flex items-center">
+                <i class="material-icons text-xs mr-1">description</i>
+                <%= number_with_delimiter(@document_revision.cached_word_count || 0) %> words
+              </span>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-3">
+            <%= link_to document_document_revisions_path(@document), class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500" do %>
+              <i class="material-icons text-sm mr-2">history</i>
+              View All Revisions
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div id="editor"><%= ContentFormatterService.substitute_content_links(@document_revision.body.try(:html_safe) || "", current_user).html_safe %></div>
-<% end %>
+  <!-- Main Content Area -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar with Revision Info -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-8">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Revision Details</h2>
+          
+          <div class="space-y-4">
+            <!-- Comparison with Current -->
+            <div>
+              <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Compared to Current</h3>
+              <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Word Difference</span>
+                  <% word_diff = (@document.cached_word_count || 0) - (@document_revision.cached_word_count || 0) %>
+                  <span class="font-medium <%= word_diff > 0 ? 'text-green-600' : word_diff < 0 ? 'text-red-600' : 'text-gray-900' %>">
+                    <%= word_diff > 0 ? '+' : '' %><%= number_with_delimiter(word_diff) %>
+                  </span>
+                </div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-600">Time Ago</span>
+                  <span class="font-medium text-gray-900">
+                    <%= time_ago_in_words(@document_revision.created_at) %>
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="border-t border-gray-200 pt-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Actions</h3>
+              <div class="space-y-2">
+                <button onclick="downloadRevision()" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center">
+                  <i class="material-icons text-sm mr-2 text-gray-500">download</i>
+                  Download as Text
+                </button>
+                <%= button_to document_document_revision_path(@document, @document_revision), 
+                    method: :delete,
+                    form: { 
+                      class: "w-full",
+                      data: { 
+                        turbo_confirm: 'Are you sure you want to delete this revision? This cannot be undone.' 
+                      },
+                      onsubmit: "return confirm('Are you sure you want to delete this revision? This cannot be undone.');"
+                    },
+                    class: "w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center" do %>
+                  <i class="material-icons text-sm mr-2">delete</i>
+                  Delete This Revision
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="border-t border-gray-200 pt-4">
+              <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Navigate</h3>
+              <div class="space-y-2">
+                <% prev_revision = @document.document_revisions.where("created_at > ?", @document_revision.created_at).order(:created_at).first %>
+                <% next_revision = @document.document_revisions.where("created_at < ?", @document_revision.created_at).order(created_at: :desc).first %>
+                
+                <% if prev_revision %>
+                  <%= link_to document_document_revision_path(@document, prev_revision), class: "w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center justify-between group" do %>
+                    <span class="flex items-center">
+                      <i class="material-icons text-sm mr-2 text-gray-500">arrow_upward</i>
+                      Newer Revision
+                    </span>
+                    <i class="material-icons text-sm text-gray-400 group-hover:text-gray-600">chevron_right</i>
+                  <% end %>
+                <% end %>
+                
+                <% if next_revision %>
+                  <%= link_to document_document_revision_path(@document, next_revision), class: "w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg flex items-center justify-between group" do %>
+                    <span class="flex items-center">
+                      <i class="material-icons text-sm mr-2 text-gray-500">arrow_downward</i>
+                      Older Revision
+                    </span>
+                    <i class="material-icons text-sm text-gray-400 group-hover:text-gray-600">chevron_right</i>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Document Content -->
+      <div class="lg:col-span-3">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <!-- Content Header -->
+          <div class="bg-gray-50 border-b border-gray-200 px-6 py-4">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold text-gray-900">Document Content</h2>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-500">Read-only view</span>
+                <i class="material-icons text-gray-400 text-sm">lock</i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Document Body -->
+          <div class="p-6">
+            <div class="prose prose-lg max-w-none">
+              <%= ContentFormatterService.substitute_content_links(@document_revision.body.try(:html_safe) || "", current_user).html_safe %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function restoreThisVersion() {
+    if (confirm('Are you sure you want to restore this version? Your current version will be saved as a new revision before restoring.')) {
+      // TODO: Implement restore functionality
+      console.log('Restoring revision <%= @document_revision.id %>');
+    }
+  }
+  
+  function downloadRevision() {
+    // Create a blob with the document content
+    const content = document.querySelector('.prose').innerText;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '<%= @document_revision.title.parameterize %>-revision-<%= @document_revision.created_at.strftime("%Y%m%d") %>.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+</script>

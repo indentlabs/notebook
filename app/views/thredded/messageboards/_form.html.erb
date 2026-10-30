@@ -1,0 +1,89 @@
+<%= form_for messageboard, html: { class: 'thredded--form block', 'data-thredded-messageboard-form' => true } do |f| %>
+  <div class="p-6 space-y-5">
+    <!-- Name Field -->
+    <div class="form-group">
+      <%= f.label :name, t('thredded.messageboard.form.title_label'),
+          class: 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5' %>
+      <%= f.text_field :name,
+            required: true,
+            autofocus: true,
+            class: 'w-full px-3 py-2.5 text-base border border-gray-300 dark:border-gray-600 rounded-md
+                   bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
+                   placeholder-gray-400 dark:placeholder-gray-500
+                   transition-colors duration-150' %>
+      <%= render 'thredded/shared/field_errors', messages: f.object.errors[:name] %>
+    </div>
+
+    <!-- Description Field -->
+    <div class="form-group">
+      <%= f.label :description, t('thredded.messageboard.form.description_label'),
+          class: 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5' %>
+      <%= f.text_area :description,
+            rows: 3,
+            class: 'w-full px-3 py-2.5 text-base border border-gray-300 dark:border-gray-600 rounded-md
+                   bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400
+                   placeholder-gray-400 dark:placeholder-gray-500
+                   transition-colors duration-150' %>
+    </div>
+
+    <!-- Messageboard Group -->
+    <div class="form-group">
+      <%= f.label :messageboard_group_id, t('thredded.messageboard.form.messageboard_group_id_label'),
+          class: 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5' %>
+      <%= f.collection_select :messageboard_group_id, Thredded::MessageboardGroup.all, :id, :name,
+            { include_blank: t('thredded.messageboard.form.no_group') },
+            class: 'w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md
+                   bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400
+                   cursor-pointer p-0' %>
+    </div>
+
+    <!-- Admin Options -->
+    <div class="form-group pt-4 border-t border-gray-200 dark:border-gray-700">
+      <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Settings</span>
+      <div class="flex flex-wrap gap-6">
+        <label class="flex items-center gap-2 cursor-pointer group">
+          <%= f.check_box :locked,
+              class: 'w-4 h-4 text-blue-600 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600
+                     rounded focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-2 cursor-pointer' %>
+          <span class="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-200 flex items-center gap-1.5">
+            <i class="material-icons text-base">lock</i>
+            <%= t 'thredded.messageboard.form.locked_label' %>
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Footer -->
+  <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div>
+      <% if messageboard.persisted? && Thredded.show_messageboard_delete_button %>
+        <%= button_to t('thredded.messageboard.form.delete'),
+              messageboard_path(messageboard),
+              method: :delete,
+              data: { confirm: t('thredded.messageboard.form.delete_confirm', messageboard_name: messageboard.name) },
+              class: 'text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 flex items-center gap-1 font-medium bg-transparent border-none p-0 cursor-pointer',
+              form_class: 'inline-block' %>
+      <% else %>
+        <%= link_to messageboards_path,
+            class: 'text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1' do %>
+          <i class="material-icons text-base">arrow_back</i>
+          Cancel
+        <% end %>
+      <% end %>
+    </div>
+    <button type="submit"
+            data-disable-with="<%= messageboard.persisted? ? t('thredded.messageboard.form.update_btn_submitting') : t('thredded.messageboard.form.create_btn_submitting') %>"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700
+                   text-white text-sm font-medium rounded-md
+                   focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                   dark:focus:ring-offset-gray-800
+                   transition-colors duration-150">
+      <i class="material-icons text-base"><%= messageboard.persisted? ? 'save' : 'add' %></i>
+      <%= messageboard.persisted? ? t('thredded.messageboard.update') : t('thredded.messageboard.create') %>
+    </button>
+  </div>
+<% end %>

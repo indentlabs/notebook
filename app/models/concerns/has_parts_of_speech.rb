@@ -75,7 +75,7 @@ module HasPartsOfSpeech
     end
 
     def numbers
-      @numbers ||= text.strip
+      @numbers ||= plaintext.strip
         .split(' ')
         .select { |w| is_numeric?(w) }
         .uniq

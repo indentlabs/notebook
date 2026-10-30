@@ -7,6 +7,10 @@ class TimelineAuthorizer < ContentAuthorizer
   end
 
   def readable_by?(user)
+    # Anonymous viewers arrive as a blank User.new, whose nil id would otherwise match
+    # contributor invites nobody has claimed yet.
+    user = nil if user && user.id.nil?
+
     return true if resource.privacy == 'public'
     return true if user && resource.user_id == user.id
     return true if resource.universe.present? && resource.universe.privacy == 'public'
@@ -18,9 +22,12 @@ class TimelineAuthorizer < ContentAuthorizer
   end
 
   def updatable_by?(user)
-    [
-      user && resource.user_id == user.id
-    ].any?
+    user = nil if user && user.id.nil?
+
+    return true if user && resource.user_id == user.id
+    return true if user && resource.universe.present? && resource.universe.contributors.pluck(:user_id).include?(user.id)
+    
+    return false
   end
 
   def deletable_by?(user)

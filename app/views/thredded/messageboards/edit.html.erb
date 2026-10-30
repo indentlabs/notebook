@@ -1,0 +1,31 @@
+<% content_for :thredded_page_title, t('thredded.nav.edit_messageboard') %>
+<% content_for :thredded_page_id, 'thredded--messageboard-edit' %>
+<% content_for :thredded_breadcrumbs do %>
+  <ul class="thredded--navigation-breadcrumbs flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
+    <li><%= link_to t('thredded.messageboard.index.page_title'), messageboards_path, class: "hover:text-blue-600 dark:hover:text-blue-400" %></li>
+    <li><span class="mx-2">/</span></li>
+    <li><%= link_to @messageboard.name, messageboard_topics_path(@messageboard), class: "hover:text-blue-600 dark:hover:text-blue-400" %></li>
+    <li><span class="mx-2">/</span></li>
+    <li class="font-medium text-gray-900 dark:text-white"><%= t('thredded.nav.edit_messageboard') %></li>
+  </ul>
+<% end %>
+
+<%= thredded_page do %>
+  <section class="thredded--main-section">
+    <div class="edit-messageboard-container max-w-2xl mx-auto mt-4 px-4 sm:px-0">
+      <div class="edit-messageboard-header mb-6">
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <i class="material-icons text-blue-500 dark:text-blue-400 text-3xl">edit</i>
+          <%= t('thredded.nav.edit_messageboard') %>
+        </h1>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          Update the settings and details for your discussion board.
+        </p>
+      </div>
+
+      <div class="edit-messageboard-form-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+        <%= render 'form', messageboard: @messageboard %>
+      </div>
+    </div>
+  </section>
+<% end %>

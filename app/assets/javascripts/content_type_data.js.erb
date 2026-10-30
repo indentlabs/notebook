@@ -1,9 +1,10 @@
 window.ContentTypeData = {
   <% (Rails.application.config.content_types[:all] + [Document, Timeline]).each do |content_type| %>
     '<%= content_type.name %>': {
-      color: '<%= content_type.color %>',
-      hex:   '<%= content_type.hex_color %>',
-      icon:  '<%= content_type.icon  %>'
+      color:  '<%= content_type.color %>', // comment to bust cache :) -- should  be safe to remove after release but double check the link dropdown optgroup bg colors when you do
+      hex:    '<%= content_type.hex_color %>',
+      icon:   '<%= content_type.icon  %>',
+      plural: '<%= content_type.name.pluralize %>'
     },
   <% end %>
 };

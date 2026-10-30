@@ -1,9 +1,14 @@
 class ContentPageSharesController < ApplicationController
+  SHAREABLE_PAGE_TYPES = (Rails.application.config.content_type_names[:all] + %w(Timeline Document)).freeze
+
   before_action :authenticate_user!, except: [:show]
   before_action :set_content_page_share, only: [
-    :show, :edit, :update, :destroy, 
+    :show, :edit, :update, :destroy,
     :follow, :unfollow, :report
   ]
+  before_action :authorize_share_owner!, only: [:edit, :update, :destroy]
+  before_action :authorize_sharing_page!, only: [:create, :update]
+  before_action :load_recent_forum_topics, only: [:show]
 
   # GET /content_page_shares
   def index
@@ -15,6 +20,15 @@ class ContentPageSharesController < ApplicationController
     @page_title = "#{@share.user.display_name}'s #{@share.content_page_type} shared"
 
     @sidenav_expansion = 'community'
+    
+    # Set up follow/block status for the share creator
+    if current_user
+      @is_following = current_user.user_followings.exists?(followed_user: @share.user)
+      @is_blocked = current_user.user_blockings.exists?(blocked_user: @share.user)
+    else
+      @is_following = false
+      @is_blocked = false
+    end
   end
 
   # GET /content_page_shares/new
@@ -31,11 +45,29 @@ class ContentPageSharesController < ApplicationController
     @share = ContentPageShare.new(content_page_share_params)
 
     if @share.save
-      @share.content_page.update(privacy: 'public')
+      content_owner = @share.content_page.user
 
-      redirect_to [@share.user, @share], notice: 'Content page share was successfully created.'
+      # Sharing your own page publishes it. Other people's pages are already public by this point.
+      @share.content_page.update(privacy: 'public') if content_owner == current_user
+
+      # Notify the content creator if they're different from the sharer
+      if content_owner != current_user && content_owner.notification_updates?
+        content_type_name = @share.content_page_type_label
+        content_type_color = @share.content_page.class.respond_to?(:color) ? @share.content_page.class.color : 'bg-blue-500'
+
+        content_owner.notifications.create(
+          message_html: "🎉 <strong>#{current_user.display_name}</strong> shared your <span class='#{content_type_color} text-white px-1 rounded'>#{content_type_name}</span> <strong>#{@share.content_page.name}</strong> with the community!",
+          icon: 'campaign',
+          icon_color: 'green',
+          happened_at: DateTime.current,
+          passthrough_link: user_content_page_share_path(@share.user, @share),
+          reference_code: 'content-shared-by-other'
+        )
+      end
+
+      redirect_to [@share.user, @share], notice: 'Thanks for sharing!'
     else
-      raise @share.errors.inspect
+      redirect_back(fallback_location: stream_path, alert: @share.errors.full_messages.to_sentence)
     end
   end
 
@@ -76,6 +108,22 @@ class ContentPageSharesController < ApplicationController
     @share = ContentPageShare.find(params[:id])
   end
 
+  def authorize_share_owner!
+    unless @share.user == current_user || current_user.site_administrator?
+      redirect_to [@share.user, @share], alert: 'You are not authorized to change this share.'
+    end
+  end
+
+  # Sharing a page publishes it, so only its owner can share a page that isn't already public.
+  def authorize_sharing_page!
+    page_type, page_id = params.require(:content_page_share).require(:content_page).split('-')
+    page = page_type.constantize.find_by(id: page_id) if SHAREABLE_PAGE_TYPES.include?(page_type)
+
+    return if page && (page.user_id == current_user.id || PermissionService.content_is_publicly_visible?(content: page))
+
+    redirect_back(fallback_location: stream_path, alert: "You don't have permission to share that page.")
+  end
+
   # Only allow a trusted parameter "white list" through.
   def content_page_share_params
     {
@@ -85,5 +133,24 @@ class ContentPageSharesController < ApplicationController
       user_id:           current_user.id,
       shared_at:         DateTime.current
     }
+  end
+
+  def load_recent_forum_topics
+    # Get the 5 most recent forum posts and their topics
+    recent_posts = Thredded::Post.joins(:topic)
+                                 .where(deleted_at: nil)
+                                 .where.not(moderation_state: :blocked)
+                                 .where("thredded_topics.moderation_state != ?", 2)
+                                 .order(created_at: :desc)
+                                 .limit(10)
+                                 .includes(:topic, :user)
+
+    # Get unique topics from recent posts, limited to 5
+    @recent_forum_topics = recent_posts.map(&:topic)
+                                      .uniq { |topic| topic.id }
+                                      .first(5)
+  rescue => e
+    Rails.logger.error "Error loading recent forum topics: #{e.message}"
+    @recent_forum_topics = []
   end
 end

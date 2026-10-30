@@ -1,23 +1,6 @@
 class UserFollowingsController < ApplicationController
-  before_action :set_user_following, only: [:show, :edit, :update, :destroy]
-
-  # GET /user_followings
-  def index
-    @user_followings = UserFollowing.all
-  end
-
-  # GET /user_followings/1
-  def show
-  end
-
-  # GET /user_followings/new
-  def new
-    @user_following = UserFollowing.new
-  end
-
-  # GET /user_followings/1/edit
-  def edit
-  end
+  before_action :authenticate_user!
+  before_action :set_user_following, only: [:destroy]
 
   # POST /user_followings
   def create
@@ -40,16 +23,7 @@ class UserFollowingsController < ApplicationController
 
       redirect_to @user_following.followed_user, notice: "You're now following #{@user_following.followed_user.name.presence || 'this user'}"
     else
-      render :new
-    end
-  end
-
-  # PATCH/PUT /user_followings/1
-  def update
-    if @user_following.update(user_following_params)
-      redirect_to @user_following, notice: 'User following was successfully updated.'
-    else
-      render :edit
+      redirect_back fallback_location: root_path, alert: 'There was a problem following this user. Please try again.'
     end
   end
 
@@ -65,7 +39,7 @@ class UserFollowingsController < ApplicationController
 
   # Use callbacks to share common setup or constraints between actions.
   def set_user_following
-    @user_following = UserFollowing.find(params[:id])
+    @user_following = current_user.user_followings.find(params[:id])
   end
 
   # Only allow a trusted parameter "white list" through.

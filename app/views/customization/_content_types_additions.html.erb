@@ -1,0 +1,57 @@
+<style>
+  @keyframes toggle-pulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+    }
+    50% {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+    }
+  }
+  
+  .toggle-animating {
+    animation: toggle-pulse 0.5s ease-out;
+  }
+  
+  blockquote.cursor-pointer {
+    user-select: none;
+  }
+</style>
+
+<script>
+  function togglePageType(contentType, enabled) {
+    // Send AJAX request to toggle the content type
+    fetch('/customization/toggle_content_type', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: new URLSearchParams({
+        'content_type': contentType,
+        'active': enabled ? 'on' : 'off'
+      })
+    }).then(response => {
+      if (!response.ok) {
+        console.error('Failed to toggle content type');
+      }
+    }).catch(error => {
+      console.error('Error toggling content type:', error);
+    });
+  }
+  
+  function animateToggle(toggleElement) {
+    if (toggleElement) {
+      toggleElement.classList.add('toggle-animating');
+      setTimeout(() => {
+        toggleElement.classList.remove('toggle-animating');
+      }, 500);
+    }
+  }
+</script>

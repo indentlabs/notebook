@@ -1,0 +1,95 @@
+          <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Table of Contents</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Drag to reorder documents in your book</p>
+          </div>
+
+          <% if book_documents.any? %>
+            <ul id="book-documents-list" class="divide-y divide-gray-200 dark:divide-gray-700">
+              <% book_documents.each_with_index do |book_document, index| %>
+                <%= render 'book_document_row', book_document: book_document, index: index %>
+              <% end %>
+            </ul>
+          <% else %>
+            <div class="px-6 py-12 text-center">
+              <div class="mx-auto w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                <i class="material-icons text-gray-400 text-2xl">description</i>
+              </div>
+              <h3 class="text-sm font-medium text-gray-900 dark:text-white">No documents yet</h3>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Add documents to build your table of contents</p>
+            </div>
+          <% end %>
+
+          <!-- Add Document Section -->
+          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            <div x-show="!showAddDocument" class="flex items-center space-x-2">
+              <button
+                @click="showAddDocument = true; $nextTick(() => $refs.documentSearchInput.focus())"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                <i class="material-icons text-lg mr-2">add</i>
+                Add Document
+              </button>
+              <button
+                @click="showNewDocumentModal = true"
+                class="inline-flex items-center px-4 py-2 text-sm font-medium text-white <%= Book.color %> rounded-lg hover:opacity-90"
+              >
+                <i class="material-icons text-lg mr-2">note_add</i>
+                Create Document
+              </button>
+            </div>
+
+            <div x-show="showAddDocument" x-transition class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-medium text-gray-900 dark:text-white">Select a document to add</h4>
+                <button @click="showAddDocument = false" class="text-gray-400 hover:text-gray-600">
+                  <i class="material-icons text-lg">close</i>
+                </button>
+              </div>
+
+              <!-- Search Documents -->
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="material-icons text-gray-400 text-lg">search</i>
+                </div>
+                <input
+                  x-model="searchQuery"
+                  x-ref="documentSearchInput"
+                  type="text"
+                  placeholder="Search documents..."
+                  class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                />
+              </div>
+
+              <!-- Available Documents List -->
+              <div class="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                <% documents_not_in_book = available_documents.reject { |d| book.document_ids.include?(d.id) } %>
+                <% if documents_not_in_book.any? %>
+                  <% documents_not_in_book.each do |document| %>
+                    <div
+                      x-show="searchQuery === '' || '<%= document.title.to_s.downcase.gsub("'", "\\'") %>'.includes(searchQuery.toLowerCase())"
+                      class="flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
+                    >
+                      <div class="flex items-center space-x-3 min-w-0">
+                        <i class="material-icons text-gray-400 text-lg">description</i>
+                        <div class="min-w-0">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white truncate"><%= document.title.presence || 'Untitled' %></p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400"><%= number_with_delimiter(document.word_count) %> <%= 'word'.pluralize(document.word_count) %></p>
+                        </div>
+                      </div>
+                      <%= button_to add_document_book_path(book, document_id: document.id), method: :post, remote: true, class: "flex-shrink-0 inline-flex items-center px-3 py-1.5 text-xs font-medium text-white #{Book.color} rounded-lg hover:opacity-90" do %>
+                        <i class="material-icons text-sm mr-1">add</i>
+                        Add
+                      <% end %>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div class="px-4 py-6 text-center text-gray-500 dark:text-gray-400">
+                    <p class="text-sm">All documents are already in this book</p>
+                    <%= link_to new_document_path, class: "text-sm #{Book.text_color} hover:underline mt-2 inline-block" do %>
+                      Create a new document
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>

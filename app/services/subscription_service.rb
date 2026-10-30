@@ -1,91 +1,201 @@
 class SubscriptionService < Service
   #todo: support multiple simultaneous plans
 
+  # Stripe subscription statuses that can still generate charges (or become
+  # chargeable), and therefore count as "the user's subscription" when we're
+  # managing plans. Everything else (canceled, incomplete_expired, paused) is
+  # dead weight we can ignore.
+  BILLABLE_STRIPE_STATUSES = %w[active trialing past_due unpaid incomplete].freeze
+
+  # Billable statuses Stripe isn't collecting payment on: unpaid (retries exhausted)
+  # and incomplete (the first payment never went through).
+  UNCOLLECTIBLE_STRIPE_STATUSES = %w[unpaid incomplete].freeze
+
   def self.add_subscription(user, plan_id)
     related_plan = BillingPlan.find_by(stripe_plan_id: plan_id, available: true)
     raise "Plan #{plan_id} not available for user #{user.id}" if related_plan.nil?
 
-    # Sync with Stripe (todo pipe into StripeService)
-    unless Rails.env.test?
-      stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-      
-      # Use safe navigation to handle customers without subscriptions
-      subscriptions = stripe_customer.subscriptions&.data || []
-      stripe_subscription = subscriptions.first
+    # Sync with Stripe (todo pipe into StripeService).
+    #
+    # Stripe::CardError is deliberately NOT rescued here. It has to propagate
+    # out of the caller's transaction so the local downgrade that precedes this
+    # call rolls back; otherwise a declined card would strip the user of the
+    # plan and bandwidth they already had.
+    sync_stripe_subscriptions_to_plan(user, plan_id) unless Rails.env.test?
 
-      if stripe_subscription.nil?
-        # Get the customer's default payment method
-        payment_methods = Stripe::PaymentMethod.list({
-          customer: user.stripe_customer_id,
-          type: 'card'
-        })
-        
-        default_payment_method = payment_methods.data.first&.id
-        
-        # Create a new subscription on Stripe with the default payment method
-        subscription_params = {
-          customer: user.stripe_customer_id,
-          items: [{ price: plan_id }]
-        }
-        
-        # Add default payment method if available
-        if default_payment_method
-          subscription_params[:default_payment_method] = default_payment_method
-        end
-        
-        Stripe::Subscription.create(subscription_params)
-        stripe_customer = Stripe::Customer.retrieve(user.stripe_customer_id)
-        
-        # Use safe navigation to get the newly created subscription
-        subscriptions = stripe_customer.subscriptions&.data || []
-        stripe_subscription = subscriptions.first
-      else
-        # Edit an existing Stripe subscription by modifying its items
-        Stripe::Subscription.modify(stripe_subscription.id, {
-          items: [{
-            id: stripe_subscription.items.data[0].id,
-            price: plan_id
-          }]
-        })
-        # Retrieve the updated subscription
-        stripe_subscription = Stripe::Subscription.retrieve(stripe_subscription.id)
-      end
+    # Add any bonus bandwidth granted by the plan
+    user.update(
+      upload_bandwidth_kb: user.upload_bandwidth_kb + related_plan.bonus_bandwidth_kb
+    )
 
-      # The subscription is already saved by the modify call above
-      begin
+    # Add any one-time referral bonuses
+    add_any_referral_bonuses(user, plan_id)
 
-        # Add any bonus bandwidth granted by the plan
-        user.update(
-          upload_bandwidth_kb: user.upload_bandwidth_kb + related_plan.bonus_bandwidth_kb
-        )
+    # We intentionally skip callbacks on this to ensure the billing plan changes even on invalid users
+    user.update_column(:selected_billing_plan_id, related_plan.id)
 
-        # Add any one-time referral bonuses
-        add_any_referral_bonuses(user, plan_id)
+    user.subscriptions.create(
+      billing_plan:    related_plan,
+      start_date:      DateTime.now,
+      end_date:        DateTime.now.end_of_day + 10.years
+    )
 
-        # We intentionally skip callbacks on this to ensure the billing plan changes even on invalid users
-        user.update_column(:selected_billing_plan_id, related_plan.id)
+    user.notifications.create(
+      message_html:     "<div class='yellow-text text-darken-4'>You signed up for Premium!</div><div>Click here to turn on your Premium pages.</div>",
+      icon:             'star',
+      icon_color:       'text-darken-3 yellow',
+      happened_at:      DateTime.current,
+      passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path,
+      reference_code:   'premium-activation'
+    ) if user.reload.on_premium_plan?
 
-        user.subscriptions.create(
-          billing_plan:    related_plan,
-          start_date:      DateTime.now,
-          end_date:        DateTime.now.end_of_day + 10.years
-        )
+    report_subscription_change_to_slack(user, plan_id)
+  end
 
-        user.notifications.create(
-          message_html:     "<div class='yellow-text text-darken-4'>You signed up for Premium!</div><div>Click here to turn on your Premium pages.</div>",
-          icon:             'star',
-          icon_color:       'text-darken-3 yellow',
-          happened_at:      DateTime.current,
-          passthrough_link: Rails.application.routes.url_helpers.customization_content_types_path,
-          reference_code:   'premium-activation'
-        ) if user.reload.on_premium_plan?
+  # Ensures the customer ends up with exactly ONE Stripe subscription, on the
+  # requested price. Any parallel subscriptions are canceled immediately with
+  # proration, so unused time is credited to the customer's balance and nobody
+  # can be billed for two plans at once.
+  #
+  # We list subscriptions directly instead of reading customer.subscriptions:
+  # current Stripe API versions no longer include subscriptions on retrieved
+  # Customer objects, so that field is always nil and reading it made every
+  # plan change look like a first-time signup (creating a brand-new parallel
+  # subscription each time).
+  def self.sync_stripe_subscriptions_to_plan(user, plan_id)
+    subscriptions = prioritize_subscriptions_to_keep(billable_stripe_subscriptions(user.stripe_customer_id))
 
-        report_subscription_change_to_slack(user, plan_id)
-
-      rescue Stripe::CardError => e
-        return :failed_card
-      end
+    # Never keep a subscription nobody is paying for. Keeping an unpaid one on the
+    # requested plan granted the plan without charging anything, since Stripe has
+    # stopped collecting on it. Those go through the new-subscription path below,
+    # which charges the card up front, and are canceled once that has succeeded.
+    uncollectible, subscriptions = subscriptions.partition do |subscription|
+      UNCOLLECTIBLE_STRIPE_STATUSES.include?(subscription.status)
     end
+
+    result = keep_one_subscription_on_plan(user, subscriptions, plan_id)
+
+    # Without proration: their current period was never paid for, so crediting its
+    # "unused time" would hand the customer free balance toward the new plan.
+    uncollectible.each do |subscription|
+      Stripe::Subscription.cancel(subscription.id, prorate: false)
+    end
+
+    result
+  end
+
+  def self.keep_one_subscription_on_plan(user, subscriptions, plan_id)
+    # Prefer to keep a subscription already on the requested price so we never
+    # interrupt a billing period the user has already paid for; otherwise keep
+    # the healthiest/oldest one and switch its price below.
+    kept = subscriptions.find { |sub| subscription_price_ids(sub).include?(plan_id) }
+    kept ||= subscriptions.first
+
+    subscriptions.each do |subscription|
+      next if kept && subscription.id == kept.id
+      Stripe::Subscription.cancel(subscription.id, prorate: true)
+    end
+
+    if kept.nil?
+      default_payment_method = card_on_file_id(user.stripe_customer_id)
+
+      # Create a new subscription on Stripe with the default payment method.
+      # error_if_incomplete makes a declined card raise Stripe::CardError
+      # instead of leaving an incomplete subscription behind.
+      subscription_params = {
+        customer:         user.stripe_customer_id,
+        items:            [{ price: plan_id }],
+        payment_behavior: 'error_if_incomplete'
+      }
+
+      # Add default payment method if available
+      if default_payment_method
+        subscription_params[:default_payment_method] = default_payment_method
+      end
+
+      Stripe::Subscription.create(subscription_params)
+    elsif !subscription_price_ids(kept).include?(plan_id)
+      # Edit the existing Stripe subscription by modifying its items.
+      # error_if_incomplete makes a declined card raise Stripe::CardError
+      # (rolling back the local plan change) instead of leaving the
+      # subscription past_due on a plan the user never paid for.
+      update_params = {
+        items: [{
+          id:    kept.items.data[0].id,
+          price: plan_id
+        }],
+        payment_behavior: 'error_if_incomplete'
+      }
+
+      # Changing plans can invoice immediately (e.g. a different billing
+      # interval). If the card the subscription was billing to has since been
+      # replaced, it has no payment method left to charge and Stripe rejects the
+      # update outright, so point it at the card currently on file.
+      if kept.try(:default_payment_method).blank? && kept.try(:default_source).blank?
+        card_id = card_on_file_id(user.stripe_customer_id)
+        update_params[:default_payment_method] = card_id if card_id
+      end
+
+      Stripe::Subscription.update(kept.id, update_params)
+      Stripe::Subscription.retrieve(kept.id)
+    else
+      # Already on the requested plan (e.g. a repeated click); just make sure a
+      # previously-scheduled cancellation doesn't end it out from under them.
+      if kept.try(:cancel_at_period_end)
+        kept = Stripe::Subscription.update(kept.id, { cancel_at_period_end: false })
+      end
+      kept
+    end
+  end
+
+  # The id of a card attached to the customer, if any. We only keep one card on
+  # file at a time (see SubscriptionsController#information_change).
+  def self.card_on_file_id(stripe_customer_id)
+    return nil if stripe_customer_id.blank?
+
+    Stripe::PaymentMethod.list({
+      customer: stripe_customer_id,
+      type:     'card'
+    }).data.first&.id
+  end
+
+  # All of the customer's Stripe subscriptions that are (or can become) billable.
+  def self.billable_stripe_subscriptions(stripe_customer_id)
+    return [] if stripe_customer_id.blank?
+
+    subscriptions = []
+    Stripe::Subscription.list(
+      customer: stripe_customer_id,
+      status:   'all',
+      limit:    100
+    ).auto_paging_each do |subscription|
+      subscriptions << subscription if BILLABLE_STRIPE_STATUSES.include?(subscription.status)
+    end
+
+    subscriptions
+  end
+
+  # Order subscriptions by how much we want to preserve them: healthy statuses
+  # before broken ones (so an active subscription is never canceled in favor of
+  # an incomplete duplicate), then oldest first (so the user's original billing
+  # anchor survives).
+  def self.prioritize_subscriptions_to_keep(subscriptions)
+    subscriptions.sort_by do |subscription|
+      [BILLABLE_STRIPE_STATUSES.index(subscription.status) || BILLABLE_STRIPE_STATUSES.length, subscription.created || 0]
+    end
+  end
+
+  def self.subscription_price_ids(subscription)
+    (subscription.items&.data || []).map { |item| item.price&.id }.compact
+  end
+
+  # The subscription's period end as a unix timestamp. Older Stripe API
+  # versions expose current_period_end on the subscription; newer ones moved it
+  # onto each subscription item.
+  def self.subscription_period_end(subscription)
+    period_end = subscription.try(:current_period_end)
+    period_end ||= (subscription.items&.data || []).map { |item| item.try(:current_period_end) }.compact.max
+    period_end
   end
 
   def self.remove_subscription(user, subscription)
@@ -98,10 +208,25 @@ class SubscriptionService < Service
     subscription.update(end_date: DateTime.now)
   end
 
+  # Ends the user's subscriptions in OUR database and reverses their benefits.
+  # This does not touch Stripe: on a plan change, add_subscription switches the
+  # existing Stripe subscription's price in place (preserving the user's billing
+  # anchor). Callers that are cancelling outright, rather than switching plans,
+  # must also call cancel_stripe_subscriptions! or the customer keeps getting
+  # billed.
   def self.cancel_all_existing_subscriptions(user)
     user.update(selected_billing_plan_id: 1)
     user.active_subscriptions.each do |subscription|
       remove_subscription(user, subscription)
+    end
+  end
+
+  # Cancels every billable subscription on Stripe outright. Use this for true
+  # cancellations (admin unsubscribes, account deletion) — NOT for plan changes,
+  # where the subscription should be re-priced in place instead.
+  def self.cancel_stripe_subscriptions!(user)
+    billable_stripe_subscriptions(user.stripe_customer_id).each do |subscription|
+      Stripe::Subscription.cancel(subscription.id)
     end
   end
 

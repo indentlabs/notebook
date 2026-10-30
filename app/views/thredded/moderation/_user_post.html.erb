@@ -1,0 +1,59 @@
+<% post, content = post_and_content if local_assigns.key?(:post_and_content) %>
+<%
+  topic = post.to_model.postable
+
+  post_state = if post.blocked?
+                 { label: 'Blocked', icon: 'block',
+                   classes: 'bg-red-100 text-red-800 dark:bg-red-900 dark:bg-opacity-30 dark:text-red-400 border border-red-200 dark:border-red-800' }
+               elsif post.approved?
+                 { label: 'Approved', icon: 'check_circle',
+                   classes: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:bg-opacity-30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' }
+               else
+                 { label: 'Pending', icon: 'schedule',
+                   classes: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:bg-opacity-30 dark:text-amber-400 border border-amber-200 dark:border-amber-800' }
+               end
+%>
+<%= content_tag :article, id: dom_id(post), class: 'thredded--post thredded--post-moderation bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm mb-6 overflow-hidden' do %>
+  <div class="p-4 border-b border-stone-100 dark:border-gray-700">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <h3 class="thredded--post--topic text-sm sm:text-base text-stone-900 dark:text-gray-100">
+          <span class="text-stone-500 dark:text-gray-400">
+            <% if post.to_model.first_post_in_topic? %>
+              Started
+            <% else %>
+              Replied in
+            <% end %>
+          </span>
+          <%= link_to truncate(topic.title, length: 60), post.permalink_path,
+                      class: 'font-semibold text-blue-600 dark:text-blue-400 hover:underline' %>
+        </h3>
+        <div class="thredded--post--created-at flex flex-wrap items-center gap-2 text-xs text-stone-400 dark:text-gray-500 mt-1">
+          <%= time_ago post.created_at %>
+          <span class="moderation-badge inline-flex items-center px-2 py-0.5 rounded-full font-medium <%= post_state[:classes] %>">
+            <i class="material-icons text-xs mr-1"><%= post_state[:icon] %></i>
+            <%= post_state[:label] %>
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center text-stone-400 flex-shrink-0">
+        <%= render 'thredded/posts_common/actions', post: post %>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 prose dark:prose-invert max-w-none">
+    <%= content || render('thredded/posts/content', post: post) %>
+  </div>
+
+  <% if post.blocked? %>
+    <p class="bg-red-50 dark:bg-red-900 dark:bg-opacity-20 text-red-800 dark:text-red-300 p-4 text-sm border-l-4 border-red-500 mx-4 mb-4 rounded-r">
+      <%= render 'thredded/shared/content_moderation_blocked_state', moderation_record: post.last_moderation_record %>
+    </p>
+  <% end %>
+
+  <div class="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+    <%= render 'post_moderation_actions', post: post %>
+  </div>
+<% end %>
