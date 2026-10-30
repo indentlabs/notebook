@@ -12,7 +12,7 @@
   
   # Try to get document mentions if available
   if raw_content.respond_to?(:document_entities)
-    document_entities = raw_content.document_entities.includes(:document).limit(20) rescue []
+    document_entities = raw_content.document_entities.joins(:document).merge(Document.public_or_owned_by(current_user)).includes(:document).limit(20) rescue []
     mentioned_in_documents = document_entities.map(&:document).compact.uniq
   end
   

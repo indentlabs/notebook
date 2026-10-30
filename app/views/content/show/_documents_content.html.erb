@@ -1,6 +1,7 @@
-<% if raw_content.documents.any? %>
+<% listed_documents = raw_content.documents_listable_by(current_user) %>
+<% if listed_documents.any? %>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <% raw_content.documents.each do |document| %>
+    <% listed_documents.each do |document| %>
       <div class="document-card bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow duration-200">
         <%= link_to document_path(document), class: "block p-6" do %>
           <div class="flex items-start space-x-4">
