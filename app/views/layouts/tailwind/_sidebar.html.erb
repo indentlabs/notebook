@@ -45,7 +45,9 @@
           <% content_type_klass = content_class_from_name(content_type) %>
           <%= link_to main_app.polymorphic_path(content_type_klass),
               class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip",
-              "data-tooltip": content_type.pluralize do %>
+              "data-tooltip": content_type.pluralize,
+              "data-tooltip-color": content_type_klass.color,
+              "data-tooltip-count": number_with_delimiter(@current_user_content.fetch(content_type, []).count) do %>
             <i class="material-icons <%= content_type_klass.text_color %> text-3xl leading-none"><%= content_type_klass.icon %></i>
           <% end %>
         <% end %>
@@ -54,16 +56,16 @@
         <div class="w-8 border-t border-gray-200 dark:border-slate-700 my-1.5 shrink-0"></div>
 
         <!-- Writing icons -->
-        <%= link_to main_app.books_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Books" do %>
+        <%= link_to main_app.books_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Books", "data-tooltip-color": Book.color, "data-tooltip-count": number_with_delimiter(@current_user_content.fetch('Book', []).count) do %>
           <i class="material-icons <%= Book.text_color %> text-3xl leading-none"><%= Book.icon %></i>
         <% end %>
-        <%= link_to main_app.documents_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Documents" do %>
+        <%= link_to main_app.documents_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Documents", "data-tooltip-color": Document.color, "data-tooltip-count": number_with_delimiter(@current_user_content.fetch('Document', []).count.nonzero?) do %>
           <i class="material-icons <%= Document.text_color %> text-3xl leading-none"><%= Document.icon %></i>
         <% end %>
-        <%= link_to main_app.timelines_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Timelines" do %>
+        <%= link_to main_app.timelines_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Timelines", "data-tooltip-color": Timeline.color, "data-tooltip-count": number_with_delimiter(@current_user_content.fetch('Timeline', []).count.nonzero?) do %>
           <i class="material-icons <%= Timeline.text_color %> text-3xl leading-none"><%= Timeline.icon %></i>
         <% end %>
-        <%= link_to main_app.prompts_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Prompts" do %>
+        <%= link_to main_app.prompts_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Prompts", "data-tooltip-color": "bg-orange-400" do %>
           <i class="material-icons text-orange-400 text-3xl leading-none">lightbulb</i>
         <% end %>
 
@@ -71,13 +73,13 @@
         <div class="w-8 border-t border-gray-200 dark:border-slate-700 my-1.5 shrink-0"></div>
 
         <!-- Community icons -->
-        <%= link_to main_app.page_collections_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Collections" do %>
+        <%= link_to main_app.page_collections_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Collections", "data-tooltip-color": PageCollection.color, "data-tooltip-count": number_with_delimiter(@current_user_content.fetch('PageCollection', []).count.nonzero?) do %>
           <i class="material-icons <%= PageCollection.text_color %> text-3xl leading-none"><%= PageCollection.icon %></i>
         <% end %>
-        <%= link_to main_app.thredded_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Discussions" do %>
+        <%= link_to main_app.thredded_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Discussions", "data-tooltip-color": "bg-blue-500", "data-tooltip-count": @unread_threads.to_i.nonzero? do %>
           <i class="material-icons text-blue-500 text-3xl leading-none">forum</i>
         <% end %>
-        <%= link_to main_app.stream_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Activity" do %>
+        <%= link_to main_app.stream_path, class: "w-11 h-10 shrink-0 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition sidebar-tooltip", "data-tooltip": "Activity", "data-tooltip-color": "bg-purple-400" do %>
           <i class="material-icons text-purple-400 text-3xl leading-none">ballot</i>
         <% end %>
       </div>
@@ -344,11 +346,20 @@
             if (!text) return;
 
             tooltip.textContent = text;
+            // Same count the expanded sidebar shows beside this item, if any
+            var count = el.getAttribute('data-tooltip-count');
+            if (count) {
+              var badge = document.createElement('span');
+              badge.className = 'ml-2 px-1.5 py-0.5 text-xs rounded-full bg-white bg-opacity-25';
+              badge.textContent = count;
+              tooltip.appendChild(badge);
+            }
+            // Match the tooltip to the hovered item's own color
+            tooltip.className = (el.getAttribute('data-tooltip-color') || 'bg-gray-900') + ' visible';
             var rect = el.getBoundingClientRect();
             tooltip.style.left = (rect.right + 8) + 'px';
             tooltip.style.top = (rect.top + rect.height / 2) + 'px';
             tooltip.style.transform = 'translateY(-50%)';
-            tooltip.classList.add('visible');
           });
 
           el.addEventListener('mouseleave', function() {
