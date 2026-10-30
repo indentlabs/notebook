@@ -223,6 +223,25 @@
               </div>
             </div>
           </div>
+
+          <!-- The reading page's address, since the edit page's own isn't the one to send people. Hidden while private, when it wouldn't open for anyone else. -->
+          <div id="document-share-link" class="<%= %w(public password).include?(@document.privacy) ? '' : 'hidden' %> mt-3 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <label for="document-share-link-url" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link to share</label>
+            <div class="relative">
+              <input
+                id="document-share-link-url"
+                type="text"
+                readonly
+                value="<%= document_url(@document) %>"
+                onclick="copyDocumentShareLink()"
+                class="block w-full px-3 py-2 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              >
+              <button type="button" onclick="copyDocumentShareLink()" aria-label="Copy link" class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
+                <i id="document-share-link-icon" class="material-icons text-base">content_copy</i>
+              </button>
+            </div>
+            <p id="document-share-link-status" class="hidden mt-2 text-xs font-medium text-teal-600 dark:text-teal-400" aria-live="polite"></p>
+          </div>
         </div>
 
         <!-- Universe privacy tab -->
@@ -388,6 +407,35 @@
     button.querySelector('i').textContent = showing ? 'visibility' : 'visibility_off';
   };
 
+  // Selected first, so the link can still be copied by hand if the browser won't do it for us
+  window.copyDocumentShareLink = window.copyDocumentShareLink || function() {
+    const input = document.getElementById('document-share-link-url');
+    input.select();
+
+    const copying = navigator.clipboard ? navigator.clipboard.writeText(input.value) : Promise.reject();
+
+    copying.then(function() {
+      showDocumentShareLinkStatus('Copied!', 'check');
+    }).catch(function() {
+      showDocumentShareLinkStatus('Press Ctrl+C or Cmd+C to copy the selected link.', 'content_copy');
+    });
+  };
+
+  window.showDocumentShareLinkStatus = window.showDocumentShareLinkStatus || function(message, icon) {
+    const status = document.getElementById('document-share-link-status');
+    const iconElement = document.getElementById('document-share-link-icon');
+
+    status.textContent = message;
+    status.classList.remove('hidden');
+    iconElement.textContent = icon;
+
+    clearTimeout(window.documentShareLinkStatusTimer);
+    window.documentShareLinkStatusTimer = setTimeout(function() {
+      status.classList.add('hidden');
+      iconElement.textContent = 'content_copy';
+    }, 3000);
+  };
+
   window.documentPrivacyForm = window.documentPrivacyForm || function() {
     return document.getElementById('document-privacy-form');
   };
@@ -481,6 +529,9 @@
     if (shareButton) {
       shareButton.classList.toggle('hidden', value === 'password');
     }
+
+    // There's only a link worth sending once other people can open it
+    document.getElementById('document-share-link').classList.toggle('hidden', value === 'private');
 
     // Update sidebar privacy UI if present (for edit page)
     const sidebarBadge = document.getElementById('sidebar-privacy-badge');
