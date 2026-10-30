@@ -24,13 +24,17 @@ class ActiveSupport::TestCase
 end
 
 class SmokeTest
-  def self.urls(list_of_urls)
+  # Defines a "should get <url>" test on +test_class+ for each named route.
+  # Define them on the calling class: tests defined on
+  # ActionDispatch::IntegrationTest itself are inherited by, and rerun in,
+  # every integration test.
+  def self.urls(test_class, list_of_urls)
     # puts "Smoke testing URLs:"
     list_of_urls.each do |url_name|
       url = Rails.application.routes.url_helpers.send(url_name) rescue "INVALID URL: #{url_name}"
 
       # puts "#{url_name}: #{url}"
-      ActionDispatch::IntegrationTest.test "should get #{url_name}" do
+      test_class.test "should get #{url_name}" do
         get(url)
         # Root URL redirects authenticated users to /my/dashboard
         if url_name.to_s == 'root_url' && response.status == 302
