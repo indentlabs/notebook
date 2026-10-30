@@ -11,11 +11,11 @@
   showNewFolderModal: false,
   sidebarOpen: false,
   showContentSidebar: <%= @folders.any? ? 'true' : 'false' %>,
-  viewMode: 'grid',
+  viewMode: localStorage.getItem('timelines_view_mode') || 'grid',
   selectedItems: [],
   searchQuery: '',
   isLoading: false
-}" class="min-h-screen flex bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+}" x-init="$watch('viewMode', value => localStorage.setItem('timelines_view_mode', value))" class="min-h-screen flex bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
   
   <!-- Content Sidebar -->
   <aside x-show="showContentSidebar" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-300" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full" class="hidden lg:flex lg:flex-col lg:w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">

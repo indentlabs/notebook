@@ -7,13 +7,14 @@
   end
 %>
 
+<% view_mode_storage_key = "#{content_type_class.name.underscore.pluralize}_view_mode" %>
 <div x-data="{
-  viewMode: 'grid',
+  viewMode: localStorage.getItem('<%= view_mode_storage_key %>') || 'grid',
   selectedItems: [],
   searchQuery: '',
   showSerendipitousQuestion: <%= @questioned_content ? 'true' : 'false' %>,
   isLoading: false
-}" class="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+}" x-init="$watch('viewMode', value => localStorage.setItem('<%= view_mode_storage_key %>', value))" class="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
 
   <main class="flex-1 flex flex-col">
     <!-- Hero Header -->
