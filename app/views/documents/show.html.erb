@@ -21,19 +21,21 @@
   <!-- Floating action buttons -->
   <div class="fixed bottom-8 right-8 z-20 flex flex-col space-y-3" x-data="{ showButtons: false }">
     <!-- Share button -->
-    <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
-            class="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg text-gray-600 hover:text-green-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-green-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
-            data-tooltip="Share with community">
-      <i class="material-icons">campaign</i>
-    </button>
-    
+    <% unless @document.password_protected? %>
+      <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
+              class="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg text-gray-600 hover:text-green-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-green-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
+              data-tooltip="Share with community">
+        <i class="material-icons">campaign</i>
+      </button>
+    <% end %>
+
     <!-- Privacy button (only for users who can edit) -->
     <% if user_signed_in? && @document.updatable_by?(current_user) %>
       <button @click="$dispatch('open-modal', 'document-privacy-modal')"
               class="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg text-gray-600 hover:text-blue-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
-              data-tooltip="<%= @document.privacy == 'public' ? 'Public' : 'Private' %>">
+              data-tooltip="<%= @document.privacy_label %>">
         <i class="material-icons <%= @document.privacy == 'public' ? 'text-green-500' : '' %>">
-          <%= @document.privacy == 'public' ? 'public' : 'lock' %>
+          <%= @document.privacy_icon %>
         </i>
       </button>
     <% end %>

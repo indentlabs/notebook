@@ -62,6 +62,13 @@ class Universe < ApplicationRecord
 
   scope :in_universe, ->(universe = nil) { where(id: universe.try(:id)) unless universe.nil? }
 
+  # Anyone who can see a universe can see its documents, except password protected ones
+  def documents_listable_by(viewer)
+    return documents if viewer && (viewer.site_administrator? || user_id == viewer.id || contributors.exists?(user_id: viewer.id))
+
+    documents.without_passwords_unless_owned_by(viewer)
+  end
+
   after_destroy do
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       content_type.where(universe_id: self.id).update_all(universe_id: nil)

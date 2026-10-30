@@ -52,6 +52,11 @@ RailsAdmin.config do |config|
     "Referral",
     "Document",
   ] + Rails.application.config.content_types[:all].map(&:name)
+
+  config.model 'Document' do
+    exclude_fields :document_password_digest
+  end
+
   # Todo whitelist the fields we want to show for each model
   # config.model 'User' do
   #   list do
