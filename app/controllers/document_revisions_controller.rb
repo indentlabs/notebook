@@ -1,5 +1,7 @@
 class DocumentRevisionsController < ApplicationController
-  before_action :set_document, only: [:index, :show, :destroy, :diff, :restore]
+  before_action :authenticate_user!
+  before_action :set_document
+  before_action :verify_document_ownership
   before_action :set_document_revision, only: [:show, :edit, :update, :destroy, :diff, :restore]
 
   # GET /document_revisions
@@ -316,9 +318,17 @@ class DocumentRevisionsController < ApplicationController
     @document = Document.find(params[:document_id])
   end
 
+  # Revisions can hold drafts the author never published, so they stay with the author
+  # even when the current version of the document is public.
+  def verify_document_ownership
+    return if @document.updatable_by?(current_user)
+
+    redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
+  end
+
   # Use callbacks to share common setup or constraints between actions.
   def set_document_revision
-    @document_revision = DocumentRevision.find(params[:id])
+    @document_revision = @document.document_revisions.find(params[:id])
   end
 
   # Only allow a trusted parameter "white list" through.

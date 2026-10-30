@@ -1,10 +1,13 @@
 class ContentPageSharesController < ApplicationController
+  SHAREABLE_PAGE_TYPES = (Rails.application.config.content_type_names[:all] + %w(Timeline Document)).freeze
+
   before_action :authenticate_user!, except: [:show]
   before_action :set_content_page_share, only: [
     :show, :edit, :update, :destroy,
     :follow, :unfollow, :report
   ]
-  before_action :authorize_destroy!, only: [:destroy]
+  before_action :authorize_share_owner!, only: [:edit, :update, :destroy]
+  before_action :authorize_sharing_page!, only: [:create, :update]
   before_action :load_recent_forum_topics, only: [:show]
 
   # GET /content_page_shares
@@ -42,10 +45,12 @@ class ContentPageSharesController < ApplicationController
     @share = ContentPageShare.new(content_page_share_params)
 
     if @share.save
-      @share.content_page.update(privacy: 'public')
+      content_owner = @share.content_page.user
+
+      # Sharing your own page publishes it. Other people's pages are already public by this point.
+      @share.content_page.update(privacy: 'public') if content_owner == current_user
 
       # Notify the content creator if they're different from the sharer
-      content_owner = @share.content_page.user
       if content_owner != current_user && content_owner.notification_updates?
         content_type_name = @share.content_page_type_label
         content_type_color = @share.content_page.class.respond_to?(:color) ? @share.content_page.class.color : 'bg-blue-500'
@@ -62,7 +67,7 @@ class ContentPageSharesController < ApplicationController
 
       redirect_to [@share.user, @share], notice: 'Thanks for sharing!'
     else
-      raise @share.errors.inspect
+      redirect_back(fallback_location: stream_path, alert: @share.errors.full_messages.to_sentence)
     end
   end
 
@@ -103,10 +108,20 @@ class ContentPageSharesController < ApplicationController
     @share = ContentPageShare.find(params[:id])
   end
 
-  def authorize_destroy!
+  def authorize_share_owner!
     unless @share.user == current_user || current_user.site_administrator?
-      redirect_to [@share.user, @share], alert: 'You are not authorized to delete this share.'
+      redirect_to [@share.user, @share], alert: 'You are not authorized to change this share.'
     end
+  end
+
+  # Sharing a page publishes it, so only its owner can share a page that isn't already public.
+  def authorize_sharing_page!
+    page_type, page_id = params.require(:content_page_share).require(:content_page).split('-')
+    page = page_type.constantize.find_by(id: page_id) if SHAREABLE_PAGE_TYPES.include?(page_type)
+
+    return if page && (page.user_id == current_user.id || PermissionService.content_is_publicly_visible?(content: page))
+
+    redirect_back(fallback_location: stream_path, alert: "You don't have permission to share that page.")
   end
 
   # Only allow a trusted parameter "white list" through.

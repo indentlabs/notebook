@@ -95,6 +95,12 @@ class Document < ApplicationRecord
     privacy == 'public' || universe_is_public || readable_via_public_book?
   end
 
+  # For listing documents alongside other pages. Stricter than #readable_by?, which takes up
+  # to three queries per document, and that adds up on pages that list twenty of them.
+  scope :public_or_owned_by, ->(user) {
+    where('documents.privacy = ? OR documents.user_id = ?', 'public', user&.id)
+  }
+
   # Archive scopes and methods (matching IsContentPage pattern)
   scope :unarchived, -> { where(archived_at: nil) }
   scope :archived, -> { where.not(archived_at: nil) }

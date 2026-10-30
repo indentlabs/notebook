@@ -6,6 +6,10 @@ class DocumentAuthorizer < ApplicationAuthorizer
   end
 
   def readable_by?(user)
+    # Anonymous viewers arrive as a blank User.new, whose nil id would otherwise match
+    # ownerless documents and contributor invites nobody has claimed yet.
+    user = nil if user && user.id.nil?
+
     return true if user && resource.user_id == user.id
     return true if user && user.site_administrator?
     return true if resource.privacy == 'public'

@@ -222,7 +222,7 @@ class ContentController < ApplicationController
 
     analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
     document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
-    @documents = Document.where(id: document_ids)
+    @documents = Document.where(id: document_ids).public_or_owned_by(current_user)
     @references = @content.incoming_page_references.preload(:referencing_page)
     @mentioning_attributes = Attribute.where(
       attribute_field_id: @references.pluck(:attribute_field_id),

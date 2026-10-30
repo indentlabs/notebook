@@ -24,6 +24,11 @@ class PermissionService < Service
     content.respond_to?(:universe) && content.universe.present? && self.content_is_public?(content: content.universe)
   end
 
+  # Whether anyone at all can view this, however it got that way
+  def self.content_is_publicly_visible?(content:)
+    content.try(:public_content?) || content_is_public?(content: content)
+  end
+
   def self.user_can_contribute_to_containing_universe?(user:, content:)
     # Early return if no user is provided
     return false if user.nil?

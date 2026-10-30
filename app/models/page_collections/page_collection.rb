@@ -32,11 +32,16 @@ class PageCollection < ApplicationRecord
   self.authorizer_name = 'CollectionAuthorizer'
 
   def pending_submissions
-    page_collection_submissions.where(accepted_at: nil).order('submitted_at ASC')
+    collectable_submissions.where(accepted_at: nil).order('submitted_at ASC')
   end
 
   def accepted_submissions
-    page_collection_submissions.where.not(accepted_at: nil).order('accepted_at DESC')
+    collectable_submissions.where.not(accepted_at: nil).order('accepted_at DESC')
+  end
+
+  # Documents can't be submitted anymore, but older submissions could have slipped one in
+  def collectable_submissions
+    page_collection_submissions.where.not(content_type: Document.name)
   end
 
   def contributors

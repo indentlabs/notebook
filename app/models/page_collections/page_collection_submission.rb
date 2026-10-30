@@ -19,6 +19,8 @@ class PageCollectionSubmission < ApplicationRecord
             uniqueness: { scope: :page_collection_id },
             allow_nil: true
 
+  validate :submitter_can_publish_content, on: :create
+
   def accept!
     update(accepted_at: DateTime.current)
 
@@ -50,8 +52,21 @@ class PageCollectionSubmission < ApplicationRecord
     page_collection.user.content_page_share_followings.create({content_page_share: share})
   end
 
+  # Submitting to a public collection publishes a page, so only its owner can submit one that
+  # isn't already public. Documents aren't collectable at all: collections show their full text,
+  # and the page types a collection can accept don't include them.
+  def submitter_can_publish_content
+    return if content.nil?
+
+    if content.is_a?(Document)
+      errors.add(:content, "can't be a document")
+    elsif content.user_id != user_id && !PermissionService.content_is_publicly_visible?(content: content)
+      errors.add(:content, "isn't yours to submit")
+    end
+  end
+
   def mark_related_content_public
-    if page_collection.try(:privacy) == 'public'
+    if page_collection.try(:privacy) == 'public' && content.user_id == user_id
       content.update(privacy: 'public')
     end
   end
