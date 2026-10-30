@@ -58,10 +58,10 @@ class WritingGoalsController < ApplicationController
     # Use query params if provided, otherwise use defaults
     @writing_goal.title = params[:title] || "My Writing Goal"
     @writing_goal.target_word_count = params[:target_word_count]&.to_i || 50000
-    @writing_goal.start_date = user_today
+    @writing_goal.start_date = date_param(:start_date) || user_today
 
     days = params[:days]&.to_i || 30
-    @writing_goal.end_date = user_today + days.days
+    @writing_goal.end_date = @writing_goal.start_date + days.days
   end
 
   def create
@@ -116,6 +116,13 @@ class WritingGoalsController < ApplicationController
 
   def writing_goal_params
     params.require(:writing_goal).permit(:title, :target_word_count, :start_date, :end_date)
+  end
+
+  # A YYYY-MM-DD query param as a Date, or nil when it's missing or malformed.
+  def date_param(key)
+    Date.iso8601(params[key].to_s)
+  rescue ArgumentError
+    nil
   end
 
   def set_sidenav_expansion
