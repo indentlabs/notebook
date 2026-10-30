@@ -1,5 +1,3 @@
-require 'puma/plugin/heroku'
-
 # Puma can serve each request in a thread from an internal thread pool.
 # The `threads` method setting takes two numbers: a minimum and maximum.
 # Any libraries that use thread pools should be configured to match
@@ -37,10 +35,9 @@ workers ENV.fetch("WEB_CONCURRENCY") { ENV.fetch("RAILS_ENV", "development") == 
 plugin :tmp_restart
 
 # We preload app to save on memory usage with Copy On Write
-# https://blog.heroku.com/matz_highlights_ruby_2_0_at_waza#speed
 preload_app!
 
 on_worker_boot do
-  # See: https://devcenter.heroku.com/articles/deploying-rails-applications-with-the-puma-web-server#on-worker-boot
+  # Forked workers can't share the parent's database connections, so each opens its own
   ActiveRecord::Base.establish_connection
 end

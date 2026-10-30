@@ -281,6 +281,26 @@
   opacity: 1;
 }
 
+/* Document editor: the Wordsmith tab pulls out 5px and glows once when the writer highlights text while it's closed.
+   It grows its right padding rather than translating, so it stays attached to the edge it's pinned to. */
+@keyframes wordsmith-tab-nudge {
+  35% {
+    padding-right: calc(0.5rem + 5px);
+    box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.35), var(--tw-shadow);
+    filter: brightness(1.12);
+  }
+}
+
+.wordsmith-tab-nudge {
+  animation: wordsmith-tab-nudge 0.7s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordsmith-tab-nudge {
+    animation: none;
+  }
+}
+
 /* Sidebar layout margin/padding utilities - defined here to avoid Tailwind purge issues */
 @media (min-width: 768px) {
   .md\:ml-56 {

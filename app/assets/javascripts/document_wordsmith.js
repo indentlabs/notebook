@@ -61,21 +61,24 @@
       cache: {},
       requestId: 0,
       lastSelection: '',
+      selectionAtTabPress: '',
 
       setActive(active) {
         this.active = active;
         if (active) {
           this.lastSelection = '';
-          this.lookupSelection();
+          // Tapping the tab on a touch screen can clear the highlight before the panel
+          // opens, so fall back to what was highlighted when the tab was pressed.
+          this.lookupSelection(editorSelectionText() || this.selectionAtTabPress);
         }
+        this.selectionAtTabPress = '';
       },
 
       // Look up the editor's current selection, if it's short enough to be a word or phrase.
-      lookupSelection() {
+      lookupSelection(text = editorSelectionText()) {
         // selectionchange also fires when clicking a word in the panel moves focus out of
         // the editor, with the old highlight still in place. Only a new highlight counts,
         // or it would yank the panel straight back to the word that's highlighted.
-        const text = editorSelectionText();
         if (text === this.lastSelection) return;
         this.lastSelection = text;
 
@@ -181,16 +184,41 @@
     });
   });
 
-  // Follow the writer's highlighting while the panel is open.
+  // While the panel is closed, a new highlight pulls the Wordsmith tab out and back
+  // to point the writer at it. Shares lastSelection with lookupSelection, so closing
+  // the panel over a word it just looked up doesn't set the tab off.
+  function nudgeTab(store) {
+    const text = editorSelectionText();
+    if (text === store.lastSelection) return;
+    store.lastSelection = text;
+    if (!text) return;
+
+    document.querySelectorAll('.js-sidebar-toggle-tab[data-panel="wordsmith"]').forEach(tab => {
+      tab.classList.remove('wordsmith-tab-nudge');
+      void tab.offsetWidth; // restart the animation if it's already playing
+      tab.classList.add('wordsmith-tab-nudge');
+      tab.addEventListener('animationend', () => tab.classList.remove('wordsmith-tab-nudge'), { once: true });
+    });
+  }
+
+  // Remember what was highlighted when the Wordsmith tab is pressed (see setActive). Pressing
+  // comes before a tap clears the highlight, so this catches it even when the click can't.
+  document.addEventListener('pointerdown', function(event) {
+    if (!window.Alpine || !event.target.closest('.js-sidebar-toggle-tab[data-panel="wordsmith"]')) return;
+
+    Alpine.store('wordsmith').selectionAtTabPress = editorSelectionText();
+  }, true);
+
+  // Follow the writer's highlighting while the panel is open, or nudge its tab while it's closed.
   let selectionTimer = null;
   document.addEventListener('selectionchange', function() {
     if (!window.Alpine || !document.getElementById('editor')) return;
 
     const store = Alpine.store('wordsmith');
-    if (!store || !store.active) return;
+    if (!store) return;
 
     clearTimeout(selectionTimer);
-    selectionTimer = setTimeout(() => store.lookupSelection(), 300);
+    selectionTimer = setTimeout(() => store.active ? store.lookupSelection() : nudgeTab(store), 300);
   });
 
   // Fired by the toolbar button; documentEditController opens the panel on the same event.

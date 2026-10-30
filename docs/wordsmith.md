@@ -40,11 +40,7 @@ panel keeps working with the old data until it commits), and is safe to re-run.
 It produces about 240k rows (~100MB). Re-run it after migrations that change the table, such as adding `frequency`. Until it has run, the panel tells writers
 Wordsmith isn't available yet.
 
-The import peaks at around 1GB of memory. On Heroku, run it on a larger one-off dyno:
-
-```bash
-heroku run --size=standard-2x rake wordsmith:import
-```
+The import peaks at around 1GB of memory, so run it somewhere with at least that much to spare.
 
 To import without network access (or to try different data), extract the three
 packages into one directory (`wordnet-db/`, `cmu-pronouncing-dictionary/`, `moby/`)

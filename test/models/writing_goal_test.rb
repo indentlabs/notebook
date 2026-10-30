@@ -126,4 +126,28 @@ class WritingGoalTest < ActiveSupport::TestCase
     # Wrote 3000 words, 7000 remaining
     assert_equal 7000, @goal.words_remaining
   end
+
+  test "a goal that hasn't started counts its days and daily goal from its start date" do
+    travel_to(Time.utc(2026, 10, 29, 16)) do
+      goal = @user.writing_goals.create!(title: "November", target_word_count: 50_000,
+                                         start_date: Date.new(2026, 11, 1), end_date: Date.new(2026, 12, 1))
+
+      assert_equal 30, goal.days_remaining
+      assert_equal 1667, goal.daily_goal
+    end
+  end
+
+  test "upcoming goals don't set today's daily word goal" do
+    travel_to(Time.utc(2026, 10, 29, 16)) do
+      @user.writing_goals.delete_all
+      @user.writing_goals.create!(title: "November", target_word_count: 50_000,
+                                  start_date: Date.new(2026, 11, 1), end_date: Date.new(2026, 12, 1))
+
+      assert_equal User::DEFAULT_DAILY_WORD_GOAL, @user.daily_word_goal
+    end
+
+    travel_to(Time.utc(2026, 11, 1, 16)) do
+      assert_equal 1667, @user.daily_word_goal
+    end
+  end
 end

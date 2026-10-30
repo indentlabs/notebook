@@ -18,9 +18,11 @@ class WritingGoal < ApplicationRecord
   scope :not_archived, -> { where(archived: false) }
   scope :current, -> { active.not_archived.where('end_date >= ?', Date.current) }
 
+  # Days left to write in, counted from the start date for goals that haven't
+  # started yet (so their daily goal is the planned pace).
   def days_remaining
     return 0 if user_current_date > end_date
-    (end_date - user_current_date).to_i
+    (end_date - [user_current_date, start_date].max).to_i
   end
 
   def total_days
