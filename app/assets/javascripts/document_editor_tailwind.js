@@ -153,16 +153,62 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Autosave timing
+  const SAVE_DELAY_MS = 2000;                       // Save once typing pauses this long
+  const MAX_SAVE_DELAY_MS = 30000;                  // ...or at most this long after the first unsaved change
+  const RETRY_DELAYS_MS = [2000, 5000, 15000, 30000]; // Wait between retries after failed saves
+
   // Autosave variables
-  let short_timer = null;           // Timer that resets on each change (2 seconds)
-  let long_timer = null;            // Timer that forces save after 30 seconds
-  let last_autosave = null;         // Last AJAX request
-  let first_change_time = null;     // When the first unsaved change was made
-  let has_unsaved_changes = false;  // Whether we have unsaved changes
+  let short_timer = null;           // Timer that resets on each change
+  let long_timer = null;            // Timer that forces a save while someone keeps typing
+  let retry_timer = null;           // Timer that retries a failed save
+  let failed_attempts = 0;          // Failed saves in a row
+  let save_in_flight = false;       // Only one save is sent at a time, so saves can't land out of order
+  let save_requested = false;       // A save was asked for while one was in flight
+  let has_unsaved_changes = false;  // Whether the server is missing any changes
   let autosave_hide_timeout = null; // Timeout for hiding success indicator
+
+  // The title and body the server last confirmed, so unchanged documents aren't sent again
+  let last_saved = {
+    title: $('#document_title').val(),
+    body: $('#editor').html()
+  };
+
+  const showSavedState = function() {
+    $('.js-autosave-status').text('Saved');
+    $('.js-autosave-icon').text('cloud_done').addClass('text-gray-400 dark:text-gray-500').removeClass('text-white text-red-400');
+    $('#save-indicator').removeClass('bg-red-500 bg-opacity-90 pulse-animation').addClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80');
+    $('.js-autosave-status').removeClass('text-white').addClass('text-gray-500 dark:text-gray-400');
+
+    // Update mini save indicator
+    $('#mini-save-indicator i').removeClass('pulse-animation');
+  };
 
   // Function to perform the actual save
   const performSave = function() {
+    // Clear all timers; this save covers whatever they were waiting to send
+    clearTimeout(short_timer);
+    clearTimeout(long_timer);
+    clearTimeout(retry_timer);
+    short_timer = null;
+    long_timer = null;
+    retry_timer = null;
+
+    // Send this save after the current one finishes, with whatever the editor holds then
+    if (save_in_flight) {
+      save_requested = true;
+      return;
+    }
+
+    const title = $('#document_title').val();
+    const body = $('#editor').html();
+
+    if (title === last_saved.title && body === last_saved.body) {
+      has_unsaved_changes = false;
+      showSavedState();
+      return;
+    }
+
     console.log('Performing save');
 
     // Update save indicator to saving state (subtle)
@@ -174,49 +220,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update mini save indicator
     $('#mini-save-indicator i').addClass('pulse-animation');
 
-    // Clear both timers
-    clearTimeout(short_timer);
-    clearTimeout(long_timer);
-    short_timer = null;
-    long_timer = null;
-
-    // Reset change tracking
-    first_change_time = null;
-    has_unsaved_changes = false;
-
     // Do the autosave
-    last_autosave = $.ajax({
+    save_in_flight = true;
+    const request = $.ajax({
       type: 'PATCH',
       url: $('#editor').data('save-url'),
       data: {
         document: {
-          title: $('#document_title').val(),
-          body: $('#editor').html(),
+          title: title,
+          body: body,
           cached_word_count: countWords()
         }
       }
     });
 
-    last_autosave.fail(function(jqXHR, textStatus) {
+    request.fail(function(jqXHR, textStatus) {
       // Update indicator to error state (subtle red)
       $('.js-autosave-status').text('Error!');
       $('.js-autosave-icon').text('cloud_off').addClass('text-white').removeClass('text-gray-400 text-gray-500');
-      $('#save-indicator').removeClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 bg-green-100 bg-opacity-80').addClass('bg-red-500 bg-opacity-90');
+      $('#save-indicator').removeClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80 bg-green-100 bg-opacity-80 pulse-animation').addClass('bg-red-500 bg-opacity-90');
       $('.js-autosave-status').removeClass('text-gray-500 dark:text-gray-400').addClass('text-white');
+      $('#mini-save-indicator i').removeClass('pulse-animation');
 
-      // Mark that we still have unsaved changes
-      has_unsaved_changes = true;
+      // Try again, backing off so a struggling server isn't flooded with retries
+      const retry_delay = RETRY_DELAYS_MS[Math.min(failed_attempts, RETRY_DELAYS_MS.length - 1)];
+      failed_attempts++;
+      retry_timer = setTimeout(performSave, retry_delay);
     });
 
-    last_autosave.done(function() {
-      // Update indicator to saved state (subtle)
-      $('.js-autosave-status').text('Saved');
-      $('.js-autosave-icon').text('cloud_done').addClass('text-gray-400 dark:text-gray-500').removeClass('text-white text-red-400');
-      $('#save-indicator').removeClass('bg-red-500 bg-opacity-90 pulse-animation').addClass('bg-gray-100 bg-opacity-80 dark:bg-gray-800 dark:bg-opacity-80');
-      $('.js-autosave-status').removeClass('text-white').addClass('text-gray-500 dark:text-gray-400');
+    request.done(function() {
+      failed_attempts = 0;
+      last_saved = { title: title, body: body };
 
-      // Update mini save indicator
-      $('#mini-save-indicator i').removeClass('pulse-animation');
+      // If more was typed while saving, the queued save will pick it up
+      if ($('#document_title').val() !== title || $('#editor').html() !== body) {
+        return;
+      }
+
+      has_unsaved_changes = false;
+      showSavedState();
 
       // Brief subtle green flash for success
       $('#save-indicator').addClass('bg-green-100 bg-opacity-80 dark:bg-green-900 dark:bg-opacity-30');
@@ -225,34 +267,38 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#save-indicator').removeClass('bg-green-100 bg-opacity-80 dark:bg-green-900 dark:bg-opacity-30');
       }, 800);
     });
+
+    request.always(function() {
+      save_in_flight = false;
+      if (save_requested) {
+        save_requested = false;
+        performSave();
+      }
+    });
   };
 
   // Function to queue an autosave after a change
   const queueAutosave = function() {
-    // If this is the first unsaved change, record the time
-    if (!has_unsaved_changes) {
-      first_change_time = new Date();
-      has_unsaved_changes = true;
+    has_unsaved_changes = true;
 
-      // Set long timer for 30 seconds (won't be reset by further changes)
-      if (!long_timer) {
-        long_timer = setTimeout(function() {
-          console.log('Long timer triggered - 30 seconds since first change');
-          performSave();
-        }, 30000); // 30 seconds
-      }
+    // Set long timer for the first unsaved change (won't be reset by further changes)
+    if (!long_timer) {
+      long_timer = setTimeout(function() {
+        console.log('Long timer triggered - ' + MAX_SAVE_DELAY_MS + 'ms since first change');
+        performSave();
+      }, MAX_SAVE_DELAY_MS);
     }
 
     // Update indicator to show pending changes (subtle)
     $('.js-autosave-status').text('Unsaved');
     $('.js-autosave-icon').text('edit');
 
-    // Clear and reset the short timer (500ms)
+    // Clear and reset the short timer
     clearTimeout(short_timer);
     short_timer = setTimeout(function() {
-      console.log('Short timer triggered - 500ms since last change');
+      console.log('Short timer triggered - ' + SAVE_DELAY_MS + 'ms since last change');
       performSave();
-    }, 500); // 500ms
+    }, SAVE_DELAY_MS);
   };
 
   // Function to count words - simple whitespace split
@@ -324,7 +370,8 @@ document.addEventListener('DOMContentLoaded', function() {
     queueAutosave();
   });
 
-  $('#document_title').on('keyup', function() {
+  // 'input' rather than 'keyup', so arrow keys and shortcuts don't queue saves
+  $('#document_title').on('input', function() {
     if ($(this).val().length > 0) {
       queueAutosave();
     }
