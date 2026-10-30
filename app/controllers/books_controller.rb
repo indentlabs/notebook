@@ -25,7 +25,7 @@ class BooksController < ApplicationController
     end
 
     @book_documents = @book.book_documents.includes(:document).order(position: :asc)
-    @unlocked_book_documents = @book_documents.reject { |bd| bd.document && helpers.document_locked?(bd.document) }
+    @unlocked_book_documents = @book_documents.reject { |bd| bd.document && document_locked?(bd.document) }
     @total_words = @unlocked_book_documents.sum { |bd| bd.document&.word_count.to_i }
     @est_reading_time = (@total_words / 200.0).ceil
 

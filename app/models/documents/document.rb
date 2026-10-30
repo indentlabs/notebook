@@ -149,6 +149,12 @@ class Document < ApplicationRecord
     end
   end
 
+  # What a reader's session keeps after they enter the password. It's tied to the digest,
+  # so setting a new password locks out everyone who entered the old one.
+  def password_fingerprint
+    OpenSSL::HMAC.hexdigest('SHA256', Rails.application.secret_key_base, "#{id}/#{document_password_digest}").first(16)
+  end
+
   # The digest is sensitive even though it isn't the password itself
   def serializable_hash(options = nil)
     options = (options || {}).dup

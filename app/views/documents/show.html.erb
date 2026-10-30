@@ -1,4 +1,4 @@
-<% set_meta_tags title: @document.title, description: truncate(@document.body) %>
+<% set_meta_tags title: @document.title, description: truncate(@document.body), noindex: @document.password_protected? %>
 
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black">
   <!-- Subtle top decoration -->
@@ -22,7 +22,8 @@
   <div class="fixed bottom-8 right-8 z-20 flex flex-col space-y-3" x-data="{ showButtons: false }">
     <!-- Share button -->
     <% unless @document.password_protected? %>
-      <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
+      <button id="document-share-button"
+              @click="$dispatch('open-modal', 'share-to-stream-modal')"
               class="flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-lg text-gray-600 hover:text-green-600 hover:bg-white transition-all duration-200 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-green-400 dark:hover:bg-gray-800 dark:border-gray-700 tooltip-left"
               data-tooltip="Share with community">
         <i class="material-icons">campaign</i>

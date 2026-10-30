@@ -100,6 +100,7 @@ gem 'will_paginate', '~> 4.0'
 # Workers
 gem 'sidekiq', '~> 7.3.9'
 gem 'redis', '~> 5.1.0'
+gem 'rack-attack', '~> 6.8'
 
 # Exports
 gem 'csv'

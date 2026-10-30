@@ -120,7 +120,8 @@ class DocumentsController < ApplicationController
   end
 
   def show
-    unless @document.present? && (current_user || User.new).can_read?(@document)
+    # Password protected documents get a lock screen rather than looking like they don't exist
+    unless @document.present? && (@document.password_protected? || (current_user || User.new).can_read?(@document))
       return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
@@ -130,6 +131,11 @@ class DocumentsController < ApplicationController
 
     # Put the focus on the document by removing Notebook.ai actions
     @navbar_actions = []
+
+    # Keep the text out of browser history and shared caches, for the back button on a shared computer
+    response.headers['Cache-Control'] = 'no-store' if @document.password_protected?
+
+    render :locked if document_locked?(@document)
   end
 
   def analysis
