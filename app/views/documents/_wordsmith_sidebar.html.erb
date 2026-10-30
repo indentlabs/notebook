@@ -1,0 +1,212 @@
+<%#
+  Wordsmith Sidebar
+
+  A word-choice reference panel: highlight a word in the editor while this
+  panel is open to see its meanings, related words and rhymes. Rendered in
+  both the desktop and mobile sidebars; all state lives in
+  Alpine.store('wordsmith') (app/assets/javascripts/document_wordsmith.js)
+  so both copies stay in sync.
+%>
+<div class="p-4 space-y-4 text-sm">
+  <!-- Search -->
+  <form @submit.prevent="$store.wordsmith.search()" class="flex items-center gap-1.5" role="search">
+    <button type="button"
+            x-show="$store.wordsmith.history.length > 0" x-cloak
+            @click="$store.wordsmith.back()"
+            class="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 transition-colors"
+            :title="'Back to “' + $store.wordsmith.history[$store.wordsmith.history.length - 1] + '”'"
+            aria-label="Back to previous word">
+      <i class="material-icons text-lg">arrow_back</i>
+    </button>
+    <div class="relative flex-1">
+      <i class="material-icons absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-base pointer-events-none">search</i>
+      <input type="search"
+             x-model="$store.wordsmith.input"
+             placeholder="Look up a word"
+             aria-label="Look up a word"
+             autocomplete="off"
+             class="w-full pl-8 pr-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-teal-500 focus:border-teal-500">
+    </div>
+  </form>
+
+  <!-- Introduction (nothing looked up yet) -->
+  <div x-show="$store.wordsmith.status === 'idle'" class="pt-2 pb-4 text-center">
+    <div class="w-12 h-12 rounded-full bg-teal-50 dark:bg-gray-700 flex items-center justify-center mx-auto mb-3">
+      <i class="material-icons text-teal-500 text-2xl">hardware</i>
+    </div>
+    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Find the right word</h3>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+      While this panel is open, highlight any word in your writing to see what it means, other words like it, and what it rhymes with.
+    </p>
+    <ul class="text-left text-xs text-gray-600 dark:text-gray-300 space-y-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
+      <li class="flex items-start gap-2">
+        <i class="material-icons text-teal-500 text-base">highlight_alt</i>
+        <span>Double-click a word, or select a short phrase.</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <i class="material-icons text-teal-500 text-base">ads_click</i>
+        <span>Click any word in the results to look that one up next.</span>
+      </li>
+      <li class="flex items-start gap-2">
+        <i class="material-icons text-teal-500 text-base">hardware</i>
+        <span>Panel closed? Select a word and press the hammer in the formatting toolbar.</span>
+      </li>
+    </ul>
+    <p class="mt-4 text-xs text-gray-400 dark:text-gray-500">Wordsmith is a reference shelf. It never changes your writing.</p>
+  </div>
+
+  <!-- Loading -->
+  <div x-show="$store.wordsmith.status === 'loading'" x-cloak class="py-6 text-center text-xs text-gray-500 dark:text-gray-400">
+    <i class="material-icons text-gray-400 text-xl animate-spin">autorenew</i>
+    <p class="mt-1">Looking up “<span x-text="$store.wordsmith.query"></span>”…</p>
+  </div>
+
+  <!-- Not found -->
+  <div x-show="$store.wordsmith.status === 'not_found'" x-cloak class="py-6 text-center">
+    <i class="material-icons text-gray-300 dark:text-gray-600 text-3xl">search_off</i>
+    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">No entry for “<span x-text="$store.wordsmith.query"></span>”</p>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+       x-text="$store.wordsmith.query.includes(' ') ? 'Try selecting a single word instead.' : 'Check the spelling, or try its simplest form (run instead of running).'"></p>
+  </div>
+
+  <!-- Dictionary data not installed -->
+  <div x-show="$store.wordsmith.status === 'unavailable'" x-cloak class="py-6 text-center">
+    <i class="material-icons text-gray-300 dark:text-gray-600 text-3xl">menu_book</i>
+    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Wordsmith isn't available yet</p>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Its dictionary is still being set up. Please check back soon.</p>
+  </div>
+
+  <!-- Request failed -->
+  <div x-show="$store.wordsmith.status === 'error'" x-cloak class="py-6 text-center">
+    <i class="material-icons text-gray-300 dark:text-gray-600 text-3xl">cloud_off</i>
+    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Couldn't look up “<span x-text="$store.wordsmith.query"></span>”</p>
+    <button type="button" @click="$store.wordsmith.retry()" class="mt-2 text-xs font-medium text-teal-600 dark:text-teal-400 hover:underline">Try again</button>
+  </div>
+
+  <!-- Results -->
+  <template x-if="$store.wordsmith.status === 'found' && $store.wordsmith.result">
+    <div class="space-y-4">
+      <!-- Word header -->
+      <div>
+        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white break-words" x-text="$store.wordsmith.result.word"></h3>
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <template x-if="$store.wordsmith.result.pronunciation">
+            <span class="font-mono" x-text="'/' + $store.wordsmith.result.pronunciation.ipa + '/'"></span>
+          </template>
+          <template x-if="$store.wordsmith.result.pronunciation">
+            <span x-text="$store.wordsmith.result.pronunciation.syllables + ($store.wordsmith.result.pronunciation.syllables === 1 ? ' syllable' : ' syllables')"></span>
+          </template>
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full"
+                :class="$store.wordsmith.usageCount > 3 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'"
+                :title="'How many times “' + $store.wordsmith.query + '” appears in this document'"
+                x-text="$store.wordsmith.usageCount === 0 ? 'Not used in this document' : 'Used ' + $store.wordsmith.usageCount + '× in this document'"></span>
+        </div>
+        <p x-show="$store.wordsmith.result.base_form" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          Showing the base form of “<span x-text="$store.wordsmith.result.query"></span>”.
+        </p>
+        <p x-show="$store.wordsmith.result.see_also" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          Base form:
+          <button type="button" @click="$store.wordsmith.lookup($store.wordsmith.result.see_also)"
+                  class="font-medium text-teal-600 dark:text-teal-400 hover:underline" x-text="$store.wordsmith.result.see_also"></button>
+        </p>
+      </div>
+
+      <!-- Meanings -->
+      <section x-show="$store.wordsmith.meaningGroups.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-3">
+        <button type="button" @click="$store.wordsmith.toggleSection('meanings')"
+                class="w-full flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <span>Meanings</span>
+          <i class="material-icons text-base transition-transform" :class="$store.wordsmith.isCollapsed('meanings') ? '' : 'rotate-180'">expand_more</i>
+        </button>
+        <div x-show="!$store.wordsmith.isCollapsed('meanings')" class="mt-2 space-y-3">
+          <template x-for="(group, groupIndex) in $store.wordsmith.meaningGroups" :key="groupIndex">
+            <div>
+              <div class="text-xs italic text-teal-600 dark:text-teal-400 mb-1" x-text="group.pos"></div>
+              <ol class="space-y-2.5 list-decimal list-outside ml-4 marker:text-gray-400">
+                <template x-for="(sense, senseIndex) in group.senses" :key="senseIndex">
+                  <li class="pl-1 text-gray-800 dark:text-gray-200">
+                    <span x-text="sense.definition"></span>
+                    <template x-for="(example, exampleIndex) in sense.examples" :key="exampleIndex">
+                      <span class="block text-xs italic text-gray-500 dark:text-gray-400 mt-0.5" x-text="'“' + example + '”'"></span>
+                    </template>
+                    <div x-show="sense.synonyms.length + sense.similar.length > 0" class="flex flex-wrap items-center gap-1 mt-1.5">
+                      <span class="text-xs text-gray-400 dark:text-gray-500 mr-0.5">Similar</span>
+                      <template x-for="word in sense.synonyms.concat(sense.similar)" :key="word">
+                        <button type="button" @click="$store.wordsmith.lookup(word)" x-text="word"
+                                class="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-gray-600 transition-colors"></button>
+                      </template>
+                    </div>
+                    <div x-show="sense.antonyms.length > 0" class="flex flex-wrap items-center gap-1 mt-1">
+                      <span class="text-xs text-gray-400 dark:text-gray-500 mr-0.5">Opposite</span>
+                      <template x-for="word in sense.antonyms" :key="word">
+                        <button type="button" @click="$store.wordsmith.lookup(word)" x-text="word"
+                                class="px-2 py-0.5 rounded-full text-xs bg-red-50 dark:bg-gray-700 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-gray-600 transition-colors"></button>
+                      </template>
+                    </div>
+                  </li>
+                </template>
+              </ol>
+            </div>
+          </template>
+        </div>
+      </section>
+
+      <!-- Related words (thesaurus) -->
+      <section x-show="$store.wordsmith.result.related.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-3">
+        <button type="button" @click="$store.wordsmith.toggleSection('related')"
+                class="w-full flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <span x-text="$store.wordsmith.result.related_to ? 'Words related to ' + $store.wordsmith.result.related_to : 'Related words'"></span>
+          <i class="material-icons text-base transition-transform" :class="$store.wordsmith.isCollapsed('related') ? '' : 'rotate-180'">expand_more</i>
+        </button>
+        <div x-show="!$store.wordsmith.isCollapsed('related')" class="mt-2">
+          <div class="flex flex-wrap gap-1">
+            <template x-for="word in $store.wordsmith.relatedWords" :key="word">
+              <button type="button" @click="$store.wordsmith.lookup(word)" x-text="word"
+                      class="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-gray-600 transition-colors"></button>
+            </template>
+          </div>
+          <button type="button" x-show="$store.wordsmith.hiddenRelatedCount > 0"
+                  @click="$store.wordsmith.showAllRelated = true"
+                  class="mt-2 text-xs font-medium text-teal-600 dark:text-teal-400 hover:underline"
+                  x-text="'Show ' + $store.wordsmith.hiddenRelatedCount + ' more'"></button>
+        </div>
+      </section>
+
+      <!-- Rhymes -->
+      <section x-show="$store.wordsmith.result.rhymes.length + $store.wordsmith.result.near_rhymes.length > 0" class="border-t border-gray-200 dark:border-gray-700 pt-3">
+        <button type="button" @click="$store.wordsmith.toggleSection('rhymes')"
+                class="w-full flex items-center justify-between text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+          <span>Rhymes</span>
+          <i class="material-icons text-base transition-transform" :class="$store.wordsmith.isCollapsed('rhymes') ? '' : 'rotate-180'">expand_more</i>
+        </button>
+        <div x-show="!$store.wordsmith.isCollapsed('rhymes')" class="mt-2 space-y-2">
+          <template x-for="group in $store.wordsmith.result.rhymes" :key="group.syllables">
+            <div>
+              <div class="text-xs text-gray-400 dark:text-gray-500 mb-1" x-text="group.syllables + (group.syllables === 1 ? ' syllable' : ' syllables')"></div>
+              <div class="flex flex-wrap gap-1">
+                <template x-for="word in group.words" :key="word">
+                  <button type="button" @click="$store.wordsmith.lookup(word)" x-text="word"
+                          class="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-gray-600 transition-colors"></button>
+                </template>
+              </div>
+            </div>
+          </template>
+          <div x-show="$store.wordsmith.result.near_rhymes.length > 0">
+            <div class="text-xs text-gray-400 dark:text-gray-500 mb-1">Near rhymes</div>
+            <div class="flex flex-wrap gap-1">
+              <template x-for="word in $store.wordsmith.result.near_rhymes" :key="word">
+                <button type="button" @click="$store.wordsmith.lookup(word)" x-text="word"
+                        class="px-2 py-0.5 rounded-full text-xs border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-teal-50 hover:text-teal-700 dark:hover:bg-gray-600 transition-colors"></button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </template>
+
+  <!-- Credits (required by the WordNet license) -->
+  <p class="pt-3 border-t border-gray-200 dark:border-gray-700 text-xxs leading-relaxed text-gray-400 dark:text-gray-500">
+    Definitions from WordNet® 3.1, © Princeton University. Pronunciations and rhymes from the CMU Pronouncing Dictionary. Related words from the public-domain Moby Thesaurus.
+  </p>
+</div>

@@ -24,7 +24,8 @@ export default class extends Controller {
     sortUrl: String,
     uploadUrl: String,
     remainingKb: Number,
-    maxUploadKb: Number
+    maxUploadKb: Number,
+    presets: Array
   }
 
   connect() {
@@ -36,14 +37,11 @@ export default class extends Controller {
     this.refreshBandwidth()
     this.onWindowPaste = this.onWindowPaste.bind(this)
     window.addEventListener("paste", this.onWindowPaste)
-    this.onDocumentClick = this.onDocumentClick.bind(this)
-    document.addEventListener("click", this.onDocumentClick)
     this.restoreShrinkPreference()
   }
 
   disconnect() {
     window.removeEventListener("paste", this.onWindowPaste)
-    document.removeEventListener("click", this.onDocumentClick)
     if (this.onGridClickCapture && this.hasGridTarget) this.gridTarget.removeEventListener("click", this.onGridClickCapture, true)
     if (this.sortable) {
       try { this.sortable.sortable("destroy") } catch (e) { /* already gone */ }
@@ -144,7 +142,7 @@ export default class extends Controller {
       .then((data) => {
         this.applyCoverState(card, data.pinned === true)
         if (data.pinned) this.cardTargets.forEach((other) => { if (other !== card) this.applyCoverState(other, false) })
-        this.toast(data.pinned ? "This image is now the cover" : "Cover removed. A random image will be used until you pick one.", "success")
+        this.toast(data.pinned ? "This image is now the default cover" : "Default cover removed. A random image will be used until you pick one.", "success")
       })
       .catch((error) => {
         this.applyCoverState(card, wasCover)
@@ -157,51 +155,46 @@ export default class extends Controller {
     card.dataset.pinned = isCover ? "true" : "false"
 
     const media = card.querySelector("[data-gallery-target='media']")
-    media.classList.toggle("ring-2", isCover)
-    media.classList.toggle("ring-inset", isCover)
-    media.classList.toggle("ring-yellow-400", isCover)
+    if (media) {
+      media.classList.toggle("ring-2", isCover)
+      media.classList.toggle("ring-inset", isCover)
+      media.classList.toggle("ring-yellow-400", isCover)
+    }
 
-    card.querySelector("[data-gallery-target='coverChip']").classList.toggle("hidden", !isCover)
+    const coverChip = card.querySelector("[data-gallery-target='coverChip']")
+    if (coverChip) coverChip.classList.toggle("hidden", !isCover)
 
     const button = card.querySelector("[data-gallery-target='coverButton']")
-    button.setAttribute("aria-pressed", isCover ? "true" : "false")
-    button.title = isCover
-      ? "This image is the cover. Click to stop using it as the cover."
-      : "Use this image on cards, the page banner and link previews."
-    const active = ["bg-yellow-400", "border-yellow-400", "text-yellow-900"]
-    const inactive = ["border-gray-300", "dark:border-gray-600", "text-gray-700", "dark:text-gray-200", "hover:bg-yellow-50", "dark:hover:bg-gray-700"]
-    active.forEach((c) => button.classList.toggle(c, isCover))
-    inactive.forEach((c) => button.classList.toggle(c, !isCover))
-    button.querySelector(".material-icons").textContent = isCover ? "star" : "star_border"
-    card.querySelector("[data-gallery-target='coverLabel']").textContent = isCover ? "Cover" : "Set as cover"
+    if (button) {
+      button.setAttribute("aria-pressed", isCover ? "true" : "false")
+      button.title = isCover
+        ? "This image is the default cover. Click to stop using it as the cover."
+        : "Use this image as the default cover across all placements."
+      const active = ["bg-yellow-400", "border-yellow-400", "text-yellow-900"]
+      const inactive = ["border-gray-300", "dark:border-gray-600", "text-gray-700", "dark:text-gray-200", "hover:bg-yellow-50", "dark:hover:bg-gray-700"]
+      active.forEach((c) => button.classList.toggle(c, isCover))
+      inactive.forEach((c) => button.classList.toggle(c, !isCover))
+      const icon = button.querySelector(".material-icons")
+      if (icon) icon.textContent = isCover ? "star" : "star_border"
+    }
+
+    const label = card.querySelector("[data-gallery-target='coverLabel']")
+    if (label) label.textContent = isCover ? "Default cover" : "Set as default cover"
 
     this.refreshCoverPrivacyWarning(card)
     this.refreshCoverSummary()
     this.announceCoverChange()
   }
 
-  // Close any open "use only for" menus when clicking elsewhere.
-  onDocumentClick(event) {
-    document.querySelectorAll("details.gallery-cover-menu[open]").forEach((details) => {
-      if (!details.contains(event.target)) details.open = false
-    })
-  }
-
-  // Cover for one shape only (banner / card / square ...).
-  toggleCoverFor(event) {
-    const item = event.currentTarget || event.target
-    const card = this.cardFor(event)
-    const preset = item.dataset.preset
-    const label = item.dataset.label || preset
-    const details = item.closest("details")
-    if (details) details.open = false
-    if (!card || !preset || card.dataset.busy) return
+  // Cover for one placement only (banner / card / square ...).
+  toggleCoverRole(card, preset) {
+    if (!card || !preset || card.dataset.busy) return Promise.reject(new Error("Busy or invalid params"))
     card.dataset.busy = "role"
 
     const wasActive = this.rolesOf(card).includes(preset)
     const url = card.dataset.pinUrl + (card.dataset.pinUrl.includes("?") ? "&" : "?") + "preset=" + encodeURIComponent(preset)
 
-    this.request(url, "POST")
+    return this.request(url, "POST")
       .then((data) => {
         this.applyCoverRoles(card, data.cover_for || [])
         if (data.active) {
@@ -209,13 +202,21 @@ export default class extends Controller {
             if (other !== card) this.applyCoverRoles(other, this.rolesOf(other).filter((role) => role !== preset))
           })
         }
+        const label = this.presetLabel(preset)
         this.toast(data.active ? `This image is now the ${label.toLowerCase()} cover` : `${label} cover removed`, "success")
+        return data
       })
       .catch((error) => {
         this.applyCoverRoles(card, wasActive ? this.rolesOf(card) : this.rolesOf(card).filter((role) => role !== preset))
         this.toast(error.message || "Couldn't update the cover", "error")
+        throw error
       })
       .finally(() => { delete card.dataset.busy })
+  }
+
+  presetLabel(key) {
+    const preset = this.presetsValue.find((p) => p.key === key)
+    return (preset && preset.chip) || key
   }
 
   rolesOf(card) {
@@ -226,12 +227,6 @@ export default class extends Controller {
     card.dataset.coverFor = JSON.stringify(roles)
     card.querySelectorAll("[data-gallery-target='roleChip']").forEach((chip) => {
       chip.classList.toggle("hidden", !roles.includes(chip.dataset.preset))
-    })
-    card.querySelectorAll("[data-action*='toggleCoverFor']").forEach((item) => {
-      const active = roles.includes(item.dataset.preset)
-      item.setAttribute("aria-checked", active ? "true" : "false")
-      const check = item.querySelector("[data-role-check]")
-      if (check) check.classList.toggle("invisible", !active)
     })
     this.refreshCoverPrivacyWarning(card)
     this.announceCoverChange()
@@ -245,7 +240,7 @@ export default class extends Controller {
     if (!this.hasCoverSummaryTarget) return
     const cover = this.cardTargets.find((card) => card.dataset.pinned === "true")
     this.coverSummaryTarget.textContent = cover
-      ? "Your cover image is used on cards, the page banner and link previews."
+      ? "Your default cover is used on cards, banners, thumbnails and link previews unless you pick another image for one of them."
       : "No cover chosen yet. A random image is used on cards and banners until you set one."
   }
 

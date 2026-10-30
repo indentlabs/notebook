@@ -145,6 +145,9 @@ Rails.application.routes.draw do
     get '/hub', to: 'document_analyses#hub', as: :analysis_hub
   end
 
+  # Word lookups for the Wordsmith panel in the document editor
+  get '/wordsmith/lookup', to: 'wordsmith#lookup', as: :wordsmith_lookup
+
   resources :documents do
     # Document Analysis routes
     get '/analysis/',            to: 'document_analyses#show',        on: :member      

@@ -60,4 +60,7 @@ Rails.application.configure do
   # Set test-mode Stripe API key
   Stripe.api_key = "We-don't-want-to-actually-hit-Stripe-from-tests"
   config.stripe_publishable_key = 'pk_test_eXI4iyJ2gR9UOGJyJERvDlHF'
+
+  # Queue document background jobs immediately rather than debouncing them (see Document#enqueue_debounced)
+  config.x.document_job_debounce = 0
 end
