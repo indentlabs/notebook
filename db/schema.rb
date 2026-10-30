@@ -467,18 +467,6 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.index ["user_id"], name: "index_character_magics_on_user_id"
   end
 
-  create_table "character_system_chats", force: :cascade do |t|
-    t.integer "character_id"
-    t.integer "user_id"
-    t.string "uid"
-    t.json "messages", default: []
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
-    t.index ["character_id"], name: "index_character_system_chats_on_character_id"
-    t.index ["uid"], name: "index_character_system_chats_on_uid", unique: true
-    t.index ["user_id"], name: "index_character_system_chats_on_user_id"
-  end
-
   create_table "character_technologies", force: :cascade do |t|
     t.integer "user_id"
     t.integer "character_id"
@@ -1338,7 +1326,7 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.integer "folder_id"
     t.integer "cached_word_count"
     t.datetime "archived_at"
-    t.integer "status", default: 2
+    t.integer "status", default: 0
     t.string "document_password_digest"
     t.index ["archived_at"], name: "index_documents_on_archived_at"
     t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
@@ -3571,6 +3559,7 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.string "notes"
     t.string "private_notes"
     t.boolean "favorite", default: false
+    t.integer "cached_word_count", default: 0
     t.index ["universe_id"], name: "index_timelines_on_universe_id"
     t.index ["user_id", "privacy", "deleted_at"], name: "index_timelines_on_user_privacy_deleted"
     t.index ["user_id"], name: "index_timelines_on_user_id"
