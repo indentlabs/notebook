@@ -102,7 +102,9 @@ module Api
 
       def timeline
         timeline = Timeline.find_by(id: params[:id].to_i)
-        events   = timeline.timeline_events
+        return render json: { error: "Page not found" } unless timeline&.readable_by?(@current_api_user || User.new)
+
+        events = timeline.timeline_events
 
         render json: {
           name: timeline.name,

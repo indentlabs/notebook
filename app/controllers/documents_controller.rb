@@ -172,6 +172,15 @@ class DocumentsController < ApplicationController
       raise "Invalid entity type #{linked_entity_params[:entity_type]}"
     end
 
+    # Linking a page shows its details in the document, so writers can only link pages they can read
+    linked_page = linked_entity_params[:entity_type].constantize.find_by(id: linked_entity_params[:entity_id])
+    unless linked_page&.readable_by?(current_user)
+      return respond_to do |format|
+        format.html { redirect_back(fallback_location: documents_path, alert: "You don't have permission to link that page.") }
+        format.json { render json: { success: false, error: "You don't have permission to link that page." }, status: :forbidden }
+      end
+    end
+
     # Take this out of the params upfront in case we need to modify the value (after creating one, for example)
     document_analysis_id = linked_entity_params[:document_analysis_id].to_i
 

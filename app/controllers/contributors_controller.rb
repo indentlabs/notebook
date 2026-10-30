@@ -30,6 +30,11 @@ class ContributorsController < ApplicationController
     contributor = Contributor.find(params[:id])
     relevant_universe = Universe.find(contributor.universe_id)
 
+    # Only the universe's owner can remove someone, though contributors can always leave
+    unless relevant_universe.user_id == current_user.id || contributor.user_id == current_user.id
+      return redirect_to(relevant_universe, alert: "You don't have permission to remove that contributor.")
+    end
+
     if contributor
       user = contributor.user
       contributor.destroy

@@ -18,6 +18,12 @@ class ContentController < ApplicationController
   before_action :set_navbar_actions, except: [:deleted, :api_sort]
   before_action :set_sidenav_expansion, except: [:api_sort]
 
+  FIELD_UPDATE_ACTIONS = [
+    :link_field_update, :name_field_update, :text_field_update, :tags_field_update, :universe_field_update
+  ].freeze
+  before_action :set_entity, only: FIELD_UPDATE_ACTIONS
+  before_action :require_field_update_permission, only: FIELD_UPDATE_ACTIONS
+
   def index
     @content_type_class = content_type_from_controller(self.class)
     @content_type_name  = @content_type_class.name
@@ -129,13 +135,21 @@ class ContentController < ApplicationController
     end
     @gallery_count += @basil_images.count
 
+    # The associations and timelines tabs name other pages, so they only list ones the viewer can read
+    viewer = current_user || User.new
+
     # Associations count
-    @associations_count = 0
+    @visible_references = []
     if @content.respond_to?(:incoming_page_references)
-      @associations_count += @content.incoming_page_references.count rescue 0
+      @visible_references = @content.incoming_page_references.limit(50).visible_to(viewer)
     end
+    @associations_count = @visible_references.size
     if @content.respond_to?(:document_entities)
-      @associations_count += @content.document_entities.select(:document_id).distinct.count rescue 0
+      @associations_count += @content.document_entities
+        .joins(:document)
+        .merge(Document.public_or_owned_by(current_user))
+        .distinct
+        .count('documents.id')
     end
 
     # Collections count
@@ -150,28 +164,26 @@ class ContentController < ApplicationController
     end
 
     # Timelines count
-    @timelines_count = 0
-    begin
-      if defined?(Timeline) && @content.respond_to?(:incoming_page_references)
-        @timelines_count += @content.incoming_page_references
-          .where(referencing_page_type: 'Timeline')
-          .select(:referencing_page_id)
-          .distinct
-          .count
-      end
-    rescue
-      # Timeline model might not exist
+    @linked_timelines = []
+    if @content.respond_to?(:incoming_page_references)
+      @linked_timelines = @content.incoming_page_references
+        .where(referencing_page_type: 'Timeline')
+        .limit(50)
+        .visible_to(viewer)
+        .map(&:referencing_page)
+        .uniq
     end
-    begin
-      if defined?(TimelineEvent) && @content.respond_to?(:timeline_events)
-        @timelines_count += @content.timeline_events
-          .select(:timeline_id)
-          .distinct
-          .count
-      end
-    rescue
-      # TimelineEvent model might not exist
+    @mentioned_in_timelines = []
+    if @content.respond_to?(:timeline_events)
+      @mentioned_in_timelines = @content.timeline_events
+        .includes(:timeline)
+        .limit(50)
+        .map(&:timeline)
+        .compact
+        .uniq
+        .select { |timeline| timeline.readable_by?(viewer) }
     end
+    @timelines_count = @linked_timelines.size + @mentioned_in_timelines.size
 
     # Shares count
     @shares_count = 0
@@ -217,16 +229,17 @@ class ContentController < ApplicationController
 
     return redirect_to(root_path) if @content.user.nil? # deleted user's content    
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
+    return redirect_to(root_path, notice: "You don't have permission to view that content.") unless current_user.can_read?(@content)
 
     @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
 
     analysis_ids = DocumentEntity.where(entity: @content).pluck(:document_analysis_id)
     document_ids = DocumentAnalysis.where(id: analysis_ids).pluck(:document_id)
     @documents = Document.where(id: document_ids).public_or_owned_by(current_user)
-    @references = @content.incoming_page_references.preload(:referencing_page)
+    @references = @content.incoming_page_references.visible_to(current_user)
     @mentioning_attributes = Attribute.where(
-      attribute_field_id: @references.pluck(:attribute_field_id),
-      entity_id: @references.pluck(:referencing_page_id)
+      attribute_field_id: @references.map(&:attribute_field_id),
+      entity_id: @references.map(&:referencing_page_id)
     )
   end
 
@@ -354,7 +367,11 @@ class ContentController < ApplicationController
 
       successful_response(content_creation_redirect_url, t(:create_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
-      failed_response('new', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json.to_s)
+      # Pages have no form of their own to send people back to, so return them to wherever they came from
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: root_path, alert: "Unable to save page. Error code: " + @content.errors.to_json.to_s) }
+        format.json { render json: @content.errors, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -387,7 +404,7 @@ class ContentController < ApplicationController
     else
       # Exclude fields only the real owner can edit
       #todo move field list somewhere when it grows
-      update_success = @content.update(content_params.except(:universe_id))
+      update_success = @content.update(content_params.except(:universe_id, :deleted_at))
     end
 
     cache_params = {}
@@ -711,7 +728,6 @@ class ContentController < ApplicationController
     attribute_value = save_attribute_value!(linked_pages)
 
     # Make sure we create references from the entity to the linked pages
-    set_entity
     referencing_page = @entity
 
     # TODO: move this into a link mention update job
@@ -751,10 +767,7 @@ class ContentController < ApplicationController
     attribute_value = save_attribute_value!(field_params.fetch('value', ''))
 
     # We also need to update the cached `name` field on the content page itself
-    entity_type = entity_params.fetch(:entity_type)
-    raise "Invalid entity type: #{entity_params.fetch(:entity_type)}" unless valid_content_types.include?(entity_params.fetch('entity_type'))
-    entity = entity_type.constantize.find_by(id: entity_params.fetch(:entity_id).to_i)
-    entity.update(name: field_params.fetch('value', ''))
+    @entity.update(name: field_params.fetch('value', ''))
 
     render json: attribute_value.to_json, status: 200
   end
@@ -778,13 +791,10 @@ class ContentController < ApplicationController
   end
 
   def tags_field_update
-    return unless valid_content_types.include?(entity_params.fetch('entity_type'))
-
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     attribute_value = save_attribute_value!(field_params.fetch('value', ''))
 
     # Create the actual page_tag models too
-    set_entity
     @content = @entity
     update_page_tags
 
@@ -795,23 +805,36 @@ class ContentController < ApplicationController
   end
 
   def universe_field_update
-    return unless valid_content_types.include?(entity_params.fetch('entity_type'))
-
     @attribute_field = AttributeField.find_by(id: params[:field_id].to_i)
     new_universe_id = field_params.fetch('value', nil).to_i
     new_universe_id = nil if new_universe_id == 0
     attribute_value = save_attribute_value!(new_universe_id)
 
-    @content = entity_params.fetch('entity_type').constantize.find_by(
-      id:   entity_params.fetch('entity_id'), 
-      user: current_user
-    )
-    @content.update!(universe_id: attribute_value.value)
+    @entity.update!(universe_id: attribute_value.value)
 
     render json: attribute_value.to_json, status: 200
   end
 
   private
+
+  # Field updates say which page they're for in their params, so check it before writing anything.
+  # Moving a page is only for its owner, and only into a universe they can use.
+  def require_field_update_permission
+    return deny_field_update unless @entity&.updatable_by?(current_user)
+
+    is_universe_update = action_name == 'universe_field_update'
+    return unless is_universe_update || AttributeField.find_by(id: params[:field_id].to_i)&.field_type == 'universe'
+
+    can_move = @entity.user_id == current_user.id && @entity.try(:can_move_to_universe?, params.dig(:field, :value))
+    deny_field_update unless is_universe_update && can_move
+  end
+
+  def deny_field_update
+    respond_to do |format|
+      format.html { redirect_back fallback_location: root_path, notice: "You don't have permission to edit that!" }
+      format.any  { render json: { error: "You don't have permission to edit that!" }, status: :forbidden }
+    end
+  end
 
   # Finds or creates the Attribute for @attribute_field on the current entity and saves `value` to it.
   # Concurrent autosaves on a field with no value yet can both miss the existing-row lookup and try to
@@ -913,7 +936,7 @@ class ContentController < ApplicationController
       .downcase
       .to_sym
 
-    params.require(content_class).except(:page_tags, :_destroy).permit(
+    params.require(content_class).except(:page_tags, :_destroy, :user_id).permit(
       content_param_list + [
         :deleted_at,
         :document_entity_id,

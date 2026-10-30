@@ -1,10 +1,8 @@
 # Helps generate HTML constructs for object owned by the user
 module ApplicationHelper
-  # Shares outlive a document's privacy setting, so check before previewing one
+  # Shares outlive a page's privacy setting, so check before previewing one
   def share_preview_visible?(page)
-    return true unless page.is_a?(Document)
-
-    page.readable_by?(current_user || User.new)
+    page&.readable_by?(current_user || User.new)
   end
 
   def content_class_from_name(class_name)

@@ -92,8 +92,7 @@ class TimelineEvent < ApplicationRecord
     "#{time_label} - #{end_time_label}"
   end
 
-  # todo move this to a real permissions authorizer
   def can_be_modified_by?(user)
-    user == timeline.user
+    timeline.updatable_by?(user)
   end
 end

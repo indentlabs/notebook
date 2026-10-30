@@ -43,6 +43,7 @@ class Document < ApplicationRecord
   validate :password_protection_changed_explicitly, if: -> { will_save_change_to_privacy? || will_save_change_to_document_password_digest? }
 
   belongs_to :folder, optional: true
+  validate :folder_belongs_to_owner, if: :will_save_change_to_folder_id?
 
   # Status enum for document workflow tracking
   enum status: {
@@ -55,6 +56,10 @@ class Document < ApplicationRecord
     published: 6,
     complete: 7
   }
+
+  def folder_belongs_to_owner
+    errors.add(:folder, "isn't one of yours") if folder && folder.user_id != user_id
+  end
 
   # Returns status options for select dropdowns: [['Display Label', 'value'], ...]
   def self.status_options

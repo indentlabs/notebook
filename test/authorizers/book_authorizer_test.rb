@@ -84,4 +84,14 @@ class BookAuthorizerTest < ActiveSupport::TestCase
     assert_not @author.can_read?(book)
     assert_not anonymous.can_read?(book)
   end
+
+  test "an unclaimed contributor invite doesn't open a private book to anonymous viewers" do
+    universe = Universe.create!(user: @author, name: 'Private Universe', privacy: 'private')
+    Contributor.create!(universe: universe, email: 'invited@example.com')
+    book = Book.create!(user: @author, name: 'My Book', privacy: 'private', universe: universe)
+
+    assert_not anonymous.can_read?(book)
+    assert_not anonymous.can_update?(book)
+    assert_not @stranger.can_read?(book)
+  end
 end

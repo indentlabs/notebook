@@ -10,6 +10,7 @@ class TimelinesController < ApplicationController
   before_action :require_premium_plan, only: [:new, :create]
   before_action :require_timeline_read_permission, only: [:show]
   before_action :require_timeline_edit_permission, only: [:edit, :update]
+  before_action :require_timeline_delete_permission, only: [:destroy]
 
   # GET /timelines
   def index
@@ -148,7 +149,10 @@ class TimelinesController < ApplicationController
 
   # PATCH/PUT /timelines/1
   def update
-    if @timeline.update(timeline_params)
+    # Moving a timeline between universes is only for its owner
+    attributes = @timeline.user_id == current_user.id ? timeline_params : timeline_params.except(:universe_id)
+
+    if @timeline.update(attributes)
       update_page_tags
 
       render status: 200, json: @timeline.reload
@@ -242,11 +246,21 @@ class TimelinesController < ApplicationController
   private
 
   def require_timeline_read_permission
-    return user_signed_in? && @timeline.readable_by?(current_user)
+    return if (current_user || User.new).can_read?(@timeline)
+
+    redirect_to root_path, notice: "You don't have permission to view that timeline."
   end
 
   def require_timeline_edit_permission
-    return user_signed_in? && @timeline.updatable_by?(current_user)
+    return if @timeline.updatable_by?(current_user)
+
+    redirect_to root_path, notice: "You don't have permission to edit that!"
+  end
+
+  def require_timeline_delete_permission
+    return if @timeline.deletable_by?(current_user)
+
+    redirect_to root_path, notice: "You don't have permission to delete that!"
   end
 
   # TODO: move this (and the copy in ContentController) into the has_page_tags concern?
@@ -277,7 +291,7 @@ class TimelinesController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def timeline_params
-    params.require(:timeline).except(:page_tags).permit(:name, :subtitle, :description, :notes, :private_notes, :universe_id, :deleted_at, :archived_at, :privacy)
+    params.require(:timeline).except(:page_tags).permit(:name, :subtitle, :description, :notes, :private_notes, :universe_id, :archived_at, :privacy)
   end
 
   def page_tag_params

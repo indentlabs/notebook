@@ -64,6 +64,7 @@ class DocumentPasswordPrivacyTest < ActionDispatch::IntegrationTest
     Contributor.create!(universe: universe, user: contributor)
     admin = User.create!(name: 'Admin', email: 'admin@example.com', password: 'password123', site_administrator: true)
     outsider = User.create!(name: 'Outsider', email: 'outsider@example.com', password: 'password123')
+    Contributor.create!(universe: universe, user: @author)
     @document.update!(universe: universe)
 
     assert @author.can_read?(@document)
@@ -223,7 +224,7 @@ class DocumentPasswordPrivacyTest < ActionDispatch::IntegrationTest
 
   test "the name lookup and content links hide its title" do
     get "/api/internal/Document/#{@document.id}/name"
-    assert_equal 'Page not found', response.body
+    assert_equal 'Private document', response.body
 
     assert_not_includes ContentFormatterService.show(text: "[[Document-#{@document.id}]]", viewing_user: User.new), SECRET_TITLE
     assert_not_includes ContentFormatterService.show(text: "[[Document-#{@document.id}]]", viewing_user: @stranger), SECRET_TITLE

@@ -74,7 +74,10 @@ class BooksController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render :edit, status: :unprocessable_entity }
+        format.html do
+          edit
+          render :edit, status: :unprocessable_entity
+        end
         format.json { render json: { errors: @book.errors }, status: :unprocessable_entity }
       end
     end
