@@ -1,10 +1,14 @@
 class ForumsProsifyService < Service
   ENDLINE = "\r\n"
 
-  def self.prosify_text(thredded_topic, strip_parentheticals=true)
+  def self.visible_posts(thredded_topic, viewer)
+    Thredded::PostPolicy::Scope.new(viewer, thredded_topic.posts).resolve
+  end
+
+  def self.prosify_text(thredded_topic, viewer, strip_parentheticals=true)
     prose = ""
 
-    thredded_topic.posts.find_each do |post|
+    visible_posts(thredded_topic, viewer).find_each do |post|
       paragraphs = post.content.split(ENDLINE)
 
       paragraphs.each do |paragraph|
@@ -15,11 +19,11 @@ class ForumsProsifyService < Service
     prose
   end
 
-  def self.prosify_irc_log(thredded_topic, strip_parentheticals=true)
+  def self.prosify_irc_log(thredded_topic, viewer, strip_parentheticals=true)
     prose = "-!- Topic: #{thredded_topic.title}#{ENDLINE}"
     user_display_name_cache = {}
 
-    thredded_topic.posts.find_each do |post|
+    visible_posts(thredded_topic, viewer).find_each do |post|
       paragraphs = post.content.split(ENDLINE)
       user_display_name_cache[post.user_id] = post.user.try(:display_name) || "Anonymous" unless user_display_name_cache.key?(post.user_id)
 
@@ -34,11 +38,11 @@ class ForumsProsifyService < Service
     prose
   end
 
-  def self.prosify_html(thredded_topic, strip_parentheticals=true)
+  def self.prosify_html(thredded_topic, viewer, strip_parentheticals=true)
     prose = ""
     user_display_name_cache = {}
 
-    thredded_topic.posts.find_each do |post|
+    visible_posts(thredded_topic, viewer).find_each do |post|
       user_display_name_cache[post.user_id] = post.user.try(:display_name) || "Anonymous user" unless user_display_name_cache.key?(post.user_id)
 
       tooltip = "authored by #{user_display_name_cache[post.user_id]}"
@@ -51,13 +55,15 @@ class ForumsProsifyService < Service
   def self.save_to_document(user, thredded_topic, strip_parentheticals=true)
     document = user.documents.create!(
       title: "#{thredded_topic.title} (forums post)",
-      body:  prosify_html(thredded_topic, strip_parentheticals)
+      body:  prosify_html(thredded_topic, user, strip_parentheticals)
     )
     analysis = document.document_analysis.create!
 
     # If there are any links to Notebook.ai pages or [[page-id]] tokens in this post, we should automatically link those pages
     tokens = ContentFormatterService.tokens_to_replace(document.body)
     tokens.each do |token|
+      next unless readable_page?(user, token[:content_type], token[:content_id])
+
       analysis.document_entities.find_or_create_by(
         entity_type: token[:content_type],
         entity_id:   token[:content_id]
@@ -65,7 +71,9 @@ class ForumsProsifyService < Service
     end
 
     links = ContentFormatterService.links_to_replace(document.body)
-    links.each do |link|
+    links.compact.each do |link|
+      next unless readable_page?(user, link[:content_type], link[:content_id])
+
       analysis.document_entities.find_or_create_by(
         entity_type: link[:content_type],
         entity_id:   link[:content_id],
@@ -74,5 +82,13 @@ class ForumsProsifyService < Service
     end
 
     document
+  end
+
+  # Linking a page shows its details in the document, so only link pages the user can read
+  def self.readable_page?(user, content_type, content_id)
+    page_type = content_type.to_s.titleize
+    return false unless ContentFormatterService::VALID_LINK_CLASSES.include?(page_type)
+
+    page_type.constantize.find_by(id: content_id)&.readable_by?(user)
   end
 end

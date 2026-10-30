@@ -148,7 +148,10 @@ class TimelinesController < ApplicationController
 
   # PATCH/PUT /timelines/1
   def update
-    if @timeline.update(timeline_params)
+    # Moving a timeline between universes is only for its owner
+    attributes = @timeline.user_id == current_user.id ? timeline_params : timeline_params.except(:universe_id)
+
+    if @timeline.update(attributes)
       update_page_tags
 
       render status: 200, json: @timeline.reload

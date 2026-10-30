@@ -627,8 +627,11 @@ Rails.application.routes.draw do
   Sidekiq::Web.use Rack::Auth::Basic do |username, password|
     # Protect with simple authentication until we can fix proper user-based auth
     # This is a temporary solution until we update the authentication to use ActiveSupport::SecurityUtils
-    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(username), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME'] || 'admin')) &
-    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(password), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD'] || 'password'))
+    # With no credentials configured, nobody gets in
+    next false if ENV['SIDEKIQ_USERNAME'].blank? || ENV['SIDEKIQ_PASSWORD'].blank?
+
+    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(username), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_USERNAME'])) &
+    ActiveSupport::SecurityUtils.secure_compare(::Digest::SHA256.hexdigest(password), ::Digest::SHA256.hexdigest(ENV['SIDEKIQ_PASSWORD']))
   end unless Rails.env.development?
 
   mount Sidekiq::Web => '/sidekiq'

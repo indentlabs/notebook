@@ -27,18 +27,18 @@ xml.rss version: "2.0", "xmlns:atom": "http://www.w3.org/2005/Atom", "xmlns:cont
       xml.item do
         xml.title submission.cached_content_name
         xml.description do
-          xml.cdata! render(partial: 'rss_item_description', locals: { submission: submission })
+          xml.cdata! render(partial: 'rss_item_description', formats: [:html], locals: { submission: submission })
         end
         xml.link url_for(submission.content)
         xml.guid url_for(submission.content), isPermaLink: true
         xml.pubDate submission.accepted_at.rfc822
-        xml.author "#{submission.user.email} (#{submission.user.display_name})"
+        xml.author submission.user.display_name
         xml.category submission.content_type
         
         # Add submission explanation as content if present
         if submission.explanation.present?
           xml.tag! "content:encoded" do
-            xml.cdata! render(partial: 'rss_item_content', locals: { submission: submission })
+            xml.cdata! render(partial: 'rss_item_content', formats: [:html], locals: { submission: submission })
           end
         end
         

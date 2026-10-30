@@ -4,6 +4,9 @@ class PageCollectionSubmissionsController < ApplicationController
 
   before_action :require_collection_ownership, only: [:index]
 
+  before_action :authenticate_user!, only: [:create]
+  before_action :require_open_collection, only: [:create]
+
   # GET /page_collection_submissions
   def index
     @page_collection_submissions = @page_collection.page_collection_submissions.where(accepted_at: nil)
@@ -97,6 +100,20 @@ class PageCollectionSubmissionsController < ApplicationController
   end
 
   private
+
+  # Owners can add anything to their own collection. Everyone else needs a public
+  # collection that's taking submissions of that page type.
+  def require_open_collection
+    submission = params.fetch(:page_collection_submission, {})
+    collection = PageCollection.find_by(id: submission[:page_collection_id])
+    return redirect_to(page_collections_path, alert: 'Invalid submission.') if collection.nil?
+    return if collection.user_id == current_user.id
+
+    page_type = submission[:content].to_s.split('-').first
+    return if collection.allow_submissions? && collection.privacy == 'public' && collection.page_types.include?(page_type)
+
+    redirect_to collection, alert: "This collection isn't taking that submission."
+  end
 
   def require_collection_ownership
     raise "Forbidden!" unless user_signed_in? && @page_collection.user_id == current_user.id

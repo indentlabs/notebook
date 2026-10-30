@@ -211,7 +211,7 @@ class AttributeCategoriesController < ContentController
 
   def content_param_list
     [
-      :user_id, :entity_type,
+      :entity_type,
       :name, :label, :icon, :description,
       :hidden, :position
     ]
