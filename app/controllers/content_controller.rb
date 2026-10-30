@@ -185,7 +185,7 @@ class ContentController < ApplicationController
 
     # Universe-specific counts
     if @content.is_a?(Universe)
-      @documents_count = @content.documents.count
+      @documents_count = @content.documents_listable_by(current_user).count
       @books_count = @content.books.count
 
       # Universes contain timelines as well as being referenced by them
