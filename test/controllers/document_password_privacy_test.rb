@@ -64,6 +64,7 @@ class DocumentPasswordPrivacyTest < ActionDispatch::IntegrationTest
     Contributor.create!(universe: universe, user: contributor)
     admin = User.create!(name: 'Admin', email: 'admin@example.com', password: 'password123', site_administrator: true)
     outsider = User.create!(name: 'Outsider', email: 'outsider@example.com', password: 'password123')
+    Contributor.create!(universe: universe, user: @author)
     @document.update!(universe: universe)
 
     assert @author.can_read?(@document)

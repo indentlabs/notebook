@@ -22,8 +22,8 @@ class StreamController < ApplicationController
     if params[:search].present?
       search_term = "%#{params[:search]}%"
       @feed = @feed.joins(:user).where(
-        "content_page_shares.message ILIKE ? OR users.name ILIKE ? OR users.email ILIKE ?", 
-        search_term, search_term, search_term
+        "content_page_shares.message ILIKE ? OR users.name ILIKE ?",
+        search_term, search_term
       )
     end
     
@@ -49,8 +49,8 @@ class StreamController < ApplicationController
     if params[:search].present?
       search_term = "%#{params[:search]}%"
       @feed = @feed.joins(:user).where(
-        "content_page_shares.message ILIKE ? OR users.name ILIKE ? OR users.email ILIKE ?", 
-        search_term, search_term, search_term
+        "content_page_shares.message ILIKE ? OR users.name ILIKE ?",
+        search_term, search_term
       )
     end
     

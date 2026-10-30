@@ -167,7 +167,7 @@ class DocumentPrivacyTest < ActionDispatch::IntegrationTest
 
   test "submitting your own private page to a public collection still publishes it" do
     character  = Character.create!(user: @author, name: 'My Person', privacy: 'private')
-    collection = PageCollection.create!(user: @stranger, title: 'Theirs', privacy: 'public')
+    collection = PageCollection.create!(user: @stranger, title: 'Theirs', privacy: 'public', page_types: ['Character'], allow_submissions: true)
     sign_in @author
 
     assert_difference 'PageCollectionSubmission.count', 1 do
