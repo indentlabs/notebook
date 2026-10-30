@@ -86,11 +86,6 @@
         <%= render partial: 'documents/entities_sidebar' %>
       </div>
 
-      <!-- Actions Panel -->
-      <div x-show="activeSidebarPanel === 'actions'">
-        <%= render partial: 'documents/actions_sidebar' %>
-      </div>
-
       <!-- Wordsmith Panel -->
       <div x-show="activeSidebarPanel === 'wordsmith'">
         <%= render partial: 'documents/wordsmith_sidebar' %>
@@ -264,12 +259,10 @@
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'information', icon: 'info', tooltip: 'Information', top_position: 124, is_desktop: true %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'linked_pages', icon: 'link', tooltip: 'Linked Pages', top_position: 172, is_desktop: true %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'books', icon: 'menu_book', tooltip: 'Books', top_position: 220, is_desktop: true %>
-    <%= render 'documents/sidebar_toggle_tab', panel_name: 'actions', icon: 'bolt', tooltip: 'Actions', top_position: 268, is_desktop: true %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'wordsmith', icon: 'hardware', tooltip: 'Wordsmith', top_position: 76, is_desktop: false %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'information', icon: 'info', tooltip: 'Information', top_position: 124, is_desktop: false %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'linked_pages', icon: 'link', tooltip: 'Linked Pages', top_position: 172, is_desktop: false %>
     <%= render 'documents/sidebar_toggle_tab', panel_name: 'books', icon: 'menu_book', tooltip: 'Books', top_position: 220, is_desktop: false %>
-    <%= render 'documents/sidebar_toggle_tab', panel_name: 'actions', icon: 'bolt', tooltip: 'Actions', top_position: 268, is_desktop: false %>
 
     <%= render 'documents/mobile_sidebar' %>
 
@@ -284,6 +277,21 @@
         <%= render 'documents/synopsis_modal' %>
         <%= render 'documents/universe_modal' %>
         <%= render 'documents/folder_modal' %>
+
+        <% unless @document.archived? %>
+          <%= render 'documents/confirm_action_modal',
+              id: 'document-archive-modal', tone: 'orange', icon: 'archive',
+              title: 'Archive this document?',
+              message: "It'll move out of your documents and into your Archive. You can unarchive it from there at any time.",
+              confirm_label: 'Archive',
+              url: toggle_archive_document_path(@document), method: :post %>
+        <% end %>
+        <%= render 'documents/confirm_action_modal',
+            id: 'document-delete-modal', tone: 'red', icon: 'delete',
+            title: 'Delete this document?',
+            message: "You'll still be able to recover it from Recently Deleted for #{current_user.on_premium_plan? ? '7 days' : '48 hours'}, then it's gone for good.",
+            confirm_label: 'Delete',
+            url: document_path(@document), method: :delete %>
     </div>
   </main>
       
@@ -307,7 +315,6 @@
               information:  { label: 'Information',  icon: 'info' },
               linked_pages: { label: 'Linked Pages', icon: 'link' },
               books:        { label: 'Books',        icon: 'menu_book' },
-              actions:      { label: 'Actions',      icon: 'bolt' },
               wordsmith:    { label: 'Wordsmith',    icon: 'hardware' }
             },
 
