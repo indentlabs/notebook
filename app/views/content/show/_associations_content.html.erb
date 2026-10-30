@@ -1,14 +1,9 @@
 <%
   # Get associations data
   # This would typically come from the controller, but we'll fetch what we can
-  references = []
+  references = @visible_references
   mentioned_in_documents = []
   linked_from_pages = []
-  
-  # Try to get references if the method exists
-  if raw_content.respond_to?(:incoming_page_references)
-    references = raw_content.incoming_page_references.includes(:referencing_page).limit(50) rescue []
-  end
   
   # Try to get document mentions if available
   if raw_content.respond_to?(:document_entities)

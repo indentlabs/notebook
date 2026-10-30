@@ -223,7 +223,7 @@ class DocumentPasswordPrivacyTest < ActionDispatch::IntegrationTest
 
   test "the name lookup and content links hide its title" do
     get "/api/internal/Document/#{@document.id}/name"
-    assert_equal 'Page not found', response.body
+    assert_equal 'Private document', response.body
 
     assert_not_includes ContentFormatterService.show(text: "[[Document-#{@document.id}]]", viewing_user: User.new), SECRET_TITLE
     assert_not_includes ContentFormatterService.show(text: "[[Document-#{@document.id}]]", viewing_user: @stranger), SECRET_TITLE
