@@ -1326,7 +1326,7 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.integer "folder_id"
     t.integer "cached_word_count"
     t.datetime "archived_at"
-    t.integer "status", default: 0
+    t.integer "status", default: 2
     t.string "document_password_digest"
     t.index ["archived_at"], name: "index_documents_on_archived_at"
     t.index ["deleted_at", "universe_id", "user_id"], name: "index_documents_on_deleted_at_and_universe_id_and_user_id"
