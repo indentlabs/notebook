@@ -80,18 +80,12 @@ module ApplicationHelper
     end
   end
 
-  # Edit link for any record that can show up in word count history. Not every
-  # tracked type has its own edit route (e.g. timeline events are edited on
-  # their parent timeline), so fall back gracefully instead of raising.
-  def word_count_entity_edit_path(entity)
-    return nil if entity.nil?
+  # Models whose edit page isn't their own polymorphic edit route (e.g.
+  # Timeline, Document, TimelineEvent) define #edit_path; everything else
+  # uses the standard route. Returns nil when there's no record to link to.
+  def edit_path_for(record)
+    return nil if record.nil?
 
-    if entity.is_a?(TimelineEvent)
-      return entity.timeline ? edit_timeline_path(entity.timeline) : nil
-    end
-
-    edit_polymorphic_path(entity)
-  rescue NoMethodError, ActionController::UrlGenerationError
-    nil
+    record.respond_to?(:edit_path) ? record.edit_path : edit_polymorphic_path(record)
   end
 end
