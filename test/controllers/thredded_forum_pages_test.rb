@@ -1,7 +1,7 @@
 require 'test_helper'
 
-# Smoke tests for the restyled forum moderation tabs and pagination.
-class ThreddedModerationPagesTest < ActionDispatch::IntegrationTest
+# Smoke tests for the forum moderation tabs and forum pagination.
+class ThreddedForumPagesTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   setup do
@@ -67,6 +67,7 @@ class ThreddedModerationPagesTest < ActionDispatch::IntegrationTest
     assert_select 'nav.forum-pagination', minimum: 1
     assert_select 'nav.forum-pagination', text: /Page.*of\s+\d+/m
     assert_select "nav.forum-pagination select option[selected]", text: "1"
-    assert_select "nav.forum-pagination select option[value$=\"/page-2\"]", text: "2"
+    assert_select "nav.forum-pagination select[data-total-pages=\"2\"]"
+    assert_select "nav.forum-pagination select[data-page-url-template$=\"/page-#{ForumPaginationHelper::PAGE_NUMBER_PLACEHOLDER}\"]"
   end
 end

@@ -7,13 +7,16 @@
   <nav class="forum-pagination w-full flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 my-3" aria-label="Pagination">
     <%= first_page_tag unless current_page.first? %>
     <%= prev_page_tag unless current_page.first? %>
+    <%# Long threads can have thousands of pages, so forum_pagination.js fills in
+        the options from a URL template instead of the server rendering each one. %>
     <label class="sm:hidden inline-flex items-center gap-1.5 px-1 text-sm text-stone-600 dark:text-gray-300">
       Page
-      <select aria-label="Go to page" onchange="window.location.href = this.value"
+      <select aria-label="Go to page" data-forum-page-jump
+              data-total-pages="<%= total_pages %>"
+              data-first-page-url="<%= page_tag(current_page).page_url_for(1) %>"
+              data-page-url-template="<%= page_tag(current_page).page_url_for(ForumPaginationHelper::PAGE_NUMBER_PLACEHOLDER) %>"
               class="h-9 py-0 pl-2 pr-7 rounded-md border border-stone-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-stone-700 dark:text-gray-200">
-        <% 1.upto(total_pages) do |number| %>
-          <option value="<%= page_tag(current_page).page_url_for(number) %>"<%= ' selected' if number == current_page.number %>><%= number %></option>
-        <% end %>
+        <option value="<%= current_page.number %>" selected><%= current_page.number %></option>
       </select>
       of <%= total_pages %>
     </label>
