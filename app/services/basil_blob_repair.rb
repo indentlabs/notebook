@@ -10,6 +10,11 @@
 # but it couldn't fix the rest without downloading every image, so those
 # variants still failed with a 500 and showed a broken image.
 #
+# Run via `rake data_integrity:repair_basil_blob_checksums` (ALL=1 to check
+# every Basil image). Deliberately not hooked into ActiveStorage at request
+# time: new images are stored with correct checksums, so an IntegrityError
+# after the sweep is a new problem that should surface in Sentry.
+#
 # Basil images are written by us and never changed, so the object in S3 is
 # the source of truth. Before trusting a download we check it against what
 # S3 reports for the object (size, and MD5 when the ETag is one), so a

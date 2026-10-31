@@ -144,17 +144,24 @@ namespace :data_integrity do
 
   desc "Repair Basil image blobs whose checksum doesn't match the PNG in S3 (the cause of " \
        "ActiveStorage::IntegrityError on Basil variants). By default only checks blobs whose " \
-       "checksum is malformed; ALL=1 downloads and verifies every Basil image."
+       "checksum is malformed; ALL=1 downloads and verifies every Basil image. " \
+       "START_ID=n resumes from blob id n."
   task repair_basil_blob_checksums: :environment do
-    blobs = ActiveStorage::Blob.where(service_name: BasilBlobRepair.services)
+    blobs     = ActiveStorage::Blob.where(service_name: BasilBlobRepair.services)
     check_all = ENV['ALL'].present?
+    start_id  = ENV.fetch('START_ID', 0).to_i
     checked = repaired = failed = 0
 
-    blobs.find_each do |blob|
+    puts "Checking #{check_all ? 'every' : 'malformed'} Basil blob checksum from id #{start_id}"
+    blobs.find_each(start: start_id) do |blob|
       next unless check_all || BasilBlobRepair.malformed_checksum?(blob.checksum)
 
       checked += 1
-      repaired += 1 if BasilBlobRepair.repair!(blob)
+      if BasilBlobRepair.repair!(blob)
+        repaired += 1
+        puts "Repaired blob #{blob.id} (#{blob.key})"
+      end
+      puts "...#{checked} checked, up to blob #{blob.id}" if (checked % 1000).zero?
     rescue ActiveStorage::FileNotFoundError, Aws::S3::Errors::ServiceError => e
       failed += 1
       puts "Blob #{blob.id} (#{blob.key}): #{e.class} #{e.message}"

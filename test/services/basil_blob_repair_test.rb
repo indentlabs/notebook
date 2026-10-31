@@ -1,19 +1,22 @@
 require "test_helper"
 
 # Basil blobs whose stored checksum doesn't match the PNG (e.g. a multipart
-# S3 ETag, which FixBasilBlobChecksums couldn't convert) are repaired from
-# the file the first time a variant is built, instead of raising
-# ActiveStorage::IntegrityError and serving a 500.
+# S3 ETag, which FixBasilBlobChecksums couldn't convert) raise
+# ActiveStorage::IntegrityError whenever a variant is built. BasilBlobRepair
+# and data_integrity:repair_basil_blob_checksums fix the stored checksum.
 class BasilBlobRepairTest < ActionDispatch::IntegrationTest
   setup do
     @data = File.binread(Rails.root.join("test/fixtures/files/gallery_test.png"))
     @services = BasilBlobRepair.services
     # Blobs in tests live on the Disk "test" service; treat it as Basil's.
     BasilBlobRepair.services = [ActiveStorage::Blob.service.name.to_s]
+    Rails.application.load_tasks unless Rake::Task.task_defined?("data_integrity:repair_basil_blob_checksums")
+    Rake::Task["data_integrity:repair_basil_blob_checksums"].reenable
   end
 
   teardown do
     BasilBlobRepair.services = @services
+    ENV.delete("ALL")
   end
 
   def commission_with_checksum(checksum)
@@ -33,36 +36,59 @@ class BasilBlobRepairTest < ActionDispatch::IntegrationTest
     follow_redirect! while response.redirect?
   end
 
-  test "a variant of a Basil image with a multipart-ETag checksum is served and the checksum fixed" do
-    commission = commission_with_checksum("#{Digest::MD5.hexdigest('parts')}-3")
-
-    get_variant(commission)
-
-    assert_response :success
-    assert_equal Digest::MD5.base64digest(@data), commission.image.blob.reload.checksum
+  def run_task(all: false)
+    ENV["ALL"] = "1" if all
+    capture_io { Rake::Task["data_integrity:repair_basil_blob_checksums"].invoke }.first
   end
 
-  test "a well-formed but wrong checksum is repaired too" do
-    commission = commission_with_checksum(Digest::MD5.base64digest("something else"))
+  MULTIPART_ETAG = "#{Digest::MD5.hexdigest('parts')}-3"
+  WRONG_CHECKSUM = Digest::MD5.base64digest("something else")
 
-    get_variant(commission)
-
-    assert_response :success
-    assert_equal Digest::MD5.base64digest(@data), commission.image.blob.reload.checksum
-  end
-
-  test "blobs on other services still raise" do
-    BasilBlobRepair.services = %w(amazon_basil)
-    commission = commission_with_checksum(Digest::MD5.base64digest("something else"))
-
+  test "a repaired Basil image serves its resized variant" do
+    commission = commission_with_checksum(MULTIPART_ETAG)
     assert_raises(ActiveStorage::IntegrityError) { get_variant(commission) }
-    assert_equal Digest::MD5.base64digest("something else"), commission.image.blob.reload.checksum
+
+    assert BasilBlobRepair.repair!(commission.image.blob)
+
+    get_variant(commission.reload)
+    assert_response :success
+    assert_equal Digest::MD5.base64digest(@data), commission.image.blob.checksum
+  end
+
+  test "the task repairs malformed checksums by default and wrong ones with ALL=1" do
+    malformed = commission_with_checksum(MULTIPART_ETAG).image.blob
+    wrong     = commission_with_checksum(WRONG_CHECKSUM).image.blob
+
+    output = run_task
+    assert_equal Digest::MD5.base64digest(@data), malformed.reload.checksum
+    assert_equal WRONG_CHECKSUM, wrong.reload.checksum, "well-formed checksums aren't downloaded by default"
+    assert_match "repaired 1", output
+
+    Rake::Task["data_integrity:repair_basil_blob_checksums"].reenable
+    run_task(all: true)
+    assert_equal Digest::MD5.base64digest(@data), wrong.reload.checksum
+  end
+
+  test "blobs on other services are left alone" do
+    BasilBlobRepair.services = %w(amazon_basil)
+    blob = commission_with_checksum(WRONG_CHECKSUM).image.blob
+
+    assert_not BasilBlobRepair.repair!(blob)
+    run_task(all: true)
+    assert_equal WRONG_CHECKSUM, blob.reload.checksum
   end
 
   test "repair! leaves a correct blob alone" do
     blob = commission_with_checksum(Digest::MD5.base64digest(@data)).image.blob
 
     assert_not BasilBlobRepair.repair!(blob)
+  end
+
+  test "a broken Basil image still raises rather than being fixed on the fly" do
+    commission = commission_with_checksum(WRONG_CHECKSUM)
+
+    assert_raises(ActiveStorage::IntegrityError) { get_variant(commission) }
+    assert_equal WRONG_CHECKSUM, commission.image.blob.reload.checksum
   end
 
   test "malformed_checksum? spots checksums that can never verify" do
@@ -81,7 +107,7 @@ class BasilBlobRepairTest < ActionDispatch::IntegrationTest
   end
 
   def repair_with_s3(download:, content_length:, etag:)
-    blob = commission_with_checksum("#{Digest::MD5.hexdigest('parts')}-3").image.blob
+    blob = commission_with_checksum(MULTIPART_ETAG).image.blob
     blob.define_singleton_method(:service) { FakeS3Service.new(download, content_length, etag) }
     [BasilBlobRepair.repair!(blob), blob.reload.checksum]
   end
@@ -104,7 +130,7 @@ class BasilBlobRepairTest < ActionDispatch::IntegrationTest
     repaired, checksum = repair_with_s3(download: corrupted, content_length: @data.bytesize,
                                         etag: %("#{Digest::MD5.hexdigest(@data)}"))
     assert_not repaired
-    assert_equal "#{Digest::MD5.hexdigest('parts')}-3", checksum
+    assert_equal MULTIPART_ETAG, checksum
 
     repaired, = repair_with_s3(download: @data.byteslice(0, 100), content_length: @data.bytesize, etag: %("x-2"))
     assert_not repaired, "a truncated download is rejected"
