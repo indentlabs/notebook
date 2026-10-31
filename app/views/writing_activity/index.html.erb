@@ -167,9 +167,11 @@
                     </div>
                     <div class="flex-grow min-w-0">
                       <% entity_edit_path = edit_path_for(entity) %>
-                      <%= link_to_if entity_edit_path, entity.try(:name) || entity.try(:title) || 'Untitled',
-                          entity_edit_path,
-                          class: "text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 truncate block" %>
+                      <% name_classes = "text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 truncate block" %>
+                      <%# Keep the same look when there's no edit page (e.g. a timeline event whose timeline was deleted) %>
+                      <%= link_to_if entity_edit_path, entity.try(:name) || entity.try(:title) || 'Untitled', entity_edit_path, class: name_classes do |name| %>
+                        <%= tag.span name, class: name_classes %>
+                      <% end %>
                       <span class="text-xs text-gray-500 dark:text-gray-400">
                         <%= entity_type.gsub(/([A-Z])/, ' \1').strip %>
                       </span>
@@ -228,9 +230,11 @@
                   </div>
                   <div class="flex-grow min-w-0">
                     <% entity_edit_path = edit_path_for(entity) %>
-                    <%= link_to_if entity_edit_path, entity.try(:name) || entity.try(:title) || 'Untitled',
-                        entity_edit_path,
-                        class: "text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 truncate block" %>
+                    <% name_classes = "text-sm font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 truncate block" %>
+                    <%# Keep the same look when there's no edit page (e.g. a timeline event whose timeline was deleted) %>
+                    <%= link_to_if entity_edit_path, entity.try(:name) || entity.try(:title) || 'Untitled', entity_edit_path, class: name_classes do |name| %>
+                      <%= tag.span name, class: name_classes %>
+                    <% end %>
                     <span class="text-xs text-gray-500 dark:text-gray-400">
                       <%= page[:entity_type].gsub(/([A-Z])/, ' \1').strip %>
                     </span>
