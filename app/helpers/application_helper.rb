@@ -79,4 +79,13 @@ module ApplicationHelper
       0
     end
   end
+
+  # Models whose edit page isn't their own polymorphic edit route (e.g.
+  # Timeline, Document, TimelineEvent) define #edit_path; everything else
+  # uses the standard route. Returns nil when there's no record to link to.
+  def edit_path_for(record)
+    return nil if record.nil?
+
+    record.respond_to?(:edit_path) ? record.edit_path : edit_polymorphic_path(record)
+  end
 end

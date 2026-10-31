@@ -18,4 +18,20 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal '1.19M', compact_number(1_190_921)
     assert_equal '1.99B', compact_number(1_999_999_999)
   end
+
+  test "edit_path_for uses a model's own edit_path when it defines one" do
+    timeline = Timeline.new(id: 42)
+    event = TimelineEvent.new(id: 7, timeline: timeline)
+    assert_equal edit_timeline_path(timeline), edit_path_for(event)
+  end
+
+  test "edit_path_for falls back to the polymorphic edit route" do
+    book = Book.new(id: 3)
+    assert_equal edit_book_path(book), edit_path_for(book)
+  end
+
+  test "edit_path_for returns nil when there is nothing to link to" do
+    assert_nil edit_path_for(nil)
+    assert_nil edit_path_for(TimelineEvent.new(id: 7))
+  end
 end
