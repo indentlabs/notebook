@@ -13,6 +13,8 @@
                    classes: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:bg-opacity-30 dark:text-amber-400 border border-amber-200 dark:border-amber-800' }
                end
 %>
+<%# Posts whose topic was deleted have nowhere to link to; skip them. %>
+<% if topic %>
 <%= content_tag :article, id: dom_id(post), class: 'thredded--post thredded--post-moderation bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm mb-6 overflow-hidden' do %>
   <div class="p-4 border-b border-stone-100 dark:border-gray-700">
     <div class="flex items-start justify-between gap-3">
@@ -56,4 +58,5 @@
   <div class="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
     <%= render 'post_moderation_actions', post: post %>
   </div>
+<% end %>
 <% end %>

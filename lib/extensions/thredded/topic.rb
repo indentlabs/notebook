@@ -69,6 +69,13 @@ module Extensions
       def name
         self.title
       end
+
+      # Topics show up in the stream and on profiles next to content pages, which
+      # are checked with readable_by? before they're previewed. Everyone can read
+      # the forums, so the only topics to hide are ones a moderator blocked.
+      def readable_by?(_user)
+        !blocked?
+      end
     end
   end
 end

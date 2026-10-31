@@ -67,6 +67,21 @@ class DocumentAutosaveTest < ActionDispatch::IntegrationTest
     assert_equal '<p>Saved anyway.</p>', @document.reload.body
   end
 
+  # Production doesn't set config.x.document_job_debounce, and an unset config.x
+  # key reads as an empty OrderedOptions rather than nil.
+  test "saving works when the debounce setting is unset" do
+    with_debounce(ActiveSupport::OrderedOptions.new) do
+      assert_equal 30.seconds, Document.background_job_debounce
+
+      assert_enqueued_with(job: SaveDocumentRevisionJob, args: [@document.id]) do
+        patch document_path(@document), params: { document: { body: '<p>Unset setting.</p>' } }
+      end
+    end
+
+    assert_response :success
+    assert_equal '<p>Unset setting.</p>', @document.reload.body
+  end
+
   private
 
   def with_debounce(wait)
