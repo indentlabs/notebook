@@ -18,4 +18,20 @@ class ApplicationHelperTest < ActionView::TestCase
     assert_equal '1.19M', compact_number(1_190_921)
     assert_equal '1.99B', compact_number(1_999_999_999)
   end
+
+  test "word_count_entity_edit_path links timeline events to their parent timeline" do
+    timeline = Timeline.new(id: 42)
+    event = TimelineEvent.new(id: 7, timeline: timeline)
+    assert_equal edit_timeline_path(timeline), word_count_entity_edit_path(event)
+  end
+
+  test "word_count_entity_edit_path returns nil for nil or unroutable records" do
+    assert_nil word_count_entity_edit_path(nil)
+    assert_nil word_count_entity_edit_path(TimelineEvent.new(id: 7))
+  end
+
+  test "word_count_entity_edit_path uses the standard edit route when one exists" do
+    document = Document.new(id: 3)
+    assert_equal edit_document_path(document), word_count_entity_edit_path(document)
+  end
 end
