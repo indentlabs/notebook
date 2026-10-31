@@ -1,0 +1,22 @@
+<%# Thredded pagination. Overrides the engine's templates so every forum list
+  (topics, posts, inbox, moderation) gets the same compact, wrapping control.
+  Small screens get first/prev, "Page X of Y", next/last; the numbered window
+  only shows from the sm breakpoint up. -%>
+<%= paginator.render do -%>
+  <nav class="forum-pagination w-full flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 my-3" aria-label="Pagination">
+    <%= first_page_tag unless current_page.first? %>
+    <%= prev_page_tag unless current_page.first? %>
+    <span class="sm:hidden px-2 text-sm text-stone-600 dark:text-gray-300" aria-current="page">
+      Page <span class="font-semibold"><%= current_page.number %></span> of <%= total_pages %>
+    </span>
+    <% each_page do |page| -%>
+      <% if page.left_outer? || page.right_outer? || page.inside_window? -%>
+        <%= page_tag page %>
+      <% elsif !page.was_truncated? -%>
+        <%= gap_tag %>
+      <% end -%>
+    <% end -%>
+    <%= next_page_tag unless current_page.last? %>
+    <%= last_page_tag unless current_page.last? %>
+  </nav>
+<% end -%>

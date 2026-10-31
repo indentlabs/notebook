@@ -202,47 +202,9 @@
   }
 }
 
-// Pagination styling - compact
+// Pagination wrapper (links are styled in app/views/thredded/kaminari)
 .topic-pagination {
-  display: flex;
-  justify-content: center;
   margin: 0.75rem 0;
-
-  .pagination {
-    display: flex;
-    gap: 0.25rem;
-
-    a,
-    span {
-      padding: 0.25rem 0.5rem;
-      font-size: 0.8125rem;
-      border-radius: 4px;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-
-    a {
-      background: white;
-      border: 1px solid #e5e7eb;
-      color: #374151;
-
-      &:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
-      }
-    }
-
-    .current {
-      background: #2196F3;
-      color: white;
-      border: 1px solid #2196F3;
-    }
-
-    .disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
 }
 
 // Locked topic notice
@@ -319,27 +281,6 @@
 
     p {
       color: #fef3c7;
-    }
-  }
-
-  // Pagination dark mode
-  .topic-pagination {
-    .pagination {
-      a {
-        background: #374151;
-        border-color: #4b5563;
-        color: #e5e7eb;
-
-        &:hover {
-          background: #4b5563;
-          border-color: #6b7280;
-        }
-      }
-
-      .current {
-        background: #3b82f6;
-        border-color: #3b82f6;
-      }
     }
   }
 }
@@ -433,4 +374,50 @@
       padding-right: 1rem;
     }
   }
+}
+// =============================================
+// Nested quotes
+// =============================================
+// Each quote level used to add ~2rem of indentation, so long reply chains
+// crushed the innermost text into a one-letter-wide column on phones. Nested
+// levels now only add a thin rule and a small inset; anything deeper than two
+// levels is folded behind a toggle by forum_quotes.js.
+.thredded--post--content {
+  overflow-wrap: anywhere;
+
+  blockquote blockquote {
+    margin: 0.5rem 0 !important;
+    padding: 0.25rem 0 0.25rem 0.625rem !important;
+    border-left-width: 2px !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+  }
+
+  .forum-quote-collapse {
+    margin: 0.5rem 0;
+
+    > summary {
+      cursor: pointer;
+      font-size: 0.8125rem;
+      font-style: normal;
+      color: #2196F3;
+      list-style: none;
+
+      &::-webkit-details-marker {
+        display: none;
+      }
+
+      &::before {
+        content: '+ ';
+      }
+    }
+
+    &[open] > summary::before {
+      content: '\2212  ';
+    }
+  }
+}
+
+.dark .thredded--post--content .forum-quote-collapse > summary {
+  color: #60a5fa;
 }

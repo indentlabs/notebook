@@ -175,8 +175,20 @@ module AllowAdminModeration
   end
 end
 
+# Topics are soft-deleted (acts_as_paranoid), and older data has posts whose
+# topic no longer loads. Those posts aren't reachable anywhere on the forum,
+# but the moderation lists query posts directly and would 500 on them.
+module SkipPostsWithoutTopicsInModeration
+  private
+
+  def preload_posts_for_moderation(posts)
+    super(posts.where(postable_id: Thredded::Topic.select(:id)))
+  end
+end
+
 Rails.application.config.to_prepare do
   Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
+  Thredded::ModerationController.prepend SkipPostsWithoutTopicsInModeration
   Thredded::PrivateTopicPolicy.prepend AllowAdminModeration
 
   Onebox::Engine::AllowlistedGenericOnebox.allowed_domains << "notebook.ai"
