@@ -16,6 +16,16 @@ end
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# will_paginate and Kaminari (pulled in by rails_admin and thredded) both define
+# `.page` on ActiveRecord, and will_paginate's wins. Its relations have no `.per`,
+# which crashed every RailsAdmin list page (e.g. the redirect after deleting a
+# record). Give Kaminari its own method name; rails_admin and thredded both call
+# it through Kaminari.config.page_method_name. Kaminari bakes the name into each
+# model as the class is defined, so this has to run before any model loads.
+Kaminari.configure do |config|
+  config.page_method_name = :kaminari_page
+end
+
 module Notebook
   class Application < Rails::Application
     config.autoload_paths += Dir[Rails.root.join('app', 'models', '{*/}')]
