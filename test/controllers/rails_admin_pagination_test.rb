@@ -24,6 +24,13 @@ class RailsAdminPaginationTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "a content type list renders" do
+    # Content types have many content grouper associations for RailsAdmin to
+    # inspect; see ContentGrouperInverseAssociationsTest.
+    without_compiling_packs { get '/admin/character' }
+    assert_response :success
+  end
+
   test "deleting a user redirects to a working user list" do
     victim = users(:two)
 
