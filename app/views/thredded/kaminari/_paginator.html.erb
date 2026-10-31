@@ -1,14 +1,22 @@
 <%# Thredded pagination. Overrides the engine's templates so every forum list
   (topics, posts, inbox, moderation) gets the same compact, wrapping control.
-  Small screens get first/prev, "Page X of Y", next/last; the numbered window
-  only shows from the sm breakpoint up. -%>
+  Small screens get first/prev, a "Page [X] of Y" dropdown to jump straight to
+  a page, and next/last; the numbered window only shows from the sm
+  breakpoint up. -%>
 <%= paginator.render do -%>
   <nav class="forum-pagination w-full flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 my-3" aria-label="Pagination">
     <%= first_page_tag unless current_page.first? %>
     <%= prev_page_tag unless current_page.first? %>
-    <span class="sm:hidden px-2 text-sm text-stone-600 dark:text-gray-300" aria-current="page">
-      Page <span class="font-semibold"><%= current_page.number %></span> of <%= total_pages %>
-    </span>
+    <label class="sm:hidden inline-flex items-center gap-1.5 px-1 text-sm text-stone-600 dark:text-gray-300">
+      Page
+      <select aria-label="Go to page" onchange="window.location.href = this.value"
+              class="h-9 py-0 pl-2 pr-7 rounded-md border border-stone-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-semibold text-stone-700 dark:text-gray-200">
+        <% 1.upto(total_pages) do |number| %>
+          <option value="<%= page_tag(current_page).page_url_for(number) %>"<%= ' selected' if number == current_page.number %>><%= number %></option>
+        <% end %>
+      </select>
+      of <%= total_pages %>
+    </label>
     <% each_page do |page| -%>
       <% if page.left_outer? || page.right_outer? || page.inside_window? -%>
         <%= page_tag page %>

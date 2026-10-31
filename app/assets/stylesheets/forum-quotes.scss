@@ -1,0 +1,82 @@
+// Quotes in forum posts, private messages and post previews.
+//
+// Quoting a post quotes everything in it, so reply chains nest one level deeper
+// with every quote. Each level only costs a 3px rule and a small gap (~13px),
+// so even long chains leave most of a phone screen for the text. The rule
+// colour rotates by depth so you can still follow which reply goes with which
+// quote.
+
+$forum-quote-colors: #3b82f6, #a855f7, #10b981, #f59e0b; // blue, purple, emerald, amber
+$forum-quote-colors-dark: #60a5fa, #c084fc, #34d399, #fbbf24;
+$forum-quote-max-depth: 12;
+
+// On phones, chains deeper than this stop indenting so the text never gets
+// squeezed; deeper levels keep their coloured rule and stack in place.
+$forum-quote-mobile-indent-cap: 8;
+
+@function forum-quote-selector($depth) {
+  $selector: 'blockquote';
+  @for $i from 2 through $depth {
+    $selector: '#{$selector} blockquote';
+  }
+  @return $selector;
+}
+
+.thredded--post--content {
+  overflow-wrap: anywhere;
+
+  blockquote {
+    margin: 0.5rem 0;
+    padding: 0.125rem 0 0.125rem 0.625rem;
+    border-left: 3px solid nth($forum-quote-colors, 1);
+    border-radius: 0;
+    background: transparent;
+    color: #4b5563;
+    font-style: normal;
+    font-weight: inherit;
+    quotes: none;
+
+    // Tailwind typography adds curly quote marks around quoted paragraphs
+    p::before,
+    p::after {
+      content: none;
+    }
+
+    // comments.scss gives every quoted paragraph a 20px bottom margin, which
+    // adds up fast in a deep chain
+    p {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem !important;
+    }
+
+    // A quote that opens with another quote would otherwise stack a gap per level
+    > blockquote:first-child {
+      margin-top: 0;
+    }
+  }
+
+  @for $depth from 2 through $forum-quote-max-depth {
+    #{forum-quote-selector($depth)} {
+      border-left-color: nth($forum-quote-colors, ($depth - 1) % length($forum-quote-colors) + 1);
+    }
+  }
+
+  @media (max-width: 640px) {
+    #{forum-quote-selector($forum-quote-mobile-indent-cap + 1)} {
+      margin-left: -0.625rem;
+      padding-left: 0.4375rem;
+    }
+  }
+}
+
+.dark .thredded--post--content {
+  blockquote {
+    color: #d1d5db;
+  }
+
+  @for $depth from 1 through $forum-quote-max-depth {
+    #{forum-quote-selector($depth)} {
+      border-left-color: nth($forum-quote-colors-dark, ($depth - 1) % length($forum-quote-colors-dark) + 1);
+    }
+  }
+}

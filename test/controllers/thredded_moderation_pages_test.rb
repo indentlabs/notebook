@@ -65,6 +65,8 @@ class ThreddedModerationPagesTest < ActionDispatch::IntegrationTest
     get thredded.messageboard_topic_path(@messageboard, @topic)
     assert_response :success
     assert_select 'nav.forum-pagination', minimum: 1
-    assert_select 'nav.forum-pagination', text: /Page\s+1\s+of\s+\d+/
+    assert_select 'nav.forum-pagination', text: /Page.*of\s+\d+/m
+    assert_select "nav.forum-pagination select option[selected]", text: "1"
+    assert_select "nav.forum-pagination select option[value$=\"/page-2\"]", text: "2"
   end
 end
