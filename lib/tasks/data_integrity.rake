@@ -141,5 +141,25 @@ namespace :data_integrity do
     puts "Re-enabling SQL logging"
     ActiveRecord::Base.logger = old_logger
   end
-end
 
+  desc "Repair Basil image blobs whose checksum doesn't match the PNG in S3 (the cause of " \
+       "ActiveStorage::IntegrityError on Basil variants). By default only checks blobs whose " \
+       "checksum is malformed; ALL=1 downloads and verifies every Basil image."
+  task repair_basil_blob_checksums: :environment do
+    blobs = ActiveStorage::Blob.where(service_name: BasilBlobRepair.services)
+    check_all = ENV['ALL'].present?
+    checked = repaired = failed = 0
+
+    blobs.find_each do |blob|
+      next unless check_all || BasilBlobRepair.malformed_checksum?(blob.checksum)
+
+      checked += 1
+      repaired += 1 if BasilBlobRepair.repair!(blob)
+    rescue ActiveStorage::FileNotFoundError, Aws::S3::Errors::ServiceError => e
+      failed += 1
+      puts "Blob #{blob.id} (#{blob.key}): #{e.class} #{e.message}"
+    end
+
+    puts "Checked #{checked} Basil blobs: repaired #{repaired}, couldn't read #{failed}."
+  end
+end
