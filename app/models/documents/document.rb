@@ -283,8 +283,11 @@ class Document < ApplicationRecord
     Rails.logger.warn "Could not queue #{job_class.name} for Document #{id}: #{e.class}: #{e.message}"
   end
 
+  # Unset config.x keys return an empty (truthy) OrderedOptions rather than nil,
+  # so `|| default` never kicks in; only use the setting if it's a number.
   def self.background_job_debounce
-    Rails.application.config.x.document_job_debounce || 30.seconds
+    wait = Rails.application.config.x.document_job_debounce
+    wait.is_a?(Numeric) ? wait : 30.seconds
   end
 
   def word_count
