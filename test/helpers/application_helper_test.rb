@@ -26,7 +26,8 @@ class ApplicationHelperTest < ActionView::TestCase
   end
 
   test "edit_path_for falls back to the polymorphic edit route" do
-    book = Book.new(id: 3)
+    # Built as if loaded from the database: unsaved records route to the plural edit_books_path
+    book = Book.instantiate('id' => 3)
     assert_equal edit_book_path(book), edit_path_for(book)
   end
 
