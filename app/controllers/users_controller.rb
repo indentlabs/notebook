@@ -29,7 +29,7 @@ class UsersController < ApplicationController
       @content_list = @user.send(content_type_name)
                            .includes(:page_tags, :image_uploads, :user)
                            .is_public
-                           .order(:name)
+                           .order(:name, :id)
                            .paginate(page: params[:page], per_page: 20)
 
       # Preload the overview field values backing #description in one batch so
@@ -39,7 +39,7 @@ class UsersController < ApplicationController
       # Cards render through content_image_tag; preload what it needs
       preload_cover_images(@content_list.to_a)
 
-      render :content_list
+      render_content_list
     end
   end
 
@@ -52,11 +52,11 @@ class UsersController < ApplicationController
     @content_list = @user.timelines
                          .includes(:page_tags, :user)
                          .where(privacy: 'public')
-                         .order(:name)
+                         .order(:name, :id)
                          .paginate(page: params[:page], per_page: 20)
 
 
-    render :content_list
+    render_content_list
   end
 
   # Silent timezone auto-update for legacy users (remove after Jan 31, 2026)
@@ -211,6 +211,18 @@ class UsersController < ApplicationController
   end
 
   private
+
+  def render_content_list
+    respond_to do |format|
+      format.html { render :content_list }
+      format.json do
+        render json: {
+          html: render_to_string(partial: 'users/content_batch', formats: [:html]),
+          next_url: @content_list.next_page ? url_for(page: @content_list.next_page, format: nil) : nil
+        }
+      end
+    end
+  end
 
   def set_user
     @user    = User.find_by(user_params)
