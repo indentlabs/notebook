@@ -305,5 +305,9 @@ class AttributeFieldsController < ContentController
 
   def set_attribute_field
     @attribute_field = current_user.attribute_fields.find_by(params.permit(:id))
+    return if @attribute_field.present?
+
+    # Someone else's field, or one that's gone. Rendering here stops the action.
+    render json: { error: "That field doesn't exist, or isn't yours." }, status: :not_found
   end
 end

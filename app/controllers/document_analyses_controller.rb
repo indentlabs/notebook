@@ -52,9 +52,11 @@ class DocumentAnalysesController < ApplicationController
   end
 
   def readability
+    redirect_to_overview_unless_analyzed
   end
 
   def style
+    redirect_to_overview_unless_analyzed
   end
 
   # def entities
@@ -90,6 +92,15 @@ class DocumentAnalysesController < ApplicationController
       redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
       return false
     end
+  end
+
+  # The readability and style pages show an analysis's results, so a document
+  # whose analysis hasn't finished (or never ran) goes to the overview, which
+  # shows its progress or offers to run one.
+  def redirect_to_overview_unless_analyzed
+    return if @analysis&.complete?
+
+    redirect_to analysis_document_path(@document), notice: "This document hasn't been analyzed yet."
   end
 
   # Use callbacks to share common setup or constraints between actions.

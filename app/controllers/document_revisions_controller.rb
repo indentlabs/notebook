@@ -2,7 +2,7 @@ class DocumentRevisionsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_document
   before_action :verify_document_ownership
-  before_action :set_document_revision, only: [:show, :edit, :update, :destroy, :diff, :restore]
+  before_action :set_document_revision, only: [:show, :destroy, :diff, :restore]
 
   # GET /document_revisions
   def index
@@ -277,35 +277,6 @@ class DocumentRevisionsController < ApplicationController
     HTML
   end
 
-  # GET /document_revisions/new
-  def new
-    @document_revision = DocumentRevision.new
-  end
-
-  # GET /document_revisions/1/edit
-  def edit
-  end
-
-  # POST /document_revisions
-  def create
-    @document_revision = DocumentRevision.new(document_revision_params)
-
-    if @document_revision.save
-      redirect_to @document_revision, notice: 'Document revision was successfully created.'
-    else
-      render :new
-    end
-  end
-
-  # PATCH/PUT /document_revisions/1
-  def update
-    if @document_revision.update(document_revision_params)
-      redirect_to @document_revision, notice: 'Document revision was successfully updated.'
-    else
-      render :edit
-    end
-  end
-
   # DELETE /document_revisions/1
   def destroy
     @document_revision.destroy
@@ -329,10 +300,5 @@ class DocumentRevisionsController < ApplicationController
   # Use callbacks to share common setup or constraints between actions.
   def set_document_revision
     @document_revision = @document.document_revisions.find(params[:id])
-  end
-
-  # Only allow a trusted parameter "white list" through.
-  def document_revision_params
-    params.fetch(:document_revision, {})
   end
 end

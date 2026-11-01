@@ -171,7 +171,8 @@ class MainController < ApplicationController
 
   # deprecated path just kept around for bookmarks for a while
   def notes
-    redirect_to edit_document_path(current_user.documents.first)
+    first_document = current_user.documents.first
+    redirect_to first_document ? edit_document_path(first_document) : documents_path
   end
 
   def recent_content

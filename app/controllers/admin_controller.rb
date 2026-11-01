@@ -251,7 +251,8 @@ class AdminController < ApplicationController
 
   def hate
     @posts = Thredded::PrivatePost.order('id DESC').limit(params.fetch(:limit, 500)).includes(:postable)
-    @list  = params[:matchlist]
+    # One of language_filter's built-in lists; anything else would raise.
+    @list  = params[:matchlist].presence_in(%w[hate profanity sex violence]) || 'hate'
   end
 
   def spam

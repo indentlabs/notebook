@@ -19,7 +19,7 @@ module Api
 
     # GET /application_integrations/new
     def new
-      @integration = ApplicationIntegration.new
+      @application_integration = ApplicationIntegration.new
     end
 
     # GET /application_integrations/1/edit
@@ -28,10 +28,10 @@ module Api
 
     # POST /application_integrations
     def create
-      @integration = ApplicationIntegration.new(application_integration_params.merge({user: current_user}))
+      @application_integration = ApplicationIntegration.new(application_integration_params.merge({user: current_user}))
 
-      if @integration.save
-        redirect_to api_application_path(@integration), notice: 'Application integration was successfully created.'
+      if @application_integration.save
+        redirect_to api_application_path(@application_integration), notice: 'Application integration was successfully created.'
       else
         render :new
       end
@@ -39,8 +39,8 @@ module Api
 
     # PATCH/PUT /application_integrations/1
     def update
-      if @integration.update(application_integration_params)
-        redirect_to @integration, notice: 'Application integration was successfully updated.'
+      if @application_integration.update(application_integration_params)
+        redirect_to api_application_path(@application_integration), notice: 'Application integration was successfully updated.'
       else
         render :edit
       end
@@ -48,15 +48,16 @@ module Api
 
     # DELETE /application_integrations/1
     def destroy
-      @integration.destroy
-      redirect_to application_integrations_url, notice: 'Application integration was successfully destroyed.'
+      @application_integration.destroy
+      redirect_to api_applications_path, notice: 'Application integration was successfully destroyed.'
     end
 
     private
 
     # Use callbacks to share common setup or constraints between actions.
     def set_integration
-      @application_integration = current_user.application_integrations.find_by(id: params[:id])
+      # Raises RecordNotFound (a 404) for someone else's application.
+      @application_integration = current_user.application_integrations.find(params[:id])
     end
 
     # Only allow a trusted parameter "white list" through.

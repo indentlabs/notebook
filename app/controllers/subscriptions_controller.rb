@@ -45,7 +45,10 @@ class SubscriptionsController < ApplicationController
 
   def prepay_paid
     @invoice = current_user.paypal_invoices.find_by(paypal_id: params[:token])
-    raise "Error: no invoice found" unless @invoice.present?
+    unless @invoice.present?
+      # PayPal sends people back here with a token; without one we know, there's nothing to process.
+      return redirect_to(:prepay, alert: "We couldn't find that PayPal payment. If you were charged, please contact us.")
+    end
 
     # Track Paypal's PayerID returned in case we need it in the future
     @invoice.update(payer_id: params[:PayerID])

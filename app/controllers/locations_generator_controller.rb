@@ -31,8 +31,8 @@ class LocationsGeneratorController < ApplicationController
     @postfix_occurrence = 0.15
     @syllables_upper_limit = 4
     @syllables_lower_limit = 2
-    @prefixes = t(:location_name_prefixes)
-    @postfixes = t(:location_name_suffixes)
-    @syllables = t(:location_name_syllables)
+    @prefixes = t(:location_name_prefixes, scope: :autocomplete)
+    @postfixes = t(:location_name_suffixes, scope: :autocomplete)
+    @syllables = t(:location_name_syllables, scope: :autocomplete)
   end
 end

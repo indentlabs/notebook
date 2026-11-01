@@ -13,7 +13,7 @@
   <%
     # Pre-filter posts to only those with triggers
     flagged_posts = @posts.filter_map do |post|
-      triggers = Documents::Analysis::ContentService.adult_content?(@list, post.content)
+      triggers = Documents::Analysis::ContentService.adult_content?(post.content, matchlist: @list)
       next unless triggers.any?
       { post: post, triggers: triggers }
     end

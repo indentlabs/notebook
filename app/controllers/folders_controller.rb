@@ -161,9 +161,8 @@ class FoldersController < ApplicationController
   def set_folder
     @folder = Folder.find_by(user: current_user, id: params.fetch(:id).to_i)
 
-    unless @folder
-      raise "No folder found with ID #{params.fetch(:id).to_i}"
-    end
+    # Someone else's folder, or one that's gone: a 404, not a 500.
+    raise ActiveRecord::RecordNotFound, "No folder found with ID #{params.fetch(:id).to_i}" unless @folder
   end
 
   def verify_folder_ownership

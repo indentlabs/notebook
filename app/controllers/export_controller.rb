@@ -29,12 +29,12 @@ class ExportController < ApplicationController
   end
 
   def notebook_xml
-    xml_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_xml
+    xml_dump = attributed_content_export.to_xml
     send_data xml_dump, filename: "notebook-#{Date.today}.xml"
   end
   
   def notebook_yml
-    yaml_dump = current_user.content.except('Document').except('Timeline').map { |category, content| {"#{category}": fill_relations(category.constantize, content)}}.to_yaml
+    yaml_dump = attributed_content_export.to_yaml
     send_data yaml_dump, filename: "notebook-#{Date.today}.yml"
   end
 
@@ -91,6 +91,14 @@ class ExportController < ApplicationController
           value
         end
       end
+    end
+  end
+
+  # Every page type that has attribute fields (so not documents, timelines or
+  # books), with each page's fields filled in.
+  def attributed_content_export
+    current_user.content.except('Document', 'Timeline', 'Book').map do |category, content|
+      { "#{category}": fill_relations(category.constantize, content) }
     end
   end
 

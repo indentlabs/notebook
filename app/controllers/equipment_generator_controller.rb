@@ -7,7 +7,7 @@ class EquipmentGeneratorController < ApplicationController
   end
 
   def armor_shield
-    @shield_types = t(:shield_types)
+    @shield_types = t(:shield_types, scope: :autocomplete)
 
     render json: @shield_types.sample
   end
@@ -15,61 +15,61 @@ class EquipmentGeneratorController < ApplicationController
   def weapon
     # TODO: just make this an aggregate, and
     # pick randomly from the different weapon generators
-    @weapon_types = t(:weapon_types)
+    @weapon_types = t(:weapon_types, scope: :autocomplete)
 
     render json: @weapon_types.sample
   end
 
   def weapon_axe
-    @axe_types = t(:axe_types)
+    @axe_types = t(:axe_types, scope: :autocomplete)
 
     render json: @axe_types.sample
   end
 
   def weapon_bow
-    @bow_types = t(:bow_types)
+    @bow_types = t(:bow_types, scope: :autocomplete)
 
     render json: @bow_types.sample
   end
 
   def weapon_club
-    @club_types = t(:club_types)
+    @club_types = t(:club_types, scope: :autocomplete)
 
     render json: @club_types.sample
   end
 
   def weapon_fist
-    @fist_weapon_types = t(:fist_weapon_types)
+    @fist_weapon_types = t(:fist_weapon_types, scope: :autocomplete)
 
     render json: @fist_weapon_types.sample
   end
 
   def weapon_flexible
-    @flexible_types = t(:flexible_weapon_types)
+    @flexible_types = t(:flexible_weapon_types, scope: :autocomplete)
 
     render json: @flexible_types.sample
   end
 
   def weapon_thrown
-    @thrown_types = t(:thrown_weapon_types)
+    @thrown_types = t(:thrown_weapon_types, scope: :autocomplete)
 
     render json: @thrown_types.sample
   end
 
   def weapon_polearm
-    @polearm_types = t(:polearm_types)
+    @polearm_types = t(:polearm_types, scope: :autocomplete)
 
     render json: @polearm_types.sample
   end
 
   def weapon_shortsword
-    @shortsword_types = t(:shortsword_types)
+    @shortsword_types = t(:shortsword_types, scope: :autocomplete)
 
     render json: @shortsword_types.sample
   end
 
   def weapon_sword
-    @sword_types = t(:sword_types)
+    @sword_types = t(:sword_types, scope: :autocomplete)
 
     render json: @sword_types.sample
   end
