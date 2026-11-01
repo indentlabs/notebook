@@ -70,9 +70,10 @@ module HasContentGroupers
       has_many relation,
         through: connecting_class_name
 
-      # inverse_siblingships
+      # inverse_siblingships: the join rows that point at this page from the
+      # other side (e.g. Siblingships whose sibling_id is this character)
       has_many "inverse_#{connecting_class_name}".to_sym,
-        class_name: through_relation_class,
+        class_name: connecting_class.name,
         foreign_key: "#{singularized_relation}_id"
 
       # inverse_siblings
