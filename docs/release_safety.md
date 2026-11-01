@@ -84,6 +84,16 @@ if any page returns a 5xx. It only needs Ruby, not the app.
     SMOKE_EMAIL=smoke-bot@example.com SMOKE_PASSWORD=... \
       ruby script/smoke_check.rb https://staging.notebook.ai
 
+The test account is set up by a rake task, run once in each environment
+(re-running it is harmless; it also resets the password):
+
+    SMOKE_EMAIL=... SMOKE_PASSWORD=... bin/rails smoke:setup_account
+
+It gives the account a private universe with a character, location, item,
+document and timeline, so the signed-in crawl reaches real pages. Keep the
+credentials with the deploy secrets, never in this (public) repository, and
+use a long random password: it's a real account on the live site.
+
 It starts at the main pages and follows links on the same host (up to
 `SMOKE_MAX_PAGES`, default 300, with `SMOKE_DELAY` seconds between requests).
 It never follows links that change data with a GET (sign out, unfollow,
