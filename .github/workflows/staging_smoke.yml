@@ -1,0 +1,93 @@
+# Crawls each pull request's Railway environment once its code is deployed,
+# and fails if any page returns a 5xx.
+#
+# Railway deploys a PR to https://notebook-notebook-pr-<number>.up.railway.app
+# after the Tests workflow passes. This workflow starts when Tests finishes,
+# waits for that environment to serve the PR's latest commit (the X-Release
+# header, see config/initializers/release_header.rb), runs
+# script/smoke_check.rb against it, and reports the result on the PR as the
+# "Staging smoke check" status.
+#
+# It runs from master's copy of this file and the script, never the PR's, so
+# a PR can't change what runs with the secrets below.
+#
+# Secrets (Settings → Secrets and variables → Actions):
+#   SMOKE_PASSWORD  the test account's password on PR environments. Without
+#                   it the check crawls the public pages only.
+#   SMOKE_EMAIL     optional; defaults to test.test@test.test (db/seeds.rb).
+
+name: Staging smoke check
+
+on:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  smoke:
+    # Only PRs from this repository (forks get no Railway environment) whose
+    # tests passed (Railway doesn't deploy otherwise).
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.pull_requests[0] != null
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: staging-smoke-${{ github.event.workflow_run.pull_requests[0].number }}
+      cancel-in-progress: true
+    env:
+      PR_NUMBER: ${{ github.event.workflow_run.pull_requests[0].number }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      SITE: https://notebook-notebook-pr-${{ github.event.workflow_run.pull_requests[0].number }}.up.railway.app
+      STATUS_CONTEXT: Staging smoke check
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.2
+
+    - name: Wait for the PR's environment to serve its latest commit
+      run: |
+        deadline=$((SECONDS + 30 * 60))
+        while [ $SECONDS -lt $deadline ]; do
+          release=$(curl -s -o /dev/null -D - --max-time 20 "$SITE/help" | tr -d '\r' | awk -F': ' 'tolower($1)=="x-release"{print $2}')
+          if [ "$release" = "$HEAD_SHA" ]; then
+            echo "$SITE is serving $HEAD_SHA"
+            exit 0
+          fi
+          echo "Waiting for $SITE to serve $HEAD_SHA (now: ${release:-not up yet})"
+          sleep 30
+        done
+        echo "::error::$SITE didn't serve $HEAD_SHA within 30 minutes. Check the deploy on Railway. If the site is up but its X-Release header is missing, the environment lacks RAILWAY_GIT_COMMIT_SHA."
+        exit 1
+
+    - name: Crawl it
+      env:
+        SMOKE_EMAIL: ${{ secrets.SMOKE_PASSWORD != '' && (secrets.SMOKE_EMAIL || 'test.test@test.test') || '' }}
+        SMOKE_PASSWORD: ${{ secrets.SMOKE_PASSWORD }}
+        SMOKE_MAX_PAGES: 400
+      run: ruby script/smoke_check.rb "$SITE"
+
+    - name: Report the result on the pull request
+      if: always()
+      env:
+        GH_TOKEN: ${{ github.token }}
+        RESULT: ${{ job.status }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        case "$RESULT" in
+          success)   state=success; description="No server errors on $SITE" ;;
+          cancelled) state=error;   description="Cancelled (a newer commit is being checked)" ;;
+          *)         state=failure; description="Server errors or deploy timeout; see the run log" ;;
+        esac
+        curl -sS -X POST \
+          -H "Authorization: Bearer $GH_TOKEN" \
+          -H "Accept: application/vnd.github+json" \
+          "https://api.github.com/repos/${{ github.repository }}/statuses/$HEAD_SHA" \
+          -d "$(printf '{"state":"%s","context":"%s","description":"%s","target_url":"%s"}' "$state" "$STATUS_CONTEXT" "$description" "$RUN_URL")"

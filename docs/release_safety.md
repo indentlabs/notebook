@@ -93,9 +93,23 @@ It starts at the main pages and follows links on the same host (up to
 It never follows links that change data with a GET (sign out, unfollow,
 delete, billing and so on); see `NEVER_FOLLOW` in the script.
 
+### On every pull request, automatically
+
+Railway deploys each PR to `https://notebook-notebook-pr-<number>.up.railway.app`
+once its tests pass. `.github/workflows/staging_smoke.yml` then waits for that
+environment to serve the PR's latest commit (every response carries it in an
+`X-Release` header, from `config/initializers/release_header.rb`), crawls it
+with `script/smoke_check.rb`, and reports **Staging smoke check** on the PR.
+
+It runs master's copy of the workflow and the script, so it starts working for
+PRs once it's merged. Add the test account's password on PR environments as
+the `SMOKE_PASSWORD` Actions secret; without it, only public pages are crawled.
+`SMOKE_EMAIL` is optional and defaults to `test.test@test.test`. To make the
+check block merging, add **Staging smoke check** to the required status checks.
+
 The release flow, then:
 
-1. Merge to `master` once CI is green.
+1. Merge to `master` once the tests and the staging smoke check are green.
 2. Deploy to staging; run `script/smoke_check.rb` against it, signed in.
 3. Deploy to production; run it against production.
 4. Watch Sentry for new issues in the new release for the next 30 minutes.
