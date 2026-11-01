@@ -11,6 +11,11 @@ class TimelineEvent < ApplicationRecord
   acts_as_list scope: [:timeline_id]
   attr_accessor :skip_word_count_update
 
+  # Events don't have their own edit page; they're edited on their timeline.
+  def edit_path
+    timeline&.edit_path
+  end
+
   # Event type definitions with narrative focus and Material Icons
   EVENT_TYPES = {
     'general' => { name: 'General', icon: 'radio_button_checked' },
