@@ -138,6 +138,11 @@ class CommunityStatsServiceTest < ActiveSupport::TestCase
   end
 
   test "counts distinct pages edited in a month, with timeline events as their timelines" do
+    # Mid-month, so "through" (yesterday) is a different day from the 1st. On
+    # the 1st itself they're the same day, and logging the same page twice on
+    # one day breaks word_count_updates' unique index.
+    travel_to Date.current.change(day: 15)
+    @today = Date.current
     month = @today.beginning_of_month
     through = [@today - 1.day, month].max
     timeline = Timeline.create!(user: @alice, name: 'History')
