@@ -18,4 +18,13 @@ module ForumPaginationHelper
       current ? FORUM_PAGINATION_CURRENT : FORUM_PAGINATION_LINK
     ].join(' ')
   end
+
+  # Forum collections are paginated with Kaminari, but will_paginate's
+  # page_entries_info shadows Kaminari's and expects will_paginate collections.
+  # Kaminari's default entry name doesn't pluralize ("all 4 user"), but it
+  # pluralizes one we pass in.
+  def forum_page_entries_info(collection, entry_name: collection.model_name.human.downcase)
+    Kaminari::Helpers::HelperMethods.instance_method(:page_entries_info)
+      .bind_call(self, collection, entry_name: entry_name)
+  end
 end
