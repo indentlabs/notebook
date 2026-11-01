@@ -138,8 +138,11 @@ class CommunityStatsServiceTest < ActiveSupport::TestCase
   end
 
   test "counts distinct pages edited in a month, with timeline events as their timelines" do
-    month = @today.beginning_of_month
-    through = [@today - 1.day, month].max
+    # Use last month so there are always two distinct days to log on; on the
+    # 1st, the current month has only one, and a second row for the same page
+    # and date breaks the unique index on word_count_updates.
+    month = @today.prev_month.beginning_of_month
+    through = month.end_of_month
     timeline = Timeline.create!(user: @alice, name: 'History')
     event_a = timeline.timeline_events.create!(title: 'A', event_type: TimelineEvent::EVENT_TYPES.keys.first, skip_word_count_update: true)
     event_b = timeline.timeline_events.create!(title: 'B', event_type: TimelineEvent::EVENT_TYPES.keys.first, skip_word_count_update: true)
