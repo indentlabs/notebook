@@ -218,17 +218,17 @@ RSpec.describe SubscriptionsController, type: :controller do
       end
 
       it "doesn't allow Starter users to create extended content types" do
-        expect(@user.can_create?(Creature)).to eq(false)
-        expect(@user.can_create?(Race)).to eq(false)
-        expect(@user.can_create?(Religion)).to eq(false)
-        expect(@user.can_create?(Group)).to eq(false)
-        expect(@user.can_create?(Magic)).to eq(false)
-        expect(@user.can_create?(Language)).to eq(false)
-        expect(@user.can_create?(Flora)).to eq(false)
+        expect(@user.can_create?(Creature)).to be_falsey
+        expect(@user.can_create?(Race)).to be_falsey
+        expect(@user.can_create?(Religion)).to be_falsey
+        expect(@user.can_create?(Group)).to be_falsey
+        expect(@user.can_create?(Magic)).to be_falsey
+        expect(@user.can_create?(Language)).to be_falsey
+        expect(@user.can_create?(Flora)).to be_falsey
       end
 
       it "doesn't allow Starter users to create collective content types" do
-        expect(@user.can_create?(Scene)).to eq(false)
+        expect(@user.can_create?(Scene)).to be_falsey
       end
     end
   end
