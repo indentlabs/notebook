@@ -54,7 +54,7 @@ class PageCollectionSubmissionsController < ApplicationController
   end
 
   def approve
-    return raise "Not allowed: approve" unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
+    return unless collection_owner!(@page_collection_submission.page_collection)
     @page_collection_submission.accept!
 
     # Create a notification for the submitter to let them know it's been accepted
@@ -71,7 +71,7 @@ class PageCollectionSubmissionsController < ApplicationController
   end
 
   def pass
-    return raise "Not allowed: pass" unless user_signed_in? && current_user == @page_collection_submission.page_collection.user
+    return unless collection_owner!(@page_collection_submission.page_collection)
     @page_collection_submission.destroy
     redirect_to(page_collection_pending_submissions_path(@page_collection_submission.page_collection), notice: "Submission passed on!")
   end
@@ -93,7 +93,16 @@ class PageCollectionSubmissionsController < ApplicationController
   end
 
   def require_collection_ownership
-    raise "Forbidden!" unless user_signed_in? && @page_collection.user_id == current_user.id
+    collection_owner!(@page_collection)
+  end
+
+  # Only a collection's owner can review its submissions. Sends everyone else
+  # back to the collection and returns false.
+  def collection_owner!(collection)
+    return true if user_signed_in? && collection.user_id == current_user.id
+
+    redirect_to collection, alert: "Only the collection's owner can review its submissions."
+    false
   end
 
   def set_page_collection

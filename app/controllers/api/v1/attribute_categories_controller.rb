@@ -24,7 +24,7 @@ module Api
       
       def edit
         authorize_action_for @category
-        content_type_class = @category.entity_type.constantize
+        content_type_class = @category.entity_type.camelize.constantize
         render partial: 'content/attributes/tailwind/category_config', locals: { 
           category: @category,
           content_type_class: content_type_class,

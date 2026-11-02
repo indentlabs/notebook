@@ -8,31 +8,31 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def bodytype
-    @possible_types = t(:body_types)
+    @possible_types = t(:body_types, scope: :autocomplete)
 
     render json: @possible_types.sample
   end
 
   def eyecolor
-    @possible_colors = t(:eye_colors)
+    @possible_colors = t(:eye_colors, scope: :autocomplete)
 
     render json: @possible_colors.sample
   end
 
   def facialhair
-    @possible_styles = t(:facial_hair_styles)
+    @possible_styles = t(:facial_hair_styles, scope: :autocomplete)
 
     render json: @possible_styles.sample
   end
 
   def haircolor
-    @possible_colors = t(:hair_colors)
+    @possible_colors = t(:hair_colors, scope: :autocomplete)
 
     render json: @possible_colors.sample
   end
 
   def hairstyle
-    @possible_styles = t(:hair_styles)
+    @possible_styles = t(:hair_styles, scope: :autocomplete)
 
     render json: @possible_styles.sample
   end
@@ -50,8 +50,8 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def identifyingmark
-    @possible_marks = t(:identifying_marks)
-    @possible_locations = t(:identifying_mark_locations)
+    @possible_marks = t(:identifying_marks, scope: :autocomplete)
+    @possible_locations = t(:identifying_mark_locations, scope: :autocomplete)
 
     render json: [
       @possible_marks.sample, t(:on_the), @possible_locations.sample
@@ -59,9 +59,9 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def name
-    @male_first_names = t(:male_first_names)
-    @female_first_names = t(:female_first_names)
-    @last_names = t(:last_names)
+    @male_first_names = t(:male_first_names, scope: :autocomplete)
+    @female_first_names = t(:female_first_names, scope: :autocomplete)
+    @last_names = t(:last_names, scope: :autocomplete)
 
     @all_first_names = [] + @male_first_names + @female_first_names
     @all_last_names  = [] + @last_names
@@ -70,13 +70,13 @@ class CharactersGeneratorController < ApplicationController
   end
 
   def race
-    @possible_races = t(:character_races)
+    @possible_races = t(:character_races, scope: :autocomplete)
 
     render json: @possible_races.sample
   end
 
   def skintone
-    @possible_tones = t(:skin_tones)
+    @possible_tones = t(:skin_tones, scope: :autocomplete)
 
     render json: @possible_tones.sample
   end

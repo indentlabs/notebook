@@ -3,7 +3,9 @@ class ExportService < Service
 
   def self.text_outline_export(universe_ids)
     page_types = Rails.application.config.content_types[:all]
-    temporary_user_id_reference = Universe.find_by(id: universe_ids).user_id
+    temporary_user_id_reference = Universe.find_by(id: universe_ids)&.user_id
+    # Someone with no universes has nothing to export (and no universe to find their fields through).
+    return '' if temporary_user_id_reference.nil?
 
     export_text = StringIO.new
 
@@ -87,7 +89,9 @@ class ExportService < Service
 
   def self.text_markdown_export(universe_ids)
     page_types = Rails.application.config.content_types[:all]
-    temporary_user_id_reference = Universe.find_by(id: universe_ids).user_id
+    temporary_user_id_reference = Universe.find_by(id: universe_ids)&.user_id
+    # Someone with no universes has nothing to export (and no universe to find their fields through).
+    return '' if temporary_user_id_reference.nil?
 
     export_text = StringIO.new
 
@@ -179,7 +183,9 @@ class ExportService < Service
 
   def self.json_export(universe_ids)
     page_types = Rails.application.config.content_types[:all]
-    temporary_user_id_reference = Universe.find_by(id: universe_ids).user_id
+    temporary_user_id_reference = Universe.find_by(id: universe_ids)&.user_id
+    # Someone with no universes has nothing to export (and no universe to find their fields through).
+    return {}.to_json if temporary_user_id_reference.nil?
 
     export_object = {}
 

@@ -1,6 +1,8 @@
 class WriteController < ApplicationController
   layout 'editor'
 
+  before_action :authenticate_user!
+
   def editor
     @document = current_user.documents.first
     @linked_entities = []

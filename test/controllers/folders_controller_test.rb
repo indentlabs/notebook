@@ -72,7 +72,7 @@ class FoldersControllerTest < ActionDispatch::IntegrationTest
   test "should not update another user's folder" do
     sign_in @user
     
-    assert_raises(RuntimeError) do
+    assert_raises(ActiveRecord::RecordNotFound) do
       patch folder_path(@other_user_folder), params: { folder: { title: 'Should Fail' } }
     end
     
@@ -112,7 +112,7 @@ class FoldersControllerTest < ActionDispatch::IntegrationTest
   test "should not show another user's folder" do
     sign_in @user
     
-    assert_raises(RuntimeError) do
+    assert_raises(ActiveRecord::RecordNotFound) do
       get folder_path(@other_user_folder)
     end
   end
@@ -141,7 +141,7 @@ class FoldersControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
     
     assert_no_difference('Folder.count') do
-      assert_raises(RuntimeError) do
+      assert_raises(ActiveRecord::RecordNotFound) do
         delete folder_path(@other_user_folder)
       end
     end

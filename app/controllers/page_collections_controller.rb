@@ -219,7 +219,9 @@ class PageCollectionsController < ApplicationController
   private
 
   def require_collection_ownership
-    raise "Forbidden!" unless user_signed_in? && @page_collection.user_id == current_user.id
+    return if user_signed_in? && @page_collection.user_id == current_user.id
+
+    redirect_to @page_collection, alert: "Only the collection's owner can do that."
   end
 
   # Use callbacks to share common setup or constraints between actions.

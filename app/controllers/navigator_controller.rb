@@ -1,6 +1,8 @@
 class NavigatorController < ApplicationController
   layout 'app'
 
+  before_action :authenticate_user!
+
   def index
     @content_types = %w(Characters Locations Items Creatures Races Religions Groups Magics Languages Scenes)
   end

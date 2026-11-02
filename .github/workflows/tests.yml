@@ -8,6 +8,12 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
+
+# A newer push to the same branch or PR makes the older run moot.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -40,5 +46,11 @@ jobs:
       # Load the schema before the app boots for tests: initializers such as
       # config/initializers/thredded.rb only extend models whose tables exist.
       run: RAILS_ENV=test bundle exec rails db:schema:load
+    # GitHub sets CI=true, so config/environments/test.rb eager loads the app
+    # the way production does. The suite includes test/smoke, which requests
+    # every page as each kind of visitor and fails on any 500.
     - name: Run tests
       run: RAILS_ENV=test bundle exec rails test
+    - name: Run specs
+      if: ${{ !cancelled() }}
+      run: RAILS_ENV=test bundle exec rspec spec

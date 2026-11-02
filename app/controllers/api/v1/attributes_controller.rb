@@ -8,7 +8,7 @@ module Api
         @category = AttributeCategory.find(params[:id])
         authorize_action_for @category
         
-        @content_type_class = @category.entity_type.constantize
+        @content_type_class = @category.entity_type.camelize.constantize
         
         render partial: 'content/attributes/tailwind/category_config', locals: {
           category: @category,
@@ -23,7 +23,7 @@ module Api
         authorize_action_for @field
         
         @category = @field.attribute_category
-        @content_type_class = @category.entity_type.constantize
+        @content_type_class = @category.entity_type.camelize.constantize
         
         render partial: 'content/attributes/tailwind/field_config', locals: {
           field: @field,

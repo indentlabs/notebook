@@ -164,7 +164,7 @@ Rails.application.routes.draw do
     delete '/password',          to: 'document_passwords#destroy',        on: :member
     post   '/unlock',            to: 'document_passwords#unlock',         on: :member, format: false, constraints: { id: /\d+/ }
 
-    resources :document_revisions, path: 'revisions', on: :member do
+    resources :document_revisions, path: 'revisions', on: :member, only: [:index, :show, :destroy] do
       member do
         get 'diff'
         post 'restore'
@@ -342,10 +342,6 @@ Rails.application.routes.draw do
     # Navigator
     get 'navigator', to: 'navigator#index'
 
-    # Babel
-    get 'babel',     to: 'lab#babel'
-    post 'babel',    to: 'lab#babel'
-
     # Pinboard
     get 'pinboard',  to: 'lab#pinboard'
 
@@ -370,7 +366,7 @@ Rails.application.routes.draw do
 
       get  :changelog,       on: :member
       # Redirect old gallery URLs to the show page with #gallery hash
-      get  :gallery,         on: :member, to: redirect { |params, req| "/plan/#{params[:controller].split('/').last}/#{params[:id]}#gallery" }
+      get  :gallery,         on: :member, to: redirect { |params, req| "/plan/universes/#{params[:id]}#gallery" }
       post :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag

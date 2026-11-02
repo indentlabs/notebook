@@ -26,7 +26,7 @@ module Api
       
       def edit
         authorize_action_for @field
-        content_type_class = @field.attribute_category.entity_type.constantize
+        content_type_class = @field.attribute_category.entity_type.camelize.constantize
         render partial: 'content/attributes/tailwind/field_config', locals: { 
           field: @field,
           content_type_class: content_type_class,
