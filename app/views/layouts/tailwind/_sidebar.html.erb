@@ -20,14 +20,10 @@
           </span>
         <% end %>
 
-        <!-- Collapsed: logo expands sidebar -->
-        <button x-show="!showSidebar && isDesktop" x-cloak
-                @click="showSidebar = true; localStorage.setItem('site_navigation_sidebar_visible', 'true')"
-                class="p-2 hover:opacity-80 transition relative group"
-                aria-label="Expand sidebar">
-          <%= image_tag 'logos/book-small.webp', class: 'h-8' %>
-          <i class="material-icons text-gray-400 group-hover:text-notebook-blue dark:group-hover:text-blue-400 transition-colors absolute -right-1 top-1/2 -translate-y-1/2 text-lg leading-none">chevron_right</i>
-        </button>
+        <!-- Collapsed: logo still links home (the expand toggle lives in the navbar) -->
+        <%= link_to main_app.root_path, class: 'p-2 hover:opacity-80 transition', 'x-show': '!showSidebar && isDesktop', 'x-cloak': true, 'aria-label': 'Notebook.ai home' do %>
+          <%= image_tag 'logos/book-small.webp', class: 'h-8', alt: 'Notebook.ai' %>
+        <% end %>
 
         <!-- Toggle button (expanded state only) -->
         <button x-show="showSidebar" x-cloak
