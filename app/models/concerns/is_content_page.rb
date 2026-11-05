@@ -6,6 +6,8 @@ module IsContentPage
   included do
     include HasAttributes
     include HasPrivacy
+    # Timelines have their own privacy rules and UI, and aren't one of the page types that can be protected yet
+    include HasPasswordProtection unless name == 'Timeline'
     include HasContentGroupers
     include HasImageUploads
     include HasChangelog

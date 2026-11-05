@@ -9,6 +9,8 @@ class ConversationController < ApplicationController
   end
 
   def character_landing
+    # Anyone can open a public character's landing page, so private images are only for its owner
+    @character_owner_viewing = user_signed_in? && @character.user == current_user
     @first_greeting = default_character_greeting
     @personality    = personality_for_character
     @description    = description_for_character

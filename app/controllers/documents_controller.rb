@@ -140,7 +140,7 @@ class DocumentsController < ApplicationController
 
   def analysis
     unless @document.present? && (current_user || User.new).can_read?(@document)
-      redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
+      return redirect_to(root_path, notice: "That document either doesn't exist or you don't have permission to view it.", status: :not_found)
     end
 
     @analysis = @document.document_analysis.where.not(queued_at: nil).order('updated_at DESC').first

@@ -2,7 +2,7 @@
   <% Rails.application.config.content_types[:all_non_universe].each do |content_type| %>
     <% 
       plural_name = content_type.name.downcase.pluralize
-      count = raw_content.public_send(plural_name).count
+      count = raw_content.pages_listable_by(current_user, plural_name).count
       next if count == 0 
     %>
     

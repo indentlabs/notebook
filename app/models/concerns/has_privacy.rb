@@ -9,7 +9,13 @@ module HasPrivacy
       if self.klass == Universe
         where(privacy: 'public')
       else
-        eager_load(:universe).where("#{self.name.pluralize}.privacy = ? OR universes.privacy = ?", 'public', 'public')
+        # A password outranks a public universe, so protected pages don't come along with it.
+        # Spelled out so that pages with no privacy value at all still do.
+        table = self.name.pluralize
+        eager_load(:universe).where(
+          "#{table}.privacy = ? OR (universes.privacy = ? AND (#{table}.privacy IS NULL OR #{table}.privacy != ?))",
+          'public', 'public', 'password'
+        )
       end
     end
 
@@ -18,6 +24,8 @@ module HasPrivacy
     end
 
     def public_content?
+      return false if try(:password_protected?)
+
       universe_is_public = respond_to?(:universe) && universe.present? && universe.public_content?
       privacy == 'public' || universe_is_public
     end

@@ -72,11 +72,8 @@ class MainController < ApplicationController
     @toc_user  = @universe.user
     @page_title = "#{@universe.name} — Table of Contents"
 
-    can_view_private = user_signed_in? && (current_user == @universe.user || Contributor.exists?(user_id: current_user.id, universe_id: @universe.id))
-
     # Fetch books that belong to this universe for the Book shelf
-    @books = @universe.books.where(deleted_at: nil, archived_at: nil).order(:name)
-    @books = @books.is_public unless can_view_private
+    @books = @universe.pages_listable_by(current_user, :books).where(deleted_at: nil, archived_at: nil).order(:name)
 
     # Gather all non-deleted content in this universe
     all_pages = []
@@ -84,8 +81,7 @@ class MainController < ApplicationController
 
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
       relation = content_type.name.downcase.pluralize.to_sym
-      pages = @universe.send(relation).where(deleted_at: nil, archived_at: nil)
-      pages = pages.is_public unless can_view_private
+      pages = @universe.pages_listable_by(current_user, relation).where(deleted_at: nil, archived_at: nil)
       
       pages.each do |page|
         all_pages << page

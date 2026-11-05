@@ -197,15 +197,16 @@ class ContentController < ApplicationController
 
     # Universe-specific counts
     if @content.is_a?(Universe)
+      # Counts only include what the viewer could open, so they don't give away how much is private
       @documents_count = @content.documents_listable_by(current_user).count
-      @books_count = @content.books.count
+      @books_count = @content.pages_listable_by(current_user, :books).count
 
       # Universes contain timelines as well as being referenced by them
-      @timelines_count += @content.timelines.count
+      @timelines_count += @content.pages_listable_by(current_user, :timelines).count
 
       @in_this_universe_count = 0
       Rails.application.config.content_types[:all_non_universe].each do |content_type|
-        @in_this_universe_count += @content.send(content_type.name.downcase.pluralize).count
+        @in_this_universe_count += @content.pages_listable_by(current_user, content_type.name.downcase.pluralize).count
       end
     end
 
@@ -416,7 +417,11 @@ class ContentController < ApplicationController
     if update_success
       successful_response(@content, t(:update_success, model_name: @content.try(:name).presence || humanized_model_name))
     else
-      failed_response('edit', :unprocessable_entity, "Unable to save page. Error code: " + @content.errors.to_json)
+      # Back to where the edit came from, since rendering the edit page from here fails without its setup
+      respond_to do |format|
+        format.html { redirect_back fallback_location: polymorphic_path(@content), alert: "Unable to save page: #{@content.errors.full_messages.to_sentence}" }
+        format.json { render json: @content.errors, status: :unprocessable_entity }
+      end
     end
   end
 

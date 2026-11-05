@@ -96,8 +96,10 @@
                   
                   <!-- Content Image/Icon -->
                   <div class="flex-shrink-0">
-                    <% if content_cover_image?(content_page, include_private: true) %>
-                      <%= content_image_tag content_page, :square, include_private: true, pick: :random, size: :small, class: "w-12 h-12 rounded-lg object-cover" %>
+                    <%# Private images only for the profile's owner, since this tab is public %>
+                    <% show_private_images = user_signed_in? && @user == current_user %>
+                    <% if content_cover_image?(content_page, include_private: show_private_images) %>
+                      <%= content_image_tag content_page, :square, include_private: show_private_images, pick: :random, size: :small, class: "w-12 h-12 rounded-lg object-cover" %>
                     <% else %>
                       <div class="w-12 h-12 <%= content_type_klass.color %> bg-opacity-20 rounded-lg flex items-center justify-center">
                         <i class="material-icons text-lg <%= content_type_klass.text_color %>"><%= content_type_klass.icon %></i>

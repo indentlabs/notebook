@@ -2,7 +2,7 @@ class CoreContentAuthorizer < ContentAuthorizer
   def self.readable_by?(user)
     # Check public content first - these should be accessible to anyone
     return true if resource.privacy == 'public'
-    return true if resource.try(:universe).try(:privacy) == 'public'
+    return true if resource.try(:universe).try(:privacy) == 'public' && !resource.try(:password_protected?)
     
     # For private content, require a user
     return false if user.nil?

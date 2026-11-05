@@ -20,7 +20,7 @@ class ContentPageShare < ApplicationRecord
   def pages_are_not_password_protected
     return unless [content_page, secondary_content_page].any? { |page| page.try(:password_protected?) }
 
-    errors.add(:base, "Password protected documents can't be shared. Change its privacy setting first.")
+    errors.add(:base, "Password protected pages can't be shared. Change its privacy setting first.")
   end
 
   # Human-readable label for the shared page's type, e.g. "character" or

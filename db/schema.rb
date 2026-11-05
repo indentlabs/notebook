@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_30_130000) do
+ActiveRecord::Schema.define(version: 2026_11_05_120000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -2571,6 +2571,15 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.datetime "deleted_at"
     t.index ["user_id", "updated_at"], name: "index_page_collections_on_user_updated"
     t.index ["user_id"], name: "index_page_collections_on_user_id"
+  end
+
+  create_table "page_passwords", force: :cascade do |t|
+    t.string "page_type", null: false
+    t.bigint "page_id", null: false
+    t.string "password_digest", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["page_type", "page_id"], name: "index_page_passwords_on_page", unique: true
   end
 
   create_table "page_references", force: :cascade do |t|

@@ -20,7 +20,10 @@ class PermissionService < Service
     content.respond_to?(:privacy) && content.privacy == 'public'
   end
 
+  # A password outranks a public universe, so a protected page never counts as being in one
   def self.content_is_in_a_public_universe?(content:)
+    return false if content.try(:password_protected?)
+
     content.respond_to?(:universe) && content.universe.present? && self.content_is_public?(content: content.universe)
   end
 

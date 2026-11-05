@@ -60,6 +60,9 @@ class PageCollectionSubmission < ApplicationRecord
 
     if content.is_a?(Document)
       errors.add(:content, "can't be a document")
+    elsif content.try(:password_protected?)
+      # Submitting would publish it, and a password only ever comes off through the page's privacy settings
+      errors.add(:content, "can't be password protected")
     elsif content.user_id != user_id && !PermissionService.content_is_publicly_visible?(content: content)
       errors.add(:content, "isn't yours to submit")
     end

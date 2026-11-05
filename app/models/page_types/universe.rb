@@ -62,11 +62,28 @@ class Universe < ApplicationRecord
 
   scope :in_universe, ->(universe = nil) { where(id: universe.try(:id)) unless universe.nil? }
 
-  # Anyone who can see a universe can see its documents, except password protected ones
-  def documents_listable_by(viewer)
-    return documents if viewer && (viewer.site_administrator? || user_id == viewer.id || contributors.exists?(user_id: viewer.id))
+  # Whether this viewer sees everything in the universe, private and password protected pages included
+  def viewable_in_full_by?(viewer)
+    return false unless viewer.present? && viewer.id.present?
 
-    documents.without_passwords_unless_owned_by(viewer)
+    viewer.site_administrator? || user_id == viewer.id || contributors.exists?(user_id: viewer.id)
+  end
+
+  # Anyone who can see a public universe can see its documents, except password protected ones.
+  # A private or password protected universe passes nothing on, so only public documents show.
+  def documents_listable_by(viewer)
+    return documents if viewable_in_full_by?(viewer)
+    return documents.without_passwords_unless_owned_by(viewer) if privacy == 'public'
+
+    documents.public_or_owned_by(viewer)
+  end
+
+  # One kind of thing in this universe (e.g. :characters, :books or :timelines) as this viewer can see
+  # it listed. Members see everything; everyone else sees what's public on its own or through the
+  # universe, which leaves out password protected pages and everything in a universe that isn't public.
+  def pages_listable_by(viewer, relation)
+    pages = public_send(relation)
+    viewable_in_full_by?(viewer) ? pages : pages.is_public
   end
 
   after_destroy do
