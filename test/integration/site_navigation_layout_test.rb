@@ -33,7 +33,7 @@ class SiteNavigationLayoutTest < ActionDispatch::IntegrationTest
 
   test "application layout" do
     sign_in @user
-    get root_path
+    get dashboard_path
     assert_site_nav_layout
   end
 
