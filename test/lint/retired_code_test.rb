@@ -36,6 +36,10 @@ class RetiredCodeTest < ActiveSupport::TestCase
     'Revisions are read-only: index, show, diff, restore and destroy' =>
       %w[new_document_document_revision_path edit_document_document_revision_path],
 
+    # Thread announcements on approval moved from the topic to its first post, so approving a
+    # reported first post (which doesn't change the topic) announces the thread too.
+    'Use Thredded::Post#announce_thread_on_first_post_approval' => %w[notify_discord_of_approval],
+
     # The easy_translate gem was removed along with the Babel lab.
     'The easy_translate gem is no longer installed' => %w[EasyTranslate],
   }.freeze

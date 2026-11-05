@@ -27,6 +27,7 @@ module Extensions
         after_create  :cascade_pending_moderation_to_topic
         after_commit  :notify_moderators_of_new_pending_post,  on: :create
         after_commit  :notify_moderators_of_newly_pended_post, on: :update
+        after_commit  :announce_thread_on_first_post_approval, on: :update
       end
 
       def held_by_automoderation?
@@ -97,6 +98,17 @@ module Extensions
         return unless pending_moderation? && saved_change_to_moderation_state?
 
         notify_moderators_of_pending_post
+      end
+
+      # A thread whose first post was in the moderation queue (held by automoderation, or reported)
+      # when NotifyDiscordOfThreadJob first ran wasn't announced then; announce it once a moderator
+      # approves that post. The job won't announce a thread twice, so this is safe to enqueue even
+      # if the thread was announced before the post was reported.
+      def announce_thread_on_first_post_approval
+        return unless saved_change_to_moderation_state? && approved?
+        return unless postable.is_a?(::Thredded::Topic) && postable.first_post&.id == id
+
+        NotifyDiscordOfThreadJob.perform_later(postable_id) if Rails.env.production?
       end
 
       def notify_moderators_of_pending_post
