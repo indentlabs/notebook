@@ -261,16 +261,16 @@ class User < ApplicationRecord
     self[:name].blank? && self.persisted? ? 'Anonymous author' : self[:name]
   end
 
+  # Builds the URL without touching storage: the representation endpoint makes the resized avatar (once) when
+  # the browser asks for it. Making it here meant an S3 check per avatar, one after another, while the page
+  # rendered (100 of them on a followers page), and the endpoint checks again anyway. The catch is that an
+  # avatar whose file is missing or corrupt shows as a broken image rather than falling back to Gravatar.
   def image_url(size: 80)
-    if avatar.attached? # manually-uploaded avatar
-      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_fill: [size, size]).processed, only_path: true)
+    if avatar.attached? && avatar.variable? # manually-uploaded avatar
+      Rails.application.routes.url_helpers.rails_representation_url(avatar.variant(resize_to_fill: [size, size]), only_path: true)
     else # otherwise, grab the default from Gravatar for this email address
       gravatar_fallback_url(size: size)
     end
-  rescue ActiveStorage::FileNotFoundError
-    gravatar_fallback_url(size: size)
-  rescue ImageProcessing::Error
-    gravatar_fallback_url(size: size)
   end
 
   def gravatar_fallback_url(size: 80)
