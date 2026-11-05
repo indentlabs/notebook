@@ -22,7 +22,7 @@ class ContentControllerDestroyTest < ActionDispatch::IntegrationTest
     delete character_path(@character)
 
     assert_redirected_to characters_path
-    assert_equal "That page has already been deleted.", flash[:notice]
+    assert_equal "That page doesn't exist or has already been deleted.", flash[:notice]
   end
 
   test "deleting a page that never existed redirects instead of erroring" do
@@ -40,5 +40,12 @@ class ContentControllerDestroyTest < ActionDispatch::IntegrationTest
     assert_equal character_path(other), URI(response.location).path
     assert_equal "You don't have permission to do that!", flash[:notice]
     assert Character.find_by(id: other.id).present?
+  end
+
+  test "the edit page's delete button only submits once" do
+    get edit_character_path(@character)
+
+    assert_response :success
+    assert_includes response.body, "if (deleting) return;"
   end
 end

@@ -619,7 +619,7 @@
       </div>
       
       <!-- Delete Section -->
-      <div x-data="{ showDeleteModal: false, confirmText: '' }" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
+      <div x-data="{ showDeleteModal: false, confirmText: '', deleting: false }" class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-6">
         <h3 class="text-lg font-medium text-red-900 dark:text-red-100 mb-4">Danger Zone</h3>
 
         <div class="border border-red-300 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900">
@@ -698,6 +698,8 @@
               <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                 <button type="button"
                         @click="
+                          if (deleting) return;
+                          deleting = true;
                           const form = document.createElement('form');
                           form.method = 'POST';
                           form.action = '<%= polymorphic_path(raw_content) %>';
@@ -715,8 +717,8 @@
                           document.body.appendChild(form);
                           form.submit();
                         "
-                        :disabled="confirmText.toLowerCase() !== 'ok'"
-                        :class="confirmText.toLowerCase() === 'ok' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'"
+                        :disabled="deleting || confirmText.toLowerCase() !== 'ok'"
+                        :class="!deleting && confirmText.toLowerCase() === 'ok' ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'"
                         class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
                   <i class="material-icons text-sm mr-2">delete_forever</i>
                   Delete permanently

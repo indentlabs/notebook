@@ -541,7 +541,7 @@ class ContentController < ApplicationController
     # Already deleted (e.g. a double-tapped delete button or a stale tab) or never existed
     if @content.nil?
       index_path = send("#{content_type.name.underscore.pluralize}_path")
-      return successful_response(index_path, "That page has already been deleted.")
+      return successful_response(index_path, "That page doesn't exist or has already been deleted.")
     end
 
     unless current_user.can_delete?(@content)
