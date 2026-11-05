@@ -53,8 +53,6 @@ See `docs/release_safety.md` for what CI checks and how to keep it passing:
 - New GET route with a new path parameter: teach `RouteSmokeTest#param_value`
   (test/smoke/route_smoke_test.rb) how to fill it in, adding data to
   `test/smoke/smoke_data.rb` if needed.
-- Removed or renamed a method, helper, route or constant: add the old name
-  to `RetiredCodeTest::RETIRED` (test/lint/retired_code_test.rb).
 - Prefer redirects or `ActiveRecord::RecordNotFound` over `raise "..."` for
   "not allowed" or "not found" cases: a bare `raise` is a 500 for the visitor.
 

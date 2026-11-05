@@ -25,8 +25,6 @@ These checks are there to catch that before users do.
      collections and forum topics. Some of it is deliberately messy (a bare
      page, an orphaned tag, a share of a deleted page, a post by a deleted
      user).
-   - **`test/lint/retired_code_test.rb`**, which fails if anything in `app/`
-     still uses a method, helper, route or constant we removed.
    - **`test/lint/stripe_api_version_test.rb`** (see Stripe below).
 3. **`bundle exec rspec`**, for the older specs in `spec/`.
 
@@ -41,12 +39,6 @@ to find a value, adding the record to `SmokeData` if needed.
 If a route can't be requested safely in a test (it signs you out or hands off
 to a payment provider, for example), add it to `RouteSmokeTest::SKIPPED_ROUTES`
 with the reason.
-
-### When you remove or rename something
-
-Add the old name to `RetiredCodeTest::RETIRED` with a hint about what to use
-instead. A stale call from another branch, or from copy-paste, then fails CI
-instead of production.
 
 ### When the smoke test fails
 
