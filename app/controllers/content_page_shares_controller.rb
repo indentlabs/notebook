@@ -89,16 +89,18 @@ class ContentPageSharesController < ApplicationController
   # PATCH/PUT /content_page_shares/1
   def update
     if @share.update(content_page_share_params)
-      redirect_to @share, notice: 'Content page share was successfully updated.'
+      redirect_to [@share.user, @share], notice: 'Content page share was successfully updated.'
     else
       render :edit
     end
   end
 
-  # DELETE /content_page_shares/1
+  # DELETE /users/:user_id/shares/1
   def destroy
     @share.destroy
-    redirect_to(content_page_shares_url, notice: 'The share was successfully deleted.')
+    # Shares are only routed under users (there's no top-level content_page_shares_url),
+    # and the share's own page is gone now, so send them back to the stream.
+    redirect_to stream_path, status: :see_other, notice: 'The share was successfully deleted.'
   end
 
   private
