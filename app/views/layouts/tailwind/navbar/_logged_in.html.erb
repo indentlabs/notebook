@@ -1,15 +1,13 @@
-<header class="no-transition flex fixed top-0 z-50 w-full h-14 shadow transition-all duration-300"
-        :class="{
-          'md:pl-56': showSidebar && isDesktop,
-          'md:pl-16': !showSidebar && isDesktop,
-          'pl-0': !isDesktop
-        }"
+<header class="site-nav-padding flex fixed top-0 z-50 w-full h-14 shadow transition-all duration-300"
         style="background-color: <%= @navbar_color.presence || '#2196F3' %>">
 
   <!-- Mobile: Logo and hamburger menu -->
-  <div class="flex items-center md:hidden pl-3" x-show="!isDesktop" x-cloak>
+  <div class="flex items-center md:hidden pl-3">
     <!-- Hamburger menu button -->
-    <button @click="showSidebar = true"
+    <button type="button"
+            @click="$store.siteNav.openDrawer()"
+            :aria-expanded="$store.siteNav.drawerOpen.toString()"
+            aria-controls="site-navigation"
             class="w-10 h-10 flex items-center justify-center text-white hover:bg-white hover:bg-opacity-20 rounded-lg transition"
             aria-label="Open menu">
       <i class="material-icons">menu</i>
@@ -22,8 +20,9 @@
   </div>
 
   <!-- Desktop: expand the collapsed sidebar (the sidebar's logo links home) -->
-  <div class="hidden md:flex items-center pl-1" x-show="!showSidebar && isDesktop" x-cloak>
-    <button @click="showSidebar = true; try { localStorage.setItem('site_navigation_sidebar_visible', 'true') } catch (e) {}"
+  <div class="site-nav-collapsed-only hidden md:flex items-center pl-1">
+    <button type="button"
+            @click="$store.siteNav.expand()"
             class="w-10 h-10 flex items-center justify-center text-white opacity-80 hover:opacity-100 hover:bg-white hover:bg-opacity-20 rounded-lg transition sidebar-tooltip"
             data-tooltip="Expand sidebar"
             data-tooltip-color="bg-gray-900"
@@ -61,7 +60,7 @@
                  x-model="query"
                  @input="handleInput()"
                  @keydown="handleKeydown($event)"
-                 @focus="if(window.innerWidth < 768) { mobileSearchOpen = true; showSidebar = false; }; handleFocus()"
+                 @focus="if (!window.matchMedia('(min-width: 768px)').matches) { mobileSearchOpen = true; $store.siteNav.closeDrawer(); }; handleFocus()"
                  placeholder="Search your notebook"
                  autocomplete="new-password"
                  autocorrect="off"

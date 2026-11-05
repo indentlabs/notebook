@@ -1,0 +1,79 @@
+<%#
+  Site navigation state. Render in <head> of every layout that renders
+  layouts/tailwind/sidebar, after Alpine's deferred <script> tag:
+
+    render 'layouts/site_navigation'
+    render 'layouts/site_navigation', start_collapsed: true   (editor layout)
+
+  The layout itself lives in CSS (app/assets/stylesheets/site-navigation.scss),
+  keyed off two attributes on <html>:
+
+    data-site-nav="expanded" | "collapsed"   the user's rail preference
+    data-site-nav-drawer="open"              the mobile drawer is open
+
+  This partial sets the first one before the page paints, so the very first
+  frame is laid out correctly, and registers `$store.siteNav`, which owns both
+  from then on. Nothing here measures the window: what the rail looks like at
+  a given width is purely the stylesheet's job.
+%>
+<% start_collapsed = local_assigns.fetch(:start_collapsed, false) %>
+<script>
+  (function() {
+    var root = document.documentElement;
+    var storageKey = 'site_navigation_sidebar_visible';
+    var signedIn = <%= user_signed_in? %>;
+    var startCollapsed = <%= start_collapsed %>;
+
+    function savePreference(collapsed) {
+      try { localStorage.setItem(storageKey, collapsed ? 'false' : 'true'); } catch (e) {}
+    }
+
+    // Before first paint: apply the saved rail preference (expanded by default).
+    if (signedIn) {
+      var collapsed = startCollapsed;
+      if (!collapsed) {
+        try { collapsed = localStorage.getItem(storageKey) === 'false'; } catch (e) {}
+      }
+      root.setAttribute('data-site-nav', collapsed ? 'collapsed' : 'expanded');
+    }
+
+    document.addEventListener('alpine:init', function() {
+      Alpine.store('siteNav', {
+        enabled: signedIn,
+        collapsed: root.getAttribute('data-site-nav') === 'collapsed',
+        drawerOpen: false,
+
+        init: function() {
+          var store = this;
+
+          // Mirror state onto <html>, where the stylesheet reads it.
+          Alpine.effect(function() {
+            if (store.enabled) {
+              root.setAttribute('data-site-nav', store.collapsed ? 'collapsed' : 'expanded');
+            }
+            if (store.drawerOpen) {
+              root.setAttribute('data-site-nav-drawer', 'open');
+            } else {
+              root.removeAttribute('data-site-nav-drawer');
+            }
+          });
+
+          // The drawer only exists below `md`. Shut it when the screen crosses
+          // that width (rotation, resize) so it doesn't pop back open later.
+          var desktop = window.matchMedia('(min-width: 768px)');
+          var closeDrawer = function() { store.drawerOpen = false; };
+          if (desktop.addEventListener) {
+            desktop.addEventListener('change', closeDrawer);
+          } else {
+            desktop.addListener(closeDrawer); // Safari < 14
+          }
+        },
+
+        collapse: function() { this.collapsed = true;  savePreference(true); },
+        expand:   function() { this.collapsed = false; savePreference(false); },
+        openDrawer:  function() { this.drawerOpen = true; },
+        closeDrawer: function() { this.drawerOpen = false; }
+      });
+    });
+  })();
+</script>

@@ -20,11 +20,11 @@
   
   <!-- Simplified stylesheet and script section for debugging -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <%= render 'layouts/site_navigation_state' %>
+  <%= render 'layouts/site_navigation' %>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      x-data="siteNavigation({ signedIn: <%= user_signed_in? %> })"
+      x-data
 >
   <%= render 'layouts/tailwind/navbar' %>
 
@@ -32,7 +32,7 @@
 
   <% unless content_for?(:messenger_fullscreen) %>
     <!-- forum navigation & breadcrumbs -->
-    <nav class="thredded-nav bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-14 z-40 overflow-hidden <%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
+    <nav class="thredded-nav bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-14 z-40 overflow-hidden site-nav-margin transition-all duration-300">
       <ol role="list" class="flex-1 flex space-x-4 pl-12 pr-4 py-2 min-w-0 overflow-hidden">
         <%= render('thredded/redesigned/breadcrumbs') %>
       </ol>
@@ -45,7 +45,7 @@
   <% end %>
 
   <!-- main content -->
-  <main class="pt-14 <%= user_signed_in? ? 'md:ml-56' : '' %> transition-all duration-300" <% if user_signed_in? %>:class="{ 'md:ml-56': showSidebar && isDesktop, 'md:ml-16': !showSidebar && isDesktop, 'ml-0': !isDesktop }"<% end %>>
+  <main class="pt-14 site-nav-margin transition-all duration-300">
     <%= yield %>
   </main>
 
