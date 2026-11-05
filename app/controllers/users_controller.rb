@@ -112,16 +112,23 @@ class UsersController < ApplicationController
     notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
   end
 
+  # Follower lists can be huge (everyone follows user 5 on signup), so they're
+  # only browsable this deep, newest first. See #paginated_follow_list.
+  FOLLOW_LIST_PER_PAGE = 100
+  FOLLOW_LIST_MAX_PAGES = 50
+
   def followers
-    @followers = @user.followed_by_users
-                      .includes(:avatar_attachment, :thredded_user_detail, :promotions)
-                      .paginate(page: params[:page], per_page: 100)
+    @followers = paginated_follow_list(
+      @user.inverse_user_followings, :user_id, @user.followers_count,
+      includes: [:avatar_attachment, :thredded_user_detail, :promotions]
+    )
   end
 
   def following
-    @following = @user.followed_users
-                      .includes(:avatar_attachment, :thredded_user_detail)
-                      .paginate(page: params[:page], per_page: 100)
+    @following = paginated_follow_list(
+      @user.user_followings, :followed_user_id, @user.following_count,
+      includes: [:avatar_attachment, :thredded_user_detail]
+    )
   end
   
   def tag
@@ -211,6 +218,26 @@ class UsersController < ApplicationController
   end
 
   private
+
+  # Pages through a user's followings by their own id (newest first), then loads
+  # just that page's users. Paging the DISTINCT users join directly made Postgres
+  # dedupe every row before the OFFSET -- 5s+ on deep pages of a big list -- so we
+  # also cap the depth and take the total from the counter cache instead of a COUNT.
+  def paginated_follow_list(followings, user_id_column, total_count, includes:)
+    total_entries = [total_count.to_i, FOLLOW_LIST_PER_PAGE * FOLLOW_LIST_MAX_PAGES].min
+    last_page     = [(total_entries.to_f / FOLLOW_LIST_PER_PAGE).ceil, 1].max
+    page          = params[:page].to_i.clamp(1, last_page)
+
+    WillPaginate::Collection.create(page, FOLLOW_LIST_PER_PAGE, total_entries) do |pager|
+      user_ids = followings.order(id: :desc)
+                           .offset(pager.offset)
+                           .limit(pager.per_page)
+                           .pluck(user_id_column)
+                           .uniq
+      users_by_id = User.where(id: user_ids).includes(*includes).index_by(&:id)
+      pager.replace(user_ids.filter_map { |id| users_by_id[id] })
+    end
+  end
 
   def set_user
     @user    = User.find_by(user_params)
