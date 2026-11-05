@@ -196,10 +196,25 @@ module Thredded
       @messageboard = topic.messageboard
     end
 
+    # Thredded permits locked/sticky for anyone who can post or edit a topic,
+    # so drop them unless the user can moderate the messageboard. Otherwise a
+    # topic's author could pin or lock their own topic.
+    def new_topic_params
+      permitted = super
+      return permitted if can_moderate_messageboard?(messageboard)
+      permitted.except(:locked, :sticky)
+    end
+
     def topic_params_for_update
-      params
+      permitted = params
         .require(:topic)
         .permit(:title, :locked, :sticky, :messageboard_id, category_ids: [])
+      return permitted if can_moderate_messageboard?(topic.messageboard)
+      permitted.except(:locked, :sticky)
+    end
+
+    def can_moderate_messageboard?(board)
+      Thredded::MessageboardPolicy.new(thredded_current_user, board).moderate?
     end
 
     def current_page
