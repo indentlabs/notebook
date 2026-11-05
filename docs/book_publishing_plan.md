@@ -103,13 +103,14 @@ It handles:
 - **Columns:** `book_id`, `user_id`, `format` (`epub`, `pdf_interior`,
   `pdf_cover`, `docx_manuscript`, `docx_formatted`, `pdf_sample`), `options`
   (jsonb, a copy of the settings used), `status` (`queued`, `processing`,
-  `complete`, `failed`), `page_count`, `warnings` (jsonb), `error`,
-  `source_fingerprint`, and `has_one_attached :file`.
+  `complete`, `failed`), `book_layout_id` (required for the PDF formats and
+  `docx_formatted`, empty otherwise), `page_count`, `warnings` (jsonb),
+  `error`, `source_fingerprint`, and `has_one_attached :file`.
 - **Reuse:** `source_fingerprint` is a digest of every section's
   `updated_at` plus the settings. Asking for the same export twice returns the
   stored file instead of rendering it again.
-- **Retention:** keep the latest 3 per book and format. A daily job purges
-  the rest.
+- **Retention:** keep the latest 3 per book, format and layout. A daily job
+  purges the rest.
 - **Job:** `BookExportJob` runs on the `export` queue. External processes run
   through `Open3` in their own process group, with a hard timeout (5 minutes)
   that kills the whole group.
@@ -123,8 +124,27 @@ It handles:
     signed blob URL with `Content-Disposition: attachment`.
   - `RouteSmokeTest#param_value` and `test/smoke/smoke_data.rb` need entries
     for `book_id` and the export `id` (see `docs/release_safety.md`).
-- **Access:** `BookAuthorizer` `updatable_by?`. Whether exports are a Premium
-  feature is an open decision (see the end).
+- **Access: the book owner only.** Not `updatable_by?`, which also lets
+  universe contributors in. Add `BookAuthorizer#exportable_by?(user)` =
+  `user && resource.user_id == user.id`, and check it on the Publish page, on
+  create, and on every download. Contributors don't see the Publish tab.
+- **Premium (decided):**
+
+  | Free | Premium |
+  |---|---|
+  | `epub`, `docx_manuscript` (whole book and single story) | `pdf_interior`, `pdf_sample`, `pdf_cover`, `docx_formatted` |
+
+  - Kept as one constant, `BookExport::PREMIUM_FORMATS`, checked with
+    `user.on_premium_plan?` when an export is **created** (the same check
+    document analysis uses).
+  - On the Publish page, free users see the Premium formats with a lock and an
+    upgrade link instead of a disabled button with no explanation. They can
+    still set up print layouts and run preflight, so the upgrade is the only
+    step left.
+  - Files made while on Premium stay downloadable after a downgrade until the
+    normal purge removes them.
+- **Layouts:** print and formatted-DOCX exports record which `BookLayout` they
+  were made from (`book_layout_id`, see Feature 2).
 
 ### Preflight
 
@@ -166,7 +186,7 @@ export depends on it.
 | `contributors` | jsonb `[{role: editor|cover_designer|illustrator|translator, name}]`. |
 | `keywords`, `bisac_codes` | Not used in the files themselves; shown on a "store listing" panel ready to copy into KDP or Ingram, alongside the blurb. |
 | `epub_identifier` | A UUID generated when the book is created and never changed, so stores see a re-upload as the same book. Used when there's no ebook ISBN. |
-| `layout_settings` | jsonb, read through a `BookLayout` value object (see Feature 2). |
+| `matter_settings` | jsonb: which generated pages to include, chapter label style, About the Author / Also By overrides. These describe the book's content, so they apply to every format and every print layout. Print settings live on `BookLayout` (see Feature 2). |
 
 ### Section kinds on `book_documents`
 
@@ -184,7 +204,7 @@ export depends on it.
   `kind: part`), a `title` ("Part One: The Drowned Year"), and an optional
   epigraph.
 - **Generated pages** don't need a Document. They're toggles in
-  `layout_settings`, placed in the standard order:
+  `matter_settings`, placed in the standard order:
   - Front matter: half title (right-hand page) → Also By (left) → title page
     (right) → copyright (left) → dedication (right) → epigraph → contents
     (right) → foreword / preface / introduction.
@@ -199,7 +219,8 @@ export depends on it.
 
 - A **Publish** tab on `books/edit`, alongside the current info, chapters and
   photos tabs, with sub-panels for Details (metadata), Front & back matter,
-  Layout, Covers and Export.
+  Layout (one tab per print layout), Covers and Export. Only the owner sees
+  this tab.
 - The chapter list on the edit page shows Front matter, Body and Back matter
   as drag targets, with "Add part" and "Add dedication / epigraph / …"
   buttons. The latter create a document with the right `matter_type`.
@@ -215,9 +236,13 @@ export depends on it.
 Use ActiveStorage, in line with the planned move off Paperclip:
 
 ```ruby
+# on Book: the artwork is the same whichever layout is printed
 has_one_attached :front_cover
 has_one_attached :back_cover
-has_one_attached :print_cover_wrap   # optional: a finished wraparound PDF from a cover designer
+
+# on BookLayout: a finished wraparound PDF from a cover designer only fits one
+# trim size and page count, so it belongs to that layout
+has_one_attached :print_cover_wrap
 ```
 
 - **Originals untouched:** gallery uploads are cropped and converted to WebP,
@@ -230,7 +255,9 @@ has_one_attached :print_cover_wrap   # optional: a finished wraparound PDF from 
   - Ebook front cover: 1600 × 2560 px is ideal (1:1.6), 1000 px minimum on the
     short side.
   - Print front or back: (trim + 0.125″ bleed on the outer edges) × 300 DPI.
-    For 6×9 that's at least 1838 × 2775 px.
+    For 6×9 that's at least 1838 × 2775 px. Checked against **each** layout's
+    trim size, so a cover that's fine for 5.5×8.5 but too small for 6×9 gets
+    a warning on the 6×9 layout only.
   - CMYK JPEGs are accepted but flagged for ebook use.
 - **Display:** the book card and `books/show` use `front_cover` when it's set,
   and fall back to the gallery's `cover_image` otherwise. Do this in
@@ -241,11 +268,14 @@ has_one_attached :print_cover_wrap   # optional: a finished wraparound PDF from 
 ### Print cover generator (stretch, but this is where separate front and back uploads pay off)
 
 KDP and IngramSpark want a single wraparound PDF. `PrintCoverRenderer` builds
-it from the front cover, the back cover and a generated spine:
+one **for each layout** (its trim size, paper and page count set the
+dimensions) from the book's front cover, back cover and a generated spine:
 
 - **Page size:** width = bleed + back + spine + front + bleed; height = trim +
   2 × bleed. Bleed is 0.125″.
-- **Spine width** = interior page count × the printer's paper factor. KDP:
+- **Spine width** = the layout's latest interior page count × the printer's
+  paper factor. If the interior hasn't been rendered since the text or layout
+  changed, render it first, because the page count has to be real. KDP:
   white 0.002252″ per page, cream 0.0025″ per page. IngramSpark uses its own
   factors. Store these per printer and paper type in a constant, with a
   comment saying where the numbers came from.
@@ -343,21 +373,67 @@ manuscript.
 - **Cost:** roughly 20–60 s and 300–600 MB of memory for a 300-page novel,
   which is why export gets its own worker.
 
-### Layout settings (`BookLayout`, stored in `books.layout_settings`)
+### Print layouts (`BookLayout`, up to 2 per book)
 
-| Setting | Options / default |
-|---|---|
-| Trim size | 5×8, 5.06×7.81, 5.25×8, **5.5×8.5**, 6×9, 6.14×9.21, 7×10, 8.5×11, 4.25×6.87 (mass market, IngramSpark), A5 (148×210 mm), B-format (129×198 mm). No custom sizes in v1. |
-| Paper | white / cream. Only affects spine width. |
-| Body font | Bundled SIL OFL fonts: EB Garamond, Crimson Pro, Libre Baskerville, Literata, Source Serif 4, Alegreya. Stored in `vendor/fonts` and **never fetched at render time**. |
-| Size / leading | 10–13 pt, default 11 pt; line spacing 1.2–1.6, default 1.35. |
-| Margins | **Inner: Auto** (default) or a set value; outer, top and bottom have defaults per trim size. |
-| Chapters start on right-hand page | Toggle, default on. `break-before: right`, which inserts a blank left page when needed. |
-| Chapter opening | Drop the title about ⅓ of the way down the page; first line in small caps, or a drop cap (toggle); first paragraph not indented. |
-| Running heads | Left page: author. Right page: book title, or **story title** (better for collections). Or none. Removed on chapter openings and blank pages (`@page :blank`). |
-| Page numbers | Bottom outside / bottom centre / top outside. Front matter unnumbered or roman numerals; body restarts at 1. |
-| Scene break | Ornament (❦ ⁂ * * *) or blank line. If it lands at the top or bottom of a page, it's always drawn as an ornament (a blank line would be invisible there). |
-| Text | Justified with hyphenation (default) or ragged right. |
+A book can have **two saved print layouts** (for example a 5.5×8.5 paperback
+and a 6×9 hardcover or large print). Each one is exported, previewed and
+checked on its own. Two is a limit, not a design assumption: everything is
+built as a normal `has_many`, so allowing more later means changing one
+constant.
+
+```ruby
+class BookLayout < ApplicationRecord
+  MAX_PER_BOOK = 2
+
+  belongs_to :book
+  acts_as_list scope: :book_id          # the first layout is the default
+  has_one_attached :print_cover_wrap    # see Feature 4
+  has_many :book_exports, dependent: :nullify
+
+  # name ("Paperback"), position, settings (jsonb), timestamps
+  validate :within_limit, on: :create
+end
+```
+
+- **`settings` jsonb:** read through typed accessors that fill in defaults
+  (`store_accessor`, or a small `BookLayout::Settings` value object), so
+  adding a setting later needs no migration. Unknown keys are dropped and
+  values are checked against the options below.
+- **Creating them:** a book has no layouts until the writer opens the Layout
+  panel. The first is then created automatically as "Paperback" with every
+  default. **"Add a second layout"** copies the first (named "Hardcover";
+  rename freely), so the writer changes only what differs, usually trim size.
+  Once 2 exist the button is gone; deleting one brings it back.
+- **Deleting:** a layout can be deleted, but not the last one if it has
+  exports. Exports keep a copy of their settings in `options`, so old files
+  still describe themselves correctly.
+- **Choosing a layout:** the Publish page shows the layouts as two tabs. Each
+  print export button belongs to a tab, so there's never a separate "which
+  layout?" question. Formatted DOCX uses the default (first) layout's trim
+  size and margins, with a small selector only when there are two.
+
+**Settings.** The four **basic** settings are always visible. The rest sit
+under one collapsed "**Advanced**" section, and the defaults are good enough
+that most writers never open it.
+
+| | Setting | Options / default |
+|---|---|---|
+| Basic | Trim size | 5×8, 5.06×7.81, 5.25×8, **5.5×8.5**, 6×9, 6.14×9.21, 7×10, 8.5×11, 4.25×6.87 (mass market, IngramSpark), A5 (148×210 mm), B-format (129×198 mm). No custom sizes in v1. |
+| Basic | Body font | Three bundled SIL OFL fonts to start: **EB Garamond**, Crimson Pro, Source Serif 4. Stored in `vendor/fonts` and **never fetched at render time**. More can be added later as one font file plus one list entry. |
+| Basic | Font size | 10–13 pt, default 11 pt. |
+| Basic | Chapters start on right-hand page | Toggle, default on. `break-before: right`, which inserts a blank left page when needed. |
+| Advanced | Paper | white / **cream**. Only affects spine width. |
+| Advanced | Line spacing | 1.2–1.6, default 1.35. |
+| Advanced | Margins | **Inner: Auto** (default) or a set value; outer, top and bottom have defaults per trim size. |
+| Advanced | Running heads | Left page: author. Right page: book title, or **story title** (better for collections, and the default when every body section is a separate story). Or none. Removed on chapter openings and blank pages (`@page :blank`). |
+| Advanced | Page numbers | **Bottom centre** / bottom outside / top outside. |
+| Advanced | Scene break | **Ornament (❦)** or blank line. If it lands at the top or bottom of a page, it's always drawn as an ornament (a blank line would be invisible there). |
+| Advanced | Text | **Justified with hyphenation** or ragged right. |
+
+Fixed in v1 (not settings): chapter titles start about ⅓ of the way down the
+page, the first line of each chapter is in small caps with no indent, front
+matter pages are unnumbered, and the body starts at page 1. Drop caps and
+roman-numeral front matter can be added later as Advanced options.
 
 ### Inner margin "Auto" (answering the "(?)" in the request)
 
@@ -387,7 +463,7 @@ minimum for the final page count.
 - Grayscale-safe (no colour in the default theme).
 - Contents page numbers filled in with `target-counter`.
 - PDF/X: KDP accepts a standard PDF with embedded fonts. IngramSpark prefers
-  PDF/X-1a. Phase 2: add a PDF/X variant, either through WeasyPrint if the
+  PDF/X-1a. **Not in this round:** add a PDF/X variant later, either through WeasyPrint if the
   pinned version supports one, or by post-processing with Ghostscript.
 
 ### Preview
@@ -458,8 +534,9 @@ Nokogiri builders) instead of a gem or Pandoc.
 ### Mode B: formatted book DOCX
 
 The same structure as the print PDF: front matter, Heading 1 chapters, page
-breaks, page size set to the chosen trim and margins, and fonts named (not
-embedded). This is the file for an editor's tracked-changes pass, for
+breaks, page size and margins taken from a print layout (the default layout
+unless the writer picks the other), and fonts named (not embedded). Premium
+only. This is the file for an editor's tracked-changes pass, for
 Draft2Digital, or for importing into Vellum or Atticus.
 
 ### Checks
@@ -527,7 +604,8 @@ Draft2Digital, or for importing into Vellum or Atticus.
 | PDF | `pdf-reader` gem: page size equals trim; even page count; every font has an embedded font file; with recto starts on, each chapter title's page number is odd; contents page numbers match. |
 | DOCX | XPath assertions on styles, header on pages 2+, `titlePg`; LibreOffice conversion succeeds. |
 | Import | Fixture DOCX files from Word, Google Docs and Scrivener; round trip through our own writer. |
-| Requests and access | Only users who can update the book can create or download exports; smoke tests cover the new GET routes. |
+| Requests and access | Only the owner can open the Publish page or create or download exports; universe contributors and other users get a redirect, not a 500. Free users can create `epub` and `docx_manuscript` but are refused each `PREMIUM_FORMATS` entry. Smoke tests cover the new GET routes. |
+| Layouts | A third layout can't be created; "Add a second layout" copies the first; deleting a layout leaves its exports readable; two layouts with different trim sizes give different page counts, spine widths and cover-size warnings. |
 
 ---
 
@@ -536,14 +614,14 @@ Draft2Digital, or for importing into Vellum or Atticus.
 | # | Milestone | Size | Depends on |
 |---|---|---|---|
 | M1 | Metadata and section kinds (Feature 5 data + UI), `ManuscriptHtml`, `BookManuscript`, preflight, scene/page break buttons | L | — |
-| M2 | `BookExport` model, job, Publish page shell, separate export worker | M | M1 |
+| M2 | `BookExport` model, job, Publish page shell (owner only, Premium locks), separate export worker | M | M1 |
 | M3 | **EPUB 3** + EPUBCheck in CI | M | M2 |
 | M4 | **Cover uploads** + checks + display fallback | M | — (can run alongside M1–M3) |
 | M5 | **DOCX writer**: standard manuscript format (book + single story) and formatted book; private contact fields | M–L | M2 |
-| M6 | **Print PDF**: WeasyPrint in Docker/CI, `BookLayout`, fonts, Auto margin passes, sample preview | L | M2 |
-| M7 | **Print cover generator** (spine calculation, wraparound PDF) | M | M4, M6 |
+| M6 | **Print PDF**: WeasyPrint in Docker/CI, `BookLayout` (up to 2 per book; basic and advanced settings), 3 fonts, Auto margin passes, sample preview | L | M2 |
+| M7 | **Print cover generator** for each layout (spine calculation, wraparound PDF) | M | M4, M6 |
 | M8 | **DOCX import** with the chapter-split review step | M–L | M1, M5 |
-| M9 | PDF/X variant for IngramSpark; per-printer spine factors | S–M | M6, M7 |
+| Later | PDF/X variant for IngramSpark; per-printer spine factors | S–M | M6, M7 |
 
 M8 can move ahead of M6 if attracting writers who already have a manuscript
 matters more than print.
@@ -565,16 +643,20 @@ Runners-up: comments and tracked changes for editors and beta readers;
 continuous whole-book reading in the browser; book-wide find & replace and
 name-consistency checks.
 
-## Open decisions (recommended default in **bold**)
+## Decisions
 
-- **Premium:** **EPUB and manuscript DOCX free; print PDF, print cover
-  generator and formatted DOCX Premium**, or everything Premium.
-- **Who can export:** **the book owner only** in v1, or universe
-  collaborators too.
-- **One layout per book (v1)** or several saved layouts (paperback 5.5×8.5 vs
-  large print 6×9 vs hardcover).
-- **Font list:** confirm the six bundled OFL fonts, or start with 3.
-- **PDF/X in v1** or after (**after**; KDP doesn't need it).
+- **Premium:** EPUB and manuscript DOCX are free. Print PDF (interior and
+  sample), the print cover and formatted DOCX are Premium. See
+  `BookExport::PREMIUM_FORMATS` under the `BookExport` section.
+- **Who can export:** the book owner only (`BookAuthorizer#exportable_by?`).
+  Universe contributors can edit a book but can't export it.
+- **Print layouts:** up to **2 per book**, built as a normal `has_many` with
+  a `MAX_PER_BOOK` constant so the limit can rise later. Each layout has four
+  basic settings, with everything else under one collapsed Advanced section.
+- **Fonts:** start with 3 bundled OFL fonts (EB Garamond, Crimson Pro,
+  Source Serif 4), in keeping with "don't overwhelm with options".
+- **PDF/X:** later. KDP doesn't need it; IngramSpark accepts standard PDFs
+  with embedded fonts but prefers PDF/X-1a.
 
 *Printer figures (KDP margins, spine factors, cover pixel sizes, page-count
 limits) were correct at the time of writing. Check them against the current
