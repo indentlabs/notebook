@@ -154,7 +154,8 @@ class SmokeData
                                       shared_at: Time.current, message: 'Look at my character')
     @share_comment = ShareComment.create!(user: stranger, content_page_share: share, message: 'Nice!')
 
-    UserFollowing.create!(user_id: stranger.id, followed_user_id: owner.id)
+    # The stranger may already follow the owner: every signup follows user 5, and the owner can end up as user 5
+    UserFollowing.find_or_create_by!(user_id: stranger.id, followed_user_id: owner.id)
   end
 
   def build_account_records
