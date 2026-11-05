@@ -538,8 +538,14 @@ class ContentController < ApplicationController
     content_type = content_type_from_controller(self.class)
     @content = content_type.find_by(id: params[:id])
 
+    # Already deleted (e.g. a double-tapped delete button or a stale tab) or never existed
+    if @content.nil?
+      index_path = send("#{content_type.name.underscore.pluralize}_path")
+      return successful_response(index_path, "That page has already been deleted.")
+    end
+
     unless current_user.can_delete?(@content)
-      return redirect_to :back, notice: "You don't have permission to do that!"
+      return redirect_back fallback_location: @content, notice: "You don't have permission to do that!"
     end
 
     cached_page_name = @content.try(:name)
