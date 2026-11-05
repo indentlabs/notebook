@@ -20,10 +20,11 @@
   <!-- Alpine.js with Collapse plugin for smooth sidebar animations -->
   <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <%= render 'layouts/site_navigation_state' %>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      x-data="{ showSidebar: false, isDesktop: window.innerWidth >= 768 }"
+      x-data="siteNavigation({ signedIn: <%= user_signed_in? %>, startCollapsed: true })"
 >
   <%= render 'layouts/tailwind/navbar' %>
   <%= render 'layouts/tailwind/sidebar' %>

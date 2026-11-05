@@ -1,0 +1,80 @@
+<%#
+  Shared Alpine state for the site navigation sidebar, used by every layout
+  that renders layouts/tailwind/sidebar.
+
+  `isDesktop` must always agree with Tailwind's `md:` breakpoint: the sidebar
+  shows its fixed icon ribbon when `isDesktop` is true, while the margin that
+  keeps page content clear of it (`md:ml-16` / `md:ml-56`) only applies when
+  the `md:` media query matches. If the two disagree -- for example a tablet
+  rotated to portrait, a resized window, or split-screen -- the ribbon covers
+  the left edge of the page. So `isDesktop` comes from matchMedia on the same
+  query, and is kept live by listening for that query to change.
+
+  Usage: <body x-data="siteNavigation({ signedIn: true, startCollapsed: false })">
+%>
+<script>
+  window.SITE_NAV_DESKTOP_QUERY = '(min-width: 768px)'; // Tailwind's `md` breakpoint
+
+  window.siteNavigation = function(options) {
+    options = options || {};
+    var storageKey = 'site_navigation_sidebar_visible';
+    var desktopQuery = window.matchMedia(window.SITE_NAV_DESKTOP_QUERY);
+
+    function preferredDesktopState() {
+      if (!options.signedIn || options.startCollapsed) return false;
+      try {
+        var saved = localStorage.getItem(storageKey);
+        return saved === null || saved === 'true';
+      } catch (e) {
+        return true;
+      }
+    }
+
+    function setScrollLock(locked) {
+      document.documentElement.classList.toggle('overflow-hidden', locked);
+      document.body.classList.toggle('overflow-hidden', locked);
+    }
+
+    return {
+      isDesktop: desktopQuery.matches,
+      showSidebar: desktopQuery.matches ? preferredDesktopState() : false,
+
+      init: function() {
+        var self = this;
+
+        // Hand off from the pre-paint CSS (see application layout) to Alpine
+        // once Alpine has applied every :class binding in the tree.
+        this.$nextTick(function() {
+          document.documentElement.removeAttribute('data-sidebar-initial');
+          setTimeout(function() {
+            document.querySelectorAll('.no-transition').forEach(function(el) {
+              el.classList.remove('no-transition');
+            });
+          }, 50);
+        });
+
+        this.$watch('showSidebar', function(value) {
+          if (self.isDesktop) {
+            // Only remember choices made on desktop; the mobile drawer always starts closed.
+            try { localStorage.setItem(storageKey, value.toString()); } catch (e) {}
+            setScrollLock(false);
+          } else {
+            // The mobile drawer covers the page, so stop the page scrolling under it.
+            setScrollLock(value);
+          }
+        });
+
+        var onBreakpointChange = function(event) {
+          self.isDesktop = event.matches;
+          self.showSidebar = event.matches ? preferredDesktopState() : false;
+          setScrollLock(false);
+        };
+        if (desktopQuery.addEventListener) {
+          desktopQuery.addEventListener('change', onBreakpointChange);
+        } else {
+          desktopQuery.addListener(onBreakpointChange); // Safari < 14
+        }
+      }
+    };
+  };
+</script>

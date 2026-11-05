@@ -20,10 +20,11 @@
   
   <!-- Simplified stylesheet and script section for debugging -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <%= render 'layouts/site_navigation_state' %>
 </head>
 <body data-in-app="true"
       class="<%= controller_name %> <%= action_name %> <%= 'dark' if user_signed_in? && current_user.dark_mode_enabled? %>"
-      x-data="{ showSidebar: <%= user_signed_in? ? 'window.innerWidth >= 768' : 'false' %>, isDesktop: window.innerWidth >= 768 }"
+      x-data="siteNavigation({ signedIn: <%= user_signed_in? %> })"
 >
   <%= render 'layouts/tailwind/navbar' %>
 

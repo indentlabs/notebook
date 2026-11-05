@@ -20,6 +20,8 @@
   <!-- Simplified stylesheet and script section for debugging -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
+  <%= render 'layouts/site_navigation_state' %>
+
   <% if user_signed_in? %>
   <script>
     // Set sidebar state before first paint to prevent layout jump.
@@ -27,8 +29,7 @@
     // margins/widths are applied from the very first frame.
     (function() {
       try {
-        var isDesktop = window.innerWidth >= 768;
-        if (!isDesktop) return;
+        if (!window.matchMedia(window.SITE_NAV_DESKTOP_QUERY).matches) return;
         var saved = localStorage.getItem('site_navigation_sidebar_visible');
         var sidebarOpen = saved === null || saved === 'true';
         document.documentElement.setAttribute('data-sidebar-initial', sidebarOpen ? 'open' : 'collapsed');
@@ -73,9 +74,9 @@
       [data-sidebar-initial="collapsed"] .site-nav-offset-left { left: 4rem; }
       [data-sidebar-initial="open"] .site-nav-offset-left { left: 14rem; }
 
-      /* Once Alpine owns the rail, its expanded width comes from `sm:w-60` at this breakpoint */
+      /* Once Alpine owns the rail */
       body.site-nav-collapsed .site-nav-offset-left { left: 4rem; }
-      body.site-nav-open .site-nav-offset-left { left: 15rem; }
+      body.site-nav-open .site-nav-offset-left { left: 14rem; }
     }
   </style>
 </head>
@@ -86,79 +87,7 @@
         'site-nav-open': showSidebar && isDesktop,
         'site-nav-collapsed': !showSidebar && isDesktop<% end %>
       }"
-      x-data="{
-        isDesktop: window.innerWidth >= 768,
-        showSidebar: (() => {
-          <% if user_signed_in? %>
-            try {
-              const saved = localStorage.getItem('site_navigation_sidebar_visible');
-              const isDesktop = window.innerWidth >= 768;
-              // On desktop, use saved preference (default true), on mobile default false
-              return isDesktop ? (saved === null ? true : saved === 'true') : false;
-            } catch (e) {
-              return window.innerWidth >= 768;
-            }
-          <% else %>
-            return false;
-          <% end %>
-        })()
-      }"
-      x-init="
-        <% if user_signed_in? %>
-          // Hand off from initial CSS to Alpine: remove the data attribute
-          // after Alpine has processed all :class bindings in the tree
-          $nextTick(() => {
-            document.documentElement.removeAttribute('data-sidebar-initial');
-            // Re-enable transitions after layout is settled
-            setTimeout(() => {
-              document.querySelectorAll('.no-transition').forEach(el => el.classList.remove('no-transition'));
-            }, 50);
-          });
-
-          // Save sidebar state to localStorage when it changes
-          $watch('showSidebar', value => {
-            try {
-              localStorage.setItem('site_navigation_sidebar_visible', value.toString());
-            } catch (e) {
-              // Silently fail is localstorage is not available
-            }
-
-            // Lock scroll on mobile
-            if (!isDesktop) {
-              if (value) {
-                document.documentElement.classList.add('overflow-hidden');
-                document.body.classList.add('overflow-hidden');
-              } else {
-                document.documentElement.classList.remove('overflow-hidden');
-                document.body.classList.remove('overflow-hidden');
-              }
-            } else {
-              // Ensure no scroll lock on desktop
-              document.documentElement.classList.remove('overflow-hidden');
-              document.body.classList.remove('overflow-hidden');
-            }
-          });
-
-          // Handle window resize
-          window.addEventListener('resize', () => {
-            isDesktop = window.innerWidth >= 768;
-            if (!isDesktop) {
-              showSidebar = false;
-            } else {
-              // Restore saved state when going back to desktop
-              try {
-                const saved = localStorage.getItem('site_navigation_sidebar_visible');
-                showSidebar = saved === null ? true : saved === 'true';
-              } catch (e) {
-                showSidebar = true;
-              }
-              // Ensure lock is cleared
-              document.documentElement.classList.remove('overflow-hidden');
-              document.body.classList.remove('overflow-hidden');
-            }
-          });
-        <% end %>
-      "
+      x-data="siteNavigation({ signedIn: <%= user_signed_in? %> })"
 >
   <%= render 'layouts/tailwind/navbar' %>
 
