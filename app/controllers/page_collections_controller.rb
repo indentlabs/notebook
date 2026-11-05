@@ -237,7 +237,10 @@ class PageCollectionsController < ApplicationController
 
   def set_submittable_content
     @submittable_content ||= if user_signed_in?
-      @current_user_content.slice(*@page_collection.page_types)
+      # Password protected pages can't be submitted, since submitting publishes a page
+      @current_user_content.slice(*@page_collection.page_types).transform_values do |pages|
+        pages.reject { |page| page.privacy == 'password' }
+      end
     else
       {}
     end

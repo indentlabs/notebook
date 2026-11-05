@@ -207,7 +207,8 @@
             is_universe_public = raw_content.respond_to?(:universe) &&
                                 raw_content.universe.present? &&
                                 raw_content.universe.privacy == 'public'
-            is_effectively_public = is_page_public || is_universe_public
+            # A password outranks a public universe
+            is_effectively_public = !raw_content.try(:password_protected?) && (is_page_public || is_universe_public)
             can_edit_privacy = raw_content.updatable_by?(current_user)
           %>
           <div class="flex justify-between items-center">
@@ -220,6 +221,9 @@
                   <% if is_effectively_public %>
                     <i class="material-icons text-sm mr-1.5">public</i>
                     Public
+                  <% elsif raw_content.try(:password_protected?) %>
+                    <i class="material-icons text-sm mr-1.5">vpn_key</i>
+                    Password protected
                   <% else %>
                     <i class="material-icons text-sm mr-1.5">lock</i>
                     Private
@@ -236,6 +240,9 @@
                   <% if is_effectively_public %>
                     <i class="material-icons text-sm mr-1.5">public</i>
                     Public
+                  <% elsif raw_content.try(:password_protected?) %>
+                    <i class="material-icons text-sm mr-1.5">vpn_key</i>
+                    Password protected
                   <% else %>
                     <i class="material-icons text-sm mr-1.5">lock</i>
                     Private

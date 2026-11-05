@@ -1,6 +1,20 @@
 # Password protected worldbuilding pages: plan
 
-Status: approved plan, nothing built yet. The open questions are settled in section 5.
+Status: built. The open questions are settled in section 5.
+
+Where the build differs from the plan below:
+
+- **Separate session store.** Page unlocks live in their own session hash (`session[:unlocked_pages]`,
+  managed by `PageUnlocks`, 20 entries) next to the documents' one, instead of one combined store.
+  `DocumentUnlocks` is unchanged, so nobody's existing document unlocks were affected. Both stores
+  together stay well under the cookie limit; a test checks this.
+- **Rate limits.** Pages have their own per-page limit. They share the per-visitor and site-wide
+  limits with documents.
+- **Universe counts.** The universe page's lists and counts now go through one rule,
+  `Universe#pages_listable_by` / `#documents_listable_by`, for every visitor, not only unlocked ones.
+- **Failed page updates.** A failed HTML update of a page now redirects back with the error. It
+  used to try to render the edit page and crash.
+- **Documents.** Documents still use their own `document_password_digest` column (step 5 not done).
 
 Goal: give characters, locations, items, universes and every other page type in
 `Rails.application.config.content_types[:all]` (29 types) the same third privacy option that

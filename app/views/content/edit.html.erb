@@ -245,12 +245,13 @@ function editPageController() {
     universePrivacy: '<%= @content.respond_to?(:universe) && @content.universe.present? ? (@content.universe.privacy || 'private') : 'private' %>',
     
     // Computed property for effective visibility
+    // A password outranks a public universe
     get isEffectivelyPublic() {
-      return this.selectedPrivacy === 'public' || this.universePrivacy === 'public';
+      return this.selectedPrivacy === 'public' || (this.selectedPrivacy !== 'password' && this.universePrivacy === 'public');
     },
     
     get showUniverseIndicator() {
-      return this.selectedPrivacy !== 'public' && this.universePrivacy === 'public';
+      return this.selectedPrivacy !== 'public' && this.selectedPrivacy !== 'password' && this.universePrivacy === 'public';
     },
 
     init() {
@@ -363,8 +364,9 @@ function editPageController() {
           const universeName = selectedOption ? selectedOption.text : '';
           const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
           
-          // Update the Alpine.js reactive state
+          // Update the Alpine.js reactive state, and the privacy picker's
           self.universePrivacy = universePrivacy;
+          window.dispatchEvent(new CustomEvent('universe-privacy-updated', { detail: universePrivacy }));
           
           // Update both the Privacy tab and sidebar Universe sections
           self.updatePrivacyUniverseSection(universeId, universeName, universePrivacy);
@@ -385,8 +387,9 @@ function editPageController() {
             const universeName = selectedOption ? selectedOption.text : '';
             const universePrivacy = selectedOption ? selectedOption.dataset.universePrivacy : 'private';
             
-            // Update the Alpine.js reactive state
+            // Update the Alpine.js reactive state, and the privacy picker's
             self.universePrivacy = universePrivacy;
+            window.dispatchEvent(new CustomEvent('universe-privacy-updated', { detail: universePrivacy }));
             
             self.updatePrivacyUniverseSection(universeId, universeName, universePrivacy);
             self.updateSidebarUniverseSection(universeId, universeName);
@@ -467,6 +470,7 @@ function editPageController() {
       }
       
       const isPublic = universePrivacy === 'public';
+      const isProtected = universePrivacy === 'password';
       const displayName = universeName || 'Selected Universe';
       
       contentArea.innerHTML = `
@@ -482,8 +486,8 @@ function editPageController() {
               <div class="flex items-center mb-2">
                 <span class="text-sm text-gray-600 mr-2">Universe is:</span>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
-                  <i class="material-icons text-xs mr-1">${isPublic ? 'public' : 'lock'}</i>
-                  ${isPublic ? 'Public' : 'Private'}
+                  <i class="material-icons text-xs mr-1">${isPublic ? 'public' : (isProtected ? 'vpn_key' : 'lock')}</i>
+                  ${isPublic ? 'Public' : (isProtected ? 'Password protected' : 'Private')}
                 </span>
               </div>
               ${isPublic ? `
@@ -492,13 +496,13 @@ function editPageController() {
                     <i class="material-icons text-blue-600 text-sm mr-2 mt-0.5">bolt</i>
                     <div>
                       <div class="text-xs font-medium text-blue-900">Universe Override Active</div>
-                      <div class="text-xs text-blue-700">All pages in this universe are automatically public</div>
+                      <div class="text-xs text-blue-700">All pages in this universe are automatically public, except password protected ones</div>
                     </div>
                   </div>
                 </div>
               ` : `
                 <div class="text-xs text-gray-600">
-                  Individual page privacy settings apply
+                  ${isProtected ? "The universe's password only opens the universe's own page. Individual page privacy settings apply, as they would in a private universe." : 'Individual page privacy settings apply'}
                 </div>
               `}
             </div>

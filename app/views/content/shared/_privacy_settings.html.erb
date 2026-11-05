@@ -1,0 +1,369 @@
+<%#
+  The privacy picker for a worldbuilding page: private, public or password protected, plus a link to
+  share once other people can open the page. Used by the edit page's and the show page's privacy views.
+
+  Locals: raw_content (the page)
+
+  Private and public save through the page's own update action. A password only ever goes to
+  PagePasswordsController, and its field has no name and sits outside any form, so nothing but the
+  save button can send it. Only the page's owner manages its password; collaborators see the setting
+  but can't change it, or move the page out of it.
+%>
+<%
+  page_type_name    = raw_content.class.name.downcase
+  universe          = raw_content.try(:universe)
+  can_manage_password = user_signed_in? && raw_content.user_id == current_user.id
+  privacy_state = {
+    selectedPrivacy:      HasPasswordProtection::PRIVACY_LABELS.key?(raw_content.privacy) ? raw_content.privacy : 'private',
+    universePrivacy:      universe&.privacy,
+    canManagePassword:    can_manage_password,
+    updateUrl:            polymorphic_path(raw_content, format: :json),
+    passwordUrl:          send("password_#{page_type_name}_path", raw_content),
+    paramKey:             raw_content.class.model_name.param_key,
+    labels:               HasPasswordProtection::PRIVACY_LABELS,
+    icons:                { 'private' => 'lock', 'public' => 'public', 'password' => 'vpn_key' }
+  }
+%>
+<%# Defined before the component that uses it, so it's there however the page was rendered %>
+<script>
+  window.pagePrivacySettings = window.pagePrivacySettings || function(state) {
+    return Object.assign({
+      choice: state.selectedPrivacy,
+      showPasswordForm: false,
+      password: '',
+      showPassword: false,
+      passwordError: '',
+      isLoading: false,
+      showToast: false,
+      toastFailed: false,
+      toastMessage: '',
+      linkCopied: false,
+
+      get publicViaUniverse() {
+        return this.selectedPrivacy === 'private' && this.universePrivacy === 'public';
+      },
+
+      // What other people actually get: a password outranks a public universe
+      get effectivePrivacy() {
+        return this.publicViaUniverse ? 'public' : this.selectedPrivacy;
+      },
+
+      // Only the owner can move a page into or out of password protection
+      isDisabled(value) {
+        if (this.canManagePassword) return false;
+        return value === 'password' || this.selectedPrivacy === 'password';
+      },
+
+      choose(value) {
+        this.choice = value;
+        this.passwordError = '';
+
+        if (value === 'password') {
+          if (this.selectedPrivacy !== 'password') this.openPasswordForm();
+          return;
+        }
+
+        this.showPasswordForm = false;
+        this.password = '';
+        if (value === this.selectedPrivacy) return;
+
+        if (this.selectedPrivacy === 'password') {
+          this.send(this.passwordUrl, 'DELETE', { privacy: value });
+        } else {
+          this.send(this.updateUrl, 'PATCH', { [this.paramKey]: { privacy: value } }, value);
+        }
+      },
+
+      openPasswordForm() {
+        this.showPasswordForm = true;
+        this.passwordError = '';
+        this.$nextTick(() => this.$refs.passwordInput && this.$refs.passwordInput.focus());
+      },
+
+      cancelPasswordForm() {
+        this.showPasswordForm = false;
+        this.password = '';
+        this.passwordError = '';
+        this.choice = this.selectedPrivacy;
+      },
+
+      savePassword() {
+        if (this.isLoading) return;
+        this.send(this.passwordUrl, 'PATCH', { password: this.password });
+      },
+
+      // Saves a privacy change. The password endpoints say what the privacy became; the page's
+      // own update action doesn't, so it passes the value it asked for.
+      send(url, method, body, requestedPrivacy) {
+        this.isLoading = true;
+
+        fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': (document.querySelector('meta[name=csrf-token]') || {}).content || '',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          credentials: 'same-origin',
+          body: JSON.stringify(body)
+        })
+        .then(response => response.json().catch(() => ({})).then(data => ({ ok: response.ok, data: data })))
+        .then(({ ok, data }) => {
+          if (!ok) throw new Error(data.error || "That didn't save. Please try again.");
+
+          this.applyPrivacy(data.privacy || requestedPrivacy);
+          this.password = '';
+          this.showPasswordForm = false;
+          this.toast(this.selectedPrivacy === 'password' ? 'Password saved' : 'Privacy settings saved', false);
+        })
+        .catch(error => {
+          if (this.showPasswordForm) {
+            this.passwordError = error.message;
+          } else {
+            this.choice = this.selectedPrivacy;
+            this.toast(error.message, true);
+          }
+        })
+        .finally(() => { this.isLoading = false; });
+      },
+
+      applyPrivacy(value) {
+        this.selectedPrivacy = value;
+        this.choice = value;
+
+        window.dispatchEvent(new CustomEvent('privacy-updated', {
+          detail: { privacy: value, label: this.labels[value], icon: this.icons[value] }
+        }));
+
+        // The show page's sidebar badge
+        const badge = document.getElementById('sidebar-visibility-badge');
+        const icon  = document.getElementById('sidebar-visibility-icon');
+        const text  = document.getElementById('sidebar-visibility-text');
+        if (badge && icon && text) {
+          badge.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ' +
+            (value === 'public' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300');
+          icon.textContent = this.icons[value];
+          text.textContent = this.labels[value];
+          badge.dataset.privacy = value;
+        }
+
+        // Protected pages can't be shared to the community
+        document.querySelectorAll('#page-share-button').forEach(button => button.classList.toggle('hidden', value === 'password'));
+      },
+
+      copyShareLink() {
+        const input = document.getElementById('page-share-link-url');
+        input.select();
+        const copied = navigator.clipboard ? navigator.clipboard.writeText(input.value) : Promise.reject();
+        copied.then(() => {
+          this.linkCopied = true;
+          setTimeout(() => { this.linkCopied = false; }, 2000);
+        }).catch(() => {});
+      },
+
+      toast(message, failed) {
+        this.toastMessage = message;
+        this.toastFailed = failed;
+        this.showToast = true;
+        setTimeout(() => { this.showToast = false; }, 3000);
+      }
+    }, state);
+  };
+</script>
+
+<div id="page-privacy-settings"
+     x-data="pagePrivacySettings(<%= privacy_state.to_json %>)"
+     @universe-privacy-updated.window="universePrivacy = $event.detail"
+     class="space-y-6">
+
+  <!-- Toast Notification -->
+  <div x-show="showToast"
+       x-cloak
+       x-transition:enter="transition ease-out duration-300"
+       x-transition:enter-start="opacity-0 transform translate-y-2"
+       x-transition:enter-end="opacity-100 transform translate-y-0"
+       x-transition:leave="transition ease-in duration-200"
+       x-transition:leave-start="opacity-100 transform translate-y-0"
+       x-transition:leave-end="opacity-0 transform translate-y-2"
+       :class="toastFailed ? 'bg-red-500' : 'bg-green-500'"
+       class="fixed top-20 right-4 z-50 text-white px-6 py-3 rounded-lg shadow-lg flex items-center"
+       role="status">
+    <i class="material-icons text-sm mr-2" x-text="toastFailed ? 'error_outline' : 'check_circle'">check_circle</i>
+    <span x-text="toastMessage"></span>
+  </div>
+
+  <!-- Current Status Overview -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <div :class="selectedPrivacy === 'public' ? 'bg-green-100 dark:bg-green-900' : (selectedPrivacy === 'password' ? 'bg-teal-100 dark:bg-teal-900' : 'bg-gray-100 dark:bg-gray-700')"
+             class="w-8 h-8 rounded-lg flex items-center justify-center mr-3 transition-colors duration-200">
+          <i :class="selectedPrivacy === 'public' ? 'text-green-600 dark:text-green-400' : (selectedPrivacy === 'password' ? 'text-teal-600 dark:text-teal-400' : 'text-gray-600 dark:text-gray-400')"
+             class="material-icons text-base transition-colors duration-200"
+             x-text="icons[selectedPrivacy]"><%= raw_content.try(:privacy_icon) || 'lock' %></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center">
+            Current Status
+            <div x-show="isLoading" x-cloak class="ml-2">
+              <i class="material-icons text-xs text-blue-500 animate-spin">refresh</i>
+            </div>
+          </h3>
+          <p class="text-xs text-gray-600 dark:text-gray-400">
+            This <%= page_type_name %> is currently
+            <span class="font-medium" x-text="labels[selectedPrivacy]"><%= raw_content.try(:privacy_label) %></span>
+          </p>
+        </div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-gray-500 dark:text-gray-400">Effective visibility</div>
+        <div class="text-sm font-medium mt-0.5"
+             :class="effectivePrivacy === 'public' ? 'text-green-600 dark:text-green-300' : 'text-gray-600 dark:text-gray-300'"
+             x-text="labels[effectivePrivacy]"></div>
+        <div x-show="publicViaUniverse" x-cloak class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">via Universe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Level Selection -->
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">Privacy Settings</h3>
+      <p class="text-gray-600 dark:text-gray-400 text-xs">Choose who can see and access this <%= page_type_name %></p>
+    </div>
+
+    <div class="space-y-3" role="radiogroup" aria-label="Privacy">
+      <% [
+           ['private',  'lock',    'Private',            'Only you and collaborators can see this page'],
+           ['public',   'public',  'Public',             'Anyone with the link can view this page'],
+           ['password', 'vpn_key', 'Password protected', 'Only people with the password can view'],
+         ].each do |value, icon, label, description| %>
+        <label class="group relative block"
+               :class="isDisabled('<%= value %>') ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'">
+          <input type="radio"
+                 id="page-privacy-<%= value %>"
+                 name="page-privacy-option"
+                 value="<%= value %>"
+                 class="sr-only"
+                 :checked="choice === '<%= value %>'"
+                 :disabled="isDisabled('<%= value %>')"
+                 @change="choose('<%= value %>')"
+                 <%= 'checked' if privacy_state[:selectedPrivacy] == value %>>
+          <div :class="choice === '<%= value %>'
+                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900 shadow-sm'
+                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm'"
+               class="border-2 rounded-lg p-3 transition-all duration-200">
+            <div class="flex items-center">
+              <div class="flex-shrink-0">
+                <div :class="choice === '<%= value %>' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-300'"
+                     class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200">
+                  <i class="material-icons text-base"><%= icon %></i>
+                </div>
+              </div>
+              <div class="ml-3 flex-1">
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100"><%= label %></div>
+                <div class="text-xs text-gray-600 dark:text-gray-400"><%= description %></div>
+              </div>
+              <div class="flex-shrink-0 ml-3">
+                <div :class="choice === '<%= value %>' ? 'text-blue-500' : 'text-gray-300 dark:text-gray-600'"
+                     class="transition-colors duration-200">
+                  <i class="material-icons text-lg">check_circle</i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </label>
+      <% end %>
+    </div>
+
+    <% unless can_manage_password %>
+      <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 flex items-start">
+        <i class="material-icons text-sm mr-1">info</i>
+        <span x-text="selectedPrivacy === 'password'
+          ? 'Only this page\'s owner can change the password or take it off.'
+          : 'Only this page\'s owner can password protect it.'"><%= raw_content.try(:password_protected?) ? "Only this page's owner can change the password or take it off." : "Only this page's owner can password protect it." %></span>
+      </p>
+    <% end %>
+
+    <!-- Password settings -->
+    <div id="page-password-panel"
+         x-show="selectedPrivacy === 'password' || showPasswordForm"
+         x-cloak
+         class="mt-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div id="page-password-summary" x-show="selectedPrivacy === 'password' && !showPasswordForm">
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          Visitors need the password to view this <%= page_type_name %>, and it won't appear anywhere else on the site.
+          Collaborators on its universe can still view it without the password.
+        </p>
+        <% if raw_content.is_a?(Universe) %>
+          <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+            The password opens this universe's own page. Pages in it follow their own privacy settings, as they would in a private universe.
+          </p>
+        <% end %>
+        <% if can_manage_password %>
+          <button type="button" @click="openPasswordForm()" class="mt-3 text-sm font-medium text-teal-600 dark:text-teal-400 hover:underline">
+            Change password
+          </button>
+        <% end %>
+      </div>
+
+      <% if can_manage_password %>
+        <div id="page-password-form" x-show="showPasswordForm">
+          <label for="page-password-input" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Choose a password</label>
+          <div class="relative">
+            <input
+              id="page-password-input"
+              x-ref="passwordInput"
+              :type="showPassword ? 'text' : 'password'"
+              type="password"
+              x-model="password"
+              @keydown.enter.prevent="savePassword()"
+              autocomplete="new-password"
+              aria-describedby="page-password-help"
+              class="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            >
+            <button type="button"
+                    @click="showPassword = !showPassword"
+                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                    aria-label="Show password"
+                    class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
+              <i class="material-icons text-base" x-text="showPassword ? 'visibility_off' : 'visibility'">visibility</i>
+            </button>
+          </div>
+          <p id="page-password-help" class="mt-2 text-xs text-gray-500 dark:text-gray-400">At least <%= HasPasswordProtection::PASSWORD_LENGTH.min %> characters. Share it with the people you want to see this <%= page_type_name %>.</p>
+          <p id="page-password-error" x-show="passwordError" x-cloak x-text="passwordError" class="mt-2 text-sm text-red-600 dark:text-red-400" role="alert"></p>
+          <div class="mt-3 flex items-center space-x-2">
+            <button type="button" id="page-password-save" @click="savePassword()" :disabled="isLoading"
+                    class="px-3 py-2 text-sm font-medium text-white bg-teal-600 rounded-md shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+              Save password
+            </button>
+            <button type="button" @click="cancelPasswordForm()"
+                    class="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700">
+              Cancel
+            </button>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- The page's own address, since the edit page's isn't the one to send people. Hidden while nobody else could open it. -->
+    <div id="page-share-link" x-show="selectedPrivacy === 'password' || effectivePrivacy === 'public'" x-cloak
+         class="mt-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+      <label for="page-share-link-url" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Link to share</label>
+      <div class="relative">
+        <input id="page-share-link-url"
+               type="text"
+               readonly
+               value="<%= polymorphic_url(raw_content) %>"
+               @click="copyShareLink()"
+               class="block w-full px-3 py-2 pr-10 text-sm border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500">
+        <button type="button" @click="copyShareLink()" aria-label="Copy link"
+                class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
+          <i class="material-icons text-base" x-text="linkCopied ? 'check' : 'content_copy'">content_copy</i>
+        </button>
+      </div>
+      <p x-show="selectedPrivacy === 'password'" x-cloak class="mt-2 text-xs text-gray-500 dark:text-gray-400">Send the password separately.</p>
+    </div>
+  </div>
+</div>

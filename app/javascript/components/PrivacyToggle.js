@@ -63,6 +63,24 @@ class PrivacyToggle extends React.Component {
   }
 
   render () {
+    // Password protection is only set or removed from the page's own privacy settings,
+    // since a single click here would make it public.
+    if (this.state.privacy == 'password') {
+      return (
+        <FormControl component="fieldset">
+          <FormLabel component="legend">
+            <i className={`material-icons ${this.props.content_color}-text left`}>
+              {this.props.content_icon}
+            </i>
+            {this.props.content.name}'s privacy:
+          </FormLabel>
+          <p className="black-text">
+            Password protected. Change this from its privacy settings.
+          </p>
+        </FormControl>
+      );
+    }
+
     return (
         <FormControl component="fieldset">
           <FormLabel component="legend">

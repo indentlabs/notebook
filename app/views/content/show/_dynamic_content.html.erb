@@ -203,10 +203,13 @@
       </div>
     </div>
     
-    <%= render partial: 'content/show/privacy_view', locals: { 
-      content: content, 
-      raw_content: raw_content 
-    } %>
+    <%# Only for people who can change it, since it holds the password settings %>
+    <% if user_signed_in? && raw_content.updatable_by?(current_user) %>
+      <%= render partial: 'content/show/privacy_view', locals: { 
+        content: content, 
+        raw_content: raw_content 
+      } %>
+    <% end %>
   </div>
 
 </div>

@@ -252,7 +252,24 @@
               </span>
             </div>
 
-            <% if @document.universe.user == current_user %>
+            <% if @document.universe.user == current_user && @document.universe.password_protected? %>
+              <%# Passwords are only set or removed from the universe's own privacy settings %>
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <div class="flex items-center">
+                  <div class="mr-3">
+                    <i class="material-icons text-blue-500">vpn_key</i>
+                  </div>
+                  <div>
+                    <span class="font-medium text-gray-900 dark:text-white"><%= @document.universe.name %></span>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Currently: <span class="font-medium">Password protected</span></p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Its password only opens the universe's own page, so this document follows its own privacy setting.
+                      <%= link_to 'Change it in the universe\'s settings', edit_universe_path(@document.universe, anchor: 'privacy'), class: 'text-blue-600 dark:text-blue-400 hover:underline' %>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% elsif @document.universe.user == current_user %>
               <%= form_for(@document.universe, remote: true, html: { id: 'universe-privacy-form', data: { turbo: false } }) do |f| %>
                 <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                   <div class="flex items-center mb-4">
@@ -301,7 +318,7 @@
                   </div>
                   <div>
                     <span class="font-medium text-gray-900 dark:text-white"><%= @document.universe.name %></span>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Currently: <span class="font-medium capitalize"><%= @document.universe.privacy || 'private' %></span></p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Currently: <span class="font-medium"><%= @document.universe.privacy_label %></span></p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">You don't own this universe, so you can't change its privacy settings.</p>
                   </div>
                 </div>
