@@ -59,8 +59,14 @@ class TimelineEventsController < ApplicationController
     redirect_to edit_timeline_path(timeline), notice: 'Timeline event was successfully removed.'
   end
 
+  # Only pages the linker can read, since the card shows the page's name and cover to the timeline's readers
   def link_entity
-    entity = @timeline_event.timeline_event_entities.find_or_create_by(timeline_event_entity_params)
+    linked_page = linkable_entity
+    unless linked_page
+      return render json: { status: 'error', message: "That page doesn't exist or you don't have permission to link it." }, status: :not_found
+    end
+
+    entity = @timeline_event.timeline_event_entities.find_or_create_by(entity_type: linked_page.class.name, entity_id: linked_page.id)
     
     if entity.persisted?
       # Reload the timeline event to get the latest linked content
@@ -71,7 +77,8 @@ class TimelineEventsController < ApplicationController
         message: 'Content linked successfully',
         html: render_to_string(
           partial: 'shared/timeline_event_linked_content', 
-          locals: { timeline_event: @timeline_event }
+          locals: { timeline_event: @timeline_event },
+          formats: [:html]
         )
       }
     else
@@ -238,7 +245,13 @@ class TimelineEventsController < ApplicationController
                                           :event_type, :importance_level, :end_time_label, :status, :private_notes)
   end
 
-  def timeline_event_entity_params
-    params.permit(:entity_type, :entity_id)
+  LINKABLE_ENTITY_TYPES = (Rails.application.config.content_type_names[:all] + %w(Timeline Document)).freeze
+
+  def linkable_entity
+    entity_type = params[:entity_type].to_s
+    return unless LINKABLE_ENTITY_TYPES.include?(entity_type)
+
+    page = entity_type.constantize.find_by(id: params[:entity_id])
+    page if page&.readable_by?(current_user)
   end
 end

@@ -21,13 +21,16 @@
         <% timeline_event.timeline_event_entities.includes(:entity).order(:entity_type).each do |te_entity| %>
           <% next if te_entity.entity.nil? %>
           <% entity = te_entity.entity %>
+          <%# The timeline can be more public than the pages linked to it %>
+          <% next unless entity.readable_by?(current_user || User.new) %>
+          <% show_private_images = user_signed_in? && entity.updatable_by?(current_user) %>
           <% klass = content_class_from_name(te_entity.entity_type) %>
           
           <div class="group/card flex-shrink-0 w-40 h-24 rounded-lg overflow-hidden linked-content-card relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <!-- Background Image -->
             <div class="absolute inset-0">
-              <% if content_cover_image?(entity, include_private: true) %>
-                <%= content_image_tag entity, :card, include_private: true, alt: entity.name, class: 'w-full h-full object-cover' %>
+              <% if content_cover_image?(entity, include_private: show_private_images) %>
+                <%= content_image_tag entity, :card, include_private: show_private_images, alt: entity.name, class: 'w-full h-full object-cover' %>
               <% else %>
                 <!-- Fallback Icon Background -->
                 <div class="w-full h-full image-placeholder bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
