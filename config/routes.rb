@@ -369,6 +369,11 @@ Rails.application.routes.draw do
       get  :gallery,         on: :member, to: redirect { |params, req| "/plan/universes/#{params[:id]}#gallery" }
       post :toggle_archive,  on: :member
       post :toggle_favorite, on: :member
+
+      # Password protection. See the page types below.
+      patch  :password, on: :member, to: 'page_passwords#update',  defaults: { page_type: 'Universe' }
+      delete :password, on: :member, to: 'page_passwords#destroy', defaults: { page_type: 'Universe' }
+      post   :unlock,   on: :member, to: 'page_passwords#unlock',  defaults: { page_type: 'Universe' }, format: false, constraints: { id: /\d+/ }
       get '/tagged/:slug', action: :index, on: :collection, as: :page_tag
     end
     Rails.application.config.content_types[:all_non_universe].each do |content_type|
@@ -391,6 +396,12 @@ Rails.application.routes.draw do
         # API endpoints
         post :toggle_archive,  on: :member
         post :toggle_favorite, on: :member
+
+        # Password protection. The page type comes from the route rather than a parameter, and the
+        # unlock route is strict about its path so that rack-attack's limits can't be dodged.
+        patch  :password, on: :member, to: 'page_passwords#update',  defaults: { page_type: content_type.name }
+        delete :password, on: :member, to: 'page_passwords#destroy', defaults: { page_type: content_type.name }
+        post   :unlock,   on: :member, to: 'page_passwords#unlock',  defaults: { page_type: content_type.name }, format: false, constraints: { id: /\d+/ }
         # Already have these routes above, no need to duplicate
       end
     end

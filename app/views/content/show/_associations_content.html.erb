@@ -145,7 +145,8 @@
   
   <!-- View More Links -->
   <% references_path_method = "references_#{raw_content.class.name.downcase}_path" %>
-  <% if respond_to?(references_path_method) %>
+  <%# Entering a page's password only opens the page itself, not its connections page %>
+  <% if respond_to?(references_path_method) && !@page_unlocked %>
     <div class="mt-16 text-center">
       <%= link_to send(references_path_method, raw_content),
                   class: "group inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full text-sm text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-lg transition-all duration-200" do %>

@@ -6,7 +6,7 @@
     .limit(50) rescue []
 %>
 
-<% if user_signed_in? && raw_content.user_id == current_user.id %>
+<% if user_signed_in? && raw_content.user_id == current_user.id && !raw_content.try(:password_protected?) %>
   <div class="mb-6">
     <button @click="$dispatch('open-modal', 'share-to-stream-modal')"
             class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">

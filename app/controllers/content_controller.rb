@@ -112,6 +112,28 @@ class ContentController < ApplicationController
     return redirect_to(root_path) if @content.user.nil? # deleted user's content
     return if ENV.key?('CONTENT_BLACKLIST') && ENV['CONTENT_BLACKLIST'].split(',').include?(@content.user.try(:email))
 
+    if @content.try(:password_protected?)
+      # Keep the page out of browser history and shared caches, for the back button on a shared computer
+      response.headers['Cache-Control'] = 'no-store'
+
+      # Password protected pages get a lock screen rather than looking like they don't exist
+      if page_locked?(@content)
+        return redirect_to(root_path, notice: "You don't have permission to view that content.") unless request.format.html?
+
+        @navbar_actions = []
+        return render 'content/locked'
+      end
+
+      # Readers who entered the password get the page itself, as HTML, and nothing else: every other
+      # route and every other page keeps treating it as private.
+      if !(current_user || User.new).can_read?(@content)
+        return redirect_to(root_path, notice: "You don't have permission to view that content.") unless request.format.html?
+
+        @page_unlocked = true
+        Current.unlocked_page = @content
+      end
+    end
+
     @serialized_content = ContentSerializer.new(@content, viewing_user: current_user)
 
     # For basil images, assume they're all public for now since there's no privacy column

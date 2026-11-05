@@ -95,6 +95,9 @@ class SmokeData
 
     # Pages a visitor without access shouldn't see, so the access checks run too.
     Character.create!(user: owner, universe: universe, name: 'Private Smoke Character', privacy: 'private')
+    # A password protected page in the public universe, which every list has to leave out for visitors.
+    Character.create!(user: owner, universe: universe, name: 'Protected Smoke Character', privacy: 'private')
+             .protect_with_password('smoke password') || raise("Couldn't protect the smoke character")
 
     @tag = PageTag.create!(user: owner, page: page('Character'), tag: 'Smoke Tag', slug: 'smoke-tag')
 

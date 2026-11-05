@@ -10,6 +10,9 @@ class UniverseCoreContentAuthorizer < CoreContentAuthorizer
   end
 
   def readable_by? user
+    # A reader who entered this page's password, while ContentController#show renders it
+    return true if Current.unlocked_page?(resource)
+
     return true if PermissionService.content_is_public?(content: resource)
     return true if PermissionService.user_owns_content?(user: user, content: resource)
     return true if PermissionService.user_can_contribute_to_universe?(user: user, universe: resource)

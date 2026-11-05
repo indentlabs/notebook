@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 class ApplicationController < ActionController::Base
   include DocumentUnlocks
+  include PageUnlocks
 
   protect_from_forgery
 
