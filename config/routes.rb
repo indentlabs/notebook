@@ -312,6 +312,7 @@ Rails.application.routes.draw do
   get '/help/organizing-with-tags', to: 'help#organizing_with_tags', as: :help_organizing_with_tags
   get '/help/page-templates', to: 'help#page_templates', as: :help_page_templates
   get '/help/organizing-with-universes', to: 'help#organizing_with_universes', as: :help_organizing_with_universes
+  get '/help/privacy-and-sharing', to: 'help#privacy_and_sharing', as: :help_privacy_and_sharing
   get '/help/premium-features', to: 'help#premium_features', as: :help_premium_features
   get '/help/free-features', to: 'help#free_features', as: :help_free_features
   get '/help/your-account', to: 'help#your_account', as: :help_your_account

@@ -19,6 +19,11 @@ class HelpController < ApplicationController
     @meta_description = "Master the art of worldbuilding organization with universes in Notebook.ai. Learn about privacy, collaboration, focus mode, and best practices for managing complex fictional worlds."
   end
 
+  def privacy_and_sharing
+    @page_title = "Privacy & Sharing"
+    @meta_description = "Learn who can see your Notebook.ai universes, pages and documents: private, public and password protected settings, how universes and books share their contents, collaborators, images and your profile."
+  end
+
   def premium_features
     @page_title = "Premium Features Guide"
     @meta_description = "Comprehensive guide to Notebook.ai Premium features including advanced content types, document analysis, unlimited storage, timelines, collections, and collaboration tools."
