@@ -8,7 +8,10 @@ class UserFollowingsController < ApplicationController
     return unless user.present?
     return if user_signed_in? && current_user.blocked_by?(user)
 
-    @user_following = UserFollowing.new(user_following_params.merge({user_id: current_user.id}))
+    # Following someone you already follow (a double-click, or a second tab) just takes you to them
+    @user_following = current_user.user_followings.find_or_initialize_by(followed_user_id: user.id)
+    return redirect_to(user, notice: following_notice(user)) if @user_following.persisted?
+
     if @user_following.save
 
       # Create a notification letting the user know!
@@ -21,10 +24,13 @@ class UserFollowingsController < ApplicationController
         reference_code:   'followed-by-user'
       )
 
-      redirect_to @user_following.followed_user, notice: "You're now following #{@user_following.followed_user.name.presence || 'this user'}"
+      redirect_to user, notice: following_notice(user)
     else
       redirect_back fallback_location: root_path, alert: 'There was a problem following this user. Please try again.'
     end
+  rescue ActiveRecord::RecordNotUnique
+    # Two follow requests at once: the other one got there first and made the follow (and the notification)
+    redirect_to user, notice: following_notice(user)
   end
 
   # DELETE /user_followings/1
@@ -36,6 +42,10 @@ class UserFollowingsController < ApplicationController
   end
 
   private
+
+  def following_notice(user)
+    "You're now following #{user.name.presence || 'this user'}"
+  end
 
   # Use callbacks to share common setup or constraints between actions.
   def set_user_following

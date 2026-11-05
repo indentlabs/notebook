@@ -21,6 +21,15 @@ class ActiveSupport::TestCase
   fixtures :all
 
   # Add more helper methods to be used by all tests here...
+
+  # Every new account follows user 5 (User#follow_andrew), and which test user ends up being user 5 depends
+  # on what ran before. Tests about follows make their users with this, so the only follows are their own.
+  def create_user_without_follows(**attributes)
+    User.create!(password: 'password', password_confirmation: 'password', **attributes).tap do |user|
+      user.user_followings.each(&:really_destroy!)
+      user.reload
+    end
+  end
 end
 
 class SmokeTest

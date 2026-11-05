@@ -112,22 +112,22 @@ class UsersController < ApplicationController
     notifier.ping ":bomb: :bomb: :bomb: #{user.email.split('@').first}@ (##{user.id}) just deleted their account."
   end
 
-  # Follower lists can be huge (everyone follows user 5 on signup), so they're
-  # only browsable this deep, newest first. See #paginated_follow_list.
+  # Follower lists can be huge (everyone follows user 5 on signup), so only the newest
+  # FOLLOW_LIST_PER_PAGE * FOLLOW_LIST_MAX_PAGES of them can be paged through.
   FOLLOW_LIST_PER_PAGE = 100
   FOLLOW_LIST_MAX_PAGES = 50
 
   def followers
-    @followers = paginated_follow_list(
-      @user.inverse_user_followings, :user_id, @user.followers_count,
-      includes: [:avatar_attachment, :thredded_user_detail, :promotions]
+    @followers = paginate_follow_list(
+      @user.followers_newest_first.includes(:thredded_user_detail, :promotions, avatar_attachment: :blob),
+      @user.followers_count
     )
   end
 
   def following
-    @following = paginated_follow_list(
-      @user.user_followings, :followed_user_id, @user.following_count,
-      includes: [:avatar_attachment, :thredded_user_detail]
+    @following = paginate_follow_list(
+      @user.followed_users_newest_first.includes(:thredded_user_detail, avatar_attachment: :blob),
+      @user.following_count
     )
   end
   
@@ -219,24 +219,15 @@ class UsersController < ApplicationController
 
   private
 
-  # Pages through a user's followings by their own id (newest first), then loads
-  # just that page's users. Paging the DISTINCT users join directly made Postgres
-  # dedupe every row before the OFFSET -- 5s+ on deep pages of a big list -- so we
-  # also cap the depth and take the total from the counter cache instead of a COUNT.
-  def paginated_follow_list(followings, user_id_column, total_count, includes:)
+  # Even indexed, an OFFSET has to step over every row before it, so deep pages of a huge list
+  # stay expensive; hence the cap. Pages past it (or past the end) show the last page. The total
+  # comes from the counter cache: will_paginate would otherwise COUNT the whole list on every page.
+  def paginate_follow_list(users, total_count)
     total_entries = [total_count.to_i, FOLLOW_LIST_PER_PAGE * FOLLOW_LIST_MAX_PAGES].min
     last_page     = [(total_entries.to_f / FOLLOW_LIST_PER_PAGE).ceil, 1].max
     page          = params[:page].to_i.clamp(1, last_page)
 
-    WillPaginate::Collection.create(page, FOLLOW_LIST_PER_PAGE, total_entries) do |pager|
-      user_ids = followings.order(id: :desc)
-                           .offset(pager.offset)
-                           .limit(pager.per_page)
-                           .pluck(user_id_column)
-                           .uniq
-      users_by_id = User.where(id: user_ids).includes(*includes).index_by(&:id)
-      pager.replace(user_ids.filter_map { |id| users_by_id[id] })
-    end
+    users.paginate(page: page, per_page: FOLLOW_LIST_PER_PAGE, total_entries: total_entries)
   end
 
   def set_user
@@ -297,24 +288,25 @@ class UsersController < ApplicationController
   end
   
   def load_user_social_data
-    # Optimized: Use counter caches if available, fallback to count
-    @followers_count = @user.respond_to?(:followers_count) ? @user.followers_count : @user.followed_by_users.count
-    @following_count = @user.respond_to?(:following_count) ? @user.following_count : @user.followed_users.count
-    
-    # Optimized: Use includes to prevent N+1
-    @followers = @user.followed_by_users.includes(:avatar_attachment).limit(12)
-    @following = @user.followed_users.includes(:avatar_attachment).limit(12)
+    @followers_count = @user.followers_count
+    @following_count = @user.following_count
+
+    # Loaded here so the view's any? checks don't each run a query of their own
+    @followers = @user.followers_newest_first.includes(avatar_attachment: :blob).limit(12).to_a
+    @following = @user.followed_users_newest_first.includes(avatar_attachment: :blob).limit(12).to_a
     
     # Optimized: Check follows and blocks efficiently
     if user_signed_in?
       @is_following = UserFollowing.exists?(user_id: current_user.id, followed_user_id: @user.id)
       @is_blocked = UserBlocking.exists?(user_id: current_user.id, blocked_user_id: @user.id)
       # Cache followed user IDs to prevent N+1 in view mutual connection checks
-      @current_user_following_ids = current_user.followed_users.pluck(:id)
+      @current_user_following_ids = current_user.user_followings.pluck(:followed_user_id)
+      @mutual_follow_count = @user.followed_users.where(id: current_user.user_followings.select(:followed_user_id)).count
     else
       @is_following = false
       @is_blocked = false
       @current_user_following_ids = []
+      @mutual_follow_count = 0
     end
   end
   

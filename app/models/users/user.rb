@@ -51,9 +51,22 @@ class User < ApplicationRecord
   end
 
   has_many :user_followings,              dependent: :destroy
-  has_many :followed_users, -> { distinct }, through: :user_followings, source: :followed_user
+  # Follows are unique (UserFollowing validates it, backed by a unique index), so these don't need DISTINCT.
+  # That matters: with it, Postgres had to read every one of a user's follows before it could return any
+  # of them, and user 5 has over a million followers (every signup follows them).
+  has_many :followed_users, through: :user_followings, source: :followed_user
   has_many :inverse_user_followings, class_name: 'UserFollowing', foreign_key: :followed_user_id, dependent: :destroy
-  has_many :followed_by_users, -> { distinct }, through: :inverse_user_followings, source: :user
+  has_many :followed_by_users, through: :inverse_user_followings, source: :user
+
+  # Newest follow first. Indexed, so a page of these costs the same however many followers there are.
+  def followers_newest_first
+    followed_by_users.reorder(UserFollowing.arel_table[:id].desc)
+  end
+
+  def followed_users_newest_first
+    followed_users.reorder(UserFollowing.arel_table[:id].desc)
+  end
+
   def followed_by?(user)
     UserFollowing.exists?(user_id: user.id, followed_user_id: self.id)
   end
