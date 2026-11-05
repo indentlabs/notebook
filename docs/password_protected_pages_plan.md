@@ -1,6 +1,6 @@
 # Password protected worldbuilding pages: plan
 
-Status: proposal, nothing built yet.
+Status: approved plan, nothing built yet. The open questions are settled in section 5.
 
 Goal: give characters, locations, items, universes and every other page type in
 `Rails.application.config.content_types[:all]` (29 types) the same third privacy option that
@@ -191,6 +191,11 @@ Include it from `IsContentPage`, so every type in `content_types[:all]` gets it.
 - `password_fingerprint`: `HMAC(secret, "#{self.class.name}/#{id}/#{digest}")`
 - Length rule `5..72`, shared with `Document::PASSWORD_LENGTH`
 
+**Only the page's owner can set, change or remove its password** (decision 1). Contributors and
+the universe owner can still edit the page and read it without the password, but they can't
+touch its password. The new controller checks `PermissionService.user_owns_content?`, not
+`updatable_by?`, which includes contributors.
+
 It may make sense to put the shared pieces (fingerprint, length rule, the explicit-change guard)
 into one module that `Document` also includes, behind a small `password_digest_value` /
 `assign_password` interface. Worth doing if it stays small; otherwise accept a little
@@ -214,9 +219,16 @@ pages.privacy = 'public'
 OR (universes.privacy = 'public' AND (pages.privacy IS NULL OR pages.privacy != 'password'))
 ```
 
-**A password-protected universe.** Its own privacy isn't `'public'`, so its pages no longer
-inherit anything. Each page falls back to its own setting, which is the fail-closed outcome
-(but see open question 2).
+**A password-protected universe** (decision 2). The password applies to the universe page
+only. Everything inside the universe is treated exactly as if the universe were private:
+
+- Pages, documents, books and timelines in it don't inherit any visibility from it.
+- Anything set to public on its own stays public.
+- Unlocking the universe doesn't unlock anything inside it.
+
+This mostly comes for free. Every inheritance check compares the universe's privacy to
+`'public'`, and `'password'` isn't `'public'`. Tests should still cover each kind of content
+in a protected universe.
 
 **The session stays out of `readable_by?`.** Same as documents: everything outside the show
 page treats a protected page as private.
@@ -232,8 +244,8 @@ page treats a protected page as private.
   in `config/routes.rb`:
 
   ```
-  PATCH  /plan/characters/:id/password   # owner sets or changes
-  DELETE /plan/characters/:id/password   # owner removes (with new privacy)
+  PATCH  /plan/characters/:id/password   # page owner only: set or change
+  DELETE /plan/characters/:id/password   # page owner only: remove (with new privacy)
   POST   /plan/characters/:id/unlock     # anyone; format: false, id: /\d+/
   ```
 
@@ -258,9 +270,15 @@ page treats a protected page as private.
   - This is the one real departure from documents. Documents could special-case a single view,
     but a content page has dozens of partials that each check readability.
   - Because the grant is cleared after every request, it can't reach any other route.
-- **What an unlocked reader sees** (recommended): the page's public attribute fields, public
-  gallery images, and linked pages, documents and timelines filtered by their own rules. No
-  edit, changelog, references or share actions, and no JSON.
+- **What an unlocked reader sees**: the page's public attribute fields, public gallery images,
+  and linked pages, documents and timelines filtered by their own rules. No edit, changelog,
+  references or share actions, and no JSON.
+- **An unlocked universe** (decision 3). The reader sees what a stranger would see if the
+  universe were public, except for its contents:
+  - Content lists, tabs and counts show only pages, documents, books and timelines the reader
+    could already open without the unlock, which means ones that are public on their own.
+  - Counts must use the same filter, so they don't reveal how much private content the
+    universe has.
 
 ### 3.5 Rate limiting
 
@@ -338,8 +356,11 @@ I'd ship item 1 as its own PR first, and fold 2 and 3 into the server-side PR be
   `privacy_label` / `privacy_icon`.
 - **`PrivacyToggle.js`** and `content/_share.html.erb`: treat `'password'` as its own state.
   Don't let a single click turn it into `'public'`; send the owner to the privacy panel instead.
-- **Universe privacy panel**: explain that protected pages inside a public universe stay
-  protected.
+- **Universe privacy panel**:
+  - Explain that protected pages inside a public universe stay protected.
+  - When the universe itself is password protected, explain that its pages aren't protected
+    by the universe's password: they follow their own privacy settings, as they would in a
+    private universe.
 - **Share-to-stream and collection quick-add**: explain that protected pages can't be shared or
   submitted.
 - **Help center** (`help/organizing_with_universes`, `help/free_features`): document the option.
@@ -378,24 +399,17 @@ Per `docs/release_safety.md`:
 
 ---
 
-## 5. Open questions
+## 5. Decisions
 
-1. **Who can set or remove a page's password?** Today contributors can change a page's privacy.
-   *Recommendation:* the page owner only, matching documents. The password is something the
-   owner hands out, and contributors don't need it to read the page.
-2. **Should unlocking a universe unlock the pages inside it?** This is probably the most
-   valuable version for game masters ("one password for my players"). It's also a much bigger
-   change: every list, link, gallery and API check inside the universe would have to become
-   session-aware.
-   *Recommendation:* not in v1. A protected universe protects only its own page, and its pages
-   keep their own settings. Revisit as a follow-up, with an explicit "pages inherit the
-   universe password" setting.
-3. **What does an unlocked reader see on a universe's page?** *Recommendation:* the universe's
-   own content, plus only the pages they could already read without the unlock.
-4. **Gallery on an unlocked page.** Image files are public S3 URLs with year-long public
-   caching. Once a reader has a file URL, a password can't take it back.
-   *Recommendation:* show public gallery images to unlocked readers, and say in the UI that
-   images can be re-shared.
-5. **Books and timelines.** They have their own authorizers and their own privacy UI. Once
-   pages are done, adding them should be mostly mechanical, but they aren't in
-   `content_types[:all]`, so they're excluded here.
+1. **Who can set or remove a page's password?** Only the page's owner, matching documents.
+   Contributors can't, even though they can change a page's other privacy settings today.
+2. **Does a universe's password unlock the pages inside it?** No. A password on a universe
+   applies only to the universe page. Everything in the universe is treated as if the universe
+   were private, and unlocking the universe opens nothing else.
+3. **What does an unlocked reader see on a universe's page?** The universe's own content, plus
+   only the contents they could already read without the unlock. Lists and counts both follow
+   that rule.
+4. **Gallery images on an unlocked page.** Public gallery images are shown to unlocked readers.
+   No UI copy is needed about image files being shareable once seen.
+5. **Books and timelines** stay out of scope. They have their own authorizers and their own
+   privacy UI. Adding them after pages should be mostly mechanical.
