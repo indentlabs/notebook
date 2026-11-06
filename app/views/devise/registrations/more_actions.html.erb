@@ -37,6 +37,10 @@
       
       <!-- Main content -->
       <div class="flex-1 p-4 sm:p-6">
+        <% if configured_oauth_providers.any? %>
+          <%= render partial: 'devise/registrations/panes/connected_accounts' %>
+        <% end %>
+
         <%= form_for(current_user, as: :user, url: registration_path(:user), html: { method: :put, id: "settings-form" }) do |f| %>
           <% if current_user.errors.any? %>
             <div class="mb-6">

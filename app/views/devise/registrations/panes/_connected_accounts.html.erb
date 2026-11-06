@@ -1,0 +1,47 @@
+<div class="mb-8">
+  <div>
+    <h2 class="text-lg font-medium text-gray-900 dark:text-white">Connected accounts</h2>
+    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+      Link an external account to log into Notebook.ai with a single click.
+    </p>
+  </div>
+
+  <% if current_user.oauth_only? %>
+    <div class="mt-4 rounded-md bg-blue-50 dark:bg-blue-900 p-4 text-sm text-blue-700 dark:text-blue-200">
+      You signed up with a linked account, so you haven't set a Notebook.ai password yet.
+      To add one (or before disconnecting your only linked account), use
+      <%= link_to 'Forgot your password?', new_user_password_path, class: 'font-medium underline' %>
+      to set a password for <%= current_user.email %>.
+    </div>
+  <% end %>
+
+  <div class="mt-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md divide-y divide-gray-200 dark:divide-gray-700">
+    <% { google_oauth2: 'Google', discord: 'Discord' }.each do |provider, provider_label| %>
+      <% next unless configured_oauth_providers.include?(provider) %>
+      <% authentication = current_user.user_authentications.find { |ua| ua.provider == provider.to_s } %>
+
+      <div class="flex items-center px-4 py-4">
+        <span class="w-6 h-6 mr-4 flex-shrink-0"><%= render 'devise/shared/provider_icon', provider: provider %></span>
+        <div class="flex-1">
+          <div class="text-sm font-medium text-gray-900 dark:text-white"><%= provider_label %></div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">
+            <%= authentication ? 'Connected' : 'Not connected' %>
+          </div>
+        </div>
+
+        <% if authentication %>
+          <% if current_user.oauth_only? && current_user.user_authentications.length == 1 %>
+            <span class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  title="Set a password first so you don't lose access to your account">Disconnect</span>
+          <% else %>
+            <%= button_to 'Disconnect', user_authentication_path(authentication), method: :delete,
+                  class: 'px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue cursor-pointer' %>
+          <% end %>
+        <% else %>
+          <%= button_to 'Connect', omniauth_authorize_path(:user, provider),
+                class: 'inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-notebook-blue hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-notebook-blue cursor-pointer' %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

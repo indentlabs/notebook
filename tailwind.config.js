@@ -91,6 +91,8 @@ module.exports = {
     extend: {
       colors: {
         'notebook-blue': '#2196F3',
+        'discord-blurple': '#5865F2',
+        'discord-blurple-dark': '#4752C4',
       },
       fontSize: {
         'xxs': '0.625rem', // 10px
