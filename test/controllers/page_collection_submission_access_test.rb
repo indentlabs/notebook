@@ -6,7 +6,7 @@ class PageCollectionSubmissionAccessTest < ActionDispatch::IntegrationTest
   setup do
     @collection_owner = users(:one)
     @submitter        = users(:two)
-    @stranger         = User.create!(email: 'stranger@example.com', password: 'password', password_confirmation: 'password')
+    @stranger         = User.create!(email: 'stranger@example.com', password: 'password', password_confirmation: 'password', confirmed_at: Time.current)
     @collection = PageCollection.create!(user: @collection_owner, title: 'Collection', privacy: 'public', page_types: ['Character'], allow_submissions: true)
     @page       = Character.create!(user: @submitter, name: 'Submitted', privacy: 'public')
     @submission = PageCollectionSubmission.create!(page_collection: @collection, content: @page, user: @submitter, submitted_at: Time.current)

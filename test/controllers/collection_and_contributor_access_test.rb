@@ -8,7 +8,7 @@ class CollectionAndContributorAccessTest < ActionDispatch::IntegrationTest
   setup do
     @owner    = users(:one)
     @stranger = users(:two)
-    @writer   = User.create!(email: 'writer@example.com', password: 'password', password_confirmation: 'password')
+    @writer   = User.create!(email: 'writer@example.com', password: 'password', password_confirmation: 'password', confirmed_at: Time.current)
     # Fixture shares point at nothing, which the feed can't render
     ContentPageShare.update_all(deleted_at: Time.current)
   end
