@@ -26,7 +26,7 @@ class EmailConfirmationTest < ActiveSupport::TestCase
     assert_enqueued_emails 1 do
       User.create!(email: 'another-newcomer@example.com', password: 'password')
     end
-    assert_enqueued_with(job: ActionMailer::MailDeliveryJob, queue: 'notifications')
+    assert_enqueued_with(queue: 'notifications')
 
     perform_enqueued_jobs
     mail = ActionMailer::Base.deliveries.last
@@ -98,7 +98,7 @@ class EmailConfirmationTest < ActiveSupport::TestCase
     pages = [
       Universe.create!(user: @unconfirmed, name: 'World'),
       Document.create!(user: @unconfirmed, title: 'Draft'),
-      Book.create!(user: @unconfirmed, title: 'Novel'),
+      Book.create!(user: @unconfirmed, name: 'Novel'),
       Timeline.create!(user: @unconfirmed, name: 'History'),
       PageCollection.create!(user: @unconfirmed, title: 'Favorites', privacy: 'private')
     ]

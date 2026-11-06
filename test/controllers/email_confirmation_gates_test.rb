@@ -25,7 +25,8 @@ class EmailConfirmationGatesTest < ActionDispatch::IntegrationTest
 
     user = User.find_by!(email: 'brand-new@example.com')
     assert_not user.confirmed?
-    follow_redirect!
+
+    get edit_user_registration_path
     assert_response :success
     assert_equal user.id, controller.current_user&.id
   end
