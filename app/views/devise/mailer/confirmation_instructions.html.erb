@@ -1,5 +1,12 @@
-<p>Welcome <%= @email %>!</p>
+<p>Hello <%= @email %>!</p>
 
-<p>You can confirm your account email through the link below:</p>
+<% if @resource.pending_reconfirmation? %>
+  <p>Please confirm this is your new Notebook.ai email address by following the link below. Your email address won't change until you do.</p>
+<% else %>
+  <p>Thanks for joining Notebook.ai! Please confirm your email address by following the link below.</p>
+  <p>Until you do, you can still build out your worlds, but you won't be able to post on the forums or share your work publicly.</p>
+<% end %>
 
-<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+<p><%= link_to 'Confirm my email address', confirmation_url(@resource, confirmation_token: @token) %></p>
+
+<p>If you didn't make this request, you can ignore this email.</p>

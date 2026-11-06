@@ -44,6 +44,10 @@
                    css_class: 'bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6',
                    placeholder: t('thredded.topics.form.title_placeholder_start') %>
       </div>
+    <% elsif user_signed_in? && !current_user.can_publish? %>
+      <div class="mb-6">
+        <%= render 'shared/confirm_email_notice', reason: 'start new topics on the forums' %>
+      </div>
     <% end %>
     
     <!-- Topics List -->

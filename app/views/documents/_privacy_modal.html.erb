@@ -157,13 +157,19 @@
                 </div>
 
                 <!-- Radio button for Public -->
-                <div class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer <%= @document.privacy == 'public' ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>" onclick="document.getElementById('document-privacy-public').click()">
-                  <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.privacy == 'public' ? 'checked' : '' %> onchange="updateDocumentPrivacy(this)">
+                <% owner_can_publish = @document.user.nil? || @document.user.can_publish? %>
+                <div class="flex items-center p-2 rounded-md <%= owner_can_publish ? 'hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer' : 'cursor-not-allowed opacity-50' %> <%= @document.privacy == 'public' ? 'bg-white dark:bg-gray-800 border border-teal-500' : '' %>" onclick="document.getElementById('document-privacy-public').click()">
+                  <input type="radio" id="document-privacy-public" name="document-privacy-option" value="public" class="h-4 w-4 text-teal-600 focus:ring-teal-500 dark:bg-gray-600 dark:border-gray-500" <%= @document.privacy == 'public' ? 'checked' : '' %> <%= 'disabled data-locked=true' unless owner_can_publish %> onchange="updateDocumentPrivacy(this)">
                   <label for="document-privacy-public" class="ml-3 flex items-center cursor-pointer">
                     <i class="material-icons text-green-500 mr-2">public</i>
                     <div>
                       <span class="block text-sm font-medium text-gray-900 dark:text-white">Public</span>
                       <span class="block text-xs text-gray-500 dark:text-gray-400">Anyone with the link can view</span>
+                      <% unless owner_can_publish %>
+                        <span class="block text-xs text-yellow-700 dark:text-yellow-300">
+                          <%= @document.user == current_user ? 'Confirm your email address' : 'Its owner needs to confirm their email address' %> to make this public
+                        </span>
+                      <% end %>
                     </div>
                   </label>
                 </div>
@@ -523,8 +529,9 @@
 
   window.setDocumentPrivacyOptionsDisabled = window.setDocumentPrivacyOptionsDisabled || function(disabled) {
     document.querySelectorAll('[name="document-privacy-option"]').forEach(function(option) {
-      option.disabled = disabled;
-      option.parentElement.classList.toggle('opacity-50', disabled);
+      // Locked options (Public, before the owner has confirmed their email) stay disabled
+      option.disabled = disabled || option.dataset.locked === 'true';
+      option.parentElement.classList.toggle('opacity-50', option.disabled);
     });
   };
 

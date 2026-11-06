@@ -1,18 +1,57 @@
-<h2>Resend confirmation instructions</h2>
+<section class="bg-blueGray">
+  <div class="w-full lg:w-4/12 px-4 mx-auto pt-6">
+    <div class="relative flex flex-col bg-white min-w-0 break-words w-full mb-6 shadow-lg rounded-lg bg-blueGray-200 border-0">
+      <div class="rounded-t mb-0 px-6 py-6">
+        <%= image_tag 'logos/both-small.webp', class: 'w-full' %>
+      </div>
 
-<% if resource.errors.any? %>
-  <%= devise_error_messages! %>
-<% end %>
+      <div class="flex-auto px-4 lg:px-10 py-10 pt-0">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-semibold text-gray-700">Confirm your email address</h2>
+          <p class="text-sm text-gray-500 mt-2">Enter your email and we'll send you a new confirmation link</p>
+        </div>
 
-<%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email) %> 
+        <% if resource.errors.any? %>
+          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+            <strong class="font-bold">Please fix the following errors:</strong>
+            <ul class="list-disc list-inside mt-2">
+              <% resource.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <%= form_for(resource, as: resource_name, url: confirmation_path(resource_name), html: { method: :post }) do |f| %>
+          <div class="relative w-full mb-6">
+            <%= f.label :email, class: "block uppercase text-blueGray-600 text-xs font-bold mb-2" %>
+            <%= f.email_field :email,
+                autofocus: true,
+                autocomplete: "email",
+                placeholder: "Email",
+                value: (resource.pending_reconfirmation? ? resource.unconfirmed_email : resource.email),
+                class: "border-0 px-3 py-3 placeholder-blueGray-300 text-blueGray-600 bg-white rounded text-sm shadow focus:outline-none focus:ring w-full ease-linear transition-all duration-150" %>
+          </div>
+
+          <div class="text-center mt-6">
+            <%= f.submit "Send confirmation link",
+                class: "bg-notebook-blue text-white active:bg-blue-600 text-sm font-bold uppercase px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 w-full ease-linear transition-all duration-150 cursor-pointer" %>
+          </div>
+
+          <% unless user_signed_in? %>
+            <div class="flex flex-wrap mt-6">
+              <div class="w-1/2">
+                <%= link_to "Back to login", new_session_path(resource_name),
+                    class: "text-notebook-blue text-sm hover:text-blue-500" %>
+              </div>
+              <div class="w-1/2 text-right">
+                <%= link_to "Sign up", new_registration_path(resource_name),
+                    class: "text-notebook-blue text-sm hover:text-blue-500" %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
   </div>
-
-  <div class="actions">
-    <%= f.submit "Resend confirmation instructions" %>
-  </div>
-<% end %>
-
-<%= render "devise/shared/links" %>
+</section>

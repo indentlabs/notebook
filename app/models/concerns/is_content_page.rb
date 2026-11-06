@@ -6,6 +6,7 @@ module IsContentPage
   included do
     include HasAttributes
     include HasPrivacy
+    include RequiresConfirmedEmailToPublish
     include HasContentGroupers
     include HasImageUploads
     include HasChangelog

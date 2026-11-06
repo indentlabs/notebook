@@ -22,6 +22,7 @@ class Document < ApplicationRecord
   include HasPageTags
   include BelongsToUniverse
   include HasPrivacy
+  include RequiresConfirmedEmailToPublish
 
   PRIVACY_LABELS = {
     'private'  => 'Private',

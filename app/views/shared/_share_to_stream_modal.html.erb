@@ -78,64 +78,68 @@
             </div>
           </div>
 
-          <!-- Share form -->
-          <%= form_with url: user_content_page_shares_path(current_user), method: :post, local: true, class: "space-y-4" do |f| %>
-            <!-- Hidden content identifier -->
-            <input type="hidden" name="content_page_share[content_page]" value="<%= "#{content_type}-#{content_id}" %>">
+          <% if current_user.can_publish? %>
+            <!-- Share form -->
+            <%= form_with url: user_content_page_shares_path(current_user), method: :post, local: true, class: "space-y-4" do |f| %>
+              <!-- Hidden content identifier -->
+              <input type="hidden" name="content_page_share[content_page]" value="<%= "#{content_type}-#{content_id}" %>">
 
-            <!-- Message textarea with user avatar -->
-            <div>
-              <label for="share-message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Say something about this page
-              </label>
-              <div class="flex items-start space-x-3">
-                <div class="flex-shrink-0">
-                  <%= image_tag current_user.image_url(size: 40), class: "w-10 h-10 rounded-full", alt: current_user.display_name %>
-                </div>
-                <div class="flex-1">
-                  <textarea
-                    id="share-message"
-                    name="content_page_share[message]"
-                    rows="3"
-                    placeholder="Share your thoughts, ask a question, or tell the community why you're sharing this..."
-                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                  ></textarea>
-                  <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Optional - you can share without a message
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Privacy notice - only show if user can edit the content AND it's not already public -->
-            <% if content.respond_to?(:privacy) && content.privacy != 'public' && content.updatable_by?(current_user) %>
-              <div class="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800">
-                <div class="flex items-start">
-                  <i class="material-icons text-yellow-600 dark:text-yellow-400 text-sm mr-2 mt-0.5">warning</i>
-                  <div class="text-sm text-yellow-800 dark:text-yellow-200">
-                    <strong>Note:</strong> Sharing this page will make it public so the community can view it.
+              <!-- Message textarea with user avatar -->
+              <div>
+                <label for="share-message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Say something about this page
+                </label>
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0">
+                    <%= image_tag current_user.image_url(size: 40), class: "w-10 h-10 rounded-full", alt: current_user.display_name %>
+                  </div>
+                  <div class="flex-1">
+                    <textarea
+                      id="share-message"
+                      name="content_page_share[message]"
+                      rows="3"
+                      placeholder="Share your thoughts, ask a question, or tell the community why you're sharing this..."
+                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
+                    ></textarea>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      Optional - you can share without a message
+                    </p>
                   </div>
                 </div>
               </div>
-            <% end %>
 
-            <!-- Action buttons -->
-            <div class="flex justify-end space-x-3 pt-2">
-              <button
-                type="button"
-                @click="open = false"
-                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center"
-              >
-                <i class="material-icons text-sm mr-2">send</i>
-                Share to Stream
-              </button>
-            </div>
+              <!-- Privacy notice - only show if user can edit the content AND it's not already public -->
+              <% if content.respond_to?(:privacy) && content.privacy != 'public' && content.updatable_by?(current_user) %>
+                <div class="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900 border border-yellow-200 dark:border-yellow-800">
+                  <div class="flex items-start">
+                    <i class="material-icons text-yellow-600 dark:text-yellow-400 text-sm mr-2 mt-0.5">warning</i>
+                    <div class="text-sm text-yellow-800 dark:text-yellow-200">
+                      <strong>Note:</strong> Sharing this page will make it public so the community can view it.
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+
+              <!-- Action buttons -->
+              <div class="flex justify-end space-x-3 pt-2">
+                <button
+                  type="button"
+                  @click="open = false"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors flex items-center"
+                >
+                  <i class="material-icons text-sm mr-2">send</i>
+                  Share to Stream
+                </button>
+              </div>
+            <% end %>
+          <% else %>
+            <%= render 'shared/confirm_email_notice', reason: 'share to the community stream' %>
           <% end %>
         <% else %>
           <!-- Not logged in state -->

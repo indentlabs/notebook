@@ -16,7 +16,7 @@ class ShareCommentsController < ApplicationController
       redirect_to([@share_comment.content_page_share.user, @share_comment.content_page_share], notice: "Thanks for leaving a comment!");
       # redirect_back(fallback_location: @share_comment.content_page_share, notice: "Comment posted successfully.")
     else
-      render :new
+      redirect_back fallback_location: stream_path, alert: @share_comment.errors.full_messages.to_sentence
     end
   end
 

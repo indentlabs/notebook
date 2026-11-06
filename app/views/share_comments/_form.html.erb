@@ -1,8 +1,15 @@
-<%= form_for ShareComment.new do |f| %>
-  <div class="input-field comment-form">
-    <%= f.hidden_field :content_page_share_id, value: share.id %>
-    <%= f.label 'Leave a message', for: "share_comment_#{share.id}" %>
-    <%= f.text_area :message, id: "share_comment_#{share.id}", class: 'materialize-textarea js-can-mention-pages' %>
-    <%= f.submit 'Comment', class: 'btn right green white-text submit-button' %>
-  </div>
+<% if user_signed_in? && !current_user.can_publish? %>
+  <p class="comment-form text-sm text-gray-600 dark:text-gray-400">
+    <%= link_to 'Confirm your email address', edit_user_registration_path, class: 'text-blue-600 dark:text-blue-400 font-medium' %>
+    to leave comments.
+  </p>
+<% else %>
+  <%= form_for ShareComment.new do |f| %>
+    <div class="input-field comment-form">
+      <%= f.hidden_field :content_page_share_id, value: share.id %>
+      <%= f.label 'Leave a message', for: "share_comment_#{share.id}" %>
+      <%= f.text_area :message, id: "share_comment_#{share.id}", class: 'materialize-textarea js-can-mention-pages' %>
+      <%= f.submit 'Comment', class: 'btn right green white-text submit-button' %>
+    </div>
+  <% end %>
 <% end %>

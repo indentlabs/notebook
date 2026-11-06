@@ -290,8 +290,14 @@
           </legend>
           
           <div class="space-y-3">
-            <%= f.label :privacy, class: 'flex items-start p-4 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200' do %>
-              <%= f.radio_button :privacy, 'public', class: 'mt-1 mr-3 text-green-600 focus:ring-green-500' %>
+            <% unless current_user.can_publish? %>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                <%= link_to 'Confirm your email address', edit_user_registration_path, class: 'text-blue-600 dark:text-blue-400 font-medium' %>
+                to make collections public.
+              </p>
+            <% end %>
+            <%= f.label :privacy, class: "flex items-start p-4 border border-gray-200 dark:border-gray-700 rounded-lg transition-all duration-200 #{current_user.can_publish? ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600' : 'cursor-not-allowed opacity-50'}" do %>
+              <%= f.radio_button :privacy, 'public', class: 'mt-1 mr-3 text-green-600 focus:ring-green-500', disabled: !current_user.can_publish? %>
               <div class="flex-1">
                 <div class="flex items-center mb-1">
                   <i class="material-icons text-green-600 dark:text-green-400 text-sm mr-2">public</i>

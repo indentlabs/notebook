@@ -136,6 +136,8 @@
                        button_submitting_text: t('thredded.posts.form.create_btn_submitting') %>
           </div>
         </div>
+      <% elsif user_signed_in? && !current_user.can_publish? && !topic.locked? %>
+        <%= render 'shared/confirm_email_notice', reason: 'reply on the forums' %>
       <% end %>
     <% end %>
   </div>

@@ -16,8 +16,12 @@ end
 #
 # Users are soft-deleted, so look among deleted ones too: creating the same
 # email again would fail, and a failing seed stops the container booting.
+#
+# Seeded accounts count as confirmed, so they can post and publish like any
+# existing account, and nobody is emailed a confirmation link.
 def seed_user(email:, name:, password:)
-  User.with_deleted.find_by(email: email) || User.create!(name: name, email: email, password: password)
+  User.with_deleted.find_by(email: email) ||
+    User.new(name: name, email: email, password: password).tap(&:skip_confirmation!).tap(&:save!)
 end
 
 # The account script/smoke_check.rb signs in as (see docs/release_safety.md).

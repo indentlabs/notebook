@@ -1,7 +1,8 @@
 # The world RouteSmokeTest requests every page against.
 #
 # Everything is owned by one premium writer. A collaborator contributes to
-# their universe, a stranger is just another signed-in user, and an admin
+# their universe, a stranger is just another signed-in user, a newcomer has
+# just signed up and hasn't confirmed their email address yet, and an admin
 # moderates the site. Keep it realistic: when production has a kind of record
 # a page might trip on, add one here.
 # The document analysis services run in the Sidekiq worker, which loads the
@@ -10,7 +11,7 @@ require 'textstat'
 require 'engtagger'
 
 class SmokeData
-  attr_reader :owner, :collaborator, :stranger, :admin,
+  attr_reader :owner, :collaborator, :stranger, :newcomer, :admin,
               :universe, :pages, :document, :revision, :folder, :book, :timeline,
               :collection, :submission, :share, :share_comment, :notification,
               :writing_goal, :integration, :category, :field, :tag,
@@ -27,6 +28,7 @@ class SmokeData
     when :owner        then owner
     when :collaborator then collaborator
     when :stranger     then stranger
+    when :newcomer     then newcomer
     when :admin        then admin
     when :anonymous    then nil
     else raise ArgumentError, "unknown role #{role}"
@@ -64,6 +66,7 @@ class SmokeData
         password:  'password',
         time_zone: 'UTC',
         created_at: 1.month.ago,
+        confirmed_at: 1.month.ago,
         # Production users get a Stripe customer when they sign up (see
         # User#initialize_stripe_customer). Billing pages then call Stripe,
         # which WebMock blocks and RouteSmokeTest skips past.
@@ -78,6 +81,7 @@ class SmokeData
     @owner        = make_user('owner', selected_billing_plan_id: BillingPlan::PREMIUM_IDS.first, upload_bandwidth_kb: 100_000)
     @collaborator = make_user('collaborator')
     @stranger     = make_user('stranger')
+    @newcomer     = make_user('newcomer', created_at: 1.hour.ago, confirmed_at: nil)
     @admin        = make_user('admin', site_administrator: true, forum_moderator: true)
     @owner.update_columns(secure_code: 'smoke-secure-code') if User.column_names.include?('secure_code')
   end

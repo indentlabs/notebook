@@ -48,7 +48,7 @@ class RouteSmokeTest < ActionDispatch::IntegrationTest
   # Rails' own routes (Active Storage, mailer previews, ...).
   SKIPPED_CONTROLLER_PREFIXES = %w[rails/ active_storage/ action_mailbox/].freeze
 
-  ROLES = %i[owner collaborator stranger anonymous admin].freeze
+  ROLES = %i[owner collaborator stranger newcomer anonymous admin].freeze
 
   # The page reached for a service the test environment doesn't run: WebMock
   # blocks outside HTTP (Stripe, image hosts, ...) and CI has no Redis.

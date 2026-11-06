@@ -4,9 +4,18 @@ class User < ApplicationRecord
   acts_as_paranoid
 
   # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
+  # :lockable, :timeoutable and :omniauthable
+  #
+  # :confirmable never blocks signing in (config.allow_unconfirmed_access_for is nil);
+  # see #can_publish? for what an unconfirmed account can't do yet.
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable,
+         :confirmable
+
+  # Shown when an unconfirmed account tries something #can_publish? doesn't allow yet
+  CONFIRM_EMAIL_TO_PUBLISH_MESSAGE =
+    "Please confirm your email address first. We emailed you a confirmation link when you signed up, " \
+    "and you can have it sent again from your account settings.".freeze
 
   include HasContent
   include Authority::UserAbilities
@@ -349,6 +358,19 @@ class User < ApplicationRecord
     result
   end
 
+  # Accounts have to confirm their email address before they can put anything in front of other
+  # people: posting on the forums, making pages public, or sharing to the stream. Everything else
+  # works the same either way. Accounts from before confirmations existed were all marked confirmed.
+  def can_publish?
+    confirmed?
+  end
+
+  # Thredded's hook for which messageboards a user can post in. Unconfirmed accounts can still read
+  # everything; Thredded hides the new topic and reply forms when this is empty.
+  def thredded_can_write_messageboards
+    can_publish? ? super : Thredded::Messageboard.none
+  end
+
   def display_name
     username = self.username.present? ? "@#{self.username}" : nil
     username ||= self.name.present? ? self.name : nil
@@ -399,6 +421,20 @@ class User < ApplicationRecord
     favorite_page_type.constantize.icon
   end
 
+  protected
+
+  # Send confirmation emails from Sidekiq, so signing up doesn't wait on (or fail with) SMTP.
+  # Other Devise emails are still sent inline, as before.
+  def send_devise_notification(notification, *args)
+    message = devise_mailer.send(notification, self, *args)
+
+    if notification == :confirmation_instructions
+      message.deliver_later(queue: 'notifications')
+    else
+      message.deliver_now
+    end
+  end
+
   private
 
   # Attributes that are non-public, and should be blacklisted from any public
@@ -409,6 +445,8 @@ class User < ApplicationRecord
       :old_password,
       :encrypted_password,
       :reset_password_token,
+      :confirmation_token,
+      :unconfirmed_email,
       :email
     ]
   end

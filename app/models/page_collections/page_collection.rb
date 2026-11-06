@@ -3,6 +3,8 @@ class PageCollection < ApplicationRecord
   
   belongs_to :user
 
+  include RequiresConfirmedEmailToPublish
+
   has_many :page_collection_submissions, dependent: :destroy
 
   has_many :page_collection_followings, dependent: :destroy

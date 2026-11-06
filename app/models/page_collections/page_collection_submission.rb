@@ -48,8 +48,9 @@ class PageCollectionSubmission < ApplicationRecord
       )
     end
 
-    # Auto-follow the page collection owner to the share also
-    page_collection.user.content_page_share_followings.create({content_page_share: share})
+    # Auto-follow the page collection owner to the share also. There's no share when the submitter
+    # can't post to the stream yet (see User#can_publish?).
+    page_collection.user.content_page_share_followings.create({content_page_share: share}) if share.persisted?
   end
 
   # Submitting to a public collection publishes a page, so only its owner can submit one that
@@ -62,6 +63,8 @@ class PageCollectionSubmission < ApplicationRecord
       errors.add(:content, "can't be a document")
     elsif content.user_id != user_id && !PermissionService.content_is_publicly_visible?(content: content)
       errors.add(:content, "isn't yours to submit")
+    elsif page_collection.try(:privacy) == 'public' && user.present? && !user.can_publish?
+      errors.add(:base, User::CONFIRM_EMAIL_TO_PUBLISH_MESSAGE)
     end
   end
 

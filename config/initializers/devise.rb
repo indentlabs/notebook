@@ -110,7 +110,12 @@ Devise.setup do |config|
   # able to access the website for two days without confirming their account,
   # access will be blocked just in the third day. Default is 0.days, meaning
   # the user cannot access the website without confirming their account.
-  # config.allow_unconfirmed_access_for = 2.days
+  #
+  # nil means unconfirmed accounts can always sign in and use the site. We don't
+  # block sign-in on confirmation; instead, a few things that put content in front
+  # of other people (posting on the forums, making pages public, sharing to the
+  # stream) check `user.confirmed?` themselves. See User#can_publish?.
+  config.allow_unconfirmed_access_for = nil
 
   # A period that the user is allowed to confirm their account before their
   # token becomes invalid. For example, if set to 3.days, the user can confirm

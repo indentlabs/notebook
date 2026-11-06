@@ -193,6 +193,12 @@
         <div class="mt-1">
           <%= f.email_field :email, class: "shadow-sm focus:ring-notebook-blue focus:border-notebook-blue block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white rounded-md" %>
         </div>
+        <% if current_user.pending_reconfirmation? %>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            We sent a confirmation link to <strong class="break-all"><%= current_user.unconfirmed_email %></strong>.
+            Your email address will change once you follow it.
+          </p>
+        <% end %>
       </div>
       
       <div>

@@ -236,7 +236,11 @@
             </h3>
             
             <!-- Quick comment form -->
-            <% if user_signed_in? %>
+            <% if user_signed_in? && !current_user.can_publish? %>
+              <div class="mb-6 pb-6 border-b border-gray-200">
+                <%= render 'shared/confirm_email_notice', reason: 'leave comments' %>
+              </div>
+            <% elsif user_signed_in? %>
               <div class="mb-6 pb-6 border-b border-gray-200">
                 <div class="flex items-start space-x-3 w-full">
                   <div class="flex-shrink-0">

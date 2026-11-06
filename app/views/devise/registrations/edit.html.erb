@@ -37,6 +37,12 @@
       
       <!-- Main content -->
       <div class="flex-1 p-4 sm:p-6">
+        <% unless current_user.can_publish? %>
+          <div class="mb-6">
+            <%= render 'shared/confirm_email_notice', reason: 'post on the forums and share your work publicly' %>
+          </div>
+        <% end %>
+
         <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, id: "settings-form" }) do |f| %>
           <% if resource.errors.any? %>
             <div class="mb-6">

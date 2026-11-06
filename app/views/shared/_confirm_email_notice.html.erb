@@ -1,0 +1,26 @@
+<%#
+  Explains why something is unavailable to an account that hasn't confirmed its email address yet
+  (see User#can_publish?), with a button to send the confirmation link again. Renders nothing for
+  everyone else. Don't render this inside another form: the button is a form of its own.
+
+  Locals:
+    reason - finishes "Confirm your email address to ...", e.g. "post on the forums"
+%>
+<% if user_signed_in? && !current_user.can_publish? %>
+  <% confirmation_email = current_user.pending_reconfirmation? ? current_user.unconfirmed_email : current_user.email %>
+  <div class="flex items-start p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900 text-sm text-yellow-900 dark:text-yellow-100" data-confirm-email-notice>
+    <i class="material-icons text-yellow-600 dark:text-yellow-300 mr-3 flex-shrink-0">email</i>
+    <div class="flex-1 min-w-0">
+      <p class="font-semibold">Confirm your email address to <%= reason %></p>
+      <p class="mt-1 text-yellow-800 dark:text-yellow-200">
+        We sent a confirmation link to <strong class="break-all"><%= confirmation_email %></strong>.
+        Can't find it? Check your spam folder, or we can send another.
+      </p>
+      <%= button_to 'Send the link again',
+            user_confirmation_path,
+            params: { user: { email: confirmation_email } },
+            form_class: 'mt-3',
+            class: 'inline-flex items-center px-3 py-1.5 rounded-md bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold cursor-pointer' %>
+    </div>
+  </div>
+<% end %>

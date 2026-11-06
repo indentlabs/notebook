@@ -103,8 +103,11 @@
       <p class="text-sm text-gray-600 dark:text-gray-400">Manage who can see and access this <%= content.class_name.downcase %></p>
     </div>
     
+    <% owner_can_publish = raw_content.try(:user).nil? || raw_content.user.can_publish? %>
     <div x-data="{
       selectedPrivacy: '<%= raw_content.privacy || 'private' %>',
+      savedPrivacy: '<%= raw_content.privacy || 'private' %>',
+      revertingPrivacy: false,
       publicType: 'standard',
       password: '',
       isLoading: false,
@@ -136,6 +139,8 @@
           })
           .then(response => {
             if (response.ok) {
+              this.savedPrivacy = this.selectedPrivacy;
+
               // Update the main controller's privacy state
               window.dispatchEvent(new CustomEvent('privacy-updated', { 
                 detail: { privacy: this.selectedPrivacy } 
@@ -147,11 +152,18 @@
                 this.showToast = false;
               }, 3000);
             } else {
-              this.showToast = true;
-              this.toastMessage = 'Error saving privacy settings';
-              setTimeout(() => {
-                this.showToast = false;
-              }, 3000);
+              // Put the selection back to what's actually saved, and say why if the server told us
+              this.revertingPrivacy = true;
+              this.selectedPrivacy = this.savedPrivacy;
+
+              response.json().catch(() => ({})).then((errors) => {
+                const privacyError = errors && errors.privacy && errors.privacy[0];
+                this.showToast = true;
+                this.toastMessage = privacyError ? 'Privacy ' + privacyError : 'Error saving privacy settings';
+                setTimeout(() => {
+                  this.showToast = false;
+                }, 3000);
+              });
             }
           })
           .catch(error => {
@@ -170,6 +182,10 @@
     }" 
     x-init="
       $watch('selectedPrivacy', (value) => {
+        if (revertingPrivacy) {
+          revertingPrivacy = false;
+          return;
+        }
         savePrivacySettings();
       });
     "
@@ -245,6 +261,16 @@
         </div>
       </div>
       
+      <% unless owner_can_publish %>
+        <% if raw_content.user == current_user %>
+          <%= render 'shared/confirm_email_notice', reason: "make this #{content.class_name.downcase} public" %>
+        <% else %>
+          <div class="p-4 rounded-lg border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900 text-sm text-yellow-900 dark:text-yellow-100">
+            This <%= content.class_name.downcase %> can be made public once its owner confirms their email address.
+          </div>
+        <% end %>
+      <% end %>
+
       <!-- Privacy Level Selection -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div class="mb-4">
@@ -286,9 +312,10 @@
           </label>
           
           <!-- Public Option -->
-          <label class="group relative cursor-pointer block">
+          <label class="group relative block <%= owner_can_publish ? 'cursor-pointer' : 'cursor-not-allowed opacity-50' %>">
             <%= f.radio_button :privacy, 'public',
                 class: 'sr-only',
+                disabled: !owner_can_publish,
                 'x-model': 'selectedPrivacy' %>
             <div :class="selectedPrivacy === 'public'
                    ? (isDark ? 'border-blue-500 bg-blue-900 shadow-sm' : 'border-blue-500 bg-blue-50 shadow-sm')

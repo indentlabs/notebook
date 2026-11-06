@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_30_130000) do
+ActiveRecord::Schema.define(version: 2026_11_06_120200) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3799,6 +3799,11 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.integer "followers_count", default: 0, null: false
     t.integer "following_count", default: 0, null: false
     t.string "time_zone", default: "UTC", null: false
+    t.string "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.string "unconfirmed_email"
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["deleted_at", "username"], name: "index_users_on_deleted_at_and_username"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["followers_count"], name: "index_users_on_followers_count"

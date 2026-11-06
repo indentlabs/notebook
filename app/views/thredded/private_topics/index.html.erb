@@ -29,14 +29,22 @@
         <% end %>
       </div>
 
-      <div class="mt-4 md:mt-0 flex md:ml-4">
-        <button @click="showComposeForm = !showComposeForm"
-                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-          <i class="material-icons mr-2 -ml-1" x-text="showComposeForm ? 'close' : 'edit'"></i>
-          <span x-text="showComposeForm ? 'Cancel' : 'Compose'"></span>
-        </button>
-      </div>
+      <% if @new_private_topic %>
+        <div class="mt-4 md:mt-0 flex md:ml-4">
+          <button @click="showComposeForm = !showComposeForm"
+                  class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+            <i class="material-icons mr-2 -ml-1" x-text="showComposeForm ? 'close' : 'edit'"></i>
+            <span x-text="showComposeForm ? 'Cancel' : 'Compose'"></span>
+          </button>
+        </div>
+      <% end %>
     </div>
+
+    <% unless @new_private_topic %>
+      <div class="mb-6">
+        <%= render 'shared/confirm_email_notice', reason: 'start new conversations' %>
+      </div>
+    <% end %>
     
     <!-- Messages List or Empty State -->
     <% if @private_topics.to_a.empty? %>

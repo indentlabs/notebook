@@ -76,6 +76,7 @@ class PageCollectionsController < ApplicationController
 
       redirect_to @page_collection, notice: 'Your collection was successfully created.'
     else
+      flash.now[:alert] = @page_collection.errors.full_messages.to_sentence
       render :new
     end
   end
@@ -87,6 +88,7 @@ class PageCollectionsController < ApplicationController
       if @page_collection.update(page_collection_params)
         redirect_to @page_collection, notice: 'Collection settings updated successfully.'
       else
+        flash.now[:alert] = @page_collection.errors.full_messages.to_sentence
         render :edit
       end
     else

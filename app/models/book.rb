@@ -9,6 +9,7 @@ class Book < ApplicationRecord
   has_many :word_count_updates, as: :entity
 
   include HasPrivacy
+  include RequiresConfirmedEmailToPublish
   include HasPageTags
   include BelongsToUniverse
   include HasImageUploads

@@ -21,7 +21,8 @@ class PageCollectionSubmissionsController < ApplicationController
         redirect_to @page_collection_submission.page_collection, notice: 'Page submitted!'
       else
         page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id])
-        redirect_to page_collection, alert: 'There was a problem submitting your page. Please try again.'
+        alert = @page_collection_submission.errors[:base].first || 'There was a problem submitting your page. Please try again.'
+        redirect_to page_collection, alert: alert
       end
     rescue ActionController::ParameterMissing => e
       page_collection = PageCollection.find(params[:page_collection_submission][:page_collection_id]) rescue nil

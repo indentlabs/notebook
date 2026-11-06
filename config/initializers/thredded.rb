@@ -186,7 +186,45 @@ module SkipPostsWithoutTopicsInModeration
   end
 end
 
+# Thredded's authorize_creating turns a denied create into Thredded::Errors::<Model>CreateDenied,
+# but only defines that error for topics, private topics and messageboards. Denied replies looked
+# up an error class that doesn't exist and 500ed instead of showing the forbidden page.
+module Thredded
+  module Errors
+    class PostCreateDenied < Thredded::Error
+      def message
+        'You are not allowed to reply to this topic.'
+      end
+    end
+
+    class PrivatePostCreateDenied < Thredded::Error
+      def message
+        'You are not allowed to reply to this conversation.'
+      end
+    end
+  end
+end
+
+# Accounts that haven't confirmed their email address can read the forums and reply to private
+# conversations they've been added to, but can't start new ones (see User#can_publish?).
+module RequireConfirmedEmailToStartPrivateTopics
+  def create?
+    super && @user.can_publish?
+  end
+end
+
+# Thredded's PrivateTopicsController#create never checks PrivateTopicPolicy#create?, so the policy
+# above alone would only hide the form. Check it before creating, the same way #new does.
+module AuthorizePrivateTopicCreation
+  def create
+    authorize_creating Thredded::PrivateTopicForm.new(user: thredded_current_user).private_topic
+    super
+  end
+end
+
 Rails.application.config.to_prepare do
+  Thredded::PrivateTopicPolicy.prepend RequireConfirmedEmailToStartPrivateTopics
+  Thredded::PrivateTopicsController.prepend AuthorizePrivateTopicCreation
   Thredded::TopicPolicy.prepend AllowUsersToDeleteOwnTopics
   Thredded::ModerationController.prepend SkipPostsWithoutTopicsInModeration
   Thredded::PrivateTopicPolicy.prepend AllowAdminModeration
@@ -197,6 +235,23 @@ end
 
 Rails.application.config.to_prepare do
   Thredded::ApplicationController.module_eval do
+    # Same as Thredded's own handler for these, but tells unconfirmed accounts why they can't post
+    rescue_from Pundit::NotAuthorizedError,
+                Thredded::Errors::TopicCreateDenied,
+                Thredded::Errors::PrivateTopicCreateDenied,
+                Thredded::Errors::PostCreateDenied,
+                Thredded::Errors::PrivatePostCreateDenied do |exception|
+      @error   = exception
+      @message = if thredded_signed_in? && !thredded_current_user.can_publish?
+                   User::CONFIRM_EMAIL_TO_PUBLISH_MESSAGE
+                 elsif exception.is_a?(Pundit::NotAuthorizedError)
+                   t('thredded.errors.not_authorized')
+                 else
+                   exception.message
+                 end
+      render template: 'thredded/error_pages/forbidden', status: :forbidden
+    end
+
     before_action :set_navbar_color
     before_action :set_navbar_actions
     before_action :set_sidenav_expansion
