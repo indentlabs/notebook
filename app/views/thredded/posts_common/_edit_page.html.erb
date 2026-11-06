@@ -1,0 +1,103 @@
+<%# Shared "Edit Post" page for forum posts and private-message posts.
+    locals: post_form, content_label, button_text, button_submitting_text %>
+<% post      = post_form.post %>
+<% topic     = post_form.topic %>
+<% back_path = post_path(post, user: thredded_current_user) %>
+<% edited    = post.updated_at.present? && post.created_at.present? && post.updated_at > post.created_at + 1.minute %>
+
+<div class="edit-post-container max-w-3xl mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-5">
+    <%= link_to back_path,
+                class: 'inline-flex items-center gap-1 text-sm text-stone-500 dark:text-gray-400 hover:text-notebook-blue dark:hover:text-blue-400 transition-colors mb-3' do %>
+      <i class="material-icons text-base">arrow_back</i>
+      <%= topic.private? ? 'Back to conversation' : 'Back to topic' %>
+    <% end %>
+
+    <h1 class="text-xl md:text-2xl font-semibold text-stone-900 dark:text-white flex items-center gap-2">
+      <i class="material-icons text-blue-500 dark:text-blue-400">edit</i>
+      <%= t('thredded.nav.edit_post') %>
+    </h1>
+    <p class="mt-1 text-sm text-stone-500 dark:text-gray-400 truncate">
+      in
+      <%= link_to topic.title, back_path,
+                  class: 'font-medium text-stone-700 dark:text-gray-300 hover:text-notebook-blue dark:hover:text-blue-400 transition-colors' %>
+    </p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="edit-post-form-card bg-white dark:bg-gray-800 border border-stone-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+    <%= form_for post_form,
+                 url: post_form.submit_path,
+                 as: :post,
+                 html: {
+                     class: 'thredded--form thredded--post-form',
+                     'data-thredded-post-form' => true,
+                     'data-autocomplete-url' => autocomplete_users_path,
+                     'data-autocomplete-min-length' => Thredded.autocomplete_min_length,
+                     'data-thredded-submit-hotkey' => true,
+                 } do |form| %>
+
+      <!-- Original post info -->
+      <div class="px-4 sm:px-6 py-3 bg-stone-50 dark:bg-gray-900 border-b border-stone-200 dark:border-gray-700 flex items-center gap-3 text-sm text-stone-500 dark:text-gray-400">
+        <% if post.user %>
+          <%= image_tag post.user.image_url(size: 32),
+                        class: 'h-8 w-8 rounded-lg border border-stone-200 dark:border-gray-600 object-cover flex-shrink-0' %>
+        <% else %>
+          <div class="h-8 w-8 rounded-lg bg-stone-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+            <i class="material-icons text-base text-stone-400 dark:text-gray-500">person_off</i>
+          </div>
+        <% end %>
+        <div class="min-w-0 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-2 gap-y-0.5">
+          <span>
+            Posted by
+            <span class="font-medium text-stone-800 dark:text-gray-200"><%= user_link post.user %></span>
+          </span>
+          <span class="hidden sm:inline text-stone-300 dark:text-gray-600">&middot;</span>
+          <span class="text-xs sm:text-sm">
+            <%= time_ago post.created_at %>
+            <% if edited %>
+              <span class="text-stone-300 dark:text-gray-600 mx-1">&middot;</span>
+              <span class="italic">last edited <%= time_ago post.updated_at %></span>
+            <% end %>
+          </span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-4 sm:p-6 space-y-5">
+        <%= render 'thredded/posts_common/form/content_field',
+                   form: form, content_label: content_label, rows: 10 %>
+
+        <%= render 'thredded/posts_common/form/preview_area',
+                   form: form, preview_url: post_form.preview_path %>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 sm:px-6 py-4 bg-stone-50 dark:bg-gray-900 border-t border-stone-200 dark:border-gray-700 flex items-center justify-between gap-4">
+        <%= link_to 'Cancel', back_path,
+                    class: 'text-sm font-medium text-stone-500 dark:text-gray-400 hover:text-stone-800 dark:hover:text-gray-200 transition-colors' %>
+
+        <div class="flex items-center gap-4">
+          <!-- Keyboard shortcut hint (hidden on mobile and tablet) -->
+          <div class="hidden lg:block text-xs text-stone-500 dark:text-gray-400">
+            <kbd class="px-2 py-1 text-xs font-semibold text-stone-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-stone-200 dark:border-gray-600 rounded-md">Ctrl</kbd>
+            +
+            <kbd class="px-2 py-1 text-xs font-semibold text-stone-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-stone-200 dark:border-gray-600 rounded-md">Enter</kbd>
+            to save
+          </div>
+
+          <button type="submit"
+                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+                         text-white text-sm font-medium rounded-md shadow-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800
+                         transition-colors duration-150"
+                  data-disable-with="<%= button_submitting_text %>">
+            <i class="material-icons text-base">save</i>
+            <%= button_text %>
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
