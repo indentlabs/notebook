@@ -157,3 +157,5 @@ This project uses Tailwind CSS for styling. **Do not use the following Tailwind 
    - For borders: `border-gray-500 border-opacity-50`
 
 3. **Custom sizes** - If you need a size that doesn't exist (e.g., smaller than `text-xs`), add it to the `extend` section in `tailwind.config.js`. For example, `text-xxs` is available for 10px text.
+
+4. **Clearing the site sidebar** - Anything fixed to the left edge, or page chrome beside the sidebar, must use `site-nav-margin`, `site-nav-padding` or `site-nav-offset-left` (or `var(--site-nav-width)`), not `md:ml-56` / `md:ml-16` or pixel widths. The sidebar's layout is pure CSS (`app/assets/stylesheets/site-navigation.scss`); JavaScript only stores the user's choice in `$store.siteNav`.

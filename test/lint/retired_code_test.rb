@@ -38,6 +38,10 @@ class RetiredCodeTest < ActiveSupport::TestCase
 
     # The easy_translate gem was removed along with the Babel lab.
     'The easy_translate gem is no longer installed' => %w[EasyTranslate],
+
+    # The site navigation's layout moved from Alpine state on <body> into CSS.
+    'Use $store.siteNav (layouts/_site_navigation.html.erb) and the site-nav-* classes or ' \
+    '--site-nav-width (site-navigation.scss)' => %w[showSidebar siteNavExpanded],
   }.freeze
 
   SEARCHED_FILES = 'app/**/*.{rb,erb,builder,js,scss,jbuilder}'.freeze

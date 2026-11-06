@@ -1,19 +1,16 @@
     <% if user_signed_in? %>
     <!-- Sidebar with integrated logo -->
-    <nav class="notebook--sidebar fixed top-0 flex flex-col left-0 overflow-hidden border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all duration-300 origin-left transform"
+    <%# Width, position and which parts show are set by site-navigation.scss, from the screen size and $store.siteNav %>
+    <nav class="site-nav notebook--sidebar fixed top-0 flex flex-col left-0 overflow-hidden border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800"
          style="height: 100dvh; z-index: 60;"
-         :class="{
-           'w-56 sm:w-60 lg:w-56': showSidebar,
-           'w-16': !showSidebar && isDesktop,
-           '-translate-x-full': !showSidebar && !isDesktop
-         }">
+         id="site-navigation"
+         @keydown.escape.window="$store.siteNav.closeDrawer()">
       <div class="absolute inset-0 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700 shadow-lg"></div>
 
       <!-- Logo header -->
-      <div class="h-14 flex items-center border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0 relative z-20"
-           :class="{ 'justify-center': !showSidebar && isDesktop }">
+      <div class="h-14 flex items-center border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0 relative z-20">
         <!-- Expanded: logo links home -->
-        <%= link_to main_app.root_path, class: 'flex items-center px-3 py-2 hover:opacity-80 transition', 'x-show': 'showSidebar', 'x-cloak': true do %>
+        <%= link_to main_app.root_path, class: 'site-nav-expanded-only flex items-center px-3 py-2 hover:opacity-80 transition' do %>
           <%= image_tag 'logos/book-small.webp', class: 'h-8 shrink-0' %>
           <span class="ml-3 text-xl font-bold text-notebook-blue dark:text-blue-300 tracking-wide whitespace-nowrap">
             Notebook.ai
@@ -21,21 +18,29 @@
         <% end %>
 
         <!-- Collapsed: logo still links home (the expand toggle lives in the navbar) -->
-        <%= link_to main_app.root_path, class: 'p-2 hover:opacity-80 transition', 'x-show': '!showSidebar && isDesktop', 'x-cloak': true, 'aria-label': 'Notebook.ai home' do %>
+        <%= link_to main_app.root_path, class: 'site-nav-collapsed-only mx-auto p-2 hover:opacity-80 transition', 'aria-label': 'Notebook.ai home' do %>
           <%= image_tag 'logos/book-small.webp', class: 'h-8', alt: 'Notebook.ai' %>
         <% end %>
 
-        <!-- Toggle button (expanded state only) -->
-        <button x-show="showSidebar" x-cloak
-                @click="showSidebar = false; localStorage.setItem('site_navigation_sidebar_visible', 'false')"
-                class="ml-auto mr-2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition group"
+        <!-- Desktop: collapse the rail to the icon ribbon -->
+        <button type="button"
+                @click="$store.siteNav.collapse()"
+                class="site-nav-expanded-only hidden md:flex ml-auto mr-2 w-8 h-8 items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition group"
                 aria-label="Collapse sidebar">
+          <i class="material-icons text-gray-400 group-hover:text-notebook-blue dark:group-hover:text-blue-400 transition-colors text-3xl leading-none">chevron_left</i>
+        </button>
+
+        <!-- Mobile: close the drawer -->
+        <button type="button"
+                @click="$store.siteNav.closeDrawer()"
+                class="md:hidden ml-auto mr-2 w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-slate-700 transition group"
+                aria-label="Close menu">
           <i class="material-icons text-gray-400 group-hover:text-notebook-blue dark:group-hover:text-blue-400 transition-colors text-3xl leading-none">chevron_left</i>
         </button>
       </div>
 
       <!-- Collapsed state: icon ribbon -->
-      <div x-show="!showSidebar && isDesktop" x-cloak class="flex flex-col items-center py-3 space-y-1 overflow-y-auto flex-1 min-h-0 relative z-10 thin-scrollbar">
+      <div class="site-nav-collapsed-only flex flex-col items-center py-3 space-y-1 overflow-y-auto flex-1 min-h-0 relative z-10 thin-scrollbar">
         <!-- Worldbuilding icons -->
         <% @activated_content_types.each do |content_type| %>
           <% content_type_klass = content_class_from_name(content_type) %>
@@ -80,7 +85,7 @@
         <% end %>
       </div>
 
-      <nav x-show="showSidebar" x-cloak class="notebook--sidebar text-sm font-medium overflow-y-auto flex-1 min-h-0 relative z-10 pl-0 thin-scrollbar" aria-label="Main Navigation">
+      <nav class="site-nav-expanded-only notebook--sidebar text-sm font-medium overflow-y-auto flex-1 min-h-0 relative z-10 pl-0 thin-scrollbar" aria-label="Main Navigation">
         <div x-data="{ expandedWorldbuildingSidebar: <%= @sidenav_expansion == 'worldbuilding' %> }" class="mb-2 mt-1">
           <!-- Section header with indicator dot -->
           <div class="cursor-pointer relative ripple-effect" role="button" @click="expandedWorldbuildingSidebar = !expandedWorldbuildingSidebar">
@@ -281,7 +286,7 @@
         </div>
       </nav>
 
-      <div x-show="showSidebar" x-cloak class="p-3 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-purple-900 dark:to-black shadow-sm shrink-0 relative z-20">
+      <div class="site-nav-expanded-only p-3 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-white dark:from-purple-900 dark:to-black shadow-sm shrink-0 relative z-20">
         <% if @universe_scope %>
           <div class="bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800 overflow-hidden">
 
@@ -327,7 +332,7 @@
     </nav>
 
     <!-- sidebar backdrop on mobile -->
-    <div class="fixed inset-0 z-10 w-screen h-screen bg-black bg-opacity-25 md:hidden" x-show="showSidebar" @click="showSidebar = false" @touchmove.prevent x-cloak></div>
+    <div class="site-nav-backdrop fixed inset-0 z-50 w-screen h-screen bg-black bg-opacity-25" @click="$store.siteNav.closeDrawer()" @touchmove.prevent></div>
 
     <!-- Sidebar tooltip (positioned via JS to escape overflow containers); also used by the navbar's expand-sidebar button -->
     <div id="sidebar-tooltip"></div>

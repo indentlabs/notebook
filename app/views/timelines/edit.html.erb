@@ -9,8 +9,7 @@
          x-transition:enter-end="translate-x-0"
          x-transition:leave="transform transition ease-in-out duration-200"
          x-transition:leave-end="-translate-x-full"
-         class="hidden lg:block fixed top-14 bottom-0 z-30 overflow-hidden"
-         :style="{ left: siteNavExpanded ? '224px' : '64px' }">
+         class="hidden lg:block fixed top-14 bottom-0 z-30 overflow-hidden site-nav-offset-left">
       <%# Filter Panel %>
       <div x-show="activeLeftPanel === 'filter'" class="h-full">
         <%= render 'timelines/edit/filter_panel',
@@ -469,32 +468,16 @@ function timelineEditor() {
     activeRightPanel: null,  // null | 'inspector' | 'settings' - mutually exclusive right panels
     isDesktop: window.innerWidth >= 1024,
 
-    // Whether the site navigation rail is expanded (w-56) or collapsed (w-16).
-    // The rail belongs to the layout, whose x-data on <body> owns `showSidebar`;
-    // reading it from that outer scope keeps the panel and its tabs beside the
-    // rail as it toggles. The rail is open unless the user collapsed it, so a
-    // missing preference means expanded (matching layouts/application.html.erb).
-    get siteNavExpanded() {
-      if (typeof this.showSidebar === 'boolean') return this.showSidebar;
-
-      try {
-        return localStorage.getItem('site_navigation_sidebar_visible') !== 'false';
-      } catch (e) {
-        return true;
-      }
-    },
-
     // Computed properties for panel visibility
     get showLeftSidebar() { return this.activeLeftPanel !== null; },
     get showRightSidebar() { return this.activeRightPanel !== null; },
 
-    // Computed left position for tabs based on sidenav and timeline panel state
+    // Left position for the pull-out tabs: past the site navigation rail
+    // (--site-nav-width, see site-navigation.scss) and, when open, the
+    // 320px (w-80) timeline panel.
     get leftTabPosition() {
-      // Sidenav: collapsed = 64px (w-16), expanded = 224px (w-56)
-      // Timeline panel: 320px (w-80)
-      const siteNavWidth = this.siteNavExpanded ? 224 : 64;
       const panelWidth = this.showLeftSidebar ? 320 : 0;
-      return (siteNavWidth + panelWidth) + 'px';
+      return 'calc(var(--site-nav-width) + ' + panelWidth + 'px)';
     },
 
     // Reactive properties for real-time inspector panel updates

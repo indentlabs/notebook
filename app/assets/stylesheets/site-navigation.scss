@@ -1,0 +1,103 @@
+/*
+  Site navigation layout (the sidebar in layouts/tailwind/_sidebar.html.erb).
+
+  The layout is decided entirely here, in CSS, so it can't disagree with the
+  screen size:
+
+    - Below 768px (Tailwind's `md`) the sidebar is an off-canvas drawer and
+      takes no room from the page.
+    - From 768px up it is a fixed rail beside the page: 14rem when expanded,
+      4rem (the icon ribbon) when collapsed.
+
+  JavaScript only records what the user chose, as attributes on <html>
+  (see layouts/_site_navigation.html.erb):
+
+    data-site-nav="expanded" | "collapsed"   rail preference; absent when signed out
+    data-site-nav-drawer="open"              mobile drawer is open
+
+  Everything that has to clear the rail reads `--site-nav-width`, through the
+  classes below. Use them instead of hard-coded `md:ml-56` / `left: 224px`.
+*/
+
+$site-nav-desktop: "(min-width: 768px)";
+$site-nav-mobile: "not all and (min-width: 768px)";
+
+:root {
+  --site-nav-width: 0px;
+  --site-nav-expanded-width: 14rem;
+  --site-nav-collapsed-width: 4rem;
+}
+
+@media #{$site-nav-desktop} {
+  html[data-site-nav="expanded"]  { --site-nav-width: var(--site-nav-expanded-width); }
+  html[data-site-nav="collapsed"] { --site-nav-width: var(--site-nav-collapsed-width); }
+}
+
+/*
+  Page chrome that sits beside the rail. `:root` raises specificity so these
+  beat utilities on the same element (e.g. `fixed left-0 site-nav-offset-left`),
+  since Tailwind's stylesheet loads after this one.
+*/
+:root .site-nav-margin      { margin-left: var(--site-nav-width); }
+:root .site-nav-padding     { padding-left: var(--site-nav-width); }
+:root .site-nav-offset-left { left: var(--site-nav-width); }
+
+/* The sidebar itself */
+.site-nav {
+  width: var(--site-nav-expanded-width);
+  transition-property: width, transform, visibility;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media #{$site-nav-mobile} {
+  /* Closed drawer: off screen, and hidden so its links can't take keyboard focus.
+     `visibility` flips only after the slide-out finishes, so the slide still shows. */
+  .site-nav {
+    transform: translateX(-100%);
+    visibility: hidden;
+  }
+
+  html[data-site-nav-drawer="open"] .site-nav {
+    transform: none;
+    visibility: visible;
+  }
+
+  /* Stop the page scrolling under the open drawer */
+  html[data-site-nav-drawer="open"],
+  html[data-site-nav-drawer="open"] body {
+    overflow: hidden;
+  }
+}
+
+/* The drawer is a little wider from `sm` up; the desktop rule after it wins from `md` */
+@media (min-width: 640px) {
+  .site-nav { width: 15rem; }
+}
+
+@media #{$site-nav-desktop} {
+  .site-nav { width: var(--site-nav-width); }
+}
+
+.site-nav-backdrop { display: none; }
+
+@media #{$site-nav-mobile} {
+  html[data-site-nav-drawer="open"] .site-nav-backdrop { display: block; }
+}
+
+/*
+  Parts of the sidebar (and navbar) that belong to one state. These only ever
+  hide an element, so each keeps its own display utility (flex, block, ...).
+*/
+
+/* Full navigation: the mobile drawer, and the expanded desktop rail */
+@media #{$site-nav-desktop} {
+  html[data-site-nav="collapsed"] .site-nav-expanded-only { display: none !important; }
+}
+
+/* Icon ribbon and its controls: the collapsed desktop rail only */
+html:not([data-site-nav="collapsed"]) .site-nav-collapsed-only { display: none !important; }
+
+@media #{$site-nav-mobile} {
+  .site-nav-collapsed-only { display: none !important; }
+}
