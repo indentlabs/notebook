@@ -1,0 +1,27 @@
+<%# Lock/pin checkboxes for the new-topic form. Only moderators see them, and
+    TopicsController#new_topic_params drops the values for everyone else. %>
+<% topic = form.object.respond_to?(:topic) ? form.object.topic : form.object %>
+<% if policy(topic).moderate? %>
+  <li class="thredded--form-list--admin-options">
+    <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Topic Options</span>
+    <div class="flex flex-wrap gap-6">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <%= form.check_box :locked,
+            class: 'w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 cursor-pointer' %>
+        <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+          <i class="material-icons text-base">lock</i>
+          <%= t 'thredded.topics.locked.label' %>
+        </span>
+      </label>
+
+      <label class="flex items-center gap-2 cursor-pointer">
+        <%= form.check_box :sticky,
+            class: 'w-4 h-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 cursor-pointer' %>
+        <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+          <i class="material-icons text-base">push_pin</i>
+          <%= t 'thredded.topics.sticky.label' %>
+        </span>
+      </label>
+    </div>
+  </li>
+<% end %>
