@@ -274,34 +274,9 @@ function writingPrompt() {
     lastAutosaveTime: 0,
     isMac: navigator.platform.toUpperCase().indexOf('MAC') >= 0,
     
-    // Word count that matches Ruby's WordCountService behavior
-    // Rules: split on /\, ignore ..., ---, ___, ignore stray punctuation
+    // Count words the same way the server does (NotebookWordCount mirrors WordCountService)
     countWords(text) {
-      if (!text || text.length === 0) return 0;
-
-      // Preserve dates like 01/02/2024 by temporarily replacing slashes in them
-      text = text.replace(/(\d{1,2})\/(\d{1,2})(\/\d{2,4})?/g, function(match) {
-        return match.replace(/\//g, '-SLASH-');
-      });
-      // Split on forward slashes
-      text = text.replace(/\//g, ' ');
-      // Restore dates
-      text = text.replace(/-SLASH-/g, '/');
-
-      // Split on backslashes
-      text = text.replace(/\\/g, ' ');
-
-      // Remove dotted lines, dashed lines, underscores (standalone)
-      text = text.replace(/\.{2,}/g, ' ');  // ... or ....
-      text = text.replace(/-{2,}/g, ' ');   // -- or ---
-      text = text.replace(/_{2,}/g, ' ');   // __ or ___
-
-      // Remove stray punctuation (standalone punctuation not part of words)
-      text = text.replace(/(?<!\w)[^\w\s]+(?!\w)/g, ' ');
-
-      // Count words (non-empty sequences after splitting on whitespace)
-      const words = text.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
-      return words.length;
+      return window.NotebookWordCount ? window.NotebookWordCount.count(text || '') : 0;
     },
 
     init() {

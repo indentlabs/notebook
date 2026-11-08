@@ -1,64 +1,62 @@
-# Centralized word counting service that provides consistent word counts
-# across the entire application (Ruby and JavaScript should match this behavior).
+# The one definition of a "word" used everywhere the app counts words: documents, notebook pages,
+# timeline events, books and analyses.
 #
-# Uses the WordCountAnalyzer gem with specific settings to ensure:
-# - Forward slashes split words (path/to/file = 3 words), except in dates
-# - Backslashes split words (path\to\file = 3 words)
-# - Dotted lines (...) are ignored
-# - Dashed lines (---) are ignored
-# - Underscores (___) are ignored
-# - Stray punctuation is ignored
-# - Contractions count as one word (don't = 1 word)
-# - Hyphenated words count as one word (well-known = 1 word)
-# - Numbers are counted as words
-# - HTML/XHTML is stripped before counting
+# The document editor and the notebook page editor show live counts with a JavaScript port of this
+# class (app/assets/javascripts/word_count.js). Both are tested against the same cases in
+# test/fixtures/files/word_count_cases.json, so keep them in step: a change here needs the same
+# change there, and a new case in that file.
 #
-# For large documents (>300KB), uses a memory-efficient lightweight counter
-# to avoid the ~28MB peak memory usage of the WordCountAnalyzer gem.
+# A word is a run of text between whitespace that contains at least one letter or digit, in any
+# script. On top of that:
+# - HTML is stripped. Block-level tags and <br> separate words, the way they separate lines on
+#   screen; inline tags like <b> and <span> don't, so "Hel<b>lo</b>" is one word. The contents of
+#   <script> and <style> elements are dropped.
+# - HTML entities are decoded, so &nbsp; separates words and &amp; or &mdash; are not words.
+# - Em dashes, ellipses ("…", "..." and longer) and runs of two or more hyphens separate words.
+# - Forward slashes and backslashes split words (path/to/file is 3 words), except in dates
+#   (01/02/2024) and links (https://example.com/a/b), which are one word each.
+# - Punctuation on its own (!, &, *, ---, ___, * * *) and emoji are not words.
+# - Contractions (don't), hyphenated words (well-known) and numbers (1,000 or 3.5) are one word.
+#
+# This is a single linear pass over the text, so it is cheap enough to run on whole novels.
 class WordCountService
-  COUNTER_OPTIONS = {
-    ellipsis:          'ignore',
-    hyperlink:         'count_as_one',
-    contraction:       'count_as_one',
-    hyphenated_word:   'count_as_one',
-    date:              'no_special_treatment',
-    number:            'count',
-    numbered_list:     'ignore',
-    xhtml:             'remove',
-    forward_slash:     'count_as_multiple_except_dates',
-    backslash:         'count_as_multiple',
-    dotted_line:       'ignore',
-    dashed_line:       'ignore',
-    underscore:        'ignore',
-    stray_punctuation: 'ignore'
+  BLOCK_TAG = %r{<\/?(?:address|article|aside|blockquote|br|caption|dd|details|div|dl|dt|figcaption|figure|footer|h[1-6]|header|hr|li|main|nav|ol|p|pre|section|summary|table|tbody|td|tfoot|th|thead|tr|ul)\b[^<>]*>}i
+  HIDDEN_ELEMENT = %r{<(script|style)\b[^<>]*>.*?<\/\1\s*>}im
+  COMMENT = /<!--.*?-->/m
+  # A tag starts with a letter right after the "<", so plain text like "I <3 you" or "a < b" keeps its words.
+  ANY_TAG = %r{<[\/!]?[a-zA-Z][^<>]*>}
+
+  ENTITY = /&(#\d{1,7}|#x[0-9a-f]{1,6}|[a-z][a-z0-9]{1,31});/i
+  # Entities that change how words are split or what counts as a word. Any other named entity is a
+  # single character that can't add or remove a word boundary (é, ©), so it is simply dropped.
+  NAMED_ENTITIES = {
+    'nbsp' => "\u00A0", 'ensp' => "\u2002", 'emsp' => "\u2003", 'thinsp' => "\u2009",
+    'amp' => '&', 'lt' => '<', 'gt' => '>', 'quot' => '"', 'apos' => "'",
+    'mdash' => "\u2014", 'ndash' => "\u2013", 'hellip' => "\u2026",
+    'lsquo' => "\u2018", 'rsquo' => "\u2019", 'sbquo' => "\u201A",
+    'ldquo' => "\u201C", 'rdquo' => "\u201D", 'bdquo' => "\u201E"
   }.freeze
 
-  # ~50k words threshold (300KB assumes ~6 bytes per word average)
-  LARGE_TEXT_THRESHOLD = 300_000
-  CHUNK_SIZE = 100_000
+  SEPARATOR = /[\u2014\u2015\u2026]|\.{2,}|-{2,}/
+  WHITESPACE = '\s\u00A0\u1680\u180E\u2000-\u200B\u2028\u2029\u202F\u205F\u3000\uFEFF'.freeze
+  TOKEN = /[^#{WHITESPACE}]+/
+  WORDLIKE = /[\p{L}\p{N}]/
+  SLASHES = %r{[\/\\]}
+  LINK = %r{\A[^\p{L}\p{N}]*(?:(?:https?|ftp):\/\/|www\.)}i
+  DATE = %r{\A\d{1,4}\/\d{1,2}(?:\/\d{1,4})?\z}
+  EDGE_PUNCTUATION = /\A[^\p{L}\p{N}]+|[^\p{L}\p{N}]+\z/
 
-  # Count words in the given text using standardized rules.
-  # Uses the WordCountAnalyzer gem for small documents and a lightweight
-  # counter for large documents to reduce memory usage.
-  #
-  # @param text [String] The text to count words in (may contain HTML)
-  # @return [Integer] The word count
+  # @param text [String, nil] HTML or plain text
+  # @return [Integer] the number of words in it
   def self.count(text)
-    return 0 if text.blank?
+    return 0 if text.nil?
 
-    if text.bytesize < LARGE_TEXT_THRESHOLD
-      WordCountAnalyzer::Counter.new(**COUNTER_OPTIONS).count(text)
-    else
-      count_large_text(text)
-    end
+    words = 0
+    plain_text(text).scan(TOKEN) { |token| words += words_in_token(token) }
+    words
   end
 
-  # Count words with fallback to simple counting on error.
-  # Use this in background jobs where reliability is more important than
-  # perfect accuracy.
-  #
-  # @param text [String] The text to count words in (may contain HTML)
-  # @return [Integer] The word count
+  # Background jobs use this so a bad string can't fail them; counting shouldn't raise anyway.
   def self.count_with_fallback(text)
     count(text)
   rescue => e
@@ -66,71 +64,39 @@ class WordCountService
     simple_count(text)
   end
 
+  # The text a reader would see, with word-separating markup turned into spaces.
+  def self.plain_text(text)
+    text = text.to_s
+    text = text.dup.force_encoding(Encoding::UTF_8) unless text.encoding == Encoding::UTF_8
+    text = text.scrub(' ') unless text.valid_encoding?
+
+    if text.include?('<')
+      text = text.gsub(HIDDEN_ELEMENT, ' ').gsub(COMMENT, ' ').gsub(BLOCK_TAG, ' ').gsub(ANY_TAG, '')
+    end
+    text = text.gsub(ENTITY) { decode_entity(Regexp.last_match(1)) } if text.include?('&')
+
+    text.gsub(SEPARATOR, ' ')
+  end
+
   class << self
     private
 
-    def count_large_text(text)
-      cleaned = text.gsub(/<[^>]*>/, ' ')  # Strip HTML
+    def words_in_token(token)
+      return 0 unless token.match?(WORDLIKE)
+      return 1 unless token.match?(SLASHES)
+      return 1 if token.match?(LINK)
+      return 1 if token.gsub(EDGE_PUNCTUATION, '').match?(DATE)
 
-      if cleaned.bytesize > CHUNK_SIZE * 3
-        count_chunked(cleaned)
-      else
-        count_single_pass(cleaned)
-      end
+      token.split(SLASHES).count { |part| part.match?(WORDLIKE) }
     end
 
-    def count_single_pass(text)
-      count = 0
-      scanner = StringScanner.new(text)
+    def decode_entity(name)
+      return NAMED_ENTITIES.fetch(name.downcase, '') unless name.start_with?('#')
 
-      while !scanner.eos?
-        scanner.skip(/\s+/)
-        token = scanner.scan(/\S+/)
-        break unless token
-        count += count_token(token)
-      end
+      codepoint = name[1].casecmp?('x') ? name[2..].to_i(16) : name[1..].to_i
+      return '' if codepoint.zero? || codepoint > 0x10FFFF || (0xD800..0xDFFF).cover?(codepoint)
 
-      count
-    end
-
-    def count_chunked(text)
-      total = 0
-      offset = 0
-
-      while offset < text.length
-        chunk_end = [offset + CHUNK_SIZE, text.length].min
-
-        # Find word boundary to avoid splitting words
-        if chunk_end < text.length
-          while chunk_end > offset && !text[chunk_end].match?(/\s/)
-            chunk_end -= 1
-          end
-          chunk_end = offset + CHUNK_SIZE if chunk_end == offset
-        end
-
-        total += count_single_pass(text[offset...chunk_end])
-        offset = chunk_end
-      end
-
-      total
-    end
-
-    def count_token(token)
-      return 0 if token.match?(/\A\.{3,}\z/)      # Ellipsis
-      return 0 if token.match?(/\A-{2,}\z/)       # Dashed line
-      return 0 if token.match?(/\A_{2,}\z/)       # Underscore line
-      return 0 if token.match?(/\A[^\w]+\z/)      # Stray punctuation
-
-      if token.include?('/')
-        return 1 if token.match?(/\A\d{1,2}\/\d{1,2}(\/\d{2,4})?\z/)  # Date
-        return token.split('/').reject(&:empty?).size
-      end
-
-      if token.include?('\\')
-        return token.split('\\').reject(&:empty?).size
-      end
-
-      1  # Contractions and hyphenated words count as one
+      [codepoint].pack('U')
     end
 
     def simple_count(text)

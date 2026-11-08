@@ -38,6 +38,18 @@ class RetiredCodeTest < ActiveSupport::TestCase
 
     # The easy_translate gem was removed along with the Babel lab.
     'The easy_translate gem is no longer installed' => %w[EasyTranslate],
+
+    # WordCountService used the word_count_analyzer gem below 300KB and a separate counter above it,
+    # so the two sizes counted differently. It has one counting path now.
+    'Count words with WordCountService.count (or NotebookWordCount.count in JavaScript)' => %w[
+      WordCountAnalyzer
+      WordCountService::COUNTER_OPTIONS
+      WordCountService::LARGE_TEXT_THRESHOLD
+      WordCountService::CHUNK_SIZE
+      count_large_text
+      count_single_pass
+      count_chunked
+    ],
   }.freeze
 
   SEARCHED_FILES = 'app/**/*.{rb,erb,builder,js,scss,jbuilder}'.freeze

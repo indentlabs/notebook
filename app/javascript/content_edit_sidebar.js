@@ -81,55 +81,31 @@ function initializeWordCount() {
   updatePageWordCount();
 }
 
-// Word count calculation - matches server-side WordCountService behavior
-// Rules: split on /\, ignore ..., ---, ___, ignore stray punctuation
+// Count words the same way the server does (window.NotebookWordCount, from
+// app/assets/javascripts/word_count.js, mirrors WordCountService).
 function countWordsInText(text) {
-  if (!text || text.length === 0) return 0;
-
-  // Strip HTML tags (matches server's xhtml: 'remove' option)
-  text = text.replace(/<[^>]*>/g, ' ');
-
-  // Preserve dates like 01/02/2024 by temporarily replacing slashes in them
-  text = text.replace(/(\d{1,2})\/(\d{1,2})(\/\d{2,4})?/g, function(match) {
-    return match.replace(/\//g, '-SLASH-');
-  });
-  // Split on forward slashes
-  text = text.replace(/\//g, ' ');
-  // Restore dates
-  text = text.replace(/-SLASH-/g, '/');
-
-  // Split on backslashes
-  text = text.replace(/\\/g, ' ');
-
-  // Remove dotted lines, dashed lines, underscores (standalone)
-  text = text.replace(/\.{2,}/g, ' ');  // ... or ....
-  text = text.replace(/-{2,}/g, ' ');   // -- or ---
-  text = text.replace(/_{2,}/g, ' ');   // __ or ___
-
-  // Remove stray punctuation (standalone punctuation not part of words)
-  text = text.replace(/(?<!\w)[^\w\s]+(?!\w)/g, ' ');
-
-  // Count words (non-empty sequences after splitting on whitespace)
-  const words = text.trim().split(/\s+/).filter(function(w) { return w.length > 0; });
-  return words.length;
+  return window.NotebookWordCount ? window.NotebookWordCount.count(text || '') : 0;
 }
 
-// Aggregate word count from all text fields on the page
+// Aggregate word count from the page's prose fields. Name and text fields are textareas; the
+// universe, tags and link pickers are selects and hidden inputs whose values aren't prose, and the
+// server doesn't count them either.
 function calculatePageWordCount() {
   let totalWords = 0;
-  document.querySelectorAll('.js-autosave').forEach(function(field) {
-    totalWords += countWordsInText(field.value || '');
+  document.querySelectorAll('textarea.js-autosave').forEach(function(field) {
+    totalWords += countWordsInText(field.value);
   });
   return totalWords;
 }
 
-// Update display with number formatting
+// Update display with number formatting. The sidebar is rendered twice (desktop and the mobile
+// drawer), so update every copy rather than just the first element with this id.
 function updatePageWordCount() {
-  const wordCountEl = document.getElementById('page-word-count');
-  if (wordCountEl) {
-    const count = calculatePageWordCount();
-    wordCountEl.textContent = count.toLocaleString();
-  }
+  const wordCountEls = document.querySelectorAll('[id="page-word-count"]');
+  if (wordCountEls.length === 0) return;
+
+  const count = calculatePageWordCount().toLocaleString();
+  wordCountEls.forEach(function(el) { el.textContent = count; });
 }
 
 // Debounced word count update (500ms, matches document editor)

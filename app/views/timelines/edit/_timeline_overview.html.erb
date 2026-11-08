@@ -38,9 +38,9 @@
          }
        },
        getTotalWords() {
-         const descWords = (this.description || '').split(/\s+/).filter(w => w.length > 0).length;
-         const notesWords = (this.notes || '').split(/\s+/).filter(w => w.length > 0).length;
-         const privateWords = (this.private_notes || '').split(/\s+/).filter(w => w.length > 0).length;
+         const descWords = NotebookWordCount.count(this.description || '');
+         const notesWords = NotebookWordCount.count(this.notes || '');
+         const privateWords = NotebookWordCount.count(this.private_notes || '');
          const totalWords = descWords + notesWords + privateWords;
          return totalWords + (totalWords === 1 ? ' word' : ' words');
        }
@@ -95,7 +95,7 @@
             <div class="flex justify-between items-center text-xs text-gray-500 mt-2">
               <span>This description helps provide context for anyone viewing your timeline</span>
               <span x-show="description"
-                    x-text="description.split(/\s+/).filter(w => w.length > 0).length + ' words'"></span>
+                    x-text="NotebookWordCount.count(description) + ' words'"></span>
             </div>
           </div>
 

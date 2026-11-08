@@ -1,190 +1,80 @@
 require 'test_helper'
+require 'open3'
+require 'minitest/mock'
 
 class WordCountServiceTest < ActiveSupport::TestCase
-  # Basic word counting
-  test "counts simple words correctly" do
-    assert_equal 3, WordCountService.count("hello world today")
+  CASES_PATH = Rails.root.join('test/fixtures/files/word_count_cases.json')
+  JS_COUNTER_PATH = Rails.root.join('app/assets/javascripts/word_count.js')
+
+  def cases
+    @cases ||= JSON.parse(File.read(CASES_PATH))
   end
 
-  test "returns 0 for blank text" do
-    assert_equal 0, WordCountService.count("")
+  test "counts every shared case as expected" do
+    failures = cases.reject { |c| WordCountService.count(c['text']) == c['words'] }.map do |c|
+      "#{c['text'].inspect}: expected #{c['words']}, got #{WordCountService.count(c['text'])}"
+    end
+
+    assert_empty failures, "WordCountService miscounted:\n  #{failures.join("\n  ")}"
+  end
+
+  # The editors show live counts with app/assets/javascripts/word_count.js. If it drifted from the
+  # server, a writer would see one number while typing and another on every other page.
+  test "the JavaScript counter agrees with the server on every shared case" do
+    node = ENV.fetch('NODE', 'node')
+    skip 'node is not installed' unless system(node, '--version', out: File::NULL, err: File::NULL)
+
+    script = <<~JS
+      const counter = require(#{JS_COUNTER_PATH.to_s.to_json});
+      const cases = require(#{CASES_PATH.to_s.to_json});
+      process.stdout.write(JSON.stringify(cases.map((c) => counter.count(c.text))));
+    JS
+    output, status = Open3.capture2(node, '-e', script)
+    assert status.success?, "node failed: #{output}"
+
+    failures = cases.zip(JSON.parse(output)).reject { |c, js| js == c['words'] }.map do |c, js|
+      "#{c['text'].inspect}: expected #{c['words']}, JavaScript counted #{js}"
+    end
+
+    assert_empty failures, "word_count.js disagrees with the shared cases:\n  #{failures.join("\n  ")}"
+  end
+
+  test "returns 0 for nil" do
     assert_equal 0, WordCountService.count(nil)
-    assert_equal 0, WordCountService.count("   ")
   end
 
-  # Forward slash handling
-  test "counts path/to/file as 3 words" do
-    assert_equal 3, WordCountService.count("path/to/file")
+  test "counts a whole novel the same way it counts a chapter" do
+    chapter = (["<p>She opened the door\u2014slowly. \u201CHello?\u201D Nobody answered.</p>"] * 50).join
+    chapter_words = WordCountService.count(chapter)
+    assert_equal 400, chapter_words
+
+    novel = chapter * 300 # ~1MB of HTML, about 120,000 words
+    assert_operator novel.bytesize, :>, 900_000
+    assert_equal chapter_words * 300, WordCountService.count(novel)
   end
 
-  test "counts URL paths as multiple words" do
-    # example/com/page/one splits into 4 words, plus "Visit" and "today" = 6
-    assert_equal 6, WordCountService.count("Visit example/com/page/one today")
+  test "handles text that isn't valid UTF-8" do
+    assert_equal 2, WordCountService.count("caf\xE9 time".dup.force_encoding('ASCII-8BIT'))
+    assert_equal 2, WordCountService.count("bad \xFF bytes".dup.force_encoding('UTF-8'))
   end
 
-  test "preserves dates with slashes as single tokens" do
-    # Dates like 01/02/2024 should not be split
-    result = WordCountService.count("Meeting on 01/02/2024")
-    # "Meeting" + "on" + "01/02/2024" (preserved) = 3 words
-    assert_equal 3, result
-  end
-
-  # Backslash handling
-  test "counts backslash paths as multiple words" do
-    assert_equal 3, WordCountService.count("path\\to\\file")
-  end
-
-  # Punctuation handling
-  test "ignores ellipsis" do
-    assert_equal 2, WordCountService.count("hello ... world")
-    assert_equal 2, WordCountService.count("hello.... world")
-  end
-
-  test "ignores dashed lines" do
-    assert_equal 2, WordCountService.count("hello --- world")
-    assert_equal 2, WordCountService.count("hello -- world")
-  end
-
-  test "ignores underscore lines" do
-    assert_equal 2, WordCountService.count("hello ___ world")
-  end
-
-  test "ignores stray punctuation" do
-    assert_equal 2, WordCountService.count("hello ! world")
-    assert_equal 2, WordCountService.count("@ hello # world")
-  end
-
-  # Contractions and hyphenated words
-  test "counts contractions as one word" do
-    assert_equal 2, WordCountService.count("don't worry")
-    assert_equal 2, WordCountService.count("I'm happy")
-  end
-
-  test "counts hyphenated words as one word" do
-    assert_equal 2, WordCountService.count("well-known fact")
-    assert_equal 1, WordCountService.count("mother-in-law")
-  end
-
-  # Numbers
-  test "counts numbers as words" do
-    assert_equal 3, WordCountService.count("chapter 42 begins")
-    assert_equal 2, WordCountService.count("100 words")
-  end
-
-  # HTML handling
-  test "strips HTML tags before counting" do
-    assert_equal 2, WordCountService.count("<p>hello</p> <strong>world</strong>")
-    assert_equal 3, WordCountService.count("<div><span>one</span> two three</div>")
-  end
-
-  # Edge cases
-  test "handles multiple spaces correctly" do
-    assert_equal 3, WordCountService.count("hello    world    today")
-  end
-
-  test "handles newlines and tabs" do
-    assert_equal 3, WordCountService.count("hello\nworld\ttoday")
-  end
-
-  test "handles mixed complex content" do
-    text = "The path/to/file contains don't and well-known words... Also 42 items!"
-    # "The" + "path" + "to" + "file" + "contains" + "don't" + "and" +
-    # "well-known" + "words" + "Also" + "42" + "items" = 12 words
-    # (ellipsis and ! are ignored)
-    assert_equal 12, WordCountService.count(text)
-  end
-
-  # Large document handling (memory-efficient lightweight counter)
-  test "handles large documents without memory issues" do
-    large_text = "word " * 60_000
-    count = WordCountService.count(large_text)
-    assert_equal 60_000, count
-  end
-
-  test "lightweight counter matches gem for forward slash" do
-    assert_lightweight_matches_gem("path/to/file", 3)
-  end
-
-  test "lightweight counter matches gem for date" do
-    assert_lightweight_matches_gem("01/02/2024", 1)
-  end
-
-  test "lightweight counter matches gem for contraction" do
-    assert_lightweight_matches_gem("don't", 1)
-  end
-
-  test "lightweight counter matches gem for hyphenated word" do
-    assert_lightweight_matches_gem("well-known", 1)
-  end
-
-  test "lightweight counter matches gem for HTML" do
-    assert_lightweight_matches_gem("<p>HTML</p> text", 2)
-  end
-
-  test "lightweight counter matches gem for ellipsis" do
-    assert_lightweight_matches_gem("...", 0)
-  end
-
-  test "lightweight counter matches gem for dashed line" do
-    assert_lightweight_matches_gem("---", 0)
-  end
-
-  test "lightweight counter matches gem for underscore line" do
-    assert_lightweight_matches_gem("___", 0)
-  end
-
-  test "lightweight counter matches gem for stray punctuation" do
-    # Note: "@#$" as a single token is counted by the gem as 1 word,
-    # but separated punctuation like "@ hello # world" ignores the @ and #
-    assert_lightweight_matches_gem("@ #", 0)
-  end
-
-  test "lightweight counter matches gem for backslash" do
-    backslash_text = "path\\to\\file"
-    assert_lightweight_matches_gem(backslash_text, 3)
+  test "plain_text shows what a reader sees" do
+    assert_equal " Hello \u00A0world ", WordCountService.plain_text('<p>Hello &nbsp;<b>world</b></p>')
   end
 
   test "count_with_fallback returns count on success" do
     assert_equal 3, WordCountService.count_with_fallback("hello world today")
   end
 
-  test "count_with_fallback falls back to simple count on error" do
-    # Test simple_count directly via reflection
-    simple_result = WordCountService.send(:simple_count, "<p>hello</p> world")
-    assert_equal 2, simple_result
+  test "count_with_fallback falls back to a simple count if counting raises" do
+    WordCountService.stub(:plain_text, ->(_) { raise 'boom' }) do
+      assert_equal 2, WordCountService.count_with_fallback("<p>hello</p> world")
+    end
   end
 
   test "simple_count strips HTML and splits on whitespace" do
     assert_equal 2, WordCountService.send(:simple_count, "<p>hello</p> <b>world</b>")
     assert_equal 0, WordCountService.send(:simple_count, nil)
     assert_equal 0, WordCountService.send(:simple_count, "")
-  end
-
-  test "chunked counting handles very large documents" do
-    # Create a document larger than CHUNK_SIZE * 3 to trigger chunked counting
-    large_text = "word " * 100_000
-    count = WordCountService.count(large_text)
-    assert_equal 100_000, count
-  end
-
-  test "chunked counting preserves word boundaries" do
-    # Create text where words might be split at chunk boundaries
-    # Use a mix of short and long words
-    words = ["the", "quick", "brown", "fox", "jumps", "over", "lazy", "dog"]
-    text = (words * 15_000).join(" ")
-    count = WordCountService.count(text)
-    assert_equal 15_000 * 8, count
-  end
-
-  private
-
-  def assert_lightweight_matches_gem(text, expected)
-    gem_count = WordCountAnalyzer::Counter.new(**WordCountService::COUNTER_OPTIONS).count(text)
-    assert_equal expected, gem_count, "Gem mismatch for: #{text.inspect}"
-
-    # Force lightweight counter by making text appear large
-    large_text = text + (" x" * 60_000)
-    service_count = WordCountService.count(large_text) - 60_000
-    assert_equal expected, service_count, "Lightweight counter mismatch for: #{text.inspect}"
   end
 end

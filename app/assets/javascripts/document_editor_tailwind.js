@@ -301,12 +301,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }, SAVE_DELAY_MS);
   };
 
-  // Function to count words - simple whitespace split
-  // Note: Server-side WordCountService is authoritative; this is an approximation for real-time display
+  // Count words the same way the server does (word_count.js mirrors WordCountService). This reads
+  // the HTML rather than textContent: textContent runs the last word of each paragraph into the
+  // first word of the next, which undercounted by one word per paragraph.
   const countWords = function() {
-    const text = document.getElementById('editor').textContent || '';
-    if (text.length === 0) return 0;
-    return text.trim().split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    return NotebookWordCount.count(document.getElementById('editor').innerHTML);
   };
 
   // Function to count characters (uses textContent for efficiency)
