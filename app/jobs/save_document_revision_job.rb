@@ -1,87 +1,63 @@
+# Runs at the end of each debounce window after a document is saved (see Document#enqueue_debounced).
+# It records the document's word count for the day and keeps its revision history up to date.
 class SaveDocumentRevisionJob < ApplicationJob
   queue_as :low_priority
 
-  MAX_RETRY_ATTEMPTS = 3
+  # Each revision covers up to this long. While a revision is this new, the job updates it in place
+  # with the latest text, so it ends up holding the text as it was at the end of that stretch of
+  # writing. A revision that held the start of the stretch instead would make its "Show Changes"
+  # show the end of the previous session as written now, and leave the last minutes of every
+  # session out of the history until the next session began.
+  REVISION_WINDOW = 5.minutes
 
-  def perform(*args)
-    document_id = args.shift
+  # A save that removes this many words, or this share of the document, starts a new revision
+  # rather than overwriting the open one, so deleting a chunk by accident can't overwrite the only
+  # copy of what was written in this window.
+  LARGE_DELETION_WORDS = 100
+  LARGE_DELETION_SHARE = 0.25
+
+  def perform(document_id)
     document = Document.find_by(id: document_id)
     return unless document
 
-    # Initialize variables; body is NOT loaded yet
-    body_loaded = false
-    body_text = nil
+    body = document.body.to_s
 
-    # Use client-provided word count if available (browser edit), otherwise calculate server-side (API/import)
-    if document.cached_word_count.present? && document.cached_word_count > 0
-      # Client already provided the count via autosave - use it as-is
-      new_word_count = document.cached_word_count
-    else
-      # No client count (API/import edit) - calculate server-side
-      begin
-        # Try the accurate (but potentially memory-intensive) count first
-        # This accesses document.body internally
-        new_word_count = document.computed_word_count
-      rescue StandardError => e
-        # Log the error for visibility
-        Rails.logger.warn("SaveDocumentRevisionJob: Failed accurate word count for Document #{document_id}: #{e.message}. Falling back to basic count.")
+    # Always count on the server: the editor's count is only for display, and an editor tab left
+    # open since before a change to the counter would send counts made the old way.
+    word_count = WordCountService.count_with_fallback(body)
+    document.update_column(:cached_word_count, word_count) unless document.cached_word_count == word_count
 
-        # Fallback: Load body ONLY if needed for fallback count
-        body_text = document.body || "" # Load body here
-        body_loaded = true
-        new_word_count = body_text.split.size
-      end
-
-      # Only update cached_word_count if we calculated it server-side
-      document.update(cached_word_count: new_word_count)
+    if document.user_id
+      # The day the edit was made (when this job was queued, not when it runs), in the writer's time zone
+      date = WordCountUpdate.date_for(document.user, enqueued_at || Time.current)
+      WordCountUpdate.record!(document, date: date, word_count: word_count)
     end
 
-    # Save a WordCountUpdate for this document for the day the edit was made
-    # Use enqueued_at (when the job was created) to handle Sidekiq delays correctly
-    user = document.user
-    enqueue_time = enqueued_at || Time.current
-    user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
+    save_revision(document, body, word_count)
+  end
 
-    retry_count = 0
-    begin
-      update = document.word_count_updates.find_or_initialize_by(
-        for_date: user_date,
-      )
-      update.word_count = new_word_count
-      update.user_id  ||= document.user_id
-      update.save!
-    rescue ActiveRecord::RecordNotUnique
-      # Unique index exists and found a duplicate via race condition - retry to find the existing record
-      retry_count += 1
-      if retry_count <= MAX_RETRY_ATTEMPTS
-        retry
-      else
-        Rails.logger.error("SaveDocumentRevisionJob: max retries exceeded for Document##{document_id} on #{user_date}")
-        raise # Let Sidekiq handle with its retry mechanism
-      end
-    end
+  private
 
-    # Check if revision is needed BEFORE potentially loading body again
-    latest_revision = document.document_revisions.order('created_at DESC').limit(1).first
-    if latest_revision.present? && latest_revision.created_at > 5.minutes.ago # read as "AFTER" the time which was 5 minutes ago, not "LESS THAN" 5 minutes ago
-      # Revision not needed, exit early. Body only loaded if fallback count happened.
-      return
-    end
-
-    # Revision IS needed. Load body if it wasn't already loaded for the fallback count.
-    unless body_loaded
-      body_text = document.body || "" # Load body here
-      # body_loaded = true # State update no longer needed
-    end
-
-    # Store the document information as-is, using the potentially-large body_text
-    document.document_revisions.create!(
+  def save_revision(document, body, word_count)
+    attributes = {
       title:             document.title,
-      body:              body_text, # Use the body_text (now definitely loaded if needed)
+      body:              body,
       synopsis:          document.synopsis,
       universe_id:       document.universe_id,
       notes_text:        document.notes_text,
-      cached_word_count: new_word_count
-    )
+      cached_word_count: word_count
+    }
+
+    latest = document.document_revisions.order(created_at: :desc, id: :desc).first
+    if latest && latest.created_at > REVISION_WINDOW.ago && !large_deletion?(latest, word_count)
+      latest.update!(attributes) # a no-op when nothing has changed
+    else
+      document.document_revisions.create!(attributes)
+    end
+  end
+
+  def large_deletion?(revision, word_count)
+    removed = revision.cached_word_count.to_i - word_count
+    removed >= LARGE_DELETION_WORDS || (removed > 0 && removed >= revision.cached_word_count.to_i * LARGE_DELETION_SHARE)
   end
 end

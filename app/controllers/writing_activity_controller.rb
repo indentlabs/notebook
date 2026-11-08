@@ -67,80 +67,56 @@ class WritingActivityController < ApplicationController
 
   def calculate_streak
     user_today = current_user.current_date_in_time_zone
-    streak = 0
-    date = user_today
+    # One query for the past year rather than one per day
+    active_dates = WordCountUpdate.dates_with_writing_activity(current_user, user_today - 365.days, user_today)
 
-    # Look back up to 365 days to find the streak
-    365.times do
-      words = WordCountUpdate.words_written_on_date(current_user, date)
-      if words > 0
-        streak += 1
-        date -= 1.day
-      else
-        # If today has no words yet, check if yesterday started a streak
-        if date == user_today && streak == 0
-          date -= 1.day
-          next
-        end
-        break
-      end
+    # If today has no words yet, a streak that ran through yesterday still counts
+    date = active_dates.include?(user_today) ? user_today : user_today - 1.day
+    streak = 0
+    while active_dates.include?(date)
+      streak += 1
+      date -= 1.day
     end
 
     streak
   end
 
-  def prepare_type_breakdown
-    # Get word counts by entity type for the date range
-    # We need to calculate deltas, not totals
-    updates_in_range = current_user.word_count_updates
-      .where(for_date: @date_range)
-      .where.not(entity_type: 'ManualAdjustment')
-      .select(:entity_type, :entity_id, :word_count, :for_date)
-      .order(:entity_type, :entity_id, :for_date)
+  # { [entity_type, entity_id] => net words over the period }, including manual adjustments
+  def net_words_by_entity
+    @net_words_by_entity ||= WordCountUpdate.net_words_by_entity(current_user, @date_range)
+  end
 
-    # Group by entity type
-    type_totals = Hash.new(0)
-
-    # For each entity, calculate the delta within the range
-    updates_in_range.group_by { |u| [u.entity_type, u.entity_id] }.each do |(_type, _id), records|
-      # Get the last record in range
-      last_record = records.max_by(&:for_date)
-
-      # Get the first record before the range for this entity
-      first_before_range = current_user.word_count_updates
-        .where(entity_type: last_record.entity_type, entity_id: last_record.entity_id)
-        .where('for_date < ?', @date_range.first)
-        .order(for_date: :desc)
-        .first
-
-      prev_count = first_before_range&.word_count || 0
-      delta = last_record.word_count - prev_count
-      type_totals[last_record.entity_type] += delta if delta > 0
+  # Each tracked page's net growth over the period (pages that shrank count as 0)
+  def entity_growth
+    net_words_by_entity.reject do |(entity_type, _entity_id), words|
+      entity_type == WordCountUpdate::MANUAL_ADJUSTMENT || words <= 0
     end
+  end
+
+  def prepare_type_breakdown
+    type_totals = Hash.new(0)
+    entity_growth.each { |(entity_type, _entity_id), words| type_totals[entity_type] += words }
+
+    manual_words = net_words_by_entity
+      .select { |(entity_type, _entity_id), _words| entity_type == WordCountUpdate::MANUAL_ADJUSTMENT }
+      .values.sum
+    type_totals['Logged by hand'] = manual_words if manual_words > 0
 
     type_totals
   end
 
   def fetch_recent_updates
-    # Get recent word count updates with their entities and calculate deltas
+    # Each day's change to each page, measured the same way as the daily totals
     updates = current_user.word_count_updates
       .where(for_date: @date_range)
-      .where.not(entity_type: 'ManualAdjustment')
+      .where.not(entity_type: WordCountUpdate::MANUAL_ADJUSTMENT)
+      .with_previous_word_count
       .includes(:entity)
       .order(for_date: :desc, updated_at: :desc)
 
-    # Calculate delta for each update by comparing to previous record
     updates_with_deltas = []
     updates.each do |update|
-      # Find the previous record for this entity
-      prev_record = current_user.word_count_updates
-        .where(entity_type: update.entity_type, entity_id: update.entity_id)
-        .where('for_date < ?', update.for_date)
-        .order(for_date: :desc)
-        .first
-
-      prev_count = prev_record&.word_count || 0
-      delta = update.word_count - prev_count
+      delta = update.words_added
 
       # Only include if there was actual change
       next if delta == 0
@@ -151,49 +127,21 @@ class WritingActivityController < ApplicationController
         delta: delta,
         for_date: update.for_date
       }
+      break if updates_with_deltas.size >= 50
     end
 
-    updates_with_deltas.first(50)
+    updates_with_deltas
   end
 
   def fetch_top_growing_pages
-    # Calculate which pages grew the most in the date range
-    updates_in_range = current_user.word_count_updates
-      .where(for_date: @date_range)
-      .where.not(entity_type: 'ManualAdjustment')
-      .select(:entity_type, :entity_id, :word_count, :for_date)
-
-    # Calculate delta for each entity
-    page_deltas = []
-
-    updates_in_range.group_by { |u| [u.entity_type, u.entity_id] }.each do |(entity_type, entity_id), records|
-      last_record = records.max_by(&:for_date)
-
-      # Get the record before the range
-      first_before_range = current_user.word_count_updates
-        .where(entity_type: entity_type, entity_id: entity_id)
-        .where('for_date < ?', @date_range.first)
-        .order(for_date: :desc)
-        .first
-
-      prev_count = first_before_range&.word_count || 0
-      delta = last_record.word_count - prev_count
-
-      next unless delta > 0
-
-      page_deltas << {
-        entity_type: entity_type,
-        entity_id: entity_id,
-        words_added: delta
-      }
-    end
-
-    # Sort by words added and take top 10
-    top_pages = page_deltas.sort_by { |p| -p[:words_added] }.first(10)
+    top_pages = entity_growth
+      .sort_by { |_key, words| -words }
+      .first(10)
+      .map { |(entity_type, entity_id), words| { entity_type: entity_type, entity_id: entity_id, words_added: words } }
 
     # Load the actual entities
     top_pages.each do |page|
-      page[:entity] = page[:entity_type].constantize.find_by(id: page[:entity_id])
+      page[:entity] = page[:entity_type].safe_constantize&.find_by(id: page[:entity_id])
     end
 
     top_pages.reject { |p| p[:entity].nil? }

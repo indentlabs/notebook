@@ -1,49 +1,35 @@
+# Recounts a notebook page's total from its fields' cached counts and records it for the day.
+# Usually run straight after CacheAttributeWordCountJob; queued on its own when a field is deleted.
 class CacheSumAttributeWordCountJob < ApplicationJob
   queue_as :cache
 
-  MAX_RETRY_ATTEMPTS = 3
-
-  def perform(*args)
-    entity_type = args.shift
-    entity_id   = args.shift
-
-    entity = entity_type.constantize.find_by(id: entity_id)
+  def perform(entity_type, entity_id)
+    entity = entity_type.safe_constantize&.find_by(id: entity_id)
     return if entity.nil?
 
     save_daily_word_count_changes(entity)
   end
 
-  def save_daily_word_count_changes(entity)
-    # Grab the latest total word count for this entity
-    sum_attribute_word_count = Attribute.where(entity_type: entity.class.name, entity_id: entity.id).sum(:word_count_cache)
+  # edited_at: when the edit was made, which decides the day it counts towards (in the writer's
+  #   time zone). Defaults to when this job was queued.
+  # words_changed: how much the edit changed the page's count, when known. The day's first edit
+  #   then starts the day from the total minus that change.
+  def save_daily_word_count_changes(entity, edited_at: nil, words_changed: nil)
+    total = Attribute.where(entity_type: entity.class.name, entity_id: entity.id).sum(:word_count_cache)
+    previous_total = entity.cached_word_count
 
-    # Cache the total word count onto the model, too
-    entity.update(cached_word_count: sum_attribute_word_count)
+    # update_column: validations (a page with no name, say) mustn't stop the count being saved,
+    # and the page has already been touched by the edit itself.
+    entity.update_column(:cached_word_count, total) unless previous_total == total
 
-    # Determine the user's date based on their timezone at enqueue time (not job execution time)
-    user = entity.user
-    enqueue_time = enqueued_at || Time.current
-    user_date = user&.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
-
-    # Create or re-use an existing WordCountUpdate for today (in user's timezone)
-    retry_count = 0
-    begin
-      update = entity.word_count_updates.find_or_initialize_by(
-        for_date: user_date,
-      )
-      update.word_count = sum_attribute_word_count
-      update.user_id  ||= entity.user_id
-
-      # Save!
-      update.save!
-    rescue ActiveRecord::RecordNotUnique
-      # Unique index exists and found a duplicate via race condition - retry to find the existing record
-      retry_count += 1
-      if retry_count <= MAX_RETRY_ATTEMPTS
-        retry
+    date = WordCountUpdate.date_for(entity.user, edited_at || enqueued_at || Time.current)
+    WordCountUpdate.record!(entity, date: date, word_count: total) do
+      if words_changed
+        total - words_changed
       else
-        Rails.logger.error("CacheSumAttributeWordCountJob: max retries exceeded for #{entity.class.name}##{entity.id} on #{user_date}")
-        raise # Let Sidekiq handle with its retry mechanism
+        # A field was removed, or the edit isn't known: the day starts from the last total, so the
+        # removal doesn't count as writing. A page whose total was never cached credits nothing.
+        previous_total.to_i > 0 ? previous_total : total
       end
     end
   end

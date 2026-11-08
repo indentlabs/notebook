@@ -228,4 +228,100 @@ class WordCountUpdateTest < ActiveSupport::TestCase
       assert_equal 0, result[Date.current]
     end
   end
+
+  # -- Starting counts --
+
+  test "a day with a starting count is measured from it, not from the previous row" do
+    # Weeks ago, counted the old way (or with days of untracked writing since)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 1_000, for_date: Date.current - 30.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 1_250, starting_word_count: 1_200, for_date: Date.current)
+
+    assert_equal 50, WordCountUpdate.words_written_on_date(@user, Date.current)
+    assert_equal({ Date.current => 50 }, WordCountUpdate.batch_words_written_on_dates(@user, [Date.current]))
+  end
+
+  test "a first-ever row with a starting count doesn't credit the text it started with" do
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 5_030, starting_word_count: 5_000, for_date: Date.current)
+
+    assert_equal 30, WordCountUpdate.words_written_on_date(@user, Date.current)
+  end
+
+  test "rows without a starting count still use the previous row" do
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 100, for_date: Date.current - 2.days)
+    row = WordCountUpdate.create!(user: @user, entity: @document, word_count: 160, for_date: Date.current)
+
+    assert_equal 100, row.previous_word_count
+    assert_equal 100, row.starting_count
+    assert_equal 60, row.words_added
+    assert_equal 60, row.counted_words
+  end
+
+  test "words_added can be negative but counted_words never is" do
+    row = WordCountUpdate.create!(user: @user, entity: @document, word_count: 80, starting_word_count: 100, for_date: Date.current)
+
+    assert_equal(-20, row.words_added)
+    assert_equal 0, row.counted_words
+  end
+
+  test "with_previous_word_count loads each row's previous count in the same query" do
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 100, for_date: Date.current - 3.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 140, for_date: Date.current - 1.day)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 200, starting_word_count: 150, for_date: Date.current)
+
+    rows = @user.word_count_updates.with_previous_word_count.order(:for_date).to_a
+    assert_equal [nil, 100, nil], rows.map(&:previous_word_count)
+    assert_equal [100, 40, 50], rows.map(&:words_added)
+  end
+
+  test "manual adjustments never subtract an earlier adjustment that happens to share their id" do
+    WordCountUpdate.create!(user: @user, entity_type: 'ManualAdjustment', entity_id: 42, word_count: 300, for_date: Date.current - 1.day)
+    WordCountUpdate.create!(user: @user, entity_type: 'ManualAdjustment', entity_id: 42, word_count: 100, for_date: Date.current)
+
+    assert_equal 100, WordCountUpdate.words_written_on_date(@user, Date.current)
+    assert_equal 400, WordCountUpdate.words_written_in_range(@user, (Date.current - 1.day)..Date.current)
+  end
+
+  test "negative manual adjustments subtract" do
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 500, starting_word_count: 0, for_date: Date.current)
+    WordCountUpdate.create!(user: @user, entity_type: 'ManualAdjustment', entity_id: 7, word_count: -200, for_date: Date.current)
+
+    assert_equal 300, WordCountUpdate.words_written_on_date(@user, Date.current)
+    assert_equal 300, WordCountUpdate.words_written_in_range(@user, Date.current..Date.current)
+  end
+
+  test "words_written_in_range starts from the first day's starting count" do
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 900, for_date: Date.current - 20.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 1_100, starting_word_count: 1_000, for_date: Date.current - 2.days)
+    WordCountUpdate.create!(user: @user, entity: @document, word_count: 1_300, starting_word_count: 1_100, for_date: Date.current)
+
+    assert_equal 300, WordCountUpdate.words_written_in_range(@user, (Date.current - 7.days)..Date.current)
+    assert_equal({ ['Document', @document.id] => 300 },
+                 WordCountUpdate.net_words_by_entity(@user, (Date.current - 7.days)..Date.current))
+  end
+
+  test "for_date is required" do
+    row = WordCountUpdate.new(user: @user, entity_type: 'ManualAdjustment', entity_id: 1, word_count: 10)
+    refute row.valid?
+    assert_includes row.errors[:for_date], "can't be blank"
+  end
+
+  test "date_for uses the writer's time zone and survives an unknown one" do
+    late_evening_eastern = Time.utc(2026, 11, 8, 3, 0) # 10pm on Nov 7 in New York
+
+    assert_equal Date.new(2026, 11, 7), WordCountUpdate.date_for(@user, late_evening_eastern)
+    assert_equal Date.new(2026, 11, 8), WordCountUpdate.date_for(nil, late_evening_eastern)
+    @user.time_zone = 'Not/AZone'
+    assert_equal Date.new(2026, 11, 8), WordCountUpdate.date_for(@user, late_evening_eastern)
+  end
+
+  test "record! only asks for the starting count when it creates the day's row" do
+    asked = 0
+    WordCountUpdate.record!(@document, date: Date.current, word_count: 120) { asked += 1; 100 }
+    WordCountUpdate.record!(@document, date: Date.current, word_count: 180) { asked += 1; 999 }
+
+    row = @document.word_count_updates.find_by(for_date: Date.current)
+    assert_equal 1, asked
+    assert_equal 100, row.starting_word_count
+    assert_equal 180, row.word_count
+  end
 end

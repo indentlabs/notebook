@@ -1,7 +1,22 @@
+# One row per tracked entity (document, notebook page, timeline event, book) per day it was edited,
+# plus "ManualAdjustment" rows that writers add by hand.
+#
+# - word_count is the entity's whole word count at the end of for_date. For a manual adjustment it
+#   is the number of words being added (or removed, if negative).
+# - starting_word_count is the entity's count when the first change of for_date was saved, measured
+#   the same way. Rows from before that column existed have none; their day starts from the
+#   entity's previous row instead.
+#
+# Words written on a day are each row's word_count minus the count its day started from. Deletions
+# don't subtract (a day that removed more than it added counts as 0), except in manual adjustments.
 class WordCountUpdate < ApplicationRecord
+  MANUAL_ADJUSTMENT = 'ManualAdjustment'.freeze
+  MAX_RETRY_ATTEMPTS = 3
+
   belongs_to :user
   belongs_to :entity, polymorphic: true, optional: true
   validates :entity, presence: true, unless: :is_manual_adjustment?
+  validates :for_date, presence: true
 
   # A blank word count means zero words written, never "unknown".
   # Normalize here so a blank manual-adjustment form submission (which
@@ -10,8 +25,89 @@ class WordCountUpdate < ApplicationRecord
 
   after_commit :check_daily_word_goal, on: [:create, :update]
 
+  # The previous row's word_count for the same entity, for rows whose day has no starting count.
+  # One backwards probe per row on the unique (entity_type, entity_id, for_date) index.
+  PREVIOUS_WORD_COUNT_SQL = <<~SQL.squish.freeze
+    CASE WHEN word_count_updates.starting_word_count IS NULL
+          AND word_count_updates.entity_type <> '#{MANUAL_ADJUSTMENT}'
+    THEN (
+      SELECT earlier.word_count
+      FROM word_count_updates earlier
+      WHERE earlier.entity_type = word_count_updates.entity_type
+        AND earlier.entity_id = word_count_updates.entity_id
+        AND earlier.for_date < word_count_updates.for_date
+      ORDER BY earlier.for_date DESC
+      LIMIT 1
+    ) END
+  SQL
+
+  scope :with_previous_word_count, -> {
+    select('word_count_updates.*', "#{PREVIOUS_WORD_COUNT_SQL} AS previous_word_count")
+  }
+
   def is_manual_adjustment?
-    entity_type == 'ManualAdjustment'
+    entity_type == MANUAL_ADJUSTMENT
+  end
+
+  # The entity's word count when this row's day began.
+  def starting_count
+    return 0 if is_manual_adjustment?
+    return starting_word_count unless starting_word_count.nil?
+
+    previous_word_count.to_i
+  end
+
+  # The word_count of the entity's row before this one, if any. Loaded in bulk by
+  # with_previous_word_count, otherwise looked up.
+  def previous_word_count
+    return self[:previous_word_count] if has_attribute?(:previous_word_count)
+    return @previous_word_count if defined?(@previous_word_count)
+
+    @previous_word_count = self.class
+      .where(entity_type: entity_type, entity_id: entity_id)
+      .where('for_date < ?', for_date)
+      .order(for_date: :desc)
+      .limit(1)
+      .pick(:word_count)
+  end
+
+  # How much the entity grew on this row's day (negative if more was deleted than written).
+  def words_added
+    is_manual_adjustment? ? word_count.to_i : word_count.to_i - starting_count
+  end
+
+  # What this row adds to "words written" for its day.
+  def counted_words
+    is_manual_adjustment? ? word_count.to_i : [words_added, 0].max
+  end
+
+  # The date a change made at `time` counts towards, in the writer's own time zone.
+  def self.date_for(user, time = Time.current)
+    zone = user&.time_zone.presence
+    zone ? time.in_time_zone(zone).to_date : time.to_date
+  rescue ArgumentError # an unrecognized time zone name
+    time.to_date
+  end
+
+  # Records an entity's word count for a day.
+  #
+  # The block is called only when this creates the day's row, and returns the count the day started
+  # from (or nil if it isn't known, so the day is measured from the entity's previous row).
+  def self.record!(entity, date:, word_count:, user_id: entity.user_id)
+    attempts = 0
+    begin
+      row = entity.word_count_updates.find_or_initialize_by(for_date: date)
+      row.starting_word_count = yield if row.new_record? && block_given?
+      row.word_count = word_count
+      row.user_id ||= user_id
+      row.save!
+      row
+    rescue ActiveRecord::RecordNotUnique
+      # Another job created the day's row first; update that one instead
+      attempts += 1
+      retry if attempts <= MAX_RETRY_ATTEMPTS
+      raise
+    end
   end
 
   private
@@ -22,118 +118,22 @@ class WordCountUpdate < ApplicationRecord
 
   public
 
-  # Calculate actual words written on a specific date (delta from previous day)
-  # Uses ActiveRecord for database-agnostic queries
+  # Words written on a single date.
   def self.words_written_on_date(user, target_date)
-    # Get all records for the target date
-    today_records = where(user: user, for_date: target_date)
-      .select(:entity_type, :entity_id, :word_count)
-      .to_a
-
-    return 0 if today_records.empty?
-
-    # Defensive: Dedupe by entity (in case of duplicate records from race conditions)
-    # Keep the record with the highest word_count per entity
-    today_records = today_records
-      .group_by { |r| [r.entity_type, r.entity_id] }
-      .transform_values { |records| records.max_by { |r| r.word_count || 0 } }
-      .values
-
-    # Get the previous record for each entity in a single query using a subquery
-    entity_ids_by_type = today_records.group_by(&:entity_type).transform_values { |recs| recs.map(&:entity_id).uniq }
-
-    prev_records = []
-    entity_ids_by_type.each do |type, ids|
-      prev_records.concat(
-        where(user: user)
-          .where('for_date < ?', target_date)
-          .where(entity_type: type, entity_id: ids)
-          .group(:entity_type, :entity_id)
-          .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
-          .to_a
-      )
-    end
-
-    # Fetch the actual word counts for those dates in bulk (avoids N+1)
-    prev_word_counts = {}
-
-    if prev_records.any?
-      # Build conditions for bulk fetch using OR clauses
-      conditions = prev_records.map do |pr|
-        sanitize_sql_array([
-          "(entity_type = ? AND entity_id = ? AND for_date = ?)",
-          pr.entity_type, pr.entity_id, pr.max_date
-        ])
-      end
-
-      records = where(user: user)
-        .where(conditions.join(' OR '))
-        .select(:entity_type, :entity_id, :word_count)
-
-      records.each do |r|
-        prev_word_counts[[r.entity_type, r.entity_id]] = r.word_count
-      end
-    end
-
-    # Calculate deltas
-    total_delta = 0
-    today_records.each do |record|
-      prev_count = prev_word_counts[[record.entity_type, record.entity_id]] || 0
-      delta = (record.word_count || 0) - prev_count
-      if record.entity_type == 'ManualAdjustment' || delta > 0
-        total_delta += delta
-      end
-    end
-
-    total_delta
+    batch_words_written_on_dates(user, [target_date])[target_date] || 0
   end
 
-  # Batch calculate words written for multiple dates efficiently
-  # Returns a hash of { date => word_count }
-  # Uses a single query to fetch all data, then calculates deltas in Ruby
+  # Words written on each of the given dates: { date => words }.
+  # Reads only the rows on those dates, each with one index probe for its previous row if needed.
   def self.batch_words_written_on_dates(user, dates)
     return {} if dates.empty?
 
-    dates = dates.sort
-    earliest_date = dates.first
-    latest_date = dates.last
+    dates = dates.uniq.sort
+    result = dates.index_with(0)
 
-    # Fetch all records in the date range plus records before earliest_date for baseline
-    # We need records from before earliest_date to calculate delta for the first date
-    all_records = where(user: user)
-      .where('for_date <= ?', latest_date)
-      .select(:entity_type, :entity_id, :word_count, :for_date)
-      .order(:entity_type, :entity_id, :for_date)
-      .to_a
-
-    return dates.each_with_object({}) { |d, h| h[d] = 0 } if all_records.empty?
-
-    # Group records by entity
-    records_by_entity = all_records.group_by { |r| [r.entity_type, r.entity_id] }
-
-    # For each target date, calculate delta for each entity
-    result = {}
-    dates.each do |target_date|
-      total_delta = 0
-
-      records_by_entity.each do |_entity_key, entity_records|
-        # Find the record for target_date (if any)
-        today_record = entity_records.find { |r| r.for_date == target_date }
-        next unless today_record
-
-        # Find the previous record (most recent before target_date)
-        prev_record = entity_records
-          .select { |r| r.for_date < target_date }
-          .max_by(&:for_date)
-
-        prev_count = prev_record&.word_count || 0
-        delta = (today_record.word_count || 0) - prev_count
-        if today_record.entity_type == 'ManualAdjustment' || delta > 0
-          total_delta += delta
-        end
-      end
-
-      result[target_date] = total_delta
+    rows = where(user: user, for_date: dates.first..dates.last).with_previous_word_count.to_a
+    one_row_per_entity_and_date(rows).each do |row|
+      result[row.for_date] += row.counted_words if result.key?(row.for_date)
     end
 
     result
@@ -151,86 +151,36 @@ class WordCountUpdate < ApplicationRecord
     word_counts.select { |_date, count| count > 0 }.keys.to_set
   end
 
-  # Calculate actual words written in a date range
-  # Compares the final word count in the range vs the day before the range started
+  # Words written over a date range: each entity's net growth from the start of the range to its
+  # end (an entity that shrank counts as 0), plus manual adjustments.
   def self.words_written_in_range(user, date_range)
-    start_date = date_range.first
-    end_date = date_range.last
-
-    # Get the latest record for each entity within the date range
-    latest_in_range = where(user: user, for_date: date_range)
-      .group(:entity_type, :entity_id)
-      .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
-      .to_a
-
-    return 0 if latest_in_range.empty?
-
-    # Fetch the actual word counts for the latest dates in bulk (avoids N+1)
-    current_word_counts = {}
-
-    if latest_in_range.any?
-      conditions = latest_in_range.map do |lr|
-        sanitize_sql_array([
-          "(entity_type = ? AND entity_id = ? AND for_date = ?)",
-          lr.entity_type, lr.entity_id, lr.max_date
-        ])
-      end
-
-      records = where(user: user)
-        .where(conditions.join(' OR '))
-        .select(:entity_type, :entity_id, :word_count)
-
-      records.each do |r|
-        current_word_counts[[r.entity_type, r.entity_id]] = r.word_count
-      end
+    net_words_by_entity(user, date_range).sum do |(entity_type, _entity_id), words|
+      entity_type == MANUAL_ADJUSTMENT ? words : [words, 0].max
     end
-
-    # Get the previous record for each entity before the range started
-    entity_ids_by_type = latest_in_range.group_by(&:entity_type).transform_values { |recs| recs.map(&:entity_id).uniq }
-
-    prev_records = []
-    entity_ids_by_type.each do |type, ids|
-      prev_records.concat(
-        where(user: user)
-          .where('for_date < ?', start_date)
-          .where(entity_type: type, entity_id: ids)
-          .group(:entity_type, :entity_id)
-          .select(:entity_type, :entity_id, 'MAX(for_date) as max_date')
-          .to_a
-      )
-    end
-
-    # Fetch the actual word counts for those dates in bulk (avoids N+1)
-    prev_word_counts = {}
-
-    if prev_records.any?
-      conditions = prev_records.map do |pr|
-        sanitize_sql_array([
-          "(entity_type = ? AND entity_id = ? AND for_date = ?)",
-          pr.entity_type, pr.entity_id, pr.max_date
-        ])
-      end
-
-      records = where(user: user)
-        .where(conditions.join(' OR '))
-        .select(:entity_type, :entity_id, :word_count)
-
-      records.each do |r|
-        prev_word_counts[[r.entity_type, r.entity_id]] = r.word_count
-      end
-    end
-
-    # Calculate deltas
-    total_delta = 0
-    current_word_counts.keys.each do |key|
-      current = current_word_counts[key] || 0
-      prev = prev_word_counts[key] || 0
-      delta = current - prev
-      if key[0] == 'ManualAdjustment' || delta > 0
-        total_delta += delta
-      end
-    end
-
-    total_delta
   end
+
+  # Each entity's net growth over a date range: { [entity_type, entity_id] => words }, measured
+  # from the count its first day in the range started from to its count at the end of the range.
+  # Manual adjustments are summed as they are.
+  def self.net_words_by_entity(user, date_range)
+    rows = where(user: user, for_date: date_range).with_previous_word_count.to_a
+
+    one_row_per_entity_and_date(rows).group_by { |row| [row.entity_type, row.entity_id] }.transform_values do |entity_rows|
+      if entity_rows.first.is_manual_adjustment?
+        entity_rows.sum { |row| row.word_count.to_i }
+      else
+        first, last = entity_rows.minmax_by(&:for_date)
+        last.word_count.to_i - first.starting_count
+      end
+    end
+  end
+
+  # The unique index allows one row per entity per date, but rows from before it existed can be
+  # duplicated by a race. Keep the highest count for each.
+  def self.one_row_per_entity_and_date(rows)
+    rows
+      .group_by { |row| [row.entity_type, row.entity_id, row.for_date] }
+      .map { |_key, dupes| dupes.max_by { |row| row.word_count.to_i } }
+  end
+  private_class_method :one_row_per_entity_and_date
 end

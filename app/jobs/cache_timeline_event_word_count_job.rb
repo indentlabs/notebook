@@ -1,43 +1,26 @@
 class CacheTimelineEventWordCountJob < ApplicationJob
   queue_as :cache
 
-  MAX_RETRY_ATTEMPTS = 3
-
-  def perform(timeline_event_id)
+  # previous_word_count: the event's count before the edit (see TimelineEvent#enqueue_word_count_update).
+  # If this job creates the day's row, the day starts from it.
+  def perform(timeline_event_id, previous_word_count = nil)
     timeline_event = TimelineEvent.find_by(id: timeline_event_id)
     return if timeline_event.nil?
 
-    # Count words in title and description
-    title_words = timeline_event.title.present? ? WordCountService.count_with_fallback(timeline_event.title) : 0
-    description_words = timeline_event.description.present? ? WordCountService.count_with_fallback(timeline_event.description) : 0
-    total_word_count = title_words + description_words
+    total_word_count = TimelineEvent.word_count_of(timeline_event.title, timeline_event.description)
+    cached_before = timeline_event.cached_word_count
 
     # Cache the total word count on the model
-    timeline_event.update_column(:cached_word_count, total_word_count)
+    timeline_event.update_column(:cached_word_count, total_word_count) unless cached_before == total_word_count
 
     # Get user via timeline association
     user = timeline_event.timeline&.user
     return if user.nil?
 
-    # Determine the user's date based on their timezone at enqueue time (not job execution time)
-    enqueue_time = enqueued_at || Time.current
-    user_date = user.time_zone.present? ? enqueue_time.in_time_zone(user.time_zone).to_date : enqueue_time.to_date
-
-    # Create or update WordCountUpdate for today (in user's timezone)
-    retry_count = 0
-    begin
-      update = timeline_event.word_count_updates.find_or_initialize_by(for_date: user_date)
-      update.word_count = total_word_count
-      update.user_id ||= user.id
-      update.save!
-    rescue ActiveRecord::RecordNotUnique
-      retry_count += 1
-      if retry_count <= MAX_RETRY_ATTEMPTS
-        retry
-      else
-        Rails.logger.error("CacheTimelineEventWordCountJob: max retries exceeded for TimelineEvent##{timeline_event_id} on #{user_date}")
-        raise # Let Sidekiq handle with its retry mechanism
-      end
+    # The day the edit was made (when this job was queued, not when it runs), in the writer's time zone
+    date = WordCountUpdate.date_for(user, enqueued_at || Time.current)
+    WordCountUpdate.record!(timeline_event, date: date, word_count: total_word_count, user_id: user.id) do
+      previous_word_count || cached_before
     end
   end
 end

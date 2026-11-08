@@ -37,9 +37,17 @@ class Book < ApplicationRecord
   end
 
   def enqueue_word_count_update
-    CacheBookWordCountJob.perform_later(self.id)
+    # The count from before this edit, so the day's words are measured from it
+    previous_word_count = self.class.word_count_of(
+      *WORD_COUNT_TRACKED_FIELDS.map { |field| attribute_before_last_save(field) }
+    )
+    CacheBookWordCountJob.perform_later(self.id, previous_word_count)
   rescue StandardError => e
     Rails.logger.error("Failed to enqueue CacheBookWordCountJob: #{e.message}")
+  end
+
+  def self.word_count_of(*texts)
+    texts.sum { |text| WordCountService.count_with_fallback(text) }
   end
 
   # Display helpers (like Timeline/Document patterns)

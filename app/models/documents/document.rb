@@ -257,9 +257,36 @@ class Document < ApplicationRecord
   end
 
   def save_document_revision!
+    record_starting_word_count! if saved_change_to_body?
+
     if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
       enqueue_debounced(SaveDocumentRevisionJob)
     end
+  end
+
+  # On the first change to the body each day, store the count the day started from, measured on the
+  # text from just before this save. SaveDocumentRevisionJob then keeps that day's word_count up to
+  # date, so the day's words are what was written that day: not everything since the document's
+  # last tracked day, not text that was imported or pasted in before the first edit, and not a
+  # difference between the old and new ways of counting.
+  def record_starting_word_count!
+    date = WordCountUpdate.date_for(user)
+    row = word_count_updates.find_by(for_date: date)
+    return if row&.starting_word_count
+
+    starting_count = WordCountService.count_with_fallback(body_before_last_save)
+
+    if row
+      # The day's row was written before starting counts were recorded (by a save earlier today).
+      # Keep the words it already credited today, and measure the rest of the day from now on.
+      already_credited = [row.word_count.to_i - row.previous_word_count.to_i, 0].max
+      row.update!(starting_word_count: [starting_count - already_credited, 0].max)
+    else
+      WordCountUpdate.record!(self, date: date, word_count: starting_count) { starting_count }
+    end
+  rescue StandardError => e
+    # Word tracking must never fail a save
+    Rails.logger.warn "Could not record the starting word count for Document #{id}: #{e.class}: #{e.message}"
   end
 
   # Autosave can update a document every few seconds while someone is writing. Rather than queueing

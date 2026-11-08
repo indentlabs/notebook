@@ -107,23 +107,29 @@ class CommunityStatsRollup
     end
   end
 
-  # One row per (user, entity type) with the positive words written on `date`.
+  # One row per (user, entity type) with the positive words written on `date`,
+  # measured as WordCountUpdate#counted_words does: from the row's starting count, or for rows
+  # without one, from the entity's previous row. Manual adjustments are their own word count.
   # (On Postgres, OFFSET 0 keeps the planner from inlining the subquery, which
   # would run each previous-record probe twice: once for the filter, once for the sum.)
   def words_by_user_and_type
-    WordCountUpdate.connection.select_all(WordCountUpdate.sanitize_sql_array([<<~SQL, { date: date }]))
+    WordCountUpdate.connection.select_all(WordCountUpdate.sanitize_sql_array([<<~SQL, { date: date, manual: WordCountUpdate::MANUAL_ADJUSTMENT }]))
       SELECT user_id, entity_type, SUM(delta) AS words
       FROM (
         SELECT w.user_id, w.entity_type,
-               COALESCE(w.word_count, 0) - COALESCE((
-                 SELECT p.word_count
-                 FROM word_count_updates p
-                 WHERE p.entity_type = w.entity_type
-                   AND p.entity_id = w.entity_id
-                   AND p.for_date < w.for_date
-                 ORDER BY p.for_date DESC
-                 LIMIT 1
-               ), 0) AS delta
+               COALESCE(w.word_count, 0) - CASE
+                 WHEN w.entity_type = :manual THEN 0
+                 WHEN w.starting_word_count IS NOT NULL THEN w.starting_word_count
+                 ELSE COALESCE((
+                   SELECT p.word_count
+                   FROM word_count_updates p
+                   WHERE p.entity_type = w.entity_type
+                     AND p.entity_id = w.entity_id
+                     AND p.for_date < w.for_date
+                   ORDER BY p.for_date DESC
+                   LIMIT 1
+                 ), 0)
+               END AS delta
         FROM word_count_updates w
         WHERE w.for_date = :date
         #{postgres? ? 'OFFSET 0' : ''}

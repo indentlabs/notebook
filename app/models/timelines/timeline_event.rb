@@ -49,7 +49,15 @@ class TimelineEvent < ApplicationRecord
     # Skip enqueueing a job if explicitly flagged (like during timeline initialization)
     return if skip_word_count_update
 
-    CacheTimelineEventWordCountJob.perform_later(self.id)
+    # The count from before this edit, so the day's words are measured from it
+    previous_word_count = self.class.word_count_of(
+      *WORD_COUNT_TRACKED_FIELDS.map { |field| attribute_before_last_save(field) }
+    )
+    CacheTimelineEventWordCountJob.perform_later(self.id, previous_word_count)
+  end
+
+  def self.word_count_of(*texts)
+    texts.sum { |text| WordCountService.count_with_fallback(text) }
   end
 
   # Helper methods

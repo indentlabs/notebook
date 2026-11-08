@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2026_10_30_130000) do
+ActiveRecord::Schema.define(version: 2026_11_08_120000) do
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
@@ -3857,6 +3857,7 @@ ActiveRecord::Schema.define(version: 2026_10_30_130000) do
     t.date "for_date"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.integer "starting_word_count"
     t.index ["entity_type", "entity_id", "for_date"], name: "index_word_count_updates_unique_entity_date", unique: true
     t.index ["entity_type", "entity_id"], name: "index_word_count_updates_on_entity_type_and_entity_id"
     t.index ["for_date", "user_id"], name: "index_word_count_updates_on_for_date_and_user_id"
