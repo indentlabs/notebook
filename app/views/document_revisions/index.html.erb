@@ -37,17 +37,17 @@
           <div class="flex items-center">
             <i class="material-icons text-xs text-gray-400 mr-1 dark:text-gray-500">layers</i>
             <span class="text-gray-600 dark:text-gray-400">
-              <span class="font-semibold text-gray-900 dark:text-white"><%= @document.document_revisions.count + 1 %></span> 
-              total <%= 'version'.pluralize(@document.document_revisions.count + 1) %>
+              <span class="font-semibold text-gray-900 dark:text-white"><%= number_with_delimiter(@revision_count + 1) %></span>
+              total <%= 'version'.pluralize(@revision_count + 1) %>
             </span>
           </div>
-          <% if @document.document_revisions.any? %>
+          <% if @first_backup_at %>
             <div class="flex items-center">
               <i class="material-icons text-xs text-gray-400 mr-1 dark:text-gray-500">schedule</i>
               <span class="text-gray-600 dark:text-gray-400">
                 First backup: 
                 <span class="font-semibold text-gray-900 dark:text-white">
-                  <%= @document.document_revisions.last.created_at.strftime("%b %d, %Y") %>
+                  <%= @first_backup_at.in_time_zone.strftime("%b %d, %Y") %>
                 </span>
               </span>
             </div>
@@ -118,7 +118,11 @@
       
       <!-- Revisions Timeline -->
       <div class="divide-y divide-gray-200 dark:divide-gray-700">
-        <% @document_revisions.each_with_index do |revision, index| %>
+        <% @revisions_on_page.each_with_index do |revision, index| %>
+          <%
+            # The revision before this one: next in this page's list, or the first on the next page
+            prev_revision = @revisions_on_page[index + 1] || (index == @revisions_on_page.length - 1 ? @revision_before_page : nil)
+          %>
           <div class="p-6 hover:bg-gray-50 transition-colors dark:hover:bg-gray-700 dark:hover:bg-opacity-50" 
                x-data="{ 
                  expanded: false, 
@@ -154,7 +158,7 @@
                   <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center dark:bg-gray-700">
                     <i class="material-icons text-gray-600 text-sm dark:text-gray-300">history</i>
                   </div>
-                  <% if index < @document_revisions.count - 1 %>
+                  <% if prev_revision %>
                     <div class="absolute top-10 left-1/2 transform -translate-x-1/2 w-0.5 h-24 bg-gray-200 dark:bg-gray-700"></div>
                   <% end %>
                 </div>
@@ -168,19 +172,20 @@
                       <%= revision.title || "Untitled Revision" %>
                     </h4>
                     <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                      <span class="flex items-center" title="<%= revision.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
+                      <%
+                        # A revision is kept up to date while its stretch of writing goes on, so its text is from when it was last saved
+                        started_at = revision.created_at.strftime('%B %d, %Y at %I:%M %p')
+                        saved_at = revision.updated_at.strftime('%B %d, %Y at %I:%M %p')
+                      %>
+                      <span class="flex items-center" title="<%= started_at == saved_at ? "Saved #{saved_at}" : "Writing from #{started_at} until #{saved_at}" %>">
                         <i class="material-icons text-xs mr-1">schedule</i>
-                        <%= time_ago_in_words(revision.created_at) %> ago
+                        <%= time_ago_in_words(revision.updated_at) %> ago
                       </span>
                       <span class="flex items-center">
                         <i class="material-icons text-xs mr-1">description</i>
                         <%= number_with_delimiter(revision.cached_word_count || 0) %> words
                       </span>
-                      <% 
-                        # Calculate word diff with previous revision
-                        prev_revision = index < @document_revisions.count - 1 ? @document_revisions[index + 1] : nil
-                        word_diff = prev_revision ? (revision.cached_word_count || 0) - (prev_revision.cached_word_count || 0) : (revision.cached_word_count || 0)
-                      %>
+                      <% word_diff = (revision.cached_word_count || 0) - (prev_revision&.cached_word_count || 0) %>
                       <% if word_diff != 0 %>
                         <span class="flex items-center <%= word_diff > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
                           <i class="material-icons text-xs mr-1"><%= word_diff > 0 ? 'add' : 'remove' %></i>
@@ -217,7 +222,7 @@
                       <!-- Expandable Preview -->
                       <div x-show="expanded" x-collapse class="mt-3">
                         <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 prose prose-sm max-w-none dark:bg-gray-900 dark:bg-opacity-50 dark:text-gray-300 dark:prose-invert">
-                          <%= truncate(strip_tags(revision.body), length: 500) %>
+                          <%= truncate(strip_tags(revision.body_preview.to_s), length: 500) %>
                         </div>
                       </div>
                     
@@ -288,7 +293,7 @@
       <% end %>
       
       <!-- Empty State -->
-      <% if @document_revisions.empty? %>
+      <% if @revisions_on_page.empty? %>
         <div class="p-12 text-center">
           <i class="material-icons text-gray-400 text-5xl mb-4 dark:text-gray-600">history_toggle_off</i>
           <h3 class="text-lg font-medium text-gray-900 mb-2 dark:text-white">No revision history yet</h3>

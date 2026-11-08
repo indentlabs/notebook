@@ -29,8 +29,8 @@
               <div class="mt-2 text-sm text-amber-700">
                 <p>
                   This is a backup of "<%= @document.title %>" that was saved 
-                  <span class="font-medium" title="<%= @document_revision.created_at.strftime('%B %d, %Y at %I:%M %p') %>">
-                    <%= time_ago_in_words(@document_revision.created_at) %> ago
+                  <span class="font-medium" title="<%= @document_revision.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
+                    <%= time_ago_in_words(@document_revision.updated_at) %> ago
                   </span>.
                 </p>
               </div>
@@ -39,7 +39,7 @@
                   <i class="material-icons text-sm mr-1.5">arrow_back</i>
                   Return to Current Version
                 <% end %>
-                <button onclick="restoreThisVersion()" class="inline-flex items-center px-3 py-1.5 border border-amber-300 text-sm font-medium rounded-lg text-amber-700 bg-white hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                <button type="button" onclick="restoreThisVersion()" class="inline-flex items-center px-3 py-1.5 border border-amber-300 text-sm font-medium rounded-lg text-amber-700 bg-white hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
                   <i class="material-icons text-sm mr-1.5">restore</i>
                   Restore This Version
                 </button>
@@ -57,7 +57,7 @@
             <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600">
               <span class="flex items-center">
                 <i class="material-icons text-xs mr-1">schedule</i>
-                Backed up <%= @document_revision.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+                Backed up <%= @document_revision.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
               </span>
               <span class="flex items-center">
                 <i class="material-icons text-xs mr-1">description</i>
@@ -100,7 +100,7 @@
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-600">Time Ago</span>
                   <span class="font-medium text-gray-900">
-                    <%= time_ago_in_words(@document_revision.created_at) %>
+                    <%= time_ago_in_words(@document_revision.updated_at) %>
                   </span>
                 </div>
               </div>
@@ -191,8 +191,22 @@
 <script>
   function restoreThisVersion() {
     if (confirm('Are you sure you want to restore this version? Your current version will be saved as a new revision before restoring.')) {
-      // TODO: Implement restore functionality
-      console.log('Restoring revision <%= @document_revision.id %>');
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '<%= restore_document_document_revision_path(@document, @document_revision) %>';
+      form.style.display = 'none';
+
+      const csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'authenticity_token';
+        csrfInput.value = csrfToken.getAttribute('content');
+        form.appendChild(csrfInput);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
     }
   }
   
@@ -203,7 +217,7 @@
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = '<%= @document_revision.title.parameterize %>-revision-<%= @document_revision.created_at.strftime("%Y%m%d") %>.txt';
+    a.download = '<%= @document_revision.title.to_s.parameterize.presence || 'document' %>-revision-<%= @document_revision.updated_at.strftime("%Y%m%d") %>.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);

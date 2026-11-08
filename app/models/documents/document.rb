@@ -289,6 +289,21 @@ class Document < ApplicationRecord
     Rails.logger.warn "Could not record the starting word count for Document #{id}: #{e.class}: #{e.message}"
   end
 
+  # Restoring a revision changes the word count without anyone writing. Move today's starting count
+  # by the same amount, so the restored words aren't counted as written today (and words written
+  # earlier today still are).
+  def discount_restored_words!(words_restored)
+    return if words_restored.zero?
+
+    row = word_count_updates.find_by(for_date: WordCountUpdate.date_for(user))
+    return if row.nil?
+
+    row.update!(
+      starting_word_count: row.starting_count + words_restored,
+      word_count: row.word_count.to_i + words_restored
+    )
+  end
+
   # Autosave can update a document every few seconds while someone is writing. Rather than queueing
   # a job for every save, queue at most one per document per debounce window, and run it at the end
   # of that window. Jobs load the document when they run, so they still see every edit made before then.
