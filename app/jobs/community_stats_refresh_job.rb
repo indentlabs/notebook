@@ -9,13 +9,13 @@ class CommunityStatsRefreshJob < ApplicationJob
   # Enqueue at most one refresh per lock window, however many page views
   # notice stale numbers at once.
   def self.enqueue_unless_pending
-    return unless Rails.cache.write(ENQUEUE_LOCK_KEY, true, unless_exist: true, expires_in: 15.minutes)
+    return unless CacheLock.acquire(ENQUEUE_LOCK_KEY, expires_in: 15.minutes)
     perform_later
   end
 
   def perform
     CommunityStatsRollup.refresh_recent!
   ensure
-    Rails.cache.delete(ENQUEUE_LOCK_KEY)
+    CacheLock.release(ENQUEUE_LOCK_KEY)
   end
 end

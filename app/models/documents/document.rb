@@ -270,12 +270,12 @@ class Document < ApplicationRecord
     return job_class.perform_later(id) if wait.zero?
 
     key = "documents/#{id}/#{job_class.name.underscore}/queued"
-    return unless Rails.cache.write(key, true, unless_exist: true, expires_in: wait)
+    return unless CacheLock.acquire(key, expires_in: wait)
 
     begin
       job_class.set(wait: wait).perform_later(id)
     rescue StandardError
-      Rails.cache.delete(key)
+      CacheLock.release(key)
       raise
     end
   rescue RedisClient::Error, Redis::BaseError => e

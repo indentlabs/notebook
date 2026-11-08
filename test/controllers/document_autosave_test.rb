@@ -56,6 +56,29 @@ class DocumentAutosaveTest < ActionDispatch::IntegrationTest
     assert_equal '<p>Edit 2</p>', @document.reload.body
   end
 
+  # Production uses the FileStore. On it (and on the MemoryStore), a write with unless_exist: true
+  # is refused while an expired entry is still stored, so the first queued job used to lock the
+  # document out of every later revision and word count job until the cache was wiped.
+  [ActiveSupport::Cache::MemoryStore, ActiveSupport::Cache::FileStore].each do |store_class|
+    test "a save after the debounce window queues another job (#{store_class.name.demodulize})" do
+      Dir.mktmpdir do |dir|
+        store = store_class == ActiveSupport::Cache::FileStore ? store_class.new(dir) : store_class.new
+        with_debounce(30.seconds, store: store) do
+          assert_enqueued_jobs(1, only: SaveDocumentRevisionJob) do
+            patch document_path(@document), params: { document: { body: '<p>First session.</p>' } }
+            patch document_path(@document), params: { document: { body: '<p>First session, again.</p>' } }
+          end
+
+          travel 31.seconds do
+            assert_enqueued_jobs(1, only: SaveDocumentRevisionJob) do
+              patch document_path(@document), params: { document: { body: '<p>Second session.</p>' } }
+            end
+          end
+        end
+      end
+    end
+  end
+
   test "a Redis failure while queueing jobs does not fail the save" do
     failing_enqueue = ->(*) { raise RedisClient::ReadTimeoutError, 'timed out' }
 
@@ -84,10 +107,10 @@ class DocumentAutosaveTest < ActionDispatch::IntegrationTest
 
   private
 
-  def with_debounce(wait)
+  def with_debounce(wait, store: ActiveSupport::Cache::MemoryStore.new)
     original_store = Rails.cache
     original_wait  = Rails.application.config.x.document_job_debounce
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    Rails.cache = store
     Rails.application.config.x.document_job_debounce = wait
     yield
   ensure
