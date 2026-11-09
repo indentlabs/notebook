@@ -73,7 +73,7 @@ class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
 
     get diff_document_document_revision_path(@document, first)
 
-    assert_includes response.body, 'First Revision Created!'
+    assert_includes response.body, 'First Revision'
     assert_includes response.body, '3 words'
   end
 
@@ -86,7 +86,7 @@ class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Every revision on the first page has a Show Changes button, including the 60th
-    assert_equal 60, response.body.scan('Show Changes').size
+    assert_equal 60, response.body.scan("'Show Changes'").size
     refute_includes response.body, '+2 words' # the 60th row would show its whole count
     assert_includes response.body, '62</span>'
   end
@@ -109,7 +109,7 @@ class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
 
   # -- Restore --
 
-  test "restoring keeps the current text as a backup and gives the restored text its own revision" do
+  test "restoring keeps the current text as a backup and makes the restored text the current version" do
     old = revision!('<p>The original opening.</p>', at: 3.days.ago)
     @document.update_columns(body: '<p>A rewritten opening I regret.</p>')
 
@@ -117,15 +117,12 @@ class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_document_path(@document)
 
     bodies = @document.document_revisions.order(:created_at, :id).pluck(:body)
-    assert_equal ['<p>The original opening.</p>', '<p>A rewritten opening I regret.</p>', '<p>The original opening.</p>'], bodies
+    assert_equal ['<p>The original opening.</p>', '<p>A rewritten opening I regret.</p>'], bodies
     assert_equal '<p>The original opening.</p>', @document.reload.body
 
-    # The revision job then keeps the restored entry up to date, leaving the backup alone
-    perform_enqueued_jobs(only: SaveDocumentRevisionJob)
-    @document.update!(body: '<p>The original opening, improved.</p>')
-    SaveDocumentRevisionJob.perform_now(@document.id)
+    # Writing on from the restored text never touches the backup
+    travel(10.minutes) { @document.update!(body: '<p>The original opening, improved.</p>') }
     assert_equal '<p>A rewritten opening I regret.</p>', @document.document_revisions.order(:created_at, :id).second.body
-    assert_equal '<p>The original opening, improved.</p>', @document.document_revisions.order(:created_at, :id).last.body
   end
 
   test "restored words aren't counted as written today" do
@@ -150,30 +147,39 @@ class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
     assert_includes response.body, restore_document_document_revision_path(@document, revision)
     refute_includes response.body, 'TODO'
   end
-  test "a revision job that runs during a restore can't overwrite the backup" do
-    old = revision!('<p>The original opening.</p>', at: 3.days.ago)
-    @document.update_columns(body: '<p>A rewritten opening I regret.</p>')
-
-    # Run the revision job the moment the restore's update commits, the worst possible time
-    run_job_on_commit = ->(*args) { SaveDocumentRevisionJob.perform_now(*args) }
-    SaveDocumentRevisionJob.stub(:perform_later, run_job_on_commit) do
-      post restore_document_document_revision_path(@document, old)
-    end
-
-    assert_includes @document.document_revisions.pluck(:body), '<p>A rewritten opening I regret.</p>'
-  end
-
-  test "deleting the restored entry doesn't let the next save overwrite the backup" do
+  test "deleting a revision never changes the others" do
     old = revision!('<p>The original opening.</p>', at: 3.days.ago)
     @document.update_columns(body: '<p>A rewritten opening I regret.</p>')
     post restore_document_document_revision_path(@document, old)
 
-    restored_entry = @document.document_revisions.order(:created_at, :id).last
-    delete document_document_revision_path(@document, restored_entry)
+    delete document_document_revision_path(@document, old)
     @document.update!(body: '<p>The original opening, improved.</p>')
-    SaveDocumentRevisionJob.perform_now(@document.id)
 
-    assert_includes @document.document_revisions.pluck(:body), '<p>A rewritten opening I regret.</p>'
+    assert_equal ['<p>A rewritten opening I regret.</p>'], @document.document_revisions.pluck(:body)
+  end
+
+  # -- Changes since the last backup --
+
+  test "the current version shows what has been written since the last backup" do
+    revision!('<p>Yesterday ended here.</p>', at: 1.day.ago)
+    @document.update_columns(body: '<p>Yesterday ended here.</p><p>Written today, not kept yet.</p>', cached_word_count: 8)
+
+    get document_document_revisions_path(@document)
+    assert_includes response.body, current_diff_document_document_revisions_path(@document)
+    assert_includes response.body, 'Show Changes Since Last Backup'
+
+    get current_diff_document_document_revisions_path(@document)
+    assert_response :success
+    assert_includes response.body, '<strong>Written today, not kept yet.</strong>'
+    refute_includes response.body, '<strong>Yesterday ended here.</strong>'
+  end
+
+  test "a document with no revisions has no changes to show" do
+    get document_document_revisions_path(@document)
+    refute_includes response.body, 'Show Changes Since Last Backup'
+
+    get current_diff_document_document_revisions_path(@document)
+    assert_response :not_found
   end
 
   test "restoring a revision the document already matches changes nothing" do

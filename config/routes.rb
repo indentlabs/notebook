@@ -165,6 +165,7 @@ Rails.application.routes.draw do
     post   '/unlock',            to: 'document_passwords#unlock',         on: :member, format: false, constraints: { id: /\d+/ }
 
     resources :document_revisions, path: 'revisions', on: :member, only: [:index, :show, :destroy] do
+      get 'current_diff', on: :collection
       member do
         get 'diff'
         post 'restore'

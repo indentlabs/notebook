@@ -26,11 +26,11 @@ namespace :word_counts do
     end
 
     if only.include?('documents')
-      recount.call(Document.with_deleted, 'Documents') { |document| WordCountService.count_with_fallback(document.body) }
+      recount.call(Document.with_deleted, 'Documents') { |document| WordCountService.count(document.body) }
     end
 
     if only.include?('revisions')
-      recount.call(DocumentRevision.with_deleted, 'Revisions') { |revision| WordCountService.count_with_fallback(revision.body) }
+      recount.call(DocumentRevision.with_deleted, 'Revisions') { |revision| WordCountService.count(revision.body) }
     end
 
     if only.include?('pages')
@@ -48,69 +48,48 @@ namespace :word_counts do
         klass = type.safe_constantize
         next unless klass&.column_names&.include?('cached_word_count')
 
-        recount.call(klass.unscoped, type) do |page|
-          Attribute.where(entity_type: type, entity_id: page.id).sum(:word_count_cache)
+        recount.call(klass.unscoped.includes(:user), type) do |page|
+          total = Attribute.where(entity_type: type, entity_id: page.id).sum(:word_count_cache)
+
+          # If the page was edited today, today started from the old total: move the start by the
+          # recount too, so it isn't credited as writing by the page's next edit
+          difference = total - page.cached_word_count.to_i
+          today = page.word_count_updates.find_by(for_date: WordCountUpdate.date_for(page.user)) unless difference.zero?
+          today&.update!(starting_word_count: today.starting_count + difference, word_count: today.word_count.to_i + difference)
+
+          total
         end
       end
     end
   end
 
-  # From Oct 30, 2026 until the fix, each document's revision job ran once after a deploy and then
-  # never again (the debounce lock never expired), so later writing got no daily word count row and
-  # no revision. This gives each such document:
-  # - a word count row on the day it was last saved, counting what was written since its last
-  #   revision (all of it on that day, since when each word was written wasn't recorded), and
-  # - a revision of its text as last saved, so the next revision's "Show Changes" shows only what
-  #   is written after that, not the stuck period's writing as new.
-  # Run it once, soon after deploying the fix. Documents edited since the deploy are skipped.
+  # From Oct 30, 2026 until the fix, each document's word count job ran once after a deploy and then
+  # never again (the debounce lock never expired), so writing saved after that got no daily word count
+  # row. A document's next save records that writing on the day it was last saved (see
+  # Document#record_untracked_writing!). This does the same for documents nobody has saved since, so
+  # their November writing counts towards goals too. Safe to run more than once.
   #
-  #   rake word_counts:recover_stuck_lock_writing                 # dry run: report only
-  #   rake word_counts:recover_stuck_lock_writing DRY_RUN=false
-  desc "Recover writing that the stuck document job lock never recorded (DRY_RUN=false to write)"
-  task recover_stuck_lock_writing: :environment do
+  #   rake word_counts:recover_untracked_writing                 # dry run: report only
+  #   rake word_counts:recover_untracked_writing DRY_RUN=false
+  desc "Record writing the stuck document job lock never counted (DRY_RUN=false to write)"
+  task recover_untracked_writing: :environment do
     dry_run = ENV['DRY_RUN'] != 'false'
     since = Time.zone.parse(ENV['SINCE'] || '2026-10-30 00:00 UTC')
-    recovered_rows = 0
-    recovered_revisions = 0
+    candidates = 0
+    recorded = 0
 
-    puts dry_run ? '=== DRY RUN (DRY_RUN=false to write) ===' : '=== RECOVERING ==='
+    puts dry_run ? '=== DRY RUN (DRY_RUN=false to write) ===' : '=== RECORDING ==='
 
     Document.where('updated_at >= ?', since).where.not(user_id: nil).includes(:user).find_each(batch_size: 200) do |document|
-      newest = document.document_revisions.order(updated_at: :desc, id: :desc).first
-      # Saved since its last revision (by more than one debounce window). A document edited since the
-      # fix has a revision from then, so it is skipped.
-      next unless newest.nil? || newest.updated_at < document.updated_at - 1.minute
+      # Saved on a day with no row: its job never ran that day
+      next if document.word_count_updates.exists?(for_date: WordCountUpdate.date_for(document.user, document.updated_at))
 
-      body = document.body.to_s
-      words_now = WordCountService.count_with_fallback(body)
-      words_at_last_revision = newest ? WordCountService.count_with_fallback(newest.body) : 0
-      last_saved_on = WordCountUpdate.date_for(document.user, document.updated_at)
-      row = document.word_count_updates.find_by(for_date: last_saved_on)
-
-      if row.nil? || row.starting_word_count.nil?
-        recovered_rows += 1
-        unless dry_run
-          if row
-            row.convert_to_starting_count!(words_at_last_revision)
-            row.update!(word_count: words_now)
-          else
-            WordCountUpdate.record!(document, date: last_saved_on, word_count: words_now) { words_at_last_revision }
-          end
-        end
-      end
-
-      recovered_revisions += 1
+      candidates += 1
       next if dry_run
 
-      document.document_revisions.where(closed_at: nil).update_all(closed_at: document.updated_at)
-      document.document_revisions.create!(
-        title: document.title, body: body, synopsis: document.synopsis, universe_id: document.universe_id,
-        notes_text: document.notes_text, cached_word_count: words_now,
-        created_at: document.updated_at, updated_at: document.updated_at, closed_at: document.updated_at
-      )
+      recorded += 1 if document.record_untracked_writing!(saved_at: document.updated_at, word_count: WordCountService.count(document.body))
     end
 
-    puts "#{recovered_rows} word count rows #{dry_run ? 'would be' : ''} recorded, " \
-         "#{recovered_revisions} revisions #{dry_run ? 'would be' : ''} added".squeeze(' ')
+    puts dry_run ? "#{candidates} documents were last saved on a day with no word count row" : "Recorded untracked writing for #{recorded} of #{candidates} documents"
   end
 end

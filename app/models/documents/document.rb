@@ -256,12 +256,56 @@ class Document < ApplicationRecord
     #       now out of date? Or should we wait until the analysis is complete?
   end
 
+  # Revision history is append-only: each revision is a version of this document, kept just before
+  # a save replaced it, and never changed afterwards. The current version is the document itself.
+  # A version is kept on the first save after REVISION_INTERVAL without one (so the end of every
+  # writing session is kept, dated when it was written), and whenever a save removes a lot of text.
+  REVISION_INTERVAL = 5.minutes
+  LARGE_REMOVAL_WORDS = 50
+  LARGE_REMOVAL_SHARE = 0.25
+
   def save_document_revision!
     record_starting_word_count! if saved_change_to_body?
+    # Any save, not only text: a status or folder change after a break keeps the end of the previous
+    # session, dated when it was written, before the next text save would replace it.
+    keep_replaced_version!
 
     if (saved_changes.keys & KEYS_TO_TRIGGER_REVISION_ON_CHANGE).any?
       enqueue_debounced(SaveDocumentRevisionJob)
     end
+  end
+
+  def keep_replaced_version!
+    old_body = body_before_last_save.to_s
+    return if old_body.blank?
+
+    last_kept_at = document_revisions.order(created_at: :desc, id: :desc).pick(:created_at)
+    due = (last_kept_at || created_at) <= REVISION_INTERVAL.ago
+    return unless due || large_removal?(old_body)
+
+    keep_version!(
+      { title: title_before_last_save, body: old_body, synopsis: synopsis_before_last_save,
+        notes_text: notes_text_before_last_save, universe_id: universe_id_before_last_save },
+      saved_at: updated_at_before_last_save
+    )
+  rescue StandardError => e
+    # History must never fail a save
+    Rails.logger.warn "Could not keep a revision of Document #{id}: #{e.class}: #{e.message}"
+  end
+
+  # Restore calls this before replacing the current version
+  def keep_current_version!
+    keep_version!(slice(:title, :body, :synopsis, :notes_text, :universe_id).symbolize_keys, saved_at: updated_at)
+  end
+
+  # Whether a version holds the same text as this document (so restoring it would change nothing)
+  def same_text_as?(version)
+    self.class.same_text?(self, version)
+  end
+
+  # The fields a version keeps, compared as text (works on documents, revisions and attribute hashes)
+  def self.same_text?(a, b)
+    %i[title body synopsis notes_text].all? { |field| a[field].to_s == b[field].to_s }
   end
 
   # On the first change to the body each day, store the count the day started from, measured on the
@@ -274,18 +318,38 @@ class Document < ApplicationRecord
     row = word_count_updates.find_by(for_date: date)
     return if row&.starting_word_count
 
-    starting_count = WordCountService.count_with_fallback(body_before_last_save)
+    starting_count = WordCountService.count(body_before_last_save)
 
     if row
       # The day's row was written before starting counts were recorded (by a save earlier today).
       # Keep the words it already credited today, and measure the rest of the day from now on.
       row.convert_to_starting_count!(starting_count)
     else
+      if updated_at_before_last_save
+        record_untracked_writing!(saved_at: updated_at_before_last_save, word_count: starting_count)
+      end
       WordCountUpdate.record!(self, date: date, word_count: starting_count) { starting_count }
     end
   rescue StandardError => e
     # Word tracking must never fail a save
     Rails.logger.warn "Could not record the starting word count for Document #{id}: #{e.class}: #{e.message}"
+  end
+
+  # Records writing that was saved on an earlier day with no word count row (its job never ran, as
+  # while the debounce lock was stuck in late 2026) on that day, measured from the last day that was
+  # tracked. word_count is the document's count as it was at saved_at.
+  def record_untracked_writing!(saved_at:, word_count:)
+    day = WordCountUpdate.date_for(user, saved_at)
+    return unless day < WordCountUpdate.date_for(user)
+    return if word_count_updates.exists?(for_date: day)
+
+    last_tracked = word_count_updates.where('for_date < ?', day).order(for_date: :desc).first
+    return if last_tracked.nil? # never tracked, so there's nothing to measure from
+
+    starting_count = last_tracked_count(last_tracked)
+    return unless word_count > starting_count
+
+    WordCountUpdate.record!(self, date: day, word_count: word_count) { starting_count }
   end
 
   # Restoring a revision changes the word count without anyone writing. Move today's starting count
@@ -354,6 +418,31 @@ class Document < ApplicationRecord
   end
 
   private
+
+  def keep_version!(version, saved_at:)
+    newest = document_revisions.order(created_at: :desc, id: :desc).first
+    return if newest && self.class.same_text?(newest, version)
+
+    # created_at is when it was kept, which spaces versions REVISION_INTERVAL apart. updated_at is
+    # when its text was saved, which is what the history shows.
+    document_revisions.create!(version.merge(cached_word_count: WordCountService.count(version[:body]), updated_at: saved_at))
+  end
+
+  def large_removal?(old_body)
+    old_count = cached_word_count_before_last_save.to_i
+    threshold = old_count > 0 ? [LARGE_REMOVAL_WORDS, (old_count * LARGE_REMOVAL_SHARE).ceil].min : LARGE_REMOVAL_WORDS
+    TextChange.removed_at_least?(old_body, body.to_s, threshold)
+  end
+
+  # The count a tracked day ended on. Rows from before starting counts were recorded hold a count
+  # made the old way; the revision kept the same day holds that text, counted the current way.
+  def last_tracked_count(row)
+    return row.word_count.to_i unless row.starting_word_count.nil?
+
+    zone = Time.find_zone(user&.time_zone.presence) || Time.find_zone('UTC')
+    revision = document_revisions.where(updated_at: row.for_date.in_time_zone(zone).all_day).order(updated_at: :desc).first
+    revision ? WordCountService.count(revision.body) : row.word_count.to_i
+  end
 
   def change_password_protection
     @changing_password_protection = true

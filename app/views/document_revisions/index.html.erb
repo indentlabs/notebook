@@ -69,8 +69,21 @@
   <!-- Main Content -->
   <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
-      <!-- Current Version Card -->
-      <div class="current-version-card border-b border-gray-200 bg-gradient-to-r from-teal-50 to-green-50 p-6 dark:border-gray-700">
+      <!-- Current Version Card: the document as it is now, which is the newest version -->
+      <div class="current-version-card border-b border-gray-200 bg-gradient-to-r from-teal-50 to-green-50 p-6 dark:border-gray-700"
+           x-data="{ showingDiff: false, diffContent: '', loadingDiff: false,
+                     async loadDiff() {
+                       if (this.diffContent) { this.showingDiff = true; return; }
+                       this.loadingDiff = true;
+                       try {
+                         const response = await fetch('<%= current_diff_document_document_revisions_path(@document) %>');
+                         if (response.ok) { this.diffContent = await response.text(); this.showingDiff = true; } else { alert('Failed to load the changes'); }
+                       } catch (error) {
+                         alert('Error loading the changes');
+                       } finally {
+                         this.loadingDiff = false;
+                       }
+                     } }">
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <div class="flex items-center">
@@ -96,7 +109,37 @@
                     <i class="material-icons text-xs mr-1">update</i>
                     Last edited <%= time_ago_in_words(@document.updated_at) %> ago
                   </span>
+                  <% if @newest_revision %>
+                    <% words_since = (@document.cached_word_count || 0) - (@newest_revision.cached_word_count || 0) %>
+                    <% if words_since != 0 %>
+                      <span class="flex items-center <%= words_since > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>"
+                            title="Since the newest backup, saved <%= @newest_revision.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
+                        <i class="material-icons text-xs mr-1"><%= words_since > 0 ? 'add' : 'remove' %></i>
+                        <%= number_with_delimiter(words_since.abs) %> words
+                      </span>
+                    <% end %>
+                  <% end %>
                 </div>
+                <% if @newest_revision %>
+                  <div class="mt-3 flex items-center space-x-3">
+                    <button @click="loadDiff()" x-show="!showingDiff" :disabled="loadingDiff"
+                            class="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center disabled:opacity-50 dark:text-blue-400 dark:hover:text-blue-300">
+                      <i class="material-icons text-xs mr-1" x-text="loadingDiff ? 'hourglass_empty' : 'compare_arrows'"></i>
+                      <span x-text="loadingDiff ? 'Loading...' : 'Show Changes Since Last Backup'"></span>
+                    </button>
+                    <button @click="showingDiff = false" x-show="showingDiff"
+                            class="text-xs text-gray-600 hover:text-gray-700 font-medium flex items-center dark:text-gray-400 dark:hover:text-gray-300">
+                      <i class="material-icons text-xs mr-1">close</i>
+                      Hide Changes
+                    </button>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+
+            <div x-show="showingDiff" x-collapse class="mt-3">
+              <div class="bg-gray-50 rounded-lg p-4 overflow-x-auto dark:bg-gray-900 dark:bg-opacity-50">
+                <div class="text-xs font-mono" x-html="diffContent"></div>
               </div>
             </div>
             
@@ -187,12 +230,7 @@
                       <%= revision.title || "Untitled Revision" %>
                     </h4>
                     <div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
-                      <%
-                        # A revision is kept up to date while its stretch of writing goes on, so its text is from when it was last saved
-                        started_at = revision.created_at.strftime('%B %d, %Y at %I:%M %p')
-                        saved_at = revision.updated_at.strftime('%B %d, %Y at %I:%M %p')
-                      %>
-                      <span class="flex items-center" title="<%= started_at == saved_at ? "Saved #{saved_at}" : "Writing from #{started_at} until #{saved_at}" %>">
+                      <span class="flex items-center" title="Saved <%= revision.updated_at.strftime('%B %d, %Y at %I:%M %p') %>">
                         <i class="material-icons text-xs mr-1">schedule</i>
                         <%= time_ago_in_words(revision.updated_at) %> ago
                       </span>

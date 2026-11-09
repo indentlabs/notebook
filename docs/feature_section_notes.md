@@ -64,13 +64,14 @@ Features covered, in order:
 
 ## Word Count Tracking System
 
-**What it is:** Background ledger (`word_count_updates`) snapshotting each entity's word count once/day, so daily "words written" = day-over-day deltas. Plus a user-facing Word Count Logs page with manual adjustments.
+**What it is:** Ledger (`word_count_updates`) with one row per entity per day it was edited: `starting_word_count` (the count when the day's first change was saved) and `word_count` (the count after its last change). A day's "words written" = word_count - starting_word_count, deletions clamped at 0. Rows from before Nov 2026 have no starting count and are measured from the entity's previous row. Range totals (goals, this week) are net growth instead. Plus a user-facing Word Count Logs page with manual adjustments.
 
 **What counts:** Documents (body), ALL worldbuilding page types (sum of prose attribute fields — link/universe/tags fields excluded), Books (description + blurb), Timeline Events (title + description), manual adjustments. Forum posts/comments do NOT count.
 
 **Bullets:**
-- One consistent counting engine (WordCountAnalyzer gem): contractions/hyphenated words/URLs = 1 word, dates = 1 word, numbers count, ellipses/dashes/stray punctuation ignored, HTML stripped; the in-editor JS counter mirrors the same rules so live counts match server counts
-- Memory-efficient path for huge documents: ≥300KB uses a lightweight scanner, chunked at 100KB boundaries
+- One counting engine, `WordCountService` (pure Ruby, linear time on any input), mirrored line for line by `app/assets/javascripts/word_count.js` for live counts; both are tested against `test/fixtures/files/word_count_cases.json`. Block tags and `<br>` separate words, entities are decoded, any script counts; contractions/hyphenated words/links/dates = 1 word, slashes otherwise split, numbers count, ellipses/em dashes separate words, stray punctuation and emoji don't count
+- Stored counts are always made on the server (the editor's count is display only)
+- Each row shows "+N words" (what it added that day) and the total; each date shows its total
 - Word Count Logs page (`/my/word_count_updates`): "Keep your writing stats perfectly tuned! Log words you've written in other apps, adjust your daily totals, or clean up your tracking history here."
 - Manual adjustments: date + words (+/-), positive for untracked writing, negative to offset; edit inline or delete; honor-system note card ("It's not a competition!")
 - 30-day activity bar chart with hover tooltips; tracking log grouped by date, up to 200 records; automatic records are read-only, deleted entities handled gracefully
@@ -164,11 +165,12 @@ Features covered, in order:
 
 ## Revision History
 
-- Auto-revisions on change to title/body/synopsis/notes, throttled to one per 5 minutes
+- Append-only: a save keeps the version it replaces when nothing has been kept for 5 minutes (so the end of every writing session is kept, dated when it was written) or when it removes 50+ words (or a quarter of a short document); revisions are never changed afterwards
+- The Current Version card is the newest version, with "+N words" and Show Changes since the last backup
 - Index: stats bar (N total versions, first backup, latest change), Current Version gradient card, timeline of revisions with word deltas (+N green / −N red), Show Preview + lazy-loaded Show Changes (side-by-side diff: removals red strikethrough, additions green bold), 60 per page
-- Restore: snapshots current state as a new revision first, then restores title/body/synopsis/notes; confirm dialog explains this
+- Restore: keeps the current text first (unless the newest revision already has it), then restores title/body/synopsis/notes; restored words aren't counted as written; confirm dialog explains this
 - Single-revision page: amber "viewing a historical revision" banner, word difference vs current, Download as Text, newer/older navigation, read-only content view
-- Diff of huge docs truncated at ~10k words for performance
+- Diffs compare whole documents; output is capped at 400 changed paragraphs per side
 
 ## Documents Index Page
 

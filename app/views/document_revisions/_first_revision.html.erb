@@ -1,0 +1,19 @@
+<%# The oldest kept version, which has nothing earlier to compare with. Locals: revision %>
+<% text = RevisionDiff.plain_text(revision.body) %>
+<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 dark:bg-gray-800 dark:border-gray-700">
+  <div class="text-center py-8">
+    <i class="material-icons text-green-500 text-5xl mb-4">celebration</i>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2 dark:text-white">First Revision</h3>
+    <p class="text-gray-600 mb-6 dark:text-gray-400">This is the oldest version of your document in its history.</p>
+
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 max-w-2xl mx-auto text-left">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-sm font-semibold text-green-800">Document Preview</span>
+        <span class="text-xs text-green-600"><%= pluralize(number_with_delimiter(WordCountService.count(revision.body)), 'word') %></span>
+      </div>
+      <div class="prose prose-sm text-gray-700">
+        <p><%= truncate(text, length: 500) %></p>
+      </div>
+    </div>
+  </div>
+</div>

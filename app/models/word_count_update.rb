@@ -9,6 +9,12 @@
 #
 # Words written on a day are each row's word_count minus the count its day started from. Deletions
 # don't subtract (a day that removed more than it added counts as 0), except in manual adjustments.
+#
+# Totals over a range (goals, this week, Writing Activity) are each entity's net growth instead:
+# its count at the end of the range minus the count its first day in the range started from. So
+# they also include changes between tracked days that weren't writing (the November 2026 counter
+# change on text that predates the range, about a word per paragraph; restores; recounts), and a
+# range can exceed the sum of its days.
 class WordCountUpdate < ApplicationRecord
   MANUAL_ADJUSTMENT = 'ManualAdjustment'.freeze
   MAX_RETRY_ATTEMPTS = 3

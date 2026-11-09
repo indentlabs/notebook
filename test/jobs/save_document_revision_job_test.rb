@@ -1,5 +1,6 @@
 require 'test_helper'
 
+# Daily word counts for documents (revisions are tested in test/models/document_revisions_test.rb)
 class SaveDocumentRevisionJobTest < ActiveJob::TestCase
   setup do
     @user = User.create!(email: 'revisions_test@example.com', password: 'password123', time_zone: 'UTC')
@@ -17,12 +18,6 @@ class SaveDocumentRevisionJobTest < ActiveJob::TestCase
   def row_for(date = Date.current)
     @document.word_count_updates.find_by(for_date: date)
   end
-
-  def revisions
-    @document.document_revisions.order(:created_at, :id).to_a
-  end
-
-  # -- Word counts --
 
   test "stores the server's count, not the count the editor sent" do
     # An editor tab opened before the counter changed would still send textContent counts
@@ -103,14 +98,30 @@ class SaveDocumentRevisionJobTest < ActiveJob::TestCase
     late_job.enqueued_at = yesterday.in_time_zone('UTC').change(hour: 23, min: 59, sec: 55).iso8601
 
     travel_to(Date.current.in_time_zone('UTC').change(hour: 0, min: 0, sec: 20)) do
-      @document.update!(body: '<p>' + 'word ' * 190 + '</p>') # starts today's row at 150
+      # Starts today's row at 150. While the late job's debounce window is open, this save queues no
+      # job of its own, so the late job is the only one that will see it.
+      @document.update!(body: '<p>' + 'word ' * 190 + '</p>')
       late_job.perform_now
-      SaveDocumentRevisionJob.perform_now(@document.id)
     end
 
-    assert_equal 150, row_for(yesterday).word_count
     totals = WordCountUpdate.batch_words_written_on_dates(@user, [yesterday, Date.current])
-    assert_equal 190 - 4, totals.values.sum # every word written once (4 were in the document already)
+    assert_equal [146, 40], totals.values_at(yesterday, Date.current)
+  end
+
+  test "a document's first save after its job stopped running records that writing on the day it was saved" do
+    first_day = Date.current - 8.days
+    # The stuck lock: one job ran (a row and the document's text, kept as a revision, on the first day)...
+    @document.update_columns(body: '<p>Day one words.</p>')
+    @document.word_count_updates.create!(user: @user, for_date: first_day, word_count: 3)
+    @document.document_revisions.create!(title: 'Novel', body: '<p>Day one words.</p>', cached_word_count: 3,
+                                         created_at: first_day.in_time_zone('UTC') + 12.hours, updated_at: first_day.in_time_zone('UTC') + 12.hours)
+    # ...then days of writing that no job recorded
+    @document.update_columns(body: '<p>Day one words.</p><p>Written while nothing was recorded.</p>', updated_at: 2.days.ago)
+
+    autosave('<p>Day one words.</p><p>Written while nothing was recorded.</p><p>Today.</p>')
+
+    assert_equal 5, WordCountUpdate.words_written_on_date(@user, 2.days.ago.to_date)
+    assert_equal 1, WordCountUpdate.words_written_on_date(@user, Date.current)
   end
 
   test "a job queued before the deploy keeps today's earlier credit without the counter change" do
@@ -123,99 +134,5 @@ class SaveDocumentRevisionJobTest < ActiveJob::TestCase
     SaveDocumentRevisionJob.perform_now(@document.id) # queued before the deploy, runs after it
 
     assert_equal 100, WordCountUpdate.words_written_on_date(@user, Date.current)
-  end
-
-  test "a document without an owner still gets a revision" do
-    @document.update_columns(user_id: nil)
-    autosave('<p>Orphaned.</p>')
-
-    assert_nil row_for
-    assert_equal 1, revisions.size
-  end
-
-  # -- Revisions --
-
-  test "a revision holds the text from the end of its stretch of writing" do
-    autosave('<p>First words.</p>')
-    travel 1.minute do
-      autosave('<p>First words. More words.</p>')
-    end
-    travel 3.minutes do
-      autosave('<p>First words. More words. Last words.</p>')
-    end
-
-    assert_equal 1, revisions.size
-    assert_equal '<p>First words. More words. Last words.</p>', revisions.last.body
-    assert_equal 6, revisions.last.cached_word_count
-  end
-
-  test "writing more than a revision window later starts a new revision" do
-    autosave('<p>Session one.</p>')
-    travel 6.minutes do
-      autosave('<p>Session one. Session two.</p>')
-    end
-
-    assert_equal ['<p>Session one.</p>', '<p>Session one. Session two.</p>'], revisions.map(&:body)
-  end
-
-  # The bug report: "it's showing things I wrote ages ago as being written today and some of the
-  # things I did write today aren't there".
-  test "a session days later gets its own revision, holding only what was written then" do
-    first_session = 9.days.ago
-    travel_to(first_session) { autosave('<p>Chapter one.</p>') }
-    travel_to(first_session + 2.minutes) { autosave('<p>Chapter one. The end of the first session.</p>') }
-
-    autosave('<p>Chapter one. The end of the first session.</p><p>Today.</p>')
-    travel 2.minutes do
-      autosave('<p>Chapter one. The end of the first session.</p><p>Today. And more today.</p>')
-    end
-
-    old_session, todays_session = revisions
-    assert_equal '<p>Chapter one. The end of the first session.</p>', old_session.body
-    assert_equal '<p>Chapter one. The end of the first session.</p><p>Today. And more today.</p>', todays_session.body
-  end
-
-  test "a large deletion starts a new revision so the deleted text stays in the history" do
-    long_text = '<p>' + 'precious ' * 300 + '</p>'
-    autosave(long_text)
-    travel 1.minute do
-      autosave('<p>Oops.</p>')
-    end
-
-    assert_equal [long_text, '<p>Oops.</p>'], revisions.map(&:body)
-  end
-
-  test "pasting over text starts a new revision even if the count stays the same" do
-    original = '<p>' + 'original ' * 300 + '</p>'
-    autosave(original)
-    travel 1.minute do
-      autosave('<p>' + 'replacement ' * 320 + '</p>')
-    end
-
-    assert_equal original, revisions.first.body
-    assert_equal 2, revisions.size
-  end
-
-  test "a revision is never changed once a newer one has been made, even if the newer one is deleted" do
-    autosave('<p>' + 'first ' * 200 + '</p>')
-    travel 1.minute do
-      autosave('<p>Short.</p>') # a large deletion starts a second revision
-    end
-    revisions.last.destroy
-
-    travel 2.minutes do
-      autosave('<p>' + 'first ' * 200 + 'more.</p>')
-    end
-
-    assert_equal '<p>' + 'first ' * 200 + '</p>', revisions.first.body
-  end
-
-  test "small deletions update the open revision" do
-    autosave('<p>' + 'word ' * 50 + 'typo</p>')
-    travel 1.minute do
-      autosave('<p>' + 'word ' * 50 + '</p>')
-    end
-
-    assert_equal 1, revisions.size
   end
 end
