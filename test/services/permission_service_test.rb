@@ -92,11 +92,8 @@ class PermissionServiceTest < ActiveSupport::TestCase
   end
 
   test "user_can_contribute_to_containing_universe returns true for attribute-related content" do
-    # Mock attribute content classes
-    stub_const('AttributeCategory', Class.new)
-    stub_const('AttributeField', Class.new) 
-    stub_const('Attribute', Class.new)
-    
+    # The real model classes. (Stubbing them with Class.new when they hadn't been autoloaded yet
+    # replaced the real models for every test that ran afterwards.)
     attribute_category = OpenStruct.new(class: AttributeCategory)
     attribute_field = OpenStruct.new(class: AttributeField)
     attribute = OpenStruct.new(class: Attribute)
