@@ -49,11 +49,13 @@ class TimelineEvent < ApplicationRecord
     # Skip enqueueing a job if explicitly flagged (like during timeline initialization)
     return if skip_word_count_update
 
-    # The count from before this edit, so the day's words are measured from it
+    # The counts from before and after this edit. The job records exactly these, so two edits
+    # queued either side of midnight each count on their own day, once.
     previous_word_count = self.class.word_count_of(
       *WORD_COUNT_TRACKED_FIELDS.map { |field| attribute_before_last_save(field) }
     )
-    CacheTimelineEventWordCountJob.perform_later(self.id, previous_word_count)
+    word_count = self.class.word_count_of(*WORD_COUNT_TRACKED_FIELDS.map { |field| public_send(field) })
+    CacheTimelineEventWordCountJob.perform_later(self.id, previous_word_count, word_count)
   end
 
   def self.word_count_of(*texts)

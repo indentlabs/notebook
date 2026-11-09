@@ -141,4 +141,58 @@ class PageWordCountJobsTest < ActiveJob::TestCase
 
     assert_equal 2, WordCountUpdate.words_written_on_date(@user, Date.current)
   end
+  test "a field counted by the old counter doesn't credit the counter change on its next edit" do
+    travel_to 1.month.ago do
+      save_field(@backstory, 'She paused--then ran. 1. Find the sword 2. Kill the dragon')
+    end
+    # Cached by the old counter, which counted this as fewer words
+    attribute = Attribute.find_by(attribute_field: @backstory, entity: @character)
+    attribute.update_column(:word_count_cache, attribute.word_count_cache - 3)
+    @character.update_column(:cached_word_count, attribute.word_count_cache)
+
+    save_field(@backstory, 'She paused--then ran. 1. Find the sword 2. Kill the dragon!')
+
+    assert_equal 0, WordCountUpdate.words_written_on_date(@user, Date.current)
+  end
+
+  test "a never-counted field edited after another field the same day credits only its edit" do
+    travel_to 1.year.ago do
+      save_field(@role, 'The reluctant hero')
+      save_field(@backstory, 'Raised by wolves in the north')
+    end
+    Attribute.find_by(attribute_field: @backstory, entity: @character).update_column(:word_count_cache, nil)
+    @character.update_column(:cached_word_count, 3)
+
+    save_field(@role, 'The reluctant hero, mostly') # creates today's row first
+    save_field(@backstory, 'Raised by wolves in the north, then bears')
+
+    assert_equal 3, WordCountUpdate.words_written_on_date(@user, Date.current)
+  end
+
+  test "deleting a template field doesn't add a row to every page it was on" do
+    travel_to 2.days.ago do
+      save_field(@backstory, 'Raised by wolves in the north')
+    end
+
+    @backstory.destroy
+    perform_enqueued_jobs
+
+    assert_equal 0, @character.reload.cached_word_count
+    assert_nil row_for(@character)
+  end
+
+  test "two timeline edits queued either side of midnight each count once" do
+    timeline = Timeline.create!(user: @user, name: 'History')
+    event = timeline.timeline_events.create!(title: 'War', description: 'Long.')
+    perform_enqueued_jobs
+
+    travel_to(Date.current.end_of_day - 1.second) { event.update!(description: 'Long. Bloody.') }
+    travel_to(Date.current.tomorrow.beginning_of_day + 1.second) do
+      event.update!(description: 'Long. Bloody. Pointless.')
+      perform_enqueued_jobs # both jobs run now, after midnight
+
+      dates = [Date.current - 1.day, Date.current]
+      assert_equal [3, 1], WordCountUpdate.batch_words_written_on_dates(@user, dates).values_at(*dates)
+    end
+  end
 end

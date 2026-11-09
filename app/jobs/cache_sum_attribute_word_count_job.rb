@@ -12,25 +12,30 @@ class CacheSumAttributeWordCountJob < ApplicationJob
 
   # edited_at: when the edit was made, which decides the day it counts towards (in the writer's
   #   time zone). Defaults to when this job was queued.
-  # words_changed: how much the edit changed the page's count, when known. The day's first edit
-  #   then starts the day from the total minus that change.
-  def save_daily_word_count_changes(entity, edited_at: nil, words_changed: nil)
+  # words_changed: how much a field edit changed the page's count. Without it (a field was removed,
+  #   or a job queued before this change), only the page's total and an existing day's row change.
+  # recount: how much of the total's change is a field being counted afresh rather than writing
+  #   (see CacheAttributeWordCountJob). It moves the day's starting count instead of crediting.
+  def save_daily_word_count_changes(entity, edited_at: nil, words_changed: nil, recount: 0)
     total = Attribute.where(entity_type: entity.class.name, entity_id: entity.id).sum(:word_count_cache)
-    previous_total = entity.cached_word_count
 
     # update_column: validations (a page with no name, say) mustn't stop the count being saved,
     # and the page has already been touched by the edit itself.
-    entity.update_column(:cached_word_count, total) unless previous_total == total
+    entity.update_column(:cached_word_count, total) unless entity.cached_word_count == total
 
     date = WordCountUpdate.date_for(entity.user, edited_at || enqueued_at || Time.current)
-    WordCountUpdate.record!(entity, date: date, word_count: total) do
-      if words_changed
-        total - words_changed
-      else
-        # A field was removed, or the edit isn't known: the day starts from the last total, so the
-        # removal doesn't count as writing. A page whose total was never cached credits nothing.
-        previous_total.to_i > 0 ? previous_total : total
-      end
+
+    if words_changed.nil?
+      # Removing a field isn't writing: lower the day's count if the page has one, but don't add a
+      # row for every page a deleted template field was on.
+      entity.word_count_updates.find_by(for_date: date)&.update!(word_count: total)
+      return
     end
+
+    row = WordCountUpdate.record!(entity, date: date, word_count: total) { total - words_changed }
+    if recount != 0 && !row.previously_new_record?
+      row.update!(starting_word_count: row.starting_count + recount)
+    end
+    row
   end
 end

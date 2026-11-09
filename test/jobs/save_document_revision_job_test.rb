@@ -81,6 +81,50 @@ class SaveDocumentRevisionJobTest < ActiveJob::TestCase
     assert_nil row_for
   end
 
+  test "a day whose first change is the title doesn't credit text from before it" do
+    # A forum thread saved as a document, never edited before
+    forum_doc = Document.create!(user: @user, title: 'Thread', body: '<p>' + 'post ' * 800 + '</p>')
+    forum_doc.update!(title: 'Renamed thread')
+    SaveDocumentRevisionJob.perform_now(forum_doc.id)
+    assert_equal 0, WordCountUpdate.words_written_on_date(@user, Date.current)
+
+    forum_doc.update!(body: forum_doc.body + '<p>My own reply here.</p>')
+    SaveDocumentRevisionJob.perform_now(forum_doc.id)
+    assert_equal 4, WordCountUpdate.words_written_on_date(@user, Date.current)
+  end
+
+  test "a job that runs after midnight doesn't count the new day's words on the old day too" do
+    yesterday = Date.current - 1.day
+    travel_to(yesterday.in_time_zone('UTC').change(hour: 23, min: 59, sec: 50)) do
+      autosave('<p>' + 'word ' * 100 + '</p>')
+      @document.update!(body: '<p>' + 'word ' * 150 + '</p>') # its job is still queued at midnight
+    end
+    late_job = SaveDocumentRevisionJob.new(@document.id)
+    late_job.enqueued_at = yesterday.in_time_zone('UTC').change(hour: 23, min: 59, sec: 55).iso8601
+
+    travel_to(Date.current.in_time_zone('UTC').change(hour: 0, min: 0, sec: 20)) do
+      @document.update!(body: '<p>' + 'word ' * 190 + '</p>') # starts today's row at 150
+      late_job.perform_now
+      SaveDocumentRevisionJob.perform_now(@document.id)
+    end
+
+    assert_equal 150, row_for(yesterday).word_count
+    totals = WordCountUpdate.batch_words_written_on_dates(@user, [yesterday, Date.current])
+    assert_equal 190 - 4, totals.values.sum # every word written once (4 were in the document already)
+  end
+
+  test "a job queued before the deploy keeps today's earlier credit without the counter change" do
+    paragraphs = (1..300).map { |i| "<p>Paragraph #{i} of the novel.</p>" }.join
+    @document.update_columns(body: paragraphs)
+    # Yesterday and earlier today, counted by the old editor (one word short per paragraph)
+    @document.word_count_updates.create!(user: @user, for_date: Date.current - 1.day, word_count: 1_201)
+    @document.word_count_updates.create!(user: @user, for_date: Date.current, word_count: 1_301)
+
+    SaveDocumentRevisionJob.perform_now(@document.id) # queued before the deploy, runs after it
+
+    assert_equal 100, WordCountUpdate.words_written_on_date(@user, Date.current)
+  end
+
   test "a document without an owner still gets a revision" do
     @document.update_columns(user_id: nil)
     autosave('<p>Orphaned.</p>')
@@ -139,6 +183,31 @@ class SaveDocumentRevisionJobTest < ActiveJob::TestCase
     end
 
     assert_equal [long_text, '<p>Oops.</p>'], revisions.map(&:body)
+  end
+
+  test "pasting over text starts a new revision even if the count stays the same" do
+    original = '<p>' + 'original ' * 300 + '</p>'
+    autosave(original)
+    travel 1.minute do
+      autosave('<p>' + 'replacement ' * 320 + '</p>')
+    end
+
+    assert_equal original, revisions.first.body
+    assert_equal 2, revisions.size
+  end
+
+  test "a revision is never changed once a newer one has been made, even if the newer one is deleted" do
+    autosave('<p>' + 'first ' * 200 + '</p>')
+    travel 1.minute do
+      autosave('<p>Short.</p>') # a large deletion starts a second revision
+    end
+    revisions.last.destroy
+
+    travel 2.minutes do
+      autosave('<p>' + 'first ' * 200 + 'more.</p>')
+    end
+
+    assert_equal '<p>' + 'first ' * 200 + '</p>', revisions.first.body
   end
 
   test "small deletions update the open revision" do

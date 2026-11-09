@@ -81,6 +81,15 @@ class WordCountUpdate < ApplicationRecord
     is_manual_adjustment? ? word_count.to_i : [words_added, 0].max
   end
 
+  # Gives a row written before starting counts were recorded (word_count by the old counter,
+  # measured from the previous row) a starting count, without changing what it has already credited:
+  # the day now runs from `count_now` (the entity's current count, by the current counter) less
+  # those words.
+  def convert_to_starting_count!(count_now)
+    already_credited = [word_count.to_i - previous_word_count.to_i, 0].max
+    update!(starting_word_count: [count_now - already_credited, 0].max)
+  end
+
   # The date a change made at `time` counts towards, in the writer's own time zone.
   def self.date_for(user, time = Time.current)
     zone = user&.time_zone.presence
@@ -114,6 +123,9 @@ class WordCountUpdate < ApplicationRecord
 
   def check_daily_word_goal
     DailyWordGoalNotificationJob.perform_later(user_id) if user_id.present?
+  rescue RedisClient::Error, Redis::BaseError => e
+    # The notification is a nicety; never let Redis trouble fail the write that triggered it
+    Rails.logger.warn "Could not queue DailyWordGoalNotificationJob for User #{user_id}: #{e.class}: #{e.message}"
   end
 
   public

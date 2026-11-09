@@ -32,12 +32,18 @@ class Attribute < ApplicationRecord
   # (or a template field across every page) recounts each page once rather than once per field.
   REMOVAL_RECOUNT_DELAY = 1.minute
 
+  # Old values longer than this aren't recounted in the request; the field's cached count is used.
+  MAX_RECOUNTED_IN_REQUEST = 500_000
+
   def enqueue_word_count_jobs
-    # Recount this field, then the page it belongs to (in that order, in one job). A field that has
-    # never had its count cached also sends the count of its text from before this edit, so the
-    # page's day starts from the right count.
-    previous_word_count = if word_count_cache.nil? && CacheAttributeWordCountJob::NON_PROSE_FIELD_TYPES.exclude?(attribute_field&.field_type)
-      WordCountService.count_with_fallback(value_before_last_save)
+    # Recount this field, then the page it belongs to (in that order, in one job). Send the count of
+    # the field's text from before this edit, counted the current way: the cached count may be
+    # missing (fields saved before counts were cached) or made by an older counter, and the
+    # difference mustn't be credited as writing.
+    previous_text = value_before_last_save.to_s
+    previous_word_count = if CacheAttributeWordCountJob::NON_PROSE_FIELD_TYPES.exclude?(attribute_field&.field_type) &&
+                             previous_text.bytesize <= MAX_RECOUNTED_IN_REQUEST
+      WordCountService.count_with_fallback(previous_text)
     end
     CacheAttributeWordCountJob.perform_later(self.id, recount_page: true, previous_word_count: previous_word_count)
   rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e

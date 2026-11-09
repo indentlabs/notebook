@@ -37,11 +37,13 @@ class Book < ApplicationRecord
   end
 
   def enqueue_word_count_update
-    # The count from before this edit, so the day's words are measured from it
+    # The counts from before and after this edit. The job records exactly these, so two edits
+    # queued either side of midnight each count on their own day, once.
     previous_word_count = self.class.word_count_of(
       *WORD_COUNT_TRACKED_FIELDS.map { |field| attribute_before_last_save(field) }
     )
-    CacheBookWordCountJob.perform_later(self.id, previous_word_count)
+    word_count = self.class.word_count_of(*WORD_COUNT_TRACKED_FIELDS.map { |field| public_send(field) })
+    CacheBookWordCountJob.perform_later(self.id, previous_word_count, word_count)
   rescue StandardError => e
     Rails.logger.error("Failed to enqueue CacheBookWordCountJob: #{e.message}")
   end

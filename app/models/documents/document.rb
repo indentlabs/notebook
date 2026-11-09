@@ -279,8 +279,7 @@ class Document < ApplicationRecord
     if row
       # The day's row was written before starting counts were recorded (by a save earlier today).
       # Keep the words it already credited today, and measure the rest of the day from now on.
-      already_credited = [row.word_count.to_i - row.previous_word_count.to_i, 0].max
-      row.update!(starting_word_count: [starting_count - already_credited, 0].max)
+      row.convert_to_starting_count!(starting_count)
     else
       WordCountUpdate.record!(self, date: date, word_count: starting_count) { starting_count }
     end
@@ -291,17 +290,16 @@ class Document < ApplicationRecord
 
   # Restoring a revision changes the word count without anyone writing. Move today's starting count
   # by the same amount, so the restored words aren't counted as written today (and words written
-  # earlier today still are).
-  def discount_restored_words!(words_restored)
+  # earlier today still are). Never fails the restore: it has already happened.
+  def discount_restored_words!(words_restored, word_count_now:)
     return if words_restored.zero?
 
     row = word_count_updates.find_by(for_date: WordCountUpdate.date_for(user))
     return if row.nil?
 
-    row.update!(
-      starting_word_count: row.starting_count + words_restored,
-      word_count: row.word_count.to_i + words_restored
-    )
+    row.update!(starting_word_count: row.starting_count + words_restored, word_count: word_count_now)
+  rescue StandardError => e
+    Rails.logger.warn "Could not discount restored words for Document #{id}: #{e.class}: #{e.message}"
   end
 
   # Autosave can update a document every few seconds while someone is writing. Rather than queueing
