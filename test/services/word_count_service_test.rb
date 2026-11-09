@@ -39,6 +39,54 @@ class WordCountServiceTest < ActiveSupport::TestCase
     assert_empty failures, "word_count.js disagrees with the shared cases:\n  #{failures.join("\n  ")}"
   end
 
+  # Each of these took from seconds to an hour with regexes that backtrack. Every step of the counter
+  # must stay linear, since it runs on whatever a writer saves, in requests and on the one worker.
+  ADVERSARIAL_INPUTS = {
+    'unclosed styles'     => '<style>' * 50_000,
+    'unclosed scripts'    => '<script> ' * 50_000,
+    'unclosed comments'   => '<!--' * 50_000,
+    'punctuation in a token with a slash' => 'a/' + '!' * 200_000 + 'b',
+    'tag starts'          => '<a' * 100_000,
+    'angle brackets'      => '<' * 200_000,
+    'ampersands'          => '&amp' * 50_000,
+    'dots'                => '.' * 200_000,
+    'link prefixes'       => 'www.' * 50_000 + '/x',
+    'schemes'             => 'http://' * 30_000 + '/x'
+  }.freeze
+
+  test "counting takes linear time even on malformed input" do
+    ADVERSARIAL_INPUTS.each do |name, text|
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      WordCountService.count(text)
+      elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - started
+
+      assert_operator elapsed, :<, 2.0, "counting #{name} (#{text.bytesize} bytes) took #{elapsed.round(2)}s"
+    end
+  end
+
+  test "the JavaScript counter takes linear time on malformed input too" do
+    node = ENV.fetch('NODE', 'node')
+    skip 'node is not installed' unless system(node, '--version', out: File::NULL, err: File::NULL)
+
+    script = <<~JS
+      const counter = require(#{JS_COUNTER_PATH.to_s.to_json});
+      const inputs = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+      const timings = {};
+      for (const [name, text] of Object.entries(inputs)) {
+        const started = process.hrtime.bigint();
+        counter.count(text);
+        timings[name] = Number(process.hrtime.bigint() - started) / 1e9;
+      }
+      process.stdout.write(JSON.stringify(timings));
+    JS
+    output, status = Open3.capture2(node, '-e', script, stdin_data: ADVERSARIAL_INPUTS.to_json)
+    assert status.success?, "node failed: #{output}"
+
+    JSON.parse(output).each do |name, elapsed|
+      assert_operator elapsed, :<, 2.0, "word_count.js counting #{name} took #{elapsed.round(2)}s"
+    end
+  end
+
   test "returns 0 for nil" do
     assert_equal 0, WordCountService.count(nil)
   end
