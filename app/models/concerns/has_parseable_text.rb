@@ -41,7 +41,7 @@ module HasParseableText
       @words ||= begin
         text = plaintext.downcase
 
-        # Split on forward slashes (matches WordCountService behavior)
+        # Split on forward slashes
         # Preserve dates like 01/02/2024 by temporarily replacing them
         text = text.gsub(/(\d{1,2})\/(\d{1,2})(\/\d{2,4})?/) { |m| m.gsub('/', '-SLASH-') }
         text = text.gsub('/', ' ')

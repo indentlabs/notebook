@@ -43,10 +43,11 @@ class Attribute < ApplicationRecord
     previous_text = value_before_last_save.to_s
     previous_word_count = if CacheAttributeWordCountJob::NON_PROSE_FIELD_TYPES.exclude?(attribute_field&.field_type) &&
                              previous_text.bytesize <= MAX_RECOUNTED_IN_REQUEST
-      WordCountService.count_with_fallback(previous_text)
+      WordCountService.count(previous_text)
     end
     CacheAttributeWordCountJob.perform_later(self.id, recount_page: true, previous_word_count: previous_word_count)
-  rescue RedisClient::CannotConnectError, Redis::CannotConnectError => e
+  rescue RedisClient::Error, Redis::BaseError => e
+    # Any Redis trouble, not only a refused connection: the attribute is already saved
     Rails.logger.error "[WordCount] Redis unavailable - word count jobs not enqueued for Attribute##{id}: #{e.message}"
     # No inline fallback - would be DDoS risk with large documents
   end

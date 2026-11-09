@@ -49,7 +49,7 @@ class Book < ApplicationRecord
   end
 
   def self.word_count_of(*texts)
-    texts.sum { |text| WordCountService.count_with_fallback(text) }
+    texts.sum { |text| WordCountService.count(text) }
   end
 
   # Display helpers (like Timeline/Document patterns)

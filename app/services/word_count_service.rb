@@ -6,6 +6,11 @@
 # test/fixtures/files/word_count_cases.json, so keep them in step: a change here needs the same
 # change there, and a new case in that file.
 #
+# Changing a rule changes stored counts. Run `rake word_counts:recount_cached` after deploying it,
+# and expect the deploy day's words to include the old-to-new difference for anyone who had already
+# written that day. (Ruby and browsers can also disagree on letters added in newer Unicode versions
+# than Ruby's, which no shared case can catch.)
+#
 # A word is a run of text between whitespace that contains at least one letter or digit, in any
 # script. On top of that:
 # - HTML is stripped. Block-level tags and <br> separate words, the way they separate lines on
@@ -63,7 +68,7 @@ class WordCountService
   TOKEN = /[^#{WHITESPACE}]+/
   WORDLIKE = /[\p{L}\p{N}]/
   SLASHES = %r{[/\\]}
-  LINK = %r{(?:[Hh][Tt][Tt][Pp][Ss]?|[Ff][Tt][Pp])://|(?<![\p{L}\p{N}])[Ww][Ww][Ww]\.}
+  LINK = %r{(?:[Hh][Tt][Tt][Pp][Ss]?|[Ff][Tt][Pp])://|(?:\A|[^\p{L}\p{N}])[Ww][Ww][Ww]\.}
   DATE = %r{\A[^\p{L}\p{N}]*[0-9]{1,4}/[0-9]{1,2}(?:/[0-9]{1,4})?[^\p{L}\p{N}]*\z}
 
   # @param text [String, nil] HTML or plain text
@@ -74,14 +79,6 @@ class WordCountService
     words = 0
     plain_text(text).scan(TOKEN) { |token| words += words_in_token(token) }
     words
-  end
-
-  # Background jobs use this so a bad string can't fail them; counting shouldn't raise anyway.
-  def self.count_with_fallback(text)
-    count(text)
-  rescue => e
-    Rails.logger.warn("WordCountService: fallback to simple count: #{e.message}")
-    simple_count(text)
   end
 
   # The text a reader would see, with word-separating markup turned into spaces.
@@ -108,8 +105,14 @@ class WordCountService
     end
 
     # One pass over the text, looking at each "<" once, so even malformed HTML takes linear time.
+    #
+    # It works on bytes: every pattern here is ASCII, and UTF-8 never uses an ASCII byte inside a
+    # multi-byte character, so these offsets always fall between characters. (On a string with any
+    # non-ASCII character, Ruby finds a character offset by scanning from the start, which made this
+    # quadratic on any draft with a curly quote in it.)
     def strip_markup(text)
-      result = +''
+      text = text.b
+      result = String.new(encoding: Encoding::BINARY)
       position = 0
 
       while (open = text.index('<', position))
@@ -138,7 +141,7 @@ class WordCountService
         end
       end
 
-      result << text[position..]
+      (result << text[position..]).force_encoding(Encoding::UTF_8)
     end
 
     def decode_entity(name)
@@ -154,11 +157,6 @@ class WordCountService
       return '' if codepoint.zero? || codepoint > 0x10FFFF || (0xD800..0xDFFF).cover?(codepoint)
 
       [codepoint].pack('U')
-    end
-
-    def simple_count(text)
-      return 0 if text.blank?
-      text.gsub(/<[^>]*>/, ' ').split.size
     end
   end
 end

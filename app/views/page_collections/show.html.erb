@@ -368,7 +368,7 @@
                             <!-- Reading time estimate -->
                             <div class="flex items-center mt-1 text-xs text-gray-500 space-x-2">
                               <% if submission.content.respond_to?(:description) && submission.content.description.present? %>
-                                <% word_count = submission.content.description.split.length %>
+                                <% word_count = WordCountService.count(submission.content.description) %>
                                 <% reading_time = [(word_count / 200.0).ceil, 1].max %>
                                 <span class="flex items-center">
                                   <i class="material-icons text-xs mr-1">schedule</i>

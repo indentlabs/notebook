@@ -10,7 +10,7 @@ namespace :backfill do
   task most_used_attribute_word_counts: :environment do
     word_counts = {}
     Attribute.where(word_count_cache: nil).group(:value).order('count_id DESC').limit(500).count(:id).each do |value, count|
-      word_count = WordCountService.count_with_fallback(value)
+      word_count = WordCountService.count(value)
     
       word_counts[word_count] ||= []
       word_counts[word_count].push value

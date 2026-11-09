@@ -56,10 +56,13 @@ class TimelineEvent < ApplicationRecord
     )
     word_count = self.class.word_count_of(*WORD_COUNT_TRACKED_FIELDS.map { |field| public_send(field) })
     CacheTimelineEventWordCountJob.perform_later(self.id, previous_word_count, word_count)
+  rescue RedisClient::Error, Redis::BaseError => e
+    # The event is already saved; never let Redis trouble turn that into an error
+    Rails.logger.warn "Could not queue CacheTimelineEventWordCountJob for TimelineEvent #{id}: #{e.class}: #{e.message}"
   end
 
   def self.word_count_of(*texts)
-    texts.sum { |text| WordCountService.count_with_fallback(text) }
+    texts.sum { |text| WordCountService.count(text) }
   end
 
   # Helper methods

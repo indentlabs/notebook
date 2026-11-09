@@ -7,7 +7,7 @@
       <span class="font-medium">Previous</span>
       <% if old_value != ContentChangeEvent::BLANK_PLACEHOLDER && old_value != ContentChangeEvent::PRIVATE_PLACEHOLDER %>
         <span class="ml-2 text-xs bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 px-2 py-0.5 rounded-full">
-          <%= old_value.to_s.split.length %> words
+          <%= WordCountService.count(old_value) %> words
         </span>
       <% end %>
     </div>
@@ -34,7 +34,7 @@
       <span class="font-medium">Current</span>
       <% if new_value != ContentChangeEvent::BLANK_PLACEHOLDER && new_value != ContentChangeEvent::PRIVATE_PLACEHOLDER %>
         <span class="ml-2 text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 px-2 py-0.5 rounded-full">
-          <%= new_value.to_s.split.length %> words
+          <%= WordCountService.count(new_value) %> words
         </span>
       <% end %>
     </div>
@@ -59,8 +59,8 @@
 <% if old_value != ContentChangeEvent::BLANK_PLACEHOLDER && old_value != ContentChangeEvent::PRIVATE_PLACEHOLDER && 
       new_value != ContentChangeEvent::BLANK_PLACEHOLDER && new_value != ContentChangeEvent::PRIVATE_PLACEHOLDER %>
   <% 
-    old_word_count = old_value.to_s.split.length
-    new_word_count = new_value.to_s.split.length
+    old_word_count = WordCountService.count(old_value)
+    new_word_count = WordCountService.count(new_value)
     word_diff = new_word_count - old_word_count
   %>
   <% if word_diff != 0 %>

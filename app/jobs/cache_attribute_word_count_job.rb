@@ -52,6 +52,6 @@ class CacheAttributeWordCountJob < ApplicationJob
     return 0 if attribute.value.blank?
     return 0 if NON_PROSE_FIELD_TYPES.include?(attribute.attribute_field&.field_type)
 
-    WordCountService.count_with_fallback(attribute.value)
+    WordCountService.count(attribute.value)
   end
 end

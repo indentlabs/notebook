@@ -1,6 +1,5 @@
 require 'test_helper'
 require 'open3'
-require 'minitest/mock'
 
 class WordCountServiceTest < ActiveSupport::TestCase
   CASES_PATH = Rails.root.join('test/fixtures/files/word_count_cases.json')
@@ -51,7 +50,8 @@ class WordCountServiceTest < ActiveSupport::TestCase
     'ampersands'          => '&amp' * 50_000,
     'dots'                => '.' * 200_000,
     'link prefixes'       => 'www.' * 50_000 + '/x',
-    'schemes'             => 'http://' * 30_000 + '/x'
+    'schemes'             => 'http://' * 30_000 + '/x',
+    'non-ASCII text with tags' => "\u00E9<b>" * 50_000
   }.freeze
 
   test "counting takes linear time even on malformed input" do
@@ -110,19 +110,13 @@ class WordCountServiceTest < ActiveSupport::TestCase
     assert_equal " Hello \u00A0world ", WordCountService.plain_text('<p>Hello &nbsp;<b>world</b></p>')
   end
 
-  test "count_with_fallback returns count on success" do
-    assert_equal 3, WordCountService.count_with_fallback("hello world today")
-  end
-
-  test "count_with_fallback falls back to a simple count if counting raises" do
-    WordCountService.stub(:plain_text, ->(_) { raise 'boom' }) do
-      assert_equal 2, WordCountService.count_with_fallback("<p>hello</p> world")
+  # Safari before 16.4 can't parse a regex lookbehind, and one it can't parse stops every script in
+  # the bundle, the document editor's autosave included.
+  test "no browser JavaScript uses a regex lookbehind" do
+    offenders = Dir[Rails.root.join('app/{assets/javascripts,javascript}/**/*.js')].select do |path|
+      File.read(path).match?(/\(\?<[!=]/)
     end
-  end
 
-  test "simple_count strips HTML and splits on whitespace" do
-    assert_equal 2, WordCountService.send(:simple_count, "<p>hello</p> <b>world</b>")
-    assert_equal 0, WordCountService.send(:simple_count, nil)
-    assert_equal 0, WordCountService.send(:simple_count, "")
+    assert_empty offenders, "These use a regex lookbehind:\n  #{offenders.join("\n  ")}"
   end
 end

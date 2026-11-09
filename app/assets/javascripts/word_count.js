@@ -50,7 +50,8 @@
   var TOKEN = new RegExp('[^' + WHITESPACE + ']+', 'g');
   var WORDLIKE = /[\p{L}\p{N}]/u;
   var SLASHES = /[\/\\]/;
-  var LINK = /(?:[Hh][Tt][Tt][Pp][Ss]?|[Ff][Tt][Pp]):\/\/|(?<![\p{L}\p{N}])[Ww][Ww][Ww]\./u;
+  // No lookbehind: Safari before 16.4 can't parse one, and a regex it can't parse stops all of application.js.
+  var LINK = /(?:[Hh][Tt][Tt][Pp][Ss]?|[Ff][Tt][Pp]):\/\/|(?:^|[^\p{L}\p{N}])[Ww][Ww][Ww]\./u;
   var DATE = /^[^\p{L}\p{N}]*[0-9]{1,4}\/[0-9]{1,2}(?:\/[0-9]{1,4})?[^\p{L}\p{N}]*$/u;
 
   function decodeEntity(match, name) {

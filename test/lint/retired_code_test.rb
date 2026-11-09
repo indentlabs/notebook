@@ -49,6 +49,8 @@ class RetiredCodeTest < ActiveSupport::TestCase
       count_large_text
       count_single_pass
       count_chunked
+      count_with_fallback
+      simple_count
     ],
   }.freeze
 
