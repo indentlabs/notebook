@@ -876,7 +876,7 @@
           <div class="grid grid-cols-7 gap-1 mb-2">
             <%
               # Batch fetch words written for last 7 days in a single query
-              streak_dates = (0..6).map { |days_ago| Date.current - days_ago }
+              streak_dates = (0..6).map { |days_ago| current_user.current_date_in_time_zone - days_ago }
               words_by_date = WordCountUpdate.words_written_on_dates(current_user, streak_dates)
 
               streak_dates.reverse.each do |date|
@@ -895,7 +895,7 @@
                   "bg-gray-200 dark:bg-gray-600"
                 end
 
-                is_today = date == Date.current
+                is_today = date == current_user.current_date_in_time_zone
             %>
               <div class="relative group">
                 <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400 dark:ring-gray-500' : '' %> transition-colors hover:opacity-80"
@@ -1026,7 +1026,7 @@
           <div class="grid grid-cols-7 gap-1 mb-2">
             <%
               # Batch fetch words written for last 7 days in a single query
-              streak_dates = (0..6).map { |days_ago| Date.current - days_ago }
+              streak_dates = (0..6).map { |days_ago| current_user.current_date_in_time_zone - days_ago }
               words_by_date = WordCountUpdate.words_written_on_dates(current_user, streak_dates)
 
               streak_dates.reverse.each do |date|
@@ -1045,7 +1045,7 @@
                   "bg-gray-200 dark:bg-gray-600"
                 end
 
-                is_today = date == Date.current
+                is_today = date == current_user.current_date_in_time_zone
             %>
               <div class="relative group">
                 <div class="aspect-square <%= opacity_class %> rounded-sm <%= is_today ? 'ring-1 ring-gray-400 dark:ring-gray-500' : '' %> transition-colors hover:opacity-80"

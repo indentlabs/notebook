@@ -7,13 +7,15 @@ class DailyWordGoalNotificationJob < ApplicationJob
     return unless user
 
     today = user.current_date_in_time_zone
-    today_start = today.beginning_of_day
-    today_end = today.end_of_day
+    # The writer's own day: today.all_day alone would be the UTC day with that date, so a writer
+    # west of UTC was congratulated again after every save from late afternoon on.
+    zone = Time.find_zone(user.time_zone.presence) || Time.find_zone('UTC')
+    todays_hours = today.in_time_zone(zone).all_day
 
     # Already notified today? Check notifications table
     already_notified = user.notifications.where(
       reference_code: 'daily-goal-achieved'
-    ).where(happened_at: today_start..today_end).exists?
+    ).where(happened_at: todays_hours).exists?
     return if already_notified
 
     # Check if goal met
