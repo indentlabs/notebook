@@ -6,8 +6,8 @@ class DocumentRevisionsController < ApplicationController
   around_action :use_writers_time_zone
 
   REVISIONS_PER_PAGE = 60
-  # The list shows the start of each revision, so it only loads that much of each body
-  PREVIEW_CHARACTERS = 2_000
+  # The list's preview shows the start of each revision's text
+  PREVIEW_CHARACTERS = 500
 
   # Diffing whole novels is fast; rendering every changed paragraph of a full rewrite isn't useful
   MAX_DIFF_LINES_SHOWN = 400
@@ -15,8 +15,8 @@ class DocumentRevisionsController < ApplicationController
   # GET /document_revisions
   def index
     @document_revisions = @document.document_revisions
+      # The list doesn't show the text itself (previews load when opened), so leave out the bodies
       .select(DocumentRevision.column_names.excluding('body').map { |column| "document_revisions.#{column}" })
-      .select("SUBSTR(document_revisions.body, 1, #{PREVIEW_CHARACTERS}) AS body_preview")
       .order(created_at: :desc, id: :desc)
       .paginate(page: params[:page], per_page: REVISIONS_PER_PAGE)
     @revisions_on_page = @document_revisions.to_a
@@ -35,7 +35,15 @@ class DocumentRevisionsController < ApplicationController
   end
 
   # GET /document_revisions/1
+  # GET /document_revisions/1.txt: the start of the revision's text, for the list's preview
   def show
+    respond_to do |format|
+      format.html
+      format.text do
+        text = strip_and_clean_html(@document_revision.body.to_s)
+        render plain: text.length > PREVIEW_CHARACTERS ? "#{text[0, PREVIEW_CHARACTERS]}..." : text
+      end
+    end
   end
 
   # GET /document_revisions/1/diff
@@ -60,31 +68,44 @@ class DocumentRevisionsController < ApplicationController
 
   # POST /document_revisions/1/restore
   def restore
-    words_before = WordCountService.count_with_fallback(@document.body)
-
-    # Keep the current text in the history, unless the newest revision already holds it
-    latest = @document.document_revisions.order(created_at: :desc, id: :desc).first
-    unless latest && same_text?(latest, @document)
-      @document.document_revisions.create!(revision_attributes_from(@document, cached_word_count: words_before))
+    restored_at = @document_revision.updated_at.strftime('%B %d, %Y at %I:%M %p')
+    if same_text?(@document_revision, @document)
+      return redirect_to edit_document_path(@document), notice: "Your document already matches the revision from #{restored_at}."
     end
 
-    @document.update!(
-      title: @document_revision.title,
-      body: @document_revision.body,
-      synopsis: @document_revision.synopsis,
-      notes_text: @document_revision.notes_text
-    )
-    words_after = WordCountService.count_with_fallback(@document.body)
-    @document.update_column(:cached_word_count, words_after)
+    words_before = WordCountService.count_with_fallback(@document.body)
+    words_after = WordCountService.count_with_fallback(@document_revision.body)
 
-    # The restored text gets its own entry at the top of the history. SaveDocumentRevisionJob keeps
-    # the newest revision up to date, so this is the one it updates, not the backup above.
-    @document.document_revisions.create!(revision_attributes_from(@document, cached_word_count: words_after))
+    # One transaction, so the revision job (queued when it commits) never sees the backup as the
+    # newest revision and overwrites it with the restored text.
+    Document.transaction do
+      now = Time.current
+      # Nothing from before the restore may be changed again
+      @document.document_revisions.where(closed_at: nil).update_all(closed_at: now)
+
+      # Keep the current text in the history, unless the newest revision already holds it
+      latest = @document.document_revisions.order(created_at: :desc, id: :desc).first
+      unless latest && same_text?(latest, @document)
+        @document.document_revisions.create!(revision_attributes_from(@document, cached_word_count: words_before).merge(closed_at: now))
+      end
+
+      @document.update!(
+        title: @document_revision.title,
+        body: @document_revision.body,
+        synopsis: @document_revision.synopsis,
+        notes_text: @document_revision.notes_text,
+        cached_word_count: words_after
+      )
+
+      # The restored text gets its own entry at the top of the history; the revision job keeps it
+      # up to date as writing continues from it.
+      @document.document_revisions.create!(revision_attributes_from(@document, cached_word_count: words_after))
+    end
 
     # Bringing back old text isn't writing it
-    @document.discount_restored_words!(words_after - words_before)
+    @document.discount_restored_words!(words_after - words_before, word_count_now: words_after)
 
-    redirect_to edit_document_path(@document), notice: "Document successfully restored to revision from #{@document_revision.updated_at.strftime('%B %d, %Y at %I:%M %p')}. Your previous version has been saved as a new revision."
+    redirect_to edit_document_path(@document), notice: "Document successfully restored to revision from #{restored_at}. Your previous version has been saved as a new revision."
   rescue => e
     Rails.logger.error "Failed to restore revision #{@document_revision.id} for document #{@document.id}: #{e.message}"
     redirect_to document_document_revisions_path(@document), alert: 'Failed to restore revision. Please try again.'
@@ -162,8 +183,9 @@ class DocumentRevisionsController < ApplicationController
       # Both texts end in a newline, so adding a paragraph at the end doesn't also show the old last
       # paragraph as removed and re-added. The whole texts are compared: cutting them short hid
       # anything written past the cut and showed old text near it as new.
-      diff = Diffy::Diff.new(previous_text + "\n", current_text + "\n", context: 3)
-      columns = diff_columns(diff.to_s(:text).lines)
+      diff = Diffy::Diff.new(previous_text + "\n", current_text + "\n", context: 3, include_diff_info: true)
+      # The first two lines name the temporary files diff compared ("--- /tmp/..." and "+++ /tmp/...")
+      columns = diff_columns(diff.to_s(:text).lines.drop(2))
     end
 
     <<~HTML
@@ -181,7 +203,7 @@ class DocumentRevisionsController < ApplicationController
             <div class="text-gray-500 dark:text-gray-400">
               Previous: #{prev_words} words → This version: #{curr_words} words
             </div>
-            #{columns&.dig(:truncated) ? '<div class="text-amber-600 flex items-center"><i class="material-icons text-xs mr-1">warning</i>Showing the first ' + MAX_DIFF_LINES_SHOWN.to_s + ' changed paragraphs</div>' : ''}
+            #{columns&.dig(:truncated) ? '<div class="text-amber-600 flex items-center"><i class="material-icons text-xs mr-1">warning</i>Too many changes to show them all; showing the first ones</div>' : ''}
           </div>
         </div>
 
@@ -190,11 +212,14 @@ class DocumentRevisionsController < ApplicationController
     HTML
   end
 
-  # Splits Diffy's unified text diff into the two columns of the side-by-side view.
+  # Splits Diffy's unified text diff into the two columns of the side-by-side view. Removed and
+  # added paragraphs are capped separately, so a huge deletion can't crowd out what was added.
   def diff_columns(diff_lines)
     old_column = []
     new_column = []
-    shown = 0
+    removed = 0
+    added = 0
+    rendered = 0
     truncated = false
 
     diff_lines.each do |line|
@@ -211,25 +236,31 @@ class DocumentRevisionsController < ApplicationController
       content = line[1..].to_s.chomp
       next if content.strip.empty?
 
-      if shown >= MAX_DIFF_LINES_SHOWN
+      if rendered >= MAX_DIFF_LINES_SHOWN * 3
         truncated = true
         break
       end
-      shown += 1
 
       escaped = CGI.escapeHTML(content)
       case line[0]
       when '-'
+        removed += 1
+        next truncated = true if removed > MAX_DIFF_LINES_SHOWN
+
         old_column << "<p class='bg-red-100 text-red-900 px-2 py-1 rounded border-l-4 border-red-500 my-2'><del>#{escaped}</del></p>"
       when '+'
+        added += 1
+        next truncated = true if added > MAX_DIFF_LINES_SHOWN
+
         new_column << "<p class='bg-green-100 text-green-900 px-2 py-1 rounded border-l-4 border-green-500 my-2'><strong>#{escaped}</strong></p>"
       else
         old_column << "<p class='text-gray-700 my-2 dark:text-gray-300'>#{escaped}</p>"
         new_column << "<p class='text-gray-700 my-2 dark:text-gray-300'>#{escaped}</p>"
       end
+      rendered += 1
     end
 
-    { old: old_column.join, new: new_column.join, truncated: truncated }
+    { old: old_column.join, new: new_column.join, truncated: truncated, removed: removed, added: added }
   end
 
   def side_by_side_html(columns)
@@ -243,7 +274,7 @@ class DocumentRevisionsController < ApplicationController
             Previous Version
           </h4>
           <div class="prose prose-sm max-w-none bg-gray-50 rounded-lg p-4 dark:bg-gray-900">
-            #{columns[:old].presence || "<p class='text-gray-400 italic'>Nothing removed</p>"}
+            #{columns[:old].presence || "<p class='text-gray-400 italic'>#{columns[:removed].zero? ? 'Nothing removed' : 'More changes not shown'}</p>"}
           </div>
         </div>
 
@@ -254,7 +285,7 @@ class DocumentRevisionsController < ApplicationController
             This Version
           </h4>
           <div class="prose prose-sm max-w-none bg-green-50 rounded-lg p-4 dark:bg-gray-900">
-            #{columns[:new].presence || "<p class='text-gray-400 italic'>Nothing added</p>"}
+            #{columns[:new].presence || "<p class='text-gray-400 italic'>#{columns[:added].zero? ? 'Nothing added' : 'More changes not shown'}</p>"}
           </div>
         </div>
       </div>

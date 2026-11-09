@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'minitest/mock'
 
 class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
@@ -148,5 +149,87 @@ class DocumentRevisionHistoryTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, restore_document_document_revision_path(@document, revision)
     refute_includes response.body, 'TODO'
+  end
+  test "a revision job that runs during a restore can't overwrite the backup" do
+    old = revision!('<p>The original opening.</p>', at: 3.days.ago)
+    @document.update_columns(body: '<p>A rewritten opening I regret.</p>')
+
+    # Run the revision job the moment the restore's update commits, the worst possible time
+    run_job_on_commit = ->(*args) { SaveDocumentRevisionJob.perform_now(*args) }
+    SaveDocumentRevisionJob.stub(:perform_later, run_job_on_commit) do
+      post restore_document_document_revision_path(@document, old)
+    end
+
+    assert_includes @document.document_revisions.pluck(:body), '<p>A rewritten opening I regret.</p>'
+  end
+
+  test "deleting the restored entry doesn't let the next save overwrite the backup" do
+    old = revision!('<p>The original opening.</p>', at: 3.days.ago)
+    @document.update_columns(body: '<p>A rewritten opening I regret.</p>')
+    post restore_document_document_revision_path(@document, old)
+
+    restored_entry = @document.document_revisions.order(:created_at, :id).last
+    delete document_document_revision_path(@document, restored_entry)
+    @document.update!(body: '<p>The original opening, improved.</p>')
+    SaveDocumentRevisionJob.perform_now(@document.id)
+
+    assert_includes @document.document_revisions.pluck(:body), '<p>A rewritten opening I regret.</p>'
+  end
+
+  test "restoring a revision the document already matches changes nothing" do
+    same = revision!('<p>Start.</p>', at: 1.day.ago)
+
+    assert_no_difference -> { @document.document_revisions.count } do
+      post restore_document_document_revision_path(@document, same)
+    end
+    assert_redirected_to edit_document_path(@document)
+  end
+
+  test "a Redis outage doesn't make a restore that worked say it failed" do
+    old = revision!('<p>Back again.</p>', at: 3.days.ago)
+    redis_down = ->(*) { raise RedisClient::CannotConnectError, 'down' }
+
+    DailyWordGoalNotificationJob.stub(:perform_later, redis_down) do
+      SaveDocumentRevisionJob.stub(:perform_later, redis_down) do
+        post restore_document_document_revision_path(@document, old)
+      end
+    end
+
+    assert_redirected_to edit_document_path(@document)
+    assert_equal '<p>Back again.</p>', @document.reload.body
+  end
+
+  test "Show Changes marks the gap between separate changes" do
+    paragraphs = (1..40).map { |i| "<p>Paragraph #{i}.</p>" }
+    revision!(paragraphs.join, at: 1.day.ago)
+    edited = paragraphs.dup
+    edited[3] = '<p>Paragraph four, rewritten.</p>'
+    edited[34] = '<p>Paragraph thirty-five, rewritten.</p>'
+    current = revision!(edited.join, at: 1.hour.ago)
+
+    get diff_document_document_revision_path(@document, current)
+
+    assert_includes response.body, "\u22EF" # the gap marker
+    refute_includes response.body, '/tmp/' # diff's file header lines aren't shown
+  end
+
+  test "a huge rewrite still shows some of what was added" do
+    revision!((1..600).map { |i| "<div>Old line #{i}</div>" }.join, at: 1.day.ago)
+    current = revision!((1..600).map { |i| "<div>New line #{i}</div>" }.join, at: 1.hour.ago)
+
+    get diff_document_document_revision_path(@document, current)
+
+    assert_includes response.body, '<strong>New line 1</strong>'
+    assert_includes response.body, '<del>Old line 1</del>'
+    refute_includes response.body, 'Nothing added'
+  end
+
+  test "the list's preview loads the start of the revision's text" do
+    revision = revision!('<p><img src="data:image/png;base64,' + 'A' * 5_000 + '"></p><p>The words after a big image.</p>', at: 1.hour.ago)
+
+    get document_document_revision_path(@document, revision, format: :text)
+
+    assert_response :success
+    assert_equal 'The words after a big image.', response.body
   end
 end
