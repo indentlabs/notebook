@@ -203,9 +203,10 @@ class ExportService < Service
         categories_for_this_page_type = categories.select { |c| c.entity_type == page_type.name.downcase }
         fields_for_this_page_type     = fields.select { |f| categories_for_this_page_type.map(&:id).include? f.attribute_category_id }
 
-        page_object = {}
-
         pages.each do |page|
+          # Each page gets its own object; sharing one across pages would leave a single
+          # record holding the last page's id/name with fields merged from every page.
+          page_object = {}
           page_object['name'] = page.name
           page_object['id']   = page.id
 
@@ -257,10 +258,10 @@ class ExportService < Service
 
             end
           end
-        end
 
-        # Append the JSON page object we just built to the list of pages of that kind
-        export_object[page_type.name].push page_object
+          # Append the JSON page object we just built to the list of pages of that kind
+          export_object[page_type.name].push page_object
+        end
       end
     end
 
